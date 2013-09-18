@@ -6,7 +6,7 @@ class fm_dns_buildconf {
 	 * Generates the server config and updates the DNS server
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function buildServerConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -226,7 +226,18 @@ class fm_dns_buildconf {
 					$config_array = array_merge($view_config, $server_view_config);
 
 					foreach ($config_array as $cfg_name => $cfg_data) {
-						$config .= "\t" . $cfg_name . ' ' . str_replace('$ROOT', $server_root_dir, $cfg_data) . ";\n";
+						$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+						$fmdb->get_results($query);
+						if (!$fmdb->num_rows) $def_multiple_values = 'no';
+						else {
+							$result = $fmdb->last_result[0];
+							$def_multiple_values = $result->def_multiple_values;
+						}
+						$config .= "\t" . $cfg_name . ' ';
+						if ($def_multiple_values == 'yes') $config .= '{ ';
+						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_data), ';')));
+						if ($def_multiple_values == 'yes') $config .= '; }';
+						$config .= ";\n";
 					}
 
 					/** Get cooresponding keys */
@@ -305,7 +316,7 @@ class fm_dns_buildconf {
 	 * Generates the zone configs (not files)
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function buildZoneConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -376,7 +387,7 @@ class fm_dns_buildconf {
 	 * Generates the zone configs (not files)
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null) {
 		global $fmdb, $__FM_CONFIG;
@@ -455,7 +466,7 @@ class fm_dns_buildconf {
 	 * Builds the zone file for $domain_id
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function buildZoneFile($domain) {
 		global $fmdb, $__FM_CONFIG;
@@ -483,7 +494,7 @@ class fm_dns_buildconf {
 	 * Figures out what files to update on the DNS server
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function buildCronConfigs($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -552,7 +563,7 @@ class fm_dns_buildconf {
 	 * Gets count of zones to reload based on server_serial_no
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function getReloadRequests($server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
@@ -571,7 +582,7 @@ class fm_dns_buildconf {
 	 * Builds the SOA for $domain->domain_id
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function buildSOA($domain) {
 		global $fmdb, $__FM_CONFIG;
@@ -610,7 +621,7 @@ class fm_dns_buildconf {
 	 * Builds the records for $domain->domain_id
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function buildRecords($domain) {
 		global $fmdb, $__FM_CONFIG;
@@ -702,7 +713,7 @@ class fm_dns_buildconf {
 	 * Returns the $domain_name based on $map
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function getDomainName($map, $domain_name_trim) {
 		if ($map == 'reverse' && substr($domain_name_trim, -5) != '.arpa') {
@@ -724,7 +735,7 @@ class fm_dns_buildconf {
 	 * Updates tables to reset flags
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function updateReloadFlags($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -757,7 +768,7 @@ class fm_dns_buildconf {
 	 * Sets cloned details to that of the parent domain
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function mergeZoneDetails($zone, $all_zones, $count) {
 		for ($i = 0; $i < $count; $i++) {
@@ -778,7 +789,7 @@ class fm_dns_buildconf {
 	 * Updates the daemon version number in the database
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function updateServerVersion() {
 		global $fmdb, $__FM_CONFIG;
@@ -793,7 +804,7 @@ class fm_dns_buildconf {
 	 * Validate the daemon version number of the client
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function validateDaemonVersion($data) {
 		global $__FM_CONFIG;
@@ -815,7 +826,7 @@ class fm_dns_buildconf {
 	 * Update fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds
 	 *
 	 * @since 1.0
-	 * @package facileManager
+	 * @package fmDNS
 	 */
 	function setBuiltDomainIDs($server_serial_no, $built_domain_ids) {
 		global $fmdb, $__FM_CONFIG;
@@ -833,6 +844,135 @@ class fm_dns_buildconf {
 			$sql = rtrim($sql, ',');
 			$fmdb->query($sql);
 		}
+	}
+	
+	
+	/**
+	 * Performs syntax checks with named-check* utilities
+	 *
+	 * @since 1.0
+	 * @package fmDNS
+	 *
+	 * @param array $files_array Array containing named files and contents
+	 * @return string
+	 */
+	function namedSyntaxChecks($files_array) {
+		global $__FM_CONFIG;
+		
+		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') != 'yes') return;
+		
+		$die = false;
+		$named_checkconf = findProgram('named-checkconf');
+		
+		$uname = php_uname('n');
+		if (!$named_checkconf) {
+			return <<<INFO
+			<div id="named_check" class="info">
+				<p>The named utilities (specifically named-checkconf and named-checkzone) cannot be found on $uname. If they were installed,
+				these configs and zones could be checked for syntax.</p>
+			</div>
+
+INFO;
+		}
+		
+		$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
+		$tmp_dir = rtrim($fm_temp_directory, '/') . '/' . $_SESSION['module'] . '_' . date("YmdHis") . '/';
+		system('rm -rf ' . $tmp_dir);
+		/** Create temporary directory structure */
+		foreach ($files_array['files'] as $file => $contents) {
+			if (!is_dir(dirname($tmp_dir . $file))) {
+				if (!@mkdir(dirname($tmp_dir . $file), 0777, true)) {
+					$class = 'class="info"';
+					$message = $fm_temp_directory . ' is not writeable by ' . $__FM_CONFIG['webserver']['user_info']['name'] . ' so the named checks cannot be performed.';
+					$die = true;
+					break;
+				}
+			}
+			file_put_contents($tmp_dir . $file, $contents);
+
+			/** Create temporary directory from named.conf's 'directory' line */
+			if (strpos($contents, 'directory')) {
+				preg_match('/directory(.+?)+/', $contents, $directory_line);
+				if (count($directory_line)) {
+					$line_array = explode('"', $directory_line[0]);
+					@mkdir($tmp_dir . $line_array[1], 0777, true);
+					$named_conf = $file;
+				}
+			}
+			
+			/** Build array of zone files to check */
+			if (preg_match('/\/zones\.(.+?)\.conf/', $file)) {
+				$view = preg_replace('/(.+?)zones\.+/', '', $file);
+
+				$tmp_contents = preg_replace('/^\/\/(.+?)+/', '', $contents);
+				$tmp_contents = explode("};\n", trim($tmp_contents));
+				foreach($tmp_contents as $zone_def) {
+					preg_match('/^zone "(.+?)+/', $zone_def, $tmp_zone_def);
+					$tmp_zone_def = explode('"', $tmp_zone_def[0]);
+					preg_match('/file "(.+?)+/', trim($zone_def), $tmp_zone_def_file);
+					$tmp_zone_def_file = explode('"', $tmp_zone_def_file[0]);
+					$zone_files[$view][$tmp_zone_def[1]] = $tmp_zone_def_file[1];
+				}
+			}
+		}
+		
+		if (!$die) {
+			/** Run named-checkconf */
+			$named_checkconf_cmd = findProgram('sudo') . ' ' . findProgram('named-checkconf') . ' -t ' . $tmp_dir . ' ' . $named_conf . ' 2>&1';
+			exec($named_checkconf_cmd, $named_checkconf_results, $retval);
+			if ($retval) {
+				$class = 'class="error"';
+				$named_checkconf_results = implode("\n", $named_checkconf_results);
+				if (strpos($named_checkconf_results, 'sudo') !== false) {
+					$class = 'class="info"';
+					$message = 'The webserver user (' . $__FM_CONFIG['webserver']['user_info']['name'] . ') on ' . $uname . ' does not have permission to run 
+								the following command:<br /><pre>' . $named_checkconf_cmd . '</pre><p>The following error ocurred:<pre>' .
+								$named_checkconf_results . '</pre>';
+				} else {
+					$message = 'Your named configuration contains one or more errors:<br /><pre>' . $named_checkconf_results . '</pre>';
+				}
+				
+			/** Run named-checkconf */
+			} else {
+				$named_checkzone_results = null;
+				if (array($zone_files)) {
+					foreach ($zone_files as $view => $zones) {
+						foreach ($zones as $zone_name => $zone_file) {
+							$named_checkzone_cmd = findProgram('sudo') . ' ' . findProgram('named-checkzone') . ' -t ' . $tmp_dir . ' ' . $zone_name . ' ' . $zone_file . ' 2>&1';
+							exec($named_checkzone_cmd, $results, $retval);
+							if ($retval) {
+								$class = 'class="error"';
+								$named_checkzone_results .= implode("\n", $results);
+								if (strpos($named_checkzone_results, 'sudo') !== false) {
+									$class = 'class="info"';
+									$message = 'The webserver user (' . $__FM_CONFIG['webserver']['user_info']['name'] . ') on ' . $uname . ' does not have permission to run 
+												the following command:<br /><pre>' . $named_checkzone_cmd . '</pre><p>The following error ocurred:<pre>' .
+												$named_checkzone_results . '</pre>';
+									break 2;
+								}
+							}
+						}
+					}
+				}
+				
+				if ($named_checkzone_results) {
+					if (empty($message)) $message = 'Your zone configuration files contain one or more errors:<br /><pre>' . $named_checkzone_results . '</pre>';
+				} else {
+					$class = null;
+					$message = 'Your named configuration and zone files are loadable.';
+				}
+			}
+		}
+		
+		/** Remove temporary directory */
+		system('rm -rf ' . $tmp_dir);
+		
+		return <<<HTML
+			<div id="named_check" $class>
+				<p>$message</p>
+			</div>
+
+HTML;
 	}
 
 }

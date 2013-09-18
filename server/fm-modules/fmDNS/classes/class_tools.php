@@ -9,31 +9,85 @@ class fm_dns_tools {
 		global $__FM_CONFIG;
 		
 		$raw_contents = file_get_contents($_FILES['import-file']['tmp_name']);
-		// Strip commented lines
+		/** Strip commented lines */
 		$clean_contents = preg_replace('/^;.*\n?/m', '', $raw_contents);
-		// Strip blank lines
+		/** Strip blank lines */
 		$clean_contents = preg_replace('/^\n?/m', '', $clean_contents);
-		// Strip $GENERATE lines
+		/** Strip $GENERATE lines */
 		$clean_contents = preg_replace('/^\$GENERATE.*\n?/m', '', $clean_contents);
 		
 		$domain_name = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 		$domain_map = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
-		$clean_contents = str_replace('.' . trimFullStop($domain_name) . '.', '', $clean_contents);
 
-		// Loop through the lines
-		$lines = explode(PHP_EOL, $clean_contents);
 		$count = 1;
+
+		/** Detect SOA */
+		if (!getSOACount($_POST['domain_id']) && strpos($clean_contents, ' SOA ') !== false) {
+			$raw_soa = preg_replace("/SOA(.+?)\)/esim", "str_replace(PHP_EOL, ' ', '\\1')", $clean_contents);
+			preg_match("/SOA(.+?)\)/esim", $clean_contents, $raw_soa);
+			preg_match("/TTL(.+?)$/esim", $clean_contents, $raw_ttl);
+			if (is_array($raw_ttl)) {
+				$soa_array['soa_ttl'] = trim(preg_replace('/;(.+?)+/', '', $raw_ttl[1]));
+			}
+				var_dump($raw_soa);
+			if (is_array($raw_soa)) {
+				$raw_soa = preg_replace('/;(.+?)+/', '', $raw_soa[1]);
+				$soa = str_replace(array("\n", "\t", '(', ')', '  '), ' ', preg_replace('/\s\s+/', ' ', $raw_soa));
+				$soa = str_replace(' ', '|', trim($soa));
+				$soa_fields = explode('|', str_replace('||', '|', $soa));
+				
+				list($soa_array['soa_master_server'], $soa_array['soa_email_address'], $tmp_serial, $soa_array['soa_refresh'],
+					$soa_array['soa_retry'], $soa_array['soa_expire'], $tmp_neg_cache) = $soa_fields;
+				
+				if (strpos($soa_array['soa_master_server'], $domain_name) !== false) {
+					$soa_array['soa_master_server'] = str_replace('.' . trimFullStop($domain_name) . '.', '', $soa_array['soa_master_server']);
+					$soa_array['soa_email_address'] = str_replace('.' . trimFullStop($domain_name) . '.', '', $soa_array['soa_email_address']);
+					$soa_array['soa_append'] = 'yes';
+				} else $soa_array['soa_append'] = 'no';
+			}
+			
+			$soa_row = '<h4>SOA:</h4><p class="soa_import">' . trimFullStop($domain_name) . '. IN SOA ' . $soa_array['soa_master_server'];
+			if ($soa_array['soa_append'] == 'yes') $soa_row .= '.' . trimFullStop($domain_name) . '.';
+			$soa_row .= ' ' . $soa_array['soa_email_address'];
+			if ($soa_array['soa_append'] == 'yes') $soa_row .= '.' . trimFullStop($domain_name) . '.';
+			$soa_row .= ' ( &lt;autogen_serial&gt; ' . $soa_array['soa_refresh'] . ' ' . $soa_array['soa_retry'] . ' ' . 
+					$soa_array['soa_expire'] . ' ' . $soa_array['soa_ttl'] . ' )';
+			
+			$soa_row = <<<HTML
+						<input type="hidden" name="create[$count][soa_master_server]" value="{$soa_array['soa_master_server']}" />
+						<input type="hidden" name="create[$count][soa_email_address]" value="{$soa_array['soa_email_address']}" />
+						<input type="hidden" name="create[$count][soa_refresh]" value="{$soa_array['soa_refresh']}" />
+						<input type="hidden" name="create[$count][soa_retry]" value="{$soa_array['soa_retry']}" />
+						<input type="hidden" name="create[$count][soa_expire]" value="{$soa_array['soa_expire']}" />
+						<input type="hidden" name="create[$count][soa_ttl]" value="{$soa_array['soa_ttl']}" />
+						<input type="hidden" name="create[$count][record_type]" value="SOA" />
+						<input type="hidden" name="create[$count][soa_append]" value="{$soa_array['soa_append']}" />
+						$soa_row
+						<span><label><input style="height: 10px;" type="checkbox" name="create[$count][record_skip]" />Skip Import</label></span>
+						</p>
+						
+						<h4>Records:</h4>
+
+HTML;
+
+			$count++;
+		} else $soa_row = null;
+
+		$clean_contents = str_replace('.' . trimFullStop($domain_name) . '.', '', $clean_contents);
+		$clean_contents = str_replace(trimFullStop($domain_name) . '.', '', $clean_contents);
+
+		/** Loop through the lines */
+		$lines = explode(PHP_EOL, $clean_contents);
 		$failed = 0;
 		$rows = null;
+		$valid_hashes = array(';', '//', '#');
 		foreach ($lines as $line) {
 			$null_keys = array('record_ttl', 'record_priority', 'record_weight', 'record_port');
 			foreach ($null_keys as $key) {
 				$array[$key] = null;
 			}
-//			$array = null;
 			if (!strlen(trim($line))) continue;
 			
-			$valid_hashes = array(';', '//', '#');
 			foreach ($valid_hashes as $tmp_hash) {
 				if (strpos($line, $tmp_hash)) {
 					$hash = $tmp_hash;
@@ -42,7 +96,7 @@ class fm_dns_tools {
 			}
 			if ($hash == '//') $hash = '\/\/';
 			
-			// Break up the line for comments
+			/** Break up the line for comments */
 			if ($hash) {
 				$comment_parts = preg_split("/{$hash}+/", $line);
 				$array['record_comment'] = trim($comment_parts[1]) ? trim($comment_parts[1]) : 'none';
@@ -51,47 +105,134 @@ class fm_dns_tools {
 				$array['record_comment'] = 'none';
 			}
 			
-			// Break up the line for parts
+			/** Break up the line for parts */
 			$parts = preg_split('/\s+/', trim($comment_parts[0]));
 			
-			if (count($parts) == 5 && is_numeric($parts[1])) {
-				// A or CNAME with TTL
-				$clean_contents .= 'A or CNAME with TTL - ';
-				list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
-			} elseif (count($parts) == 5 && $parts[2] == 'MX') {
-				// MX without TTL
-				$clean_contents .= 'MX without TTL - ';
-				list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_value']) = $parts;
-			} elseif (count($parts) == 6 && is_numeric($parts[1]) && $parts[3] == 'MX') {
-				// MX with TTL
-				$clean_contents .= 'MX with TTL - ';
-				list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_value']) = $parts;
-			} elseif (count($parts) == 7 && $parts[2] == 'SRV') {
-				// SRV without TTL
-				$clean_contents .= 'SRV without TTL - ';
-				list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_weight'], $array['record_port'], $array['record_value']) = $parts;
-			} elseif (count($parts) == 8 && is_numeric($parts[1]) && $parts[3] == 'SRV') {
-				// SRV with TTL
-				$clean_contents .= 'SRV with TTL - ';
-				list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_weight'], $array['record_port'], $array['record_value']) = $parts;
-			} elseif (count($parts) == 4 && $parts[2] == 'PTR') {
-				// PTR without TTL
-				$clean_contents .= 'PTR without TTL - ';
-				list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
-			} elseif (count($parts) == 5 && is_numeric($parts[1]) && $parts[3] == 'PTR') {
-				// PTR with TTL
-				$clean_contents .= 'PTR with TTL - ';
-				list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+			if ($domain_map == 'forward') {
+				if (in_array('MX', $parts)) {
+					switch(array_search('MX', $parts)) {
+						case 3:
+							list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_value']) = $parts;
+							break;
+						case 2:
+							if (is_numeric($parts[0])) {
+								$array['record_name'] = isset($current_name) ? $current_name : '@';
+								list($array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_value']) = $parts;
+							} else {
+								list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_value']) = $parts;
+							}
+							break;
+						case 1:
+							$array['record_name'] = isset($current_name) ? $current_name : '@';
+							list($array['record_class'], $array['record_type'], $array['record_priority'], $array['record_value']) = $parts;
+					}
+				} elseif (in_array('SRV', $parts)) {
+					switch(array_search('SRV', $parts)) {
+						case 3:
+							list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_weight'], $array['record_port'], $array['record_value']) = $parts;
+							break;
+						case 2:
+							if (is_numeric($parts[0])) {
+								$array['record_name'] = isset($current_name) ? $current_name : '@';
+								list($array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_weight'], $array['record_port'], $array['record_value']) = $parts;
+							} else {
+								list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_weight'], $array['record_port'], $array['record_value']) = $parts;
+							}
+							break;
+						case 1:
+							$array['record_name'] = isset($current_name) ? $current_name : '@';
+							list($array['record_class'], $array['record_type'], $array['record_priority'], $array['record_weight'], $array['record_port'], $array['record_value']) = $parts;
+					}
+				} elseif (in_array('TXT', $parts)) {
+					$key = array_search('TXT', $parts);
+					$txt_record = null;
+					for ($i=$key + 1; $i<count($parts); $i++) {
+						$txt_record .= $parts[$i] . ' ';
+					}
+					$parts[$key + 1] = rtrim($txt_record);
+					switch($key) {
+						case 3:
+							list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							break;
+						case 2:
+							if (is_numeric($parts[0])) {
+								$array['record_name'] = isset($current_name) ? $current_name : '@';
+								list($array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							} else {
+								list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							}
+							break;
+						case 1:
+							$array['record_name'] = isset($current_name) ? $current_name : '@';
+							list($array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+					}
+					$array['record_value'] = str_replace('"', '', $array['record_value']);
+				} elseif (in_array('A', $parts) || in_array('CNAME', $parts)) {
+					$key = (in_array('A', $parts)) ? array_search('A', $parts) : array_search('CNAME', $parts);
+					switch($key) {
+						case 3:
+							list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							break;
+						case 2:
+							if (is_numeric($parts[0])) {
+								$array['record_name'] = isset($current_name) ? $current_name : '@';
+								list($array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							} else {
+								list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							}
+							break;
+						case 1:
+							$array['record_name'] = isset($current_name) ? $current_name : '@';
+							list($array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+					}
+				}
 			} else {
-				// A or CNAME without TTL
-				$clean_contents .= count($parts) . ' ('.$comment_parts[0].') : A or CNAME without TTL - ';
-				list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+				if (in_array('PTR', $parts)) {
+					switch(array_search('PTR', $parts)) {
+						case 3:
+							list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							break;
+						case 2:
+							if ($parts[0] > 255) {
+								$array['record_name'] = isset($current_name) ? $current_name : '@';
+								list($array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							} else {
+								list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+							}
+							break;
+						case 1:
+							$array['record_name'] = isset($current_name) ? $current_name : '@';
+							list($array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+					}
+				}
 			}
-			// Still need PTR, TXT records here
+			if (in_array('NS', $parts)) {
+				switch(array_search('NS', $parts)) {
+					case 3:
+						list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+						break;
+					case 2:
+						if (is_numeric($parts[0])) {
+							$array['record_name'] = isset($current_name) ? $current_name : '@';
+							list($array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+						} else {
+							list($array['record_name'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+						}
+						break;
+					case 1:
+						$array['record_name'] = isset($current_name) ? $current_name : '@';
+						list($array['record_class'], $array['record_type'], $array['record_value']) = $parts;
+				}
+			}
+			
+			if (empty($array['record_name']) && !empty($array['record_comment'])) continue;
 			
 			$array['record_append'] = (substr($array['record_value'], -1) == '.') ? 'no' : 'yes';
 			
-			// Automatically skip duplicates
+			/** Set current_name to check for blanks on next run */
+			$current_name = $array['record_name'];
+			
+			/** Automatically skip duplicates */
 			$checked = $this->checkDuplicates($array, $_POST['domain_id']);
 			
 			$class = buildSelect('create[' . $count . '][record_class]', 'class' . $count . 'b', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $array['record_class'], 1, null, false, 'exchange(this);');
@@ -123,6 +264,7 @@ ROW;
 			<input type="hidden" name="map" value="$domain_map">
 			<input type="hidden" name="import_records" value="true">
 			<input type="hidden" name="import_file" value="{$_FILES['import-file']['name']}">
+			$soa_row
 			<table class="display_results">
 				<thead>
 					<tr>

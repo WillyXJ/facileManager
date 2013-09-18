@@ -66,13 +66,15 @@ class fm_dns_records {
 		$new_array['account_id'] = $_SESSION['user']['account_id'];
 		
 		/** Process default integers */
-		if (array_key_exists('record_priority',$new_array) && !is_numeric($new_array['record_priority'])) $new_array['record_priority'] = 0;
-		if (array_key_exists('record_weight',$new_array) && !is_numeric($new_array['record_weight'])) $new_array['record_weight'] = 0;
-		if (array_key_exists('record_port',$new_array) && !is_numeric($new_array['record_port'])) $new_array['record_port'] = 0;
-		if (array_key_exists('record_ttl',$new_array) && !is_numeric($new_array['record_ttl'])) $new_array['record_ttl'] = null;
+		if (array_key_exists('record_priority', $new_array) && !is_numeric($new_array['record_priority'])) $new_array['record_priority'] = 0;
+		if (array_key_exists('record_weight', $new_array) && !is_numeric($new_array['record_weight'])) $new_array['record_weight'] = 0;
+		if (array_key_exists('record_port', $new_array) && !is_numeric($new_array['record_port'])) $new_array['record_port'] = 0;
+		if (array_key_exists('record_ttl', $new_array) && !is_numeric($new_array['record_ttl'])) $new_array['record_ttl'] = null;
 
 		foreach ($new_array as $key => $data) {
 			if ($key == 'PTR') continue;
+			if ($key == 'record_type') continue;
+			if ($record_type == 'SOA' && in_array($key, array('record_type', 'record_comment'))) continue;
 			$sql_fields .= $key . ',';
 			$sql_values .= "'" . mysql_real_escape_string($data) . "',";
 			if ($key != 'account_id') {

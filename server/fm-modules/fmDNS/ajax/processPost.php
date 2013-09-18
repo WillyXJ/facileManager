@@ -25,9 +25,6 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
 
-//	$table = $_POST['item_type'];
-//	$item_type = substr($table, 0, -1);
-//	$prefix = substr($table, 0, -1) . '_';
 	$field = $prefix . 'id';
 	$type_map = null;
 	$id = sanitize($_POST['item_id']);
@@ -112,13 +109,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 			}
 	}
 
-//if (!empty($_POST['view_name'])) {
-//echo '<pre>';
-//print_r($_POST);
-//echo '</pre>';
-
 	exit;
-//}
 }
 
 echo 'You do not have sufficient privileges.';

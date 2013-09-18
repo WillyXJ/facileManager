@@ -135,7 +135,7 @@ class fm_dns_acls {
 		global $fmdb, $__FM_CONFIG;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-		if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $id, 'acl_', 'deleted', 'acl_id')) {
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $id, 'acl_', 'deleted', 'acl_id') === false) {
 			return 'This ACL could not be deleted because a database error occurred.';
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');

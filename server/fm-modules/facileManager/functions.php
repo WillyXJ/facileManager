@@ -117,7 +117,7 @@ function sanitize($data, $replace = null) {
  * @since 1.0
  * @package facileManager
  */
-function printHeader($subtitle = null, $css = 'facileManager', $help = false) {
+function printHeader($subtitle = null, $css = 'facileManager', $help = false, $menu = true) {
 	global $fm_name;
 	
 	$title = ($subtitle) ? " &rsaquo; $subtitle" : null;
@@ -125,7 +125,7 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false) {
 	$head = $logo = null;
 	
 	if ($css == 'facileManager') {
-		$head = getTopHeader($help);
+		$head = $menu ? getTopHeader($help) : null;
 	} else {
 		$logo = '<h1 id="logo"><img alt="' . $fm_name . '" src="' . $GLOBALS['RELPATH'] . 'fm-includes/images/logo.png" /></h1>' . "\n";
 	}
@@ -415,7 +415,6 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
 	}
 	
 	$get_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='$account_id' AND `$field`='$id' $sql";
-//	echo "$get_query<br/>\n";
 	return $fmdb->get_results($get_query);
 }
 
@@ -457,9 +456,8 @@ function updateStatus($table, $id, $prefix, $status, $field = 'id') {
 	global $fmdb;
 	
 	$query = "UPDATE `$table` SET `{$prefix}status`='" . sanitize($status) . "' WHERE `$field`=" . sanitize($id);
-	if (!$result = $fmdb->query($query)) return false;
 
-	return $result;
+	return $fmdb->query($query);
 }
 
 
@@ -475,9 +473,8 @@ function basicDelete($table, $id, $field = 'id', $include_account_id = true) {
 	$account_id = $include_account_id ? "account_id='{$_SESSION['user']['account_id']}' AND" : null;
 	
 	$query = "DELETE FROM `$table` WHERE $account_id `$field`='" . sanitize($id) . "'";
-	if (!$result = $fmdb->query($query)) return false;
 
-	return $result;
+	return $fmdb->query($query);
 }
 
 
@@ -491,9 +488,8 @@ function basicUpdate($table, $id, $update_field, $update_value, $field = 'id') {
 	global $fmdb;
 	
 	$query = "UPDATE `$table` SET `$update_field`='" . sanitize($update_value) . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `$field`='" . sanitize($id) . "'";
-	if (!$result = $fmdb->query($query)) return false;
 
-	return $result;
+	return $fmdb->query($query);
 }
 
 
@@ -996,7 +992,7 @@ function getOption($option = null, $account_id = 0, $table = 'fm_options', $pref
 	
 	$value = $prefix . 'value';
 	
-	$query = "SELECT * FROM $table WHERE {$prefix}name='$option' AND account_id=$account_id";
+	$query = "SELECT * FROM $table WHERE {$prefix}name='$option' AND account_id=$account_id LIMIT 1";
 	$fmdb->get_results($query);
 	
 	if ($fmdb->num_rows) {
@@ -1558,6 +1554,11 @@ function buildSettingsForm($saved_options, $default_options) {
 		switch($options_array['type']) {
 			case 'textarea':
 				$input_field = '<textarea name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '">' . $option_value . '</textarea>';
+				break;
+			case 'checkbox':
+				$checked = $option_value == 'yes' ? 'checked' : null;
+				$input_field = '<input name="' . $option . '" id="' . $option . '" type="hidden" value="no" />';
+				$input_field .= '<label><input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="yes" ' . $checked . ' />' . $options_array['description'][0] . '</label>';
 				break;
 			default:
 				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="40" />';

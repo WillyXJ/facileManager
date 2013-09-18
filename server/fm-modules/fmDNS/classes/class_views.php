@@ -120,14 +120,14 @@ class fm_dns_views {
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_view=' . $id);
 		if ($fmdb->num_rows) {
 			/** Delete corresponding configs */
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_view')) {
+			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_view') === false) {
 				return 'The corresponding configs could not be deleted.';
 			}
 		}
 		
 		/** Delete view */
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-		if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $id, 'view_', 'deleted', 'view_id')) {
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $id, 'view_', 'deleted', 'view_id') === false) {
 			return 'This view could not be deleted because a database error occurred.';
 		} else {
 //			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');

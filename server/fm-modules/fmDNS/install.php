@@ -81,6 +81,16 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` 
 TABLE;
 
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmDNS']['prefix']}options` (
+  `option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `option_name` varchar(255) NOT NULL,
+  `option_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`option_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+TABLE;
+
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmDNS']['prefix']}records` (
   `record_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -367,10 +377,12 @@ VALUES
 ('options',  'alt-transfer-source-v6',  '( ipv6_address | * )',  'no',  'yes'),
 ('options',  'use-alt-transfer-source',  '( yes | no )',  'no',  'yes'),
 ('options',  'zone-statistics',  '( yes | no )',  'no',  'yes'),
-('options',  'key-directory',  '( quoted_string )',  'no',  'yes')
+('options',  'key-directory',  '( quoted_string )',  'no',  'yes'),
+('options',  'match-clients',  '( address_match_element )',  'yes',  'yes'),
+('options',  'match-destinations',  '( address_match_element )',  'yes',  'yes'),
+('options',  'match-recursive-only',  '( yes | no )',  'no',  'yes')
 ;
 INSERT;
-	
 	
 	
 	/** fm_options inserts */
@@ -404,6 +416,10 @@ INSERT;
 			}
 		}
 //	}
+
+//	$current_value = getOption('enable_named_checks', 1, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options');
+//	$command = ($current_value === false) ? 'insert' : 'update';
+//	setOption('enable_named_checks', 'no', $command, 1, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options');
 
 	if (function_exists('displayProgress')) {
 		return displayProgress($module, $result, $noisy);

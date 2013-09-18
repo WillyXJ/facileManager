@@ -351,7 +351,7 @@ class fm_dns_logging {
 		$fmdb->query($query);
 		
 		/** Delete item */
-		if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id')) {
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
 			return 'This ' . $type . ' could not be deleted because a database error occurred.';
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');

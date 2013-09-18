@@ -28,3 +28,51 @@ img.clone_remove {
 	top: 2px;
 	cursor: pointer;
 }
+p.soa_import {
+	width: 100%;
+	font-size: 11px;
+	margin-top: 0;
+}
+p.soa_import span {
+	float: right;
+	padding-right: 5px;
+}
+
+pre {
+	padding: 10px;
+}
+
+#named_check {
+	margin: 10px;
+	padding: 3px;
+	font-size: 10pt;
+	border: 1px #C1DCC1 solid;
+	background-color: #E6F6E6;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	background-image: url('../../facileManager/images/greenshield64.png');
+	background-repeat: no-repeat;
+	background-attachment: local;
+	min-height: 59px;
+	overflow: scroll;
+}
+#named_check p {
+	padding-left: 5em;
+}
+#named_check.info {
+	border-color: #E6E678;
+	background-color: #FFFFE5;
+	background-image: url('../../facileManager/images/yellowshield64.png');
+	background-repeat: no-repeat;
+}
+#named_check.error {
+	border-color: #B22400;
+	background-color: #EAC1B7;
+	background-image: url('../../facileManager/images/redshield64.png');
+	background-repeat: no-repeat;
+}
+#named_check pre {
+	margin-left: 6.5em;
+	padding: 0;
+	font-size: 9pt;
+}

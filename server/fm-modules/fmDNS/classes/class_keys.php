@@ -128,7 +128,7 @@ class fm_dns_keys {
 		global $fmdb, $__FM_CONFIG;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
-		if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $id, 'key_', 'deleted', 'key_id')) {
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $id, 'key_', 'deleted', 'key_id') === false) {
 			return 'This key could not be deleted because a database error occurred.';
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');

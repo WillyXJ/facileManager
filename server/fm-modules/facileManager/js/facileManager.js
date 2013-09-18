@@ -178,12 +178,19 @@ $(document).ready(function() {
 							$row_id.remove();
 						});
 					} else {
-						$('#body_container').animate({marginTop: '4em'}, 200);
-						$('#response').html('<p class="error">'+response+'</p>');
-						$('#response').fadeIn(200);
-						$('#response').delay(3000).fadeOut(400, function() {
-							$('#body_container').animate({marginTop: '2.2em'}, 200);
-						});
+						var eachLine = response.split("\n");
+						if (eachLine.length <= 2) {
+							$('#body_container').animate({marginTop: '4em'}, 200);
+							$('#response').html('<p class="error">'+response+'</p>');
+							$('#response').fadeIn(200);
+							$('#response').delay(3000).fadeOut(400, function() {
+								$('#body_container').animate({marginTop: '2.2em'}, 200);
+							});
+						} else {
+							$('#manage_item').fadeIn(200);
+							$('#manage_item_contents').fadeIn(200);
+							$('#manage_item_contents').html('<h2>Delete Results</h2>' + response + '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />');
+						}
 					}
 				}
 			});
@@ -199,7 +206,7 @@ $(document).ready(function() {
 	});
 	
 	
-	$('#save_fm_settings').click(function() {
+	$('#save_fm_settings, #save_module_settings').click(function() {
 		$.ajax({
 			type: "POST",
 			url: 'fm-modules/facileManager/ajax/processPost.php',
@@ -208,8 +215,6 @@ $(document).ready(function() {
 			{
 				if(response == 'force_logout') {
 					window.location = '?logout';
-//					document.getElementById('manage').reset();	
-//					$('#response').html('');
 				} else {
 					$('#body_container').animate({marginTop: '4em'}, 200);
 					$('#response').html(response);

@@ -366,7 +366,7 @@ class fm_dns_zones {
 			/** Delete all associated records */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) {
-				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'deleted', 'domain_id')) {
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
 					return 'The associated records for this zone could not be deleted because a database error occurred.';
 				}
 			}
@@ -374,13 +374,15 @@ class fm_dns_zones {
 			/** Delete all associated SOA */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_id, 'soa_', 'domain_id');
 			if ($fmdb->num_rows) {
-				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_id, 'soa_', 'deleted', 'domain_id')) {
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_id, 'soa_', 'deleted', 'domain_id') === false) {
 					return 'The SOA for this zone could not be deleted because a database error occurred.';
 				}
 			}
 			
 			/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
-			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $domain_id, 'domain_id', false);
+			if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $domain_id, 'domain_id', false) === false) {
+				return 'The zone could not be removed from the fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds table because a database error occurred.';
+			}
 			
 			/** Force buildconf for all associated DNS servers */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
@@ -403,14 +405,14 @@ class fm_dns_zones {
 			/** Delete cloned zones */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
 			if ($fmdb->num_rows) {
-				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_clone_domain_id')) {
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_clone_domain_id') === false) {
 					return 'The associated clones for this zone could not be deleted because a database error occurred.';
 				}
 			}
 			
 			/** Delete zone */
 			$tmp_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_id')) {
+			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_id') === false) {
 				return 'This zone could not be deleted because a database error occurred.';
 			}
 			

@@ -14,15 +14,6 @@ $page_name_sub = 'Servers';
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
 
-if ($allowed_to_build_configs) {
-	if (isset($_REQUEST['action']) && $_POST['action'] == 'build') {
-		if (isset($_POST['serial_no']) && !empty($_POST['serial_no'])) {
-			$response = $fm_dns_servers->buildServerConfig($_POST['serial_no']);
-		} else header('Location: ' . $GLOBALS['basename']);
-		unset($_POST);
-	}
-}
-
 if ($allowed_to_manage_servers) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {

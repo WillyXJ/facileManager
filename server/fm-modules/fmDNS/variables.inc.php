@@ -8,7 +8,7 @@
  */
 
 /** Module Information */
-$__FM_CONFIG['fmDNS']['version'] = '1.0-rc1';
+$__FM_CONFIG['fmDNS']['version'] = '1.0-rc2';
 $__FM_CONFIG['fmDNS']['description'] = 'Easily manage one or more ISC BIND servers through a web UI.  No more editing configuration and zone files manually.';
 $__FM_CONFIG['fmDNS']['prefix'] = 'dns_';
 $__FM_CONFIG['fmDNS']['required_dns_version'] = '9.3';
@@ -31,12 +31,16 @@ $__FM_CONFIG['module']['menu']['Config']['Keys']	= 'config-keys';
 $__FM_CONFIG['module']['menu']['Config']['Options']	= 'config-options';
 $__FM_CONFIG['module']['menu']['Config']['Logging']	= 'config-logging';
 
+/** Settings Menu Options */
+$__FM_CONFIG['module']['menu']['Settings']['URL']	= 'module-settings';
+
 $__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
 
 /** Images */
 $__FM_CONFIG['module']['icons']['preview']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/preview24.png" border="0" alt="Preview Config" title="Preview Config" width="20" />';
 $__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';
 $__FM_CONFIG['module']['icons']['build']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/build24.png" border="0" alt="Build Config" title="Build Config" width="20" />';
+$__FM_CONFIG['module']['icons']['build']		= '<input type="image" id="build" src="fm-modules/' . $_SESSION['module'] . '/images/build24.png" border="0" alt="Build Config" title="Build Config" width="20" />';
 $__FM_CONFIG['module']['icons']['reload']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/reload256.png" border="0" alt="Reload Zone" title="Reload Zone" width="20" />';
 $__FM_CONFIG['module']['icons']['sub_delete']	= '<img class="clone_remove" id="__ID__" src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Delete" title="Delete" width="12" />';
 
@@ -87,6 +91,17 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmDNS'
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa'=>'soa', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views'=>'view'
 											);
 $__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+
+/** Default values */
+$named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkconf') . ', ' . findProgram('named-checkzone') : '/path/to/named-checkconf, /path/to/named-checkzone';
+$__FM_CONFIG['fmDNS']['default']['options'] = array(
+		'enable_named_checks' => array(
+				'description' => array('Enabled named Checks', 'Enable or disable named-checkconf and named-checkzone utilities.</p>
+								<p>sudo must be installed on ' . php_uname('n') . ' with the following in sudoers:<br />
+								<pre>' . $__FM_CONFIG['webserver']['user_info']['name'] . ' ALL=(root) NOPASSWD: ' . $named_check_utils . '</pre>'),
+				'default_value' => 'no',
+				'type' => 'checkbox')
+	);
 
 /** Array sorts */
 sort($__FM_CONFIG['logging']['categories']);

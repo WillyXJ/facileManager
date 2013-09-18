@@ -10,7 +10,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption($module . '_version', 0);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-b14', '<') ? upgradefmDNS_105($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-rc2', '<') ? upgradefmDNS_106($__FM_CONFIG, $running_version) : true;
 	if (!$success) return 'Failed';
 	
 	return 'Success';
@@ -260,6 +260,54 @@ function upgradefmDNS_105($__FM_CONFIG, $running_version) {
 	if (count($updates) && $updates[0]) {
 		foreach ($updates as $query) {
 			$fmdb->query($query);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	return true;
+}
+
+function upgradefmDNS_106($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.0-b14', '<') ? upgradefmDNS_105($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}options` (
+  `option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `option_name` varchar(255) NOT NULL,
+  `option_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`option_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+TABLE;
+
+	$inserts[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_view_support`
+)
+VALUES 
+('options',  'match-clients',  '( address_match_element )',  'yes',  'yes'),
+('options',  'match-destinations',  '( address_match_element )',  'yes',  'yes'),
+('options',  'match-recursive-only',  '( yes | no )',  'no',  'yes')
+";	
+
+
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
 			if (!$fmdb->result) return false;
 		}
 	}

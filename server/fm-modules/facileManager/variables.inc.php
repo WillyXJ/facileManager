@@ -59,6 +59,9 @@ $__FM_CONFIG['icons']['account']		= '<img src="fm-modules/' . $fm_name . '/image
 $__FM_CONFIG['icons']['star']			= '<img src="fm-modules/' . $fm_name . '/images/star16.png" border="0" alt="Super Admin" title="Super Admin" width="12" style="padding-right: 2px;" />';
 $__FM_CONFIG['icons']['template_user']	= '<img src="fm-modules/' . $fm_name . '/images/template_user16.png" border="0" alt="Template Account" title="Template Account" width="12" style="padding-right: 2px;" />';
 $__FM_CONFIG['icons']['fm_logo']		= '<img src="'. $GLOBALS['FM_URL'] . 'fm-modules/' . $fm_name . '/images/fm.png" border="0" alt="' . $fm_name . '" title="' . $fm_name . '" style="padding-left: 17px;" />';
+$__FM_CONFIG['icons']['shield_error']	= '<img src="fm-modules/' . $fm_name . '/images/redshield64.png" border="0" alt="Error" title="Error" />';
+$__FM_CONFIG['icons']['shield_info']	= '<img src="fm-modules/' . $fm_name . '/images/yellowshield64.png" border="0" alt="Information" title="Information" />';
+$__FM_CONFIG['icons']['shield_ok']		= '<img src="fm-modules/' . $fm_name . '/images/greenshield64.png" border="0" alt="OK" title="OK" />';
 
 /** Cleanup options */
 $__FM_CONFIG['clean']['prefixes']	= array('fm_accounts'=>'account', 'fm_users'=>'user');
@@ -80,6 +83,9 @@ $__FM_CONFIG['options']['date_format']			= array(array(date('F j, Y'), 'F j, Y')
 $__FM_CONFIG['options']['time_format']			= array(array(date('g:i a'), 'g:i a'), array(date('g:i:s a'), 'g:i:s a'), array(date('g:i A'), 'g:i A'), array(date('g:i:s A'), 'g:i:s A'), array(date('H:i'), 'H:i'), array(date('H:i:s'), 'H:i:s'), array(date('H:i:s O'), 'H:i:s O'), array(date('H:i:s T'), 'H:i:s T'));
 
 if (function_exists('ldap_connect')) array_push($__FM_CONFIG['options']['auth_method'], array('LDAP Authentication', 2));
+
+/** Webserver Runas */
+$__FM_CONFIG['webserver']['user_info'] = posix_getpwuid(posix_geteuid());
 
 /** Array sorts */
 @sort($__FM_CONFIG['logging']['categories']);

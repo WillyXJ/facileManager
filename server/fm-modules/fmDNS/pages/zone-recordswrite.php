@@ -41,12 +41,17 @@ if (isset($create) && is_array($create)) {
 	$record_count = 0;
 	foreach ($create as $new_id => $data) {
 		if (!isset($data['record_skip'])) {
+			if (isset($import_records)) $record_type = $data['record_type'];
+			
 			/** Auto-detect IPv4 vs IPv6 A records */
 			if ($record_type == 'A' && strrpos($data['record_value'], ':')) $record_type = 'AAAA';
 			elseif ($record_type == 'AAAA' && !strrpos($data['record_value'], ':')) $record_type = 'A';
 			
 			if (!isset($record_type)) $record_type = null;
-			if ($data['record_comment'] == 'none') $data['record_comment'] = null;
+			if (!isset($data['record_comment']) || strtolower($data['record_comment']) == 'none') $data['record_comment'] = null;
+			
+			/** Remove double quotes */
+			if (isset($data['record_value'])) $data['record_value'] = str_replace('"', '', $data['record_value']);
 			
 			$fm_dns_records->add($domain_id, $record_type, $data);
 			
@@ -95,7 +100,7 @@ if (isset($create) && is_array($create)) {
 	}
 }
 
-if (isset($record_type)) {
+if (isset($record_type) && !isset($import_records)) {
 	if ($record_type == 'AAAA') $record_type = 'A';
 	header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);
 } else header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);

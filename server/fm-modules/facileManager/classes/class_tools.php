@@ -160,7 +160,7 @@ class fm_tools {
 	 * Backs up the database
 	 */
 	function backupDatabase() {
-		global $__FM_CONFIG, $allowed_to_run_tools;
+		global $__FM_CONFIG, $allowed_to_run_tools, $fm_name;
 		
 		if (!$allowed_to_run_tools) return '<p class="error">You are not authorized to run these tools.</p>';
 		

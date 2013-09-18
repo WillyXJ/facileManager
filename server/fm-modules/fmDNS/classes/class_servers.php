@@ -184,16 +184,20 @@ class fm_dns_servers {
 					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_name_servers`='$serverids' WHERE `domain_id`={$result[$i]->domain_id} AND `account_id`='{$_SESSION['user']['account_id']}'";
 					$result2 = $fmdb->query($query);
 					if (!$fmdb->rows_affected) {
-						return 'The associated zones for this server could not be updated. Deletion failed.';
+						return 'The associated zones for this server could not be updated because a database error occurred.';
 					}
 				}
 			}
 
 			/** Delete associated config options */
-			updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no');
+			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
+				return 'The associated server configs could not be deleted because a database error occurred.';
+			}
 			
 			/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
-			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false);
+			if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false) === false) {
+				return 'The server could not be removed from the fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds table because a database error occurred.';
+			}
 			
 			/** Delete server */
 			$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
@@ -210,12 +214,12 @@ class fm_dns_servers {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		$edit_actions = $edit_status = null;
+		$edit_status = null;
+		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
 		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
-				$edit_actions .= '<form name="build" id="build" method="post" action="' . $GLOBALS['basename'] . '"><a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
-				$edit_actions .= '<input type="hidden" name="action" value="build" /><input type="hidden" name="serial_no" value="' . $row->server_serial_no . '" />' . $__FM_CONFIG['icons']['build'] . '</form>';
+				$edit_actions .= $__FM_CONFIG['icons']['build'];
 			}
 		}
 		if ($allowed_to_manage_servers) {
@@ -228,8 +232,6 @@ class fm_dns_servers {
 				$edit_status .= '</a>';
 			}
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&id=' . $row->server_id .'" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-		} elseif (!$allowed_to_manage_servers) {
-			$edit_actions = 'N/A';
 		}
 		if ($row->server_installed != 'yes') {
 			$edit_actions = 'Client Install Required<br />';
@@ -369,27 +371,42 @@ FORM;
 	function buildServerConfig($serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$response = '<p class="error">Building server configs failed.</p>'. "\n";
-		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return $error;
+		if (!$fmdb->num_rows) return '<p class="error">This server is not found.</p>';
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+		
+		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') == 'yes') {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
+			
+			$data['SERIALNO'] = $server_serial_no;
+			$data['compress'] = 0;
+			$data['dryrun'] = true;
+		
+			basicGet('fm_accounts', $_SESSION['user']['account_id'], 'account_', 'account_id');
+			$account_result = $fmdb->last_result;
+			$data['AUTHKEY'] = $account_result[0]->account_key;
+		
+			$raw_data = $fm_dns_buildconf->buildServerConfig($data);
+		
+			$response = $fm_dns_buildconf->namedSyntaxChecks($raw_data);
+			if (strpos($response, 'error') !== false) return $response;
+		} else $response = null;
 		
 		switch($server_update_method) {
 			case 'cron':
 				/* set the server_update_config flag */
 				setBuildUpdateConfigFlag($serial_no, 'yes', 'update');
-				$response = '<p>This server will be updated on the next cron run.</p>'. "\n";
+				$response .= '<p>This server will be updated on the next cron run.</p>'. "\n";
 				break;
 			case 'http':
 			case 'https':
 				/** Test the port first */
 				$port = ($server_update_method == 'https') ? 443 : 80;
 				if (!socketTest($server_name, $port, 30)) {
-					return '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $port . ').</p>'. "\n";
+					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $port . ').</p>'. "\n";
 				}
 				
 				/** Remote URL to use */
@@ -405,10 +422,10 @@ FORM;
 					if (empty($post_result)) {
 						$post_result = 'It appears ' . $server_name . ' does not have php configured properly within httpd.';
 					}
-					return '<p class="error">' . $post_result . '</p>'. "\n";
+					return $response . '<p class="error">' . $post_result . '</p>'. "\n";
 				} else {
 					if (count($post_result) > 1) {
-						$response = '<textarea rows="4" cols="100">';
+						$response .= '<textarea rows="4" cols="100">';
 						
 						/** Loop through and format the output */
 						foreach ($post_result as $line) {
@@ -417,7 +434,7 @@ FORM;
 						
 						$response .= "</textarea>\n";
 					} else {
-						$response = "<p>[$server_name] " . $post_result[0] . '</p>';
+						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
 					}
 				}
 		}

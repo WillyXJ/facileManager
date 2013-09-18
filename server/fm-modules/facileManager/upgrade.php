@@ -25,7 +25,7 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 18) ? fmUpgrade_104($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 22) ? fmUpgrade_105($database) : true;
 	displayProgress('Upgrading Schema', $success);
 
 	echo "</table>\n</center>\n";
@@ -94,7 +94,7 @@ function fmUpgrade_101($database) {
 
 	upgradeConfig('fm_db_version', 14, false);
 	
-	return true;
+	return $success;
 }
 
 
@@ -107,7 +107,7 @@ function fmUpgrade_104($database) {
 	$success = ($GLOBALS['running_db_version'] < 14) ? fmUpgrade_101($database) : true;
 	
 	if ($success) {
-		$table = null;
+		$table = $inserts = $updates = null;
 		
 		/** Schema change */
 		if ($GLOBALS['running_db_version'] < 14) {
@@ -196,6 +196,7 @@ INSERT;
 			WHERE NOT EXISTS
 				(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'time_format');
 INSERT;
+
 			}
 			
 			if ($GLOBALS['running_db_version'] >= 15) {
@@ -244,25 +245,62 @@ INSERT;
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) {
-					$success = false;
-					break;
-				}
+				if (!$fmdb->result) return false;
 			}
 		}
 	
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) {
-					$success = false;
-					break;
-				}
+				if (!$fmdb->result) return false;
 			}
 		}
 	
 		if (count($updates) && $updates[0] && $success) {
 			foreach ($updates as $query) {
+				$fmdb->query($query);
+				if (!$fmdb->result) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 18, false);
+	
+	return $success;
+}
+
+
+function fmUpgrade_105($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 18) ? fmUpgrade_104($database) : true;
+	
+	if ($success) {
+		$table = $inserts = $updates = null;
+
+		/** Schema change */
+		$inserts[] = <<<INSERT
+INSERT INTO $database.`fm_options` (`option_name`, `option_value`) 
+	SELECT 'fm_temp_directory', '/tmp' FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'fm_temp_directory');
+INSERT;
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result) {
+					if (!$fmdb->result) return false;
+				}
+			}
+		}
+	
+		if (count($inserts) && $inserts[0] && $success) {
+			foreach ($inserts as $query) {
 				$fmdb->query($query);
 				if (!$fmdb->result) {
 					$success = false;

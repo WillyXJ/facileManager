@@ -16,6 +16,7 @@ class fm_settings {
 		
 		foreach ($_POST as $key => $data) {
 			if (!in_array($key, $exclude)) {
+				unset($data_array);
 				if (is_array($data)) {
 					$data_array = $data;
 					$account_id = $_SESSION['user']['account_id'];
@@ -32,10 +33,7 @@ class fm_settings {
 					if (!verifyNumber($data, 1, 65535, false)) return 'Invalid port number specified.';
 				}
 				
-				if (isset($data_array)) {
-					$data = $data_array;
-					unset($data_array);
-				}
+				if (isset($data_array)) $data = $data_array;
 				
 				$new_array[$key] = ($current_value === false) ? array($data, 'insert') : array($data, 'update');
 			}
@@ -62,8 +60,8 @@ class fm_settings {
 				elseif ($option == 'mail_smtp_pass') $log_message .= str_repeat('*', 8);
 				elseif ($option == 'date_format' || $option == 'time_format') $log_message .= date($log_value);
 				elseif ($option == 'ldap_user_template') $log_message .= getNameFromID($log_value, 'fm_users', 'user_', 'user_id', 'user_login');
-				elseif ($option_value == 1) $log_message .= 'Yes';
-				elseif ($option_value == 0) $log_message .= 'No';
+				elseif ($option_value == '1') $log_message .= 'Yes';
+				elseif ($option_value == '0') $log_message .= 'No';
 				else $log_message .= $log_value;
 				
 				$log_message .= "\n";
@@ -164,6 +162,8 @@ class fm_settings {
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		$time_format_list = buildSelect('time_format[' . $_SESSION['user']['account_id'] . ']', 'time_format', $__FM_CONFIG['options']['time_format'], $time_format);
 		
+		$fm_temp_directory = getOption('fm_temp_directory');
+
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">
 			<input type="hidden" name="item_type" value="fm_settings" />
@@ -390,6 +390,17 @@ class fm_settings {
 						</div>
 						<div class="choices">
 							$time_format_list
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="fm_temp_directory">Temporary Directory</label>
+							<p>Temporary directory on $local_hostname to use for scratch files (must be writeable by {$__FM_CONFIG['webserver']['user_info']['name']}).</p>
+						</div>
+						<div class="choices">
+							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="$fm_temp_directory" size="40" placeholder="/tmp" />
 						</div>
 					</div>
 				</div>

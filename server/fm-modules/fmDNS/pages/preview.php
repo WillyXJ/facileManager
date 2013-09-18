@@ -23,7 +23,7 @@ if (!$fm_login->isLoggedIn()) {
 	exit;
 }
 
-$preview = null;
+$preview = $named_check_status = null;
 
 if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_serial_no'])) {
 	extract($_GET);
@@ -41,6 +41,7 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	if (!is_array($raw_data)) {
 		$preview = unserialize($raw_data);
 	} else {
+		$named_check_status = $fm_dns_buildconf->namedSyntaxChecks($raw_data);
 		foreach ($raw_data['files'] as $filename => $contents) {
 			$preview .= str_repeat('=', 75) . "\n";
 			$preview .= $filename . ":\n";
@@ -52,6 +53,8 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	$preview = 'Invalid Server ID.';
 }
 
-echo '<pre>' . $preview . '</pre>';
+printHeader('Server Config Preview', 'facileManager', false, false);
+echo $named_check_status . '<pre>' . $preview . '</pre>';
+printFooter();
 
 ?>

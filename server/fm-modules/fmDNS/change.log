@@ -1,3 +1,11 @@
+1.0-rc2 (2013-09-18)
+====================
+* Server - (Git Issue 16) Added missing view options.
+* Server - (Git Issue 17) Improved zone file imports.
+* Server - Server config builds now use jquery.
+* Server - (Git Issue 19) Added named-checkconf and named-checkzone support and the
+           ability to enable/disable the checks.
+
 1.0-rc1 (2013-09-13)
 ====================
 * Server - Uses the datetime format from facileManager settings.

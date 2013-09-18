@@ -1,3 +1,10 @@
+1.0-rc2 (2013-09-18)
+====================
+* Server - (Git Issue 18) Integrated installation and upgrade instructions into
+           the README.
+* Server - (Git Issue 1) Added additional OS-specific installation instructions.
+* Server - Updated some jquery functions.
+
 1.0-rc1 (2013-09-13)
 ====================
 * Server - Added ability to change the displayed datetime format and set the 

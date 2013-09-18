@@ -159,7 +159,7 @@ body {
 }
 
 #mainitems div.separator {
-	height: 0.3em;
+	height: 0.5em;
 	background-color: #DFDFDF;
 	border-top: 1px #CFCFCF solid;
 }
@@ -304,6 +304,14 @@ h2 {
 	font: normal 24px Georgia, "Times New Roman", Times, serif;
 	margin: 5px 0px;
 	border-bottom: 1px solid #cfcfcf;
+}
+
+h4 {
+	color: #333;
+	font-weight: bold;
+	font-size: 12px;
+	margin: 3px 0px;
+	margin-top: 1em;
 }
 
 #body_container {
@@ -631,6 +639,7 @@ a {
 	display: none;
 	opacity: 1.0;
 	padding: 2em;
+	max-width: 70%;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	moz-box-shadow: 0 4px 10px -1px #000;

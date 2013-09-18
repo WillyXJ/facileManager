@@ -187,7 +187,8 @@ function buildModuleHelpFile() {
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
 			<p>Once a server is added or modified, the configuration files for the server will need to be built before zone reloads will be available. 
 			Before building the configuration ({$__FM_CONFIG['icons']['build']}) you can preview ({$__FM_CONFIG['icons']['preview']}) the configs to 
-			ensure they are how you desire them.</p>
+			ensure they are how you desire them. Both the preview and the build will check the configuration files with named-checkconf and named-checkzone
+			if enabled in the <a href="{$__FM_CONFIG['menu']['Settings']['URL']}">Settings</a>.</p>
 			<p><i>The 'Build Server Configs' or 'Super Admin' permission is required to build the DNS server configurations.</i></p>
 			<br />
 			
