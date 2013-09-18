@@ -1,0 +1,74 @@
+1.0-rc1 (2013-09-13)
+====================
+* Server - Added ability to change the displayed datetime format and set the 
+           timezone.
+* Server - Added ad-hoc database backup functionality.
+* Server - (Git Issue 10) Added LDAP authentication support.
+* Server - Updated help files.
+
+1.0-b15 (2013-09-04)
+====================
+* Server - (Git Issue 3) Added search capabilities to the admin logs page.
+
+1.0-b14 (2013-09-03)
+====================
+* Server - Minor change to forgotton password email.
+* Server - Fixed an issue with module upgrades.
+* Server - Added more error checking.
+
+1.0-b13 (2013-08-28)
+====================
+* Server - Added Admin->Settings menu item to set authentication and mailing methods.
+* Server - Can now disable authentication thus using only the default super-admin
+           user account.
+* Server - Set several tables to INNODB.
+* Server - (Git Issue 12) Added support to email password reset links.
+* Server - (Git Issue 7) Added support for modules to have more granular user permissions.
+
+1.0-b12 (2013-08-23)
+====================
+* Server - Fixed database clean up bug.
+* Server - Supports pressing the ESC button to cancel a window.
+* Server - Fixed module installation output.
+* Server - Replaced logout button with account menu.
+* Server - Redesigned user management page.
+* Server - Fixed an issue where user permissions could be removed unintentionally
+           during a password change.
+* Server - (Git Issue 11) Super-admins can no longer be demoted by non-super-admins
+           nor themselves.
+* Server - Added option to enforce a user password change upon login.
+
+1.0-b11 (2013-08-21)
+====================
+* Server - Help now pops out.
+
+1.0-b10 (2013-08-14)
+====================
+* Server - Fixed post-upgrade redirection.
+
+1.0-b9 (2013-08-14)
+===================
+* Server - Decreased the update check interval.
+* Client - Added PHP version check.
+
+1.0-b7 (2013-08-13)
+===================
+* Server - Updated version checks.
+* Server - Improved installation to prevent duplicate entries.
+* Server - (Git Issue 1) Improved application requirement checks.
+* Server - Improved user creation and modification.
+
+1.0-b6 (2013-08-13)
+===================
+* Server - (Git Issue 1) Added mod_rewrite check.
+* Server - Fixed relative pathing issue.
+* Server - User no longer gets redirected to the dashboard after authentication.
+
+1.0-b5 (2013-08-10)
+===================
+* Server - Added module version checks.
+* Server - Improved upgrade process.
+
+1.0-b4 (2013-08-09)
+===================
+* Initial release.

@@ -1,0 +1,30 @@
+tr.import_swap span {
+	cursor: pointer;
+}
+
+tr.import_swap input:not([type="checkbox"]) {
+	display: none;
+	font-size: 11px;
+}
+
+tr.import_swap select {
+	display: none;
+}
+
+#fmdns_config_zones, #fmdns_manage_records, #fmdns_config_servers {
+	display: none;
+}
+
+.value_placeholder {
+	white-space: nowrap;
+}
+
+#clones p {
+	margin: 0;
+}
+
+img.clone_remove {
+	position: relative;
+	top: 2px;
+	cursor: pointer;
+}

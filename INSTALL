@@ -1,0 +1,50 @@
+Installation instructions for facileManager
+============================================
+
+This document describes the necessary steps to install facileManager and get it to
+a working state - it shouldn't take long at all!
+
+There are two parts: the server and the client(s).  The server is where the web
+interface will run from.  It is *not* required to host the MySQL database on the
+same server as the web interface.  The client runs on the DNS servers we are
+managing.
+
+
+Prerequisites
+--------------
+
+facileManager (server) requires the following:
+
+	* PHP 5.2.0 or later with MySQL support
+	* MySQL 4.0 or later
+	* A working webserver (httpd) with mod_rewrite.so enabled
+	* facileManager-core
+
+facileManager (client) requires the following:
+
+	* ISC BIND 9.3 or later
+	* PHP 5.0 or later
+	* A running web server if using http(s) update methods
+		- The install script supports the following web servers:
+			~ httpd
+			~ lighttpd
+
+
+Server Installation
+--------------------
+
+1.	Move the contents of the server directory to your document root.
+	(ie /var/www/html/facileManager/)
+2.	Point your web browser to http://example.com/facileManager/ or your virtualhost
+	if you set one up (ie http://facileManager.example.com).
+3.	Follow the installation wizard to setup your database.
+
+
+Client Installation
+--------------------
+
+1.	Move the contents of the client directory to /usr/local/ on your DNS servers
+	to manage.
+	`sudo mv facileManager/client/facileManager /usr/local/`
+2.  Run the following to complete the client installation.
+	`sudo php /usr/local/facileManager/fmDNS/dns.php install`
