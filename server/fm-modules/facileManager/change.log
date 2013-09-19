@@ -1,6 +1,7 @@
 1.0-rc3 (2013-09-??)
 ====================
 * Server - Improved validateNumber() javascript function.
+* Server - Added option to enforce HTTPS.
 
 1.0-rc2 (2013-09-18)
 ====================

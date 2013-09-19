@@ -147,9 +147,9 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>$fm_name$title</title>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css" type="text/css" />
-		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-		<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-		<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 		$module_css
 		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js" type="text/javascript" charset="utf-8"></script>
 		$module_js

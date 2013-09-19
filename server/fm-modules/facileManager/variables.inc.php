@@ -29,7 +29,7 @@ $fm_name = 'facileManager';
 
 /** Set global variables */
 $GLOBALS['REQUEST_PROTOCOL'] = isSiteSecure() ? 'https' : 'http';
-$GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['SERVER_NAME'] . $GLOBALS['RELPATH'];
+$GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'] . $GLOBALS['RELPATH'];
 
 /** Styled break in menu listing */
 $__FM_CONFIG['menu']['Break'][]				= null;

@@ -10,7 +10,7 @@ class fm_settings {
 		
 		$force_logout = false;
 		$exclude = array('save', 'item_type');
-		$ports = array('ldap_port', 'ldap_port_ssl');
+		$ports = array('ldap_port', 'ldap_port_ssl', 'fm_port_ssl');
 		
 		$log_message = "Set system settings to the following:\n";
 		
@@ -131,6 +131,11 @@ class fm_settings {
 		$ldap_user_template = getOption('ldap_user_template');
 		$ldap_user_template_list = buildSelect('ldap_user_template', 'ldap_user_template', $this->buildUserList(), $ldap_user_template);
 
+		/** SSL Section */
+		$enforce_ssl = getOption('enforce_ssl');
+		$enforce_ssl_checked = ($enforce_ssl) ? 'checked' : null;
+		$fm_port_ssl = getOption('fm_port_ssl');
+		
 		/** Mailing Section */
 		$mail_enable = getOption('mail_enable');
 		if ($mail_enable) {
@@ -168,6 +173,7 @@ class fm_settings {
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">
 			<input type="hidden" name="item_type" value="fm_settings" />
 			<input type="hidden" name="ldap_group_require" value="0" />
+			<input type="hidden" name="enforce_ssl" value="0" />
 			<input type="hidden" name="mail_enable" value="0" />
 			<input type="hidden" name="mail_smtp_auth" value="0" />
 			<input type="hidden" name="mail_smtp_tls" value="0" />
@@ -289,6 +295,26 @@ class fm_settings {
 							<div class="choices">
 								$ldap_user_template_list
 							</div>
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="enforce_ssl">Enforce SSL</label>
+							<p>Attempt to auto-detect and redirect the user to https.</p>
+						</div>
+						<div class="choices">
+							<input style="height: 10px;" name="enforce_ssl" id="enforce_ssl" type="checkbox" value="1" $enforce_ssl_checked /><label for="enforce_ssl">Enforce SSL</label>
+						</div>
+					</div>
+					<div id="setting-row">
+						<div class="description">
+							<label for="fm_port_ssl">HTTPS Port</label>
+							<p>The HTTPS TCP port $fm_name runs on.</p>
+						</div>
+						<div class="choices">
+							<input name="fm_port_ssl" id="fm_port_ssl" type="text" value="$fm_port_ssl" size="40" placeholder="443" onkeydown="return validateNumber(event)" />
 						</div>
 					</div>
 				</div>

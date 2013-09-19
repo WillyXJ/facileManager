@@ -288,7 +288,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$server_id = 0;
-		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = null;
+		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$ucaction = ucfirst($action);
 		

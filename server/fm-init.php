@@ -23,7 +23,7 @@ if (!defined('AJAX')) {
 
 //error_reporting(E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR);
 ini_set('display_errors', false);
-error_reporting(E_NONE);
+error_reporting(0);
 
 if (file_exists(ABSPATH . 'config.inc.php')) {
 	
@@ -40,6 +40,15 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 
 	if (!defined('INSTALL') && !defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
+		
+		/** Enforce SSL if applicable */
+		if (getOption('fm_db_version') >= 23 && getOption('enforce_ssl')) {
+			if (!isSiteSecure()) {
+				$fm_port_ssl = getOption('fm_port_ssl') ? getOption('fm_port_ssl') : 443;
+				header('Location: https://' . $_SERVER['HTTP_HOST'] . ':' . $fm_port_ssl . $_SERVER['REQUEST_URI']);
+			}
+		}
+		
 		require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 		
 		if (!$fm_login->isLoggedIn()) {
