@@ -107,7 +107,7 @@ $(document).ready(function() {
     });
     
 	/* Form edits */
-    $('#table_edits').delegate('a.edit_form_link','click tap',function(e){
+    $('#table_edits').delegate('a.edit_form_link', 'click tap', function(e) {
         var $this 		= $(this);
         var $row_id		= $this.parent().parent();
         item_id			= $row_id.attr('id');
@@ -145,7 +145,7 @@ $(document).ready(function() {
     });
 
 	/* Form deletes */
-    $('#table_edits').delegate('a.delete','click tap',function(e){
+    $('#table_edits').delegate('a.delete', 'click tap', function(e) {
         var $this 		= $(this);
         var $row_id		= $this.parent().parent();
         item_id			= $row_id.attr('id');
@@ -200,7 +200,7 @@ $(document).ready(function() {
     });
 
     /* Cancel button */
-    $('#manage_item_contents').delegate('#cancel_button','click tap',function(e){
+    $('#manage_item_contents').delegate('#cancel_button', 'click tap', function(e) {
 		$('#manage_item').fadeOut(200);
 		$('#manage_item_contents').fadeOut(200).html();
 	});
@@ -330,7 +330,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$("#manage_item_contents").delegate('#user_template_only','click tap',function(e){
+	$("#manage_item_contents").delegate('#user_template_only', 'click tap', function(e) {
 		$('input[type="submit"]').removeAttr('disabled');
 	});
 	
@@ -385,6 +385,7 @@ $(document).ready(function() {
 	$(function() {
 		$( ".datepicker" ).datepicker();
 	});
+
 });
 
 function del(msg){
@@ -470,16 +471,21 @@ function toggleLayer(whichLayer, view) {
 }
 
 function validateNumber(event) {
-    var key = window.event ? event.keyCode : event.which;
-
-    if (event.keyCode == 8 || event.keyCode == 46
-     || event.keyCode == 37 || event.keyCode == 39) {
-        return true;
-    }
-    else if (key < 48 || key > 57) {
-        return false;
-    }
-    else return true;
+	// Allow: backspace, delete, tab, escape, and enter
+	if ( event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 || 
+		// Allow: Ctrl+A
+		(event.keyCode == 65 && event.ctrlKey === true) || 
+		// Allow: home, end, left, right
+		(event.keyCode >= 35 && event.keyCode <= 39)) {
+			// let it happen, don't do anything
+			return;
+	}
+	else {
+		// Ensure that it is a number and stop the keypress
+		if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
+		event.preventDefault(); 
+		}   
+	}
 }
 
 function showHideBox(div, selectbox, testvalue) {

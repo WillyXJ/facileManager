@@ -202,7 +202,7 @@ class fm_settings {
 								<p>TCP/UDP port for non-SSL communication.</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_port" id="ldap_port" type="number" value="$ldap_port" size="10" placeholder="389" />
+								<input name="ldap_port" id="ldap_port" type="number" value="$ldap_port" size="10" placeholder="389" onkeydown="return validateNumber(event)" />
 							</div>
 						</div>
 						<div id="setting-row">
@@ -211,7 +211,7 @@ class fm_settings {
 								<p>TCP/UDP port for SSL communication.</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_port_ssl" id="ldap_port_ssl" type="number" value="$ldap_port_ssl" size="10" placeholder="636" />
+								<input name="ldap_port_ssl" id="ldap_port_ssl" type="number" value="$ldap_port_ssl" size="10" placeholder="636" onkeydown="return validateNumber(event)" />
 							</div>
 						</div>
 						<div id="setting-row">
