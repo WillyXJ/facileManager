@@ -1,3 +1,9 @@
+1.0-rc3 (2013-09-??)
+====================
+* Both   - (Git Issue 20) Added support for server and clients to run http(s) on
+           non-standard ports.
+* Server - Improved jquery functions.
+
 1.0-rc2 (2013-09-18)
 ====================
 * Server - (Git Issue 16) Added missing view options.

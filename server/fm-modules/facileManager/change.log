@@ -1,3 +1,7 @@
+1.0-rc3 (2013-09-??)
+====================
+* Server - Improved validateNumber() javascript function.
+
 1.0-rc2 (2013-09-18)
 ====================
 * Server - (Git Issue 18) Integrated installation and upgrade instructions into
