@@ -1,11 +1,17 @@
-                                _/ _/         _/    _/_/
-        _/_/   _/_/      _/_/     _/  _/_/   _/_/ _/ _/   _/_/    _/  _/_/     _/_/     _/_/    _/_/   _/  _/_/
-     _/     _/    _/  _/      _/ _/ _/ _/_/ _/  _/  _/ _/    _/  _/_/    _/ _/    _/ _/    _/ _/ _/_/ _/_/
-    _/_/_/ _/    _/  _/      _/ _/ _/      _/      _/ _/    _/  _/      _/ _/    _/ _/    _/ _/      _/
-   _/       _/_/ _/   _/_/  _/ _/    _/_/ _/      _/   _/_/ _/ _/      _/   _/_/ _/  _/_/_/    _/_/ _/
-  _/                                                                                    _/
-_/                                                                                  _/_/
-
+                                _/ _/
+        _/_/   _/_/      _/_/     _/  _/_/ 
+     _/     _/    _/  _/      _/ _/ _/ _/_/
+    _/_/_/ _/    _/  _/      _/ _/ _/      
+   _/       _/_/ _/   _/_/  _/ _/    _/_/ 
+  _/
+_/  _/    _/_/
+   _/_/ _/ _/   _/_/    _/  _/_/     _/_/     _/_/    _/_/   _/  _/_/
+  _/  _/  _/ _/    _/  _/_/    _/ _/    _/ _/    _/ _/ _/_/ _/_/
+ _/      _/ _/    _/  _/      _/ _/    _/ _/    _/ _/      _/
+_/      _/   _/_/ _/ _/      _/   _/_/ _/  _/_/_/    _/_/ _/
+                                              _/
+                                          _/_/
+                                          
 Created by Jon LaBass <http://www.jonlabass.com> and Tim Rowland <http://www.nebtech.net>.
 
 (c) 2013 by facileManager project members.
@@ -16,8 +22,8 @@ Please see LICENSE for license.
 Installation instructions for facileManager
 ============================================
 
-This document describes the necessary steps to install facileManager and get it to
-a working state - it shouldn't take long at all!
+This document describes the necessary steps to install facileManager and get it
+to a working state - it shouldn't take long at all!
 
 There are two parts: the server and the client(s).  The server is where the web
 interface will run from.  It is *not* required to host the MySQL database on the
@@ -52,22 +58,23 @@ Server Installation
 
 1.	Move the contents of the server directory to your document root.
 	(ie /var/www/html/facileManager/)
-2.	Point your web browser to http://example.com/facileManager/ or your virtualhost
-	if you set one up (ie http://facileManager.example.com).
+2.	Point your web browser to http://example.com/facileManager/ or your
+	virtualhost if you set one up (ie http://facileManager.example.com).
 3.	Follow the installation wizard to setup your database.
 
 Additional Steps (OS-based)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Ubuntu - Edit /etc/apache2/sites-available/default and change 'AllowOverride None' to
-         'AllowOverride All' under <directory /var/www/> and reload apache.
+Ubuntu - Edit /etc/apache2/sites-available/default and change 'AllowOverride 
+         None' to 'AllowOverride All' under <directory /var/www/> and reload 
+         apache.
 
 
 Client Installation
 --------------------
 
-1.	Move the contents of the client directory to /usr/local/ on your DNS servers
-	to manage.
+1.	Move the contents of the client directory to /usr/local/ on your DNS
+	servers to manage.
 	`sudo mv facileManager/client/facileManager /usr/local/`
 2.  Run the following to complete the client installation.
 	`sudo php /usr/local/facileManager/fmDNS/dns.php install`
@@ -77,20 +84,21 @@ Client Installation
 Upgrade instructions for facileManager
 =======================================
 
-This section describes the necessary steps to upgrade facileManager and get it to
-a working state - it shouldn't take long at all!
+This section describes the necessary steps to upgrade facileManager and get it
+to a working state - it shouldn't take long at all!
 
 
 Server Upgrade
 ---------------
 
-1.	Make a backup of your database using the built-in tool via the UI or manually.
+1.	Make a backup of your database using the built-in tool via the UI or
+	manually.
 2.  Make a backup of your config.inc.php file.
 3.	Delete your old facileManager files.
 4.  Extract/upload the new files from the server directory.
 5.  Copy your backup of config.inc.php to the document root.
     (ie /var/www/html/facileManager/)
-6.  Login as a super-admin to facileManager and follow the wizard to upgrade your
-    database.
-7.  Once fM is upgraded, you will be redirected to the admin-modules page where you 
-    can upgrade your modules individually.
+6.  Login as a super-admin to facileManager and follow the wizard to upgrade 
+	your database.
+7.  Once fM is upgraded, you will be redirected to the admin-modules page where
+	you can upgrade your modules individually.
