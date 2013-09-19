@@ -138,7 +138,6 @@ $(document).ready(function() {
 						$('#response').delay(3000).fadeOut(400, function() {
 							$('#body_container').animate({marginTop: '2.2em'}, 200);
 						});
-//						$row_id.parent().parent().parent().addClass("response");
 					}
 				}
 			});
@@ -155,25 +154,21 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#manage_item_contents").delegate('#cfg_destination', 'change', function(e) {
+		if ($(this).val() == 'file') {
+			$('#syslog_options').slideUp();
+			$('#destination_option').show('slow');
+		} else if ($(this).val() == 'syslog') {
+			$('#destination_option').slideUp();
+			$('#syslog_options').show('slow');
+		} else {
+			$('#syslog_options').slideUp();
+			$('#destination_option').slideUp();
+		}
+	});
+	
 });
 
-
-function manageDestinations() {
-	var desttype = document.getElementById('cfg_destination').value;
-	var dest = document.getElementById('destination_option');
-	var syslog = document.getElementById('syslog_options');
-	
-	if (desttype == 'file') {
-		dest.style.display = 'block';
-		syslog.style.display = 'none';
-	} else if (desttype == 'syslog') {
-		dest.style.display = 'none';
-		syslog.style.display = 'block';
-	} else {
-		dest.style.display = 'none';
-		syslog.style.display = 'none';
-	}
-}
 
 function displayOptionPlaceholder() {
 	var option_name = document.getElementById('cfg_name').value;

@@ -438,7 +438,7 @@ FORM;
 		if ($type == 'channel') {
 			$dest = $this->getChannel($cfg_id);
 			$cfg_syslog = buildSelect('cfg_syslog', 'cfg_syslog', $__FM_CONFIG['logging']['options']['syslog'], $this->getChannel($cfg_id, 'syslog'));
-			$cfg_destination = buildSelect('cfg_destination', 'cfg_destination', $__FM_CONFIG['logging']['options']['destinations'], $dest, 1, '', false, 'manageDestinations()');
+			$cfg_destination = buildSelect('cfg_destination', 'cfg_destination', $__FM_CONFIG['logging']['options']['destinations'], $dest, 1);
 			$cfg_severity = buildSelect('severity', 'severity', $__FM_CONFIG['logging']['options']['severity'], $this->getChannel($cfg_id, 'severity'));
 			$cfg_print_category = buildSelect('print-category', 'print-category', $__FM_CONFIG['logging']['options']['print-category'], $this->getChannel($cfg_id, 'print-category'));
 			$cfg_print_severity = buildSelect('print-severity', 'print-severity', $__FM_CONFIG['logging']['options']['print-severity'], $this->getChannel($cfg_id, 'print-severity'));
