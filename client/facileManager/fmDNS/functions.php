@@ -40,7 +40,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	$daemon = detectDaemonVersion(true);
 	if ($daemon === null) {
 		echo "failed\n\n";
-		echo "Cannot find a supported DNS server - please check the INSTALL document for supported DNS servers.  Aborting.\n";
+		echo "Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n";
 		exit(1);
 	}
 	extract($daemon);
@@ -88,7 +88,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 			/** Detect which web server is running */
 			$web_server = detectHttpd();
 			if (!is_array($web_server)) {
-				echo "\nCannot find a supported web server - please check the INSTALL document for supported web servers.  Aborting.\n";
+				echo "\nCannot find a supported web server - please check the README document for supported web servers.  Aborting.\n";
 				exit(1);
 			}
 			
