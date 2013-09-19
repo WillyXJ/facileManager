@@ -382,10 +382,6 @@ $(document).ready(function() {
 		});
 	});
 
-	$(function() {
-		$( ".datepicker" ).datepicker();
-	});
-
 });
 
 function del(msg){
