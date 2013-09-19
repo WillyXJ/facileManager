@@ -151,8 +151,6 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 		<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 		<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 		$module_css
-		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-1.7.min.js" type="text/javascript" charset="utf-8"></script>
-		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js" type="text/javascript" charset="utf-8"></script>
 		$module_js
 	</head>
