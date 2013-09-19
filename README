@@ -36,31 +36,31 @@ Prerequisites
 
 facileManager (server) requires the following:
 
-	* PHP 5.2.0 or later with MySQL support
-	* MySQL 4.0 or later
-		- Required MySQL user privileges on the database include 
-			SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, LOCK TABLES
-	* A working webserver (httpd) with mod_rewrite.so enabled
-	* facileManager-core
+    * PHP 5.2.0 or later with MySQL support
+    * MySQL 4.0 or later
+        - Required MySQL user privileges on the database include 
+          SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, LOCK TABLES
+    * A working webserver (httpd) with mod_rewrite.so enabled
+    * facileManager-core
 
 facileManager (client) requires the following:
 
-	* ISC BIND 9.3 or later
-	* PHP 5.0 or later
-	* A running web server if using http(s) update methods
-		- The install script supports the following web servers:
-			~ httpd
-			~ lighttpd
+    * ISC BIND 9.3 or later
+    * PHP 5.0 or later
+    * A running web server if using http(s) update methods
+        - The install script supports the following web servers:
+            ~ httpd
+            ~ lighttpd
 
 
 Server Installation
 --------------------
 
-1.	Move the contents of the server directory to your document root.
-	(ie /var/www/html/facileManager/)
-2.	Point your web browser to http://example.com/facileManager/ or your
-	virtualhost if you set one up (ie http://facileManager.example.com).
-3.	Follow the installation wizard to setup your database.
+1.  Move the contents of the server directory to your document root.
+    (ie /var/www/html/facileManager/)
+2.  Point your web browser to http://example.com/facileManager/ or your
+    virtualhost if you set one up (ie http://facileManager.example.com).
+3.  Follow the installation wizard to setup your database.
 
 Additional Steps (OS-based)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,11 +73,11 @@ Ubuntu - Edit /etc/apache2/sites-available/default and change 'AllowOverride
 Client Installation
 --------------------
 
-1.	Move the contents of the client directory to /usr/local/ on your DNS
-	servers to manage.
-	`sudo mv facileManager/client/facileManager /usr/local/`
+1.  Move the contents of the client directory to /usr/local/ on your DNS
+    servers to manage.
+    `sudo mv facileManager/client/facileManager /usr/local/`
 2.  Run the following to complete the client installation.
-	`sudo php /usr/local/facileManager/fmDNS/dns.php install`
+    `sudo php /usr/local/facileManager/fmDNS/dns.php install`
 	
 
 
@@ -91,14 +91,14 @@ to a working state - it shouldn't take long at all!
 Server Upgrade
 ---------------
 
-1.	Make a backup of your database using the built-in tool via the UI or
-	manually.
+1.  Make a backup of your database using the built-in tool via the UI or
+    manually.
 2.  Make a backup of your config.inc.php file.
-3.	Delete your old facileManager files.
+3.  Delete your old facileManager files.
 4.  Extract/upload the new files from the server directory.
 5.  Copy your backup of config.inc.php to the document root.
     (ie /var/www/html/facileManager/)
 6.  Login as a super-admin to facileManager and follow the wizard to upgrade 
-	your database.
+    your database.
 7.  Once fM is upgraded, you will be redirected to the admin-modules page where
-	you can upgrade your modules individually.
+    you can upgrade your modules individually.
