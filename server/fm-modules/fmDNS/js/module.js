@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	
 	/* Server config builds */
-    $('#table_edits').delegate('#build','click tap',function(e){
+    $('#table_edits').delegate('#build', 'click tap', function(e) {
         var $this 	= $(this);
         server_id	= $this.parent().parent().attr('id');
 
@@ -45,7 +45,7 @@ $(document).ready(function() {
     });
 
 	/* Zone reloads */
-    $('#zones').delegate('form','click tap',function(e){
+    $('#zones').delegate('form', 'click tap', function(e) {
         var $this 	= $(this);
         domain_id	= $this.attr('id');
 
@@ -106,7 +106,7 @@ $(document).ready(function() {
     });
     
 	/* Zone clone deletes */
-    $('#table_edits').delegate('img.clone_remove','click tap',function(e){
+    $('#table_edits').delegate('img.clone_remove', 'click tap', function(e) {
         var $this 		= $(this);
         var $clone		= $this.parent();
         item_type		= $('#table_edits').attr('name');
@@ -147,6 +147,14 @@ $(document).ready(function() {
 		return false;
     });
 
+	$("#manage_item_contents").delegate('#server_update_method', 'change', function(e) {
+		if ($(this).val() == 'cron') {
+			$('#server_update_port_option').slideUp();
+		} else {
+			$('#server_update_port_option').show('slow');
+		}
+	});
+	
 });
 
 

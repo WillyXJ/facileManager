@@ -146,6 +146,7 @@ function installFM($proto, $compress) {
 	echo "Please enter the location of the facileManager interface:\n";
 	echo "    Examples include:\n";
 	echo "\tfm.mydomain.com\n";
+	echo "\tfm.mydomain.com:8443\n";
 	echo "\tmydomain.com/fm\n";
 	echo "\thttp://fm.mydomain.com/facileManager\n\n";
 	echo 'Please enter the location of the facileManager interface: ';

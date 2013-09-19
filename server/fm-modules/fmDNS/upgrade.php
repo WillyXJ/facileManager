@@ -10,7 +10,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption($module . '_version', 0);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-rc2', '<') ? upgradefmDNS_106($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-rc3', '<') ? upgradefmDNS_107($__FM_CONFIG, $running_version) : true;
 	if (!$success) return 'Failed';
 	
 	return 'Success';
@@ -307,6 +307,45 @@ VALUES
 
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	return true;
+}
+
+function upgradefmDNS_107($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.0-rc2', '<') ? upgradefmDNS_106($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_update_port` INT( 5 ) NOT NULL DEFAULT  '0' AFTER  `server_update_method` ;";
+
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '80' WHERE  `server_update_method` = 'http';";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '443' WHERE  `server_update_method` = 'https';";
+
+	$inserts[] = '';	
+
+
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
 			$fmdb->query($schema);
 			if (!$fmdb->result) return false;
 		}

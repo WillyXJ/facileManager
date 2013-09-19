@@ -61,6 +61,16 @@ class fm_dns_servers {
 		if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
 		if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
 		
+		/** Set default ports */
+		if ($post['server_update_method'] == 'cron') {
+			$post['server_update_port'] = 0;
+		}
+		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return 'Server update port must be a valid TCP port.';
+		if (empty($post['server_update_port'])) {
+			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
+			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
+		}
+		
 		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
 
 		/** Get a valid and unique serial number */
@@ -126,6 +136,16 @@ class fm_dns_servers {
 		/** Process server_key */
 		if (!is_numeric($post['server_key'])) $post['server_key'] = 0;
 
+		/** Set default ports */
+		if ($post['server_update_method'] == 'cron') {
+			$post['server_update_port'] = 0;
+		}
+		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return 'Server update port must be a valid TCP port.';
+		if (empty($post['server_update_port'])) {
+			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
+			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
+		}
+		
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
 		$post['server_run_as'] = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : null;
 
@@ -242,18 +262,7 @@ class fm_dns_servers {
 		$key = ($row->server_key) ? getNameFromID($row->server_key, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'none';
 		$runas = ($row->server_run_as_predefined == 'as defined:') ? $row->server_run_as : $row->server_run_as_predefined;
 		
-		switch ($row->server_update_method) {
-			case 'http':
-				$port = 80;
-				break;
-			case 'https':
-				$port = 443;
-				break;
-			case 'ssh':
-				$port = 22;
-				break;
-		}
-//		$server_status = ($row->server_status == 'active' && !socketTest($row->server_name, $port, 30)) ? "<span style=\"color: red;\" title=\"Failed: could not access {$row->server_name} using {$row->server_update_method} (tcp/$port)\">! $edit_name</span>" : $edit_name;
+		$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
 		
 		echo <<<HTML
 		<tr id="$row->server_id">
@@ -262,7 +271,7 @@ class fm_dns_servers {
 			<td>$key</td>
 			<td>$row->server_type</td>
 			<td>$runas</td>
-			<td>$row->server_update_method</td>
+			<td>$row->server_update_method $port</td>
 			<td>$row->server_config_file</td>
 			<td>$row->server_root_dir</td>
 			<td>$row->server_zones_dir</td>
@@ -297,6 +306,8 @@ HTML;
 			$runashow = 'none';
 			$server_run_as = null;
 		}
+		$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
+		
 		$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
 		$server_update_method = buildSelect('server_update_method', 'server_update_method', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_update_method'), $server_update_method, 1);
 		$server_key = buildSelect('server_key', 'server_key', $this->availableKeys(), $server_key);
@@ -326,7 +337,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_update_method">Update Method</label></th>
-					<td width="67%">$server_update_method</td>
+					<td width="67%">$server_update_method<div id="server_update_port_option" $server_update_port_style><input type="number" name="server_update_port" value="$server_update_port" placeholder="80" onkeydown="return validateNumber(event)" /></div></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_config_file">Config File</label></th>

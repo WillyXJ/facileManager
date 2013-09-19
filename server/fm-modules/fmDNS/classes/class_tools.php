@@ -342,9 +342,8 @@ BODY;
 			/** http(s) tests */
 			$return .= "\thttp(s):\t\t";
 			if ($results[$x]->server_update_method != 'cron') {
-				$port = ($results[$x]->server_update_method == 'http') ? 80 : 443;
-				if (socketTest($results[$x]->server_name, $port, 10)) {
-					$return .= 'success (tcp/' . $port . ")\n";
+				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
+					$return .= 'success (tcp/' . $results[$x]->server_update_port . ")\n";
 					
 					/** php tests */
 					$return .= "\thttp page:\t\t";
@@ -353,7 +352,7 @@ BODY;
 					if ($php_result == 'Incorrect parameters defined.') $return .= 'success';
 					else $return .= 'failed';
 					
-				} else $return .=  'failed (tcp/' . $port . ')';
+				} else $return .=  'failed (tcp/' . $results[$x]->server_update_port . ')';
 			} else $return .= 'skipping (host updates via cron)';
 			$return .=  "\n";
 			
