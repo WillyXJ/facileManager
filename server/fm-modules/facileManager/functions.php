@@ -965,7 +965,7 @@ function getAvailableModules() {
 	
 	$module_dir = ABSPATH . 'fm-modules';
 	if ($handle = opendir($module_dir)) {
-		$blacklist = array('.', '..', strtolower($fm_name));
+		$blacklist = array('.', '..', 'shared', strtolower($fm_name));
 		while (false !== ($file = readdir($handle))) {
 			if (!in_array(strtolower($file), $blacklist)) {
 				if (is_dir($module_dir . DIRECTORY_SEPARATOR . $file)) {

@@ -22,6 +22,8 @@ if (isset($_SESSION['user']['module_perms'])) {
 	$allowed_to_manage_zones = ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_ZONE_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
 	$allowed_to_manage_records = ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_RECORD_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
 	$allowed_to_reload_zones = ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_RELOAD_ZONES) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
+	
+	$allowed_to_manage_module_settings = $allowed_to_build_configs;
 }
 require(ABSPATH . 'fm-modules/facileManager/permissions.inc.php');
 

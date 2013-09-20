@@ -27,7 +27,7 @@ class fm_module_settings {
 				if (empty($data)) return 'Empty values are not allowed.';
 				
 				/** Check if the option has changed */
-				$current_value = getOption($key, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options');
+				$current_value = getOption($key, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'options');
 				if (is_array($current_value)) $current_value = implode("\n", $current_value);
 				if ($current_value == $data) continue;
 				
@@ -38,7 +38,7 @@ class fm_module_settings {
 		if (is_array($new_array)) {
 			foreach ($new_array as $option => $value) {
 				list($option_value, $command) = $value;
-				if (is_array($__FM_CONFIG['fmDNS']['default']['options'][$option]['default_value'])) {
+				if (is_array($__FM_CONFIG[$_SESSION['module']]['default']['options'][$option]['default_value'])) {
 					$temp_array = explode("\n", $option_value);
 					$temp_value = array();
 					foreach ($temp_array as $line) {
@@ -50,7 +50,7 @@ class fm_module_settings {
 				} else $option_value = sanitize(trim($option_value));
 				
 				/** Update with the new value */
-				$result = setOption($option, $option_value, $command, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options');
+				$result = setOption($option, $option_value, $command, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'options');
 	
 				if (!$result) {
 					if ($log_message != $log_message_head) addLogEntry($log_message);
@@ -83,13 +83,13 @@ class fm_module_settings {
 	 * Displays the form to modify options
 	 */
 	function printForm() {
-		global $fmdb, $__FM_CONFIG, $allowed_to_build_configs;
+		global $fmdb, $__FM_CONFIG, $allowed_to_manage_module_settings;
 		
-		$disabled = $allowed_to_build_configs ? null : 'disabled';
+		$disabled = $allowed_to_manage_module_settings ? null : 'disabled';
 		
 		$save_button = $disabled ? null : '<input type="submit" name="save" id="save_module_settings" value="Save" class="button" />';
 		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}options WHERE account_id={$_SESSION['user']['account_id']}";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}options WHERE account_id={$_SESSION['user']['account_id']}";
 		$fmdb->get_results($query);
 		
 		if ($fmdb->num_rows) {
@@ -101,7 +101,7 @@ class fm_module_settings {
 			$saved_options = array();
 		}
 		
-		$option_rows = buildSettingsForm($saved_options, $__FM_CONFIG['fmDNS']['default']['options']);
+		$option_rows = buildSettingsForm($saved_options, $__FM_CONFIG[$_SESSION['module']]['default']['options']);
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">

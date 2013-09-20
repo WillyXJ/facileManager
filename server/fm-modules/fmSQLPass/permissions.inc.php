@@ -16,6 +16,8 @@ if (!defined('PERM_SQLPASS_PASSWORD_MANAGEMENT'))	define('PERM_SQLPASS_PASSWORD_
 if (isset($_SESSION['user']['module_perms'])) {
 	$allowed_to_manage_servers = ($_SESSION['user']['module_perms']['perm_value'] & PERM_SQLPASS_SERVER_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
 	$allowed_to_manage_passwords = ($_SESSION['user']['module_perms']['perm_value'] & PERM_SQLPASS_PASSWORD_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
+	
+	$allowed_to_manage_module_settings = $allowed_to_manage_passwords;
 }
 require(ABSPATH . 'fm-modules/facileManager/permissions.inc.php');
 
