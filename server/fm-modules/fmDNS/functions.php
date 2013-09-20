@@ -10,17 +10,14 @@ function moduleFunctionalCheck() {
 	global $fmdb, $__FM_CONFIG;
 	$html_checks = null;
 	
-	/** FP version check */
-	
-	
 	/** Count active name servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active name servers defined.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to define one or more to manage.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active name servers defined.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to define one or more to manage.</p>';
 	
 	/** Count global options */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : '<p>You currently have no global options defined for named.conf.  <a href="' . $__FM_CONFIG['menu']['Config']['Options'] . '">Click here</a> to define one or more.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : '<p>You currently have no global options defined for named.conf.  <a href="' . $__FM_CONFIG['menu']['Config']['Options'] . '">Click here</a> to define one or more.</p>';
 	
 	/** Count zones */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : '<p>You currently have no zones defined.  <a href="' . $__FM_CONFIG['menu']['Zones']['URL'] . '">Click here</a> to define one or more.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : '<p>You currently have no zones defined.  <a href="' . $__FM_CONFIG['menu']['Zones']['URL'] . '">Click here</a> to define one or more.</p>';
 	
 	foreach ($checks as $val) {
 		$html_checks .= $val;
@@ -41,7 +38,7 @@ function buildModuleDashboard() {
 	$dashboard = $errors = null;
 	
 	/** Name server stats */
-	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_');
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
 	$server_count = $fmdb->num_rows;
 	$server_results = $fmdb->last_result;
 	for ($i=0; $i<$server_count; $i++) {
@@ -55,7 +52,7 @@ function buildModuleDashboard() {
 	$server_error_display = ($server_errors) ? '<li>' . nl2br($server_errors) . '</li>' : null;
 
 	/** Zone stats */
-	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_');
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
 	$domain_count = $fmdb->num_rows;
 	$domain_results = $fmdb->last_result;
 	for ($i=0; $i<$domain_count; $i++) {
@@ -74,7 +71,7 @@ function buildModuleDashboard() {
 	} else $error_display = null;
 
 	/** Record stats */
-	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_');
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', 'record_id', 'record_');
 	$record_count = $fmdb->num_rows;
 
 	$dashboard = <<<DASH
@@ -226,6 +223,14 @@ function buildModuleHelpFile() {
 			To manage the logging configuration, go to Config &rarr; <a href="{$__FM_CONFIG['menu']['Config']['Logging']}">Logging</a>.</p>
 			<p>Server-level channels and categories always supercede global ones.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server logging.</i></p>
+			<br />
+		</div>
+	</li>
+	<li>
+		<a class="list_title" onclick="javascript:toggleLayer('fm_module_settings', 'block');">Module Settings</a>
+		<div id="fm_module_settings">
+			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['module']['menu']['Settings']['URL']}">Settings</a> 
+			menu item.</p>
 			<br />
 		</div>
 	</li>

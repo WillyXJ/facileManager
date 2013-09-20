@@ -183,7 +183,7 @@ FOOT;
  * @package facileManager
  */
 function getTopHeader($help) {
-	global $fm_login, $__FM_CONFIG;
+	global $fm_login, $__FM_CONFIG, $super_admin;
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
@@ -201,6 +201,7 @@ function getTopHeader($help) {
 HTML;
 			}
 
+			$star = $super_admin ? $__FM_CONFIG['icons']['star'] . ' ' : null;
 			$change_pwd_link = ($auth_method == 1) ? '<li><a class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#"><span>Change Password</span></a></li>' . "\n" : null;
 			$user_account_menu = <<<HTML
 		<div id="topheadpartright" style="padding: 0 1px 0 0;">
@@ -208,7 +209,7 @@ HTML;
 			<ul>
 				<li class="has-sub has-image"><a href="#"><span>{$__FM_CONFIG['icons']['account']}</span></a>
 					<ul class="sub-right">
-						<li class="text-only"><span>{$__FM_CONFIG['icons']['star']} {$_SESSION['user']['name']}</span></li>
+						<li class="text-only"><span>$star{$_SESSION['user']['name']}</span></li>
 						$change_pwd_link
 						<li class="last"><a href="{$GLOBALS['RELPATH']}?logout"><span>Logout</span></a></li>
 					</ul>
@@ -891,12 +892,16 @@ function buildHelpFile() {
 				template account for granular permissions within the environment. These users cannot be disabled nor can their passwords be changed 
 				within $fm_name. The PHP LDAP extensions have to be installed before this option is available.</li>
 			</ul>
+			<p><b>SSL</b><br />
+			You can choose to have $fm_name enforce the use of SSL when a user tries to access the web app.</p>
 			<p><b>Mailing</b><br />
 			There are a few things $fm_name and its modules may need to send an e-mail about (such as password reset links). These settings allow
 			you to configure the mailing settings to use for your environment and enable/disable mailing altogether.</p>
 			<p><b>Date and Time</b><br />
 			Set your preferred timezone, date format, and time format for $fm_name to use throughout all aspects of the app. What you select is
 			how all dates and times will be display including any client configuration files.</p>
+			<p><b>Temporary Directory</b><br />
+			Periodically $fm_name and its modules may need to create temporary files or directories on your webserver. Specify the local path for it to use.</p>
 		</div>
 	</li>
 	<li>
