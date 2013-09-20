@@ -1558,6 +1558,9 @@ function buildSettingsForm($saved_options, $default_options) {
 				$input_field = '<input name="' . $option . '" id="' . $option . '" type="hidden" value="no" />';
 				$input_field .= '<label><input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="yes" ' . $checked . ' />' . $options_array['description'][0] . '</label>';
 				break;
+			case 'select':
+				$input_field = buildSelect($option, $option, $options_array['options'], $option_value);
+				break;
 			default:
 				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="40" />';
 		}
