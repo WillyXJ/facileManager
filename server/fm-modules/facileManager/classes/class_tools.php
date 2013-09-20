@@ -28,7 +28,7 @@ class fm_tools {
 			}
 			
 			addLogEntry("$module_name {$__FM_CONFIG[$module_name]['version']} was born.", $module_name);
-		}
+		} else return '<p>No installation file found for ' . $module_name . '.</p>';
 		
 		return '<p>' . $module_name . ' was installed successfully!</p>';
 	}
