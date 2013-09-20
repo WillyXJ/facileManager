@@ -1,0 +1,8 @@
+#table_edits .center {
+	text-align: center;
+}
+
+#fmsqlpass_config_servers, #fmsqlpass_config_groups, #fmsqlpass_passwords {
+	display: none;
+}
+
