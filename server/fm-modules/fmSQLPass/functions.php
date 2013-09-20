@@ -4,7 +4,8 @@
  * Checks the app functionality
  *
  * @since 1.0
- * @package fmSQLPass
+ * @package facileManager
+ * @subpackage fmSQLPass
  */
 function moduleFunctionalCheck() {
 	global $fmdb, $__FM_CONFIG;
@@ -28,7 +29,8 @@ function moduleFunctionalCheck() {
  * Builds the dashboard for display
  *
  * @since 1.0
- * @package fmSQLPass
+ * @package facileManager
+ * @subpackage fmSQLPass
  */
 function buildModuleDashboard() {
 	global $fmdb, $__FM_CONFIG;
@@ -62,7 +64,8 @@ DASH;
  * Builds the help for display
  *
  * @since 1.0
- * @package fmSQLPass
+ * @package facileManager
+ * @subpackage fmSQLPass
  */
 function buildModuleHelpFile() {
 	global $__FM_CONFIG;
@@ -123,18 +126,12 @@ HTML;
 }
 
 
-function moduleAddServer($action) {
-	include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/classes/class_servers.php');
-	
-	return $fm_sqlpass_servers->$action($_POST);
-}
-
-
 /**
  * Returns an option value
  *
  * @since 1.0
- * @package fmSQLPass
+ * @package facileManager
+ * @subpackage fmSQLPass
  */
 function getServerCredentials($account_id = 0, $server_serial_no) {
 	global $fmdb, $__FM_CONFIG;
@@ -160,7 +157,8 @@ function getServerCredentials($account_id = 0, $server_serial_no) {
  * Changes a MySQL user password
  *
  * @since 1.0
- * @package fmSQLPass
+ * @package facileManager
+ * @subpackage fmSQLPass
  *
  * @param string $server_name Hostname of the database server
  * @param string $admin_user User to login with

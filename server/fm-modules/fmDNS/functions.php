@@ -5,6 +5,7 @@
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function moduleFunctionalCheck() {
 	global $fmdb, $__FM_CONFIG;
@@ -31,6 +32,7 @@ function moduleFunctionalCheck() {
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function buildModuleDashboard() {
 	global $fmdb, $__FM_CONFIG, $allowed_to_manage_zones;
@@ -104,6 +106,7 @@ DASH;
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function buildModuleToolbar() {
 	global $__FM_CONFIG;
@@ -125,6 +128,7 @@ HTML;
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function buildModuleHelpFile() {
 	global $__FM_CONFIG;
@@ -246,6 +250,7 @@ HTML;
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function buildServerSubMenu($server_serial_no = 0, $class = null) {
 	global $fmdb, $__FM_CONFIG;
@@ -361,6 +366,7 @@ function getNSCount($domain_id) {
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function verifyAndCleanAddresses($data, $allow_alpha = false) {
 	$alpha = (!$allow_alpha) ? 'a-z' : null;
@@ -403,6 +409,7 @@ function isDNSNameAcceptable($string) {
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function postReloadZones($server, $data, $proto = 'http') {
 	$url = $proto . '://' . $server . '/facileManager/index.php';
@@ -417,6 +424,7 @@ function postReloadZones($server, $data, $proto = 'http') {
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  */
 function setBuildUpdateConfigFlag($serial_no, $flag, $build_update) {
 	global $fmdb, $__FM_CONFIG;
