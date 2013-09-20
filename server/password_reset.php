@@ -52,6 +52,7 @@ function printPasswordResetForm($message=null) {
 
 	printHeader('Password Reset', 'install');
 	
+	$strength = PWD_STRENGTH;
 	echo <<<HTML
 	<form id="forgotpwd" method="post" action="{$_SERVER['REQUEST_URI']}">
 		<input type="hidden" name="reset_pwd" value="1" />
@@ -60,11 +61,11 @@ function printPasswordResetForm($message=null) {
 		<table class="form-table">
 			<tr>
 				<th><label for="user_password">New Password</label></th>
-				<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd('user_password', 'resetpwd');" /></td>
+				<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd('user_password', 'resetpwd', '$strength');" /></td>
 			</tr>
 			<tr>
 				<th><label for="cpassword">Confirm Password</label></th>
-				<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd('cpassword', 'resetpwd');" /></td>
+				<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd('cpassword', 'resetpwd', '$strength');" /></td>
 			</tr>
 			<tr>
 				<th>Password Validity</th>

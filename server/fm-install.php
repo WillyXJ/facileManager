@@ -214,6 +214,7 @@ function displayAccountSetup($error = null) {
 		$error = "<strong>ERROR: $error</strong>\n";
 	}
 	
+	$strength = PWD_STRENGTH;
 	echo <<<HTML
 <form method="post" action="?step=5">
 	<center>
@@ -222,19 +223,19 @@ function displayAccountSetup($error = null) {
 	<table class="form-table">
 		<tr>
 			<th><label for="user_login">Username:</label></th>
-			<td><input type="text" size="25" name="user_login" id="user_login" placeholder="username" onkeyup="javascript:checkPasswd('user_password', 'createaccount');" /></td>
+			<td><input type="text" size="25" name="user_login" id="user_login" placeholder="username" onkeyup="javascript:checkPasswd('user_password', 'createaccount', '$strength');" /></td>
 		</tr>
 		<tr>
 			<th><label for="user_email">Email:</label></th>
-			<td><input type="email" size="25" name="user_email" id="user_email" placeholder="email address" onkeyup="javascript:checkPasswd('user_password', 'createaccount');" /></td>
+			<td><input type="email" size="25" name="user_email" id="user_email" placeholder="email address" onkeyup="javascript:checkPasswd('user_password', 'createaccount', '$strength');" /></td>
 		</tr>
 		<tr>
 			<th><label for="user_password">Password:</label></th>
-			<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd('user_password', 'createaccount');" /></td>
+			<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd('user_password', 'createaccount', '$strength');" /></td>
 		</tr>
 		<tr>
 			<th><label for="cpassword">Confirm Password:</label></th>
-			<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd('cpassword', 'createaccount');" /></td>
+			<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd('cpassword', 'createaccount', '$strength');" /></td>
 		</tr>
 		<tr>
 			<th>Password Validity</th>

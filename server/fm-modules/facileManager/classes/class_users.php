@@ -386,24 +386,26 @@ FORM_ROW;
 FORM_ROW;
 		}
 
-		if (in_array('user_password', $form_bits)) {
+		if (in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) {
 			$button_disabled = 'disabled';
+			$strength = PWD_STRENGTH;
+			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
 			$password_form = <<<FORM_ROW
 				<tr>
 					<th width="33%" scope="row"><label for="user_password">User Password</label></th>
-					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd('user_password', '$button_id');" /></td>
+					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd('user_password', '$button_id', '$strength');" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="cpassword">Confirm Password</label></th>
-					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd('cpassword', '$button_id');" /></td>
+					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd('cpassword', '$button_id', '$strength');" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row">Password Validity</th>
-					<td width="67%"><span id="passwd_check">No Password</span></td>
+					<td width="67%"><div id="passwd_check">No Password</div></td>
 				</tr>
 				<tr class="pwdhint">
 					<th width="33%" scope="row">Hint</th>
-					<td width="67%">{$__FM_CONFIG['password_hint'][PWD_STRENGTH]}</td>
+					<td width="67%">{$__FM_CONFIG['password_hint'][$strength]}</td>
 				</tr>
 			
 FORM_ROW;

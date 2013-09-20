@@ -10,6 +10,10 @@ body {
 	height: 100%;
 }
 
+label {
+	cursor: pointer;
+}
+
 #tophead {
 	background: #7d7e7d; /* Old browsers */
 	background: -moz-linear-gradient(top,  #7d7e7d 0%, #565656 100%); /* FF3.6+ */
@@ -440,9 +444,6 @@ tbody {
 	display: inline-block;
 	vertical-align: top;
 	margin-top: 0.8em;
-}
-#setting-row label {
-	cursor: pointer;
 }
 #setting-row .description label {
 	font-weight: bold;
@@ -935,4 +936,10 @@ table.log_search_form th {
 	font-size: 11px;
 }
 
-
+#passwd_check {
+	padding: 5px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	width: 150px;
+	text-align: center;
+}

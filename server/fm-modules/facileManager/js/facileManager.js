@@ -388,7 +388,7 @@ function del(msg){
 	return confirm(msg);
 }
 
-function checkPasswd(pass, pwdbutton) {
+function checkPasswd(pass, pwdbutton, pwdtype) {
 	var user = document.getElementById('user_login');
 	var strength = document.getElementById('passwd_check');
 	var button = document.getElementById(pwdbutton);
@@ -401,35 +401,41 @@ function checkPasswd(pass, pwdbutton) {
 	if (pwd1.value.length==0) {
 		strength.innerHTML = 'No Password';
 		strength.style.color = 'black';
+		strength.style.background = 'white';
 		button.disabled = true;
 	} else {
+		strength.style.color = 'white';
 		if (false == enoughRegex.test(pwd1.value)) {
 			strength.innerHTML = 'More Characters';
-			strength.style.color = 'black';
+			strength.style.background = '#878787';
 			button.disabled = true;
 		} else if (strongRegex.test(pwd1.value)) {
-			strength.innerHTML = 'Strong Password!';
-			strength.style.color = 'green';
+			strength.innerHTML = 'Strong';
+			strength.style.background = 'green';
 			button.disabled = false;
 		} else if (mediumRegex.test(pwd1.value)) {
-			strength.innerHTML = 'Medium Password!';
-			strength.style.color = 'orange';
-			button.disabled = true;
+			strength.innerHTML = 'Medium';
+			strength.style.background = 'orange';
+			if (pwdtype == 'strong') {
+				button.disabled = true;
+			} else {
+				button.disabled = false;
+			}
 		} else {
-			strength.innerHTML = 'Weak Password!';
-			strength.style.color = 'red';
+			strength.innerHTML = 'Weak';
+			strength.style.background = 'red';
 			button.disabled = true;
 		}
 	}
 	if (pwd2.value.length!=0 && pwd1.value!=pwd2.value) {
-		strength.innerHTML = 'Passwords do not match';
-		strength.style.color = 'red';
+		strength.innerHTML = "Passwords don't match";
+		strength.style.background = 'red';
 		button.disabled = true;
 	} else if (pwd2.value.length==0) {
 		button.disabled = true;
 	} else if (user.value.length==0) {
 		strength.innerHTML = 'No Username Specified';
-		strength.style.color = 'black';
+		strength.style.background = '#878787';
 		button.disabled = true;
 	}
 }
