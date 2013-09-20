@@ -13,7 +13,7 @@ function includeModuleFile($module = null, $file = '') {
 	if (!$module) $module = $fm_name;
 	
 	if (!file_exists(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $file)) {
-		$module = $fm_name;
+		$module = (file_exists(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $file)) ? 'shared' : $fm_name;
 	}
 
 	return ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $file;
