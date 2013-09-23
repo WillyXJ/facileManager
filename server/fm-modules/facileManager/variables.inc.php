@@ -68,8 +68,8 @@ $__FM_CONFIG['clean']['prefixes']	= array('fm_accounts'=>'account', 'fm_users'=>
 $__FM_CONFIG['clean']['days']		= 7;
 
 /** Text string variables */
-$__FM_CONFIG['password_hint']['medium']		= 'You must choose a password with at least six (7) characters containing letters and numbers.';
-$__FM_CONFIG['password_hint']['strong']		= 'You must choose a password with at least seven (8) characters containing uppercase and lowercase letters, numbers, and special characters (\'&\', \'$\', \'@\', etc.).';
+$__FM_CONFIG['password_hint']['medium']		= 'You must choose a password with at least seven (7) characters containing letters and numbers.';
+$__FM_CONFIG['password_hint']['strong']		= 'You must choose a password with at least eight (8) characters containing uppercase and lowercase letters, numbers, and special characters (\'&\', \'$\', \'@\', etc.).';
 
 /** Limits */
 $__FM_CONFIG['limit']['records']	= 50;

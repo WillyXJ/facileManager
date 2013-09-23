@@ -179,3 +179,11 @@ strong {
 	border-bottom: #c8c8c8 solid 1px;
 	border-top: none;
 }
+
+#passwd_check {
+	padding: 5px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	width: 200px;
+	text-align: center;
+}

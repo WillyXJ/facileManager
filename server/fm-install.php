@@ -239,7 +239,7 @@ function displayAccountSetup($error = null) {
 		</tr>
 		<tr>
 			<th>Password Validity</th>
-			<td style="padding-top: 6px;"><span id="passwd_check">No Password</span></td>
+			<td><div id="passwd_check">No Password</div>/td>
 		</tr>
 		<tr class="pwdhint">
 			<th width="33%" scope="row">Hint</th>
