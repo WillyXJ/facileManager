@@ -169,6 +169,8 @@ function getServerCredentials($account_id = 0, $server_serial_no) {
  * @return string
  */
 function changeMySQLUserPassword($server_name, $admin_user, $admin_pass, $user, $user_password, $server_group) {
+	global $__FM_CONFIG;
+	
 	/** Connect to remote server */
 	$verbose_output = ' --> Connecting to MySQL ';
 	$remote_connection = @new mysqli($server_name, $admin_user, $admin_pass);
@@ -215,7 +217,24 @@ function changeMySQLUserPassword($server_name, $admin_user, $admin_pass, $user, 
 }
 
 
+/**
+ * Changes a PostgreSQL user password
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmSQLPass
+ *
+ * @param string $server_name Hostname of the database server
+ * @param string $admin_user User to login with
+ * @param string $admin_pass User password to login with
+ * @param string $user Database user to change
+ * @param string $user_password New password
+ * @param string $server_group Server group to process
+ * @return string
+ */
 //function changePostgreSQLUserPassword($server_name, $backup_user, $backup_pass, $user, $user_password, $server_group) {
+//	global $__FM_CONFIG;
+	
 //}
 
 
