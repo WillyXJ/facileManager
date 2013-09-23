@@ -34,7 +34,7 @@ class fm_sqlpass_passwords {
 		}
 		echo '			</table>' . "\n";
 
-		if ($allowed_to_manage_passwords) {
+		if ($allowed_to_manage_passwords && $result) {
 			echo <<<HTML
 				<br /><br />
 				<a name="#manage"></a>
