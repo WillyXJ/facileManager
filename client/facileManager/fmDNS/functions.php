@@ -374,13 +374,18 @@ function getStartupScript() {
 	$distros = array(
 		'Arch'      => '/etc/rc.d/named start',
 		'Debian'    => '/etc/init.d/bind9 start',
-		'Fedora'    => '/etc/init.d/named start',
 		'Ubuntu'    => '/etc/init.d/bind9 start',
+		'Fubuntu'   => '/etc/init.d/bind9 start',
+		'Fedora'    => '/etc/init.d/named start',
 		'Redhat'    => '/etc/init.d/named start',
 		'CentOS'    => '/etc/init.d/named start',
+		'ClearOS'   => '/etc/init.d/named start',
+		'Oracle'    => '/etc/init.d/named start',
+		'SUSE'      => '/etc/init.d/named start',
+		'Gentoo'    => '/etc/init.d/named start',
 		'Slackware' => '/etc/rc.d/rc.bind start',
 		'FreeBSD'   => '/etc/rc.d/named start',
-		'Darwin'    => 'launchctl start org.isc.named'
+		'Apple'     => 'launchctl start org.isc.named'
 		);
 	
 	$os = detectOSDistro();

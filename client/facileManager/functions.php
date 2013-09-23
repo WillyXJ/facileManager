@@ -465,7 +465,7 @@ function detectOSDistro() {
 			'Redhat'     => 'redhat-release',
 			'Debian'     => 'debian_version;debian_release',
 			'Slackware'  => 'slackware-version;/etc/slackware-release',
-			'Suse'       => '/etc/SuSE-release;/etc/UnitedLinux-release',
+			'SUSE'       => '/etc/SuSE-release;/etc/UnitedLinux-release',
 			'Gentoo'     => '/etc/gentoo-release',
 			'Mandrake'   => '/etc/mandrake-release;/etc/mandrakelinux-release;/etc/mandiva-release',
 			'Vector'     => '/etc/vector-version',
