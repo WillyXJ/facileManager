@@ -107,7 +107,6 @@ class fm_dns_servers {
 		$sql_values = rtrim($sql_values, ',');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		file_put_contents('/tmp/php.log', "$query\n", FILE_APPEND);
 		$result = $fmdb->query($query);
 		
 		if (!$result) return 'Could not add the server because a database error occurred.';
@@ -241,10 +240,9 @@ class fm_dns_servers {
 
 
 	function displayRow($row) {
-		global $fm_name, $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		$os = file_exists(ABSPATH . 'fm-modules/' . $fm_name . '/images/os/' . $row->server_os . '.png') ? $row->server_os : 'unknown';
-		$os_image = '<img src="fm-modules/' . $fm_name . '/images/os/' . $os . '.png" border="0" alt="' . $os . '" title="' . $os . '" width="18" />';
+		$os_image = setOSIcon($row->server_os);
 		
 		$edit_status = null;
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;

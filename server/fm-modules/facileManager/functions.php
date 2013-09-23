@@ -1634,4 +1634,23 @@ function sendFileToBrowser($filename) {
 }
 
 
+/**
+ * Returns an icon for the server OS
+ *
+ * @since 1.0
+ * @package facileManager
+ *
+ * @param string $server_os Server OS to return the icon for
+ * @return string
+ */
+function setOSIcon($server_os) {
+	global $fm_name;
+	
+	$os = file_exists(ABSPATH . 'fm-modules/' . $fm_name . '/images/os/' . $server_os . '.png') ? $server_os : 'unknown';
+	$os_image = '<img src="fm-modules/' . $fm_name . '/images/os/' . $os . '.png" border="0" alt="' . $os . '" title="' . $os . '" width="18" />';
+	
+	return $os_image;
+}
+
+
 ?>
