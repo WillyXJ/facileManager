@@ -3,6 +3,10 @@
 * Both   - (Git Issue 20) Added support for server and clients to run http(s) on
            non-standard ports.
 * Server - Improved jquery functions.
+* Client - Added more Linux distros to OS detection.
+* Server - Displays OS type in server list.
+* Client - Fixed an issue where some clients may fail to install due to default 
+           named.conf ownership.
 
 1.0-rc2 (2013-09-18)
 ====================

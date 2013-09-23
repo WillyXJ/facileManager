@@ -51,6 +51,9 @@ if (file_exists($fm_client_functions)) {
 	require_once($fm_client_functions);
 }
 
+/** Detect OS */
+$data['server_os'] = detectOSDistro();
+
 /** Run the installer */
 if (in_array('install', $argv)) {
 	if (file_exists($config_file)) {
@@ -202,6 +205,7 @@ function installFM($proto, $compress) {
 
 	/** Server serial number **/
 	$data['server_name'] = php_uname('n');
+	$data['server_os'] = detectOSDistro();
 	echo 'Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ';
 	$serialno = trim(fgets(STDIN));
 	
@@ -449,17 +453,44 @@ function detectOSDistro() {
 	if (PHP_OS == 'Linux') {
 		/** declare supported Linux distros */
 		$distros = array(
-			'Arch'      => 'arch-release',
-			'Ubuntu'    => 'lsb-release',
-			'Fedora'    => 'fedora-release',
-			'CentOS'    => 'centos-release',
-			'Redhat'    => 'redhat-release',
-			'Debian'    => 'debian_version',
-			'Slackware' => 'slackware-version'
+			'Arch'       => 'arch-release',
+			'Fubuntu'    => '/etc/fuduntu-release',
+			'Ubuntu'     => 'lsb-release',
+			'Fedora'     => 'fedora-release',
+			'CentOS'     => 'centos-release',
+			'ClearOS'    => 'clearos-release',
+			'Oracle'     => 'oracle-release',
+			'ALT'        => '/etc/altlinux-release',
+			'Sabayon'    => '/etc/sabayon-release',
+			'Redhat'     => 'redhat-release',
+			'Debian'     => 'debian_version;debian_release',
+			'Slackware'  => 'slackware-version;/etc/slackware-release',
+			'Suse'       => '/etc/SuSE-release;/etc/UnitedLinux-release',
+			'Gentoo'     => '/etc/gentoo-release',
+			'Mandrake'   => '/etc/mandrake-release;/etc/mandrakelinux-release;/etc/mandiva-release',
+			'Vector'     => '/etc/vector-version',
+			'Porteus'    => '/etc/porteus-version',
+			'SMS'        => '/etc/sms-version',
+			'PCLinuxOS'  => '/etc/pclinuxos-version',
+			'Turbolinux' => '/etc/turbolinux-version'
 			);
 		
-		foreach ($distros as $distro => $release_file) {
-			if (file_exists('/etc/' . $release_file)) return $distro;
+		foreach ($distros as $distro => $release_files) {
+			$release_file_array = explode(';', $release_files);
+			foreach ($release_file_array as $release_file) {
+				if (file_exists('/etc/' . $release_file)) return $distro;
+			}
+		}
+	} elseif (PHP_OS == 'Darwin') {
+		@exec(findProgram('system_profiler') . ' SPSoftwareDataType 2>/dev/null', $output, $retval);
+		if (!$retval) {
+			foreach ($output as $line) {
+				$array_line = explode(':', $line);
+				if (trim($array_line[0]) == 'System Version') {
+					$distro = trim($array_line[1]);
+					if (preg_match('/(^Mac OS)|(^OS X)/', $distro)) return 'Apple';
+				}
+			}
 		}
 	}
 	

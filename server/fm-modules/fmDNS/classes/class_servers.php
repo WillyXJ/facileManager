@@ -15,6 +15,7 @@ class fm_dns_servers {
 			?>
 				<thead>
 					<tr>
+						<th width="20" style="text-align: center;"></th>
 						<th>Hostname</th>
 						<th>Serial No</th>
 						<th>Key</th>
@@ -61,6 +62,13 @@ class fm_dns_servers {
 		if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
 		if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
 		
+		/** Process server_run_as */
+		$server_run_as_options = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined');
+		if (!in_array($post['server_run_as_predefined'], $server_run_as_options)) {
+			$post['server_run_as'] = $post['server_run_as_predefined'];
+			$post['server_run_as_predefined'] = 'as defined:';
+		}
+		
 		/** Set default ports */
 		if ($post['server_update_method'] == 'cron') {
 			$post['server_update_port'] = 0;
@@ -99,6 +107,7 @@ class fm_dns_servers {
 		$sql_values = rtrim($sql_values, ',');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
+		file_put_contents('/tmp/php.log', "$query\n", FILE_APPEND);
 		$result = $fmdb->query($query);
 		
 		if (!$result) return 'Could not add the server because a database error occurred.';
@@ -232,7 +241,10 @@ class fm_dns_servers {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $fm_name, $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
+		
+		$os = file_exists(ABSPATH . 'fm-modules/' . $fm_name . '/images/os/' . $row->server_os . '.png') ? $row->server_os : 'unknown';
+		$os_image = '<img src="fm-modules/' . $fm_name . '/images/os/' . $os . '.png" border="0" alt="' . $os . '" title="' . $os . '" width="18" />';
 		
 		$edit_status = null;
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
@@ -266,6 +278,7 @@ class fm_dns_servers {
 		
 		echo <<<HTML
 		<tr id="$row->server_id">
+			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
 			<td>$key</td>
