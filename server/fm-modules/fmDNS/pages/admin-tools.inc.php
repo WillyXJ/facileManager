@@ -9,17 +9,13 @@
  *
  */
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_tools.php');
+$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
+if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
+	include($module_tools_file);
+}
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 $available_zones = $fm_dns_zones->availableZones();
 $zone_options = $available_zones ? buildSelect('domain_id', 1, $available_zones) : 'You need to define one or more zones first.';
-
-$tools_option[] = <<<HTML
-			<h2>Connection Tests</h2>
-			<p>Test the connectivity of your DNS servers with the $fm_name server.</p>
-			<p class="step"><input id="connect-test" name="submit" type="submit" value="Run Tests" class="button" $disabled /></p>
-			<br />
-HTML;
 
 $disabled = (($_SESSION['user']['fm_perms'] & PERM_FM_RUN_TOOLS) && ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_RECORD_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN)) ? null : 'disabled';
 $tools_option[] = <<<HTML
@@ -45,7 +41,7 @@ if (array_key_exists('submit', $_POST)) {
 		case 'Import Records':
 			if (!empty($_FILES['import-file']['tmp_name'])) {
 				$block_style = 'style="display: block;"';
-				$output = $fm_dns_tools->zoneImportWizard();
+				$output = $fm_module_tools->zoneImportWizard();
 			}
 			break;
 	}

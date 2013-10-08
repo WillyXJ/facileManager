@@ -1,27 +1,16 @@
 <?php
 
-if (empty($_POST)) {
-	echo "Incorrect parameters defined.";
-	exit;
-}
+/**
+ * fmDNS Client Utility HTTPD Handler
+ *
+ * @package fmDNS
+ * @subpackage Client
+ *
+ */
 
-/** Get the config file */
-if (file_exists('/usr/local/facileManager/config.inc.php')) {
-	require('/usr/local/facileManager/config.inc.php');
-}
+require_once(dirname(dirname(dirname(__FILE__))) . '/functions.php');
 
-if (!defined('SERIALNO')) {
-	echo serialize('Cannot find the serial number for ' . php_uname('n') . '.');
-	exit;
-}
-
-extract($_POST, EXTR_SKIP);
-
-/** Ensure the serial numbers match so we don't work on the wrong server */
-if ($serial_no != SERIALNO) {
-	echo serialize('The serial numbers do not match for ' . php_uname('n') . '.');
-	exit;
-}
+initWebRequest();
 
 /** Process $_POST for buildconf or zone reload */
 if (isset($_POST['action'])) {
@@ -53,28 +42,5 @@ if (isset($_POST['action'])) {
 }
 
 echo serialize($output);
-
-
-
-/**
- * Finds the path for $program
- *
- * @since 1.0
- * @package facileManager
- */
-function findProgram($program) {
-	$path = array('/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin');
-
-	if (function_exists('is_executable')) {
-		while ($this_path = current($path)) {
-			if (is_executable("$this_path/$program")) {
-				return "$this_path/$program";
-			}
-			next($path);
-		}
-	}
-
-	return;
-}
 
 ?>

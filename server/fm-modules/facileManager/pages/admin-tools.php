@@ -62,6 +62,10 @@ $module_var_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['mod
 if (file_exists($module_var_file)) {
 	include($module_var_file);
 }
+$shared_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . 'admin-tools.inc.php';
+if (file_exists($shared_tools_file)) {
+	include($shared_tools_file);
+}
 $module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . 'admin-tools.inc.php';
 if (file_exists($module_tools_file)) {
 	include($module_tools_file);

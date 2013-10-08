@@ -50,7 +50,7 @@ if ($allowed_to_manage_servers) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			if (!$fm_dns_options->add($_POST)) {
+			if (!$fm_module_options->add($_POST)) {
 				$response = 'This option could not be added.'. "\n";
 				$form_data = $_POST;
 			} else {
@@ -69,7 +69,7 @@ if ($allowed_to_manage_servers) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			if (!$fm_dns_options->update($_POST)) {
+			if (!$fm_module_options->update($_POST)) {
 				$response = 'This option could not be updated.'. "\n";
 				$form_data = $_POST;
 			} else {
@@ -109,7 +109,7 @@ if ($allowed_to_manage_servers) {
 echo '</h2>' . "\n$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no=$server_serial_no");
-$fm_dns_options->rows($result);
+$fm_module_options->rows($result);
 
 printFooter();
 

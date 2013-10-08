@@ -3,7 +3,7 @@
 /**
  * fmDNS Client Utility
  *
- * @package facileManager
+ * @package fmDNS
  * @subpackage Client
  *
  */

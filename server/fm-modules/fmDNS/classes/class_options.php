@@ -1,6 +1,6 @@
 <?php
 
-class fm_dns_options {
+class fm_module_options {
 	
 	/**
 	 * Displays the option list
@@ -341,7 +341,7 @@ FORM;
 
 }
 
-if (!isset($fm_dns_options))
-	$fm_dns_options = new fm_dns_options();
+if (!isset($fm_module_options))
+	$fm_module_options = new fm_module_options();
 
 ?>

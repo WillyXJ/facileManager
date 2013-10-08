@@ -1,6 +1,6 @@
 <?php
 
-class fm_dns_logging {
+class fm_module_logging {
 	
 	/**
 	 * Displays the logging list
@@ -656,7 +656,7 @@ FORM;
 
 }
 
-if (!isset($fm_dns_logging))
-	$fm_dns_logging = new fm_dns_logging();
+if (!isset($fm_module_logging))
+	$fm_module_logging = new fm_module_logging();
 
 ?>

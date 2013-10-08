@@ -2,11 +2,11 @@
 
 /**
  * Bootstrap file for setting the ABSPATH constant
- * and loading the fm-config.php file.
+ * and loading the config.php file.
  *
  * If the fm-config.php file is not found then an error
  * will be displayed asking the visitor to set up the
- * fm-config.php file.
+ * config.php file.
  *
  * @internal This file must be parsable by PHP4.
  *

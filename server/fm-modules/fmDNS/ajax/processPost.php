@@ -46,7 +46,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 			$post_class = $fm_dns_keys;
 			break;
 		case 'options':
-			$post_class = $fm_dns_options;
+			$post_class = $fm_module_options;
 			$table = 'config';
 			$prefix = 'cfg_';
 			$field = $prefix . 'id';
@@ -59,7 +59,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 			$action = 'create';
 			break;
 		case 'logging':
-			$post_class = $fm_dns_logging;
+			$post_class = $fm_module_logging;
 			$table = 'config';
 			$prefix = 'cfg_';
 			$field = $prefix . 'id';

@@ -155,7 +155,12 @@ class fm_module_servers {
 		}
 		
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
+		
 		$post['server_run_as'] = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : null;
+		if (!in_array($post['server_run_as_predefined'], enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'))) {
+			$post['server_run_as'] = $post['server_run_as_predefined'];
+			$post['server_run_as_predefined'] = 'as defined:';
+		}
 
 		$sql_edit = null;
 		
@@ -411,9 +416,9 @@ FORM;
 			$account_result = $fmdb->last_result;
 			$data['AUTHKEY'] = $account_result[0]->account_key;
 		
-			$raw_data = $fm_dns_buildconf->buildServerConfig($data);
+			$raw_data = $fm_module_buildconf->buildServerConfig($data);
 		
-			$response = $fm_dns_buildconf->namedSyntaxChecks($raw_data);
+			$response = $fm_module_buildconf->namedSyntaxChecks($raw_data);
 			if (strpos($response, 'error') !== false) return $response;
 		} else $response = null;
 		

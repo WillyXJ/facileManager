@@ -18,7 +18,7 @@ include(ABSPATH . 'fm-modules/fmDNS/classes/class_buildconf.php');
 
 /** Validate daemon version */
 if (array_key_exists('action', $_POST) && $_POST['action'] == 'version_check') {
-	$data = $fm_dns_buildconf->validateDaemonVersion($_POST);
+	$data = $fm_module_buildconf->validateDaemonVersion($_POST);
 	if ($_POST['compress']) echo gzcompress(serialize($data));
 	else echo serialize($data);
 	exit;
@@ -36,22 +36,22 @@ if ($account_verify != 'Success') {
 if (array_key_exists('action', $_POST)) {
 	/** Process building of the server config */
 	if ($_POST['action'] == 'buildconf') {
-		$data = $fm_dns_buildconf->buildServerConfig($_POST);
+		$data = $fm_module_buildconf->buildServerConfig($_POST);
 	}
 	
 	/** Process building of zone files */
 	if ($_POST['action'] == 'zones') {
-		$data = $fm_dns_buildconf->buildZoneConfig($_POST);
+		$data = $fm_module_buildconf->buildZoneConfig($_POST);
 	}
 	
 	/** Process building of whatever is required */
 	if ($_POST['action'] == 'cron') {
-		$data = $fm_dns_buildconf->buildCronConfigs($_POST);
+		$data = $fm_module_buildconf->buildCronConfigs($_POST);
 	}
 	
 	/** Process updating the tables */
 	if ($_POST['action'] == 'update') {
-		$data = $fm_dns_buildconf->updateReloadFlags($_POST);
+		$data = $fm_module_buildconf->updateReloadFlags($_POST);
 	}
 	
 	/** Output $data */
@@ -60,7 +60,7 @@ if (array_key_exists('action', $_POST)) {
 		else echo serialize($data);
 	}
 	
-	$fm_dns_buildconf->updateServerVersion();
+	$fm_module_buildconf->updateServerVersion();
 }
 
 ?>

@@ -31,7 +31,7 @@ if ($allowed_to_manage_servers) {
 	case 'add':
 		if (!empty($_POST)) {
 			if ($_POST['sub_type'] == 'channel') {
-				$result = $fm_dns_logging->addChannel($_POST);
+				$result = $fm_module_logging->addChannel($_POST);
 				if ($result !== true) {
 					$response = $result;
 					$form_data = $_POST;
@@ -40,7 +40,7 @@ if ($allowed_to_manage_servers) {
 					header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
 				}
 			} elseif ($_POST['sub_type'] == 'category') {
-				$result = $fm_dns_logging->addCategory($_POST);
+				$result = $fm_module_logging->addCategory($_POST);
 				if ($result !== true) {
 					$response = $result;
 					$form_data = $_POST;
@@ -54,11 +54,11 @@ if ($allowed_to_manage_servers) {
 	case 'delete':
 		if (isset($_GET['id'])) {
 			/** Check if channel is associated first */
-			if ($type == 'channel' && is_array($fm_dns_logging->getAssocCategories(sanitize($_GET['id'])))) {
+			if ($type == 'channel' && is_array($fm_module_logging->getAssocCategories(sanitize($_GET['id'])))) {
 				$response = 'This ' . $type . ' is associated with a category and cannot be deleted.';
 				$action = 'add';
 			} else {
-				$delete_status = $fm_dns_logging->delete(sanitize($_GET['id']), $server_serial_no, $type);
+				$delete_status = $fm_module_logging->delete(sanitize($_GET['id']), $server_serial_no, $type);
 				if ($delete_status !== true) {
 					$response = $delete_status;
 				} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
@@ -67,7 +67,7 @@ if ($allowed_to_manage_servers) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_dns_logging->update($_POST);
+			$result = $fm_module_logging->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -107,7 +107,7 @@ if ($allowed_to_manage_servers) {
 echo '</h2>' . "\n$avail_types\n$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', 'AND cfg_type="logging" AND cfg_name="' . $channel_category . '" AND server_serial_no=' . $server_serial_no);
-$fm_dns_logging->rows($result, $channel_category);
+$fm_module_logging->rows($result, $channel_category);
 
 printFooter();
 

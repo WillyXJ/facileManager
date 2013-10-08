@@ -1,6 +1,6 @@
 <?php
 
-class fm_dns_buildconf {
+class fm_module_buildconf {
 	
 	/**
 	 * Generates the server config and updates the DNS server
@@ -983,7 +983,7 @@ HTML;
 
 }
 
-if (!isset($fm_dns_buildconf))
-	$fm_dns_buildconf = new fm_dns_buildconf();
+if (!isset($fm_module_buildconf))
+	$fm_module_buildconf = new fm_module_buildconf();
 
 ?>

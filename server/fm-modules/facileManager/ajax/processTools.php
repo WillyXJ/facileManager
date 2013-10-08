@@ -13,6 +13,11 @@ define('AJAX', true);
 require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules/facileManager/classes/class_tools.php');
+$shared_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processTools.php';
+if (file_exists($shared_tools_file) && $_SESSION['module'] != $fm_name) {
+	include($shared_tools_file);
+}
+
 $module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processTools.php';
 if (file_exists($module_tools_file) && $_SESSION['module'] != $fm_name) {
 	include($module_tools_file);

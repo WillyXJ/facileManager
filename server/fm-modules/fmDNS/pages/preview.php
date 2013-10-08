@@ -36,12 +36,12 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	$account_result = $fmdb->last_result;
 	$data['AUTHKEY'] = $account_result[0]->account_key;
 
-	$raw_data = $fm_dns_buildconf->buildServerConfig($data);
+	$raw_data = $fm_module_buildconf->buildServerConfig($data);
 
 	if (!is_array($raw_data)) {
 		$preview = unserialize($raw_data);
 	} else {
-		$named_check_status = $fm_dns_buildconf->namedSyntaxChecks($raw_data);
+		$named_check_status = $fm_module_buildconf->namedSyntaxChecks($raw_data);
 		foreach ($raw_data['files'] as $filename => $contents) {
 			$preview .= str_repeat('=', 75) . "\n";
 			$preview .= $filename . ":\n";

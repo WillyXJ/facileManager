@@ -77,7 +77,7 @@ if ($allowed_to_manage_zones) {
 			$account_result = $fmdb->last_result;
 			$data['AUTHKEY'] = $account_result[0]->account_key;
 		
-			$raw_data = $fm_dns_buildconf->buildZoneConfig($data);
+			$raw_data = $fm_module_buildconf->buildZoneConfig($data);
 		
 			if (!is_array($raw_data)) {
 				$zone_contents = unserialize($raw_data);

@@ -1,6 +1,6 @@
 <?php
 
-class fm_dns_tools {
+class fm_module_tools {
 	
 	/**
 	 * Imports records from a zone file and presents a confirmation
@@ -325,7 +325,7 @@ BODY;
 		$return = null;
 		
 		/** Get server list */
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
 		
 		/** Process server list */
 		$num_rows = $fmdb->num_rows;
@@ -371,7 +371,7 @@ BODY;
 	
 }
 
-if (!isset($fm_dns_tools))
-	$fm_dns_tools = new fm_dns_tools();
+if (!isset($fm_module_tools))
+	$fm_module_tools = new fm_module_tools();
 
 ?>

@@ -8,7 +8,6 @@
  *
  */
 
-
 $compress = true;
 
 /** Check for options */
@@ -343,6 +342,9 @@ function getServerPath($server) {
  *
  * @since 1.0
  * @package facileManager
+ *
+ * @param string $server Server hostname to ping
+ * @return boolean
  */
 function pingTest($server) {
 	$program = findProgram('ping');
@@ -426,6 +428,10 @@ function saveFMConfigFile($data) {
  *
  * @since 1.0
  * @package facileManager
+ *
+ * @param string $url URL to generate serial number
+ * @param array $data Array to pass to the server
+ * @return integer
  */
 function generateSerialNo($url, $data) {
 	/** Generate a new serial number */
@@ -448,6 +454,8 @@ function generateSerialNo($url, $data) {
  *
  * @since 1.0
  * @package facileManager
+ *
+ * @return string
  */
 function detectOSDistro() {
 	if (PHP_OS == 'Linux') {
@@ -495,6 +503,156 @@ function detectOSDistro() {
 	}
 	
 	return PHP_OS;
+}
+
+
+/**
+ * Initializes web requests for client interaction
+ *
+ * @since 1.0
+ * @package facileManager
+ */
+function initWebRequest() {
+	if (empty($_POST)) {
+		echo "Incorrect parameters defined.";
+		exit;
+	}
+	
+	/** Get the config file */
+	if (file_exists(dirname(__FILE__) . '/config.inc.php')) {
+		require(dirname(__FILE__) . '/config.inc.php');
+	}
+	
+	if (!defined('SERIALNO')) {
+		echo serialize('Cannot find the serial number for ' . php_uname('n') . '.');
+		exit;
+	}
+	
+	extract($_POST, EXTR_SKIP);
+	
+	/** Ensure the serial numbers match so we don't work on the wrong server */
+	if ($serial_no != SERIALNO) {
+		echo serialize('The serial numbers do not match for ' . php_uname('n') . '.');
+		exit;
+	}
+}
+
+
+/**
+ * Processes the update method and prepares the system
+ *
+ * @since 1.0
+ * @package facileManager
+ *
+ * @param string $module_name Module currently being used
+ * @param string $update_method User entered update method
+ * @return string
+ */
+function processUpdateMethod($module_name, $update_method) {
+	global $argv;
+	
+	switch($update_method) {
+		/** cron */
+		case 'c':
+			$tmpfile = '/tmp/crontab.facileManager';
+			$dump = shell_exec('crontab -l -u root | grep -v ' . $argv[0] . '> ' . $tmpfile . ' 2>/dev/null');
+			
+			$cmd = "echo '*/5 * * * * " . findProgram('php') . ' ' . $argv[0] . " cron' >> $tmpfile && " . findProgram('crontab') . " -u root $tmpfile";
+			$cron_update = system($cmd, $retval);
+			unlink($tmpfile);
+			
+			if ($retval) echo "  --> The crontab cannot be created.\n  --> $cmd\n";
+			else echo "  --> The crontab has been created.\n";
+			
+			return 'cron';
+
+			break;
+		/** http(s) */
+		case 'h':
+			/** Detect which web server is running */
+			$web_server = detectHttpd();
+			if (!is_array($web_server)) {
+				echo "\nCannot find a supported web server - please check the README document for supported web servers.  Aborting.\n";
+				exit(1);
+			}
+			
+			/** Add a symlink to the docroot */
+			$httpdconf = findFile($web_server['file']);
+			if (!$httpdconf) {
+				echo "\nCannot find " . $web_server['file'] . '.  Please enter the full path of ' . $web_server['file'] . ' (/etc/httpd/conf/httpd.conf): ';
+				$httpdconf = trim(strtolower(fgets(STDIN)));
+				
+				/** Check if the file exists */
+				if (!is_file($httpdconf)) {
+					echo "  --> $httpdconf does not exist.  Aborting.\n";
+					exit(1);
+				}
+			}
+			$raw_root = explode('"', shell_exec('grep ^DocumentRoot ' . $httpdconf));
+			/** Get the docroot from STDIN if it's not found */
+			if (count($raw_root) <= 1) {
+				echo "\nCannot find DocumentRoot in " . $web_server['file'] . ".  Please enter the full path of your\n default DocumentRoot (/var/www/html): ";
+				$docroot = rtrim(trim(strtolower(fgets(STDIN))), '/');
+			} else $docroot = trim($raw_root[1]);
+				
+			/** Check if the docroot exists */
+			if (!is_dir($docroot)) {
+				echo "  --> $docroot does not exist.  Aborting.\n";
+				exit(1);
+			}
+			$link_name = $docroot . DIRECTORY_SEPARATOR . $module_name;
+			
+			echo "  --> Creating $link_name link.\n";
+			
+			if (!is_link($link_name)) {
+				symlink(dirname(__FILE__) . '/' . $module_name . '/www', $link_name);
+			} else echo "      --> $link_name already exists...skipping\n";
+			
+			/** Add an entry to sudoers */
+			$sudoers = findFile('sudoers');
+			$raw_user = explode(' ', shell_exec('grep ^User ' . $httpdconf));
+			$user = trim($raw_user[1]);
+			if ($user[0] == '$') {
+				$user_var = preg_replace(array('/\$/', '/{/', '/}/'), '', $user);
+				$raw_user = explode('=', shell_exec('grep ' . $user_var . ' ' . findFile('envvars')));
+				if (count($raw_user)) {
+					$user = trim($raw_user[1]);
+				}
+			}
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0];
+			
+			echo '  --> Detected ' . $web_server['daemon'] . " runs as '$user'\n";
+			
+			if (!$sudoers) {
+				echo "  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n";
+				echo "\n      $sudoers_line\n";
+				
+				echo "\nInstallation aborted.\n";
+				exit(1);
+			} else {
+				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
+				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
+					$sudoers_update = system($cmd, $retval);
+				
+					if ($retval) echo "  --> The sudoers entry cannot be added.\n$cmd\n";
+					else echo "  --> The sudoers entry has been added.\n";
+				} else echo "  --> The sudoers entry already exists...skipping\n";
+				
+				/** Check for bad settings and disable */
+				$bad_settings = array('requiretty', 'env_reset');
+				foreach ($bad_settings as $setting) {
+					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
+					if ($found_bad != 0) {
+						echo "  --> Disabling 'Defaults $setting' in $sudoers...\n";
+						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
+					}
+				}
+			}
+
+			return 'http';
+
+			break;
+	}
 }
 
 

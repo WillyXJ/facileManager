@@ -21,7 +21,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_run_tools) {
 			case 'connect-test':
 				$response = '<h2>Connectivity Test Results</h2>' . "\n";
 				$response .= '<textarea rows="15" cols="80">' . "\n";
-				$response .= $fm_dns_tools->connectTests();
+				$response .= $fm_module_tools->connectTests();
 				$response .= '</textarea>' . "\n";
 				break;
 		}
