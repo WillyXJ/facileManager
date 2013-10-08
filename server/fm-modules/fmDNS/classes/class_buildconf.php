@@ -73,6 +73,12 @@ class fm_dns_buildconf {
 			}
 			$config .= "};\n\n";
 			
+			/** Ubuntu requires named.conf.options */
+			if (strtolower($server_os) == 'ubuntu') {
+				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
+				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";;
+			}
+			
 
 			/** Build logging config */
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in (0, ' . $server_serial_no . ')');
@@ -143,9 +149,9 @@ class fm_dns_buildconf {
 			if ($keys) {
 				$keys = "keys {\n$keys};\n";
 			}
-			$data->files[dirname($server_config_file) . '/named.keys.conf'] = $key_config;
+			$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
 			
-			$config .= $logging . $servers . "\ninclude \"" . dirname($server_config_file) . "/named.keys.conf\";\n\n";;
+			$config .= $logging . $servers . "\ninclude \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";;
 			
 
 			/** Build ACLs */
@@ -266,15 +272,15 @@ class fm_dns_buildconf {
 							}
 						}
 					}
-					$data->files[$server_zones_dir . '/views.keys.conf'] = $key_config;
+					$data->files[$server_zones_dir . '/views.conf.keys'] = $key_config;
 					
 					/** Generate zone file */
 					$tmp_files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name);
 					
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
-						$config .= "\n\tinclude \"" . $server_zones_dir . "/views.keys.conf\";\n";
-						$config .= "\tinclude \"" . $server_zones_dir . '/zones.' . $view_result[$i]->view_name . ".conf\";\n";
+						$config .= "\n\tinclude \"" . $server_zones_dir . "/views.conf.keys\";\n";
+						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . $view_result[$i]->view_name . "\";\n";
 						$files = array_merge($files, $tmp_files);
 					}
 					
@@ -288,7 +294,7 @@ class fm_dns_buildconf {
 				
 				/** Include all zones in one file */
 				if (is_array($files)) {
-					$config .= "\ninclude \"" . $server_zones_dir . "/zones.all.conf\";\n";
+					$config .= "\ninclude \"" . $server_zones_dir . "/zones.conf.all\";\n";
 				}
 			}
 
@@ -453,9 +459,9 @@ class fm_dns_buildconf {
 			}
 			
 			if ($view_name) {
-				$files[$server_zones_dir . '/zones.' . $view_name . '.conf'] = $zones;
+				$files[$server_zones_dir . '/zones.conf.' . $view_name] = $zones;
 			} else {
-				$files[$server_zones_dir . '/zones.all.conf'] = $zones;
+				$files[$server_zones_dir . '/zones.conf.all'] = $zones;
 			}
 		}
 		return $files;
@@ -901,8 +907,8 @@ INFO;
 			}
 			
 			/** Build array of zone files to check */
-			if (preg_match('/\/zones\.(.+?)\.conf/', $file)) {
-				$view = preg_replace('/(.+?)zones\.+/', '', $file);
+			if (preg_match('/\/zones\.conf\.(.+?)/', $file)) {
+				$view = preg_replace('/(.+?)zones\.conf\.+/', '', $file);
 
 				$tmp_contents = preg_replace('/^\/\/(.+?)+/', '', $contents);
 				$tmp_contents = explode("};\n", trim($tmp_contents));
