@@ -8,11 +8,11 @@
  */
 
 /** Module Information */
-$__FM_CONFIG['fmDNS']['version'] = '1.0-rc3';
+$__FM_CONFIG['fmDNS']['version'] = '1.0-rc4';
 $__FM_CONFIG['fmDNS']['description'] = 'Easily manage one or more ISC BIND servers through a web UI.  No more editing configuration and zone files manually.';
 $__FM_CONFIG['fmDNS']['prefix'] = 'dns_';
 $__FM_CONFIG['fmDNS']['required_dns_version'] = '9.3';
-$__FM_CONFIG['fmDNS']['required_fm_version'] = '1.0-rc1';
+$__FM_CONFIG['fmDNS']['required_fm_version'] = '1.0-rc3';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']	= '';
@@ -106,6 +106,7 @@ $__FM_CONFIG['fmDNS']['default']['options'] = array(
 /** Array sorts */
 sort($__FM_CONFIG['logging']['categories']);
 
+/** Module Permissions */
 if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
 	include(dirname(__FILE__) . '/permissions.inc.php');
 }
