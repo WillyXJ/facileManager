@@ -1,6 +1,6 @@
 <?php
 
-class fm_dns_servers {
+class fm_module_servers {
 	
 	/**
 	 * Displays the server list
@@ -474,7 +474,7 @@ FORM;
 	
 }
 
-if (!isset($fm_dns_servers))
-	$fm_dns_servers = new fm_dns_servers();
+if (!isset($fm_module_servers))
+	$fm_module_servers = new fm_module_servers();
 
 ?>

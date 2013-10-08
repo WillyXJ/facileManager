@@ -1,4 +1,4 @@
-1.0-rc3 (2013-09-??)
+1.0-rc3 (2013-09-30)
 ====================
 * Server - Improved validateNumber() javascript function.
 * Server - Added option to enforce HTTPS.

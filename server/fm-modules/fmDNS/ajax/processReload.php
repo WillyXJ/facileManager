@@ -22,7 +22,7 @@ if (is_array($_POST) && count($_POST)) {
 			exit;
 		}
 		$server_serial_no = getNameFromID($_POST['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
-		echo $fm_dns_servers->buildServerConfig($server_serial_no);
+		echo $fm_module_servers->buildServerConfig($server_serial_no);
 		exit;
 	}
 	if (isset($_POST['domain_id']) && $allowed_to_reload_zones) {

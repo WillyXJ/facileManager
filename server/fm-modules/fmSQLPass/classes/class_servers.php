@@ -1,6 +1,6 @@
 <?php
 
-class fm_sqlpass_servers {
+class fm_module_servers {
 	
 	/**
 	 * Displays the server list
@@ -312,7 +312,7 @@ FORM;
 	
 }
 
-if (!isset($fm_sqlpass_servers))
-	$fm_sqlpass_servers = new fm_sqlpass_servers();
+if (!isset($fm_module_servers))
+	$fm_module_servers = new fm_module_servers();
 
 ?>

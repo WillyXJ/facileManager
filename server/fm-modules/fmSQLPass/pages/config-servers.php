@@ -19,7 +19,7 @@ if ($allowed_to_manage_servers) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			if (!$fm_sqlpass_servers->add($_POST)) {
+			if (!$fm_module_servers->add($_POST)) {
 				$response = 'This database server could not be added.'. "\n";
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
@@ -27,7 +27,7 @@ if ($allowed_to_manage_servers) {
 		break;
 	case 'delete':
 		if (isset($_GET['id'])) {
-			$delete_status = $fm_sqlpass_servers->delete(sanitize($_GET['id']));
+			$delete_status = $fm_module_servers->delete(sanitize($_GET['id']));
 			if ($delete_status !== true) {
 				$response = $delete_status;
 			} else header('Location: ' . $GLOBALS['basename']);
@@ -35,7 +35,7 @@ if ($allowed_to_manage_servers) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			if (!$fm_sqlpass_servers->update($_POST)) {
+			if (!$fm_module_servers->update($_POST)) {
 				$response = 'This database server could not be updated.'. "\n";
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
@@ -69,7 +69,7 @@ if ($allowed_to_manage_servers) {
 echo '</h2>' . "\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name', 'server_');
-$fm_sqlpass_servers->rows($result);
+$fm_module_servers->rows($result);
 
 printFooter();
 

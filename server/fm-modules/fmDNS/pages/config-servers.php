@@ -19,7 +19,7 @@ if ($allowed_to_manage_servers) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			$result = $fm_dns_servers->add($_POST);
+			$result = $fm_module_servers->add($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -28,7 +28,7 @@ if ($allowed_to_manage_servers) {
 		break;
 	case 'delete':
 		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$server_delete_status = $fm_dns_servers->delete(sanitize($_GET['id']));
+			$server_delete_status = $fm_module_servers->delete(sanitize($_GET['id']));
 			if ($server_delete_status !== true) {
 				$response = $server_delete_status;
 				$action = 'add';
@@ -37,7 +37,7 @@ if ($allowed_to_manage_servers) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_dns_servers->update($_POST);
+			$result = $fm_module_servers->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -77,7 +77,7 @@ if ($allowed_to_manage_servers) {
 echo '</h2>' . "\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
-$fm_dns_servers->rows($result);
+$fm_module_servers->rows($result);
 
 printFooter();
 

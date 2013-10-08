@@ -48,6 +48,7 @@ $__FM_CONFIG['fmSQLPass']['default']['options'] = array(
 				'type' => 'password')
 	);
 
+/** Module Permissions */
 if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
 	include(dirname(__FILE__) . '/permissions.inc.php');
 }

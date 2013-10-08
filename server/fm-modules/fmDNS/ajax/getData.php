@@ -12,10 +12,10 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && $allowed_to_manage_servers) {
-	$query = "SELECT def_type FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
+	$query = "SELECT def_type FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
@@ -24,12 +24,12 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && $a
 	exit;
 }
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_views.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_logging.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
 /** Edits */
 if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
@@ -42,7 +42,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 		$add_new = false;
 	} else returnError();
 	
-	$table = $__FM_CONFIG['fmDNS']['prefix'] . $_POST['item_type'];
+	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
 	$field = $prefix . 'id';
@@ -52,7 +52,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 	/* Determine which class we need to deal with */
 	switch($_POST['item_type']) {
 		case 'servers':
-			$post_class = $fm_dns_servers;
+			$post_class = $fm_module_servers;
 			break;
 		case 'views':
 			$post_class = $fm_dns_views;
@@ -65,7 +65,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 			break;
 		case 'options':
 			$post_class = $fm_dns_options;
-			$table = $__FM_CONFIG['fmDNS']['prefix'] . 'config';
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			$field = $prefix . 'id';
 			$type_map = 'global';
@@ -77,7 +77,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 			break;
 		case 'logging':
 			$post_class = $fm_dns_logging;
-			$table = $__FM_CONFIG['fmDNS']['prefix'] . 'config';
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			$field = $prefix . 'id';
 			$item_type = $_POST['item_sub_type'] . ' ';

@@ -39,7 +39,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
 			$post_class = $fm_sqlpass_groups;
 			break;
 		case 'servers':
-			$post_class = $fm_sqlpass_servers;
+			$post_class = $fm_module_servers;
 			break;
 	}
 	

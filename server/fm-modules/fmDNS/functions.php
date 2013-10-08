@@ -291,7 +291,7 @@ HTML;
 function moduleAddServer($action) {
 	include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/classes/class_servers.php');
 	
-	return $fm_dns_servers->$action($_POST);
+	return $fm_module_servers->$action($_POST);
 }
 
 

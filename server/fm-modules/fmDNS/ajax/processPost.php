@@ -12,13 +12,13 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_views.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_logging.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
 if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 	$table = 'dns_' . $_POST['item_type'];
@@ -34,7 +34,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 	/* Determine which class we need to deal with */
 	switch($_POST['item_type']) {
 		case 'servers':
-			$post_class = $fm_dns_servers;
+			$post_class = $fm_module_servers;
 			break;
 		case 'views':
 			$post_class = $fm_dns_views;
@@ -95,12 +95,12 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 				} else header('Location: ' . $GLOBALS['basename']);
 			}
 			if (isset($_GET['status'])) {
-				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_GET['id'], 'view_', $_GET['status'], 'view_id')) {
+				if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', $_GET['status'], 'view_id')) {
 					$response = '<div class="error"><p>This ' . $table . ' could not be '. $_GET['status'] .'.</p></div>'. "\n";
 				} else header('Location: ' . $GLOBALS['basename']);
 			}
 			if (!isset($_POST['id']) && isset($_GET['id'])) {
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_GET['id'], 'view_', 'view_id');
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', 'view_id');
 				if (!$fmdb->num_rows) {
 					$response = '<div class="error"><p>This ' . $table . ' is not found in the database.</p></div>'. "\n";
 				} else {

@@ -328,7 +328,7 @@ function upgradefmDNS_107($__FM_CONFIG, $running_version) {
 	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '80' WHERE  `server_update_method` = 'http';";
 	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '443' WHERE  `server_update_method` = 'https';";
 
-	$inserts[] = '';	
+	$inserts = null;
 
 
 	/** Create table schema */

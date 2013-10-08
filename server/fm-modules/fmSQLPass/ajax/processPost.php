@@ -43,7 +43,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 			$post_class = $fm_sqlpass_groups;
 			break;
 		case 'servers':
-			$post_class = $fm_sqlpass_servers;
+			$post_class = $fm_module_servers;
 			break;
 	}
 
