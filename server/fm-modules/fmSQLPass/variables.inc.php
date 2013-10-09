@@ -8,7 +8,7 @@
  */
 
 /** Module Version */
-$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b1';
+$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b2';
 $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords across multiple servers.';
 $__FM_CONFIG['fmSQLPass']['prefix']					= 'sqlpass_';
 $__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.0-rc3';
@@ -47,6 +47,10 @@ $__FM_CONFIG['fmSQLPass']['default']['options'] = array(
 				'default_value' => null,
 				'type' => 'password')
 	);
+$__FM_CONFIG['fmSQLPass']['default']['ports'] = array('MySQL' => 3306,
+													'PostgreSQL' => 5432,
+													'MSSQL' => 1433
+												);
 
 /** Module Permissions */
 if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {

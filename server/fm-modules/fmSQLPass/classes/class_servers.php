@@ -46,11 +46,11 @@ HEAD;
 		
 		$server_name = sanitize($server_name);
 		
-		if (empty($server_name)) return false;
+		if (empty($server_name)) return 'No server name defined.';
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $server_name, 'server_', 'server_name');
-		if ($fmdb->num_rows) return false;
+		if ($fmdb->num_rows) return 'This server name already exists.';
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers`";
 		$sql_fields = '(';
@@ -59,6 +59,12 @@ HEAD;
 		$log_message = "Added a database server with the following details:\n";
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
+		
+		/** Set default ports */
+		if (!empty($post['server_port']) && !verifyNumber($post['server_port'], 1, 65535, false)) return 'Server port must be a valid TCP port.';
+		if (empty($post['server_port'])) {
+			$post['server_port'] = $__FM_CONFIG['fmSQLPass']['default']['ports'][$post['server_type']];
+		}
 		
 		$module = isset($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
 
@@ -89,6 +95,16 @@ HEAD;
 				if ($key == 'server_credentials') {
 					$clean_data = str_repeat('*', 7);
 				}
+				if ($key == 'server_groups') {
+					if ($post['server_groups']) {
+						$group_array = explode(';', $post['server_group']);
+						$clean_data = null;
+						foreach ($group_array as $group_id) {
+							$clean_data .= getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name') . '; ';
+						}
+						$clean_data = rtrim($clean_data, '; ');
+					} else $clean_data = 'None';
+				}
 				$log_message .= ($clean_data && $key != 'account_id') ? ucwords(str_replace('_', ' ', str_replace('server_', '', $key))) . ": $clean_data\n" : null;
 			}
 		}
@@ -98,8 +114,7 @@ HEAD;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result)
-			return false;
+		if (!$result) return 'Could not add the server because a database error occurred.';
 
 		addLogEntry($log_message);
 		return true;
@@ -111,13 +126,19 @@ HEAD;
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['server_name'])) return false;
+		if (empty($post['server_name'])) return 'No server name defined.';
 
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
-			if ($result[0]->server_id != $post['server_id']) return false;
+			if ($result[0]->server_id != $post['server_id']) return 'This server name already exists.';
+		}
+		
+		/** Set default ports */
+		if (!empty($post['server_port']) && !verifyNumber($post['server_port'], 1, 65535, false)) return 'Server port must be a valid TCP port.';
+		if (empty($post['server_port'])) {
+			$post['server_port'] = $__FM_CONFIG['fmSQLPass']['default']['ports'][$post['server_type']];
 		}
 		
 		$exclude = array('submit', 'action', 'server_id', 'page');
@@ -147,6 +168,16 @@ HEAD;
 				if ($key == 'server_credentials') {
 					$data = str_repeat('*', 7);
 				}
+				if ($key == 'server_groups') {
+					if ($data) {
+						$group_array = explode(';', $data);
+						$clean_data = null;
+						foreach ($group_array as $group_id) {
+							$clean_data .= getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name') . '; ';
+						}
+						$data = rtrim($clean_data, '; ');
+					} else $data = 'None';
+				}
 				$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('server_', '', $key))) . ": $data\n" : null;
 			}
 		}
@@ -156,8 +187,7 @@ HEAD;
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result)
-			return false;
+		if (!$result) return 'Could not add the server because a database error occurred.';
 
 		addLogEntry($log_message);
 		return $result;
@@ -229,7 +259,7 @@ HEAD;
 		echo <<<HTML
 		<tr id="$row->server_id">
 			<td>{$row->server_name}</td>
-			<td>{$row->server_type}</td>
+			<td>{$row->server_type} (tcp/{$row->server_port})</td>
 			<td>$groups</td>
 			<td id="edit_delete_img">$edit_status</td>
 		</tr>
@@ -243,7 +273,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$server_id = 0;
-		$server_name = $server_groups = $server_type = null;
+		$server_name = $server_groups = $server_type = $server_port = null;
 		$server_cred_user = $server_cred_password = $server_credentials = null;
 		$server_type = 'database';
 		$ucaction = ucfirst($action);
@@ -288,6 +318,10 @@ HTML;
 				<tr>
 					<th width="33%" scope="row"><label for="server_type">Server Type</label></th>
 					<td width="67%">$server_types</td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="server_port">Server Port</label></th>
+					<td width="67%"><input type="number" name="server_port" value="$server_port" placeholder="3306" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_groups">Groups</label></th>

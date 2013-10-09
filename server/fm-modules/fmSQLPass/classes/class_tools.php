@@ -29,17 +29,8 @@ class fm_module_tools {
 
 			/** SQL tests */
 			$return .= "\t" . $results[$x]->server_type . ":\t\t\t";
-			switch ($results[$x]->server_type) {
-				case 'MySQL':
-					$port = 53;
-					break;
-				case 'Postgre':
-					$port = 5432;
-					break;
-				case 'SQL Server':
-					$port = 1433;
-					break;
-			}
+			$port = $results[$x]->server_port ? $results[$x]->server_port : $__FM_CONFIG['fmSQLPass']['default']['ports'][$results[$x]->server_type];
+
 			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  'success (tcp/' . $port . ')';
 			else $return .=  'failed (tcp/' . $port . ')';
 			$return .=  "\n\n";

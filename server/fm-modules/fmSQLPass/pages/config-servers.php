@@ -19,24 +19,27 @@ if ($allowed_to_manage_servers) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			if (!$fm_module_servers->add($_POST)) {
-				$response = 'This database server could not be added.'. "\n";
+			$result = $fm_module_servers->add($_POST);
+			if ($result !== true) {
+				$response = $result;
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
 	case 'delete':
 		if (isset($_GET['id'])) {
-			$delete_status = $fm_module_servers->delete(sanitize($_GET['id']));
-			if ($delete_status !== true) {
-				$response = $delete_status;
+			$server_delete_status = $fm_module_servers->delete(sanitize($_GET['id']));
+			if ($server_delete_status !== true) {
+				$response = $server_delete_status;
+				$action = 'add';
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			if (!$fm_module_servers->update($_POST)) {
-				$response = 'This database server could not be updated.'. "\n";
+			$result = $fm_module_servers->update($_POST);
+			if ($result !== true) {
+				$response = $result;
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
