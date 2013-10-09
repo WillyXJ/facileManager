@@ -167,6 +167,10 @@ class fm_settings {
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		$time_format_list = buildSelect('time_format[' . $_SESSION['user']['account_id'] . ']', 'time_format', $__FM_CONFIG['options']['time_format'], $time_format);
 		
+		/** Other Section */
+		$show_errors = getOption('show_errors');
+		$show_errors_checked = $show_errors ? 'checked' : null;
+		
 		$fm_temp_directory = getOption('fm_temp_directory');
 
 		$return_form = <<<FORM
@@ -177,6 +181,7 @@ class fm_settings {
 			<input type="hidden" name="mail_enable" value="0" />
 			<input type="hidden" name="mail_smtp_auth" value="0" />
 			<input type="hidden" name="mail_smtp_tls" value="0" />
+			<input type="hidden" name="show_errors" value="0" />
 			<div id="settings">
 				<div id="settings-section">
 					<div id="setting-row">
@@ -208,7 +213,7 @@ class fm_settings {
 								<p>TCP/UDP port for non-SSL communication.</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_port" id="ldap_port" type="number" value="$ldap_port" size="10" placeholder="389" onkeydown="return validateNumber(event)" />
+								<input name="ldap_port" id="ldap_port" type="text" value="$ldap_port" size="10" placeholder="389" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
 							</div>
 						</div>
 						<div id="setting-row">
@@ -217,7 +222,7 @@ class fm_settings {
 								<p>TCP/UDP port for SSL communication.</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_port_ssl" id="ldap_port_ssl" type="number" value="$ldap_port_ssl" size="10" placeholder="636" onkeydown="return validateNumber(event)" />
+								<input name="ldap_port_ssl" id="ldap_port_ssl" type="text" value="$ldap_port_ssl" size="10" placeholder="636" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
 							</div>
 						</div>
 						<div id="setting-row">
@@ -314,7 +319,7 @@ class fm_settings {
 							<p>The HTTPS TCP port $fm_name runs on.</p>
 						</div>
 						<div class="choices">
-							<input name="fm_port_ssl" id="fm_port_ssl" type="text" value="$fm_port_ssl" size="40" placeholder="443" onkeydown="return validateNumber(event)" />
+							<input name="fm_port_ssl" id="fm_port_ssl" type="text" value="$fm_port_ssl" size="40" placeholder="443" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
 						</div>
 					</div>
 				</div>
@@ -420,6 +425,15 @@ class fm_settings {
 					</div>
 				</div>
 				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="show_errors">Show Errors</label>
+							<p>If this is checked, $fm_name will display database errors when they occur.</p>
+						</div>
+						<div class="choices">
+							<input style="height: 10px;" name="show_errors" id="show_errors" type="checkbox" value="1" $show_errors_checked /><label for="show_errors">Show Errors</label>
+						</div>
+					</div>
 					<div id="setting-row">
 						<div class="description">
 							<label for="fm_temp_directory">Temporary Directory</label>

@@ -900,6 +900,9 @@ function buildHelpFile() {
 			<p><b>Date and Time</b><br />
 			Set your preferred timezone, date format, and time format for $fm_name to use throughout all aspects of the app. What you select is
 			how all dates and times will be display including any client configuration files.</p>
+			<p><b>Show Errors</b><br />
+			Choose whether you want $fm_name errors to be displayed as they occur or not. This can be useful if you are having trouble
+			adding or editing opjects.</p>
 			<p><b>Temporary Directory</b><br />
 			Periodically $fm_name and its modules may need to create temporary files or directories on your webserver. Specify the local path for it to use.</p>
 		</div>

@@ -106,21 +106,19 @@ class fmdb {
 	 * Print SQL/DB error.
 	 */
 	function print_error($query = '') {
-		global $EZSQL_ERROR;
 		$str = mysql_error($this->dbh);
 		if ($query) $str .= " | Query: [$query]";
-		$EZSQL_ERROR[] =
-
 		$str = htmlspecialchars($str, ENT_QUOTES);
+
 		// Is error output turned on or not..
-//		if ($this->show_errors) {
+		if (getOption('show_errors')) {
 			// If there is an error then take note of it
 			print "<div id='error'>
 			<p class='wpdberror'><strong>Database error:</strong> [$str]</p>
 			</div>";
-//		} else {
-//			return false;
-//		}
+		} else {
+			return false;
+		}
 	}
 
 }
