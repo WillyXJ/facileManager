@@ -161,6 +161,7 @@ function getServerCredentials($account_id = 0, $server_serial_no) {
  * @subpackage fmSQLPass
  *
  * @param string $server_name Hostname of the database server
+ * @param integer $server_port Server port to connect to
  * @param string $admin_user User to login with
  * @param string $admin_pass User password to login with
  * @param string $user Database user to change
@@ -168,12 +169,12 @@ function getServerCredentials($account_id = 0, $server_serial_no) {
  * @param string $server_group Server group to process
  * @return string
  */
-function changeMySQLUserPassword($server_name, $admin_user, $admin_pass, $user, $user_password, $server_group) {
+function changeMySQLUserPassword($server_name, $server_port, $admin_user, $admin_pass, $user, $user_password, $server_group) {
 	global $__FM_CONFIG;
 	
 	/** Connect to remote server */
 	$verbose_output = ' --> Connecting to MySQL ';
-	$remote_connection = @new mysqli($server_name, $admin_user, $admin_pass);
+	$remote_connection = @new mysqli($server_name, $admin_user, $admin_pass, null, $server_port);
 	if (!$remote_connection->connect_error) $verbose_output .= "[ok]\n";
 	else {
 		$verbose_output .= '[failed] - ' . $remote_connection->connect_error . "\n";

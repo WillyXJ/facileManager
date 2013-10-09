@@ -110,7 +110,7 @@ HTML;
 				/** Change the user password */
 				$passwd_function = 'change' . $server_type . 'UserPassword';
 				if (function_exists($passwd_function)) {
-					$verbose_output .= $passwd_function($server_name, $admin_user, $admin_pass, str_replace(array('"', "'"), '', $user_login), $user_password, $server_group);
+					$verbose_output .= $passwd_function($server_name, $server_port, $admin_user, $admin_pass, str_replace(array('"', "'"), '', $user_login), $user_password, $server_group);
 				} else {
 					$verbose_output .= " --> Database server type '$server_type' is not currently supported.\n";
 				}

@@ -1,3 +1,7 @@
+1.0-b2 (2013-10-??)
+===================
+* Added option to specify database server port.
+
 1.0-b1 (2013-09-30)
 ===================
 * Initial release.
