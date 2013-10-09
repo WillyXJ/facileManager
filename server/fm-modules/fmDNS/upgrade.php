@@ -35,7 +35,7 @@ function upgradefmDNS_100($__FM_CONFIG) {
 function upgradefmDNS_101($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
-	$success = version_compare($running_version, '1.0-b5', '<') ? upgradefmDNS_100($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-b5', '<') ? upgradefmDNS_100($__FM_CONFIG) : true;
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_type`  `server_type` ENUM(  'bind9' ) NOT NULL DEFAULT  'bind9',

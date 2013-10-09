@@ -353,7 +353,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_update_method">Update Method</label></th>
-					<td width="67%">$server_update_method<div id="server_update_port_option" $server_update_port_style><input type="number" name="server_update_port" value="$server_update_port" placeholder="80" onkeydown="return validateNumber(event)" /></div></td>
+					<td width="67%">$server_update_method<div id="server_update_port_option" $server_update_port_style><input type="number" name="server_update_port" value="$server_update_port" placeholder="80" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></div></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_config_file">Config File</label></th>
