@@ -526,14 +526,14 @@ HTML;
 		/** Get field length */
 		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
 
-		$views = buildSelect("{$action}Zone[$domain_id][domain_view]", 1, $this->availableViews(), $domain_view, 4, null, true);
-		$zone_maps = buildSelect("{$action}Zone[$domain_id][domain_mapping]", 1, enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map);
-		$domain_types = buildSelect("{$action}Zone[$domain_id][domain_type]", 1, enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type);
-		$check_names = buildSelect("{$action}Zone[$domain_id][domain_check_names]", 1, enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_check_names',''), $domain_check_names);
-		$notify_slaves = buildSelect("{$action}Zone[$domain_id][domain_notify_slaves]", 1, enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_notify_slaves',''), $domain_notify_slaves);
-		$multi_masters = buildSelect("{$action}Zone[$domain_id][domain_multi_masters]", 1, enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','multi_masters',''), $domain_multi_masters);
-		$clone = buildSelect("{$action}Zone[$domain_id][domain_clone_domain_id]", 1, $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1);
-		$name_servers = buildSelect("{$action}Zone[$domain_id][domain_name_servers]", 1, $this->availableDNSServers(), $domain_name_servers, 5, null, true);
+		$views = buildSelect("{$action}Zone[$domain_id][domain_view]", 'domain_view', $this->availableViews(), $domain_view, 4, null, true);
+		$zone_maps = buildSelect("{$action}Zone[$domain_id][domain_mapping]", 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map);
+		$domain_types = buildSelect("{$action}Zone[$domain_id][domain_type]", 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type);
+		$check_names = buildSelect("{$action}Zone[$domain_id][domain_check_names]", 'domain_check_names', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_check_names',''), $domain_check_names);
+		$notify_slaves = buildSelect("{$action}Zone[$domain_id][domain_notify_slaves]", 'domain_notify_slaves', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_notify_slaves',''), $domain_notify_slaves);
+		$multi_masters = buildSelect("{$action}Zone[$domain_id][domain_multi_masters]", 'domain_multi_masters', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','multi_masters',''), $domain_multi_masters);
+		$clone = buildSelect("{$action}Zone[$domain_id][domain_clone_domain_id]", 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1);
+		$name_servers = buildSelect("{$action}Zone[$domain_id][domain_name_servers]", 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 5, null, true);
 		$domain_transfers_from = str_replace('; ', "\n", rtrim($domain_transfers_from, '; '));
 		$domain_updates_from = str_replace('; ', "\n", rtrim($domain_updates_from, '; '));
 		$domain_master_servers = str_replace('; ', "\n", rtrim($domain_master_servers, '; '));
@@ -543,40 +543,40 @@ HTML;
 		<form name="manage" id="manage" method="post" action="zones?map=$map">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="{$action}Zone[ZoneID]" value="$domain_id" />
-			<table class="form-table">
+			<table class="form-table zone-form">
 				<tr>
 					<td>
 						<table class="form-table">
 							<tr>
-								<th>Domain Name</th>
-								<td><input type="text" name="{$action}Zone[$domain_id][domain_name]" size="40" value="$domain_name" maxlength="$domain_name_length" /></td>
+								<th><label for="domain_name">Domain Name</label></th>
+								<td><input type="text" id="domain_name" name="{$action}Zone[$domain_id][domain_name]" size="40" value="$domain_name" maxlength="$domain_name_length" /></td>
 							</tr>
 							<tr>
-								<th>Views</th>
+								<th><label for="domain_view">Views</label></th>
 								<td>$views</td>
 							</tr>
 							<tr>
-								<th>Zone Type</th>
+								<th><label for="domain_mapping">Zone Type</label></th>
 								<td>$zone_maps</td>
 							</tr>
 							<tr>
-								<th>Domain Type</th>
+								<th><label for="domain_type">Domain Type</label></th>
 								<td>$domain_types</td>
 							</tr>
 							<tr>
-								<th>Clone Of (optional)</th>
+								<th><label for="domain_clone_domain_id">Clone Of (optional)</label></th>
 								<td>$clone</td>
 							</tr>
 							<tr>
-								<th>Check Names (optional)</th>
+								<th><label for="domain_check_names">Check Names (optional)</label></th>
 								<td>$check_names</td>
 							</tr>
 							<tr>
-								<th>Notify Slaves (optional)</th>
+								<th><label for="domain_notify_slaves">Notify Slaves (optional)</label></th>
 								<td>$notify_slaves</td>
 							</tr>
 							<tr>
-								<th>Multiple Masters (optional)</th>
+								<th><label for="domain_multi_masters">Multiple Masters (optional)</label></th>
 								<td>$multi_masters</td>
 							</tr>
 						</table>
@@ -584,23 +584,23 @@ HTML;
 					<td>
 						<table class="form-table">
 							<tr>
-								<th>Transfers From (optional)</th>
-								<td><textarea name="{$action}Zone[$domain_id][domain_transfers_from]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_transfers_from</textarea></td>
+								<th><label for="domain_transfers_from">Transfers From (optional)</label></th>
+								<td><textarea id="domain_transfers_from" name="{$action}Zone[$domain_id][domain_transfers_from]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_transfers_from</textarea></td>
 							</tr>
 							<tr>
-								<th>Updates From (optional)</th>
-								<td><textarea name="{$action}Zone[$domain_id][domain_updates_from]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_updates_from</textarea></td>
+								<th><label for="domain_updates_from">Updates From (optional)</label></th>
+								<td><textarea id="domain_updates_from" name="{$action}Zone[$domain_id][domain_updates_from]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_updates_from</textarea></td>
 							</tr>
 							<tr>
-								<th>Master Servers (optional)</th>
-								<td><textarea name="{$action}Zone[$domain_id][domain_master_servers]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_master_servers</textarea></td>
+								<th><label for="domain_master_servers">Master Servers (optional)</label></th>
+								<td><textarea id="domain_master_servers" name="{$action}Zone[$domain_id][domain_master_servers]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_master_servers</textarea></td>
 							</tr>
 							<tr>
-								<th>Forward Servers (optional)</th>
-								<td><textarea name="{$action}Zone[$domain_id][domain_forward_servers]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_forward_servers</textarea></td>
+								<th><label for="domain_forward_servers">Forward Servers (optional)</label></th>
+								<td><textarea id="domain_forward_servers" name="{$action}Zone[$domain_id][domain_forward_servers]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_forward_servers</textarea></td>
 							</tr>
 							<tr>
-								<th>DNS Servers</th>
+								<th><label for="domain_name_servers">DNS Servers</label></th>
 								<td>$name_servers</td>
 							</tr>
 						</table>
