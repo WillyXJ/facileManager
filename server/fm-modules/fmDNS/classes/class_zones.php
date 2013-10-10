@@ -523,6 +523,9 @@ HTML;
 			if (in_array('0', $domain_name_servers)) $domain_name_servers = 0;
 		}
 		
+		/** Get field length */
+		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
+
 		$views = buildSelect("{$action}Zone[$domain_id][domain_view]", 1, $this->availableViews(), $domain_view, 4, null, true);
 		$zone_maps = buildSelect("{$action}Zone[$domain_id][domain_mapping]", 1, enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map);
 		$domain_types = buildSelect("{$action}Zone[$domain_id][domain_type]", 1, enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type);
@@ -546,7 +549,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th>Domain Name</th>
-								<td><input type="text" name="{$action}Zone[$domain_id][domain_name]" size="40" value="$domain_name" /></td>
+								<td><input type="text" name="{$action}Zone[$domain_id][domain_name]" size="40" value="$domain_name" maxlength="$domain_name_length" /></td>
 							</tr>
 							<tr>
 								<th>Views</th>

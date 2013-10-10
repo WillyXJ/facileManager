@@ -469,7 +469,14 @@ FORM;
 					</tr>
 					<tr>
 						<th width="33%" scope="row"><label for="cfg_destination">Logging Destination</label></th>
-						<td width="67%">$cfg_destination<div id="destination_option" style="display: $fileshow"><input type="text" name="cfg_file_path[]" value="$cfg_file_path" placeholder="/path/to/file" /><br />$cfg_file_versions <input type="number" name="cfg_file_path[]" value="$cfg_file_size" style="width: 5em;" onkeydown="return validateNumber(event)" /> $cfg_file_size_spec</div><div id="syslog_options" style="display: $syslogshow">$cfg_syslog</div></td>
+						<td width="67%">
+							$cfg_destination
+							<div id="destination_option" style="display: $fileshow">
+								<input type="text" name="cfg_file_path[]" value="$cfg_file_path" placeholder="/path/to/file" /><br />
+								$cfg_file_versions <input type="number" name="cfg_file_path[]" value="$cfg_file_size" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
+								$cfg_file_size_spec
+							</div>
+							<div id="syslog_options" style="display: $syslogshow">$cfg_syslog</div></td>
 					</tr>
 					</span>
 					<tr>

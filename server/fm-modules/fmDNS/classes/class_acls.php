@@ -200,7 +200,7 @@ HTML;
 		$acl_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $acl_addresses), ';'));
 
 		/** Get field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
+		$acl_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
 
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="config-acls">
@@ -210,7 +210,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="acl_name">ACL Name</label></th>
-					<td width="67%"><input name="acl_name" id="acl_name" type="text" value="$acl_name" size="40" placeholder="internal" maxlength="$field_length" /></td>
+					<td width="67%"><input name="acl_name" id="acl_name" type="text" value="$acl_name" size="40" placeholder="internal" maxlength="$acl_name_length" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="acl_predefined">Matched Address List</label></th>

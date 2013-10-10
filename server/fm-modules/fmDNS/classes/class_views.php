@@ -187,7 +187,7 @@ HTML;
 		}
 		
 		/** Get field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
+		$view_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="config-views">
@@ -198,7 +198,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="view_name">View Name</label></th>
-					<td width="67%"><input name="view_name" id="view_name" type="text" value="$view_name" size="40" placeholder="internal" maxlength="$field_length" /></td>
+					<td width="67%"><input name="view_name" id="view_name" type="text" value="$view_name" size="40" placeholder="internal" maxlength="$view_name_length" /></td>
 				</tr>
 			</table>
 			<input type="submit" name="submit" id="submit" value="$ucaction View" class="button" />

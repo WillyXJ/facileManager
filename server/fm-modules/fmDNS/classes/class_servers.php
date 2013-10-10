@@ -324,6 +324,12 @@ HTML;
 		}
 		$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
 		
+		/** Check name field length */
+		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
+		$server_config_file_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_config_file');
+		$server_root_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_root_dir');
+		$server_zones_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_zones_dir');
+
 		$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
 		$server_update_method = buildSelect('server_update_method', 'server_update_method', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_update_method'), $server_update_method, 1);
 		$server_key = buildSelect('server_key', 'server_key', $this->availableKeys(), $server_key);
@@ -336,7 +342,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="server_name">Server Name</label></th>
-					<td width="67%"><input name="server_name" id="server_name" type="text" value="$server_name" size="40" placeholder="dns1.local" /></td>
+					<td width="67%"><input name="server_name" id="server_name" type="text" value="$server_name" size="40" placeholder="dns1.local" maxlength="$server_name_length" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_key">Key</label></th>
@@ -357,15 +363,15 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_config_file">Config File</label></th>
-					<td width="67%"><input name="server_config_file" id="server_config_file" type="text" value="$server_config_file" size="40" placeholder="{$__FM_CONFIG['ns']['named_config_file']}" /></td>
+					<td width="67%"><input name="server_config_file" id="server_config_file" type="text" value="$server_config_file" size="40" placeholder="{$__FM_CONFIG['ns']['named_config_file']}" maxlength="$server_config_file_length" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_root_dir">Server Root</label></th>
-					<td width="67%"><input name="server_root_dir" id="server_root_dir" type="text" value="$server_root_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_root_dir']}" /></td>
+					<td width="67%"><input name="server_root_dir" id="server_root_dir" type="text" value="$server_root_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_root_dir']}" maxlength="$server_root_dir_length" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_zones_dir">Zone File Directory</label></th>
-					<td width="67%"><input name="server_zones_dir" id="server_zones_dir" type="text" value="$server_zones_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_zones_dir']}" /></td>
+					<td width="67%"><input name="server_zones_dir" id="server_zones_dir" type="text" value="$server_zones_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_zones_dir']}" maxlength="$server_zones_dir_length" /></td>
 				</tr>
 			</table>
 			<input type="submit" name="submit" value="$ucaction Server" class="button" />

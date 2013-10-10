@@ -48,6 +48,10 @@ HEAD;
 		
 		if (empty($server_name)) return 'No server name defined.';
 		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
+		if ($field_length !== false && strlen($server_name) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
+		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $server_name, 'server_', 'server_name');
 		if ($fmdb->num_rows) return 'This server name already exists.';
@@ -127,6 +131,9 @@ HEAD;
 		global $fmdb, $__FM_CONFIG;
 		
 		if (empty($post['server_name'])) return 'No server name defined.';
+
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
 
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name');
@@ -295,6 +302,9 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
+		/** Check name field length */
+		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
+
 		$server_types = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_type'), $server_type);
 		$groups = (is_array($group_options)) ? buildSelect('server_groups', 1, $group_options, $server_groups, 4, null, true) : 'Server Groups need to be defined first.';
 		
@@ -313,7 +323,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="server_name">Hostname</label></th>
-					<td width="67%"><input name="server_name" id="server_name" type="text" value="$server_name" size="40" /></td>
+					<td width="67%"><input name="server_name" id="server_name" type="text" value="$server_name" size="40" maxlength="$server_name_length" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_type">Server Type</label></th>

@@ -189,6 +189,10 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 
+		/** Check name field length */
+		$key_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
+		$key_secret_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_secret');
+
 		$key_algorithm = buildSelect('key_algorithm', 'key_algorithm', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_algorithm'), $key_algorithm, 1);
 		$key_view = buildSelect('key_view', 'key_view', $fm_dns_zones->availableViews(), $key_view);
 		
@@ -199,7 +203,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="key_name">Key Name</label></th>
-					<td width="67%"><input name="key_name" id="key_name" type="text" value="$key_name" size="40" /></td>
+					<td width="67%"><input name="key_name" id="key_name" type="text" value="$key_name" size="40" maxlength="$key_name_length" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="key_view">View</label></th>
@@ -211,7 +215,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="key_secret">Secret</label></th>
-					<td width="67%"><input name="key_secret" id="key_secret" type="text" value="$key_secret" size="40" /></td>
+					<td width="67%"><input name="key_secret" id="key_secret" type="text" value="$key_secret" size="40" maxlength="$key_secret_length" /></td>
 				</tr>
 			</table>
 			<input type="submit" name="submit" value="$ucaction Key" class="button" />

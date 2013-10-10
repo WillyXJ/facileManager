@@ -46,6 +46,10 @@ class fm_sqlpass_groups {
 		
 		if (empty($group_name)) return false;
 		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
+		if ($field_length !== false && strlen($group_name) > $field_length) return 'Group name is too long (maximum ' . $field_length . ' characters).';
+		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', $group_name, 'group_', 'group_name');
 		if ($fmdb->num_rows) return false;
@@ -68,6 +72,10 @@ class fm_sqlpass_groups {
 		
 		if (empty($post['group_name'])) return false;
 
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return 'Group name is too long (maximum ' . $field_length . ' characters).';
+		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', sanitize($post['group_name']), 'group_', 'group_name');
 		if ($fmdb->num_rows) {
@@ -173,6 +181,9 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
+		/** Check name field length */
+		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
+
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="config-groups">
 			<input type="hidden" name="action" id="action" value="$action" />
@@ -180,7 +191,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="group_name">Group Name</label></th>
-					<td width="67%"><input name="group_name" id="group_name" type="text" value="$group_name" size="40" placeholder="internal" /></td>
+					<td width="67%"><input name="group_name" id="group_name" type="text" value="$group_name" size="40" placeholder="internal" maxlength="$group_name_length" /></td>
 				</tr>
 			</table>
 			<input type="submit" name="submit" id="submit" value="$ucaction Group" class="button" />
