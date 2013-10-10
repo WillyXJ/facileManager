@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}se
   `server_type` enum('MySQL') NOT NULL,
   `server_port` int(5) DEFAULT NULL,
   `server_name` varchar(255) NOT NULL,
-  `server_groups` text NOT NULL,
-  `server_credentials` varchar(255) DEFAULT NULL,
+  `server_groups` text,
+  `server_credentials` text,
   `server_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`server_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
