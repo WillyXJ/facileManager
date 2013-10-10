@@ -55,18 +55,7 @@ if ($allowed_to_manage_users) {
 printHeader();
 @printMenu($page_name, $page_name_sub);
 
-if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-echo '<div id="response" style="display: none;"></div>' . "\n";
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
-echo '>
-	<h2>Users';
-
-if ($allowed_to_manage_users) {
-	echo '<a id="plus" href="#" title="Add New">' . $__FM_CONFIG['icons']['add'] . '</a>';
-}
-
-echo "</h2>\n";
+echo printPageHeader($response, 'Users', $allowed_to_manage_users);
 
 if ($allowed_to_manage_users) {
 	$result = basicGetList('fm_users', 'user_id', 'user_');

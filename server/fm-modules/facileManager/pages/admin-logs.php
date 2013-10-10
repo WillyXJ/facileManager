@@ -62,12 +62,8 @@ $log_search_user = isset($log_search_user) ? $log_search_user : 0;
 $module_list = buildSelect('log_search_module', 1, buildModuleList(), $log_search_module, 4, null, true);
 $user_list = buildSelect('log_search_user', 1, buildUserList(), $log_search_user, 4, null, true);
 	
-if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
+echo printPageHeader($response, 'Logs');
 echo <<<HTML
->
-	<h2>Logs</h2>
 $pagination
 		<form class="search-form" id="date-range" action="admin-logs" method="post">
 		<table class="log_search_form" align="center">

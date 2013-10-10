@@ -95,18 +95,8 @@ printHeader();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-echo '<div id="response" style="display: none;"></div>' . "\n";
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
-echo ">
-	<h2>$display_option_type Options";
-
-if ($allowed_to_manage_servers) {
-	echo '<a id="plus" href="#" title="Add New" name="' . $view_id . '">' . $__FM_CONFIG['icons']['add'] . '</a>';
-}
-
-echo '</h2>' . "\n$avail_servers\n";
+echo printPageHeader($response, $display_option_type . ' Options', $allowed_to_manage_servers, $view_id);
+echo "$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no=$server_serial_no");
 $fm_module_options->rows($result);

@@ -93,18 +93,8 @@ printHeader();
 $avail_types = buildSubMenu($type, $server_serial_no_uri);
 $avail_servers = buildServerSubMenu($server_serial_no, 'log_space');
 
-if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-echo '<div id="response" style="display: none;"></div>' . "\n";
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
-echo ">
-	<h2>Logging $display_type";
-
-if ($allowed_to_manage_servers) {
-	echo '<a id="plus" name="' . $type . '" href="#" title="Add New">' . $__FM_CONFIG['icons']['add'] . '</a>';
-}
-
-echo '</h2>' . "\n$avail_types\n$avail_servers\n";
+echo printPageHeader($response, 'Logging ' . $display_type, $allowed_to_manage_servers, $type);
+echo "$avail_types\n$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', 'AND cfg_type="logging" AND cfg_name="' . $channel_category . '" AND server_serial_no=' . $server_serial_no);
 $fm_module_logging->rows($result, $channel_category);

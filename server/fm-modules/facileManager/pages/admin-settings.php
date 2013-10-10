@@ -18,12 +18,7 @@ include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPA
 printHeader();
 @printMenu($page_name, $page_name_sub);
 
-echo <<<HTML
-<div id="response" style="display: none;"></div>
-<div id="body_container">
-	<h2>$fm_name Settings</h2>
-
-HTML;
+echo printPageHeader(null, $fm_name . ' Settings');
 	
 echo $fm_settings->printForm();
 

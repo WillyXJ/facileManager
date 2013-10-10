@@ -1656,4 +1656,32 @@ function setOSIcon($server_os) {
 }
 
 
+/**
+ * Returns an icon for the server OS
+ *
+ * @since 1.0
+ * @package facileManager
+ *
+ * @param string $server_os Server OS to return the icon for
+ * @return string
+ */
+function printPageHeader($response, $title, $allowed_to_add = false, $name = null) {
+	global $__FM_CONFIG;
+	
+	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
+	echo '<div id="response" style="display: none;"></div>' . "\n";
+	echo '<div id="body_container"';
+	if (!empty($response)) echo ' style="margin-top: 4em;"';
+	echo ">
+		<h2>$title";
+	
+	if ($allowed_to_add) {
+		if ($name) $name = ' name="' . $name . '"';
+		echo '<a id="plus" href="#" title="Add New"' . $name . '>' . $__FM_CONFIG['icons']['add'] . '</a>';
+	}
+	
+	echo '</h2>' . "\n";
+}
+
+
 ?>

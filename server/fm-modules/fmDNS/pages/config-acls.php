@@ -71,18 +71,8 @@ printHeader();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-echo '<div id="response" style="display: none;"></div>' . "\n";
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
-echo '>
-	<h2>Access Control Lists';
-
-if ($allowed_to_manage_servers) {
-	echo '<a id="plus" href="#" title="Add New">' . $__FM_CONFIG['icons']['add'] . '</a>';
-}
-
-echo '</h2>' . "\n$avail_servers\n";
+echo printPageHeader($response, 'Access Control Lists', $allowed_to_manage_servers);
+echo "\n$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', "AND server_serial_no=$server_serial_no");
 $fm_dns_acls->rows($result);
