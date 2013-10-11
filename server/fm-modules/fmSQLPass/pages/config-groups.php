@@ -13,14 +13,16 @@ $page_name = 'Config';
 $page_name_sub = 'Server Groups';
 
 include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_groups.php');
+$response = isset($response) ? $response : null;
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 if ($allowed_to_manage_servers) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			if (!$fm_sqlpass_groups->add($_POST)) {
-				$response = 'This server group could not be added.'. "\n";
+			$result = $fm_sqlpass_groups->add($_POST);
+			if ($result !== true) {
+				$response = $result;
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
@@ -35,8 +37,9 @@ if ($allowed_to_manage_servers) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			if (!$fm_sqlpass_groups->update($_POST)) {
-				$response = 'This server group could not be updated.'. "\n";
+			$result = $fm_sqlpass_groups->update($_POST);
+			if ($result !== true) {
+				$response = $result;
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}

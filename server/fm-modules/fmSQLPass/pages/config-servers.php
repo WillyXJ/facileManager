@@ -13,6 +13,7 @@ $page_name = 'Config';
 $page_name_sub = 'Servers';
 
 include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_servers.php');
+$response = isset($response) ? $response : null;
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 if ($allowed_to_manage_servers) {

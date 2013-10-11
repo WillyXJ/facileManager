@@ -37,28 +37,17 @@ class fm_sqlpass_groups {
 	/**
 	 * Adds the new group
 	 */
-	function add($data) {
+	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		extract($data, EXTR_SKIP);
+		/** Validate entries */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
-		$group_name = sanitize($group_name);
-		
-		if (empty($group_name)) return false;
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
-		if ($field_length !== false && strlen($group_name) > $field_length) return 'Group name is too long (maximum ' . $field_length . ' characters).';
-		
-		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', $group_name, 'group_', 'group_name');
-		if ($fmdb->num_rows) return false;
-		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (`account_id`, `group_name`) VALUES('{$_SESSION['user']['account_id']}', '$group_name')";
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (`account_id`, `group_name`) VALUES('{$_SESSION['user']['account_id']}', '{$post['group_name']}')";
 		$result = $fmdb->query($query);
 		
-		if (!$result)
-			return false;
+		if (!$result) return 'Could not add the group because a database error occurred.';
 
 		addLogEntry("Added server group '$group_name'.");
 		return true;
@@ -70,18 +59,9 @@ class fm_sqlpass_groups {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['group_name'])) return false;
-
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
-		if ($field_length !== false && strlen($post['group_name']) > $field_length) return 'Group name is too long (maximum ' . $field_length . ' characters).';
-		
-		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', sanitize($post['group_name']), 'group_', 'group_name');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			if ($result[0]->group_id != $post['group_id']) return false;
-		}
+		/** Validate entries */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
 		$exclude = array('submit', 'action', 'group_id', 'page');
 
@@ -97,7 +77,7 @@ class fm_sqlpass_groups {
 		// Update the group
 		$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		if (!$result = $fmdb->query($query)) return false;
+		if (!$result = $fmdb->query($query)) return 'Could not add the group because a database error occurred.';
 		
 		addLogEntry("Updated server group '$old_name' to name: '{$post['group_name']}'.");
 		return $result;
@@ -202,6 +182,27 @@ FORM;
 		return $return_form;
 	}
 
+	function validatePost($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$post['group_name'] = sanitize($post['group_name']);
+		
+		if (empty($post['group_name'])) return 'No group name defined.';
+
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return 'Group name is too long (maximum ' . $field_length . ' characters).';
+		
+		/** Does the record already exist for this account? */
+		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', sanitize($post['group_name']), 'group_', 'group_name');
+		if ($fmdb->num_rows) {
+			$result = $fmdb->last_result;
+			if ($result[0]->group_id != $post['group_id']) return 'This group name already exists.';
+		}
+		
+		return $post;
+	}
+	
 }
 
 if (!isset($fm_sqlpass_groups))

@@ -101,7 +101,7 @@ class fm_module_settings {
 			$saved_options = array();
 		}
 		
-		if (!$option_rows = buildSettingsForm($saved_options, $__FM_CONFIG[$_SESSION['module']]['default']['options'])) return '<p>There are no settings for this module.</p>';
+		if (!$option_rows = @buildSettingsForm($saved_options, $__FM_CONFIG[$_SESSION['module']]['default']['options'])) return '<p>There are no settings for this module.</p>';
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">

@@ -18,6 +18,7 @@ include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTO
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 
 $form_data = null;
+$response = isset($response) ? $response : null;
 
 if ($allowed_to_manage_users) {
 	switch ($action) {

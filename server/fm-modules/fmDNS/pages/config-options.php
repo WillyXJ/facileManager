@@ -14,14 +14,10 @@ $page_name_sub = 'Options';
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
 
-if (count($_POST)) {
-//	print_r($_POST);
-//	exit;
-}
-
 $option_type = $display_option_type = $display_option_type_sql = (isset($_GET['option_type'])) ? sanitize(ucfirst($_GET['option_type'])) : 'Global';
 $display_option_type_sql = "global' AND cfg_view='";
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+$response = isset($response) ? $response : null;
 
 /* Configure options for a view */
 if (array_key_exists('view_id', $_GET)) {

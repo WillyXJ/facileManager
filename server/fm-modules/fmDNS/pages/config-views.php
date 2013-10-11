@@ -16,6 +16,7 @@ include(ABSPATH . 'fm-modules/fmDNS/classes/class_views.php');
 
 $view_option = (isset($_GET['view_option'])) ? ucfirst($_GET['view_option']) : 'Views';
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+$response = isset($response) ? $response : null;
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 if ($allowed_to_manage_servers) {

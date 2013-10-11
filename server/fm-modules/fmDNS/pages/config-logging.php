@@ -18,6 +18,7 @@ $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'channel'
 $display_type = ucfirst($__FM_CONFIG['logging']['avail_types'][$type]);
 $channel_category = ($type == 'channel') ? 'channel' : 'category';
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+$response = isset($response) ? $response : null;
 
 /* Ensure proper type is defined */
 if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {

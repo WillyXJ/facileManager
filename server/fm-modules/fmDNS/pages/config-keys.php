@@ -15,6 +15,7 @@ $page_name_sub = 'Keys';
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+$response = isset($response) ? $response : null;
 
 if ($allowed_to_manage_servers) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';

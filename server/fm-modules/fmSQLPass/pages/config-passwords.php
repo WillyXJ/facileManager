@@ -12,6 +12,8 @@
 $page_name = 'Config';
 $page_name_sub = 'Passwords';
 
+$response = isset($response) ? $response : null;
+
 printHeader();
 @printMenu($page_name, $page_name_sub);
 

@@ -72,7 +72,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
-			$type_map = $_POST['item_sub_type'];
+			$type_map = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
 			$action = 'create';
 			break;
 		case 'logging':

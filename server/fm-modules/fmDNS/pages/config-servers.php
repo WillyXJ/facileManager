@@ -13,6 +13,7 @@ $page_name = 'Config';
 $page_name_sub = 'Servers';
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
+$response = isset($response) ? $response : null;
 
 if ($allowed_to_manage_servers) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
