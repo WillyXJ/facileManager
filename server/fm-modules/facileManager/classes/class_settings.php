@@ -428,7 +428,7 @@ class fm_settings {
 					<div id="setting-row">
 						<div class="description">
 							<label for="show_errors">Show Errors</label>
-							<p>If this is checked, $fm_name will display database errors when they occur.</p>
+							<p>If this is checked, $fm_name will display application errors when they occur.</p>
 						</div>
 						<div class="choices">
 							<input style="height: 10px;" name="show_errors" id="show_errors" type="checkbox" value="1" $show_errors_checked /><label for="show_errors">Show Errors</label>

@@ -21,10 +21,6 @@ if (!defined('AJAX')) {
 	$GLOBALS['RELPATH'] = rtrim(substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], 'fm-modules')), '/') . '/';
 }
 
-//error_reporting(E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR);
-ini_set('display_errors', false);
-error_reporting(0);
-
 if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 	/** The config file resides in ABSPATH */
@@ -106,6 +102,15 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		if (isset($_GET) && array_key_exists('logout', $_GET)) {
 			$fm_login->logout();
 			header('Location: ' . $GLOBALS['RELPATH']);
+		}
+		
+		/** Show/Hide errors */
+		if (getOption('show_errors')) {
+			error_reporting(E_ALL);
+			ini_set('display_errors', true);
+		} else {
+			ini_set('display_errors', false);
+			error_reporting(0);
 		}
 		
 		/** Include module variables */
