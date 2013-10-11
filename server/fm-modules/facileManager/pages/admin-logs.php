@@ -151,14 +151,14 @@ ROW;
 function buildModuleList() {
 	global $fmdb;
 	
-	$array[] = 'All Modules';
+	$array[0] = array_fill(0, 2, 'All Modules');
 	
 	$query = "SELECT DISTINCT log_module FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']})";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$list = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$array[] = $list[$i]->log_module;
+			$array[$i+1] = array_fill(0, 2, $list[$i]->log_module);
 		}
 	}
 	
