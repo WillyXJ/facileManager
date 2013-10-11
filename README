@@ -102,3 +102,13 @@ Server Upgrade
     your database.
 7.  Once fM is upgraded, you will be redirected to the admin-modules page where
     you can upgrade your modules individually.
+
+
+Client Upgrade
+---------------
+
+1.  Make a backup of your config.inc.php file.
+2.  Move the contents of the client directory to /usr/local/ on your DNS
+    servers to manage.
+    `sudo mv facileManager/client/facileManager /usr/local/`
+3.  Copy your backup of config.inc.php to /usr/local/facileManager.

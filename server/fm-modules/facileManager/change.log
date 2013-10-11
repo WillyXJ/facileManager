@@ -1,5 +1,8 @@
 1.0-rc4 (2013-10-??)
 ====================
+* Server - Fixed issue with admin log searching.
+* Server - (Git Issue 23) Module upgrades now inform user to upgrade client files
+           upon completion.
 * Server - Added support to show/hide application errors.
 
 1.0-rc3 (2013-09-30)

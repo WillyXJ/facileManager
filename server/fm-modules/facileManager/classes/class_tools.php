@@ -65,7 +65,7 @@ class fm_tools {
 			addLogEntry("$module_name was upgraded to {$__FM_CONFIG[$module_name]['version']}.", $module_name);
 		}
 		
-		return '<p>' . $module_name . ' was upgraded successfully!</p>';
+		return '<p>' . $module_name . ' was upgraded successfully! Make sure you upgrade your clients with the updated client files (if applicable).</p>';
 	}
 	
 	/**
