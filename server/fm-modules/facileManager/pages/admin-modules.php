@@ -72,7 +72,7 @@ HTML;
 		/** Get module status */
 		$module_version = getOption(strtolower($module_name) . '_version', 0);
 		if ($module_version !== false) {
-			if ($module_version == $__FM_CONFIG[$module_name]['version']) {
+			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
 				if (in_array($module_name, getActiveModules())) {
 					if ($allowed_to_manage_modules) {
 						$activate_link = '<br /><a href="?action=deactivate&module=' . $module_name . '">Deactivate</a>' . "\n";
@@ -80,9 +80,7 @@ HTML;
 				} else {
 					if ($allowed_to_manage_modules) {
 						$activate_link = '<br /><a href="?action=activate&module=' . $module_name . '">Activate</a>' . "\n";
-//						if (file_exists(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'uninstall.php')) {
-							$activate_link .= ' | <a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a>' . "\n";
-//						}
+						$activate_link .= ' | <a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a>' . "\n";
 					}
 				}
 			} else {
