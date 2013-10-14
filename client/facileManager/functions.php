@@ -619,7 +619,7 @@ function processUpdateMethod($module_name, $update_method) {
 					$user = trim($raw_user[1]);
 				}
 			}
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0];
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
 			echo '  --> Detected ' . $web_server['daemon'] . " runs as '$user'\n";
 			
