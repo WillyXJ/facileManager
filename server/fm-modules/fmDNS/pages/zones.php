@@ -124,7 +124,7 @@ printHeader();
 $reload_allowed = $fm_dns_zones->reloadAllowed();
 if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to manage one or more servers.</p>';
 
-echo printPageHeader($response, 'Zones', $allowed_to_manage_zones);
+echo printPageHeader($response, 'Zones', $allowed_to_manage_zones, $map);
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='$map' AND domain_clone_domain_id='0'");
 $fm_dns_zones->rows($result, $map, $reload_allowed);

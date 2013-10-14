@@ -1,5 +1,6 @@
 1.0-rc4-1 (2013-10-14)
 ======================
+* Server - Creating zones now autoselects the correct zone type. 
 * Server - (Git Issue 24) Fixed broken ACLs introduced in rc4 (doh!). 
 
 1.0-rc4 (2013-10-14)
