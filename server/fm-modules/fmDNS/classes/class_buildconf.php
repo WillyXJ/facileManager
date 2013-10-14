@@ -68,15 +68,29 @@ class fm_module_buildconf {
 
 			/** Merge arrays */
 			$config_array = array_merge($global_config, $server_config);
+			
 			foreach ($config_array as $cfg_name => $cfg_data) {
-				$config .= "\t" . $cfg_name . ' ' . str_replace('$ROOT', $server_root_dir, $cfg_data) . ";\n";
+				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+				$fmdb->get_results($query);
+				if (!$fmdb->num_rows) $def_multiple_values = 'no';
+				else {
+					$result = $fmdb->last_result[0];
+					$def_multiple_values = $result->def_multiple_values;
+				}
+				$config .= "\t" . $cfg_name . ' ';
+				if ($def_multiple_values == 'yes') $config .= '{ ';
+				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_data), ';')));
+				if ($def_multiple_values == 'yes') $config .= '; }';
+				$config .= ";\n";
 			}
 			$config .= "};\n\n";
 			
-			/** Ubuntu requires named.conf.options */
-			if (strtolower($server_os) == 'ubuntu') {
+			/** Debian-based requires named.conf.options */
+			if (isDebianSystem($server_os)) {
 				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
-				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";;
+				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";
+				$data->files[$server_config_file] = $config;
+				$config = $zones;
 			}
 			
 
@@ -298,6 +312,12 @@ class fm_module_buildconf {
 				if (is_array($files)) {
 					$config .= "\ninclude \"" . $server_zones_dir . "/zones.conf.all\";\n";
 				}
+			}
+
+			/** Debian-based requires named.conf.local */
+			if (isDebianSystem($server_os)) {
+				$data->files[dirname($server_config_file) . '/named.conf.local'] = $config;
+				$config = $data->files[$server_config_file] . "include \"" . dirname($server_config_file) . "/named.conf.local\";\n\n";
 			}
 
 			$data->files[$server_config_file] = $config;
@@ -886,6 +906,8 @@ INFO;
 		$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
 		$tmp_dir = rtrim($fm_temp_directory, '/') . '/' . $_SESSION['module'] . '_' . date("YmdHis") . '/';
 		system('rm -rf ' . $tmp_dir);
+		$debian_system = isDebianSystem($files_array['server_os']);
+		$named_conf_contents = null;
 		/** Create temporary directory structure */
 		foreach ($files_array['files'] as $file => $contents) {
 			if (!is_dir(dirname($tmp_dir . $file))) {
@@ -897,6 +919,7 @@ INFO;
 				}
 			}
 			file_put_contents($tmp_dir . $file, $contents);
+			if ($debian_system && (strpos($file, 'named.conf.options') || strpos($file, 'named.conf.local'))) $named_conf_contents .= $contents;
 
 			/** Create temporary directory from named.conf's 'directory' line */
 			if (strpos($contents, 'directory')) {
@@ -923,6 +946,8 @@ INFO;
 				}
 			}
 		}
+		
+		if ($debian_system) file_put_contents($tmp_dir . $named_conf, $named_conf_contents);
 		
 		if (!$die) {
 			/** Run named-checkconf */

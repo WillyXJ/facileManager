@@ -448,7 +448,7 @@ FORM;
 				/** Data to post to $url */
 				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no);
 				
-				$post_result = unserialize(getPostData($url, $post_data));
+				$post_result = @unserialize(getPostData($url, $post_data));
 				
 				if (!is_array($post_result)) {
 					/** Something went wrong */
