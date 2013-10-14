@@ -8,7 +8,7 @@
  */
 
 /** Module Information */
-$__FM_CONFIG['fmDNS']['version'] = '1.0-rc4';
+$__FM_CONFIG['fmDNS']['version'] = '1.0-rc4-1';
 $__FM_CONFIG['fmDNS']['description'] = 'Easily manage one or more ISC BIND servers through a web UI.  No more editing configuration and zone files manually.';
 $__FM_CONFIG['fmDNS']['prefix'] = 'dns_';
 $__FM_CONFIG['fmDNS']['required_dns_version'] = '9.3';

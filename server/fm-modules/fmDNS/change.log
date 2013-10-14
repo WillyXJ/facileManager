@@ -1,3 +1,7 @@
+1.0-rc4-1 (2013-10-14)
+======================
+* Server - (Git Issue 24) Fixed broken ACLs introduced in rc4 (doh!). 
+
 1.0-rc4 (2013-10-14)
 ====================
 * Server - Added more validity checks.

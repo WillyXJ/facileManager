@@ -163,9 +163,11 @@ class fm_module_buildconf {
 						$global_acl_array[$acl_result[$i]->acl_name] = $acl_result[$i]->acl_predefined;
 					} else {
 						$addresses = explode(' ', $acl_result[$i]->acl_addresses);
+						$global_acl_array[$acl_result[$i]->acl_name] = null;
 						foreach($addresses as $address) {
 							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . "\n";
 						}
+						$global_acl_array[$acl_result[$i]->acl_name] = rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n");
 					}
 				}
 
