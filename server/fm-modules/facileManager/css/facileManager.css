@@ -499,6 +499,9 @@ tbody {
 #configtypesmenu span.selected, #configtypesmenu span:hover {
 	background-color: #666;
 }
+#configtypesmenu span:hover a {
+	color: #fff;
+}
 #configtypesmenu a {
 	color: #000;
 	text-decoration: none;
