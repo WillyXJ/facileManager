@@ -231,7 +231,13 @@ label {
 #cssmenu ul li.has-sub:hover > a{ background:#3f3f3f; border-color:#3f3f3f; padding-bottom:1.3em; padding-top:1.3em; top:-.78em; z-index:999; }
 #cssmenu ul li.has-sub:hover > ul, #cssmenu ul li.has-sub:hover > div{display:block;}
 #cssmenu ul li.has-sub > a:hover{background:#3f3f3f; border-color:#3f3f3f;}
-#cssmenu ul li > ul, #cssmenu ul li > div{ display:none; width:auto; position:absolute; top:32px; padding:10px 0; background:#3f3f3f; border-radius:0 0 5px 5px; z-index:999; }
+#cssmenu ul li > ul, #cssmenu ul li > div {
+	display:none; width:auto; position:absolute; top:32px; padding:10px 0; background:#3f3f3f; border-radius:0 0 5px 5px; z-index:999;
+	moz-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 5px;
+	-webkit-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 5px;
+	-khtml-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 5px;
+	box-shadow: rgba(10,10,10,0.4) 0 15px 40px 5px;
+}
 #cssmenu ul li > ul{width:200px;}
 #cssmenu ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
 #cssmenu ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; text-shadow:1px 1px 0 rgba(0,0,0, 0.5); }
