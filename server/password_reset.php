@@ -52,8 +52,7 @@ if (count($_POST)) {
 			require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 			$fm_login->checkPassword($login, $user_password);
 			
-			printResetConfirmation();
-			exit;
+			exit(printResetConfirmation());
 		}
 	}
 }

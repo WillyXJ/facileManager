@@ -30,7 +30,6 @@ $page_name = 'Zones';
 $page_name_sub = ($map == 'forward') ? 'Forward' : 'Reverse';
 
 $record_type = (isset($_GET['record_type'])) ? strtoupper($_GET['record_type']) : 'A';
-//$domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: /');
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
@@ -95,10 +94,6 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 	}
 	$input_return = array();
 
-//	echo "<pre>";
-//	print_r($sql_records);
-//	print_r($changes);
-//	exit;
 	$HTMLOut = NULL;
 	$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 	foreach ($changes as $i => $data) {
@@ -108,17 +103,12 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 		if (isset($data['Delete'])) {
 			$action = 'Delete';
-
-//			echo "Delete $record_type $i\n";
 			$HTMLOut.= buildInputReturn('update', $record_type, $i ,'record_status', 'deleted');
-
 		} else {
 			$y = 0;
 			$action = '&nbsp;';
 			foreach ($data as $key => $val) {
 				$val = trim($val);
-//				echo "$record_type $i =>  $key => $val<br>";
-
 				if ($key == 'record_name' && $record_type != 'PTR') {
 					if (!verifyName($val, true, $record_type)) {
 						if ($val != '@') {
@@ -289,9 +279,6 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 	$ErrorCode = '<font color="red"><b>*Invalid*</b></font>';
 	$HTMLOut = $SOAHTMLOut = NULL;
 	$input_return = array();
-//	echo "<pre>";
-//	print_r($value);
-//	echo "</pre>";
 	$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 	foreach ($value as $i => $data) {
 		$name_error = null;
@@ -300,12 +287,9 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 		$append_error = null;
 		$ttl_error = null;
 		$action = '&nbsp;';
-//		echo "{$value_tmp[$i]['Name']}*{$value_tmp[$i]['record_value']}<br>";
 		if (!empty($value_tmp[$i]['record_value']) || (!isset($value_tmp[$i]['record_value']) && $record_type == 'SOA')) {
 			$y = 0;
 			foreach ($data as $key => $val) {
-//				echo "Create($y) $record_type $i =>  $key => $val<br>";
-				
 				if (!isset($_POST['create'][$i]['record_append'])) $_POST['create'][$i]['record_append'] = 'no';
 				if (!isset($value[$i]['record_append'])) $value[$i]['record_append'] = 'no';
 
@@ -605,7 +589,6 @@ function buildSQLRecords($record_type, $domain_id) {
 		if ($fmdb->num_rows) $result = $fmdb->last_result;
 		else return null;
 		
-//		$sql_results[$result[0]->soa_id] = get_object_vars($result[0]);
 		foreach (get_object_vars($result[0]) as $key => $val) {
 			$sql_results[$result[0]->soa_id][$key] = $val;
 		}
@@ -647,52 +630,5 @@ function buildSQLRecords($record_type, $domain_id) {
 	}
 
 }
-
-/**
-function BuildSOAPreview($domain_id) {
-//	$SQLRecords = buildSQLRecords('SOA',$domain_id);
-	$domain_info = DomainInformation($domain_id);
-	$DomainName = $domain_info->DomainName;
-	$DomainNameTrim = TrimFullStop($DomainName);
-	
-	$select = "select * from {$GLOBALS['DNSDB']}.{$GLOBALS['TBLSOA']} where domain_id='$domain_id' limit 1";
-	$data = mysql_query($select,$GLOBALS['DCOCON']) or die("Invalid query: " . mysql_error() . "\n");
-	if ($data && mysql_num_rows($data)) {
-		$results = mysql_fetch_object($data);
-		$SOAID = $results->SOAID;
-		@mysql_free_result($data);
-		
-		extract($_POST['UpdateSOA'][$SOAID]);
-	} else extract($_POST['CreateSOA'][0]);
-	
-	$email = ($Append == 'yes' && $domain_info->ZoneType == "forward") ? "$EmailAddress.$DomainNameTrim." : $EmailAddress ;
-	$master = ($Append == 'yes' && $domain_info->ZoneType == "forward") ? "$MasterServer.$DomainNameTrim." : $MasterServer ;
-	$SerialNo = ($SerialNo) ? $SerialNo : 'AutoGen';
-	
-	if ($domain_info->ZoneType == "forward") {
-		$DomainName = "$DomainNameTrim.";
-	}elseif ($domain_info->ZoneType == "reverse") {
-		list($ip1, $ip2, $ip3) = split ("\." , $DomainNameTrim);
-		if ($ip3!=NULL)
-			$DomainName = "$ip3.$ip2.$ip1.in-addr.arpa.";
-		else
-			$DomainName = "$ip2.$ip1.in-addr.arpa.";
-	}
-	
-	echo <<<HTML
-<br /><b>Preview:</b>
-<textarea class="tabby file-contents" rows="15" cols="80" wrap="off" disabled>
-\$TTL = $TTL
-$DomainName	IN	SOA	$master $email (
-				$SerialNo	 ; serial
-				$Refresh	 ; refresh
-				$Retry	 ; retry
-				$Expire	 ; expire
-				$TTL	 ; ttl
-				)
-</textarea>
-HTML;
-}
-*/
 
 ?>

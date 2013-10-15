@@ -169,7 +169,7 @@ class fm_dns_keys {
 			$edit_status .= '">';
 			$edit_status .= ($row->key_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&id=' . $row->key_id . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
 			$edit_status = '<td style="text-align: center;">N/A</td>';

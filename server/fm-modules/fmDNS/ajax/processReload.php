@@ -32,12 +32,10 @@ include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 if (is_array($_POST) && count($_POST)) {
 	if (isset($_POST['action']) && $_POST['action'] == 'build') {
 		if (!$allowed_to_build_configs) {
-			echo '<p class="error">You are not authorized to build server configs.</p>';
-			exit;
+			exit('<p class="error">You are not authorized to build server configs.</p>');
 		}
 		$server_serial_no = getNameFromID($_POST['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
-		echo $fm_module_servers->buildServerConfig($server_serial_no);
-		exit;
+		exit($fm_module_servers->buildServerConfig($server_serial_no));
 	}
 	if (isset($_POST['domain_id']) && $allowed_to_reload_zones) {
 		echo '<h2>Zone Reload Results</h2>' . "\n";

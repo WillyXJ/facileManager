@@ -177,9 +177,7 @@ class fm_dns_acls {
 			$edit_status .= '">';
 			$edit_status .= ($row->acl_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&id=' . $row->acl_id;
-			$edit_status .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
-			$edit_status .= '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
 			$edit_status = '<td style="text-align: center;">N/A</td>';

@@ -62,8 +62,7 @@ class fm_login {
 	
 HTML;
 		
-		printFooter();
-		exit;
+		exit(printFooter());
 	}
 	
 	

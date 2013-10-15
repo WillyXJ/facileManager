@@ -174,7 +174,7 @@ class fm_module_options {
 			$edit_status .= '">';
 			$edit_status .= ($row->cfg_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
-			$edit_status .= '<a href="' . $edit_uri . 'action=delete&id=' . $row->cfg_id .'" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
 			$edit_status = '<td style="text-align: center;">N/A</td>';

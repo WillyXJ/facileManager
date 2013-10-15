@@ -286,7 +286,7 @@ class fm_module_servers {
 				$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
 			}
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&id=' . $row->server_id .'" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 		}
 		if ($row->server_installed != 'yes') {
 			$edit_actions = 'Client Install Required<br />';

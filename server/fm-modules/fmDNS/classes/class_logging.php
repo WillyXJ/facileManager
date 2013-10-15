@@ -397,7 +397,7 @@ class fm_module_logging {
 			if ($channel_category == 'channel' && is_array($this->getAssocCategories($row->cfg_id))) {
 				$edit_status .= null;
 			} else {
-				$edit_status .= '<a href="' . $edit_uri . 'action=delete&id=' . $row->cfg_id .'" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			}
 			$edit_status .= '</td>';
 		} else {

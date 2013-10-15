@@ -477,7 +477,7 @@ FORM;
 		if ($allowed_to_manage_zones && $zone_access_allowed) {
 			$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 //			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&domain_id=' . $row->domain_id . '&map=' . $row->domain_mapping . '" onClick="return del(\'Are you sure you want to delete this zone and all associated records?\')">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
-			$edit_status .= '<a class="delete" href="' . $GLOBALS['basename'] . '?action=delete&domain_id=' . $row->domain_id . '&map=' . $row->domain_mapping . '">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
+			$edit_status .= '<a class="delete" href="#">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 		}
 		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">{$row->domain_name}</a>" : $row->domain_name;
 		if ($row->domain_view) {

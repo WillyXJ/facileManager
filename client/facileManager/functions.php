@@ -85,8 +85,7 @@ if (in_array('install', $argv)) {
 			$raw_data = getPostData($url, $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if ($raw_data == 'Success') {
-				echo "$module_name is already installed.\n";
-				exit;
+				exit("$module_name is already installed.\n");
 			}
 		}
 	}
@@ -533,8 +532,7 @@ function detectOSDistro() {
  */
 function initWebRequest() {
 	if (empty($_POST)) {
-		echo "Incorrect parameters defined.";
-		exit;
+		exit('Incorrect parameters defined.');
 	}
 	
 	/** Get the config file */
@@ -543,16 +541,14 @@ function initWebRequest() {
 	}
 	
 	if (!defined('SERIALNO')) {
-		echo serialize('Cannot find the serial number for ' . php_uname('n') . '.');
-		exit;
+		exit(serialize('Cannot find the serial number for ' . php_uname('n') . '.'));
 	}
 	
 	extract($_POST, EXTR_SKIP);
 	
 	/** Ensure the serial numbers match so we don't work on the wrong server */
 	if ($serial_no != SERIALNO) {
-		echo serialize('The serial numbers do not match for ' . php_uname('n') . '.');
-		exit;
+		exit(serialize('The serial numbers do not match for ' . php_uname('n') . '.'));
 	}
 }
 

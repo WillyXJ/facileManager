@@ -40,8 +40,6 @@ echo <<<HTML
 
 HTML;
 
-printFooter();
-exit;
-
+exit(printFooter());
 
 ?>

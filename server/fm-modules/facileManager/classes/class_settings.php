@@ -97,8 +97,7 @@ class fm_settings {
 			addLogEntry($log_message, $fm_name);
 
 			if ($force_logout) {
-				echo 'force_logout';
-				exit;
+				exit('force_logout');
 			}
 
 			return true;

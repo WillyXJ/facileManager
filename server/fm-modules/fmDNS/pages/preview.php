@@ -33,8 +33,7 @@ include(ABSPATH . 'fm-modules/fmDNS/classes/class_buildconf.php');
 
 /** Enforce authentication */
 if (!$fm_login->isLoggedIn()) {
-	echo '<pre>Invalid account.</pre>';
-	exit;
+	exit('<pre>Invalid account.</pre>');
 }
 
 $preview = $named_check_status = null;

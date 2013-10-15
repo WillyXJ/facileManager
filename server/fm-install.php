@@ -204,14 +204,12 @@ function processSetup() {
 	
 	$link = @mysql_connect($dbhost, $dbuser, $dbpass);
 	if (!$link) {
-		displaySetup('Could not connect to MySQL.<br />Please check your credentials.');
-		exit;
+		exit(displaySetup('Could not connect to MySQL.<br />Please check your credentials.'));
 	} else {
 		$db_selected = @mysql_select_db($dbname, $link);
 		if ($db_selected) {
 			@mysql_close($link);
-			displaySetup('Database already exists.<br />Please choose a different name.');
-			exit;
+			exit(displaySetup('Database already exists.<br />Please choose a different name.'));
 		}
 	}
 	

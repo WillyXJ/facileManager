@@ -83,8 +83,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 				}
 				
 				if ($_POST['is_ajax']) {
-					echo $message;
-					exit;
+					exit($message);
 				}
 			}
 			

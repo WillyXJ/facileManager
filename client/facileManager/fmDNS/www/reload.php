@@ -46,8 +46,7 @@ if (isset($_POST['action'])) {
 			break;
 		case 'reload':
 			if (!isset($_POST['domain_id']) || !is_numeric($_POST['domain_id'])) {
-				echo serialize('Zone ID is not found.');
-				exit;
+				exit(serialize('Zone ID is not found.'));
 			}
 			
 			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php zones id=' . $domain_id, $output, $retval);

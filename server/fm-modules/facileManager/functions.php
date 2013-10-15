@@ -1390,8 +1390,7 @@ function displayPagination($page, $total_pages) {
 function bailOut($message, $title = 'Requirement Error') {
 	printHeader($title, 'install');
 	echo $message;
-	printFooter();
-	exit;
+	exit(printFooter());
 }
 
 

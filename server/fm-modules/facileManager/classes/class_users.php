@@ -160,8 +160,6 @@ class fm_users {
 	 */
 	function update($post) {
 		global $fmdb, $fm_name, $fm_login;
-//		echo '<pre>';
-//		print_r($post);exit;
 		
 		/** Template user? */
 		if (isset($post['user_template_only']) && $post['user_template_only'] == 'yes') {
