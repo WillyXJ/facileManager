@@ -1,0 +1,90 @@
+<?php
+/*
+ +-------------------------------------------------------------------------+
+ | Copyright (C) 2013 The facileManager Team                               |
+ |                                                                         |
+ | This program is free software; you can redistribute it and/or           |
+ | modify it under the terms of the GNU General Public License             |
+ | as published by the Free Software Foundation; either version 2          |
+ | of the License, or (at your option) any later version.                  |
+ |                                                                         |
+ | This program is distributed in the hope that it will be useful,         |
+ | but WITHOUT ANY WARRANTY; without even the implied warranty of          |
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           |
+ | GNU General Public License for more details.                            |
+ +-------------------------------------------------------------------------+
+ | facileManager: Easy System Administration                               |
+ | fmFirewall: Easily manage one or more software firewalls                |
+ +-------------------------------------------------------------------------+
+ | http://www.facilemanager.com/modules/fmfirewall/                        |
+ +-------------------------------------------------------------------------+
+ | Processes object groups management page                                 |
+ | Author: Jon LaBass                                                      |
+ +-------------------------------------------------------------------------+
+*/
+
+$page_name = 'Objects';
+$page_name_sub = 'Groups';
+
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
+$response = isset($response) ? $response : null;
+
+if ($allowed_to_manage_objects) {
+	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
+	switch ($action) {
+	case 'add':
+		if (!empty($_POST)) {
+			$result = $fm_module_groups->add($_POST);
+			if ($result !== true) {
+				$response = $result;
+				$form_data = $_POST;
+			} else header('Location: ' . $GLOBALS['basename']);
+		}
+		break;
+	case 'delete':
+		if (isset($_GET['id']) && !empty($_GET['id'])) {
+			$group_delete_status = $fm_module_groups->delete(sanitize($_GET['id']));
+			if ($group_delete_status !== true) {
+				$response = $group_delete_status;
+				$action = 'add';
+			} else header('Location: ' . $GLOBALS['basename']);
+		}
+		break;
+	case 'edit':
+		if (!empty($_POST)) {
+			$result = $fm_module_groups->update($_POST);
+			if ($result !== true) {
+				$response = $result;
+				$form_data = $_POST;
+			} else header('Location: ' . $GLOBALS['basename']);
+		}
+		if (isset($_GET['status'])) {
+			if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $_GET['id'], 'group_', $_GET['status'], 'group_id')) {
+				$response = 'This group could not be ' . $_GET['status'] . '.';
+			} else {
+				/* set the group_build_config flag */
+				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}groups` SET `group_build_config`='yes' WHERE `group_id`=" . sanitize($_GET['id']);
+				$result = $fmdb->query($query);
+				
+				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
+				addLogEntry("Set group '$tmp_name' status to " . $_GET['status'] . '.');
+				header('Location: ' . $GLOBALS['basename']);
+			}
+		}
+		break;
+	}
+}
+
+printHeader();
+@printMenu($page_name, $page_name_sub);
+
+$group_type = substr(strtolower($page_name), 0, -1);
+
+echo printPageHeader($response, 'Object Groups', $allowed_to_manage_services, $group_type);
+
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='object'");
+$fm_module_groups->rows($result, $group_type);
+
+printFooter();
+
+?>

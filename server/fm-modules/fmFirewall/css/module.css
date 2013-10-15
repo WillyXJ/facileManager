@@ -1,0 +1,32 @@
+.tcp-flags th, .tcp-flags td {
+	width: 1em;
+	font-size: 11px;
+	padding: 0;
+}
+
+.tcp-flags th, .list-toggle th {
+	text-align: center;
+}
+
+.tcp-flags input[type="checkbox"] {
+	height: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.list-toggle input[type="button"] {
+	padding: 3px 10px;
+}
+.list-toggle select {
+	width: 150px;
+	height: 100px;
+	overflow: scroll;
+}
+.list-toggle td {
+	text-align: center;
+	vertical-align: middle;
+}
+.list-toggle th, .list-toggle td {
+	font-size: 11px;
+	padding: 0;
+}
