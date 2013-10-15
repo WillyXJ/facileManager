@@ -99,6 +99,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
+				$( ".datepicker" ).datepicker();
 				$('.form-table input:text, .form-table select').first().focus();
 			}
 		});
@@ -137,6 +138,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
+				$( ".datepicker" ).datepicker();
 				$('.form-table input, .form-table select').first().focus();
 			}
 		});
