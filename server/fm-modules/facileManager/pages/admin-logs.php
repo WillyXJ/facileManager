@@ -92,8 +92,8 @@ $pagination
 				<tr>
 					<td>$module_list</td>
 					<td>$user_list</td>
-					<td><input name="log_search_date_b" value="$log_search_date_b" type="text" class="datepicker" /></td>
-					<td><input name="log_search_date_e" value="$log_search_date_e" type="text" class="datepicker" /></td>
+					<td><input name="log_search_date_b" value="$log_search_date_b" type="date" class="datepicker" /></td>
+					<td><input name="log_search_date_e" value="$log_search_date_e" type="date" class="datepicker" /></td>
 					<td><input type="text" name="log_search_query" value="$log_search_query" /></td>
 					<td><input value="Search" type="submit" /></td>
 				</tr>
