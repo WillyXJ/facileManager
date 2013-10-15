@@ -42,8 +42,9 @@ facileManager (server) requires the following:
           SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, LOCK TABLES
     * A working webserver (httpd) with mod_rewrite.so enabled
     * facileManager-core
+    * JavaScript enabled in your web browser
 
-facileManager (client) requires the following:
+fmDNS (client) requires the following:
 
     * ISC BIND 9.3 or later
     * PHP 5.0 or later
