@@ -93,7 +93,7 @@ $pagination
 					<th>Timestamp</th>
 					<th>Module</th>
 					<th>User</th>
-					<th>Log Message</th>
+					<th style="width: 50%;">Log Message</th>
 				</tr>
 			</thead>
 			<tbody>
