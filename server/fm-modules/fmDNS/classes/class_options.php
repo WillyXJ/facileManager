@@ -165,6 +165,8 @@ class fm_module_options {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers;
 		
+		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
+		
 		if ($allowed_to_manage_servers) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="edit_delete_img">';
@@ -181,7 +183,7 @@ class fm_module_options {
 		}
 		
 		echo <<<HTML
-		<tr id="$row->cfg_id">
+		<tr id="$row->cfg_id"$disabled_class>
 			<td>$row->cfg_name</td>
 			<td>$row->cfg_data</td>
 			$edit_status

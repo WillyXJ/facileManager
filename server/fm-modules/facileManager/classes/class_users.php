@@ -34,7 +34,6 @@ class fm_users {
 			<table class="display_results" id="table_edits" name="users">
 				<thead>
 					<tr>
-						<th width="50" style="text-align: center;">ID</th>
 						<th width="10" style="text-align: center;"></th>
 						<th>Login</th>
 						<th>Last Session Date</th>
@@ -298,6 +297,8 @@ class fm_users {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_users, $fm_name;
 		
+		$disabled_class = ($row->user_status == 'disabled') ? ' class="disabled"' : null;
+
 		if ($allowed_to_manage_users && $_SESSION['user']['id'] != $row->user_id) {
 			$edit_status = null;
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -339,8 +340,7 @@ class fm_users {
 		}
 		
 		echo <<<HTML
-		<tr id="$row->user_id">
-			<th scope="row" style="text-align: center;">$row->user_id</th>
+		<tr id="$row->user_id"$disabled_class>
 			<td>$star $template_user</td>
 			<td>$row->user_login</td>
 			<td>$last_login</td>

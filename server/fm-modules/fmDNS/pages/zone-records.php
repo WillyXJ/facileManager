@@ -126,7 +126,7 @@ function buildRecordTypes($record_type = null, $domain_id = null, $map = 'forwar
 	
 	$menu_selects = null;
 	
-	if (isset($record_type) && $domain_id != NULL) {
+	if (isset($record_type) && $domain_id != null) {
 		foreach ($__FM_CONFIG['records']['avail_types'] as $type) {
 			if (in_array($type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) continue;
 			$select = ($record_type == $type) ? ' class="selected"' : '';

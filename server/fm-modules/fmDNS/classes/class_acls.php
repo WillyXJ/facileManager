@@ -168,6 +168,8 @@ class fm_dns_acls {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers;
 		
+		$disabled_class = ($row->acl_status == 'disabled') ? ' class="disabled"' : null;
+		
 		if ($allowed_to_manage_servers) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -187,7 +189,7 @@ class fm_dns_acls {
 		$edit_addresses = ($row->acl_predefined == 'as defined:') ? nl2br(str_replace(';', "\n", $row->acl_addresses)) : $row->acl_predefined;
 		
 		echo <<<HTML
-		<tr id="$row->acl_id">
+		<tr id="$row->acl_id"$disabled_class>
 			<td>$edit_name</td>
 			<td>$edit_addresses</td>
 			$edit_status

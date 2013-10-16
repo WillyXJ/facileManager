@@ -160,6 +160,8 @@ class fm_dns_views {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers;
 		
+		$disabled_class = ($row->view_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$edit_name = '<a href="config-options.php?view_id=' . $row->view_id;
 		$edit_name .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		$edit_name .= '">' . $row->view_name . '</a>';
@@ -179,7 +181,7 @@ class fm_dns_views {
 		}
 		
 		echo <<<HTML
-		<tr id="$row->view_id">
+		<tr id="$row->view_id"$disabled_class>
 			<td>$edit_name</td>
 			$edit_status
 		</tr>

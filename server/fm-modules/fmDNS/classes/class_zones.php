@@ -448,6 +448,8 @@ class fm_dns_zones {
 	function displayRow($row, $map, $reload_allowed) {
 		global $__FM_CONFIG, $allowed_to_manage_zones, $allowed_to_reload_zones, $super_admin;
 		
+		$disabled_class = ($row->domain_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$soa_count = getSOACount($row->domain_id);
 		$reload_allowed = $this->reloadAllowed($row->domain_id);
 		$response = (!$soa_count && $row->domain_type == 'master') ? '** You still need to create the SOA for this zone **" style="background-color: #F5EBEB;' : null;
@@ -496,7 +498,7 @@ FORM;
 		} else $domain_view = 'All Views';
 
 		echo <<<HTML
-		<tr title="$response" id="$row->domain_id">
+		<tr title="$response" id="$row->domain_id"$disabled_class>
 			<td>$row->domain_id</td>
 			<td>$edit_name</td>
 			<td>$row->domain_type</td>

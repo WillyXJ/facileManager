@@ -155,7 +155,6 @@ $(document).ready(function() {
         item_sub_type	= $this.attr('name');
         var log_type	= getUrlVars()["type"];
         var server_serial_no	= getUrlVars()["server_serial_no"];
-//        server_serial_no		= $('#configtypesmenu').attr('name');
 
 		var form_data = {
 			item_id: item_id,

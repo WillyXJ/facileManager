@@ -161,6 +161,8 @@ class fm_dns_keys {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers;
 		
+		$disabled_class = ($row->key_status == 'disabled') ? ' class="disabled"' : null;
+		
 		if ($allowed_to_manage_servers) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -179,7 +181,7 @@ class fm_dns_keys {
 		$key_view = ($row->key_view) ? getNameFromID($row->key_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'none';
 		
 		echo <<<HTML
-		<tr id="$row->key_id">
+		<tr id="$row->key_id"$disabled_class>
 			<td>$edit_name</td>
 			<td>$row->key_algorithm</td>
 			<td>$row->key_secret</td>

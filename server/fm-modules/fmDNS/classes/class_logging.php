@@ -384,6 +384,8 @@ class fm_module_logging {
 	function displayRow($row, $channel_category) {
 		global $__FM_CONFIG, $allowed_to_manage_servers;
 		
+		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$edit_name = ($row->cfg_parent) ? '&nbsp;&nbsp;&nbsp;' : null;
 		if ($allowed_to_manage_servers) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
@@ -420,7 +422,7 @@ class fm_module_logging {
 		} else $channels_row = null;
 		
 		echo <<<HTML
-		<tr id="$row->cfg_id">
+		<tr id="$row->cfg_id"$disabled_class>
 			<td>$edit_name</td>
 			$channels_row
 			$edit_status
@@ -516,7 +518,7 @@ FORM;
 						<td width="67%">$cfg_print_time</td>
 					</tr>
 				</table>
-				<input type="submit" name="submit" value="$ucaction Option" class="button" />
+				<input type="submit" name="submit" value="$ucaction Channel" class="button" />
 				<input value="Cancel" class="button cancel" id="cancel_button" />
 			</form>
 FORM;

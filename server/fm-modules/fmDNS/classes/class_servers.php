@@ -267,6 +267,8 @@ class fm_module_servers {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
+		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$os_image = setOSIcon($row->server_os);
 		
 		$edit_status = null;
@@ -300,7 +302,7 @@ class fm_module_servers {
 		$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
 		
 		echo <<<HTML
-		<tr id="$row->server_id">
+		<tr id="$row->server_id"$disabled_class>
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
