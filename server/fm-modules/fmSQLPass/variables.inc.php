@@ -28,7 +28,7 @@
  */
 
 /** Module Version */
-$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b2';
+$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b3';
 $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords across multiple servers.';
 $__FM_CONFIG['fmSQLPass']['prefix']					= 'sqlpass_';
 $__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.0-rc3';

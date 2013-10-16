@@ -1,5 +1,8 @@
-1.0-rc? (2013-10-??)
+1.0-rc5 (2013-10-16)
 ====================
+* Server - Code clean up.
+* Server - Changed date items to date type.
+* Client - Fixed client sudoers line.
 * Server - Added more graphical elements.
 
 1.0-rc4 (2013-10-14)

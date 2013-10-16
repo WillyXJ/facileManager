@@ -1,3 +1,8 @@
+1.0-rc5 (2013-10-16)
+====================
+* Server - Changed color of disabled items.
+* Client - (Git Issue 25) Fixed broken zone reloads.
+
 1.0-rc4-2 (2013-10-14)
 ======================
 * Both   - (Git Issue 24) Fixed broken config checks introduced in rc4  
