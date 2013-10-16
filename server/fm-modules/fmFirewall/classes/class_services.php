@@ -155,6 +155,8 @@ HTML;
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_services, $allowed_to_build_configs;
 		
+		$disabled_class = ($row->service_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$edit_status = null;
 		
 		if ($allowed_to_manage_services) {
@@ -187,7 +189,7 @@ HTML;
 		} else $service_tcp_flags = null;
 		
 		echo <<<HTML
-			<tr id="$row->service_id">
+			<tr id="$row->service_id"$disabled_class>
 				<td>$row->service_name</td>
 
 HTML;

@@ -156,6 +156,8 @@ HTML;
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_objects, $allowed_to_build_configs;
 		
+		$disabled_class = ($row->object_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$edit_status = null;
 		
 		if ($allowed_to_manage_objects) {
@@ -168,7 +170,7 @@ HTML;
 		$netmask = ($row->object_type != 'address') ? "<td>$row->object_mask</td>" : null;
 		
 		echo <<<HTML
-			<tr id="$row->object_id">
+			<tr id="$row->object_id"$disabled_class>
 				<td>$row->object_name</td>
 				<td>$row->object_address</td>
 				$netmask

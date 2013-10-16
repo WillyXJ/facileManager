@@ -169,6 +169,8 @@ class fm_module_servers {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
+		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$os_image = setOSIcon($row->server_os);
 		
 		$edit_status = $edit_actions = null;
@@ -190,19 +192,18 @@ class fm_module_servers {
 			}
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 		}
+		
 		if ($row->server_installed != 'yes') {
 			$edit_actions = 'Client Install Required<br />';
 		}
 		$edit_status = $edit_actions . $edit_status;
 		
-		$edit_name = $row->server_name;
-		
 		$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
 		
 		echo <<<HTML
-		<tr id="$row->server_id">
+		<tr id="$row->server_id"$disabled_class>
 			<td>$os_image</td>
-			<td>$edit_name</td>
+			<td><a href="config-policy?server_serial_no={$row->server_serial_no}">{$row->server_name}</a></td>
 			<td>$row->server_serial_no</td>
 			<td>$row->server_type</td>
 			<td>$row->server_update_method $port</td>

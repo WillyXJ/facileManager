@@ -163,6 +163,8 @@ HTML;
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_time;
 		
+		$disabled_class = ($row->time_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$edit_status = null;
 		
 		if ($allowed_to_manage_time) {
@@ -183,7 +185,7 @@ HTML;
 		$weekdays = $this->formatDays($row->time_weekdays);
 		
 		echo <<<HTML
-			<tr id="$row->time_id">
+			<tr id="$row->time_id"$disabled_class>
 				<td>$row->time_name</td>
 				<td>$date_range</td>
 				<td>$row->time_start_time &rarr; $row->time_end_time</td>
@@ -236,9 +238,9 @@ HTML;
 		/** Weekdays */
 		$weekdays_form = null;
 		foreach ($__FM_CONFIG['weekdays'] as $day => $bit) {
-			$weekdays_form .= '<input id="' . $day . '" type="checkbox" name="time_weekdays[' . $bit . ']" ';
+			$weekdays_form .= '<label><input type="checkbox" name="time_weekdays[' . $bit . ']" ';
 			if ($bit & $time_weekdays) $weekdays_form .= 'checked';
-			$weekdays_form .= '/> <label for="' . $day . '">' . $day . "</label>\n";
+			$weekdays_form .= '/>' . $day . "</label>\n";
 		}
 
 		$return_form = <<<FORM
