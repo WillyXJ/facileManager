@@ -246,6 +246,8 @@ HEAD;
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers, $fm_sqlpass_backup_jobs;
 		
+		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$timezone = date("T");
 		
 		if ($allowed_to_manage_servers) {
@@ -282,7 +284,7 @@ HEAD;
 		if (empty($groups)) $groups = 'None';
 
 		echo <<<HTML
-		<tr id="$row->server_id">
+		<tr id="$row->server_id"$disabled_class>
 			<td>{$row->server_name}</td>
 			<td>{$row->server_type} (tcp/{$row->server_port})</td>
 			<td>$groups</td>

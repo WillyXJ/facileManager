@@ -124,6 +124,8 @@ class fm_sqlpass_groups {
 	function displayRow($row) {
 		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
 		
+		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
+		
 		$assoc_servers = 'None';
 		
 		$query = "SELECT server_name from fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers WHERE server_status!='deleted' AND account_id={$_SESSION['user']['account_id']}
@@ -154,7 +156,7 @@ class fm_sqlpass_groups {
 		}
 		
 		echo <<<HTML
-		<tr id="$row->group_id">
+		<tr id="$row->group_id"$disabled_class>
 			<td>$row->group_name</td>
 			<td>$assoc_servers</td>
 			$edit_status
