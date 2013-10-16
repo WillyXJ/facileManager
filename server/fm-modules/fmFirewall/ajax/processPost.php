@@ -63,6 +63,12 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
 			$field = $prefix . 'id';
 			$item_type .= ' ';
 			break;
+		case 'policies':
+			$post_class = $fm_module_policies;
+			$prefix = 'policy_';
+			$field = $prefix . 'id';
+			$item_type = 'policys';
+			break;
 	}
 
 	switch ($_POST['action']) {
@@ -71,16 +77,16 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
 				if (!$post_class->add($_POST)) {
 					echo '<div class="error"><p>This ' . $table . ' could not be added.</p></div>'. "\n";
 					$form_data = $_POST;
-				} else echo 'Success';
+				} else exit('Success');
 			}
 			break;
 		case 'delete':
 			if (isset($id)) {
 				$delete_status = $post_class->delete(sanitize($id), $server_serial_no, $type);
 				if ($delete_status !== true) {
-					echo $delete_status;
+					exit($delete_status);
 				} else {
-					echo 'Success';
+					exit('Success');
 				}
 			}
 			break;
@@ -104,6 +110,16 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
 					$form_data = $fmdb->last_result;
 				}
 			}
+			break;
+		case 'update_sort':
+			if (!empty($_POST)) {
+				$result = $post_class->update($_POST);
+				if ($result !== true) {
+					exit($result);
+				}
+				exit('Success');
+			}
+			exit('The sort order could not be updated due to an invalid request.');
 	}
 
 	exit;

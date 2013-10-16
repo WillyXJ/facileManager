@@ -73,6 +73,13 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
 			$field = $prefix . 'id';
 			$item_type .= ' ';
 			break;
+		case 'policies':
+			$post_class = $fm_module_policies;
+			$prefix = 'policy_';
+			$field = $prefix . 'id';
+			$item_type = $_POST['item_sub_type'];
+			if (substr($item_type, -1) != 's') $item_type .= ' ';
+			break;
 		case 'options':
 			$post_class = $fm_module_options;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
@@ -84,7 +91,11 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
 	
 	if ($add_new) {
 		$edit_form = '<h2>Add ' . substr(ucfirst($item_type), 0, -1) . '</h2>' . "\n";
-		$edit_form .= $post_class->printForm(null, $action, $type_map, $id);
+		if ($_POST['item_type'] == 'policies') {
+			$edit_form .= $post_class->printForm(null, $action, $_POST['item_sub_type']);
+		} else {
+			$edit_form .= $post_class->printForm(null, $action, $type_map, $id);
+		}
 	} else {
 		$edit_form = '<h2>Edit ' . substr(ucfirst($item_type), 0, -1) . '</h2>' . "\n";
 		basicGet('fm_' . $table, $id, $prefix, $field);
@@ -92,7 +103,11 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
 		if (!$fmdb->num_rows) returnError();
 		
 		$edit_form_data[] = $results[0];
-		$edit_form .= $post_class->printForm($edit_form_data, 'edit', $type_map, $view_id);
+		if ($_POST['item_type'] == 'policies') {
+			$edit_form .= $post_class->printForm($edit_form_data, 'edit', $_POST['item_sub_type']);
+		} else {
+			$edit_form .= $post_class->printForm($edit_form_data, 'edit', $type_map, $view_id);
+		}
 	}
 	
 	echo $edit_form;

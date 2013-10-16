@@ -83,6 +83,29 @@ DASH;
 
 
 /**
+ * Builds the additional module menu for display
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ */
+function buildModuleToolbar() {
+	global $__FM_CONFIG;
+	
+	if (isset($_GET['server_serial_no'])) {
+		$server_name = getNameFromID($_GET['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+		$domain_menu = <<<HTML
+		<div id="topheadpart">
+			<span class="single_line">Firewall:&nbsp;&nbsp; $server_name</span>
+		</div>
+HTML;
+	} else $domain_menu = null;
+	
+	return $domain_menu;
+}
+
+
+/**
  * Builds the help for display
  *
  * @since 1.0
@@ -157,4 +180,72 @@ function moduleAddServer($action) {
 }
 
 
+function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_group_id = null) {
+	global $fmdb, $__FM_CONFIG;
+	
+	$array = null;
+	$name = $group_type . '_name';
+	$id = $group_type . '_id';
+	
+	$service_ids = $group_ids = $edit_group_id_sql = null;
+	
+	if (count($select_ids)) {
+		foreach ($select_ids as $temp_id) {
+			if (substr($temp_id, 0, 1) == 'g') {
+				$group_ids[] = substr($temp_id, 1);
+			} else {
+				$service_ids[] = substr($temp_id, 1);
+			}
+		}
+	}
+	
+	/** Services */
+	if ($list_type == 'available') {
+		$select_ids_sql = (is_array($service_ids) && count($service_ids)) ? "AND {$group_type}_id NOT IN (" . implode(',', $service_ids) . ")" : null;
+	} else {
+		$select_ids_sql = (is_array($service_ids) && count($service_ids)) ? "AND {$group_type}_id IN (" . implode(',', $service_ids) . ")" : "AND {$group_type}_id=0";
+	}
+		
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $group_type . 's', $group_type . '_name', $group_type . '_', $select_ids_sql);
+	$results = $fmdb->last_result;
+	$service_count = $fmdb->num_rows;
+	for ($i=0; $i<$service_count; $i++) {
+		$array[$i][] = ($group_type == 'service') ? $results[$i]->$name . ' (' . $results[$i]->service_type . ')' : $results[$i]->$name;
+		$array[$i][] = substr($group_type, 0, 1) . $results[$i]->$id;
+	}
+	
+	/** Groups */
+	if ($list_type == 'available') {
+		$edit_group_id_sql = (isset($edit_group_id)) ? "AND group_id!=$edit_group_id" : null;
+		$select_ids_sql = (is_array($group_ids) && count($group_ids)) ? "AND group_id NOT IN (" . implode(',', $group_ids) . ")" : null;
+	} else {
+		$select_ids_sql = (is_array($group_ids) && count($group_ids)) ? "AND group_id IN (" . implode(',', $group_ids) . ")" : "AND group_id=0";
+	}
+		
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='$group_type'" . $select_ids_sql . ' ' . $edit_group_id_sql);
+	$results = $fmdb->last_result;
+	$j = $service_count;
+	for ($i=0; $i<$fmdb->num_rows; $i++) {
+		$array[$j][] = $results[$i]->group_name;
+		$array[$j][] = 'g' . $results[$i]->group_id;
+		$j++;
+	}
+	
+	return $array;
+}
+
+
+function getGroupItems($group_items) {
+	$group_items_assigned = null;
+	
+	if ($group_items) {
+		$group_items_assigned = explode(';', trim($group_items, ';'));
+//			foreach ($item_array as $item) {
+//				$group_items_assigned[] = substr($item, 1);
+//				$group_items_assigned[] = $item;
+//			}
+	}
+	
+	return $group_items_assigned;
+}
 ?>

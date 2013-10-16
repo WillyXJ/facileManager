@@ -33,23 +33,31 @@ $(document).ready(function() {
 	});
 	
 	$("#manage_item_contents").delegate('#buttonRight', 'click', function(e) {
-		var selectedOpts = $('#group_items_assigned option:selected');
+		var box_id = $(this).attr('class');
+		if (box_id == null) {
+			box_id = 'group';
+		}
+		var selectedOpts = $('#' + box_id + '_items_assigned option:selected');
 		if (selectedOpts.length == 0) {
 			e.preventDefault();
 		}
 		
-		$('#group_items_available').append($(selectedOpts).clone());
+		$('#' + box_id + '_items_available').append($(selectedOpts).clone());
 		$(selectedOpts).remove();
 		e.preventDefault();
 	});
 	
 	$("#manage_item_contents").delegate('#buttonLeft', 'click', function(e) {
-		var selectedOpts = $('#group_items_available option:selected');
+		var box_id = $(this).attr('class');
+		if (box_id == null) {
+			box_id = 'group';
+		}
+		var selectedOpts = $('#' + box_id + '_items_available option:selected');
 		if (selectedOpts.length == 0) {
 			e.preventDefault();
 		}
 		
-		$('#group_items_assigned').append($(selectedOpts).clone());
+		$('#' + box_id + '_items_assigned').append($(selectedOpts).clone());
 		$(selectedOpts).remove();
 		e.preventDefault();
 	});
@@ -63,6 +71,81 @@ $(document).ready(function() {
 		}
 		$('#group_items').val(items);
 	});
+	
+	var fixHelperModified = function(e, tr) {
+		var $originals = tr.children();
+		var $helper = tr.clone();
+		$helper.children().each(function(index) {
+			$(this).width($originals.eq(index).width())
+		});
+		return $helper;
+	},
+		updateIndex = function(e, ui) {
+			$('td.index', ui.item.parent()).each(function (i) {
+				$(this).html(i + 1);
+			});
+		};
+
+	$("#table_edits.grab tbody").sortable({
+		helper: fixHelperModified,
+		start: function() {
+			$(this).parent().addClass('grabbing');
+		},
+		stop: function() {
+			$(this).parent().removeClass('grabbing');
+			updateIndex;
+			
+			var items = $("#table_edits.grab tr");
+			var linkIDs = [items.size()];
+			var index = 0;
+			
+			items.each(function(intIndex) {
+				linkIDs[index] = $(this).attr('id');
+				index++;
+			});
+			var new_sort_order = linkIDs.join(';');
+			
+			/** Update the database */
+	        var $this 				= $(this);
+	        var item_type			= $('#table_edits').attr('name');
+	        var policy_type			= getUrlVars()["type"];
+	        var server_serial_no	= getUrlVars()["server_serial_no"];
+	
+			var form_data = {
+				item_id: '',
+				item_type: item_type,
+				policy_type: policy_type,
+				server_serial_no: server_serial_no,
+				sort_order: new_sort_order,
+				action: 'update_sort',
+				is_ajax: 1
+			};
+	
+			$.ajax({
+				type: 'POST',
+				url: 'fm-modules/facileManager/ajax/processPost.php',
+				data: form_data,
+				success: function(response)
+				{
+					if (response != 'Success') {
+						var eachLine = response.split("\n");
+						if (eachLine.length <= 2) {
+							$('#body_container').animate({marginTop: '4em'}, 200);
+							$('#response').html('<p class="error">'+response+'</p>');
+							$('#response').fadeIn(200);
+							$('#response').delay(3000).fadeOut(400, function() {
+								$('#body_container').animate({marginTop: '2.2em'}, 200);
+							});
+						} else {
+							$('#manage_item').fadeIn(200);
+							$('#manage_item_contents').fadeIn(200);
+							$('#manage_item_contents').html('<h2>Sort Order Results</h2>' + response + '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />');
+						}
+					}
+				}
+			});
+		}
+	}).disableSelection();
 	
 });
 

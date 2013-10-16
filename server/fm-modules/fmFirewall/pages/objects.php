@@ -23,11 +23,11 @@
  +-------------------------------------------------------------------------+
 */
 
-$type = (isset($_GET['type'])) ? strtolower($_GET['type']) : 'host';
+$type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'host';
 
 $page_name = 'Objects';
 $page_name_sub = ucfirst($type);
-if ($page_name_sub = 'Address') $page_name_sub .= 'e';
+if ($page_name_sub == 'Address') $page_name_sub .= 'e';
 $page_name_sub .= 's';
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_objects.php');

@@ -36,12 +36,8 @@ $__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.0-rc3';
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';
 
-/** Policies Menu Options */
-$__FM_CONFIG['module']['menu']['Policies']['URL']			= '';
-
 /** Firewalls Menu Options */
 $__FM_CONFIG['module']['menu']['Firewalls']['URL']			= 'config-servers';
-//$__FM_CONFIG['module']['menu']['Config']['Servers']			= 'config-servers';
 
 /** Objects Menu Options */
 $__FM_CONFIG['module']['menu']['Objects']['URL']			= 'object-groups';
@@ -52,7 +48,6 @@ $__FM_CONFIG['module']['menu']['Objects']['Networks']		= 'objects?type=network';
 
 /** Firewalls Menu Options */
 $__FM_CONFIG['module']['menu']['Services']['URL']			= 'service-groups';
-//$__FM_CONFIG['module']['menu']['Services']['Custom']		= 'services';
 $__FM_CONFIG['module']['menu']['Services']['Groups']		= 'service-groups';
 $__FM_CONFIG['module']['menu']['Services']['ICMP']			= 'services?type=icmp';
 $__FM_CONFIG['module']['menu']['Services']['TCP']			= 'services?type=tcp';
@@ -67,22 +62,27 @@ $__FM_CONFIG['module']['menu']['Time']['URL']				= 'config-time';
 $__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
 
 /** Images */
+$__FM_CONFIG['module']['icons']['action']['active']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
+$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action___d.png" border="0" alt="__Action__ (disabled)" title="__Action__ (disabled)" width="12" />';
 
-//$__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
 /** TCP Flags */
-$__FM_CONFIG['tcp_flags']		= array('URG' => 1, 'ACK' => 2, 'PSH' => 4,
-										'RST' => 8, 'SYN' => 16, 'FIN' => 32);
+$__FM_CONFIG['tcp_flags']				= array('URG' => 1, 'ACK' => 2, 'PSH' => 4,
+												'RST' => 8, 'SYN' => 16, 'FIN' => 32);
 /** Weekdays */
-$__FM_CONFIG['weekdays']		= array('Mon' => 1, 'Tue' => 2, 'Wed' => 4,
-										'Thu' => 8, 'Fri' => 16, 'Sat' => 32, 'Sun' => 64);
+$__FM_CONFIG['weekdays']				= array('Mon' => 1, 'Tue' => 2, 'Wed' => 4,
+												'Thu' => 8, 'Fri' => 16, 'Sat' => 32, 'Sun' => 64);
+/** Policy options */
+$__FM_CONFIG['fw']['policy_options']	= array('log' => 1);
 
 /** Default values */
-$__FM_CONFIG['fw']['config_file'] = array('iptables' => '/etc/sysconfig/iptables',
-										'pf' => '/etc/pf.conf',
-										'ipfw' => '/etc/ipfw.rules',
-										'ipfilter' => '/etc/ipf.rules'
-									);
+$__FM_CONFIG['fw']['config_file'] 		= array('iptables' => '/etc/sysconfig/iptables',
+												'pf' => '/etc/pf.conf',
+												'ipfw' => '/etc/ipfw.rules',
+												'ipfilter' => '/etc/ipf.rules'
+											);
+$__FM_CONFIG['policy']['avail_types'] = array('rules' => 'Rules', 'nat' => 'NAT');
 
 /** Module Permissions */
 if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {

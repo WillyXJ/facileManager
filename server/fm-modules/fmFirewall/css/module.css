@@ -30,3 +30,23 @@
 	font-size: 11px;
 	padding: 0;
 }
+
+table.legend {
+	margin-top: 5em;
+	font-size: 11px;
+}
+table.legend tr td {
+	padding: 2px 6px;
+}
+table.legend tr td span {
+	display: block;
+	margin-top: -15px;
+	margin-left: 18px;
+}
+
+#table_edits.grab tbody tr {
+	cursor: url(https://mail.google.com/mail/images/2/openhand.cur) 8 8, move;
+}
+#table_edits.grabbing tbody tr {
+	cursor: url(https://mail.google.com/mail/images/2/closedhand.cur) 8 8, move;
+}

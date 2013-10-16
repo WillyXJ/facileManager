@@ -24,7 +24,6 @@
 */
 
 $page_name = 'Firewalls';
-//$page_name_sub = 'Servers';
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 $response = isset($response) ? $response : null;
