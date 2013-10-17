@@ -14,9 +14,8 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | http://www.facilemanager.com/modules/                                   |
  +-------------------------------------------------------------------------+
  | Shows a preview of the server configuration files                       |
  | Author: Jon LaBass                                                      |
@@ -29,14 +28,14 @@ require('fm-init.php');
 
 require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_buildconf.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
 
 /** Enforce authentication */
 if (!$fm_login->isLoggedIn()) {
 	exit('<pre>Invalid account.</pre>');
 }
 
-$preview = $named_check_status = null;
+$preview = $check_status = null;
 
 if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_serial_no'])) {
 	extract($_GET);
@@ -54,20 +53,14 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	if (!is_array($raw_data)) {
 		$preview = unserialize($raw_data);
 	} else {
-		$named_check_status = $fm_module_buildconf->namedSyntaxChecks($raw_data);
-		foreach ($raw_data['files'] as $filename => $contents) {
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $filename . ":\n";
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $contents . "\n\n";
-		}
+		list($preview, $check_status) = $fm_module_buildconf->processConfigs($raw_data);
 	}
 } else {
 	$preview = 'Invalid Server ID.';
 }
 
 printHeader('Server Config Preview', 'facileManager', false, false);
-echo $named_check_status . '<pre>' . $preview . '</pre>';
+echo $check_status . '<pre>' . $preview . '</pre>';
 printFooter();
 
 ?>

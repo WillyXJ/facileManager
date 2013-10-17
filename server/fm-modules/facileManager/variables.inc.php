@@ -82,6 +82,9 @@ $__FM_CONFIG['icons']['shield_error']	= '<img src="fm-modules/' . $fm_name . '/i
 $__FM_CONFIG['icons']['shield_info']	= '<img src="fm-modules/' . $fm_name . '/images/yellowshield64.png" border="0" alt="Information" title="Information" />';
 $__FM_CONFIG['icons']['shield_ok']		= '<img src="fm-modules/' . $fm_name . '/images/greenshield64.png" border="0" alt="OK" title="OK" />';
 
+$__FM_CONFIG['module']['icons']['preview']		= '<img src="fm-modules/' . $fm_name . '/images/preview24.png" border="0" alt="Preview Config" title="Preview Config" width="20" />';
+$__FM_CONFIG['module']['icons']['build']		= '<input type="image" id="build" src="fm-modules/' . $fm_name . '/images/build24.png" border="0" alt="Build Config" title="Build Config" width="20" />';
+
 /** Cleanup options */
 $__FM_CONFIG['clean']['prefixes']	= array('fm_accounts'=>'account', 'fm_users'=>'user');
 $__FM_CONFIG['clean']['days']		= 7;

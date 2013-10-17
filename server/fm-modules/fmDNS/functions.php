@@ -439,28 +439,6 @@ function postReloadZones($server, $data, $proto = 'http') {
 
 
 
-/**
- * Sets server build config flag
- *
- * @since 1.0
- * @package facileManager
- * @subpackage fmDNS
- */
-function setBuildUpdateConfigFlag($serial_no, $flag, $build_update) {
-	global $fmdb, $__FM_CONFIG;
-
-	if ($serial_no) {
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_" . $build_update . "_config`='$flag' WHERE `server_serial_no`=" . sanitize($serial_no) . " AND `server_installed`='yes'";
-	} else {
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_" . $build_update . "_config`='$flag' WHERE `server_installed`='yes' AND `server_status`='active'";
-	}
-	$result = $fmdb->query($query);
-	
-	if ($result) return true;
-	return false;
-}
-
-
 function buildFullIPAddress($partial_ip, $domain) {
 	$domain_pieces = array_reverse(explode('.', $domain));
 	$domain_parts = count($domain_pieces);

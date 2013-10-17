@@ -1702,4 +1702,30 @@ function printPageHeader($response, $title, $allowed_to_add = false, $name = nul
 }
 
 
+/**
+ * Sets server build config flag
+ *
+ * @since 1.0
+ * @package facileManager
+ *
+ * @param integer $serial_no Server serial number
+ * @param string $flag Flag to set (yes or no)
+ * @param string $build_update Are we building or updating
+ * @return boolean
+ */
+function setBuildUpdateConfigFlag($serial_no, $flag, $build_update) {
+	global $fmdb, $__FM_CONFIG;
+
+	if ($serial_no) {
+		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_serial_no`=" . sanitize($serial_no) . " AND `server_installed`='yes'";
+	} else {
+		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_installed`='yes' AND `server_status`='active'";
+	}
+	$result = $fmdb->query($query);
+	
+	if ($result) return true;
+	return false;
+}
+
+
 ?>

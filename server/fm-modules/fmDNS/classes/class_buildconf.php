@@ -21,6 +21,30 @@
 */
 
 class fm_module_buildconf {
+
+	/**
+	 * Performs syntax checks with named-check* utilities
+	 *
+	 * @since 1.0
+	 * @package fmDNS
+	 *
+	 * @param array $files_array Array containing named files and contents
+	 * @return string
+	 */
+	function processConfigs($raw_data) {
+		$preview = null;
+		
+		$check_status = $this->namedSyntaxChecks($raw_data);
+		foreach ($raw_data['files'] as $filename => $contents) {
+			$preview .= str_repeat('=', 75) . "\n";
+			$preview .= $filename . ":\n";
+			$preview .= str_repeat('=', 75) . "\n";
+			$preview .= $contents . "\n\n";
+		}
+		
+		return array($preview, $check_status);
+	}
+	
 	
 	/**
 	 * Generates the server config and updates the DNS server
