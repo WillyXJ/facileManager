@@ -23,7 +23,7 @@
 class fm_module_buildconf {
 
 	/**
-	 * Performs syntax checks with named-check* utilities
+	 * Processes the server configs
 	 *
 	 * @since 1.0
 	 * @package fmDNS
@@ -77,6 +77,8 @@ class fm_module_buildconf {
 				$error = "DNS server is $server_status.\n";
 				if ($compress) echo gzcompress(serialize($error));
 				else echo serialize($error);
+				
+				exit;
 			}
 			
 			include(ABSPATH . 'fm-includes/version.php');

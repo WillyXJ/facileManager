@@ -959,3 +959,8 @@ table.log_search_form th {
 th {
 	text-transform: capitalize;
 }
+
+pre {
+	padding: 10px;
+}
+
