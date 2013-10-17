@@ -29,7 +29,7 @@ class fm_module_policies {
 		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
 		
 		echo '			<table class="display_results';
-		if ($allowed_to_manage_servers) echo ' grab';
+		if ($allowed_to_manage_servers && $fmdb->num_rows > 1) echo ' grab';
 		echo '" id="table_edits" name="policies">' . "\n";
 		if (!$result) {
 			echo '<p id="noresult">There are no firewall policies.</p>';
@@ -96,11 +96,6 @@ HTML;
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
-
-		/** Get a valid and unique serial number */
-		$post['policy_serial_no'] = (isset($post['policy_serial_no'])) ? $post['policy_serial_no'] : generateSerialNo($module);
-
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies`";
 		$sql_fields = '(';
 		$sql_values = null;
@@ -111,7 +106,6 @@ HTML;
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'policy_name') && empty($clean_data)) return 'No policy name defined.';
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -125,8 +119,10 @@ HTML;
 		
 		if (!$result) return 'Could not add the policy because a database error occurred.';
 
-		addLogEntry("Added policy:\nName: {$post['policy_name']} ({$post['policy_serial_no']})\nType: {$post['policy_type']}\n" .
-				"Update Method: {$post['policy_update_method']}\nConfig File: {$post['policy_config_file']}");
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+		
+//		addLogEntry("Added policy:\nName: {$post['policy_name']} ({$post['server_serial_no']})\nType: {$post['policy_type']}\n" .
+//				"Update Method: {$post['policy_update_method']}\nConfig File: {$post['policy_config_file']}");
 		return true;
 	}
 
@@ -178,10 +174,10 @@ HTML;
 		
 		if (!$result) return 'Could not update the policy because a database error occurred.';
 
-//		setBuildUpdateConfigFlag(getPolicySerial($post['policy_id'], $_SESSION['module']), 'yes', 'build');
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
-		addLogEntry("Updated policy '$old_name' to:\nName: {$post['policy_name']}\nType: {$post['policy_type']}\n" .
-					"Update Method: {$post['policy_update_method']}\nConfig File: {$post['policy_config_file']}");
+//		addLogEntry("Updated policy '$old_name' to:\nName: {$post['policy_name']}\nType: {$post['policy_type']}\n" .
+//					"Update Method: {$post['policy_update_method']}\nConfig File: {$post['policy_config_file']}");
 		return true;
 	}
 	
@@ -197,6 +193,8 @@ HTML;
 			/** Delete service */
 //			$tmp_name = getNameFromID($service_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'service_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $policy_id, 'policy_', 'deleted', 'policy_id')) {
+				setBuildUpdateConfigFlag($_REQUEST['server_serial_no'], 'yes', 'build');
+				
 				addLogEntry("Deleted policy.");
 				return true;
 			}
@@ -212,16 +210,10 @@ HTML;
 		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = $edit_actions = null;
-//		$edit_actions = $row->policy_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?policy_serial_no=' . $row->policy_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
-		if ($allowed_to_build_configs && $row->policy_installed == 'yes') {
-			if ($row->policy_build_config == 'yes' && $row->policy_status == 'active' && $row->policy_installed == 'yes') {
-				$edit_actions .= $__FM_CONFIG['icons']['build'];
-			}
-		}
 		if ($allowed_to_manage_servers) {
-			$edit_status = '<a id="plus" href="#" title="Add New" name="' . $type . '">' . $__FM_CONFIG['icons']['add'] . '</a>';
-			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+//			$edit_status = '<a id="plus" href="#" title="Add New" name="' . $type . '">' . $__FM_CONFIG['icons']['add'] . '</a>';
+			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->policy_id . '&status=';
 			$edit_status .= ($row->policy_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= '&server_serial_no=' . $row->server_serial_no . '">';
@@ -262,9 +254,10 @@ HTML;
 	function printForm($data = '', $action = 'add', $type = 'rules') {
 		global $__FM_CONFIG;
 		
-		$policy_id = 0;
-		$policy_interface = $policy_direction = $policy_time = $policy_update_port = null;
-		$services_items_assigned = $services_items_assigned = $policy_comment = null;
+		$policy_id = $policy_order_id = 0;
+		$policy_interface = $policy_direction = $policy_time = $policy_comment = $policy_options = null;
+		$policy_services = $policy_source = $policy_destination = $policy_action = null;
+		$source_items = $destination_items = $services_items = null;
 		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -274,14 +267,10 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
-		echo '<pre>';
-		print_r($data);
-		echo '</pre>';
-
-//		$policy_type = buildSelect('policy_type', 'policy_type', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_type'), $policy_type, 1);
-//		$policy_update_method = buildSelect('policy_update_method', 'policy_update_method', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_update_method'), $policy_update_method, 1);
+		$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
 		$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
 		$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
+		$policy_action = buildSelect('policy_action', 'policy_action', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action'), $policy_action, 1);
 
 		$source_items_assigned = getGroupItems($policy_source);
 		$source_assigned_list = buildSelect(null, 'source_items_assigned', availableGroupItems('object', 'assigned', $source_items_assigned), null, 7, null, true);
@@ -298,9 +287,13 @@ HTML;
 		$log_check = ($policy_options & $__FM_CONFIG['fw']['policy_options']['log']) ? 'checked' : null;
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-policies">
+		<form name="manage" id="manage" method="post" action="config-policy?server_serial_no={$_REQUEST['server_serial_no']}">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
+			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
+			<input type="hidden" name="source_items" id="source_items" value="$source_items" />
+			<input type="hidden" name="destination_items" id="destination_items" value="$destination_items" />
+			<input type="hidden" name="services_items" id="services_items" value="$services_items" />
 FORM;
 		if ($type == 'rules') {
 			$return_form .= <<<FORM
@@ -384,9 +377,13 @@ FORM;
 					<td width="67%">$policy_time</td>
 				</tr>
 				<tr>
+					<th width="33%" scope="row"><label for="policy_action">Action</label></th>
+					<td width="67%">$policy_action</td>
+				</tr>
+				<tr>
 					<th width="33%" scope="row">Options</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" $log_check />Log packets processed by this rule</label>
+						<label><input style="height: 10px;" name="policy_options[]" id="policy_options" value="{$__FM_CONFIG['fw']['policy_options']['log']}" type="checkbox" $log_check />Log packets processed by this rule</label>
 					</td>
 				</tr>
 				<tr>
@@ -394,7 +391,7 @@ FORM;
 					<td width="67%"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">$policy_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Rule" class="button" />
+			<input type="submit" name="submit" id="submit_items" value="$ucaction Rule" class="button" />
 
 FORM;
 		}
@@ -492,26 +489,34 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['policy_name'])) return 'No policy name defined.';
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_name');
-		if ($field_length !== false && strlen($post['policy_name']) > $field_length) return 'Policy name is too long (maximum ' . $field_length . ' characters).';
-		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['policy_name'], 'policy_', 'policy_name');
-		if ($fmdb->num_rows) return 'This policy name already exists.';
+//		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['policy_name'], 'policy_', 'policy_name');
+//		if ($fmdb->num_rows) return 'This policy name already exists.';
 		
-		if (empty($post['policy_config_file'])) $post['policy_config_file'] = $__FM_CONFIG['fw']['config_file'][$post['policy_type']];
+		/** Process weekdays */
+		if (@is_array($post['policy_options'])) {
+			$decimals = 0;
+			foreach ($post['policy_options'] as $dec) {
+				$decimals += $dec;
+			}
+			$post['policy_options'] = $decimals;
+		} else $post['policy_options'] = 0;
 		
-		/** Set default ports */
-		if ($post['policy_update_method'] == 'cron') {
-			$post['policy_update_port'] = 0;
-		}
-		if (!empty($post['policy_update_port']) && !verifyNumber($post['policy_update_port'], 1, 65535, false)) return 'Policy update port must be a valid TCP port.';
-		if (empty($post['policy_update_port'])) {
-			if ($post['policy_update_method'] == 'http') $post['policy_update_port'] = 80;
-			elseif ($post['policy_update_method'] == 'https') $post['policy_update_port'] = 443;
+		$post['server_serial_no'] = $_REQUEST['server_serial_no'];
+		$post['policy_source'] = $post['source_items'];
+		$post['policy_destination'] = $post['destination_items'];
+		$post['policy_services'] = $post['services_items'];
+		unset($post['source_items']);
+		unset($post['destination_items']);
+		unset($post['services_items']);
+		
+		/** Get policy_order_id */
+		if (!isset($post['policy_order_id']) || $post['policy_order_id'] == 0) {
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $_REQUEST['server_serial_no'], 'policy_', 'server_serial_no', 'ORDER BY policy_order_id DESC LIMIT 1');
+			if ($fmdb->num_rows) {
+				$result = $fmdb->last_result[0];
+				$post['policy_order_id'] = $result->policy_order_id + 1;
+			} else $post['policy_order_id'] = 1;
 		}
 		
 		return $post;
@@ -538,7 +543,7 @@ FORM;
 	function availableTimes() {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return[0][] = 'None';
+		$return[0][] = 'none';
 		$return[0][] = '';
 		
 		$query = "SELECT time_id,time_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time WHERE account_id='{$_SESSION['user']['account_id']}' AND time_status='active' ORDER BY time_name ASC";
@@ -549,6 +554,24 @@ FORM;
 				$return[$i+1][] = $results[$i]->time_name;
 				$return[$i+1][] = $results[$i]->time_id;
 			}
+		}
+		
+		return $return;
+	}
+
+	function availableInterfaces($server_serial_no) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return[] = 'any';
+		
+		if (!is_numeric($server_serial_no)) return $return;
+		
+		$query = "SELECT server_interfaces FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers WHERE account_id='{$_SESSION['user']['account_id']}' AND server_status!='deleted' AND server_serial_no=$server_serial_no ORDER BY server_name ASC";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$results = $fmdb->last_result[0];
+			
+			$return = array_merge($return, explode(';', trim($results->server_interfaces, ';')));
 		}
 		
 		return $return;

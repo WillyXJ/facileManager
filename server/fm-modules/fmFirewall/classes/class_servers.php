@@ -130,7 +130,7 @@ class fm_module_servers {
 		
 		if (!$result) return 'Could not update the server because a database error occurred.';
 
-//		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
+		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
 		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
 		$tmp_runas = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : $post['server_run_as_predefined'];
@@ -174,7 +174,7 @@ class fm_module_servers {
 		$os_image = setOSIcon($row->server_os);
 		
 		$edit_status = $edit_actions = null;
-//		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
 		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
@@ -192,9 +192,11 @@ class fm_module_servers {
 			}
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 		}
+		$edit_name = '<a href="config-policy?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>';
 		
 		if ($row->server_installed != 'yes') {
 			$edit_actions = 'Client Install Required<br />';
+			$edit_name = $row->server_name;
 		}
 		$edit_status = $edit_actions . $edit_status;
 		
@@ -203,7 +205,7 @@ class fm_module_servers {
 		echo <<<HTML
 		<tr id="$row->server_id"$disabled_class>
 			<td>$os_image</td>
-			<td><a href="config-policy?server_serial_no={$row->server_serial_no}">{$row->server_name}</a></td>
+			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
 			<td>$row->server_type</td>
 			<td>$row->server_update_method $port</td>

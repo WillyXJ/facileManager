@@ -63,13 +63,16 @@ $(document).ready(function() {
 	});
 	
 	$("#manage_item_contents").delegate('#submit_items', 'click', function(e) {
-		var options = $('#group_items_assigned option');
-		var items = '';
-		
-		for (i=0; i<options.length; i++) {
-			items += options[i].value + ';';
-		}
-		$('#group_items').val(items);
+		var arr = [ 'group', 'source', 'destination', 'services' ];
+		$.each(arr, function(index, box_id) {
+			var options = $('#' + box_id + '_items_assigned option');
+			var items = '';
+			
+			for (i=0; i<options.length; i++) {
+				items += options[i].value + ';';
+			}
+			$('#' + box_id + '_items').val(items);
+		});
 	});
 	
 	var fixHelperModified = function(e, tr) {
