@@ -171,6 +171,7 @@ HTML;
 		if ($row->service_type == 'tcp') {
 			@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $row->service_tcp_flags);
 			$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
+			$service_tcp_flags['mask'] = $service_tcp_flags['settings'] = null;
 			foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
 				if ($bit & $tcp_flag_mask) $service_tcp_flags['mask'] .= $flag . ',';
 				if ($bit & $tcp_flag_settings) $service_tcp_flags['settings'] .= $flag . ',';
@@ -447,11 +448,14 @@ FORM;
 			sort($post['port_dest']);
 			$post['service_dest_ports'] = implode(':', $post['port_dest']);
 			if ($post['service_dest_ports'] == ':') $post['service_dest_ports'] = null;
+			
+			unset($post['service_icmp_code']);
+			unset($post['service_icmp_type']);
 		} else {
-			if (!empty($post['service_icmp_type']) && !verifyNumber($post['service_icmp_type'], 0, 40, false)) return 'ICMP type is invalid.';
+			if (!empty($post['service_icmp_type']) && !verifyNumber($post['service_icmp_type'], -1, 40, false)) return 'ICMP type is invalid.';
 			if (empty($post['service_icmp_type'])) $post['service_icmp_type'] = 0;
 			
-			if (!empty($post['service_icmp_code']) && !verifyNumber($post['service_icmp_code'], 0, 15, false)) return 'ICMP code is invalid.';
+			if (!empty($post['service_icmp_code']) && !verifyNumber($post['service_icmp_code'], -1, 15, false)) return 'ICMP code is invalid.';
 			if (empty($post['service_icmp_code'])) $post['service_icmp_code'] = 0;
 		}
 		

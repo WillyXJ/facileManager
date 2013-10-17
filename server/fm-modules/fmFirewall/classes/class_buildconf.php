@@ -23,10 +23,10 @@
 class fm_module_buildconf {
 	
 	/**
-	 * Performs syntax checks with named-check* utilities
+	 * Processes the server configs
 	 *
 	 * @since 1.0
-	 * @package fmDNS
+	 * @package fmFirewall
 	 *
 	 * @param array $files_array Array containing named files and contents
 	 * @return string
@@ -36,14 +36,21 @@ class fm_module_buildconf {
 		
 		$check_status = null;
 		
+		foreach ($raw_data['files'] as $filename => $contents) {
+			$preview .= str_repeat('=', 75) . "\n";
+			$preview .= $filename . ":\n";
+			$preview .= str_repeat('=', 75) . "\n";
+			$preview .= $contents . "\n\n";
+		}
+
 		return array($preview, $check_status);
 	}
 	
 	/**
-	 * Generates the server config and updates the DNS server
+	 * Generates the server config and updates the firewall server
 	 *
 	 * @since 1.0
-	 * @package fmDNS
+	 * @package fmFirewall
 	 */
 	function buildServerConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -61,7 +68,44 @@ class fm_module_buildconf {
 		
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
-			return serialize('This still needs to be implemented.');
+			$server_result = $fmdb->last_result;
+			$data = $server_result[0];
+			extract(get_object_vars($data), EXTR_SKIP);
+			
+			/** Disabled DNS server */
+			if ($server_status != 'active') {
+				$error = "DNS server is $server_status.\n";
+				if ($compress) echo gzcompress(serialize($error));
+				else echo serialize($error);
+				
+				exit;
+			}
+			
+			include(ABSPATH . 'fm-includes/version.php');
+			
+			$config = '// This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
+
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_status='active'");
+			if ($fmdb->num_rows) {
+				$policy_count = $fmdb->num_rows;
+				$policy_result = $fmdb->last_result;
+				
+				$function = $server_type . 'BuildConfig';
+				$config .= $this->$function($policy_result, $policy_count);
+			}
+
+
+
+
+			$data->files[$server_config_file] = $config;
+			if (is_array($files)) {
+				$data->files = array_merge($data->files, $files);
+			}
+			
+//			print_r($data);
+//			exit;
+			
+			return get_object_vars($data);
 		}
 		
 		/** Bad DNS server */
@@ -69,6 +113,273 @@ class fm_module_buildconf {
 		if ($compress) echo gzcompress(serialize($error));
 		else echo serialize($error);
 	}
+	
+	
+	function iptablesBuildConfig($policy_result, $count) {
+		global $fmdb, $__FM_CONFIG;
+		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
+		
+		$fw_actions = array('pass' => 'ACCEPT',
+							'block' => 'DROP',
+							'reject' => 'REJECT');
+		
+		$config[] = '*filter';
+		$config[] = ':INPUT ACCEPT [0:0]';
+		$config[] = ':FORWARD ACCEPT [0:0]';
+		$config[] = ':OUTPUT ACCEPT [0:0]';
+		$config[] = '';
+		
+		for ($i=0; $i<$count; $i++) {
+			$line = null;
+			$log_rule = false;
+			
+			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$config[] = '# ' . $rule_title;
+			$config[] = wordwrap('# ' . $policy_result[$i]->policy_comment, 20, "\n");
+			
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) {
+				$log_rule = true;
+				$log_chain = 'RULE_' . $policy_result[$i]->policy_order_id;
+				$config[] = '-N ' . $log_chain;
+				$config[] = '-A ' . strtoupper($policy_result[$i]->policy_direction) . 'PUT -j ' . $log_chain;
+			}
+			
+			$rule_chain = $log_rule ? $log_chain : $fw_actions[$policy_result[$i]->policy_action];
+			
+			$line[] = '-A';
+			$line[] = strtoupper($policy_result[$i]->policy_direction) . 'PUT';
+			if ($policy_result[$i]->policy_interface != 'any') {
+				if ($policy_result[$i]->policy_direction == 'in') {
+					$line[] = '-i ' . $policy_result[$i]->policy_interface;
+				} elseif ($policy_result[$i]->policy_direction == 'out') {
+					$line[] = '-o ' . $policy_result[$i]->policy_interface;
+				}
+			}
+			
+			
+			/** Handle destinations */
+			unset($policy_destination);
+			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
+				$policy_destination = $this->buildAddressList($temp_destination);
+			} else $policy_destination[] = null;
+			
+			
+			/** Handle sources */
+			unset($policy_source);
+			if ($temp_source = trim($policy_result[$i]->policy_source, ';')) {
+				$policy_source = $this->buildAddressList($temp_source);
+			} else $policy_source[] = null;
+			
+			
+			/** Handle services */
+			$tcp = $udp = $icmp = null;
+			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
+				foreach (explode(';', $assigned_services) as $temp_id) {
+					$temp_services = null;
+					if ($temp_id[0] == 'g') {
+						$temp_services[] = $this->extractItemsFromGroup($temp_id);
+					} else {
+						$temp_services[] = substr($temp_id, 1);
+					}
+					
+					if (is_array($temp_services[0])) $temp_services = $temp_services[0];
+					
+					foreach ($temp_services as $service_id) {
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $service_id, 'service_', 'service_id', 'active');
+						$result = $fmdb->last_result[0];
+						
+						if ($result->service_type == 'icmp') {
+							$icmp_type = $result->service_icmp_type;
+							if ($result->service_icmp_code > -1) $icmp_type .= '/' . $result->service_icmp_code;
+							
+							$policy_services['processed'][$result->service_type][] = ' -p icmp -m icmp --icmp-type ' . $icmp_type;
+						} else {
+							/** Source ports */
+							@list($start, $end) = explode(':', $result->service_src_ports);
+							if ($start && $end) {
+								$policy_services[$result->service_type]['src'][] = ($start == $end) ? $start : $result->service_src_ports;
+							}
+							
+							/** Destination ports */
+							@list($start, $end) = explode(':', $result->service_dest_ports);
+							if ($start && $end) {
+								$policy_services[$result->service_type]['dest'][] = ($start == $end) ? $start : $result->service_dest_ports;
+							}
+						}
+					}
+				}
+			}
+			
+			foreach ($policy_services as $protocol => $proto_array) {
+				if ($protocol == 'processed') continue;
+				
+				foreach ($proto_array as $direction => $port_array) {
+					$k = $j = 0;
+					foreach ($port_array as $port) {
+						if ($j > 14) {
+							$k++;
+							$j = 0;
+						}
+						$multiports[$k][] = $port;
+						if (strpos($port, ':')) $j++;
+						
+						$j++;
+					}
+					foreach ($multiports as $ports) {
+						$ports = array_unique($ports);
+						$multi = (count($ports) > 1) ? ' -m multiport --' . substr($direction, 0, 1) . 'ports ' : ' --' . substr($direction, 0, 1) . 'port ';
+						$policy_services['processed'][$protocol][] = ' -p ' . $protocol . $multi  . implode(',', $ports);
+					}
+					unset($multiports);
+				}
+				unset($policy_services[$protocol]);
+			}
+			
+			/** Handle time restrictions */
+			$time_restrictions = null;
+			if ($policy_result[$i]->policy_time) {
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $policy_result[$i]->policy_time, 'time_', 'time_id', 'active');
+				if ($fmdb->num_rows) {
+					$time = null;
+					$time_result = $fmdb->last_result[0];
+					
+					if ($time_result->time_start_date) $time[] = '--datestart ' . date('Y:m:d', strtotime($time_result->time_start_date));
+					if ($time_result->time_end_date) $time[] = '--datestop ' . date('Y:m:d', strtotime($time_result->time_end_date));
+					
+					if ($time_result->time_start_time) $time[] = '--timestart ' . $time_result->time_start_time;
+					if ($time_result->time_end_time) $time[] = '--timestop ' . $time_result->time_end_time;
+					
+					if ($time_result->time_weekdays && $time_result->time_weekdays != array_sum($__FM_CONFIG['weekdays'])) {
+						$time[] = '--days ' . str_replace(' ', '', $fm_module_time->formatDays($time_result->time_weekdays));
+					}
+					
+					$time_restrictions = implode(' ', $time);
+				}
+				
+				$line[] = $time_restrictions;
+			}
+			
+			@sort($policy_services['processed']);
+			
+			foreach ($policy_source as $source_address) {
+				$source = ($source_address) ? ' -s ' . $source_address : null;
+				foreach ($policy_destination as $destination_address) {
+					$destination = ($destination_address) ? ' -d ' . $destination_address : null;
+					if (is_array($policy_services['processed'])) {
+						foreach ($policy_services['processed'] as $line_array) {
+							foreach ($line_array as $rule) {
+								$config[] = implode(' ', $line) . $source . $destination . $rule . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+							}
+						}
+					} else {
+						$config[] = implode(' ', $line) . $source . $destination . ' -j ' . $rule_chain;
+					}
+				}
+			}
+			unset($policy_services['processed']);
+			
+			/** Handle logging */
+			if ($log_rule) {
+				$config[] = '-A ' . $log_chain . ' -j LOG --log-level info --log-prefix "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ':"';
+				$config[] = '-A ' . $log_chain . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+			}
+			
+			$config[] = null;
+		}
+
+		$config[] = 'COMMIT';
+		
+		return implode("\n", $config);
+	}
+	
+	
+	function pfBuildConfig($policy_result, $count) {
+		echo '<pre>';
+		echo "pf\n";
+		print_r($policy_result);
+	}
+	
+	
+	function ipfBuildConfig($policy_result, $count) {
+		echo '<pre>';
+		echo "ipf\n";
+		print_r($policy_result);
+	}
+	
+	
+	function ipfwBuildConfig($policy_result, $count) {
+		echo '<pre>';
+		echo "ifpw\n";
+		print_r($policy_result);
+	}
+	
+	
+	function extractItemsFromGroup($group_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$new_group_items = null;
+		
+		if ($group_id[0] == 'g') {
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', substr($group_id, 1), 'group_', 'group_id', 'active');
+			$group_result = $fmdb->last_result[0];
+			$group_items = $group_result->group_items;
+			
+			foreach (explode(';', trim($group_result->group_items, ';')) as $id) {
+				if ($id[0] == 'g') {
+					$new_group_items = $this->extractItemsFromGroup($id);
+				} else {
+					$temp_items[] = substr($id, 1);
+				}
+			}
+		} else {
+			$temp_items[] = substr($group_id, 1);
+		}
+		
+		if (is_array($new_group_items)) $temp_items = array_merge($temp_items, $new_group_items);
+		
+		return $temp_items;
+	}
+	
+	
+	function buildAddressList($addresses) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$address_list = null;
+		
+		$address_ids = explode(';', $addresses);
+		foreach ($address_ids as $temp_id) {
+			$temp = null;
+			if ($temp_id[0] == 'g') {
+				$temp[] = $this->extractItemsFromGroup($temp_id);
+			} else {
+				$temp[] = substr($temp_id, 1);
+			}
+			
+			if (is_array($temp[0])) $temp = $temp[0];
+			
+			foreach ($temp as $object_id) {
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $object_id, 'object_', 'object_id', 'active');
+				$result = $fmdb->last_result[0];
+				
+				if ($result->object_type == 'network') {
+					$address_list[] = $result->object_address . '/' . $this->mask2cidr($result->object_mask);
+				} else {
+					$address_list[] = $result->object_address;
+				}
+			}
+		}
+		
+		return $address_list;
+	}
+	
+	
+	function mask2cidr($mask) {
+		$long = ip2long($mask);
+		$base = ip2long('255.255.255.255');
+		return 32 - log(($long ^ $base) +1, 2);
+	}
+	
 }
 
 if (!isset($fm_module_buildconf))

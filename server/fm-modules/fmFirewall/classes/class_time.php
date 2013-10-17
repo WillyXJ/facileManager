@@ -339,7 +339,7 @@ FORM;
 		global $__FM_CONFIG;
 		
 		/** Format weekdays */
-		if (!$weekdays_bits || $weekdays_bits == 127) {
+		if (!$weekdays_bits || $weekdays_bits == array_sum($__FM_CONFIG['weekdays'])) {
 			return 'Everyday';
 		} else {
 			$weekdays = null;
