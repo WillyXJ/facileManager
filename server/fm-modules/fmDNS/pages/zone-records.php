@@ -58,7 +58,7 @@ $avail_types = buildRecordTypes($record_type, $domain_id, $map);
 
 $response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
-	$response = '** You need to reload this zone **';
+	$response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
 }
 if (!getNSCount($domain_id)) {
 	$response = '** You still need to create NS records for this zone **';

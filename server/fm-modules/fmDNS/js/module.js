@@ -66,8 +66,40 @@ $(document).ready(function() {
 			{
 				$('#manage_item_contents').html(response);
 		
-				if (response.indexOf("failed") == -1) {
+				if (response.indexOf("Failed") == -1) {
 					$this.hide();
+				}
+			}
+		});
+		
+		return false;
+    });
+
+    $('a.zone_reload').click(function(e) {
+        var $this 	= $(this);
+        domain_id	= $this.attr('id');
+
+		$('#manage_item').fadeIn(200);
+		$('#manage_item_contents').fadeIn(200);
+		$('#manage_item_contents').html('<p>Processing Reload...</p>');
+		
+		var form_data = {
+			domain_id: domain_id,
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: 'POST',
+			url: 'fm-modules/fmDNS/ajax/processReload.php',
+			data: form_data,
+			success: function(response)
+			{
+				$('#manage_item_contents').html(response);
+		
+				if (response.indexOf("Failed") == -1) {
+					$('#response').delay(1000).fadeOut(400, function() {
+						$('#body_container').animate({marginTop: '2.2em'}, 200);
+					});
 				}
 			}
 		});
