@@ -37,6 +37,10 @@ $(document).ready(function() {
 					$('#response').delay(myDelay).fadeOut(400, function() {
 						$('#body_container').animate({marginTop: '2.2em'}, 200);
 					});
+
+					if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("errors") == -1) {
+						$this.fadeOut(400);
+					}
 				}
 			});
 		}, 500);
@@ -44,7 +48,7 @@ $(document).ready(function() {
 		return false;
     });
 
-	/* Zone reloads */
+	/* Zone reload button */
     $('#zones').delegate('form', 'click tap', function(e) {
         var $this 	= $(this);
         domain_id	= $this.attr('id');
@@ -66,7 +70,7 @@ $(document).ready(function() {
 			{
 				$('#manage_item_contents').html(response);
 		
-				if (response.indexOf("Failed") == -1) {
+				if (response.toLowerCase().indexOf("failed") == -1) {
 					$this.hide();
 				}
 			}
@@ -75,6 +79,7 @@ $(document).ready(function() {
 		return false;
     });
 
+	/* Zone reload link */
     $('a.zone_reload').click(function(e) {
         var $this 	= $(this);
         domain_id	= $this.attr('id');
@@ -96,7 +101,7 @@ $(document).ready(function() {
 			{
 				$('#manage_item_contents').html(response);
 		
-				if (response.indexOf("Failed") == -1) {
+				if (response.toLowerCase().indexOf("failed") == -1) {
 					$('#response').delay(1000).fadeOut(400, function() {
 						$('#body_container').animate({marginTop: '2.2em'}, 200);
 					});
