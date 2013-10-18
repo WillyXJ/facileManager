@@ -24,7 +24,7 @@
 
 /** Handle client installations */
 if (array_key_exists('verify', $_GET)) {
-	define('CLIENT', true);
+	if (!defined('CLIENT')) define('CLIENT', true);
 	
 	require_once('fm-init.php');
 	include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');

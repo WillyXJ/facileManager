@@ -24,13 +24,13 @@
 
 /** Handle client installations */
 if (arrayKeysExist(array('genserial', 'addserial', 'install'), $_GET)) {
-	define('CLIENT', true);
+	if (!defined('CLIENT')) define('CLIENT', true);
 	
 	require_once('fm-init.php');
 	include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/variables.inc.php');
 
 	if (array_key_exists('genserial', $_GET)) {
-		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
+		$module = ($_POST['module_name']) ? $_POST['module_name'] : $_SESSION['module'];
 		$data['server_serial_no'] = generateSerialNo($module);
 	}
 	

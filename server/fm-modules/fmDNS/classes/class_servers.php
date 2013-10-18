@@ -155,11 +155,8 @@ class fm_module_servers {
 		if ($field_length !== false && strlen($post['server_name']) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			if ($result[0]->server_id != $post['server_id']) return 'This server name already exists.';
-		}
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name', "AND server_id!='{$post['server_id']}'");
+		if ($fmdb->num_rows) return 'This server name already exists.';
 		
 		/** Process server_key */
 		if (!is_numeric($post['server_key'])) $post['server_key'] = 0;

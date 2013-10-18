@@ -888,7 +888,7 @@ class fm_module_buildconf {
 			$required_version = $__FM_CONFIG['fmDNS']['required_dns_version'];
 		}
 		
-		if (substr($server_version, 0, strlen($required_version)) < $required_version) {
+		if (version_compare($server_version, $required_version, '<')) {
 			return false;
 		}
 		
