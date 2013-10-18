@@ -38,6 +38,7 @@ $dryrun = (in_array('-n', $argv) || in_array('dryrun', $argv)) ? true : false;
 $buildconf = (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : false;
 $cron = (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 
+/** Include shared client functions */
 $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
 if (file_exists($fm_client_functions)) {
 	include_once($fm_client_functions);
@@ -51,6 +52,9 @@ if (exec(findProgram('whoami')) != $whoami && !$dryrun) {
 	echo "This script must run as $whoami.\n";
 	exit(1);
 }
+
+/** Check if running supported version */
+$data['server_version'] = detectFWVersion();
 
 /** Build everything required via cron */
 if ($cron) {

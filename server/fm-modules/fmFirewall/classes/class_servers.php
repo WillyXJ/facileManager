@@ -368,7 +368,7 @@ FORM;
 		if ($field_length !== false && strlen($post['server_name']) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name');
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name', "AND server_id!='{$post['server_id']}'");
 		if ($fmdb->num_rows) return 'This server name already exists.';
 		
 		if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['fw']['config_file'][$post['server_type']];

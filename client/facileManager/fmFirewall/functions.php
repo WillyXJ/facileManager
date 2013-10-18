@@ -55,14 +55,22 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	extract($server_location);
 
 	echo "  --> Detecting firewall...";
-	$fwtype = detectFirewallType();
-	if ($fwtype === null) {
+	$app = detectFWVersion(true);
+	if ($app === null) {
 		echo "failed\n\n";
 		echo "Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n";
 		exit(1);
 	}
-	$data['server_type'] = $fwtype['type'];
-	echo 'ok (' . $fwtype['type'] . ")\n";
+	extract($app);
+	$data['server_type'] = $server['type'];
+	if (versionCheck($app_version, $proto . '://' . $hostname . '/' . $path, $compress) == true) {
+		echo 'ok (' . $server['type'] . ")\n";
+	} else {
+		echo "failed\n\n";
+		echo $server['type'] . ' ' . $app_version . " is not supported.\n";
+		exit(1);
+	}
+	$data['server_version'] = $app_version;
 	
 	echo "\n  --> Detection complete.  Continuing installation.\n\n";
 	
@@ -192,17 +200,6 @@ function findFile($file) {
 }
 
 
-function detectHttpd() {
-	$httpd_choices = array('httpd'=>'httpd.conf', 'lighttpd'=>'', 'apache2'=>'apache2.conf');
-	
-	foreach ($httpd_choices as $daemon => $file) {
-		if (findProgram($daemon)) return array('daemon'=>$daemon, 'file'=>$file);
-	}
-	
-	return false;
-}
-
-
 function detectFirewallType() {
 	$supported_firewalls = array('iptables'=>'iptables',
 								'pf' => 'pfctl',
@@ -218,10 +215,37 @@ function detectFirewallType() {
 }
 
 
+function detectFWVersion($return_array = false) {
+	$fw = detectFirewallType();
+	$fw_flags = array('iptables'=>'-V | awk -F v "{print \$NF}"',
+						'pf'=>'-v',
+						'ipfw'=>'-v',
+						'ipf'=>'-v'
+					);
+	
+	if ($fw) {
+		$version = trim(shell_exec(findProgram($fw['app']) . ' ' . $fw_flags[$fw['app']]));
+		if ($return_array) {
+			return array('server' => $fw, 'app_version' => $version);
+		} else return trim($version);
+	}
+	
+	return null;
+}
+
+
 function moduleAddServer($url, $data) {
 	/** Add the server to the account */
 	$servertype = detectFirewallType();
-	$data['server_type'] = is_array($servertype) ? $servertype['type'] : $servertype;
+//	$data['server_type'] = is_array($servertype) ? $servertype['type'] : $servertype;
+	$app = detectFWVersion(true);
+	if ($app === null) {
+		echo "failed\n\n";
+		echo "Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n";
+		exit(1);
+	}
+	$data['server_type'] = $app['server']['type'];
+	$data['server_version'] = $app['app_version'];
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
@@ -234,12 +258,12 @@ function moduleAddServer($url, $data) {
 }
 
 
-function versionCheck($daemon_version, $serverhost, $compress) {
+function versionCheck($app_version, $serverhost, $compress) {
 	$url = $serverhost . '/buildconf';
 	$data['action'] = 'version_check';
 	$server_type = detectFirewallType();
 	$data['server_type'] = $server_type['type'];
-	$data['server_version'] = $daemon_version;
+	$data['server_version'] = $app_version;
 	$data['compress'] = $compress;
 	
 	$raw_data = getPostData($url, $data);

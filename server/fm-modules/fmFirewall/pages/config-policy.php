@@ -14,7 +14,7 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmDNS: Easily manage one or more ISC BIND servers                       |
+ | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
