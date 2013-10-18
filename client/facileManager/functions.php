@@ -468,6 +468,25 @@ function generateSerialNo($url, $data) {
 
 
 /**
+ * Detects web server daemon
+ *
+ * @since 1.0
+ * @package facileManager
+ *
+ * @return string
+ */
+function detectHttpd() {
+	$httpd_choices = array('httpd'=>'httpd.conf', 'lighttpd'=>'', 'apache2'=>'apache2.conf');
+	
+	foreach ($httpd_choices as $app => $file) {
+		if (findProgram($app)) return array('app'=>$app, 'file'=>$file);
+	}
+	
+	return false;
+}
+
+
+/**
  * Detects OS and distribution
  *
  * @since 1.0
@@ -636,7 +655,7 @@ function processUpdateMethod($module_name, $update_method) {
 			}
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
-			echo '  --> Detected ' . $web_server['daemon'] . " runs as '$user'\n";
+			echo '  --> Detected ' . $web_server['app'] . " runs as '$user'\n";
 			
 			if (!$sudoers) {
 				echo "  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n";

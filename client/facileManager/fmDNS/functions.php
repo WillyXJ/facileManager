@@ -57,22 +57,22 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	extract($server_location);
 
 	echo "  --> Running version tests...";
-	$daemon = detectDaemonVersion(true);
-	if ($daemon === null) {
+	$app = detectDaemonVersion(true);
+	if ($app === null) {
 		echo "failed\n\n";
 		echo "Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n";
 		exit(1);
 	}
-	extract($daemon);
+	extract($app);
 	$data['server_type'] = $server['type'];
-	if (versionCheck($daemon_version, $proto . '://' . $hostname . '/' . $path, $compress) == true) {
+	if (versionCheck($app_version, $proto . '://' . $hostname . '/' . $path, $compress) == true) {
 		echo "ok\n";
 	} else {
 		echo "failed\n\n";
-		echo "$daemon_version is not supported.\n";
+		echo "$app_version is not supported.\n";
 		exit(1);
 	}
-	$data['server_version'] = $daemon_version;
+	$data['server_version'] = $app_version;
 	
 	echo "\n  --> Tests complete.  Continuing installation.\n\n";
 	
@@ -202,22 +202,11 @@ function findFile($file) {
 }
 
 
-function detectHttpd() {
-	$httpd_choices = array('httpd'=>'httpd.conf', 'lighttpd'=>'', 'apache2'=>'apache2.conf');
-	
-	foreach ($httpd_choices as $daemon => $file) {
-		if (findProgram($daemon)) return array('daemon'=>$daemon, 'file'=>$file);
-	}
-	
-	return false;
-}
-
-
 function detectServerType() {
 	$supported_servers = array('bind9'=>'named');
 	
-	foreach($supported_servers as $type => $daemon) {
-		if (findProgram($daemon)) return array('type'=>$type, 'daemon'=>$daemon);
+	foreach($supported_servers as $type => $app) {
+		if (findProgram($app)) return array('type'=>$type, 'app'=>$app);
 	}
 	
 	return null;
@@ -245,8 +234,14 @@ function moduleAddServer($url, $data) {
 	} else $data['server_run_as_predefined'] = 'named';
 	
 	/** Add the server to the account */
-	$servertype = detectServerType();
-	$data['server_type'] = is_array($servertype) ? $servertype['type'] : $servertype;
+	$app = detectDaemonVersion(true);
+	if ($app === null) {
+		echo "failed\n\n";
+		echo "Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n";
+		exit(1);
+	}
+	$data['server_type'] = $app['server']['type'];
+	$data['server_version'] = $app['app_version'];
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
@@ -264,9 +259,9 @@ function detectDaemonVersion($return_array = false) {
 	$dns_flags = array('named'=>'-v | sed "s/BIND //"');
 	
 	if ($dns_server) {
-		$version = shell_exec(findProgram($dns_server['daemon']) . ' ' . $dns_flags[$dns_server['daemon']]);
+		$version = trim(shell_exec(findProgram($dns_server['app']) . ' ' . $dns_flags[$dns_server['app']]));
 		if ($return_array) {
-			return array('server' => $dns_server, 'daemon_version' => $version);
+			return array('server' => $dns_server, 'app_version' => $version);
 		} else return trim($version);
 	}
 	
@@ -274,12 +269,12 @@ function detectDaemonVersion($return_array = false) {
 }
 
 
-function versionCheck($daemon_version, $serverhost, $compress) {
+function versionCheck($app_version, $serverhost, $compress) {
 	$url = $serverhost . '/buildconf';
 	$data['action'] = 'version_check';
 	$server_type = detectServerType();
 	$data['server_type'] = $server_type['type'];
-	$data['server_version'] = $daemon_version;
+	$data['server_version'] = $app_version;
 	$data['compress'] = $compress;
 	
 	$raw_data = getPostData($url, $data);

@@ -39,6 +39,7 @@ $buildconf = (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : fa
 $zones = (in_array('-z', $argv) || in_array('zones', $argv)) ? true : false;
 $cron = (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 
+/** Include shared client functions */
 $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
 if (file_exists($fm_client_functions)) {
 	include_once($fm_client_functions);

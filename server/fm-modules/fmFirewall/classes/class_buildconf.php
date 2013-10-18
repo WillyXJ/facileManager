@@ -380,6 +380,46 @@ class fm_module_buildconf {
 		return 32 - log(($long ^ $base) +1, 2);
 	}
 	
+	
+	/**
+	 * Updates the daemon version number in the database
+	 *
+	 * @since 1.0
+	 * @package fmFirewall
+	 */
+	function updateServerVersion() {
+		global $fmdb, $__FM_CONFIG;
+		
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` SET `server_version`='" . $_POST['server_version'] . "', `server_os`='" . $_POST['server_os'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
+			(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
+		$fmdb->query($query);
+	}
+	
+	
+	/**
+	 * Validate the daemon version number of the client
+	 *
+	 * @since 1.0
+	 * @package fmFirewall
+	 */
+	function validateDaemonVersion($data) {
+		global $__FM_CONFIG;
+		extract($data);
+		
+		return true;
+		
+		if ($server_type == 'bind9') {
+			$required_version = $__FM_CONFIG['fmFirewall']['required_dns_version'];
+		}
+		
+		if (version_compare($server_version, $required_version, '<')) {
+			return false;
+		}
+		
+		return true;
+	}
+
+
 }
 
 if (!isset($fm_module_buildconf))
