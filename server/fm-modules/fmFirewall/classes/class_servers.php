@@ -323,17 +323,17 @@ FORM;
 				/** Data to post to $url */
 				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no);
 				
-				$post_result = unserialize(getPostData($url, $post_data));
+				$post_result = @unserialize(getPostData($url, $post_data));
 				
 				if (!is_array($post_result)) {
 					/** Something went wrong */
 					if (empty($post_result)) {
-						$post_result = 'It appears ' . $server_name . ' does not have php configured properly within httpd.';
+						$post_result = 'Failed: It appears ' . $server_name . ' does not have php configured properly within httpd.';
 					}
 					return $response . '<p class="error">' . $post_result . '</p>'. "\n";
 				} else {
 					if (count($post_result) > 1) {
-						$response .= '<textarea rows="4" cols="100">';
+						$response .= '<textarea rows="7" cols="100">';
 						
 						/** Loop through and format the output */
 						foreach ($post_result as $line) {

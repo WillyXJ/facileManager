@@ -232,12 +232,16 @@ HTML;
 		$interface = ($row->policy_interface) ? $row->policy_interface : 'any';
 		$policy_time = ($row->policy_time) ? getNameFromID($row->policy_time, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name') : 'any';
 		
+		$source_not = ($row->policy_source_not) ? '!' : null;
+		$destination_not = ($row->policy_destination_not) ? '!' : null;
+		$service_not = ($row->policy_services_not) ? '!' : null;
+
 		echo <<<HTML
 		<tr id="$row->policy_id"$disabled_class>
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
-			<td>$source</td>
-			<td>$destination</td>
-			<td>$services</td>
+			<td>$source_not $source</td>
+			<td>$destination_not $destination</td>
+			<td>$service_not $services</td>
 			<td>$interface</td>
 			<td>$row->policy_direction</td>
 			<td>$policy_time</td>
@@ -258,6 +262,7 @@ HTML;
 		$policy_interface = $policy_direction = $policy_time = $policy_comment = $policy_options = null;
 		$policy_services = $policy_source = $policy_destination = $policy_action = null;
 		$source_items = $destination_items = $services_items = null;
+		$policy_source_not = $policy_destination_not = $policy_services_not = null;
 		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -266,6 +271,8 @@ HTML;
 		} elseif (@is_object($data[0])) {
 			extract(get_object_vars($data[0]));
 		}
+		
+		$server_firewall_type = getNameFromID($_POST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
 		
 		$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
 		$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
@@ -285,14 +292,20 @@ HTML;
 		$services_available_list = buildSelect(null, 'services_items_available', availableGroupItems('service', 'available', $services_items_assigned), null, 7, null, true);
 		
 		$log_check = ($policy_options & $__FM_CONFIG['fw']['policy_options']['log']) ? 'checked' : null;
+		$source_not_check = ($policy_source_not) ? 'checked' : null;
+		$destination_not_check = ($policy_destination_not) ? 'checked' : null;
+		$service_not_check = ($policy_services_not) ? 'checked' : null;
 
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="config-policy?server_serial_no={$_REQUEST['server_serial_no']}">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
+			<input type="hidden" name="policy_source_not" id="policy_source_not" value="0" />
 			<input type="hidden" name="source_items" id="source_items" value="$source_items" />
+			<input type="hidden" name="policy_destination_not" id="policy_destination_not" value="0" />
 			<input type="hidden" name="destination_items" id="destination_items" value="$destination_items" />
+			<input type="hidden" name="policy_services_not" id="policy_services_not" value="0" />
 			<input type="hidden" name="services_items" id="services_items" value="$services_items" />
 FORM;
 		if ($type == 'rules') {
@@ -309,6 +322,8 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Source</th>
 					<td width="67%">
+						<label><input style="height: 10px;" name="policy_source_not" id="policy_source_not" value="1" type="checkbox" $source_not_check /><b>not</b></label>
+						<p class="checkbox_desc">Use this option to invert the match</p>
 						<table class="form-table list-toggle">
 							<tbody>
 								<tr>
@@ -331,6 +346,8 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Destination</th>
 					<td width="67%">
+						<label><input style="height: 10px;" name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" $destination_not_check /><b>not</b></label>
+						<p class="checkbox_desc">Use this option to invert the match</p>
 						<table class="form-table list-toggle">
 							<tbody>
 								<tr>
@@ -353,6 +370,8 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Services</th>
 					<td width="67%">
+						<label><input style="height: 10px;" name="policy_services_not" id="policy_services_not" value="1" type="checkbox" $service_not_check /><b>not</b></label>
+						<p class="checkbox_desc">Use this option to invert the match</p>
 						<table class="form-table list-toggle">
 							<tbody>
 								<tr>
@@ -372,10 +391,16 @@ FORM;
 						</table>
 					</td>
 				</tr>
+
+FORM;
+			if ($server_firewall_type == 'iptables') $return_form .= <<<FORM
 				<tr>
 					<th width="33%" scope="row"><label for="policy_time">Time Restriction</label></th>
 					<td width="67%">$policy_time</td>
 				</tr>
+
+FORM;
+			$return_form .= <<<FORM
 				<tr>
 					<th width="33%" scope="row"><label for="policy_action">Action</label></th>
 					<td width="67%">$policy_action</td>

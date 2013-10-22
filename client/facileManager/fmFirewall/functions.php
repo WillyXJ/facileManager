@@ -71,6 +71,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 		exit(1);
 	}
 	$data['server_version'] = $app_version;
+	$data['server_interfaces'] = implode(';', getInterfaceNames(PHP_OS));
 	
 	echo "\n  --> Detection complete.  Continuing installation.\n\n";
 	
@@ -116,7 +117,7 @@ function buildConf($url, $data) {
 	
 	extract($raw_data, EXTR_SKIP);
 	
-	$runas = ($server_run_as_predefined == 'as defined:') ? $server_run_as : $server_run_as_predefined;
+	$runas = 'root';
 		
 	if ($debug) echo "Setting directory and file permissions for $runas.\n";
 	if (!$data['dryrun']) {
@@ -151,21 +152,18 @@ function buildConf($url, $data) {
 	
 	/** Reload the server */
 	if ($debug) echo "Reloading the server.\n";
+	$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
+	if ($debug) echo "$rc_script\n";
 	if (!$data['dryrun']) {
-		if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
-			system(findProgram('rndc') . ' reload 2>&1 > /dev/null', $retval);
+		$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
+		if ($rc_script === false) {
+			if ($debug) echo "Cannot locate the start script.\n";
+			$retval = true;
 		} else {
-			if ($debug) echo "The server is not running. Attempting to start it.\n";
-			$named_rc_script = getStartupScript();
-			if ($named_rc_script === false) {
-				if ($debug) echo "Cannot locate the start script.\n";
-				$retval = true;
-			} else {
-				system($named_rc_script . ' 2>&1', $retval);
-			}
+			system($rc_script . ' 2>&1', $retval);
 		}
 		if ($retval) {
-			if ($debug) echo "There was an error reloading the server.  Please check the logs for details.\n";
+			if ($debug) echo "There was an error reloading the firewall.  Please check the logs for details.\n";
 			return false;
 		} else {
 			/** Only update reloaded zones */
@@ -176,8 +174,8 @@ function buildConf($url, $data) {
 			
 			/** Update the server with a successful reload */
 			$data['action'] = 'update';
-			$raw_update = getPostData($url, $data);
-			$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
+//			$raw_update = getPostData($url, $data);
+//			$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
 		}
 	}
 	return true;
@@ -217,14 +215,14 @@ function detectFirewallType() {
 
 function detectFWVersion($return_array = false) {
 	$fw = detectFirewallType();
-	$fw_flags = array('iptables'=>'-V | awk -F v "{print \$NF}"',
-						'pf'=>'-v',
-						'ipfw'=>'-v',
-						'ipf'=>'-v'
+	$fw_flags = array('iptables' => '-V | awk -F v "{print \$NF}"',
+						'pf' => null,
+						'ipfw' => null,
+						'ipf' => '-V | awk -F v \'{print $NF}\''
 					);
 	
 	if ($fw) {
-		$version = trim(shell_exec(findProgram($fw['app']) . ' ' . $fw_flags[$fw['app']]));
+		$version = ($fw_flags[$fw['app']]) ? trim(shell_exec(findProgram($fw['app']) . ' ' . $fw_flags[$fw['app']])) : null;
 		if ($return_array) {
 			return array('server' => $fw, 'app_version' => $version);
 		} else return trim($version);
@@ -236,8 +234,6 @@ function detectFWVersion($return_array = false) {
 
 function moduleAddServer($url, $data) {
 	/** Add the server to the account */
-	$servertype = detectFirewallType();
-//	$data['server_type'] = is_array($servertype) ? $servertype['type'] : $servertype;
 	$app = detectFWVersion(true);
 	if ($app === null) {
 		echo "failed\n\n";
@@ -273,31 +269,66 @@ function versionCheck($app_version, $serverhost, $compress) {
 }
 
 
-function getStartupScript() {
+function getStartupScript($fw) {
 	$distros = array(
-		'Arch'      => '/etc/rc.d/named start',
-		'Debian'    => '/etc/init.d/bind9 start',
-		'Ubuntu'    => '/etc/init.d/bind9 start',
-		'Fubuntu'   => '/etc/init.d/bind9 start',
-		'Fedora'    => '/etc/init.d/named start',
-		'Redhat'    => '/etc/init.d/named start',
-		'CentOS'    => '/etc/init.d/named start',
-		'ClearOS'   => '/etc/init.d/named start',
-		'Oracle'    => '/etc/init.d/named start',
-		'SUSE'      => '/etc/init.d/named start',
-		'Gentoo'    => '/etc/init.d/named start',
-		'Slackware' => '/etc/rc.d/rc.bind start',
-		'FreeBSD'   => '/etc/rc.d/named start',
-		'Apple'     => 'launchctl start org.isc.named'
-		);
+		'iptables' => array(
+			'Arch'      => '/etc/rc.d/iptables restart',
+			'Debian'    => '/etc/init.d/iptables restart',
+			'Ubuntu'    => '/etc/init.d/iptables restart',
+			'Fubuntu'   => '/etc/init.d/iptables restart',
+			'Fedora'    => '/etc/init.d/iptables restart',
+			'Redhat'    => '/etc/init.d/iptables restart',
+			'CentOS'    => '/etc/init.d/iptables restart',
+			'ClearOS'   => '/etc/init.d/iptables restart',
+			'Oracle'    => '/etc/init.d/iptables restart',
+			'SUSE'      => '/etc/init.d/iptables restart',
+			'Gentoo'    => '/etc/init.d/iptables restart',
+			'Slackware' => '/etc/rc.d/rc.iptables restart'
+		),
+		'pf' => array(
+			'FreeBSD'   => findProgram('pfctl') . ' -d -F all -f __FILE__',
+			'OpenBSD'   => findProgram('pfctl') . ' -d -F all -f __FILE__'
+		),
+		'ipfilter' => array(
+			'FreeBSD'   => findProgram('ipf') . ' -Fa -f __FILE__'
+		),
+		'ipfw' => array(
+			'FreeBSD'   => findProgram('sh') . ' __FILE__',
+			'Apple'     => 'launchctl start org.isc.named'
+		)
+	);
 	
 	$os = detectOSDistro();
 	
-	if (array_key_exists($os, $distros)) {
-		return $distros[$os];
+	if (array_key_exists($os, $distros[$fw])) {
+		return $distros[$fw][$os];
 	}
 	
 	return false;
+}
+
+
+function getInterfaceNames($os) {
+	$interfaces = null;
+	
+	switch(PHP_OS) {
+		case 'Linux':
+			$command = findProgram('ifconfig');
+			break;
+		case 'Darwin':
+		case 'FreeBSD':
+		case 'OpenBSD':
+		case 'NetBSD':
+			$command = findProgram('netstat') . ' -i';
+			break;
+		default:
+			return null;
+			break;
+	}
+	
+	exec($command . ' | grep Link | awk "{print \$1}" | sort', $interfaces);
+	
+	return $interfaces;
 }
 
 

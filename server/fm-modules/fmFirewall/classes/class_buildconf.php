@@ -83,7 +83,7 @@ class fm_module_buildconf {
 			
 			include(ABSPATH . 'fm-includes/version.php');
 			
-			$config = '// This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
+			$config = '# This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_status='active'");
 			if ($fmdb->num_rows) {
@@ -158,13 +158,6 @@ class fm_module_buildconf {
 			}
 			
 			
-			/** Handle destinations */
-			unset($policy_destination);
-			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
-				$policy_destination = $this->buildAddressList($temp_destination);
-			} else $policy_destination[] = null;
-			
-			
 			/** Handle sources */
 			unset($policy_source);
 			if ($temp_source = trim($policy_result[$i]->policy_source, ';')) {
@@ -172,6 +165,18 @@ class fm_module_buildconf {
 			} else $policy_source[] = null;
 			
 			
+			/** Handle destinations */
+			unset($policy_destination);
+			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
+				$policy_destination = $this->buildAddressList($temp_destination);
+			} else $policy_destination[] = null;
+			
+			
+			/** Handle match inverses */
+			$source_not = ($policy_result[$i]->policy_source_not) ? '! ' : null;
+			$destination_not = ($policy_result[$i]->policy_destination_not) ? '! ' : null;
+			$services_not = ($policy_result[$i]->policy_services_not) ? '! ' : null;
+
 			/** Handle services */
 			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
@@ -211,29 +216,31 @@ class fm_module_buildconf {
 				}
 			}
 			
-			foreach ($policy_services as $protocol => $proto_array) {
-				if ($protocol == 'processed') continue;
-				
-				foreach ($proto_array as $direction => $port_array) {
-					$k = $j = 0;
-					foreach ($port_array as $port) {
-						if ($j > 14) {
-							$k++;
-							$j = 0;
+			if (@is_array($policy_services)) {
+				foreach ($policy_services as $protocol => $proto_array) {
+					if ($protocol == 'processed') continue;
+					
+					foreach ($proto_array as $direction => $port_array) {
+						$k = $j = 0;
+						foreach ($port_array as $port) {
+							if ($j > 14) {
+								$k++;
+								$j = 0;
+							}
+							$multiports[$k][] = $port;
+							if (strpos($port, ':')) $j++;
+							
+							$j++;
 						}
-						$multiports[$k][] = $port;
-						if (strpos($port, ':')) $j++;
-						
-						$j++;
+						foreach ($multiports as $ports) {
+							$ports = array_unique($ports);
+							$multi = (count($ports) > 1) ? ' -m multiport --' . substr($direction, 0, 1) . 'ports ' : ' --' . substr($direction, 0, 1) . 'port ';
+							$policy_services['processed'][$protocol][] = ' -p ' . $protocol . $multi . $services_not . implode(',', $ports);
+						}
+						unset($multiports);
 					}
-					foreach ($multiports as $ports) {
-						$ports = array_unique($ports);
-						$multi = (count($ports) > 1) ? ' -m multiport --' . substr($direction, 0, 1) . 'ports ' : ' --' . substr($direction, 0, 1) . 'port ';
-						$policy_services['processed'][$protocol][] = ' -p ' . $protocol . $multi  . implode(',', $ports);
-					}
-					unset($multiports);
+					unset($policy_services[$protocol]);
 				}
-				unset($policy_services[$protocol]);
 			}
 			
 			/** Handle time restrictions */
@@ -262,10 +269,11 @@ class fm_module_buildconf {
 			
 			@sort($policy_services['processed']);
 			
+			/** Build the rules */
 			foreach ($policy_source as $source_address) {
-				$source = ($source_address) ? ' -s ' . $source_address : null;
+				$source = ($source_address) ? ' -s ' . $source_not . $source_address : null;
 				foreach ($policy_destination as $destination_address) {
-					$destination = ($destination_address) ? ' -d ' . $destination_address : null;
+					$destination = ($destination_address) ? ' -d ' . $destination_not . $destination_address : null;
 					if (is_array($policy_services['processed'])) {
 						foreach ($policy_services['processed'] as $line_array) {
 							foreach ($line_array as $rule) {
@@ -287,7 +295,8 @@ class fm_module_buildconf {
 			
 			$config[] = null;
 		}
-
+		
+//		array_pop($config);
 		$config[] = 'COMMIT';
 		
 		return implode("\n", $config);
@@ -301,17 +310,156 @@ class fm_module_buildconf {
 	}
 	
 	
-	function ipfBuildConfig($policy_result, $count) {
+	function ipfilterBuildConfig($policy_result, $count) {
+		global $fmdb, $__FM_CONFIG;
+		
 		echo '<pre>';
 		echo "ipf\n";
+
+		$fw_actions = array('pass' => 'allow',
+							'block' => 'deny',
+							'reject' => 'unreach host');
+		
+		for ($i=0; $i<$count; $i++) {
+			$line = null;
+			
+			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$config[] = '# ' . $rule_title;
+			$config[] = wordwrap('# ' . $policy_result[$i]->policy_comment, 20, "\n");
+			
+			$line[] = $fw_actions[$policy_result[$i]->policy_action];
+			$line[] = $policy_result[$i]->policy_direction;
+			$line[] = 'quick';
+			
+			/** Handle logging */
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) {
+				$line[] = 'log';
+			}
+			
+			/** Handle interface */
+			$interface = ($policy_result[$i]->policy_interface != 'any') ? ' on ' . $policy_result[$i]->policy_interface : null;
+			
+			/** Handle keep-states */
+			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep state' : null;
+
+
+			$config[] = null;
+		}
+
+
 		print_r($policy_result);
+		
+		return implode("\n", $config);
 	}
 	
 	
 	function ipfwBuildConfig($policy_result, $count) {
-		echo '<pre>';
-		echo "ifpw\n";
-		print_r($policy_result);
+		global $fmdb, $__FM_CONFIG;
+		
+		$fw_actions = array('pass' => 'pass',
+							'block' => 'block',
+							'reject' => 'block');
+		
+		$cmd = 'ipfw -q add';
+		
+		$config[] = 'ipfw -q -f flush';
+		$config[] = $cmd . ' check-state';
+		$config[] = null;
+		
+		for ($i=0; $i<$count; $i++) {
+			$line = null;
+			
+			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$config[] = '# ' . $rule_title;
+			$config[] = wordwrap('# ' . $policy_result[$i]->policy_comment, 20, "\n");
+			
+			$line[] = $cmd;
+			$line[] = $fw_actions[$policy_result[$i]->policy_action];
+			
+			/** Handle logging */
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) {
+				$line[] = 'log';
+			}
+			
+			/** Handle interface */
+			$interface = ($policy_result[$i]->policy_interface != 'any') ? ' via ' . $policy_result[$i]->policy_interface : null;
+			
+			/** Handle keep-states */
+			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep-state' : null;
+
+			/** Handle match inverses */
+			$services_not = ($policy_result[$i]->policy_services_not) ? 'not' : null;
+
+			/** Handle sources */
+			unset($policy_source);
+			if ($temp_source = trim($policy_result[$i]->policy_source, ';')) {
+				$policy_source = $this->buildAddressList($temp_source);
+			} else $policy_source = null;
+			$source_address = ($policy_result[$i]->policy_source_not) ? 'not ' : null;
+			$source_address .= (is_array($policy_source)) ? implode(',', $policy_source) : 'any';
+			
+			/** Handle destinations */
+			unset($policy_destination);
+			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
+				$policy_destination = $this->buildAddressList($temp_destination);
+			} else $policy_destination = null;
+			$destination_address = ($policy_result[$i]->policy_destination_not) ? 'not ' : null;
+			$destination_address .= (is_array($policy_destination)) ? implode(',', $policy_destination) : 'any';
+			
+			/** Handle services */
+			$tcp = $udp = $icmp = null;
+			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
+				foreach (explode(';', $assigned_services) as $temp_id) {
+					$temp_services = null;
+					if ($temp_id[0] == 'g') {
+						$temp_services[] = $this->extractItemsFromGroup($temp_id);
+					} else {
+						$temp_services[] = substr($temp_id, 1);
+					}
+					
+					if (is_array($temp_services[0])) $temp_services = $temp_services[0];
+					
+					foreach ($temp_services as $service_id) {
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $service_id, 'service_', 'service_id', 'active');
+						$result = $fmdb->last_result[0];
+						
+						if ($result->service_type == 'icmp') {
+							$policy_services[$result->service_type][] = $result->service_icmp_type;
+						} else {
+							/** Source ports */
+							@list($start, $end) = explode(':', $result->service_src_ports);
+							if ($start && $end) {
+								$policy_services[$result->service_type]['src'][] = ($start == $end) ? $start : str_replace(':', '-', $result->service_src_ports);
+							}
+							
+							/** Destination ports */
+							@list($start, $end) = explode(':', $result->service_dest_ports);
+							if ($start && $end) {
+								$policy_services[$result->service_type]['dest'][] = ($start == $end) ? $start : str_replace(':', '-', $result->service_dest_ports);
+							}
+						}
+					}
+				}
+			}
+			
+			/** Build the rules */
+			if (@is_array($policy_services)) {
+				foreach ($policy_services as $protocol => $proto_array) {
+					$source_ports = (array_key_exists('src', $proto_array)) ? $services_not . ' ' . implode(',', array_unique($proto_array['src'])) : null;
+					$destination_ports = (array_key_exists('dest', $proto_array)) ? $services_not . ' ' . implode(',', array_unique($proto_array['dest'])) : null;
+					$icmptypes = ($protocol == 'icmp') ? ' icmptypes ' . $services_not . ' ' . implode(',', $proto_array) : null;
+	
+					$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . $destination_ports . $icmptypes . ' ' . $policy_result[$i]->policy_direction . $interface . $keep_state;
+				}
+				unset($policy_services);
+			} else {
+				$config[] = implode(' ', $line) . " all from $source_address to $destination_address " . $policy_result[$i]->policy_direction . $interface . $keep_state;
+			}
+			
+			$config[] = null;
+		}
+		
+		return implode("\n", $config);
 	}
 	
 	

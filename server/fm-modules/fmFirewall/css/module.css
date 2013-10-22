@@ -50,3 +50,8 @@ table.legend tr td span {
 #table_edits.grabbing tbody tr {
 	cursor: url(https://mail.google.com/mail/images/2/closedhand.cur) 8 8, move;
 }
+p.checkbox_desc {
+	font-size: 10px;
+	margin-top: 0;
+	margin-left: 3px;
+}
