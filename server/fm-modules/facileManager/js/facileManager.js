@@ -453,7 +453,7 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 	if (pwd1.value.length==0) {
 		strength.innerHTML = 'No Password';
 		strength.style.color = 'black';
-		strength.style.background = 'white';
+		strength.style.background = '';
 		button.disabled = true;
 	} else {
 		strength.style.color = 'white';

@@ -36,7 +36,7 @@ class fmdb {
 		global $__FM_CONFIG;
 		$this->dbh = @mysql_connect($dbhost, $dbuser, $dbpassword);
 		if (!$this->dbh) {
-			bailOut('<center>The connection to the database has failed.  Please check the configuration.</center>');
+			bailOut('<center>The connection to the database has failed.  Please check the configuration.</center><p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">Try Again</a></p>');
 		}
 
 		$this->select($dbname);
