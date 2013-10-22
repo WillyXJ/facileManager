@@ -108,8 +108,8 @@ class fm_module_buildconf {
 			return get_object_vars($data);
 		}
 		
-		/** Bad DNS server */
-		$error = "DNS server is not found.\n";
+		/** Bad server */
+		$error = "Server is not found.\n";
 		if ($compress) echo gzcompress(serialize($error));
 		else echo serialize($error);
 	}
