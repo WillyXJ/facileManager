@@ -1,53 +1,5 @@
 $(document).ready(function() {
 	
-	/* Server config builds */
-    $('#table_edits').delegate('#build', 'click tap', function(e) {
-        var $this 	= $(this);
-        server_id	= $this.parent().parent().attr('id');
-
-		$('#body_container').animate({marginTop: '4em'}, 200);
-		$('#response').html('<p>Processing Config Build...</p>');
-		$('#response').fadeIn(200);
-		
-		var form_data = {
-			server_id: server_id,
-			action: 'build',
-			is_ajax: 1
-		};
-
-		setTimeout(function() {
-			$.ajax({
-				type: 'POST',
-				url: 'fm-modules/fmDNS/ajax/processReload.php',
-				data: form_data,
-				success: function(response)
-				{
-					var eachLine = response.split("\n");
-					if (eachLine.length <= 2) {
-						var myDelay = 6000;
-						$('#response').html(response);
-					} else {
-						var myDelay = 0;
-	
-						$('#manage_item').fadeIn(200);
-						$('#manage_item_contents').fadeIn(200);
-						$('#manage_item_contents').html('<h2>Configuration Build Results</h2>' + response + '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />');
-					}
-					
-					$('#response').delay(myDelay).fadeOut(400, function() {
-						$('#body_container').animate({marginTop: '2.2em'}, 200);
-					});
-
-					if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("errors") == -1) {
-						$this.fadeOut(400);
-					}
-				}
-			});
-		}, 500);
-		
-		return false;
-    });
-
 	/* Zone reload button */
     $('#zones').delegate('form', 'click tap', function(e) {
         var $this 	= $(this);
@@ -64,13 +16,13 @@ $(document).ready(function() {
 
 		$.ajax({
 			type: 'POST',
-			url: 'fm-modules/fmDNS/ajax/processReload.php',
+			url: 'fm-modules/facileManager/ajax/processReload.php',
 			data: form_data,
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
 		
-				if (response.toLowerCase().indexOf("failed") == -1) {
+				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
 					$this.hide();
 				}
 			}
@@ -95,13 +47,13 @@ $(document).ready(function() {
 
 		$.ajax({
 			type: 'POST',
-			url: 'fm-modules/fmDNS/ajax/processReload.php',
+			url: 'fm-modules/facileManager/ajax/processReload.php',
 			data: form_data,
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
 		
-				if (response.toLowerCase().indexOf("failed") == -1) {
+				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
 					$('#response').delay(1000).fadeOut(400, function() {
 						$('#body_container').animate({marginTop: '2.2em'}, 200);
 					});

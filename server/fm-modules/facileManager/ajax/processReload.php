@@ -23,21 +23,31 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!defined('AJAX')) define('AJAX', true);
+require_once('../../../fm-init.php');
+
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+
 if (is_array($_POST) && count($_POST)) {
-	include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
-	
-	if (isset($_POST['domain_id']) && $allowed_to_reload_zones) {
-		echo '<h2>Zone Reload Results</h2>' . "\n";
-		
-		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
-			$response = $fm_dns_zones->buildZoneConfig($_POST['domain_id']);
+	if (isset($_POST['action']) && $_POST['action'] == 'build') {
+		if (!$allowed_to_build_configs) {
+			exit('<p class="error">You are not authorized to build server configs.</p>');
 		}
-		
-		echo $response . "<br />\n";
-	} else {
-		echo '<h2>Error</h2>' . "\n";
-		echo '<p>You are not authorized to reload zones.</p>' . "\n";
+		$server_serial_no = getNameFromID($_POST['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
+		exit($fm_module_servers->buildServerConfig($server_serial_no));
 	}
 }
+
+$shared_ajax_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processReload.php';
+if (file_exists($shared_ajax_file) && $_SESSION['module'] != $fm_name) {
+	include($shared_ajax_file);
+}
+
+$module_ajax_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processReload.php';
+if (file_exists($module_ajax_file) && $_SESSION['module'] != $fm_name) {
+	include($module_ajax_file);
+}
+
+echo '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />' . "\n";
 
 ?>
