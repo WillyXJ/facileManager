@@ -27,6 +27,7 @@
  *
  */
 
+error_reporting(0);
 $compress = true;
 
 /** Check for options */
