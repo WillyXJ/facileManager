@@ -34,7 +34,7 @@ class fm_module_buildconf {
 	function processConfigs($raw_data) {
 		$preview = null;
 		
-		$check_status = $this->namedSyntaxChecks($raw_data);
+		$check_status = @$this->namedSyntaxChecks($raw_data);
 		foreach ($raw_data['files'] as $filename => $contents) {
 			$preview .= str_repeat('=', 75) . "\n";
 			$preview .= $filename . ":\n";
@@ -124,9 +124,9 @@ class fm_module_buildconf {
 					$def_multiple_values = $result->def_multiple_values;
 				}
 				$config .= "\t" . $cfg_name . ' ';
-				if ($def_multiple_values == 'yes') $config .= '{ ';
+				if ($def_multiple_values == 'yes' && strpos($cfg_data, '{') === false) $config .= '{ ';
 				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_data), ';')));
-				if ($def_multiple_values == 'yes') $config .= '; }';
+				if ($def_multiple_values == 'yes' && strpos($cfg_data, '}') === false) $config .= '; }';
 				$config .= ";\n";
 			}
 			$config .= "};\n\n";
