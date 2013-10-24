@@ -71,7 +71,8 @@ if (file_exists($fm_client_functions)) {
 }
 
 /** Detect OS */
-$data['server_os'] = detectOSDistro();
+$data['server_os'] = PHP_OS;
+$data['server_os_distro'] = detectOSDistro();
 
 /** Run the installer */
 if (in_array('install', $argv)) {
@@ -223,7 +224,8 @@ function installFM($proto, $compress) {
 
 	/** Server serial number **/
 	$data['server_name'] = php_uname('n');
-	$data['server_os'] = detectOSDistro();
+	$data['server_os'] = PHP_OS;
+	$data['server_os_distro'] = detectOSDistro();
 	echo 'Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ';
 	$serialno = trim(fgets(STDIN));
 	
@@ -590,9 +592,18 @@ function processUpdateMethod($module_name, $update_method) {
 		/** cron */
 		case 'c':
 			$tmpfile = '/tmp/crontab.facileManager';
-			$dump = shell_exec('crontab -l -u root | grep -v ' . $argv[0] . '> ' . $tmpfile . ' 2>/dev/null');
+			$dump = shell_exec('crontab -l | grep -v ' . $argv[0] . '> ' . $tmpfile . ' 2>/dev/null');
 			
-			$cmd = "echo '*/5 * * * * " . findProgram('php') . ' ' . $argv[0] . " cron' >> $tmpfile && " . findProgram('crontab') . " -u root $tmpfile";
+			/** Handle special cases */
+			if (PHP_OS == 'SunOS') {
+				for ($x = 0; $x < 12; $x++) {
+					$minopt[] = sprintf("%02d", $x*5);
+				}
+				$minutes = implode(',', $minopt);
+				unset($minopt);
+			} else $minutes = '*/5';
+			
+			$cmd = "echo '" . $minutes . ' * * * * ' . findProgram('php') . ' ' . $argv[0] . " cron' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
 			$cron_update = system($cmd, $retval);
 			unlink($tmpfile);
 			

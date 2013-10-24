@@ -167,8 +167,10 @@ class fm_module_servers {
 		}
 		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return 'Server update port must be a valid TCP port.';
 		if (empty($post['server_update_port'])) {
-			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
-			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
+			if (isset($post['server_update_port'])) {
+				if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
+				elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
+			}
 		}
 		
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
@@ -266,7 +268,7 @@ class fm_module_servers {
 		
 		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$os_image = setOSIcon($row->server_os);
+		$os_image = setOSIcon($row->server_os_distro);
 		
 		$edit_status = null;
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
@@ -443,7 +445,7 @@ FORM;
 		
 			$raw_data = $fm_module_buildconf->buildServerConfig($data);
 		
-			$response = $fm_module_buildconf->namedSyntaxChecks($raw_data);
+			$response = @$fm_module_buildconf->namedSyntaxChecks($raw_data);
 			if (strpos($response, 'error') !== false) return $response;
 		} else $response = null;
 		

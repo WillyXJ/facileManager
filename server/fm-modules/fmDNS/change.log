@@ -1,5 +1,7 @@
 1.0-?? (2013-10-??)
 ====================
+* Server - Fixed some php errors.
+* Client - OS detection now separates OS from distro.
 * Server - (Git Issue 30) Fixed server options config syntax with listen-on.
 * Server - Fixed show/hide of server build button.
 * Server - (Git Issue 26) Added additional zone reload link.
