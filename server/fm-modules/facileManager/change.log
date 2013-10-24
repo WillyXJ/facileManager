@@ -1,3 +1,9 @@
+1.0-?? (2013-10-??)
+====================
+* Server - Ensures current module is active.
+* Server - Fixed some PHP errors.
+* Server - Fixed installer password validity background display.
+
 1.0-rc5 (2013-10-16)
 ====================
 * Server - Code clean up.

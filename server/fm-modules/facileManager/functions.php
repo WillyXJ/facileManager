@@ -1723,7 +1723,7 @@ function setBuildUpdateConfigFlag($serial_no, $flag, $build_update) {
 	}
 	$result = $fmdb->query($query);
 	
-	if ($result) return true;
+	if ($fmdb->result) return true;
 	return false;
 }
 

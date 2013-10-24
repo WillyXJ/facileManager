@@ -142,6 +142,14 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 				$_SESSION['user']['module_perms'] = $fm_login->getModulePerms($_SESSION['user']['id'], null, true);
 			}
 			header('Location: ' . $GLOBALS['RELPATH']);
+			exit;
+		}
+		
+		/** Ensure selected module is indeed active */
+		if ($_SESSION['module'] != $fm_name && !in_array($_SESSION['module'], getActiveModules())) {
+			$_SESSION['module'] = $fm_name;
+			header('Location: ' . $GLOBALS['RELPATH'] . 'admin-modules');
+			exit;
 		}
 		
 		if (!defined('UPGRADE')) {
