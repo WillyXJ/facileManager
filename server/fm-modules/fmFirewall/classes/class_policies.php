@@ -603,7 +603,9 @@ FORM;
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result[0];
 			
-			$return = array_merge($return, explode(';', trim($results->server_interfaces, ';')));
+			if (trim($results->server_interfaces, ';')) {
+				$return = array_merge($return, explode(';', trim($results->server_interfaces, ';')));
+			}
 		}
 		
 		return $return;

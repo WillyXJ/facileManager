@@ -379,7 +379,8 @@ FORM;
 				array_shift($all_firewalls);
 				break;
 			case 'OpenBSD':
-				return array('pf');
+//				return array('pf');
+				return array();
 				break;
 			case 'Darwin':
 				return array('ipfw');

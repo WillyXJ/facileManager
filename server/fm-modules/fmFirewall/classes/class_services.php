@@ -195,9 +195,11 @@ HTML;
 
 HTML;
 		if ($row->service_type == 'icmp') {
+			$icmp_type = ($row->service_icmp_type == -1) ? 'any' : $row->service_icmp_type;
+			$icmp_code = ($row->service_icmp_code == -1) ? 'any' : $row->service_icmp_code;
 			echo <<<HTML
-				<td>$row->service_icmp_type</td>
-				<td>$row->service_icmp_code</td>
+				<td>$icmp_type</td>
+				<td>$icmp_code</td>
 
 HTML;
 		} else {

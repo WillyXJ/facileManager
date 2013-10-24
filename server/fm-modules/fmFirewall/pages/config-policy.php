@@ -61,9 +61,8 @@ if ($allowed_to_manage_servers) {
 			if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $_GET['id'], 'policy_', $_GET['status'], 'policy_id')) {
 				$response = 'This policy could not be ' . $_GET['status'] . '.';
 			} else {
-				/* set the server_build_config flag */
-//				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET `server_build_config`='yes' WHERE `server_id`=" . sanitize($_GET['id']);
-//				$result = $fmdb->query($query);
+				/* Set the server_build_config flag */
+				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				
 				addLogEntry("Set policy status to " . $_GET['status'] . '.');
 				header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
