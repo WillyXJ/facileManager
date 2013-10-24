@@ -30,11 +30,6 @@ if (array_key_exists('action', $_POST)) {
 		$data = $fm_module_buildconf->buildServerConfig($_POST);
 	}
 	
-	/** Process building of zone files */
-	if ($_POST['action'] == 'zones') {
-		$data = $fm_module_buildconf->buildZoneConfig($_POST);
-	}
-	
 	/** Process building of whatever is required */
 	if ($_POST['action'] == 'cron') {
 		$data = $fm_module_buildconf->buildCronConfigs($_POST);

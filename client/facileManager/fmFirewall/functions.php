@@ -128,12 +128,6 @@ function buildConf($url, $data) {
 		}
 	}
 		
-		/** Remove previous files so there are no stale files */
-//		foreach (scandir($server_zones_dir) as $item) {
-//			if ($item == '.' || $item == '..') continue;
-//			unlink($server_zones_dir . DIRECTORY_SEPARATOR . $item);
-//		}
-		
 	/** Process the files */
 	if (count($files)) {
 		foreach($files as $filename => $contents) {
@@ -166,16 +160,10 @@ function buildConf($url, $data) {
 			if ($debug) echo "There was an error reloading the firewall.  Please check the logs for details.\n";
 			return false;
 		} else {
-			/** Only update reloaded zones */
-			$data['built_domain_ids'] = $built_domain_ids;
-			if (!isset($server_build_all)) {
-				$data['zone'] = 'update';
-			}
-			
 			/** Update the server with a successful reload */
 			$data['action'] = 'update';
-//			$raw_update = getPostData($url, $data);
-//			$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
+			$raw_update = getPostData($url, $data);
+			$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
 		}
 	}
 	return true;
@@ -215,10 +203,10 @@ function detectFirewallType() {
 
 function detectFWVersion($return_array = false) {
 	$fw = detectFirewallType();
-	$fw_flags = array('iptables' => '-V | awk -F v "{print \$NF}"',
+	$fw_flags = array('iptables' => '-V | awk -Fv "{print \$NF}"',
 						'pf' => null,
 						'ipfw' => null,
-						'ipf' => '-V | awk -F v \'{print $NF}\''
+						'ipf' => '-V | head -1 | awk -Fv \'{print $NF}\''
 					);
 	
 	if ($fw) {
@@ -313,20 +301,23 @@ function getInterfaceNames($os) {
 	
 	switch(PHP_OS) {
 		case 'Linux':
-			$command = findProgram('ifconfig');
+			$command = findProgram('ifconfig') . ' | grep Link';
 			break;
 		case 'Darwin':
 		case 'FreeBSD':
 		case 'OpenBSD':
 		case 'NetBSD':
-			$command = findProgram('netstat') . ' -i';
+			$command = findProgram('netstat') . ' -i | grep Link';
+			break;
+		case 'SunOS':
+			$command = findProgram('ifconfig') . ' -a | grep flags | sed -e \'s/://g\'';
 			break;
 		default:
 			return null;
 			break;
 	}
 	
-	exec($command . ' | grep Link | awk "{print \$1}" | sort', $interfaces);
+	exec($command . ' | awk "{print \$1}" | sort | uniq', $interfaces);
 	
 	return $interfaces;
 }

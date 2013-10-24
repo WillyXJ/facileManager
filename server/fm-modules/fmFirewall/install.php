@@ -119,13 +119,6 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}time` 
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 TABLE;
 
-	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}track_builds` (
-  `domain_id` int(11) NOT NULL,
-  `server_serial_no` int(11) NOT NULL
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
-TABLE;
-
 	$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_options` (option_name, option_value) 
 	SELECT '{$module}_version', '{$__FM_CONFIG[$module]['version']}' FROM DUAL

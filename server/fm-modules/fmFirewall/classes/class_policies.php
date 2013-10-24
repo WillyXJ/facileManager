@@ -273,11 +273,13 @@ HTML;
 		}
 		
 		$server_firewall_type = getNameFromID($_POST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
+		$available_policy_actions = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
+		if ($server_firewall_type == 'ipfilter') array_pop($available_policy_actions);
 		
 		$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
 		$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
 		$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
-		$policy_action = buildSelect('policy_action', 'policy_action', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action'), $policy_action, 1);
+		$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
 
 		$source_items_assigned = getGroupItems($policy_source);
 		$source_assigned_list = buildSelect(null, 'source_items_assigned', availableGroupItems('object', 'assigned', $source_items_assigned), null, 7, null, true);
@@ -542,6 +544,11 @@ FORM;
 				$result = $fmdb->last_result[0];
 				$post['policy_order_id'] = $result->policy_order_id + 1;
 			} else $post['policy_order_id'] = 1;
+		}
+		
+		/** ipfilter does not support reject */
+		if (getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type') == 'ipfilter' && $post['policy_action'] == 'reject') {
+			$post['policy_action'] = 'block';
 		}
 		
 		return $post;
