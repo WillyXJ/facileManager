@@ -278,7 +278,8 @@ function getStartupScript($fw) {
 			'OpenBSD'   => findProgram('pfctl') . ' -d -F all -f __FILE__'
 		),
 		'ipfilter' => array(
-			'FreeBSD'   => findProgram('ipf') . ' -Fa -f __FILE__'
+			'FreeBSD'   => findProgram('ipf') . ' -Fa -f __FILE__',
+			'SunOS'     => findProgram('ipf') . ' -Fa -f __FILE__'
 		),
 		'ipfw' => array(
 			'FreeBSD'   => findProgram('sh') . ' __FILE__',
