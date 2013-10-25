@@ -1,5 +1,7 @@
 1.0-?? (2013-10-??)
 ====================
+* Server - Fixed an issue where zone imports could be performed without any
+           defined zones.
 * Server - Fixed some php errors.
 * Client - OS detection now separates OS from distro.
 * Server - (Git Issue 30) Fixed server options config syntax with listen-on.
