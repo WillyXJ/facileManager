@@ -200,7 +200,7 @@ HTML;
 		}
 
 		/** Show/hide divs */
-		$netmask_option = ($type == 'address') ? 'none' : 'block';
+		$netmask_option = ($type == 'address') ? 'style="display: none;"' : null;
 
 		$object_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name');
 		$object_address_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_address');
@@ -226,7 +226,7 @@ HTML;
 					<th width="33%" scope="row"><label for="object_address">Address</label></th>
 					<td width="67%"><input name="object_address" id="object_address" type="text" value="$object_address" size="40" placeholder="127.0.0.1" maxlength="$object_address_length" /></td>
 				</tr>
-				<tr id="netmask_option" style="display: $netmask_option;">
+				<tr id="netmask_option" $netmask_option>
 					<th width="33%" scope="row"><label for="object_mask">Netmask</label></th>
 					<td width="67%"><input name="object_mask" id="object_mask" type="text" value="$object_mask" size="40" placeholder="255.255.255.0" maxlength="$object_mask_length" /></td>
 				</tr>
