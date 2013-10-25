@@ -188,7 +188,6 @@ function findFile($file) {
 
 function detectFirewallType() {
 	$supported_firewalls = array('iptables'=>'iptables',
-								'pf' => 'pfctl',
 								'ipfw' => 'ipfw',
 								'ipfilter' => 'ipf'
 							);
