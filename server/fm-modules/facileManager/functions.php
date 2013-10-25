@@ -1112,7 +1112,7 @@ function getActiveModules($allowed_modules = false) {
 	$modules = getOption('fm_active_modules', $_SESSION['user']['account_id']);
 	
 	if ($modules !== false) {
-		sort($modules);
+		@sort($modules);
 		if (!$allowed_modules) {
 			return $modules;
 		}
