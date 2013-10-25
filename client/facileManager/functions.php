@@ -172,7 +172,12 @@ function installFM($proto, $compress) {
 	echo "\tmydomain.com/fm\n";
 	echo "\thttp://fm.mydomain.com/facileManager\n\n";
 	echo 'Please enter the location of the facileManager interface: ';
-	$serverhost = trim(fgets(STDIN));
+	if (defined('FMHOST')) {
+		$serverhost = FMHOST;
+		echo FMHOST . "\n";
+	} else {
+		$serverhost = trim(fgets(STDIN));
+	}
 	
 	/** Get server name from input */
 	$server_location = getServerPath($serverhost);
@@ -227,22 +232,28 @@ function installFM($proto, $compress) {
 	$data['server_os'] = PHP_OS;
 	$data['server_os_distro'] = detectOSDistro();
 	echo 'Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ';
-	$serialno = trim(fgets(STDIN));
+	if (defined('SERIALNO')) {
+		$serialno = $data['server_serial_no'] = SERIALNO;
+		echo SERIALNO . "\n";
+	} else {
+		$serialno = trim(fgets(STDIN));
+	}
+	
+	$url = "${proto}://${hostname}/${path}admin-servers?genserial";
 	
 	/** Process new server */
 	if (empty($serialno)) {
 		/** Generate new serial number */
 		echo '  --> Generating new serial number: ';
-		$url = "${proto}://${hostname}/${path}admin-servers?genserial";
 		$serialno = $data['server_serial_no'] = generateSerialNo($url, $data);
 		echo $serialno . "\n";
-
-		/** Add new server */
-		echo '  --> Adding ' . $data['server_name'] . ' to the database...';
-		$add_server_result = moduleAddServer($url, $data);
-		extract($add_server_result, EXTR_OVERWRITE);
-		echo $add_result;
 	}
+
+	/** Add new server */
+	echo '  --> Adding ' . $data['server_name'] . ' to the database...';
+	$add_server_result = moduleAddServer($url, $data);
+	extract($add_server_result, EXTR_OVERWRITE);
+	echo $add_result;
 
 	$data['SERIALNO'] = $serialno;
 	$data['config'][] = array('SERIALNO', 'Server unique serial number', $serialno);

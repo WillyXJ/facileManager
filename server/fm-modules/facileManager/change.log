@@ -1,5 +1,6 @@
 1.0-?? (2013-10-??)
 ====================
+* Client - Added install support for multiple modules.
 * Server - Ensures current module is active.
 * Server - Fixed some PHP errors.
 * Server - Fixed installer password validity background display.
