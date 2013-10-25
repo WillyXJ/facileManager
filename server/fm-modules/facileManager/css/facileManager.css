@@ -747,6 +747,14 @@ span.not_installed {
 	text-align: center;
 }
 
+#shadow_container.note {
+	padding: 0 1em;
+	text-align: left;
+}
+#shadow_container.note b {
+	color: #e19419;
+}
+
 #shadow_box {
 	-moz-border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px;
 	-webkit-border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px;

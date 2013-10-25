@@ -59,6 +59,19 @@ HTML;
 			echo "</tbody>\n";
 		}
 		
+		$server_firewall_type = getNameFromID($_REQUEST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
+		if (array_key_exists($server_firewall_type, $__FM_CONFIG['fw']['notes'])) {
+			$policy_note = <<<NOTE
+			<br />
+			<div id="shadow_box" class="fullwidthbox">
+				<div id="shadow_container" class="fullwidthbox note">
+				<p><b>Note:</b><br />{$__FM_CONFIG['fw']['notes'][$server_firewall_type]}</p>
+				</div>
+			</div>
+
+NOTE;
+		} else $policy_note = null;
+		
 		$action_icons = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
 		$action_icons[] = 'log';
 		
@@ -72,6 +85,7 @@ HTML;
 		
 		echo <<<HTML
 			</table>
+			$policy_note
 			<table class="legend">
 				<tbody>
 					<tr>
@@ -431,88 +445,7 @@ FORM;
 		return $return_form;
 	}
 	
-	function buildPolicyConfig($serial_no) {
-		global $fmdb, $__FM_CONFIG;
-		
-		/** Check serial number */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', sanitize($serial_no), 'policy_', 'policy_serial_no');
-		if (!$fmdb->num_rows) return '<p class="error">This policy is not found.</p>';
 
-		$policy_details = $fmdb->last_result;
-		extract(get_object_vars($policy_details[0]), EXTR_SKIP);
-		
-		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'options') == 'yes') {
-			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
-			
-			$data['SERIALNO'] = $policy_serial_no;
-			$data['compress'] = 0;
-			$data['dryrun'] = true;
-		
-			basicGet('fm_accounts', $_SESSION['user']['account_id'], 'account_', 'account_id');
-			$account_result = $fmdb->last_result;
-			$data['AUTHKEY'] = $account_result[0]->account_key;
-		
-			$raw_data = $fm_module_buildconf->buildPolicyConfig($data);
-		
-			$response = $fm_module_buildconf->namedSyntaxChecks($raw_data);
-			if (strpos($response, 'error') !== false) return $response;
-		} else $response = null;
-		
-		switch($policy_update_method) {
-			case 'cron':
-				/* set the policy_update_config flag */
-				setBuildUpdateConfigFlag($serial_no, 'yes', 'update');
-				$response .= '<p>This policy will be updated on the next cron run.</p>'. "\n";
-				break;
-			case 'http':
-			case 'https':
-				/** Test the port first */
-				$port = ($policy_update_method == 'https') ? 443 : 80;
-				if (!socketTest($policy_name, $port, 30)) {
-					return $response . '<p class="error">Failed: could not access ' . $policy_name . ' using ' . $policy_update_method . ' (tcp/' . $port . ').</p>'. "\n";
-				}
-				
-				/** Remote URL to use */
-				$url = $policy_update_method . '://' . $policy_name . '/' . $_SESSION['module'] . '/reload.php';
-				
-				/** Data to post to $url */
-				$post_data = array('action'=>'buildconf', 'serial_no'=>$policy_serial_no);
-				
-				$post_result = unserialize(getPostData($url, $post_data));
-				
-				if (!is_array($post_result)) {
-					/** Something went wrong */
-					if (empty($post_result)) {
-						$post_result = 'It appears ' . $policy_name . ' does not have php configured properly within httpd.';
-					}
-					return $response . '<p class="error">' . $post_result . '</p>'. "\n";
-				} else {
-					if (count($post_result) > 1) {
-						$response .= '<textarea rows="4" cols="100">';
-						
-						/** Loop through and format the output */
-						foreach ($post_result as $line) {
-							$response .= "[$policy_name] $line\n";
-						}
-						
-						$response .= "</textarea>\n";
-					} else {
-						$response .= "<p>[$policy_name] " . $post_result[0] . '</p>';
-					}
-				}
-		}
-		
-		/* reset the policy_build_config flag */
-		if (!strpos($response, strtolower('failed'))) {
-			setBuildUpdateConfigFlag($serial_no, 'no', 'build');
-		}
-
-		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_serial_no', 'policy_name');
-		addLogEntry("Built the configuration for policy '$tmp_name'.");
-
-		return $response;
-	}
-	
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		

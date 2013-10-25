@@ -82,7 +82,19 @@ $__FM_CONFIG['fw']['config_file'] 		= array('iptables' => '/etc/sysconfig/iptabl
 												'ipfw' => '/etc/ipfw.rules',
 												'ipfilter' => '/etc/ipf.rules'
 											);
+
+/** Firewall notes */
+$__FM_CONFIG['fw']['notes'] 			= array('iptables' => '',
+												'pf' => 'Rules are evaluated on a last-match basis and everything that isn\'t explicitly blocked
+														will be allowed by default. So make sure you take care with your rule order.',
+												'ipfw' => 'Rules are evaluated on a first-match basis and everything that isn\'t explicitly passed
+														will be blocked by default. So make sure you take care with your rule order.',
+												'ipfilter' => 'Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked
+														will be passed by default. So make sure you take care with your rule order.'
+											);
+
 $__FM_CONFIG['policy']['avail_types'] = array('rules' => 'Rules', 'nat' => 'NAT');
+$__FM_CONFIG['policy']['avail_types'] = array('rules' => 'Rules');
 
 /** Cleanup options */
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'groups'=>'group', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'objects'=>'object',
