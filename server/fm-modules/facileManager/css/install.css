@@ -61,7 +61,7 @@ code {
 .form-table th {
 	font-size: 14px;
 	text-align: left;
-	padding: 6px 10px 10px 10px;
+	padding: 2px 10px 10px 10px;
 	width: 140px;
 	vertical-align: top;
 	text-align: right;
@@ -91,7 +91,7 @@ code {
 
 .form-table td.status {
 	margin-bottom: 0;
-	padding-top: 6px;
+	padding-top: 2px;
 }
 
 .form-table tr.pwdhint th, .form-table tr.pwdhint td {
