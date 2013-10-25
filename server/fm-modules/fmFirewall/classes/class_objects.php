@@ -200,7 +200,7 @@ HTML;
 		}
 
 		/** Show/hide divs */
-		$netmask_option = ($type == 'address') ? 'style="display: none;"' : null;
+		$netmask_option = ($type == 'host') ? 'style="display: none;"' : null;
 
 		$object_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name');
 		$object_address_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_address');

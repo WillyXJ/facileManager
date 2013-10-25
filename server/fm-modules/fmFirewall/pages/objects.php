@@ -25,10 +25,11 @@
 
 $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'host';
 
+/** Ensure we have a valid type */
+if (!in_array($type, enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'))) header('Location: ' . $GLOBALS['basename']);
+
 $page_name = 'Objects';
-$page_name_sub = ucfirst($type);
-if ($page_name_sub == 'Address') $page_name_sub .= 'e';
-$page_name_sub .= 's';
+$page_name_sub = ucfirst($type) . 's';
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_objects.php');
 $response = isset($response) ? $response : null;

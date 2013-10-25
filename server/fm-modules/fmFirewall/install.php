@@ -43,7 +43,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (
   `object_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
-  `object_type` enum('address','host','network') NOT NULL,
+  `object_type` enum('host','network') NOT NULL,
   `object_name` varchar(255) NOT NULL,
   `object_address` varchar(255) NOT NULL,
   `object_mask` varchar(15) NOT NULL,
@@ -197,14 +197,13 @@ WHERE NOT EXISTS
 	);
 INSERT;
 
-	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups` (account_id, group_type, group_name, group_items, group_comment) 
-	SELECT '1', 'object', 'rfc1918-networks', 'o2;o3;o4', 'RFC1918 networks.' FROM DUAL
-WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups` WHERE 
-	group_type = 'object' AND group_name = 'rfc1918-networks' AND account_id = '1'
-	);
-INSERT;
+	$groups[] = array('object',
+					array(
+						'network|net-10.0.0.0',
+						'network|net-172.16.0.0',
+						'network|net-192.168.0.0'
+					), 'rfc1918', 'RFC1918 networks.'
+				);
 
 
 	/** Default ICMP Services */
@@ -332,32 +331,32 @@ INSERT;
 	$services[] = array('tcp', 'cvsup', '', '5999:5999', 'CVSup file transfers (FreeBSD uses this)');
 	$services[] = array('tcp', 'irc', '', '6667:6667', '');
 
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'tcp|ssh',
 						'tcp|rdp'
 					), 'Remote Server Administration', ''
 				);
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'tcp|http',
 						'tcp|https'
 					), 'Web Server', ''
 				);
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'tcp|domain',
 						'udp|domain'
 					), 'DNS', ''
 				);
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'tcp|ftp',
 						'tcp|ftp-data',
 						'tcp|ftp-data passive'
 					), 'FTP', ''
 				);
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'tcp|kerberos',
 						'udp|kerberos',
@@ -369,19 +368,19 @@ INSERT;
 						'tcp|ksh'
 					), 'Kerberos', ''
 				);
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'udp|bootps',
 						'udp|bootpc'
 					), 'DHCP', ''
 				);
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'tcp|nfs',
 						'udp|nfs'
 					), 'NFS', ''
 				);
-	$groups[] = array(
+	$groups[] = array('service',
 					array(
 						'udp|netbios-ns',
 						'udp|netbios-dgm',
@@ -422,23 +421,25 @@ INSERT;
 		}
 	}
 	
+	/** Process groups */
 	foreach ($groups as $array) {
-		list($service_array, $group_name, $comment) = $array;
+		list($group_type, $item_array, $group_name, $comment) = $array;
 		$group_ids = null;
-		foreach ($service_array as $service) {
-			list($protocol, $name) = explode('|', $service);
-			basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}services", $name, 'service_', 'service_name', "AND service_type = '$protocol'", 1);
+		foreach ($item_array as $item) {
+			list($protocol, $name) = explode('|', $item);
+			basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s", $name, $group_type . '_', $group_type . '_name', "AND {$group_type}_type = '$protocol'", 1);
 			$temp_result = $fmdb->last_result[0];
-			$group_ids[] = 's' . $temp_result->service_id;
+			$type_id = $group_type . '_id';
+			$group_ids[] = substr($group_type, 0, 1) . $temp_result->$type_id;
 		}
 
 		$group_items = implode(';', $group_ids);
 		$group_inserts[] = <<<INSERT
 INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups` (account_id, group_type, group_name, group_items, group_comment) 
-	SELECT '1', 'service', '$group_name', '$group_items', '$comment' FROM DUAL
+	SELECT '1', '$group_type', '$group_name', '$group_items', '$comment' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups` WHERE 
-	group_type = 'service' AND group_name = '$group_name' AND account_id = '1'
+	group_type = '$group_type' AND group_name = '$group_name' AND account_id = '1'
 	);
 INSERT;
 		

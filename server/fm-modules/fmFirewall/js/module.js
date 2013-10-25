@@ -25,7 +25,7 @@ $(document).ready(function() {
 	});
 	
 	$("#manage_item_contents").delegate('#object_type', 'change', function(e) {
-		if ($(this).val() == 'address') {
+		if ($(this).val() == 'host') {
 			$('#netmask_option').slideUp();
 		} else {
 			$('#netmask_option').show('slow');

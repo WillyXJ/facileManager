@@ -42,7 +42,6 @@ $__FM_CONFIG['module']['menu']['Firewalls']['URL']			= 'config-servers';
 /** Objects Menu Options */
 $__FM_CONFIG['module']['menu']['Objects']['URL']			= 'object-groups';
 $__FM_CONFIG['module']['menu']['Objects']['Groups']			= 'object-groups';
-$__FM_CONFIG['module']['menu']['Objects']['Addresses']		= 'objects?type=address';
 $__FM_CONFIG['module']['menu']['Objects']['Hosts']			= 'objects?type=host';
 $__FM_CONFIG['module']['menu']['Objects']['Networks']		= 'objects?type=network';
 
@@ -84,7 +83,7 @@ $__FM_CONFIG['fw']['config_file'] 		= array('iptables' => '/etc/sysconfig/iptabl
 											);
 
 /** Firewall notes */
-$__FM_CONFIG['fw']['notes'] 			= array('iptables' => '',
+$__FM_CONFIG['fw']['notes'] 			= array(
 												'pf' => 'Rules are evaluated on a last-match basis and everything that isn\'t explicitly blocked
 														will be allowed by default. So make sure you take care with your rule order.',
 												'ipfw' => 'Rules are evaluated on a first-match basis and everything that isn\'t explicitly passed
@@ -94,7 +93,6 @@ $__FM_CONFIG['fw']['notes'] 			= array('iptables' => '',
 											);
 
 $__FM_CONFIG['policy']['avail_types'] = array('rules' => 'Rules', 'nat' => 'NAT');
-$__FM_CONFIG['policy']['avail_types'] = array('rules' => 'Rules');
 
 /** Cleanup options */
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'groups'=>'group', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'objects'=>'object',
