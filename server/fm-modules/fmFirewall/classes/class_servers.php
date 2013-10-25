@@ -62,13 +62,13 @@ class fm_module_servers {
 	 * Adds the new server
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
+		$module = (isset($post['module_name'])) ? $post['module_name'] : $_SESSION['module'];
 
 		/** Get a valid and unique serial number */
 		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? $post['server_serial_no'] : generateSerialNo($module);
@@ -96,6 +96,33 @@ class fm_module_servers {
 		$result = $fmdb->query($query);
 		
 		if (!$result) return 'Could not add the server because a database error occurred.';
+		
+		/** Add default fM interaction rules */
+		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
+		include_once(ABSPATH . 'fm-modules/' . $module . '/classes/class_policies.php');
+		$fm_host_id = getNameFromID($fm_name, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'objects', 'object_', 'object_name', 'object_id', $account_id);
+		$fm_service_id = getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
+		$default_rules[] = array(
+								'account_id' => $account_id,
+								'server_serial_no' => $post['server_serial_no'],
+								'source_items' => 'o' . $fm_host_id,
+								'destination_items' => '',
+								'services_items' => 'g' . $fm_service_id,
+								'policy_comment' => 'Required for ' . $fm_name . ' client interaction.'
+							);
+		$default_rules[] = array(
+								'account_id' => $account_id,
+								'server_serial_no' => $post['server_serial_no'],
+								'policy_direction' => 'out',
+								'source_items' => '',
+								'destination_items' => 'o' . $fm_host_id,
+								'services_items' => 'g' . $fm_service_id,
+								'policy_comment' => 'Required for ' . $fm_name . ' client interaction.'
+							);
+
+		foreach ($default_rules as $rule) {
+			$fm_module_policies->add($rule);
+		}
 
 		addLogEntry("Added server:\nName: {$post['server_name']} ({$post['server_serial_no']})\nType: {$post['server_type']}\n" .
 				"Update Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}");
@@ -357,7 +384,7 @@ FORM;
 		if ($fmdb->num_rows) return 'This server name already exists.';
 		
 		if (empty($post['server_config_file'])) {
-			$post['server_config_file'] = $post['server_os'] == 'SunOS' ? '/etc/ipf/ipf.conf' : $__FM_CONFIG['fw']['config_file'][$post['server_type']];
+			$post['server_config_file'] = (isset($post['server_os']) && $post['server_os'] == 'SunOS') ? '/etc/ipf/ipf.conf' : $__FM_CONFIG['fw']['config_file'][$post['server_type']];
 		}
 		
 		/** Set default ports */

@@ -212,7 +212,9 @@ class fm_module_buildconf {
 			
 			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
 			$config[] = '# ' . $rule_title;
-			$config[] = wordwrap('# ' . $policy_result[$i]->policy_comment, 20, "\n");
+			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
+			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
+			unset($rule_comment);
 			
 			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) {
 				$log_rule = true;
@@ -422,7 +424,9 @@ class fm_module_buildconf {
 			
 			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
 			$config[] = '# ' . $rule_title;
-			$config[] = wordwrap('# ' . $policy_result[$i]->policy_comment, 20, "\n");
+			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
+			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
+			unset($rule_comment);
 			
 			$line[] = $fw_actions[$policy_result[$i]->policy_action];
 			$line[] = $policy_result[$i]->policy_direction;
@@ -569,7 +573,9 @@ class fm_module_buildconf {
 			
 			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
 			$config[] = '# ' . $rule_title;
-			$config[] = wordwrap('# ' . $policy_result[$i]->policy_comment, 20, "\n");
+			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
+			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
+			unset($rule_comment);
 			
 			$line[] = $cmd;
 			$line[] = $fw_actions[$policy_result[$i]->policy_action];

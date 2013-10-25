@@ -64,7 +64,7 @@ if ($allowed_to_manage_servers) {
 				/* Set the server_build_config flag */
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				
-				addLogEntry("Set policy status to " . $_GET['status'] . '.');
+				addLogEntry("Set firewall policy status to " . $_GET['status'] . ' for ' . getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . '.');
 				header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
 			}
 		}

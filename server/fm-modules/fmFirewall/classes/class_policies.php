@@ -44,7 +44,7 @@ class fm_module_policies {
 						<th>Interface</th>
 						<th>Direction</th>
 						<th>Time</th>
-						<th style="width: 10%;">Comment</th>
+						<th style="width: 20%;">Comment</th>
 						<th width="110" style="text-align: center;">Actions</th>
 					</tr>
 				</thead>
@@ -118,11 +118,19 @@ HTML;
 		
 		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
 
+		$log_message = "Added a firewall policy for " . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name', $post['account_id']) . " with the following details:\n";
+
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
+				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
+					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
+						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
+					}
+					$log_message .= ucwords(str_replace('_', ' ', str_replace('policy_', '', $key))) . ": $clean_data\n";
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ',') . ')';
@@ -135,8 +143,7 @@ HTML;
 
 		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
-//		addLogEntry("Added policy:\nName: {$post['policy_name']} ({$post['server_serial_no']})\nType: {$post['policy_type']}\n" .
-//				"Update Method: {$post['policy_update_method']}\nConfig File: {$post['policy_config_file']}");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -162,7 +169,7 @@ HTML;
 				$result = $fmdb->query($query);
 				if ($result === false) return 'Could not update the policy order because a database error occurred.';
 			}
-			addLogEntry('Updated policy order for ' . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name'));
+			addLogEntry('Updated firewall policy order for ' . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name'));
 			return true;
 		}
 		
@@ -174,42 +181,48 @@ HTML;
 
 		$sql_edit = null;
 		
+		$log_message = "Updated a firewall policy for " . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . " with the following details:\n";
+
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$clean_data = sanitize($data);
+				$sql_edit .= $key . "='" . $clean_data . "',";
+				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
+					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
+						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
+					}
+					$log_message .= ucwords(str_replace('_', ' ', str_replace('policy_', '', $key))) . ": $clean_data\n";
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ',');
 		
-		// Update the policy
-//		$old_name = getNameFromID($post['policy_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
+		/** Update the policy */
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET $sql WHERE `policy_id`={$post['policy_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the policy because a database error occurred.';
+		if (!$result) return 'Could not update the firewall policy because a database error occurred.';
 
 		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
-//		addLogEntry("Updated policy '$old_name' to:\nName: {$post['policy_name']}\nType: {$post['policy_type']}\n" .
-//					"Update Method: {$post['policy_update_method']}\nConfig File: {$post['policy_config_file']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
 	/**
 	 * Deletes the selected policy
 	 */
-	function delete($policy_id) {
+	function delete($policy_id, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Does the policy_id exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $policy_id, 'policy_', 'policy_id');
 		if ($fmdb->num_rows) {
 			/** Delete service */
-//			$tmp_name = getNameFromID($service_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'service_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $policy_id, 'policy_', 'deleted', 'policy_id')) {
 				setBuildUpdateConfigFlag($_REQUEST['server_serial_no'], 'yes', 'build');
 				
-				addLogEntry("Deleted policy.");
+				addLogEntry('Deleted policy from ' . getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . '.');
 				return true;
 			}
 		}
@@ -449,10 +462,6 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Does the record already exist for this account? */
-//		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['policy_name'], 'policy_', 'policy_name');
-//		if ($fmdb->num_rows) return 'This policy name already exists.';
-		
 		/** Process weekdays */
 		if (@is_array($post['policy_options'])) {
 			$decimals = 0;
@@ -462,7 +471,7 @@ FORM;
 			$post['policy_options'] = $decimals;
 		} else $post['policy_options'] = 0;
 		
-		$post['server_serial_no'] = $_REQUEST['server_serial_no'];
+		$post['server_serial_no'] = isset($post['server_serial_no']) ? $post['server_serial_no'] : $_REQUEST['server_serial_no'];
 		$post['policy_source'] = $post['source_items'];
 		$post['policy_destination'] = $post['destination_items'];
 		$post['policy_services'] = $post['services_items'];
@@ -472,7 +481,7 @@ FORM;
 		
 		/** Get policy_order_id */
 		if (!isset($post['policy_order_id']) || $post['policy_order_id'] == 0) {
-			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $_REQUEST['server_serial_no'], 'policy_', 'server_serial_no', 'ORDER BY policy_order_id DESC LIMIT 1');
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['server_serial_no'], 'policy_', 'server_serial_no', 'ORDER BY policy_order_id DESC LIMIT 1');
 			if ($fmdb->num_rows) {
 				$result = $fmdb->last_result[0];
 				$post['policy_order_id'] = $result->policy_order_id + 1;
