@@ -128,6 +128,8 @@ HTML;
 				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
 						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
+					} elseif ($key == 'policy_time') {
+						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 					}
 					$log_message .= ucwords(str_replace('_', ' ', str_replace('policy_', '', $key))) . ": $clean_data\n";
 				}
