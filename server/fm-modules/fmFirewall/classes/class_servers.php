@@ -147,9 +147,9 @@ class fm_module_servers {
 		$server_serial_no = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
-			/** Delete associated records from fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds */
-			if (basicDelete('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false) === false) {
-				return 'The server could not be removed from the fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'track_builds table because a database error occurred.';
+			/** Delete associated policies */
+			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $server_serial_no, 'policy_', 'deleted', 'server_serial_no') === false) {
+				return 'The associated policies could not be removed because a database error occurred.';
 			}
 			
 			/** Delete server */
@@ -361,11 +361,11 @@ FORM;
 		}
 		
 		/** Set default ports */
-		if ($post['server_update_method'] == 'cron') {
+		if (empty($post['server_update_port']) || (isset($post['server_update_port']) && $post['server_update_method'] == 'cron')) {
 			$post['server_update_port'] = 0;
 		}
 		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return 'Server update port must be a valid TCP port.';
-		if (empty($post['server_update_port'])) {
+		if (empty($post['server_update_port']) && isset($post['server_update_method'])) {
 			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
 			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
 		}

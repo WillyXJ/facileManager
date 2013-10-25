@@ -42,7 +42,7 @@ TABLE;
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (
   `object_id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL DEFAULT '1',
   `object_type` enum('host','network') NOT NULL,
   `object_name` varchar(255) NOT NULL,
   `object_address` varchar(255) NOT NULL,
@@ -56,7 +56,7 @@ TABLE;
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}options` (
   `option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL DEFAULT '1',
   `option_name` varchar(255) NOT NULL,
   `option_value` varchar(255) NOT NULL,
   PRIMARY KEY (`option_id`)
@@ -66,8 +66,8 @@ TABLE;
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}policies` (
   `policy_id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL,
-  `server_serial_no` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` int(10) NOT NULL,
   `policy_order_id` int(11) NOT NULL,
   `policy_interface` varchar(150) NOT NULL,
   `policy_direction` enum('in','out') NOT NULL,
@@ -130,7 +130,7 @@ TABLE;
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}time` (
   `time_id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL DEFAULT '1',
   `time_name` varchar(255) NOT NULL,
   `time_start_date` date DEFAULT NULL,
   `time_end_date` date DEFAULT NULL,

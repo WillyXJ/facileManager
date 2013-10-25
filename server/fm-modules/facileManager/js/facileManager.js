@@ -390,7 +390,7 @@ $(document).ready(function() {
 	        server_id	= $this.parent().parent().attr('id');
 	
 			$('#body_container').animate({marginTop: '4em'}, 200);
-			$('#response').html('<p>Processing Config Build&hellip;</p>');
+			$('#response').html('<p>Processing Config Build...</p>');
 			$('#response').fadeIn(200);
 			
 			var form_data = {
