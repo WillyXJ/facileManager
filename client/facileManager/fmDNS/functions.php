@@ -216,9 +216,12 @@ function detectServerType() {
 function moduleAddServer($url, $data) {
 	/** Attempt to determine default variables */
 	$named_conf = findFile('named.conf');
+	$data['server_run_as_predefined'] = 'named';
 	if ($named_conf) {
-		if ($run_as = posix_getgrgid(filegroup($named_conf))) {
-			$data['server_run_as_predefined'] = $run_as['name'];
+		if (function_exists('posix_getgrgid')) {
+			if ($run_as = posix_getgrgid(filegroup($named_conf))) {
+				$data['server_run_as_predefined'] = $run_as['name'];
+			}
 		}
 		$data['server_config_file'] = $named_conf;
 		$raw_root = explode('"', shell_exec('grep directory ' . $named_conf));
@@ -231,7 +234,7 @@ function moduleAddServer($url, $data) {
 		$data['server_root_dir'] = @trim($raw_root[1]);
 		
 		$data['server_zones_dir'] = (dirname($named_conf) == '/etc') ? null : dirname($named_conf) . '/zones';
-	} else $data['server_run_as_predefined'] = 'named';
+	}
 	
 	/** Add the server to the account */
 	$app = detectDaemonVersion(true);

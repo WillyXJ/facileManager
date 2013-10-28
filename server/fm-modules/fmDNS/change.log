@@ -1,12 +1,13 @@
 1.0-?? (2013-10-??)
 ====================
+* Server - (Git Issue 26) Added additional zone reload link.
+* Server - Fixed show/hide of server build button.
+* Server - (Git Issue 30) Fixed server options config syntax with listen-on.
+* Client - OS detection now separates OS from distro.
+* Server - Fixed some php errors.
 * Server - (Git Issue 31) Fixed an issue where zone imports could be performed
            without any defined zones.
-* Server - Fixed some php errors.
-* Client - OS detection now separates OS from distro.
-* Server - (Git Issue 30) Fixed server options config syntax with listen-on.
-* Server - Fixed show/hide of server build button.
-* Server - (Git Issue 26) Added additional zone reload link.
+* Client - Checks for posix support before attempting to use it.
 
 1.0-rc5 (2013-10-16)
 ====================
