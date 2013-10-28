@@ -90,6 +90,7 @@ class fm_module_servers {
 		}
 		
 		/** Set default ports */
+		if (!isset($post['server_update_method'])) $post['server_update_method'] = 'http';
 		if ($post['server_update_method'] == 'cron') {
 			$post['server_update_port'] = 0;
 		}
@@ -105,7 +106,7 @@ class fm_module_servers {
 		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? $post['server_serial_no'] : generateSerialNo($module);
 
 		/** Process server_key */
-		if (!is_numeric($post['server_key'])) $post['server_key'] = 0;
+		if (!isset($post['server_key']) || !is_numeric($post['server_key'])) $post['server_key'] = 0;
 
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers`";
 		$sql_fields = '(';
@@ -159,7 +160,7 @@ class fm_module_servers {
 		if ($fmdb->num_rows) return 'This server name already exists.';
 		
 		/** Process server_key */
-		if (!is_numeric($post['server_key'])) $post['server_key'] = 0;
+		if (!isset($post['server_key']) || !is_numeric($post['server_key'])) $post['server_key'] = 0;
 
 		/** Set default ports */
 		if ($post['server_update_method'] == 'cron') {
@@ -167,10 +168,8 @@ class fm_module_servers {
 		}
 		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return 'Server update port must be a valid TCP port.';
 		if (empty($post['server_update_port'])) {
-			if (isset($post['server_update_port'])) {
-				if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
-				elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
-			}
+			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
+			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
 		}
 		
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
