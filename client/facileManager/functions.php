@@ -490,7 +490,12 @@ function generateSerialNo($url, $data) {
  * @return string
  */
 function detectHttpd() {
-	$httpd_choices = array('httpd'=>'httpd.conf', 'lighttpd'=>'', 'apache2'=>'apache2.conf');
+	$httpd_choices = array(
+							'httpd'=>'httpd.conf',
+							'httpd2'=>'httpd.conf',
+							'apache2'=>'apache2.conf',
+							'lighttpd'=>''
+						);
 	
 	foreach ($httpd_choices as $app => $file) {
 		if (findProgram($app)) return array('app'=>$app, 'file'=>$file);
@@ -512,18 +517,10 @@ function detectOSDistro() {
 	if (PHP_OS == 'Linux') {
 		/** declare supported Linux distros */
 		$distros = array(
-			'Arch'       => 'arch-release',
-			'Fubuntu'    => '/etc/fuduntu-release',
-			'Ubuntu'     => 'lsb-release',
-			'Fedora'     => 'fedora-release',
-			'CentOS'     => 'centos-release',
-			'ClearOS'    => 'clearos-release',
-			'Oracle'     => 'oracle-release',
+			'Arch'       => '/etc/arch-release',
 			'ALT'        => '/etc/altlinux-release',
 			'Sabayon'    => '/etc/sabayon-release',
-			'Redhat'     => 'redhat-release',
-			'Debian'     => 'debian_version;debian_release',
-			'Slackware'  => 'slackware-version;/etc/slackware-release',
+			'Slackware'  => '/etc/slackware-version;/etc/slackware-release',
 			'SUSE'       => '/etc/SuSE-release;/etc/UnitedLinux-release',
 			'Gentoo'     => '/etc/gentoo-release',
 			'Mandrake'   => '/etc/mandrake-release;/etc/mandrakelinux-release;/etc/mandiva-release',
@@ -534,10 +531,32 @@ function detectOSDistro() {
 			'Turbolinux' => '/etc/turbolinux-version'
 			);
 		
+		/** Debian-based systems */
+		if ($program = findProgram('lsb_release')) {
+			$lsb_release = shell_exec($program . ' -a 2>/dev/null | grep -i distributor');
+			if ($lsb_release && trim($lsb_release) != '') {
+				$distrib = explode(':', $lsb_release);
+				$distrib_id = explode(' ', trim($distrib[1]));
+				return $distrib_id[0];
+			} elseif (file_exists($filename = '/etc/lsb-release')
+				&& $lsb_release = file_get_contents($filename)
+				&& preg_match('/^DISTRIB_ID="?([^"\n]+)"?/m', $lsb_release, $id)) {
+				 return trim($id[1]);
+			}
+		}
+		
+		/** Redhat-based systems */
+		if (file_exists($filename = '/etc/redhat-release')
+			&& $rh_release = file_get_contents($filename)) {
+			 $rh_release = explode(' ', $rh_release);
+			 return $rh_release[0];
+		}
+		
+		/** All other systems */
 		foreach ($distros as $distro => $release_files) {
 			$release_file_array = explode(';', $release_files);
 			foreach ($release_file_array as $release_file) {
-				if (file_exists('/etc/' . $release_file)) return $distro;
+				if (file_exists($release_file)) return $distro;
 			}
 		}
 	} elseif (PHP_OS == 'Darwin') {

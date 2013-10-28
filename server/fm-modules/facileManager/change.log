@@ -1,10 +1,11 @@
 1.0-?? (2013-10-??)
 ====================
-* Client - Added install support for multiple modules.
-* Server - Ensures current module is active.
-* Server - Fixed some PHP errors.
-* Server - Fixed installer password validity background display.
 * Server - Server config builds now prompt for confirmation.
+* Server - Fixed installer password validity background display.
+* Server - Fixed some PHP errors.
+* Server - Ensures current module is active.
+* Client - Added install support for multiple modules.
+* Client - Improved Linux distro detection.
 
 1.0-rc5 (2013-10-16)
 ====================
