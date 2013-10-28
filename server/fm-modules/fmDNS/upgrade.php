@@ -375,6 +375,7 @@ function upgradefmDNS_108($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_os`  `server_os_distro` VARCHAR( 50 ) NULL DEFAULT NULL ;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_os` VARCHAR( 50 ) NULL DEFAULT NULL AFTER  `server_name` ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'as defined:' ) NOT NULL DEFAULT  'named';";
 
 	$inserts = $updates = null;
 
