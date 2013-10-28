@@ -384,7 +384,18 @@ FORM;
 		if ($fmdb->num_rows) return 'This server name already exists.';
 		
 		if (empty($post['server_config_file'])) {
-			$post['server_config_file'] = (isset($post['server_os']) && $post['server_os'] == 'SunOS') ? '/etc/ipf/ipf.conf' : $__FM_CONFIG['fw']['config_file'][$post['server_type']];
+			$post['server_config_file'] = $__FM_CONFIG['fw']['config_file']['default'];
+			if (!is_array($__FM_CONFIG['fw']['config_file'][$post['server_type']]) && $__FM_CONFIG['fw']['config_file'][$post['server_type']]) {
+				$post['server_config_file'] = $__FM_CONFIG['fw']['config_file'][$post['server_type']];
+			} elseif (is_array($__FM_CONFIG['fw']['config_file'][$post['server_type']])) {
+				if (isset($post['server_os_distro'])) $distro = $post['server_os_distro'];
+				else {
+					if ($post['action'] == 'edit') {
+						$distro = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_os_distro');
+					}
+				}
+				if (isset($distro) && array_key_exists($distro, $__FM_CONFIG['fw']['config_file'][$post['server_type']])) $post['server_config_file'] = $__FM_CONFIG['fw']['config_file'][$post['server_type']][$distro];
+			}
 		}
 		
 		/** Set default ports */
@@ -406,8 +417,8 @@ FORM;
 				array_shift($all_firewalls);
 				break;
 			case 'OpenBSD':
-//				return array('pf');
 				return array();
+				return array('pf');
 				break;
 			case 'Darwin':
 				return array('ipfw');

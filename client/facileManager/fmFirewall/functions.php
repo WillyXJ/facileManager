@@ -259,7 +259,7 @@ function versionCheck($app_version, $serverhost, $compress) {
 function getStartupScript($fw) {
 	$distros = array(
 		'iptables' => array(
-			'Arch'      => '/etc/rc.d/iptables restart',
+			'Arch'      => 'systemctl reload iptables',
 			'Debian'    => '/etc/init.d/iptables restart',
 			'Ubuntu'    => '/etc/init.d/iptables restart',
 			'Fubuntu'   => '/etc/init.d/iptables restart',
@@ -268,7 +268,7 @@ function getStartupScript($fw) {
 			'CentOS'    => '/etc/init.d/iptables restart',
 			'ClearOS'   => '/etc/init.d/iptables restart',
 			'Oracle'    => '/etc/init.d/iptables restart',
-			'SUSE'      => '/etc/init.d/iptables restart',
+			'SUSE'      => '/sbin/service SuSEfirewall2 restart',
 			'Gentoo'    => '/etc/init.d/iptables restart',
 			'Slackware' => '/etc/rc.d/rc.iptables restart'
 		),

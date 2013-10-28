@@ -81,6 +81,25 @@ $__FM_CONFIG['fw']['config_file'] 		= array('iptables' => '/etc/sysconfig/iptabl
 												'ipfw' => '/etc/ipfw.rules',
 												'ipfilter' => '/etc/ipf.rules'
 											);
+$__FM_CONFIG['fw']['config_file'] 		= array(
+											'pf' => '/etc/pf.conf',
+											'ipfw' => '/etc/ipfw.rules',
+											'iptables' => array(
+												'Arch'      => '/etc/iptables/iptables.rules',
+												'Fedora'    => '/etc/sysconfig/iptables',
+												'Redhat'    => '/etc/sysconfig/iptables',
+												'CentOS'    => '/etc/sysconfig/iptables',
+												'ClearOS'   => '/etc/sysconfig/iptables',
+												'Oracle'    => '/etc/sysconfig/iptables',
+												'Gentoo'    => '/var/lib/iptables/rules-save',
+												'Slackware' => '/etc/rc.d/rc.firewall'
+											),
+											'ipfilter' => array(
+												'FreeBSD'   => '/etc/ipf.rules',
+												'SunOS'     => '/etc/ipf/ipf.conf'
+											),
+											'default' => '/usr/local/facileManager/fmFirewall/fw.rules'
+										);
 
 /** Firewall notes */
 $__FM_CONFIG['fw']['notes'] 			= array(
