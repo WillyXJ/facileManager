@@ -110,7 +110,16 @@ class fm_dns_records {
 		if (!$result) return false;
 
 		/** Update the SOA serial number */
-		$this->updateSOAReload($domain_id);
+		$soa_count = getSOACount($domain_id);
+		$ns_count = getNSCount($domain_id);
+		if (reloadAllowed($domain_id) && $soa_count && $ns_count) {
+			$this->updateSOAReload($domain_id);
+		}
+
+		if (in_array($record_type, array('SOA', 'NS')) && $soa_count && $ns_count) {
+			/** Update all associated DNS servers */
+			setBuildUpdateConfigFlag(null, 'yes', 'build', $insert_id);
+		}
 
 		addLogEntry($log_message);
 		return true;
@@ -131,8 +140,6 @@ class fm_dns_records {
 		
 		$record_type_sql = ($record_type != 'SOA') ? ",record_type='$record_type'" : null;
 		
-//		if (empty($array['record_ttl'])) $array['record_ttl'] = 300;
-		
 		$sql_edit = null;
 		
 		foreach ($array as $key => $data) {
@@ -148,7 +155,9 @@ class fm_dns_records {
 		if (!$result) return false;
 
 		/** Update the SOA serial number */
-		$this->updateSOAReload($domain_id);
+		if (reloadAllowed($domain_id) && getSOACount($domain_id) && getNSCount($domain_id)) {
+			$this->updateSOAReload($domain_id);
+		}
 
 		addLogEntry($log_message);
 		return $result;

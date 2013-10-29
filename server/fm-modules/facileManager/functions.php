@@ -1725,11 +1725,31 @@ function printPageHeader($response, $title, $allowed_to_add = false, $name = nul
  * @param string $build_update Are we building or updating
  * @return boolean
  */
-function setBuildUpdateConfigFlag($serial_no, $flag, $build_update) {
-	global $fmdb, $__FM_CONFIG;
+function setBuildUpdateConfigFlag($serial_no, $flag, $build_update, $domain_id = null) {
+	global $fmdb, $__FM_CONFIG, $fm_dns_zones;
 
-	if ($serial_no) {
-		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_serial_no`=" . sanitize($serial_no) . " AND `server_installed`='yes'";
+	if ($domain_id) {
+		/** Force buildconf for all associated DNS servers */
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
+		if ($fmdb->num_rows) {
+			$result = $fmdb->last_result;
+			$domain_name_servers = $result[0]->domain_name_servers;
+			
+			$name_servers = $fm_dns_zones->getNameServers($domain_name_servers);
+			
+			/** Loop through name servers */
+			if ($name_servers) {
+				$name_server_count = $fmdb->num_rows;
+				for ($i=0; $i<$name_server_count; $i++) {
+					$serial_no[] = $name_servers[$i]->server_serial_no;
+				}
+				$serial_no = implode(',', $serial_no);
+			} else return false;
+		} else return false;
+	}
+
+	if ($serial_no = sanitize($serial_no)) {
+		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_serial_no` IN (" . $serial_no . ") AND `server_installed`='yes'";
 	} else {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_installed`='yes' AND `server_status`='active'";
 	}

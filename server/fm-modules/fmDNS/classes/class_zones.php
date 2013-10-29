@@ -213,24 +213,6 @@ class fm_dns_zones {
 
 		$insert_id = $fmdb->insert_id;
 		
-		/** Force buildconf for all associated DNS servers */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $fmdb->insert_id, 'domain_', 'domain_id');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			$domain_name_servers = $result[0]->domain_name_servers;
-			
-			$name_servers = $this->getNameServers($domain_name_servers);
-			
-			/** Loop through name servers */
-			if ($name_servers) {
-				$name_server_count = $fmdb->num_rows;
-				for ($i=0; $i<$name_server_count; $i++) {
-					/** Set the server_build_config flag */
-					setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'build');
-				}
-			}
-		}
-
 		addLogEntry($log_message);
 		return $insert_id;
 	}
@@ -363,12 +345,11 @@ class fm_dns_zones {
 		
 		if (!$result) return 'Could not update the zone because a database error occurred.';
 
-		reloadZoneSQL($id, 'yes');
+		/* set the server_build_config flag */
+		if (reloadAllowed($id) && getSOACount($id) && getNSCount($id)) {
+			setBuildUpdateConfigFlag(null, 'yes', 'build', $id);
+		}
 
-//		/* set the server_build_config flag */
-//		setBuildUpdateConfigFlag($serial_no, 'yes', 'build');
-
-//		$domain_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 		addLogEntry($log_message);
 		return true;
 	}
@@ -405,22 +386,7 @@ class fm_dns_zones {
 			}
 			
 			/** Force buildconf for all associated DNS servers */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
-			if ($fmdb->num_rows) {
-				$result = $fmdb->last_result;
-				$domain_name_servers = $result[0]->domain_name_servers;
-				
-				$name_servers = $this->getNameServers($domain_name_servers);
-				
-				/** Loop through name servers */
-				if ($name_servers) {
-					$name_server_count = $fmdb->num_rows;
-					for ($i=0; $i<$name_server_count; $i++) {
-						/** Set the server_build_config flag */
-						setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'build');
-					}
-				}
-			}
+			setBuildUpdateConfigFlag(null, 'yes', 'build', $domain_id);
 			
 			/** Delete cloned zones */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
@@ -451,7 +417,7 @@ class fm_dns_zones {
 		$disabled_class = ($row->domain_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$soa_count = getSOACount($row->domain_id);
-		$reload_allowed = $this->reloadAllowed($row->domain_id);
+		$reload_allowed = reloadAllowed($row->domain_id);
 		$response = (!$soa_count && $row->domain_type == 'master') ? '** You still need to create the SOA for this zone **" style="background-color: #F5EBEB;' : null;
 		$clones = $this->cloneDomainsList($row->domain_id);
 		$zone_access_allowed = true;
@@ -839,26 +805,6 @@ HTML;
 		
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` SET `soa_serial_no`=$soa_serial_no WHERE `domain_id`=$domain_id";
 		$result = $fmdb->query($query);
-	}
-	
-	function reloadAllowed($domain_id = null) {
-		global $fmdb, $__FM_CONFIG;
-		
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'active', 'server_', 'server_status');
-		if ($fmdb->num_rows) {
-//			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'yes', 'server_', 'server_build_config', 'active');
-//			if ($fmdb->num_rows) {
-//				$reload_allowed = false;
-//			} else {
-				if ($domain_id) {
-					$query = 'SELECT * FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id;
-					$result = $fmdb->get_results($query);
-					$reload_allowed = ($fmdb->num_rows) ? true : false;
-				} else $reload_allowed = true;
-//			}
-		} else $reload_allowed = false;
-		
-		return $reload_allowed;
 	}
 	
 	function availableZones() {

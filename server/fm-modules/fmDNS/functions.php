@@ -349,7 +349,7 @@ function getSOACount($domain_id) {
 function getNSCount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE `domain_id`='$domain_id' AND `record_type`='NS'";
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE `domain_id`='$domain_id' AND `record_type`='NS' AND `record_status`='active'";
 	$fmdb->get_results($query);
 	return $fmdb->num_rows;
 }
@@ -454,4 +454,19 @@ function isDebianSystem($os) {
 }
 
 
+function reloadAllowed($domain_id = null) {
+	global $fmdb, $__FM_CONFIG;
+	
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'active', 'server_', 'server_status');
+	if ($fmdb->num_rows) {
+		if ($domain_id) {
+			$query = 'SELECT * FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id;
+			$result = $fmdb->get_results($query);
+			$reload_allowed = ($fmdb->num_rows) ? true : false;
+		} else $reload_allowed = true;
+	} else $reload_allowed = false;
+	
+	return $reload_allowed;
+}
+	
 ?>

@@ -10,6 +10,8 @@
 * Client - Checks for posix support before attempting to use it.
 * Server - Added an unsupported note during zone imports if $GENERATE and/or
            $ORIGIN records are found.
+* Server - (Git Issue 32) Fixed an issue where the server config build icon
+           would not appear when expected to.
 
 1.0-rc5 (2013-10-16)
 ====================
