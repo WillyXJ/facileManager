@@ -63,7 +63,6 @@ class fm_module_buildconf {
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);
 
-		$GLOBALS['built_domain_ids'] = null;
 		$data->server_build_all = true;
 		
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
