@@ -286,12 +286,12 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 		$number_error = null;
 		$append_error = null;
 		$ttl_error = null;
-		$action = '&nbsp;';
+		$action = null;
 		if (!empty($value_tmp[$i]['record_value']) || (!isset($value_tmp[$i]['record_value']) && $record_type == 'SOA')) {
 			$y = 0;
 			foreach ($data as $key => $val) {
-				if (!isset($_POST['create'][$i]['record_append'])) $_POST['create'][$i]['record_append'] = 'no';
-				if (!isset($value[$i]['record_append'])) $value[$i]['record_append'] = 'no';
+				if (!isset($_POST['create'][$i]['record_append'])) $_POST['create'][$i]['record_append'] = 'yes';
+				if (!isset($value[$i]['record_append'])) $value[$i]['record_append'] = 'yes';
 
 				if ($key == 'record_name' && $record_type != 'PTR') {
 					if (!verifyName($val, true, $record_type)) {
@@ -500,9 +500,9 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 	return $HTMLOut;
 }
 
-function buildInputReturn($action, $record_type, $i, $Var1, $Var2) {
+function buildInputReturn($action, $record_type, $i, $key, $val) {
 
-	return "<input type='hidden' name='{$action}[$i][$Var1]' value='$Var2'>\n";
+	return "<input type='hidden' name='{$action}[$i][$key]' value='$val'>\n";
 }
 
 function verifyName($record_name, $allow_null = true, $record_type = null) {

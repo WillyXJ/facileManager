@@ -325,32 +325,6 @@ function reloadZoneSQL($domain_id, $reload_zone) {
 	
 	$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone' WHERE `domain_id`='$domain_id'";
 	$fmdb->query($query);
-	
-/*
-	$update = "update {$GLOBALS['DBName']}.{$GLOBALS['TBLDomainsList']} set ReloadZone='$ReloadZone' where DomainID='$DomainID'";
-	$data = mysql_query($update,$GLOBALS['Connect']) or die("Invalid query: " . mysql_error() . "\n");
-
-	$SerialNo = SerialNoIncrement($DomainID);
-	$ReloadReturn = array();
-	if($ReloadZone=="no"){
-		$DomainName = rtrim(GetDomainName($DomainID), ".");
-		$PostData = array();
-		$PostData['ReloadZones'] = "1";
-		$PostData['DomainID'] = $DomainID;
-//		var_dump($GLOBALS['DNSServer']);
-		foreach($GLOBALS['DNSServer'] as $x => $ServerIP){
-			$ReloadReturn[] = PostReloadZones("http://$ServerIP/update/reload.php",$PostData);
-			$sdlkfhdsfh = 1;
-//			exec("/usr/sbin/rndc -s $ServerIP reload $DomainName");	
-		}
-		
-		$Date = date("M d H");
-//		$cmd = "cat /var/log/named.log |grep '$DomainName' |grep '$Date'|/usr/bin/tail -n5";
-//		echo "$cmd";
-//		exec($cmd, $tmp);
-		return $ReloadReturn;
-	}
-*/
 }
 
 function reloadZone($domain_id) {
