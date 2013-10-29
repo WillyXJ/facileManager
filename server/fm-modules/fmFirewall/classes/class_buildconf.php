@@ -235,7 +235,9 @@ class fm_module_buildconf {
 				}
 			}
 			
-			
+			/** Handle keep-states */
+			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' -m state --state NEW,ESTABLISHED' : null;
+
 			/** Handle sources */
 			unset($policy_source);
 			if ($temp_source = trim($policy_result[$i]->policy_source, ';')) {
@@ -380,11 +382,11 @@ class fm_module_buildconf {
 					if (is_array($policy_services['processed'])) {
 						foreach ($policy_services['processed'] as $line_array) {
 							foreach ($line_array as $rule) {
-								$config[] = implode(' ', $line) . $source . $destination . $rule . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+								$config[] = implode(' ', $line) . $source . $destination . $rule . $keep_state . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination . ' -j ' . $rule_chain;
+						$config[] = implode(' ', $line) . $source . $destination . $keep_state . ' -j ' . $rule_chain;
 					}
 				}
 			}
@@ -392,7 +394,7 @@ class fm_module_buildconf {
 			
 			/** Handle logging */
 			if ($log_rule) {
-				$config[] = '-A ' . $log_chain . ' -j LOG --log-level info --log-prefix "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ':"';
+				$config[] = '-A ' . $log_chain . ' -j LOG --log-level info --log-prefix "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ': "';
 				$config[] = '-A ' . $log_chain . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
 			}
 			
@@ -400,6 +402,7 @@ class fm_module_buildconf {
 		}
 		
 		$config[] = 'COMMIT';
+		$config[] = null;
 		
 		return implode("\n", $config);
 	}

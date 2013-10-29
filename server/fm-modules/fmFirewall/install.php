@@ -274,6 +274,8 @@ INSERT;
 	/** Default TCP/UDP Services */
 	$services[] = array('tcp', 'Any TCP', '', '', '');
 	$services[] = array('udp', 'Any UDP', '', '', '');
+	$services[] = array('tcp', 'High TCP Ports', '', '1024:65535', '');
+	$services[] = array('udp', 'High UDP Ports', '', '1024:65535', '');
 	$services[] = array('tcp', 'ssh', '', '22:22', '');
 	$services[] = array('tcp', 'rdp', '', '3389:3389', '');
 	$services[] = array('tcp', 'http', '', '80:80', '');
@@ -384,8 +386,15 @@ INSERT;
 					array(
 						'udp|netbios-ns',
 						'udp|netbios-dgm',
-						'udp|netbios-ssn'
+						'tcp|netbios-ssn'
 					), 'NETBIOS', ''
+				);
+	$groups[] = array('service',
+					array(
+						'tcp|http',
+						'tcp|https',
+						'tcp|High TCP Ports'
+					), $fm_name . '_required_ports', ''
 				);
 
 
@@ -412,7 +421,7 @@ INSERT;
 		}
 	}
 
-	/** Insert site values if not already present */
+	/** Insert values if not already present */
 	foreach ($inserts as $query) {
 		if ($link) {
 			$result = mysql_query($query, $link);
@@ -427,10 +436,32 @@ INSERT;
 		$group_ids = null;
 		foreach ($item_array as $item) {
 			list($protocol, $name) = explode('|', $item);
-			basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s", $name, $group_type . '_', $group_type . '_name', "AND {$group_type}_type = '$protocol'", 1);
-			$temp_result = $fmdb->last_result[0];
-			$type_id = $group_type . '_id';
-			$group_ids[] = substr($group_type, 0, 1) . $temp_result->$type_id;
+			if ($protocol == 'group') {
+				if ($link) {
+					$query = "SELECT * FROM $database.fm_{$__FM_CONFIG[$module]['prefix']}groups WHERE group_status!='deleted'
+								AND account_id=1 AND group_name='$name' LIMIT 1";
+					$result = mysql_query($query, $link);
+					$temp_result = mysql_fetch_object($result);
+				} else {
+					basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}groups", $name, 'group_', 'group_name', null, 1);
+					$temp_result = $fmdb->last_result[0];
+				}
+				$type_id = 'group_id';
+				$prefix = 'g';
+			} else {
+				if ($link) {
+					$query = "SELECT * FROM $database.fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s WHERE {$group_type}_status!='deleted'
+								AND account_id=1 AND {$group_type}_name='$name' AND {$group_type}_type = '$protocol' LIMIT 1";
+					$result = mysql_query($query, $link);
+					$temp_result = mysql_fetch_object($result);
+				} else {
+					basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s", $name, $group_type . '_', $group_type . '_name', "AND {$group_type}_type = '$protocol'", 1);
+					$temp_result = $fmdb->last_result[0];
+				}
+				$type_id = $group_type . '_id';
+				$prefix = substr($group_type, 0, 1);
+			}
+			$group_ids[] = $prefix . $temp_result->$type_id;
 		}
 
 		$group_items = implode(';', $group_ids);

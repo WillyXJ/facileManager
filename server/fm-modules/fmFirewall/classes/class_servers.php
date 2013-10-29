@@ -101,13 +101,14 @@ class fm_module_servers {
 		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
 		include_once(ABSPATH . 'fm-modules/' . $module . '/classes/class_policies.php');
 		$fm_host_id = getNameFromID($fm_name, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'objects', 'object_', 'object_name', 'object_id', $account_id);
-		$fm_service_id = getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
+		$fm_service_id[] = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
+		if ($post['server_type'] == 'iptables') $fm_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
 		$default_rules[] = array(
 								'account_id' => $account_id,
 								'server_serial_no' => $post['server_serial_no'],
 								'source_items' => 'o' . $fm_host_id,
 								'destination_items' => '',
-								'services_items' => 'g' . $fm_service_id,
+								'services_items' => implode(';', $fm_service_id),
 								'policy_comment' => 'Required for ' . $fm_name . ' client interaction.'
 							);
 		$default_rules[] = array(
