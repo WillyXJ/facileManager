@@ -108,7 +108,7 @@ class fm_module_servers {
 		/** Process server_key */
 		if (!isset($post['server_key']) || !is_numeric($post['server_key'])) $post['server_key'] = 0;
 
-		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers`";
+		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers`";
 		$sql_fields = '(';
 		$sql_values = null;
 		

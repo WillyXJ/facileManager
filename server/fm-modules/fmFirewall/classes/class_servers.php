@@ -73,7 +73,7 @@ class fm_module_servers {
 		/** Get a valid and unique serial number */
 		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? $post['server_serial_no'] : generateSerialNo($module);
 
-		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers`";
+		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers`";
 		$sql_fields = '(';
 		$sql_values = null;
 		

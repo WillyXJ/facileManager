@@ -76,7 +76,7 @@ HEAD;
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $server_name, 'server_', 'server_name');
 		if ($fmdb->num_rows) return 'This server name already exists.';
 		
-		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers`";
+		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers`";
 		$sql_fields = '(';
 		$sql_values = null;
 		
