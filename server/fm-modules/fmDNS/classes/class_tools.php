@@ -26,7 +26,7 @@ class fm_module_tools {
 	 * Imports records from a zone file and presents a confirmation
 	 */
 	function zoneImportWizard() {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_name;
 		
 		$raw_contents = file_get_contents($_FILES['import-file']['tmp_name']);
 		/** Strip commented lines */
@@ -34,7 +34,16 @@ class fm_module_tools {
 		/** Strip blank lines */
 		$clean_contents = preg_replace('/^\n?/m', '', $clean_contents);
 		/** Strip $GENERATE lines */
-		$clean_contents = preg_replace('/^\$GENERATE.*\n?/m', '', $clean_contents);
+		$clean_contents = preg_replace('/^\$GENERATE.*\n?/m', '', $clean_contents, -1, $generate_count);
+		/** Strip $ORIGIN lines */
+		$clean_contents = preg_replace('/^\$ORIGIN.*\n?/m', '', $clean_contents, -1, $origin_count);
+		
+		/** Handle unsupported message */
+		if ($generate_count || $origin_count) {
+			$unsupported[] = '<h4>Unsupported Entries:</h4>';
+			$unsupported[] = '<p class="soa_import">' . $fm_name . ' currently does not support importing $GENERATE and $ORIGIN entries which were found in your zone file.</p>';
+			$unsupported = implode("\n", $unsupported);
+		} else $unsupported = null;
 		
 		$domain_name = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 		$domain_map = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
@@ -49,7 +58,6 @@ class fm_module_tools {
 			if (is_array($raw_ttl)) {
 				$soa_array['soa_ttl'] = trim(preg_replace('/;(.+?)+/', '', $raw_ttl[1]));
 			}
-				var_dump($raw_soa);
 			if (is_array($raw_soa)) {
 				$raw_soa = preg_replace('/;(.+?)+/', '', $raw_soa[1]);
 				$soa = str_replace(array("\n", "\t", '(', ')', '  '), ' ', preg_replace('/\s\s+/', ' ', $raw_soa));
@@ -284,6 +292,7 @@ ROW;
 			<input type="hidden" name="map" value="$domain_map">
 			<input type="hidden" name="import_records" value="true">
 			<input type="hidden" name="import_file" value="{$_FILES['import-file']['name']}">
+			$unsupported
 			$soa_row
 			<table class="display_results">
 				<thead>

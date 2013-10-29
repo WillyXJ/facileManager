@@ -432,7 +432,7 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
 			break;
 	}
 	
-	$get_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='$account_id' AND `$field`='$id' $sql";
+	$get_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND `account_id`='$account_id' AND `$field`='$id' $sql";
 	return $fmdb->get_results($get_query);
 }
 
