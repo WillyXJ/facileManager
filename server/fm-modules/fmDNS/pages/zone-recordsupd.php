@@ -106,7 +106,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 			$HTMLOut.= buildInputReturn('update', $record_type, $i ,'record_status', 'deleted');
 		} else {
 			$y = 0;
-			$action = '&nbsp;';
+			$action = null;
 			foreach ($data as $key => $val) {
 				$val = trim($val);
 				if ($key == 'record_name' && $record_type != 'PTR') {
@@ -571,7 +571,7 @@ function nameCheck($domain_id, $value) {
 function compareValues($value, $sql_records) {
 	$changes = array();
 	foreach ($value as $key => $val) {
-		$diff = array_diff($value[$key], $sql_records[$key]);
+		$diff = array_diff_assoc($value[$key], $sql_records[$key]);
 		if ($diff) {
 			$changes[$key] = $diff;
 		}

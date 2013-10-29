@@ -12,6 +12,8 @@
            $ORIGIN records are found.
 * Server - (Git Issue 32) Fixed an issue where the server config build icon
            would not appear when expected to.
+* Server - (Git Issue 33) Fixed an issue where record comments could not be
+           deleted.
 
 1.0-rc5 (2013-10-16)
 ====================
