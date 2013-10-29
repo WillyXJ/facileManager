@@ -373,8 +373,7 @@ class fm_module_buildconf {
 
 			/** Set variable containing all loaded domain_ids */
 			if (!$dryrun) {
-				$data->built_domain_ids = rtrim($GLOBALS['built_domain_ids'], ',');
-				$this->setBuiltDomainIDs($server_serial_no, $data->built_domain_ids);
+				$this->setBuiltDomainIDs($server_serial_no, array_unique($GLOBALS['built_domain_ids']));
 			}
 			
 			return get_object_vars($data);
@@ -484,9 +483,6 @@ class fm_module_buildconf {
 			$count = $fmdb->num_rows;
 			$zone_result = $fmdb->last_result;
 			for ($i=0; $i < $count; $i++) {
-				/** Add domain_id to built_domain_ids for tracking */
-				$GLOBALS['built_domain_ids'] .= $zone_result[$i]->domain_id . ',';
-
 				/** Is this a clone id? */
 				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], $zone_result, $count);
 				if ($zone_result[$i] == false) break;
@@ -523,6 +519,9 @@ class fm_module_buildconf {
 							$zones .= "\tforwarders { " . $zone_result[$i]->domain_forward_servers . "};\n";
 					}
 					$zones .= "};\n";
+	
+					/** Add domain_id to built_domain_ids for tracking */
+					$GLOBALS['built_domain_ids'][] = $zone_result[$i]->domain_id;
 				}
 			}
 			
@@ -911,8 +910,7 @@ class fm_module_buildconf {
 
 			/** Add new records */
 			$sql = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds` VALUES ";
-			$domain_ids = explode(',', $built_domain_ids);
-			foreach ($domain_ids as $id) {
+			foreach ($built_domain_ids as $id) {
 				$sql .= '(' . $id . ',' . $server_serial_no . '),';
 			}
 			$sql = rtrim($sql, ',');
