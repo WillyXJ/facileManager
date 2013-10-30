@@ -217,7 +217,7 @@ HEAD;
 		if (!$result) return 'Could not add the server because a database error occurred.';
 
 		addLogEntry($log_message);
-		return $result;
+		return true;
 	}
 	
 	
@@ -325,7 +325,7 @@ HTML;
 		/** Check name field length */
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
 
-		$server_types = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_type'), $server_type);
+		$server_types = buildSelect('server_type', 'server_type', $this->getServerTypes(), $server_type);
 		$groups = (is_array($group_options)) ? buildSelect('server_groups', 1, $group_options, $server_groups, 4, null, true) : 'Server Groups need to be defined first.';
 		
 		/** Handle credentials */
@@ -372,6 +372,21 @@ HTML;
 FORM;
 
 		return $return_form;
+	}
+	
+	
+	function getServerTypes() {
+		global $__FM_CONFIG;
+		
+		$fm_supported_servers = null;
+		$db_support = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_type');
+		
+		foreach ($db_support as $db_type) {
+			$php_function = (strtolower($db_type) == 'postgresql') ? 'pg' : strtolower($db_type);
+			if (function_exists($php_function . '_connect') && function_exists('change' . $db_type . 'UserPassword')) $fm_supported_servers[] = $db_type;
+		}
+		
+		return $fm_supported_servers;
 	}
 	
 }
