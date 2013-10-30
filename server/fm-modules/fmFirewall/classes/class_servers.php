@@ -117,7 +117,7 @@ class fm_module_servers {
 								'policy_direction' => 'out',
 								'source_items' => '',
 								'destination_items' => 'o' . $fm_host_id,
-								'services_items' => 'g' . $fm_service_id,
+								'services_items' => implode(';', $fm_service_id),
 								'policy_comment' => 'Required for ' . $fm_name . ' client interaction.'
 							);
 
