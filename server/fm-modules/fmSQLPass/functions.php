@@ -194,6 +194,10 @@ function changeMySQLUserPassword($server_name, $server_port, $admin_user, $admin
 	
 	/** Connect to remote server */
 	$verbose_output = ' --> Connecting to MySQL ';
+	if (!socketTest($server_name, $server_port, 5)) {
+		return $verbose_output . "[failed] - Could not connect to $server_name on tcp/$server_port\n";
+	}
+
 	$remote_connection = @new mysqli($server_name, $admin_user, $admin_pass, null, $server_port);
 	if (!$remote_connection->connect_error) $verbose_output .= "[ok]\n";
 	else {
