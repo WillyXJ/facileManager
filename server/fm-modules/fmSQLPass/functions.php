@@ -250,6 +250,7 @@ function changeMySQLUserPassword($server_name, $server_port, $admin_user, $admin
  * @subpackage fmSQLPass
  *
  * @param string $server_name Hostname of the database server
+ * @param integer $server_port Server port to connect to
  * @param string $admin_user User to login with
  * @param string $admin_pass User password to login with
  * @param string $user Database user to change
@@ -257,10 +258,26 @@ function changeMySQLUserPassword($server_name, $server_port, $admin_user, $admin
  * @param string $server_group Server group to process
  * @return string
  */
-//function changePostgreSQLUserPassword($server_name, $backup_user, $backup_pass, $user, $user_password, $server_group) {
-//	global $__FM_CONFIG;
+function changePostgreSQLUserPassword($server_name, $server_port, $admin_user, $admin_pass, $user, $user_password, $server_group) {
+	global $__FM_CONFIG;
 	
-//}
+	/** Connect to remote server */
+	$verbose_output = ' --> Connecting to PostreSQL ';
+	if (!socketTest($server_name, $server_port, 5)) {
+		return $verbose_output . "[failed] - Could not connect to $server_name on tcp/$server_port\n";
+	}
+	
+	$remote_connection = pg_connect("host='$server_name' port='$server_port' user='$admin_user' password='$admin_pass' dbname='postgres'");
+	if (pg_connection_status($remote_connection) === PGSQL_CONNECTION_OK) $verbose_output .= "[ok]\n";
+	else {
+		$verbose_output .= '[failed] - ' . pg_last_error() . "\n";
+		return $verbose_output;
+	}
+	
+	@pg_close($remote_connection);
+	
+	return $verbose_output;
+}
 
 
 
