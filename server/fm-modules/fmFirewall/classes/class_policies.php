@@ -171,6 +171,9 @@ HTML;
 				$result = $fmdb->query($query);
 				if ($result === false) return 'Could not update the policy order because a database error occurred.';
 			}
+			
+			setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+		
 			addLogEntry('Updated firewall policy order for ' . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name'));
 			return true;
 		}
