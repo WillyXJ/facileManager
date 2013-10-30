@@ -389,13 +389,6 @@ INSERT;
 						'tcp|netbios-ssn'
 					), 'NETBIOS', ''
 				);
-	$groups[] = array('service',
-					array(
-						'tcp|http',
-						'tcp|https',
-						'tcp|High TCP Ports'
-					), $fm_name . '_required_ports', ''
-				);
 
 
 	foreach ($services as $array) {
