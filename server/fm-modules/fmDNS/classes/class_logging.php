@@ -364,6 +364,11 @@ class fm_module_logging {
 	function delete($id, $server_serial_no = 0, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Check if channel is currently associated with category */
+		if ($type == 'channel' && is_array($this->getAssocCategories($id))) {
+			return 'This ' . $type . ' could not be deleted because it is associated with one or more categories.';
+		}
+		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 
 		/** Delete associated children */
