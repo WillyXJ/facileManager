@@ -76,11 +76,6 @@ $__FM_CONFIG['weekdays']				= array('Mon' => 1, 'Tue' => 2, 'Wed' => 4,
 $__FM_CONFIG['fw']['policy_options']	= array('log' => 1);
 
 /** Default values */
-$__FM_CONFIG['fw']['config_file'] 		= array('iptables' => '/etc/sysconfig/iptables',
-												'pf' => '/etc/pf.conf',
-												'ipfw' => '/etc/ipfw.rules',
-												'ipfilter' => '/etc/ipf.rules'
-											);
 $__FM_CONFIG['fw']['config_file'] 		= array(
 											'pf' => '/etc/pf.conf',
 											'ipfw' => '/etc/ipfw.rules',
@@ -103,6 +98,8 @@ $__FM_CONFIG['fw']['config_file'] 		= array(
 
 /** Firewall notes */
 $__FM_CONFIG['fw']['notes'] 			= array(
+												'iptables' => 'Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked
+														will be passed by default. So make sure you take care with your rule order.',
 												'pf' => 'Rules are evaluated on a last-match basis and everything that isn\'t explicitly blocked
 														will be allowed by default. So make sure you take care with your rule order.',
 												'ipfw' => 'Rules are evaluated on a first-match basis and everything that isn\'t explicitly passed

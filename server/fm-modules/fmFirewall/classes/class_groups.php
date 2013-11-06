@@ -139,6 +139,9 @@ HTML;
 		/** Does the group_id exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $group_id, 'group_', 'group_id');
 		if ($fmdb->num_rows) {
+			/** Is the group_id present in a policy? */
+			if (isItemInPolicy($group_id, 'group')) return 'This group could not be deleted because it is associated with one or more policies.';
+			
 			/** Delete group */
 			$tmp_name = getNameFromID($group_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $group_id, 'group_', 'deleted', 'group_id')) {
@@ -160,7 +163,7 @@ HTML;
 		
 		if ($allowed_to_manage_services) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->group_id, 'group')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -297,6 +300,7 @@ FORM;
 		return $post;
 	}
 	
+
 }
 
 if (!isset($fm_module_groups))

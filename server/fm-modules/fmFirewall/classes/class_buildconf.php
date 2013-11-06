@@ -194,6 +194,7 @@ class fm_module_buildconf {
 		global $fmdb, $__FM_CONFIG;
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
 		
 		$fw_actions = array('pass' => 'ACCEPT',
 							'block' => 'DROP',
@@ -291,14 +292,19 @@ class fm_module_buildconf {
 								$service_destination = ($start == $end) ? $start : $result->service_dest_ports;
 							} else $service_destination = null;
 							
+							/** TCP Flags */
+							$tcp_flags = ($result->service_tcp_flags) ? '|' . $result->service_tcp_flags : null;
+							
 							/** Determine which array to put the service in */
 							if ($service_source && $service_destination) {
-								$policy_services[$result->service_type]['s-d']['s'][] = $service_source;
-								$policy_services[$result->service_type]['s-d']['d'][] = $service_destination;
+								$policy_services[$result->service_type]['s-d']['s'][] = $service_source . $tcp_flags;
+								$policy_services[$result->service_type]['s-d']['d'][] = $service_destination . $tcp_flags;
 							} elseif ($service_source && !$service_destination) {
-								$policy_services[$result->service_type]['s-any']['s'][] = $service_source;
+								$policy_services[$result->service_type]['s-any']['s'][] = $service_source . $tcp_flags;
 							} elseif (!$service_source && $service_destination) {
-								$policy_services[$result->service_type]['any-d']['d'][] = $service_destination;
+								$policy_services[$result->service_type]['any-d']['d'][] = $service_destination . $tcp_flags;
+							} else {
+								$policy_services[$result->service_type]['flag_only']['f'][] = $tcp_flags;
 							}
 						}
 					}
@@ -327,7 +333,14 @@ class fm_module_buildconf {
 									}
 									$l++;
 								} else {
-									$multiports[$k][] = $port;
+									if (strpos($port, '|') !== false) {
+										$k++;
+										$multiports[$k][] = $port;
+										$k++;
+										$j = 0;
+									} else {
+										$multiports[$k][] = $port;
+									}
 								}
 								if (strpos($port, ':')) $j++;
 								
@@ -337,7 +350,16 @@ class fm_module_buildconf {
 								foreach ($multiports as $ports) {
 									$ports = array_unique($ports);
 									$multi = (count($ports) > 1) ? ' -m multiport --' . $direction . 'ports ' : ' --' . $direction . 'port ';
-									$policy_services['processed'][$protocol][] = ' -p ' . $protocol . $multi . $services_not . implode(',', $ports);
+									if ($direction == 'f') $multi = null;
+									$tcp_flags = null;
+									if ($protocol == 'tcp' && strpos($ports[0], '|') !== false) {
+										list($port, $flags) = explode('|', $ports[0]);
+										$tcp_flags = $fm_module_services->getTCPFlags($flags, 'iptables');
+										$service_ports = $port;
+									} else {
+										$service_ports = implode(',', $ports);
+									}
+									$policy_services['processed'][$protocol][] = ' -p ' . $protocol . $tcp_flags . $multi . $services_not . $service_ports;
 								}
 							}
 							unset($multiports);
@@ -417,6 +439,8 @@ class fm_module_buildconf {
 	function ipfilterBuildConfig($policy_result, $count) {
 		global $fmdb, $__FM_CONFIG;
 		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+
 		$fw_actions = array('pass' => 'pass',
 							'block' => 'block',
 							'reject' => 'block');
@@ -494,14 +518,19 @@ class fm_module_buildconf {
 								$service_destination = ($start == $end) ? $start : str_replace(':', ' <> ', $result->service_dest_ports);
 							} else $service_destination = null;
 							
+							/** TCP Flags */
+							$tcp_flags = ($result->service_tcp_flags) ? '|' . $result->service_tcp_flags : null;
+							
 							/** Determine which array to put the service in */
 							if ($service_source && $service_destination) {
-								$policy_services[$result->service_type]['s-d']['s'][] = $service_source;
-								$policy_services[$result->service_type]['s-d']['d'][] = $service_destination;
+								$policy_services[$result->service_type]['s-d']['s'][] = $service_source . $tcp_flags;
+								$policy_services[$result->service_type]['s-d']['d'][] = $service_destination . $tcp_flags;
 							} elseif ($service_source && !$service_destination) {
-								$policy_services[$result->service_type]['s-any']['s'][] = $service_source;
+								$policy_services[$result->service_type]['s-any']['s'][] = $service_source . $tcp_flags;
 							} elseif (!$service_source && $service_destination) {
-								$policy_services[$result->service_type]['any-d']['d'][] = $service_destination;
+								$policy_services[$result->service_type]['any-d']['d'][] = $service_destination . $tcp_flags;
+							} else {
+								$policy_services[$result->service_type]['flag_only']['f'][] = $tcp_flags;
 							}
 						}
 					}
@@ -525,18 +554,54 @@ class fm_module_buildconf {
 									if ($direction_group == 's-any') {
 										$source_port = ' port ' . $services_not . '= ';
 										foreach (@array_unique($direction_array['s']) as $port) {
-											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $port . $destination . $destination_port . $keep_state;
+											if ($protocol == 'tcp' && strpos($port, '|') !== false) {
+												list($service_port, $flags) = explode('|', $port);
+												$tcp_flags = $fm_module_services->getTCPFlags($flags, 'ipfilter');
+												$service_ports = $service_port;
+											} else {
+												$service_ports = $port;
+												$tcp_flags = null;
+											}
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $tcp_flags . $keep_state;
 										}
 									} elseif ($direction_group == 'any-d') {
 										$destination_port = ' port ' . $services_not . '= ';
 										foreach (@array_unique($direction_array['d']) as $port) {
-											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $port . $keep_state;
+											if ($protocol == 'tcp' && strpos($port, '|') !== false) {
+												list($service_port, $flags) = explode('|', $port);
+												$tcp_flags = $fm_module_services->getTCPFlags($flags, 'ipfilter');
+												$service_ports = $service_port;
+											} else {
+												$service_ports = $port;
+												$tcp_flags = null;
+											}
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $keep_state;
 										}
 									} elseif ($direction_group == 's-d') {
 										$source_port = ' port ' . $services_not . '= ';
 										$destination_port = ' port ' . $services_not . '= ';
 										foreach (@array_unique($direction_array['s']) as $index => $port) {
-											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $port . $destination . $destination_port . $direction_array['d'][$index] . $keep_state;
+											if ($protocol == 'tcp' && strpos($port, '|') !== false) {
+												list($service_port, $flags) = explode('|', $port);
+												$tcp_flags = $fm_module_services->getTCPFlags($flags, 'ipfilter');
+												$service_ports = $service_port;
+											} else {
+												$service_ports = $port;
+												$tcp_flags = null;
+											}
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $direction_array['d'][$index] . $tcp_flags . $keep_state;
+										}
+									} elseif ($direction_group == 'flag_only') {
+										foreach (@array_unique($direction_array['f']) as $port) {
+											if ($protocol == 'tcp' && strpos($port, '|') !== false) {
+												list($service_port, $flags) = explode('|', $port);
+												$tcp_flags = $fm_module_services->getTCPFlags($flags, 'ipfilter');
+												$service_ports = $service_port;
+											} else {
+												$service_ports = $port;
+												$tcp_flags = null;
+											}
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $keep_state;
 										}
 									}
 								}
@@ -560,6 +625,10 @@ class fm_module_buildconf {
 	function ipfwBuildConfig($policy_result, $count) {
 		global $fmdb, $__FM_CONFIG;
 		
+		echo '<pre>';
+		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+
 		$fw_actions = array('pass' => 'allow',
 							'block' => 'deny',
 							'reject' => 'unreach host');
@@ -644,25 +713,91 @@ class fm_module_buildconf {
 								$service_destination = ($start == $end) ? $start : str_replace(':', '-', $result->service_dest_ports);
 							} else $service_destination = null;
 							
+							/** TCP Flags */
+							$tcp_flags = ($result->service_tcp_flags) ? '|' . $result->service_tcp_flags : null;
+							
 							/** Determine which array to put the service in */
 							if ($service_source && $service_destination) {
-								$policy_services[$result->service_type]['s-d']['s'][] = $service_source;
-								$policy_services[$result->service_type]['s-d']['d'][] = $service_destination;
+								$policy_services[$result->service_type]['s-d']['s'][] = $service_source . $tcp_flags;
+								$policy_services[$result->service_type]['s-d']['d'][] = $service_destination . $tcp_flags;
 							} elseif ($service_source && !$service_destination) {
-								$policy_services[$result->service_type]['s-any']['s'][] = $service_source;
+								$policy_services[$result->service_type]['s-any']['s'][] = $service_source . $tcp_flags;
 							} elseif (!$service_source && $service_destination) {
-								$policy_services[$result->service_type]['any-d']['d'][] = $service_destination;
+								$policy_services[$result->service_type]['any-d']['d'][] = $service_destination . $tcp_flags;
+							} else {
+								$policy_services[$result->service_type]['flag_only']['f'][] = $tcp_flags;
 							}
 						}
 					}
 				}
 			}
 			
+			print_r($policy_services);
+			if (@is_array($policy_services)) {
+				foreach ($policy_services as $protocol => $proto_array) {
+					if ($protocol == 'processed') continue;
+					
+					foreach ($proto_array as $direction_group => $group_array) {
+						foreach ($group_array as $direction => $port_array) {
+							$l = $k = $j = 0;
+							foreach ($port_array as $port) {
+								if ($l) break;
+								
+								if ($j > 14) {
+									$k++;
+									$j = 0;
+								}
+								
+								if ($direction_group == 's-d') {
+									if (@array_key_exists($l, $group_array['s'])) {
+										$multiports[$k][] = $group_array['s'][$l] . ' --dport ' . $group_array['d'][$l];
+										unset($group_array);
+									}
+									$l++;
+								} else {
+									if (strpos($port, '|') !== false) {
+										$k++;
+										$multiports[$k][] = $port;
+										$k++;
+										$j = 0;
+									} else {
+										$multiports[$k][] = $port;
+									}
+								}
+								if (strpos($port, ':')) $j++;
+								
+								$j++;
+							}
+							if (@is_array($multiports)) {
+								foreach ($multiports as $ports) {
+									$ports = array_unique($ports);
+									$multi = (count($ports) > 1) ? ' -m multiport --' . $direction . 'ports ' : ' --' . $direction . 'port ';
+									if ($direction == 'f') $multi = null;
+									$tcp_flags = null;
+									if ($protocol == 'tcp' && strpos($ports[0], '|') !== false) {
+										list($port, $flags) = explode('|', $ports[0]);
+										$tcp_flags = $fm_module_services->getTCPFlags($flags, 'iptables');
+										$service_ports = $port;
+									} else {
+										$service_ports = implode(',', $ports);
+									}
+									$policy_services['processed'][$protocol][] = ' -p ' . $protocol . $tcp_flags . $services_not . $service_ports;
+								}
+							}
+							unset($multiports);
+						}
+					}
+					unset($policy_services[$protocol]);
+				}
+			}
+
+			print_r($policy_services);
 			/** Build the rules */
 			if (@is_array($policy_services)) {
 				foreach ($policy_services as $protocol => $proto_array) {
 					foreach ($proto_array as $direction_group => $direction_array) {
 						$source_ports = $destination_ports = null;
+						$tcp_flags = $protocol == 'tcp' ? $fm_module_services->getTCPFlags($flags, 'ipfw') : null;
 						if ($direction_group == 's-any') {
 							$source_ports = $services_not . ' ' . @implode(',', @array_unique($direction_array['s']));
 						} elseif ($direction_group == 'any-d') {
@@ -673,7 +808,7 @@ class fm_module_buildconf {
 						}
 						$icmptypes = ($protocol == 'icmp') ? ' icmptypes ' . $services_not . ' ' . implode(',', $proto_array) : null;
 		
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . $destination_ports . $icmptypes . ' ' . $policy_result[$i]->policy_direction . $interface . $keep_state;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . $destination_ports . $icmptypes . ' ' . $policy_result[$i]->policy_direction . $interface . $tcp_flags . $keep_state;
 					}
 				}
 				unset($policy_services);

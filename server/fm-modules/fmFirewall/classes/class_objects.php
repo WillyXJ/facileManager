@@ -141,6 +141,9 @@ HTML;
 		/** Does the object_id exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $object_id, 'object_', 'object_id');
 		if ($fmdb->num_rows) {
+			/** Is the object_id present in a policy? */
+			if (isItemInPolicy($object_id, 'object')) return 'This object could not be deleted because it is associated with one or more policies.';
+			
 			/** Delete object */
 			$tmp_name = getNameFromID($object_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $object_id, 'object_', 'deleted', 'object_id')) {
@@ -162,7 +165,7 @@ HTML;
 		
 		if ($allowed_to_manage_objects) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->object_id, 'object')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -249,7 +252,7 @@ FORM;
 		
 		if (empty($post['object_name'])) return 'No object name defined.';
 		if (empty($post['object_address'])) return 'No object address defined.';
-		if ($post['object_type'] != 'address') {
+		if ($post['object_type'] == 'network') {
 			if (empty($post['object_mask'])) return 'No object netmask defined.';
 		}
 		
@@ -263,7 +266,7 @@ FORM;
 		
 		/** Check address and mask */
 		if (!verifyIPAddress($post['object_address'])) return 'Address is invalid.';
-		if ($post['object_type'] != 'address') {
+		if ($post['object_type'] == 'network') {
 			if (!verifyIPAddress($post['object_mask'])) return 'Netmask is invalid.';
 		}
 		

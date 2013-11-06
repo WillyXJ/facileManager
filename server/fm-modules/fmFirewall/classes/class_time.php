@@ -148,6 +148,9 @@ HTML;
 		/** Does the time_id exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $time_id, 'time_', 'time_id');
 		if ($fmdb->num_rows) {
+			/** Is the time_id present in a policy? */
+			if (isItemInPolicy($time_id, 'time')) return 'This schedule could not be deleted because it is associated with one or more policies.';
+			
 			/** Delete time */
 			$tmp_name = getNameFromID($time_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $time_id, 'time_', 'deleted', 'time_id')) {
@@ -174,7 +177,7 @@ HTML;
 			$edit_status .= '">';
 			$edit_status .= ($row->time_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->time_id, 'time')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		

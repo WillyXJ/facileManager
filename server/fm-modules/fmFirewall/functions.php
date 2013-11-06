@@ -248,4 +248,32 @@ function getGroupItems($group_items) {
 	
 	return $group_items_assigned;
 }
+
+
+function isItemInPolicy($id, $type) {
+	global $fmdb, $__FM_CONFIG;
+	
+	if ($type == 'time') {
+		$query = "SELECT policy_id FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies WHERE account_id='{$_SESSION['user']['account_id']}' 
+				AND policy_status!='deleted' AND policy_time={$id}";
+	} else {
+		$item_id = substr($type, 0, 1) . $id;
+		
+		$query = "SELECT policy_id FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies WHERE account_id='{$_SESSION['user']['account_id']}' AND policy_status!='deleted' AND 
+				(policy_source='{$item_id}' OR policy_source LIKE '{$item_id};%' OR policy_source LIKE '%;{$item_id};%' OR policy_source LIKE '%;{$item_id}') OR
+				(policy_destination='{$item_id}' OR policy_destination LIKE '{$item_id};%' OR policy_destination LIKE '%;{$item_id};%' OR policy_destination LIKE '%;{$item_id}') OR
+				(policy_services='{$item_id}' OR policy_services LIKE '{$item_id};%' OR policy_services LIKE '%;{$item_id};%' OR policy_services LIKE '%;{$item_id}')
+				ORDER BY policy_id ASC";
+	}
+	
+	$fmdb->get_results($query);
+	if ($fmdb->num_rows) {
+		return true;
+	}
+	
+	return false;
+}
+
+
+
 ?>

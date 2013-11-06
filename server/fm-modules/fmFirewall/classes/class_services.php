@@ -140,6 +140,9 @@ HTML;
 		/** Does the service_id exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $service_id, 'service_', 'service_id');
 		if ($fmdb->num_rows) {
+			/** Is the service_id present in a policy? */
+			if (isItemInPolicy($service_id, 'service')) return 'This service could not be deleted because it is associated with one or more policies.';
+			
 			/** Delete service */
 			$tmp_name = getNameFromID($service_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $service_id, 'service_', 'deleted', 'service_id')) {
@@ -161,7 +164,7 @@ HTML;
 		
 		if ($allowed_to_manage_services) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->service_id, 'service')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -169,24 +172,7 @@ HTML;
 		
 		/** Process TCP Flags */
 		if ($row->service_type == 'tcp') {
-			@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $row->service_tcp_flags);
-			$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
-			$service_tcp_flags['mask'] = $service_tcp_flags['settings'] = null;
-			foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
-				if ($bit & $tcp_flag_mask) $service_tcp_flags['mask'] .= $flag . ',';
-				if ($bit & $tcp_flag_settings) $service_tcp_flags['settings'] .= $flag . ',';
-
-				if (!$tcp_flag_mask) $service_tcp_flags['mask'] = 'NONE';
-				if ($tcp_flag_mask == array_sum($__FM_CONFIG['tcp_flags'])) $service_tcp_flags['mask'] = 'ALL';
-
-				if (!$tcp_flag_settings) $service_tcp_flags['settings'] = 'NONE';
-				if ($tcp_flag_settings == array_sum($__FM_CONFIG['tcp_flags'])) $service_tcp_flags['settings'] = 'ALL';
-			}
-			
-			$service_tcp_flags['mask'] = rtrim($service_tcp_flags['mask'], ',');
-			$service_tcp_flags['settings'] = rtrim($service_tcp_flags['settings'], ',');
-			
-			$service_tcp_flags = implode(' ', $service_tcp_flags);
+			$service_tcp_flags = $this->getTCPFlags($row->service_tcp_flags);
 		} else $service_tcp_flags = null;
 		
 		echo <<<HTML
@@ -306,7 +292,7 @@ HTML;
 										$tcp_flags_head
 									</tr>
 									<tr>
-										<th style="text-align: right;">Mask</th>
+										<th style="text-align: right;" title="Only iptables uses the Mask bit">Mask</th>
 										$tcp_flags_mask_form
 									</tr>
 									<tr>
@@ -391,6 +377,62 @@ FORM;
 		} else $post['service_tcp_flags'] = null;
 		
 		return $post;
+	}
+	
+	
+	function getTCPFlags($flag_bits, $type = 'display') {
+		global $__FM_CONFIG;
+		
+		@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $flag_bits);
+		$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
+		$service_tcp_flags['mask'] = $service_tcp_flags['settings'] = null;
+		
+		foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
+			if (in_array($type, array('iptables', 'display')) && ($bit & $tcp_flag_mask)) $service_tcp_flags['mask'] .= $flag . ',';
+			if ($bit & $tcp_flag_settings) {
+				switch ($type) {
+					case 'iptables':
+					case 'display':
+						$service_tcp_flags['settings'] .= $flag . ',';
+						break;
+					case 'ipfw':
+						$service_tcp_flags['settings'] .= strtolower($flag) . ',';
+						break;
+					case 'ipfilter':
+						$service_tcp_flags['settings'] .= substr($flag, 0, 1) . ',';
+						break;
+				}
+			}
+
+			if (!$tcp_flag_settings) {
+				$service_tcp_flags['settings'] = in_array($type, array('iptables', 'display')) ? 'NONE' : null;
+			}
+			if ($tcp_flag_mask == array_sum($__FM_CONFIG['tcp_flags'])) {
+				$service_tcp_flags['settings'] = in_array($type, array('iptables', 'display')) ? 'ALL' : null;
+			}
+
+			if (in_array($type, array('iptables', 'display'))) {
+				if (!$tcp_flag_mask) $service_tcp_flags['mask'] = 'NONE';
+				if ($tcp_flag_mask == array_sum($__FM_CONFIG['tcp_flags'])) $service_tcp_flags['mask'] = 'ALL';
+			}
+		}
+		
+		$service_tcp_flags['mask'] = rtrim($service_tcp_flags['mask'], ',');
+		$service_tcp_flags['settings'] = rtrim($service_tcp_flags['settings'], ',');
+		ksort($service_tcp_flags);
+		
+		$service_tcp_flags = trim(implode(' ', $service_tcp_flags));
+
+		switch ($type) {
+			case 'iptables':
+				return (substr_count($service_tcp_flags, 'NONE') != 2) ? ' --tcp-flags ' . $service_tcp_flags : null;
+			case 'ipfw':
+				return ' tcpflags ' . $service_tcp_flags;
+			case 'ipfilter':
+				return ' flags ' . $service_tcp_flags;
+			default:
+				return $service_tcp_flags;
+		}
 	}
 	
 }
