@@ -1,4 +1,4 @@
-1.0-?? (2013-10-??)
+1.0-rc6 (2013-11-06)
 ====================
 * Server - Server config builds now prompt for confirmation.
 * Server - Fixed installer password validity background display.
