@@ -1,3 +1,7 @@
+1.0-rc6-1 (2013-11-07)
+======================
+* Server - (Git Issue 34) Fixed an issue where servers could not be added.
+
 1.0-rc6 (2013-11-06)
 ====================
 * Server - (Git Issue 26) Added additional zone reload link.
