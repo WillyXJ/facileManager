@@ -6,6 +6,8 @@
 ====================
 * Server - Server config builds now prompt for confirmation.
 * Server - Fixed installer password validity background display.
+* Server - Serial number generation now checks all module server tables for 
+           unique values.
 * Server - Fixed some PHP errors.
 * Server - Ensures current module is active.
 * Client - Added install support for multiple modules.
