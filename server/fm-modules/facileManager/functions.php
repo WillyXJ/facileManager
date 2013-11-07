@@ -1241,7 +1241,7 @@ HTML;
  * @return int
  */
 function generateSerialNo($module = null) {
-	global $fmdb, $__FM_CONFIG;
+	global $fmdb, $__FM_CONFIG, $fm_name;
 
 	if ($module) {
 		while(1) {
@@ -1256,7 +1256,7 @@ function generateSerialNo($module = null) {
 			$serialno = rand(100000000, 999999999);
 			
 			/** Ensure the serial number does not exist in any of the server tables */
-			$all_tables = $fmdb->get_results("SELECT table_name FROM information_schema.tables t WHERE t.table_schema = '{$__FM_CONFIG['db']['name']}' AND t.table_name LIKE 'fm_%_servers'");
+			$all_tables = $fmdb->get_results("SELECT table_name FROM information_schema.tables t WHERE t.table_schema = '$fm_name' AND t.table_name LIKE 'fm_%_servers'");
 			$table_count = $fmdb->num_rows;
 			$result = $fmdb->last_result;
 			$taken = true;
