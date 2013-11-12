@@ -209,7 +209,7 @@ class fm_dns_zones {
 			$result = $fmdb->query($query);
 		}
 		
-		if (!$result) return 'Could not add zone because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add zone because a database error occurred.';
 
 		$insert_id = $fmdb->insert_id;
 		
@@ -343,7 +343,10 @@ class fm_dns_zones {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $sql_edit WHERE `domain_id`='$id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the zone because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the zone because a database error occurred.';
+
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		/* set the server_build_config flag */
 		if (reloadAllowed($id) && getSOACount($id) && getNSCount($id)) {

@@ -1,3 +1,7 @@
+1.0-b5 (2013-11-??)
+===================
+* Server - (Git Issue 36) Fixed false error reporting.
+
 1.0-b4 (2013-11-06)
 ===================
 * Server - Added server type support checks.

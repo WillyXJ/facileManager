@@ -138,7 +138,7 @@ HEAD;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the server because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the server because a database error occurred.';
 
 		addLogEntry($log_message);
 		return true;
@@ -214,7 +214,10 @@ HEAD;
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the server because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the server because a database error occurred.';
+		
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		addLogEntry($log_message);
 		return true;

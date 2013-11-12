@@ -107,7 +107,7 @@ class fm_dns_records {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return false;
+		if (!$fmdb->result) return false;
 
 		/** Update the SOA serial number */
 		$soa_count = getSOACount($domain_id);
@@ -152,7 +152,10 @@ class fm_dns_records {
 		$query = "UPDATE `$table` SET $sql_edit $record_type_sql WHERE `$field`='$id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return false;
+		if (!$fmdb->result) return false;
+
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		/** Update the SOA serial number */
 		if (reloadAllowed($domain_id) && getSOACount($domain_id) && getNSCount($domain_id)) {

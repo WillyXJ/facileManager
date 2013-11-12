@@ -141,7 +141,7 @@ HTML;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the policy because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the policy because a database error occurred.';
 
 		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
@@ -206,7 +206,10 @@ HTML;
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET $sql WHERE `policy_id`={$post['policy_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the firewall policy because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the firewall policy because a database error occurred.';
+		
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		

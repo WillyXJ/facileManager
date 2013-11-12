@@ -91,7 +91,7 @@ HTML;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the time because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the time because a database error occurred.';
 
 		/** Format weekdays */
 		$weekdays = $this->formatDays($post['time_weekdays']);
@@ -129,7 +129,10 @@ HTML;
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time` SET $sql WHERE `time_id`={$post['time_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the time because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the time because a database error occurred.';
+		
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 //		setBuildUpdateConfigFlag(getServerSerial($post['time_id'], $_SESSION['module']), 'yes', 'build');
 		

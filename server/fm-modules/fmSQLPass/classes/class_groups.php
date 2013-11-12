@@ -67,7 +67,7 @@ class fm_sqlpass_groups {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (`account_id`, `group_name`) VALUES('{$_SESSION['user']['account_id']}', '{$post['group_name']}')";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the group because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the group because a database error occurred.';
 
 		addLogEntry("Added server group '$group_name'.");
 		return true;
@@ -97,10 +97,15 @@ class fm_sqlpass_groups {
 		// Update the group
 		$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		if (!$result = $fmdb->query($query)) return 'Could not add the group because a database error occurred.';
+		$fmdb->query($query);
+		
+		if (!$fmdb->result) return 'Could not add the group because a database error occurred.';
+		
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 		
 		addLogEntry("Updated server group '$old_name' to name: '{$post['group_name']}'.");
-		return $result;
+		return true;
 	}
 	
 	

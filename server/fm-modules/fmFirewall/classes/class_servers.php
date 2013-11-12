@@ -95,7 +95,7 @@ class fm_module_servers {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the server because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the server because a database error occurred.';
 		
 		/** Add default fM interaction rules */
 		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
@@ -156,7 +156,10 @@ class fm_module_servers {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the server because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the server because a database error occurred.';
+		
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		

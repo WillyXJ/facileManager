@@ -76,7 +76,7 @@ class fm_dns_views {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`) VALUES('{$_SESSION['user']['account_id']}', $server_serial_no, '$view_name')";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the view because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the view because a database error occurred.';
 
 		addLogEntry("Added view '$view_name'.");
 		return true;
@@ -110,17 +110,20 @@ class fm_dns_views {
 				$sql_edit .= $key . "='" . sanitize($data) . "',";
 			}
 		}
-		$sql = rtrim($sql_edit . $sql_pwd, ',');
+		$sql = rtrim($sql_edit, ',');
 		
 		/** Update the view */
 		$old_name = getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET $sql WHERE `view_id`={$post['view_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the view because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the view because a database error occurred.';
+
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		addLogEntry("Updated view '$old_name' to name: '{$post['view_name']}'.");
-		return $result;
+		return true;
 	}
 	
 	

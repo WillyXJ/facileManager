@@ -94,7 +94,7 @@ class fm_dns_acls {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the ACL because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the ACL because a database error occurred.';
 
 		addLogEntry("Added ACL '{$post['acl_name']}'.");
 		return true;
@@ -140,7 +140,10 @@ class fm_dns_acls {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET $sql WHERE `acl_id`={$post['acl_id']}";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the ACL because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the ACL because a database error occurred.';
+
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		$acl_addresses = $post['acl_predefined'] == 'as defined:' ? $post['acl_addresses'] : $post['acl_predefined'];
 		addLogEntry("Updated ACL '$old_name' to name: '{$post['acl_name']}'; addresses: $acl_addresses");

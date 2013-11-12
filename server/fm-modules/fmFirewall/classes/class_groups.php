@@ -88,7 +88,7 @@ HTML;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the group because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the group because a database error occurred.';
 
 		addLogEntry("Added {$post['group_type']} group:\nName: {$post['group_name']}\n" .
 				"Comment: {$post['group_comment']}");
@@ -121,7 +121,10 @@ HTML;
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the group because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the group because a database error occurred.';
+		
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 //		setBuildUpdateConfigFlag(getServerSerial($post['group_id'], $_SESSION['module']), 'yes', 'build');
 		

@@ -92,7 +92,7 @@ class fm_dns_keys {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the key because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the key because a database error occurred.';
 
 		addLogEntry("Added key '{$post['key_name']}'.");
 		return true;
@@ -133,7 +133,10 @@ class fm_dns_keys {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET $sql WHERE `key_id`={$post['key_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not update the key because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the key because a database error occurred.';
+
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		$view_name = $post['key_view'] ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		addLogEntry("Updated key '$old_name' to name: '{$post['key_name']}'; algorithm: {$post['key_algorithm']}; secret: '{$post['key_secret']}'; view: $view_name.");

@@ -1,3 +1,7 @@
+1.0 (2013-11-??)
+================
+* Server - (Git Issue 36) Fixed false error reporting.
+
 1.0-rc6 (2013-11-06)
 ====================
 * Server - (Git Issue 26) Added additional zone reload link.

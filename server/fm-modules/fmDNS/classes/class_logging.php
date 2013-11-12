@@ -148,7 +148,7 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the channel because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the channel because a database error occurred.';
 		
 		addLogEntry("Added logging channel '$channel_name'.");
 		return true;
@@ -218,7 +218,7 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the category because a database error occurred.';
+		if (!$fmdb->result) return 'Could not add the category because a database error occurred.';
 		
 		addLogEntry("Added logging category '$category_name'.");
 		return true;
@@ -352,7 +352,7 @@ class fm_module_logging {
 			$result = $fmdb->query($query);
 		}
 		
-		if (!$result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
+		if (!$fmdb->result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
 		
 		return true;
 	}

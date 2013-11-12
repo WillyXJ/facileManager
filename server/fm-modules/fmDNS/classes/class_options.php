@@ -71,7 +71,7 @@ class fm_module_options {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
 		$exclude = array('submit', 'action', 'cfg_id');
-
+		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
@@ -87,8 +87,7 @@ class fm_module_options {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result)
-			return false;
+		if (!$fmdb->result) return false;
 
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
@@ -133,8 +132,10 @@ class fm_module_options {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$result)
-			return false;
+		if (!$fmdb->result) return false;
+
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
 
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
