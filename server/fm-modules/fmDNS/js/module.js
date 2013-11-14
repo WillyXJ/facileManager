@@ -159,12 +159,13 @@ $(document).ready(function() {
 });
 
 
-function displayOptionPlaceholder() {
+function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById('cfg_name').value;
 
 	var form_data = {
 		get_option_placeholder: true,
 		option_name: option_name,
+		option_value: option_value,
 		is_ajax: 1
 	};
 

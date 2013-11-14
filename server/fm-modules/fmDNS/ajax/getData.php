@@ -29,11 +29,41 @@ require_once('../../../fm-init.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && $allowed_to_manage_servers) {
-	$query = "SELECT def_type FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
+	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
+	$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		echo $result[0]->def_type;
+		if ($result[0]->def_dropdown == 'no') {
+			echo <<<HTML
+					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
+					<td width="67%"><input name="cfg_data" id="cfg_data" type="text" value='$cfg_data' size="40" /><br />
+					{$result[0]->def_type}</td>
+
+HTML;
+		} else {
+			/** Build array of possible values */
+			$raw_def_type_array = explode(')', str_replace('(', '', $result[0]->def_type));
+			$saved_data = explode(' ', $cfg_data);
+			$i = 0;
+			$dropdown = null;
+			foreach ($raw_def_type_array as $raw_def_type) {
+				$def_type_items = null;
+				if (strlen(trim($raw_def_type))) {
+					$raw_items = explode('|', $raw_def_type);
+					foreach ($raw_items as $item) {
+						$def_type_items[] = trim($item);
+					}
+					$dropdown .= buildSelect('cfg_data[]', 'cfg_data', $def_type_items, $saved_data[$i], 1);
+				}
+				$i++;
+			}
+			echo <<<HTML
+					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
+					<td width="67%">$dropdown</td>
+
+HTML;
+		}
 	}
 	exit;
 }

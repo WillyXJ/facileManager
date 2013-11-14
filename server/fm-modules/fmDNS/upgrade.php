@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption($module . '_version', 0);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-rc6', '<') ? upgradefmDNS_108($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0', '<') ? upgradefmDNS_109($__FM_CONFIG, $running_version) : true;
 	if (!$success) return 'Failed';
 	
 	return 'Success';
@@ -379,6 +379,46 @@ function upgradefmDNS_108($__FM_CONFIG, $running_version) {
 
 	$inserts = $updates = null;
 
+
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	return true;
+}
+
+function upgradefmDNS_108($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.0-rc6', '<') ? upgradefmDNS_108($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE  `fm_dns_functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
+
+	$inserts = null;
+	
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_option` IN ('match-mapped-addresses','transfer-format','check-names','preferred-glue','dialup','notify','forward');";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_type` =  '( yes | no )';";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_type` =  '( master | slave | response ) ( warn | fail | ignore )' WHERE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`.`def_option` =  'check-names';";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_type` =  '( port )' WHERE  `def_option` =  'port';";
 
 	/** Create table schema */
 	if (count($table) && $table[0]) {

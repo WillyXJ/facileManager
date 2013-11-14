@@ -60,6 +60,10 @@ class fm_module_options {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Validate post */
+		if (!$this->validatePost()) return false;
+		$post = $_POST;
+		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_view='{$post['cfg_view']}'");
 		if ($fmdb->num_rows) return false;
@@ -101,6 +105,10 @@ class fm_module_options {
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
+		
+		/** Validate post */
+		if (!$this->validatePost()) return false;
+		$post = $_POST;
 		
 		if (isset($post['cfg_id']) && !isset($post['cfg_name'])) {
 			$post['cfg_name'] = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
@@ -255,8 +263,13 @@ HTML;
 			
 			$data_holder = $results[0]->def_type;
 		}
+		
+		$cfg_data = sanitize($cfg_data);
 
 		$return_form = <<<FORM
+		<script>
+			displayOptionPlaceholder("$cfg_data");
+		</script>
 		<form name="manage" id="manage" method="post" action="config-options.php$request_uri">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="cfg_id" value="$cfg_id" />
@@ -269,12 +282,9 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="cfg_name">Option Name</label></th>
-					<td width="67%">$cfg_avail_options<br />
-					<div class="value_placeholder">$data_holder</div></td>
+					<td width="67%">$cfg_avail_options</td>
 				</tr>
-				<tr>
-					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
-					<td width="67%"><input name="cfg_data" id="cfg_data" type="text" value='$cfg_data' size="40" /></td>
+				<tr class="value_placeholder">
 				</tr>
 			</table>
 			<input type="submit" name="submit" value="$ucaction Option" class="button" />
@@ -292,7 +302,9 @@ FORM;
 		$return[0][] = 'None';
 		$return[0][] = '0';
 		
-		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status='active' AND cfg_isparent='yes' AND cfg_id!=$cfg_id AND cfg_type='$cfg_type' ORDER BY cfg_name,cfg_data ASC";
+		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE 
+				account_id='{$_SESSION['user']['account_id']}' AND cfg_status='active' AND cfg_isparent='yes' AND 
+				cfg_id!=$cfg_id AND cfg_type='$cfg_type' ORDER BY cfg_name,cfg_data ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
@@ -360,6 +372,58 @@ FORM;
 		}
 		
 		return $return;
+	}
+	
+	
+	function validatePost() {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (is_array($_POST['cfg_data'])) $_POST['cfg_data'] = join(' ', $_POST['cfg_data']);
+		
+		if (isset($_POST['cfg_name'])) {
+			$def_option = "'{$_POST['cfg_name']}'";
+		} elseif (isset($_POST['cfg_id'])) {
+			$def_option = "(SELECT cfg_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE cfg_id = {$_POST['cfg_id']})";
+		} else return false;
+		
+		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$result = $fmdb->last_result;
+			if ($result[0]->def_dropdown == 'no') {
+				$valid_types = trim(str_replace(array('(', ')'), '', $result[0]->def_type));
+				
+				switch ($valid_types) {
+					case 'integer':
+					case 'seconds':
+					case 'minutes':
+					case 'size_in_bytes':
+						return verifyNumber($_POST['cfg_data']);
+						break;
+					case 'port':
+						return verifyNumber($_POST['cfg_data'], 0, 65535);
+						break;
+					case 'quoted_string':
+						$_POST['cfg_data'] = '"' . trim($_POST['cfg_data'], '"') . '"';
+						break;
+					case 'quoted_string | none':
+						$_POST['cfg_data'] = '"' . trim($_POST['cfg_data'], '"') . '"';
+						if ($_POST['cfg_data'] == '"none"') $_POST['cfg_data'] = 'none';
+						break;
+					case 'address_match_element':
+						break;
+					case 'ipv4_address | ipv6_address':
+						return verifyIPAddress($_POST['cfg_data']);
+						break;
+					case 'ipv4_address | *':
+					case 'ipv6_address | *':
+						if ($_POST['cfg_data'] != '*') return verifyIPAddress($_POST['cfg_data']);
+						break;
+				}
+			}
+		}
+		
+		return true;
 	}
 
 }

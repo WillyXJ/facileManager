@@ -1,5 +1,6 @@
 1.0 (2013-11-??)
 ================
+* Server - (Git Issue 35) Added config option input validation.
 * Server - (Git Issue 36) Fixed false error reporting.
 
 1.0-rc6 (2013-11-06)
