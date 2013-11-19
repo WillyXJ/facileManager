@@ -285,6 +285,12 @@ class fm_users {
 	function delete($id) {
 		global $fm_name;
 		
+		/** Ensure user is not current LDAP template user */
+		if (getOption('auth_method') == 2) {
+			$template_user_id = getOption('ldap_user_template');
+			if ($id == $template_user_id) return 'This user is the LDAP user template and cannot be deleted at this time.';
+		}
+		
 		$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
 		if (!updateStatus('fm_users', $id, 'user_', 'deleted', 'user_id')) {
 			return 'This user could not be deleted.'. "\n";
