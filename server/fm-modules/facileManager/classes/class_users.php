@@ -164,6 +164,7 @@ class fm_users {
 		if (isset($post['user_template_only']) && $post['user_template_only'] == 'yes') {
 			$post['user_template_only'] = 'yes';
 			$post['user_auth_type'] = 0;
+			$post['user_status'] = 'disabled';
 		} else {
 			$post['user_template_only'] = 'no';
 			$post['user_auth_type'] = getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_auth_type');
@@ -302,17 +303,19 @@ class fm_users {
 		if ($allowed_to_manage_users && $_SESSION['user']['id'] != $row->user_id) {
 			$edit_status = null;
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if ($row->user_id != $_SESSION['user']['id']) {
-				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->user_id . '&status=';
-				$edit_status .= ($row->user_status == 'active') ? 'disabled">' . $__FM_CONFIG['icons']['disable'] : 'active">' . $__FM_CONFIG['icons']['enable'];
-				$edit_status .= '</a>';
-
-				/** Cannot change password without mail_enable defined */
-				if (getOption('mail_enable') && $row->user_auth_type != 2 && $row->user_template_only == 'no') {
-					$edit_status .= '<a class="reset_password" id="' . $row->user_login . '" href="#">' . $__FM_CONFIG['icons']['pwd_reset'] . '</a>';
+			if ($row->user_template_only == 'no') {
+				if ($row->user_id != $_SESSION['user']['id']) {
+					$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->user_id . '&status=';
+					$edit_status .= ($row->user_status == 'active') ? 'disabled">' . $__FM_CONFIG['icons']['disable'] : 'active">' . $__FM_CONFIG['icons']['enable'];
+					$edit_status .= '</a>';
+	
+					/** Cannot change password without mail_enable defined */
+					if (getOption('mail_enable') && $row->user_auth_type != 2 && $row->user_template_only == 'no') {
+						$edit_status .= '<a class="reset_password" id="' . $row->user_login . '" href="#">' . $__FM_CONFIG['icons']['pwd_reset'] . '</a>';
+					}
+				} else {
+					$edit_status .= '<center>Enabled</center>';
 				}
-			} else {
-				$edit_status .= '<center>Enabled</center>';
 			}
 			if ($row->user_id != 1) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
