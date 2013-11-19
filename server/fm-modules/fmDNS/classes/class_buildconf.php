@@ -313,7 +313,8 @@ class fm_module_buildconf {
 					if ($fmdb->num_rows) {
 						$key_result = $fmdb->last_result;
 						$key_config = '// This file was built using ' . $_SESSION['module'] . ' ' . $fm_version . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
-						for($k=0; $k < $fmdb->num_rows; $k++) {
+						$key_count = $fmdb->num_rows;
+						for ($k=0; $k < $key_count; $k++) {
 							$key_name = trimFullStop($key_result[$k]->key_name) . '.';
 							$key_config .= "key \"" . $key_name . "\" {\n";
 							$key_config .= "\talgorithm " . $key_result[$k]->key_algorithm . ";\n";
@@ -333,22 +334,25 @@ class fm_module_buildconf {
 								}
 							}
 						}
+						$data->files[$server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys'] = $key_config;
 					}
-					$data->files[$server_zones_dir . '/views.conf.keys'] = $key_config;
 					
 					/** Generate zone file */
 					$tmp_files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name);
 					
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
-						$config .= "\n\tinclude \"" . $server_zones_dir . "/views.conf.keys\";\n";
+						/** Include view keys if present */
+						if (array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $data->files)) {
+							$config .= "\n\tinclude \"" . $server_zones_dir . "/views.conf." . $view_result[$i]->view_name . ".keys\";\n";
+						}
 						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . $view_result[$i]->view_name . "\";\n";
 						$files = array_merge($files, $tmp_files);
 					}
 					
 					$config .= "};\n\n";
 					
-					$view_config = $server_view_config = null;
+					$key_config = $view_config = $server_view_config = null;
 				}
 			} else {
 				/** Generate zones.all.conf */

@@ -2,6 +2,8 @@
 ================
 * Server - (Git Issue 35) Added config option input validation.
 * Server - (Git Issue 36) Fixed false error reporting.
+* Server - (Git Issue 40) Fixed issue where server key definitions would be
+           incorrectly included in views.
 
 1.0-rc6 (2013-11-06)
 ====================
