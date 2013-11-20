@@ -87,7 +87,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#more_records').append(response);
-				$this.hide();
+				$this.parent().parent().parent().remove();
 			}
 		});
 		

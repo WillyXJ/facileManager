@@ -8,6 +8,7 @@
 * Server - (Git Issue 41) Fixed issue where views without zones defined would
            cause the named-checks to fail.
 * Server - Fixed server key syntax.
+* Server - (Git Issue 42) Fixed 'Add more records' link.
 
 1.0-rc6 (2013-11-06)
 ====================

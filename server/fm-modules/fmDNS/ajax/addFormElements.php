@@ -26,6 +26,8 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
+$zone_access_allowed = true;
+
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
 if (is_array($_POST) && count($_POST)) {
