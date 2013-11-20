@@ -990,7 +990,9 @@ INFO;
 					$tmp_zone_def = explode('"', $tmp_zone_def[0]);
 					preg_match('/file "(.+?)+/', trim($zone_def), $tmp_zone_def_file);
 					$tmp_zone_def_file = explode('"', $tmp_zone_def_file[0]);
-					$zone_files[$view][$tmp_zone_def[1]] = $tmp_zone_def_file[1];
+					if (!empty($tmp_zone_def_file[1])) {
+						$zone_files[$view][$tmp_zone_def[1]] = $tmp_zone_def_file[1];
+					}
 				}
 			}
 		}

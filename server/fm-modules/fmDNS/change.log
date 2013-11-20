@@ -5,6 +5,8 @@
 * Server - (Git Issue 40) Fixed issue where server key definitions would be
            incorrectly included in views.
 * Server - Updated jquery animations.
+* Server - (Git Issue 41) Fixed issue where views without zones defined would
+           cause the named-checks to fail.
 
 1.0-rc6 (2013-11-06)
 ====================
