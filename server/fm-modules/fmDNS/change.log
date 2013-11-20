@@ -10,6 +10,7 @@
 * Server - Fixed server key syntax.
 * Server - (Git Issue 42) Fixed 'Add more records' link.
 * Server - Fixed some PHP errors.
+* Both   - (Git Issue 43) Added option to purge configuration files.
 
 1.0-rc6 (2013-11-06)
 ====================

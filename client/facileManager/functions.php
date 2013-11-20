@@ -34,6 +34,7 @@ $compress = true;
 if (in_array('-h', $argv) || in_array('help', $argv)) printHelp();
 $debug = (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
 $proto = (in_array('-s', $argv) || in_array('no-ssl', $argv)) ? 'http' : 'https';
+$purge = (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
 
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
@@ -128,6 +129,7 @@ function printHelp () {
 {$argv[0]} [options]
   -h|help        Display this help
   -d|debug       Enter debug mode for more output
+  -p|purge       Delete old configuration files before writing
   -s|no-ssl      Do not use SSL to retrieve the configs
 
 HELP;

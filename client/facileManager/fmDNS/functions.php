@@ -97,7 +97,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 
 
 function buildConf($url, $data) {
-	global $proto, $debug;
+	global $proto, $debug, $purge;
 	
 	if ($data['dryrun'] && $debug) echo "Dryrun mode (nothing will be written to disk).\n\n";
 	
@@ -129,12 +129,18 @@ function buildConf($url, $data) {
 		}
 	}
 		
-		/** Remove previous files so there are no stale files */
-//		foreach (scandir($server_zones_dir) as $item) {
-//			if ($item == '.' || $item == '..') continue;
-//			unlink($server_zones_dir . DIRECTORY_SEPARATOR . $item);
-//		}
-		
+	/** Remove previous files so there are no stale files */
+	if ($purge) {
+		foreach (scandir($server_zones_dir) as $item) {
+			if (in_array($item, array('.', '..'))) continue;
+			$full_path_file = $server_zones_dir . DIRECTORY_SEPARATOR . $item;
+			if ($debug) echo "Deleting $full_path_file.\n";
+			if 	(!$data['dryrun']) {
+				unlink($full_path_file);
+			}
+		}
+	}
+	
 	/** Process the files */
 	if (count($files)) {
 		foreach($files as $filename => $contents) {

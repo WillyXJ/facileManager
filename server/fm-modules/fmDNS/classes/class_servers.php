@@ -433,6 +433,7 @@ FORM;
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+		$options[] = null;
 		
 		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') == 'yes') {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
@@ -450,6 +451,10 @@ FORM;
 			$response = @$fm_module_buildconf->namedSyntaxChecks($raw_data);
 			if (strpos($response, 'error') !== false) return $response;
 		} else $response = null;
+		
+		if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') == 'yes') {
+			$options[] = 'purge';
+		}
 		
 		switch($server_update_method) {
 			case 'cron':
@@ -469,7 +474,7 @@ FORM;
 				$url = $server_update_method . '://' . $server_name . '/' . $_SESSION['module'] . '/reload.php';
 				
 				/** Data to post to $url */
-				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no);
+				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no, 'options'=>implode(' ', $options));
 				
 				$post_result = @unserialize(getPostData($url, $post_data));
 				

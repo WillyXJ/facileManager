@@ -116,8 +116,13 @@ $named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkco
 $__FM_CONFIG['fmDNS']['default']['options'] = array(
 		'enable_named_checks' => array(
 				'description' => array('Enabled named Checks', 'Enable or disable named-checkconf and named-checkzone utilities.</p>
-								<p>sudo must be installed on ' . php_uname('n') . ' with the following in sudoers:<br />
+								<p>sudo must be installed on ' . php_uname('n') . ' with the following in sudoers:</p>
 								<pre>' . $__FM_CONFIG['webserver']['user_info']['name'] . ' ALL=(root) NOPASSWD: ' . $named_check_utils . '</pre>'),
+				'default_value' => 'no',
+				'type' => 'checkbox'),
+		'purge_config_files' => array(
+				'description' => array('Purge Configuration Files', 'When enabled, configuration files will be deleted on the DNS
+								servers before building the server config. This can be handy if you want to remove unused files.'),
 				'default_value' => 'no',
 				'type' => 'checkbox')
 	);

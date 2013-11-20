@@ -36,7 +36,7 @@ initWebRequest();
 if (isset($_POST['action'])) {
 	switch ($_POST['action']) {
 		case 'buildconf':
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php buildconf', $output, $retval);
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php buildconf' . $_POST['options'], $output, $retval);
 			if ($retval) {
 				/** Something went wrong */
 				$output[] = 'Config build failed.';
