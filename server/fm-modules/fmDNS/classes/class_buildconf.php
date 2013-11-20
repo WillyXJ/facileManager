@@ -835,7 +835,9 @@ class fm_module_buildconf {
 				$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') && !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
 				$msg = "Success.\n";
 //			}
-			$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
+			if (isset($built_domain_ids)) {
+				$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
+			}
 		} else $msg = "DNS server is not found.\n";
 		
 		if ($compress) echo gzcompress(serialize($msg));
