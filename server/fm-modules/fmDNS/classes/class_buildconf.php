@@ -198,8 +198,9 @@ class fm_module_buildconf {
 						$server_result = $fmdb->last_result;
 						$server_count = $fmdb->num_rows;
 						for ($j=0; $j < $server_count; $j++) {
-							$servers .= 'server ' . $server_result[$j]->server_name . " {\n";
-							$servers .= "\tkey \"$key_name\";\n";
+							$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
+							$servers .= "server " . $server_ip[0]['ip'] . " {\n";
+							$servers .= "\tkeys {\"$key_name\";};\n";
 							$servers .= "};\n";
 						}
 					}
@@ -328,8 +329,9 @@ class fm_module_buildconf {
 								$server_count = $fmdb->num_rows;
 								$servers = null;
 								for ($j=0; $j < $server_count; $j++) {
-									$config .= "\tserver " . $server_result[$j]->server_name . " {\n";
-									$config .= "\t\tkey \"$key_name\";\n";
+									$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
+									$config .= "\tserver " . $server_ip[0]['ip'] . " {\n";
+									$config .= "\t\tkeys {\"$key_name\";};\n";
 									$config .= "\t};\n";
 								}
 							}
