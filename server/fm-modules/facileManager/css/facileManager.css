@@ -529,12 +529,11 @@ tbody {
 	text-align: center;
 	color: #000;
 	font-size: 10pt;
-	position: absolute;
-	top: 3em;
+	margin-top: -10px;
 	width: 75%;
-	margin-left: 16em;
+	margin-left: 12.5%;
+	padding-top: 1px;
 	background-color: #FFFBCC;
-	height: 2.3em;
 	line-height: 50%;
 	border: 1px #E6DB55 solid;
 	border-top: none;

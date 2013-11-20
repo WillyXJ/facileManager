@@ -181,11 +181,17 @@ $(document).ready(function() {
 					} else {
 						var eachLine = response.split("\n");
 						if (eachLine.length <= 2) {
-							$('#body_container').animate({marginTop: '4em'}, 200);
 							$('#response').html('<p class="error">'+response+'</p>');
-							$('#response').fadeIn(200);
-							$('#response').delay(3000).fadeOut(400, function() {
-								$('#body_container').animate({marginTop: '2.2em'}, 200);
+							$('#response')
+								.css('opacity', 0)
+								.slideDown(400, function() {
+									$('#response').animate(
+										{ opacity: 1 },
+										{ queue: false, duration: 200 }
+									);
+								});
+							$('#response').delay(3000).fadeTo(200, 0.00, function() {
+								$('#response').slideUp(400);
 							});
 						} else {
 							$('#manage_item').fadeIn(200);
@@ -217,11 +223,17 @@ $(document).ready(function() {
 				if(response == 'force_logout') {
 					window.location = '?logout';
 				} else {
-					$('#body_container').animate({marginTop: '4em'}, 200);
 					$('#response').html(response);
-					$('#response').fadeIn(200);
-					$('#response').delay(3000).fadeOut(400, function() {
-						$('#body_container').animate({marginTop: '2.2em'}, 200);
+					$('#response')
+						.css('opacity', 0)
+						.slideDown(400, function() {
+							$('#response').animate(
+								{ opacity: 1 },
+								{ queue: false, duration: 200 }
+							);
+						});
+					$('#response').delay(3000).fadeTo(200, 0.00, function() {
+						$('#response').slideUp(400);
 					});
 				}
 			}
@@ -275,11 +287,17 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				$('#body_container').animate({marginTop: '4em'}, 200);
 				$('#response').html(response);
-				$('#response').fadeIn(200);
-				$('#response').delay(3000).fadeOut(400, function() {
-					$('#body_container').animate({marginTop: '2.2em'}, 200);
+				$('#response')
+					.css('opacity', 0)
+					.slideDown(400, function() {
+						$('#response').animate(
+							{ opacity: 1 },
+							{ queue: false, duration: 200 }
+						);
+					});
+				$('#response').delay(3000).fadeTo(200, 0.00, function() {
+					$('#response').slideUp(400);
 				});
 			}
 		});
@@ -389,9 +407,15 @@ $(document).ready(function() {
 	        var $this 	= $(this);
 	        server_id	= $this.parent().parent().attr('id');
 	
-			$('#body_container').animate({marginTop: '4em'}, 200);
 			$('#response').html('<p>Processing Config Build...</p>');
-			$('#response').fadeIn(200);
+			$('#response')
+				.css('opacity', 0)
+				.slideDown(400, function() {
+					$('#response').animate(
+						{ opacity: 1 },
+						{ queue: false, duration: 200 }
+					);
+				});
 			
 			var form_data = {
 				server_id: server_id,
@@ -418,8 +442,8 @@ $(document).ready(function() {
 							$('#manage_item_contents').html('<h2>Configuration Build Results</h2>' + response + '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />');
 						}
 						
-						$('#response').delay(myDelay).fadeOut(400, function() {
-							$('#body_container').animate({marginTop: '2.2em'}, 200);
+						$('#response').delay(3000).fadeTo(200, 0.00, function() {
+							$('#response').slideUp(400);
 						});
 	
 						if (response.toLowerCase().indexOf("failed") == -1 && 

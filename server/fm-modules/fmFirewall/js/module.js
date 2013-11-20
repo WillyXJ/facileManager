@@ -133,11 +133,17 @@ $(document).ready(function() {
 					if (response != 'Success') {
 						var eachLine = response.split("\n");
 						if (eachLine.length <= 2) {
-							$('#body_container').animate({marginTop: '4em'}, 200);
 							$('#response').html('<p class="error">'+response+'</p>');
-							$('#response').fadeIn(200);
-							$('#response').delay(3000).fadeOut(400, function() {
-								$('#body_container').animate({marginTop: '2.2em'}, 200);
+							$('#response')
+								.css('opacity', 0)
+								.slideDown(400, function() {
+									$('#response').animate(
+										{ opacity: 1 },
+										{ queue: false, duration: 200 }
+									);
+								});
+							$('#response').delay(3000).fadeTo(200, 0.00, function() {
+								$('#response').slideUp(400);
 							});
 						} else {
 							$('#manage_item').fadeIn(200);

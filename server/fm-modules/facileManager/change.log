@@ -2,6 +2,7 @@
 ================
 * Server - Removed enable/disable option for template user accounts.
 * Server - Can no longer delete the active template user account.
+* Server - Updated css and jquery animations.
 
 1.0-rc6-1 (2013-11-07)
 ======================

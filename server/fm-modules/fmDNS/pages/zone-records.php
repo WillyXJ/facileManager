@@ -67,11 +67,9 @@ if (!getSOACount($domain_id)) {
 	$response = '** You still need to create the SOA for this zone **';
 }
 
+echo '<div id="body_container">' . "\n";
 if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
-echo ">
-	<h2>Records</h2>
+echo "	<h2>Records</h2>
 	$avail_types\n";
 	
 	if ($allowed_to_manage_records && $zone_access_allowed) {

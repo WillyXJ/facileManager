@@ -2,9 +2,15 @@ $(document).ready(function() {
 	
 	$('#set_sql_password').click(function() {
 		if ($('#verbose').is(":checked") == false) {
-			$('#body_container').animate({marginTop: '4em'}, 200);
 			$('#response').html('<p>Processing...please wait.</p>');
-			$('#response').fadeIn(200);
+			$('#response')
+				.css('opacity', 0)
+				.slideDown(400, function() {
+					$('#response').animate(
+						{ opacity: 1 },
+						{ queue: false, duration: 200 }
+					);
+				});
 		} else {
 			$('#manage_item').fadeIn(200);
 			$('#manage_item_contents').fadeIn(200);
@@ -19,8 +25,8 @@ $(document).ready(function() {
 			{
 				if ($('#verbose').is(":checked") == false) {
 					$('#response').html(response);
-					$('#response').delay(3000).fadeOut(400, function() {
-						$('#body_container').animate({marginTop: '2.2em'}, 200);
+					$('#response').delay(3000).fadeTo(200, 0.00, function() {
+						$('#response').slideUp(400);
 					});
 				} else {
 					$('#manage_item_contents').html(response);

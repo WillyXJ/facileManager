@@ -30,8 +30,8 @@ printHeader();
 include(ABSPATH . 'fm-modules/shared/classes/class_settings.php');
 
 echo <<<HTML
-<div id="response" style="display: none;"></div>
 <div id="body_container">
+<div id="response" style="display: none;"></div>
 	<h2>{$_SESSION['module']} Settings</h2>
 
 HTML;

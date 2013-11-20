@@ -1698,12 +1698,17 @@ function setOSIcon($server_os) {
 function printPageHeader($response, $title, $allowed_to_add = false, $name = null) {
 	global $__FM_CONFIG;
 	
+//	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
+//	echo '<div id="response" style="display: none;"></div>' . "\n";
+//	echo '<div id="body_container"';
+//	if (!empty($response)) echo ' style="margin-top: 4em;"';
+//	echo ">
+//		<h2>$title";
+		
+	echo '<div id="body_container">' . "\n";
 	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-	echo '<div id="response" style="display: none;"></div>' . "\n";
-	echo '<div id="body_container"';
-	if (!empty($response)) echo ' style="margin-top: 4em;"';
-	echo ">
-		<h2>$title";
+	else echo '<div id="response" style="display: none;"></div>' . "\n";
+	echo "<h2>$title";
 	
 	if ($allowed_to_add) {
 		if ($name) $name = ' name="' . $name . '"';

@@ -43,11 +43,9 @@ $style = ($line_count > 1) ? ' style="height: ' . $line_height . 'em;"' : null;
 
 $dashboard = buildDashboard();
 
+echo '<div id="body_container">' . "\n";
 if (!empty($response)) echo '<div id="response"' . $style . '>' . $response . "</div>\n";
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: ' . $margin . 'em;"';
 echo <<<HTML
->
 	<h2>$page_name</h2>
 	$dashboard
 <pre>

@@ -4,6 +4,7 @@
 * Server - (Git Issue 36) Fixed false error reporting.
 * Server - (Git Issue 40) Fixed issue where server key definitions would be
            incorrectly included in views.
+* Server - Updated jquery animations.
 
 1.0-rc6 (2013-11-06)
 ====================
