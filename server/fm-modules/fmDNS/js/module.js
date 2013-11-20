@@ -133,7 +133,6 @@ $(document).ready(function() {
 						$('#response').delay(3000).fadeTo(200, 0.00, function() {
 							$('#response').slideUp(400);
 						});
-						});
 					}
 				}
 			});
