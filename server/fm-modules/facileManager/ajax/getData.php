@@ -46,13 +46,14 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
 	$form_bits = array('user_login', 'user_password');
-	$edit_form = '<h2>Change Password</h2>' . "\n";
+	$edit_form = '<div id="popup_response" style="display: none;"></div>' . "\n";
+	$edit_form .= '<h2>Change Password</h2>' . "\n";
 	basicGet('fm_users', $_SESSION['user']['id'], 'user_', 'user_id');
 	$results = $fmdb->last_result;
 	if (!$fmdb->num_rows) returnError();
 	
 	$edit_form_data[] = $results[0];
-	$edit_form .= $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits);
+	$edit_form .= $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits, 'Save', 'change_user_password', null, false);
 
 	exit($edit_form);
 }

@@ -269,6 +269,48 @@ $(document).ready(function() {
 		
 		return false;
     });
+    
+    /* Account password changes */
+    $('#manage_item_contents').delegate('#change_user_password', 'click tap', function(e) {
+        var user_id			= $('input[name=user_id]').val();
+        var user_login		= $('input[name=user_login]').val();
+        var user_pwd		= $('input[name=user_password]').val();
+        var user_cpwd		= $('input[name=cpassword]').val();
+        
+		var form_data = {
+			user_id: user_id,
+			user_login: user_login,
+			user_password: user_pwd,
+			cpassword: user_cpwd,
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: 'POST',
+			url: 'fm-modules/facileManager/ajax/processPost.php',
+			data: form_data,
+			success: function(response)
+			{
+				if (response == 'Success') {
+					$('#popup_response').html('<p>Password has been updated.</p>');
+				} else {
+					$('#popup_response').html('<p>' + response + '</p>');
+				}
+				$('#popup_response').fadeIn(200);
+				
+				if (response == 'Success') {
+					$('#manage_item_contents').delay(2000).fadeOut(200, function() {
+						$('#manage_item_contents').html();
+						$('#manage_item').fadeOut(200);
+					});
+				} else {
+					$('#popup_response').delay(2000).fadeOut(200, function() {
+						$('#popup_response').html();
+					});
+				}
+			}
+		});
+    });
 
 	/* Account password reset */
     $('.reset_password').click(function() {

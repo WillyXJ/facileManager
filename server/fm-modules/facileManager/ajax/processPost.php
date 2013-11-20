@@ -27,8 +27,17 @@ require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'functions.php');
 
+/** Handle user password change */
+if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
+	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
+	$update_status = $fm_users->update($_POST);
+	if ($update_status !== true) {
+		echo $update_status;
+	} else {
+		echo 'Success';
+	}
 /** Handle fM settings */
-if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_settings') {
+} elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_settings') {
 	if (!$allowed_to_manage_settings) returnUnAuth(false);
 
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');

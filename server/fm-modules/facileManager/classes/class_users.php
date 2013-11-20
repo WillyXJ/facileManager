@@ -195,7 +195,7 @@ class fm_users {
 		
 		$sql_edit = null;
 		
-		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'fm_perm');
+		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'fm_perm', 'is_ajax');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

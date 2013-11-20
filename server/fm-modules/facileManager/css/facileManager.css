@@ -555,6 +555,31 @@ tbody {
 	text-decoration: underline;
 }
 
+#popup_response {
+	text-align: center;
+	color: #000;
+	font-size: 10pt;
+	position: absolute;
+	top: 0;
+	width: 75%;
+	margin-left: 7%;
+	background-color: #FFFBCC;
+	height: 2.3em;
+	padding-top: 1px;
+	line-height: 50%;
+	border: 1px #E6DB55 solid;
+	border-top: none;
+	-webkit-border-bottom-right-radius: 3px;
+	-webkit-border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	border-bottom-left-radius: 3px;
+	moz-box-shadow: 0 4px 10px -1px #ccc;
+	-webkit-box-shadow: 0 4px 10px -1px #ccc;
+	-khtml-box-shadow: 0 4px 10px -1px #ccc;
+	box-shadow: 0 4px 10px -1px #ccc;
+	z-index: 2;
+}
+
 .replace {
 	display:none;
 }
