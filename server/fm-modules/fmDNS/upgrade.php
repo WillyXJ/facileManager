@@ -405,13 +405,13 @@ function upgradefmDNS_108($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-function upgradefmDNS_108($__FM_CONFIG, $running_version) {
+function upgradefmDNS_109($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '1.0-rc6', '<') ? upgradefmDNS_108($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_dns_functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
 
 	$inserts = null;
 	
