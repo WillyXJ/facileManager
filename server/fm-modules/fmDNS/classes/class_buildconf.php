@@ -132,7 +132,7 @@ class fm_module_buildconf {
 			$config .= "};\n\n";
 			
 			/** Debian-based requires named.conf.options */
-			if (isDebianSystem($server_os)) {
+			if (isDebianSystem($server_os_distro)) {
 				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
 				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";
 				$data->files[$server_config_file] = $config;
@@ -368,7 +368,7 @@ class fm_module_buildconf {
 			}
 
 			/** Debian-based requires named.conf.local */
-			if (isDebianSystem($server_os)) {
+			if (isDebianSystem($server_os_distro)) {
 				$data->files[dirname($server_config_file) . '/named.conf.local'] = $config;
 				$config = $data->files[$server_config_file] . "include \"" . dirname($server_config_file) . "/named.conf.local\";\n\n";
 			}
@@ -959,7 +959,7 @@ INFO;
 		$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
 		$tmp_dir = rtrim($fm_temp_directory, '/') . '/' . $_SESSION['module'] . '_' . date("YmdHis") . '/';
 		system('rm -rf ' . $tmp_dir);
-		$debian_system = isDebianSystem($files_array['server_os']);
+		$debian_system = isDebianSystem($files_array['server_os_distro']);
 		$named_conf_contents = null;
 		/** Create temporary directory structure */
 		foreach ($files_array['files'] as $file => $contents) {

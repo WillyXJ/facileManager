@@ -11,6 +11,8 @@
 * Server - (Git Issue 42) Fixed 'Add more records' link.
 * Server - Fixed some PHP errors.
 * Both   - (Git Issue 43) Added option to purge configuration files.
+* Both   - (Git Issue 43) Fixed an issue where Debian-based files were not
+           getting created/updated.
 
 1.0-rc6 (2013-11-06)
 ====================
