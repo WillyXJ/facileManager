@@ -200,19 +200,20 @@ class fm_module_buildconf {
 						for ($j=0; $j < $server_count; $j++) {
 							$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
 							$servers .= "server " . $server_ip[0]['ip'] . " {\n";
-							$servers .= "\tkeys {\"$key_name\";};\n";
+							$servers .= "\tkeys { \"$key_name\"; };\n";
 							$servers .= "};\n";
 						}
 					}
 				}
 			}
+			
+			$config .= $logging . $servers;
 
 			if ($keys) {
-				$keys = "keys {\n$keys};\n";
-			}
-			$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
+				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
 			
-			$config .= $logging . $servers . "\ninclude \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";;
+				$config .= "\ninclude \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
+			}
 			
 
 			/** Build ACLs */
@@ -331,7 +332,7 @@ class fm_module_buildconf {
 								for ($j=0; $j < $server_count; $j++) {
 									$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
 									$config .= "\tserver " . $server_ip[0]['ip'] . " {\n";
-									$config .= "\t\tkeys {\"$key_name\";};\n";
+									$config .= "\t\tkeys { \"$key_name\"; };\n";
 									$config .= "\t};\n";
 								}
 							}
@@ -345,7 +346,7 @@ class fm_module_buildconf {
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
 						/** Include view keys if present */
-						if (array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $data->files)) {
+						if (@array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $data->files)) {
 							$config .= "\n\tinclude \"" . $server_zones_dir . "/views.conf." . $view_result[$i]->view_name . ".keys\";\n";
 						}
 						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . $view_result[$i]->view_name . "\";\n";
