@@ -62,7 +62,7 @@ class fm_sqlpass_passwords {
 				<h2>Set User Password</h2>
 			
 HTML;
-			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options')) $pwd_strength = PWD_STRENGTH;
+			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options')) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
 			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'Set Password', 'set_sql_password', 'config-passwords', false);
 			echo '</form>';
 		}

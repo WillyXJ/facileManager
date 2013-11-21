@@ -710,7 +710,8 @@ a {
 
 #fm_module_settings, #import_output, #fm_config_modules, #fm_config_users, 
 #fm_config_settings, #fm_config_logs, #help, #fm_mailing_options,
-#mail_smtp_auth_options, #auth_ldap_options, #ldap_group_require_options {
+#mail_smtp_auth_options, #auth_ldap_options, #ldap_group_require_options,
+#auth_fm_options {
 	display: none;
 }
 

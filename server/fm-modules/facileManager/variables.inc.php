@@ -114,12 +114,13 @@ $__FM_CONFIG['webserver']['user_info'] = posix_getpwuid(posix_geteuid());
 
 
 /** Constants */
-if (!defined('PWD_STRENGTH')) {
-	define('PWD_STRENGTH', 'strong');
-}
 if (!defined('TMP_FILE_EXPORTS')) {
 	define('TMP_FILE_EXPORTS', '/tmp');
 }
+
+/** PWD_STRENGTH */
+if (class_exists('fmdb')) $auth_fm_pw_strength = getOption('auth_fm_pw_strength');
+$GLOBALS['PWD_STRENGTH'] = ($auth_fm_pw_strength) ? $auth_fm_pw_strength : 'strong';
 
 include(dirname(__FILE__) . '/permissions.inc.php');
 

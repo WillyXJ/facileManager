@@ -396,10 +396,15 @@ $(document).ready(function() {
 	});
 	
 	$("#auth_method").change(function() {
-		if ($(this).val() == 2) {
+		if ($(this).val() == 1) {
+			$('#auth_fm_options').show('slow');
+			$('#auth_ldap_options').slideUp();
+		} else if ($(this).val() == 2) {
 			$('#auth_ldap_options').show('slow');
+			$('#auth_fm_options').slideUp();
 		} else {
 			$('#auth_ldap_options').slideUp();
+			$('#auth_fm_options').slideUp();
 		}
 	});
 	

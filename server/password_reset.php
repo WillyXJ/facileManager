@@ -70,7 +70,8 @@ function printPasswordResetForm($message=null) {
 
 	printHeader('Password Reset', 'install');
 	
-	$strength = PWD_STRENGTH;
+	if (class_exists('fmdb')) $GLOBALS['PWD_STRENGTH'] = getOption('auth_fm_pw_strength');
+	$strength = $GLOBALS['PWD_STRENGTH'];
 	echo <<<HTML
 	<form id="forgotpwd" method="post" action="{$_SERVER['REQUEST_URI']}">
 		<input type="hidden" name="reset_pwd" value="1" />
@@ -92,7 +93,7 @@ function printPasswordResetForm($message=null) {
 			<tr class="pwdhint">
 				<th width="33%" scope="row">Hint</th>
 				<td width="67%">
-				{$__FM_CONFIG['password_hint'][PWD_STRENGTH]}
+				{$__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]}
 				<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
 				</td>
 			</tr>

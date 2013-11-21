@@ -122,6 +122,15 @@ class fm_settings {
 		$auth_method = getOption('auth_method');
 		$auth_method_list = buildSelect('auth_method', 'auth_method', $__FM_CONFIG['options']['auth_method'], $auth_method);
 		
+		/** fM Auth Section */
+		foreach ($__FM_CONFIG['password_hint'] as $strength => $hint) {
+			$auth_fm_pw_strength_opt[] = $strength;
+		}
+		$auth_fm_pw_strength_list = buildSelect('auth_fm_pw_strength', 'auth_fm_pw_strength', $auth_fm_pw_strength_opt, $GLOBALS['PWD_STRENGTH']);
+		if ($auth_method == 1) {
+			 $auth_fm_options_style = 'style="display: block;"';
+		} else $auth_fm_options_style = null;
+		
 		/** LDAP Section */
 		if ($auth_method == 2) {
 			 $auth_ldap_options_style = 'style="display: block;"';
@@ -213,6 +222,17 @@ class fm_settings {
 						</div>
 						<div class="choices">
 							$auth_method_list
+						</div>
+					</div>
+					<div id="auth_fm_options" $auth_fm_options_style>
+						<div id="setting-row">
+							<div class="description">
+								<label for="auth_fm_pw_strength">Password Strength</label>
+								<p>Protocol version the server supports.</p>
+							</div>
+							<div class="choices">
+								$auth_fm_pw_strength_list
+							</div>
 						</div>
 					</div>
 					<div id="auth_ldap_options" $auth_ldap_options_style>

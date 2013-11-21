@@ -414,7 +414,7 @@ FORM_ROW;
 
 		if (in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) {
 			$button_disabled = 'disabled';
-			$strength = PWD_STRENGTH;
+			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
 			$password_form = <<<FORM_ROW
 				<tr>

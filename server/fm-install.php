@@ -231,7 +231,7 @@ function displayAccountSetup($error = null) {
 		$error = "<strong>ERROR: $error</strong>\n";
 	}
 	
-	$strength = PWD_STRENGTH;
+	$strength = $GLOBALS['PWD_STRENGTH'];
 	echo <<<HTML
 <form method="post" action="?step=5">
 	<center>
@@ -260,7 +260,7 @@ function displayAccountSetup($error = null) {
 		</tr>
 		<tr class="pwdhint">
 			<th width="33%" scope="row">Hint</th>
-			<td width="67%">{$__FM_CONFIG['password_hint'][PWD_STRENGTH]}</td>
+			<td width="67%">{$__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]}</td>
 		</tr>
 	</table>
 	</center>
