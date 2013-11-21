@@ -131,6 +131,21 @@ function buildConf($url, $data) {
 		
 	/** Remove previous files so there are no stale files */
 	if ($purge) {
+		/** Server config files */
+		$path_parts = pathinfo($server_config_file);
+		if (version_compare(PHP_VERSION, '5.2.0', '<')) {
+			$path_parts['filename'] = str_replace('.' . $path_parts['extension'], '', $path_parts['basename']);
+		}
+		$config_file_pattern = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $path_parts['filename'] . '.*';
+		exec('ls ' . $config_file_pattern, $config_file_match);
+		foreach ($config_file_match as $config_file) {
+			if ($debug) echo "Deleting $config_file.\n";
+			if 	(!$data['dryrun']) {
+				unlink($config_file);
+			}
+		}
+		
+		/** Zone files */
 		foreach (scandir($server_zones_dir) as $item) {
 			if (in_array($item, array('.', '..'))) continue;
 			$full_path_file = $server_zones_dir . DIRECTORY_SEPARATOR . $item;
