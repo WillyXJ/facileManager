@@ -120,7 +120,7 @@ if (!defined('TMP_FILE_EXPORTS')) {
 
 /** PWD_STRENGTH */
 if (class_exists('fmdb')) $auth_fm_pw_strength = getOption('auth_fm_pw_strength');
-$GLOBALS['PWD_STRENGTH'] = ($auth_fm_pw_strength) ? $auth_fm_pw_strength : 'strong';
+$GLOBALS['PWD_STRENGTH'] = (isset($auth_fm_pw_strength) && !empty($auth_fm_pw_strength)) ? $auth_fm_pw_strength : 'strong';
 
 include(dirname(__FILE__) . '/permissions.inc.php');
 
