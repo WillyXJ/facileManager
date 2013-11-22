@@ -928,6 +928,8 @@ function buildHelpFile() {
 			adding or editing opjects.</p>
 			<p><b>Temporary Directory</b><br />
 			Periodically $fm_name and its modules may need to create temporary files or directories on your webserver. Specify the local path for it to use.</p>
+			<p><b>Software Update</b><br />
+			Choose whether you want $fm_name to automatically check for software updates or not.</p>
 		</div>
 	</li>
 	<li>

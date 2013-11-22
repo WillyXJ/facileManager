@@ -359,27 +359,6 @@ class fm_settings {
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label for="software_update">Software Update</label>
-							<p>If this is checked, $fm_name will automatically check for updates.</p>
-						</div>
-						<div class="choices">
-							<input style="height: 10px;" name="software_update" id="software_update" type="checkbox" value="1" $software_update_checked /><label for="software_update">Check for Updates</label>
-						</div>
-					</div>
-					<div id="software_update_options" $software_update_options_style>
-						<div id="setting-row">
-							<div class="description">
-								<label for="software_update_interval">Update Check Interval</label>
-								<p>The frequency $fm_name should check for updates.</p>
-							</div>
-							<div class="choices">
-								$software_update_list
-							</div>
-						</div>
-				</div>
-				<div id="settings-section">
-					<div id="setting-row">
-						<div class="description">
 							<label for="enforce_ssl">Enforce SSL</label>
 							<p>Attempt to auto-detect and redirect the user to https.</p>
 						</div>
@@ -517,6 +496,27 @@ class fm_settings {
 							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="$fm_temp_directory" size="40" placeholder="/tmp" />
 						</div>
 					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="software_update">Software Update</label>
+							<p>If this is checked, $fm_name will automatically check for updates.</p>
+						</div>
+						<div class="choices">
+							<input style="height: 10px;" name="software_update" id="software_update" type="checkbox" value="1" $software_update_checked /><label for="software_update">Check for Updates</label>
+						</div>
+					</div>
+					<div id="software_update_options" $software_update_options_style>
+						<div id="setting-row">
+							<div class="description">
+								<label for="software_update_interval">Update Check Interval</label>
+								<p>The frequency $fm_name should check for updates.</p>
+							</div>
+							<div class="choices">
+								$software_update_list
+							</div>
+						</div>
 				</div>
 			$save_button
 			</div>
