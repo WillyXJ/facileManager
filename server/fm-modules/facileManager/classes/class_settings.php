@@ -75,8 +75,14 @@ class fm_settings {
 		
 				$log_value = trim($option_value);
 				$log_message .= ucwords(str_replace('_', ' ', $option)) . ': ';
-				if (@is_array($__FM_CONFIG['options'][$option][$log_value])) $log_message .= $__FM_CONFIG['options'][$option][$log_value][0];
-				elseif ($option == 'mail_smtp_pass') $log_message .= str_repeat('*', 8);
+				if (@is_array($__FM_CONFIG['options'][$option][0])) {
+					foreach ($__FM_CONFIG['options'][$option] as $array) {
+						if ($log_value == $array[1]) {
+							$log_message .= $array[0];
+							break;
+						}
+					}
+				} elseif ($option == 'mail_smtp_pass') $log_message .= str_repeat('*', 8);
 				elseif ($option == 'date_format' || $option == 'time_format') $log_message .= date($log_value);
 				elseif ($option == 'ldap_user_template') $log_message .= getNameFromID($log_value, 'fm_users', 'user_', 'user_id', 'user_login');
 				elseif ($option_value == '1') $log_message .= 'Yes';
