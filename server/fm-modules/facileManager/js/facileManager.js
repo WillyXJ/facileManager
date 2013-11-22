@@ -432,6 +432,14 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#software_update").click(function() {
+		if ($(this).is(':checked')) {
+			$('#software_update_options').show('slow');
+		} else {
+			$('#software_update_options').slideUp();
+		}
+	});
+	
 	$("#help_topbar img.popout").click(function() {
 		$("#topheadpartright .help_link").click();
 		window.open('help','1356124444538','width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0');

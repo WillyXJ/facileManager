@@ -5,6 +5,7 @@
 * Server - Updated css and jquery animations.
 * Server - User password strength is now selectable in the settings.
 * Server - Improved logging of settings changes.
+* Server - Customizable app update checks.
 
 1.0-rc6-1 (2013-11-07)
 ======================

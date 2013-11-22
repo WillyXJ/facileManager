@@ -90,8 +90,12 @@ function isNewVersionAvailable($package, $version) {
 	
 	$method = 'update';
 	
+	/** Are software updates enabled? */
+	if (!getOption('software_update', 0)) return false;
+	
 	/** Should we be running this check now? */
 	$last_version_check = getOption($package . '_version_check', 0);
+	if (!$software_update_interval = getOption('software_update_interval', 0)) $software_update_interval = 'week';
 	if (!$last_version_check) {
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
@@ -99,7 +103,7 @@ function isNewVersionAvailable($package, $version) {
 	} elseif (strpos($last_version_check['data'], $version)) {
 		$last_version_check['timestamp'] = 0;
 	}
-	if (strtotime($last_version_check['timestamp']) < strtotime("6 hours ago")) {
+	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
 		$result = getPostData($fm_site_url, $data);
 		
 		setOption($package . '_version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, 0);

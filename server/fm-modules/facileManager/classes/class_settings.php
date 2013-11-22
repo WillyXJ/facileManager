@@ -91,7 +91,6 @@ class fm_settings {
 				
 				$log_message .= "\n";
 				
-//				if ($option == 'auth_method' && $option_value) $force_logout = true;
 				if ($option == 'auth_method') $force_logout = true;
 
 				if (isset($data_array)) {
@@ -205,6 +204,15 @@ class fm_settings {
 		$show_errors_checked = $show_errors ? 'checked' : null;
 		
 		$fm_temp_directory = getOption('fm_temp_directory');
+		
+		/** Software Update Section */
+		if (!$software_update_interval = getOption('software_update_interval')) $software_update_interval = 'week';
+		$software_update_list = buildSelect('software_update_interval', 'software_update_interval', $__FM_CONFIG['options']['software_update_interval'], $software_update_interval);
+		$software_update = getOption('software_update');
+		if ($software_update) {
+			 $software_update_checked = 'checked';
+			 $software_update_options_style = 'style="display: block;"';
+		} else $software_update_checked = $software_update_options_style = null;
 
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">
@@ -215,6 +223,7 @@ class fm_settings {
 			<input type="hidden" name="mail_smtp_auth" value="0" />
 			<input type="hidden" name="mail_smtp_tls" value="0" />
 			<input type="hidden" name="show_errors" value="0" />
+			<input type="hidden" name="software_update" value="0" />
 			<div id="settings">
 				<div id="settings-section">
 					<div id="setting-row">
@@ -346,6 +355,27 @@ class fm_settings {
 							</div>
 						</div>
 					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="software_update">Software Update</label>
+							<p>If this is checked, $fm_name will automatically check for updates.</p>
+						</div>
+						<div class="choices">
+							<input style="height: 10px;" name="software_update" id="software_update" type="checkbox" value="1" $software_update_checked /><label for="software_update">Check for Updates</label>
+						</div>
+					</div>
+					<div id="software_update_options" $software_update_options_style>
+						<div id="setting-row">
+							<div class="description">
+								<label for="software_update_interval">Update Check Interval</label>
+								<p>The frequency $fm_name should check for updates.</p>
+							</div>
+							<div class="choices">
+								$software_update_list
+							</div>
+						</div>
 				</div>
 				<div id="settings-section">
 					<div id="setting-row">

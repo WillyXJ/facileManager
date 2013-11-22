@@ -28,7 +28,7 @@ $page_name_sub = 'Modules';
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 
-$output = $avail_modules = null;
+$output = $avail_modules = $response = null;
 $import_output = '<p>Processing...</p>';
 
 $disabled = $super_admin ? null : 'disabled';
@@ -56,9 +56,8 @@ $fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version);
 printHeader();
 @printMenu($page_name, $page_name_sub);
 
+echo '<div id="body_container">';
 if (!empty($response) || !empty($fm_new_version_available)) echo '<div id="response">' . $fm_new_version_available . '<p>' . $response . '</p></div>';
-echo '<div id="body_container"';
-if (!empty($response) || !empty($fm_new_version_available)) echo ' style="margin-top: 4em;"';
 
 $modules = getAvailableModules();
 if (count($modules)) {
@@ -143,7 +142,6 @@ HTML;
 }
 
 echo <<<HTML
->
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="">
 			<h2>Module Configuration</h2>
