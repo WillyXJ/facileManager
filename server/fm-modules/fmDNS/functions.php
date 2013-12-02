@@ -180,6 +180,9 @@ function buildModuleHelpFile() {
 			<p>When adding CNAME, MX, SRV, SOA, or NS records, you have the option append the domain to the record. This means {$_SESSION['module']} 
 			will automatically add the domain to the record so you don't have to give the fully qualified domain name in the record value.</p>
 			<p><i>The 'Record Management' or 'Super Admin' permission is required to add, edit, and delete records.</i></p>
+			<p>When adding or updating a SOA record for a zone, the domain can be appended to the Master Server and Email Address if selected. This
+			means you could simply enter 'ns1' and 'username' for the Master Server and Email Address respectively. If you prefer to enter the entire
+			entry, make sure you append a period (.) at the end of each and select 'no' for Append Domain.</p>
 			<p>Adding A records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
 			exist in order for PTR records to automatically be created.</p>
 			<p>You can also import BIND-compatible zone files instead of adding records individually. Go to Admin &rarr; 

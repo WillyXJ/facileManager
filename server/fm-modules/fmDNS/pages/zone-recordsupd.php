@@ -94,7 +94,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 	}
 	$input_return = array();
 
-	$HTMLOut = NULL;
+	$HTMLOut = $SOAHTMLOut = null;
 	$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 	foreach ($changes as $i => $data) {
 		$name_error = $value_error = $ttl_error = $priority_error = null;
@@ -210,12 +210,20 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 						$val = strpos($val, '@') ? str_replace('@', '.', rtrim($val, '.') . '.') : $val ;
 						$data[$key] = $val;
 					}
-					if ($key == 'soa_append') {
-						if (!verifyCNAME($val, $_POST['update'][$i]['soa_master_server'])) {
-							$value_error = '<font color="red"><i>Invalid</i></font> ';
-							$input_return_error[$i] = 1;
+					if (in_array($key, array('soa_master_server', 'soa_email_address'))) {
+						$val = rtrim($val, '.');
+						if (strpos($_POST['update'][$i]['soa_master_server'], $domain) && strpos($_POST['update'][$i]['soa_email_address'], $domain)) {
+							$new_val = rtrim(str_replace($domain, '', $val), '.');
+							if ($new_val != rtrim($val, '.')) {
+								$_POST['update'][$i]['soa_append'] = 'yes';
+							}
+							$val = $new_val;
 						}
-					} else {
+						if ($_POST['update'][$i]['soa_append'] == 'no') {
+							$val .= '.';
+						}
+					}
+					if ($key != 'soa_append') {
 						if ($key == 'soa_serial_no' && !$val) {
 							continue;
 						} elseif (in_array($key, array('soa_master_server', 'soa_email_address'))) {
@@ -229,7 +237,14 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 								$input_return_error[$i] = 1;
 							}
 						}
+					} else {
+						$val = $_POST['update'][$i]['soa_append'];
 					}
+					
+					$action = (!isset($input_return_error[$i]) || !$input_return_error[$i]) ? 'Create' : 'None';
+					$img = ($name_error || $value_error) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
+					$SOAHTMLOut.= "<tr><td>$action</td><td>$key</td><td>$value_error $val</td><td></td><td style=\"text-align: center;\">$img</td></tr>\n";
+					$value_error = null;
 				}
 
 				if (!isset($input_return_error[$i]) || !$input_return_error[$i]) {
@@ -244,7 +259,9 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 		}
 
 		$img = ($name_error || $value_error || $priority_error || $ttl_error || $append_error) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
-		$value[$i]['record_name'] = (!$value[$i]['record_name'] && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
+		if ($record_type != 'SOA') {
+			$value[$i]['record_name'] = (!$value[$i]['record_name'] && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
+		}
 		if ($record_type == 'MX') {
 			$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 		} elseif ($record_type == 'SRV') {
@@ -252,10 +269,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 		} elseif ($record_type == 'CNAME' || $record_type == 'NS') {
 			$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 		} elseif ($record_type == 'SOA') {
-			foreach ($data as $name => $value) {
-				if (($name == 'soa_serial_no' && !$value) || in_array($name, array('domain_id', 'soa_status'))) continue;
-				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$value_error $value</td><td></td><td style=\"text-align: center;\">$img</td></tr>\n";
-			}
+			$HTMLOut.= $SOAHTMLOut;
 		} else {
 			$name = ($record_type == 'PTR') ? $value[$i]['record_name'] . '.' . $domain : $value[$i]['record_name'];
 			$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
@@ -277,7 +291,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 
 	$value_tmp = $value;
 	$ErrorCode = '<font color="red"><b>*Invalid*</b></font>';
-	$HTMLOut = $SOAHTMLOut = NULL;
+	$HTMLOut = $SOAHTMLOut = null;
 	$input_return = array();
 	$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 	foreach ($value as $i => $data) {
@@ -439,12 +453,20 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 						$val = strpos($val, '@') ? str_replace('@', '.', rtrim($val, '.') . '.') : $val ;
 						$data[$key] = $val;
 					}
-					if ($key == 'soa_append') {
-						if (!verifyCNAME($val, $_POST['create'][$i]['soa_master_server'])) {
-							$value_error = '<font color="red"><i>Invalid</i></font> ';
-							$input_return_error[$i] = 1;
+					if (in_array($key, array('soa_master_server', 'soa_email_address'))) {
+						$val = rtrim($val, '.');
+						if (strpos($_POST['create'][$i]['soa_master_server'], $domain) && strpos($_POST['create'][$i]['soa_email_address'], $domain)) {
+							$new_val = rtrim(str_replace($domain, '', $val), '.');
+							if ($new_val != rtrim($val, '.')) {
+								$_POST['create'][$i]['soa_append'] = 'yes';
+							}
+							$val = $new_val;
 						}
-					} else {
+						if ($_POST['create'][$i]['soa_append'] == 'no') {
+							$val .= '.';
+						}
+					}
+					if ($key != 'soa_append') {
 						if ($key == 'soa_serial_no' && !$val) {
 							continue;
 						} elseif (in_array($key, array('soa_master_server', 'soa_email_address'))) {
@@ -458,11 +480,14 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 								$input_return_error[$i] = 1;
 							}
 						}
+					} else {
+						$val = $_POST['create'][$i]['soa_append'];
 					}
 					
 					$action = (!isset($input_return_error[$i]) || !$input_return_error[$i]) ? 'Create' : 'None';
 					$img = ($name_error || $value_error) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
-					$SOAHTMLOut.= "<tr><td>$action</td><td>$name_error $key</td><td>$value_error $val</td><td></td><td style=\"text-align: center;\">$img</td></tr>\n";
+					$SOAHTMLOut.= "<tr><td>$action</td><td>$key</td><td>$value_error $val</td><td></td><td style=\"text-align: center;\">$img</td></tr>\n";
+					$value_error = null;
 				}
 				
 				if (!isset($input_return_error[$i]) || !$input_return_error[$i]) {
@@ -475,7 +500,9 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 			}
 
 			$img = ($name_error || $value_error || $number_error || $ttl_error || $append_error) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
-			$value[$i]['record_name'] = (empty($value[$i]['record_name']) && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
+			if ($record_type != 'SOA') {
+				$value[$i]['record_name'] = (empty($value[$i]['record_name']) && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
+			}
 			if ($record_type == 'MX') {
 				$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">$append_error {$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 			} elseif ($record_type == 'SRV') {
@@ -520,7 +547,7 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 	}
 }
 
-function verifyCNAME($Append, $Var2, $allow_null=true) {
+function verifyCNAME($Append, $Var2, $allow_null = true) {
 	if (!$allow_null && !strlen($Var2)) return false;
 	
 	if (preg_match("([_\!#\$&\*\+\=\|/:;,'\"�%^\(\)])", $Var2) == false) {

@@ -13,6 +13,7 @@
 * Both   - (Git Issue 43) Added option to purge configuration files.
 * Both   - (Git Issue 43) Fixed an issue where Debian-based files were not
            getting created/updated.
+* Server - (Git Issue 44) Improved SOA create/update checks and updated help file.
 
 1.0-rc6 (2013-11-06)
 ====================
