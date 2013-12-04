@@ -392,6 +392,7 @@ FORM;
 		
 		foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
 			if (in_array($type, array('iptables', 'display')) && ($bit & $tcp_flag_mask)) $service_tcp_flags['mask'] .= $flag . ',';
+			if ($type == 'ipfw' && (($bit & $tcp_flag_mask) && !($bit & $tcp_flag_settings))) $service_tcp_flags['mask'] .= '!' . strtolower($flag) . ',';
 			if ($bit & $tcp_flag_settings) {
 				switch ($type) {
 					case 'iptables':
@@ -430,6 +431,8 @@ FORM;
 			case 'iptables':
 				return (substr_count($service_tcp_flags, 'NONE') != 2) ? ' --tcp-flags ' . $service_tcp_flags : null;
 			case 'ipfw':
+				$service_tcp_flags = str_replace(' ', ',', $service_tcp_flags);
+				if (in_array($service_tcp_flags, array('!ack,syn', 'syn,!ack'))) return ' setup';
 				return ' tcpflags ' . $service_tcp_flags;
 			case 'ipfilter':
 				return ' flags ' . $service_tcp_flags;
