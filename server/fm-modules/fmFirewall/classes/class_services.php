@@ -392,7 +392,7 @@ FORM;
 		
 		foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
 			if (in_array($type, array('iptables', 'display')) && ($bit & $tcp_flag_mask)) $service_tcp_flags['mask'] .= $flag . ',';
-			if ($type == 'ipfw' && (($bit & $tcp_flag_mask) && !($bit & $tcp_flag_settings))) $service_tcp_flags['mask'] .= '!' . strtolower($flag) . ',';
+			if ($type == 'ipfw' && (($bit & $tcp_flag_mask) && !($bit & $tcp_flag_settings))) $service_tcp_flags['settings'] .= '!' . strtolower($flag) . ',';
 			if ($bit & $tcp_flag_settings) {
 				switch ($type) {
 					case 'iptables':
@@ -411,13 +411,11 @@ FORM;
 			if (!$tcp_flag_settings) {
 				$service_tcp_flags['settings'] = in_array($type, array('iptables', 'display')) ? 'NONE' : null;
 			}
-			if ($tcp_flag_mask == array_sum($__FM_CONFIG['tcp_flags'])) {
-				$service_tcp_flags['settings'] = in_array($type, array('iptables', 'display')) ? 'ALL' : null;
-			}
 
 			if (in_array($type, array('iptables', 'display'))) {
 				if (!$tcp_flag_mask) $service_tcp_flags['mask'] = 'NONE';
 				if ($tcp_flag_mask == array_sum($__FM_CONFIG['tcp_flags'])) $service_tcp_flags['mask'] = 'ALL';
+				if ($tcp_flag_settings == array_sum($__FM_CONFIG['tcp_flags'])) $service_tcp_flags['settings'] = 'ALL';
 			}
 		}
 		

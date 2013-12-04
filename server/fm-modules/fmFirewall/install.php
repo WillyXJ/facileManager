@@ -272,66 +272,67 @@ INSERT;
 
 
 	/** Default TCP/UDP Services */
-	$services[] = array('tcp', 'Any TCP', '', '', '');
-	$services[] = array('udp', 'Any UDP', '', '', '');
-	$services[] = array('tcp', 'High TCP Ports', '', '1024:65535', '');
-	$services[] = array('udp', 'High UDP Ports', '', '1024:65535', '');
-	$services[] = array('tcp', 'ssh', '', '22:22', '');
-	$services[] = array('tcp', 'rdp', '', '3389:3389', '');
-	$services[] = array('tcp', 'http', '', '80:80', '');
-	$services[] = array('tcp', 'https', '', '443:443', '');
-	$services[] = array('tcp', 'mysql', '', '3306:3306', '');
-	$services[] = array('tcp', 'mssql', '', '1433:1433', '');
-	$services[] = array('tcp', 'postgre', '', '5432:5432', '');
-	$services[] = array('tcp', 'domain', '', '53:53', '');
-	$services[] = array('udp', 'domain', '', '53:53', '');
-	$services[] = array('tcp', 'ftp', '', '21:21', '');
-	$services[] = array('tcp', 'ftp-data', '20:20', '1024:65535', '');
-	$services[] = array('tcp', 'ftp-data passive', '', '20:20', '');
-	$services[] = array('tcp', 'smtp', '', '25:25', '');
-	$services[] = array('tcp', 'smtps', '', '465:465', '');
-	$services[] = array('tcp', 'pop3', '', '110:110', '');
-	$services[] = array('tcp', 'pop3s', '', '995:995', '');
-	$services[] = array('tcp', 'imap', '', '143:143', '');
-	$services[] = array('tcp', 'imaps', '', '993:993', '');
-	$services[] = array('tcp', 'squid', '', '3128:3128', 'Standard proxy server');
-	$services[] = array('tcp', 'telnet', '', '23:23', '');
-	$services[] = array('tcp', 'afp', '', '548:548', 'Apple File Sharing over TCP');
-	$services[] = array('tcp', 'nfs', '', '2049:2049', '');
-	$services[] = array('udp', 'nfs', '', '2049:2049', '');
-	$services[] = array('tcp', 'kerberos', '', '88:88', '');
-	$services[] = array('udp', 'kerberos', '', '88:88', '');
-	$services[] = array('udp', 'kerberos-adm', '', '749:750', '');
-	$services[] = array('tcp', 'ldap', '', '389:389', '');
-	$services[] = array('tcp', 'ldaps', '', '636:636', '');
-	$services[] = array('tcp', 'eklogin', '', '2105:2105', '');
-	$services[] = array('tcp', 'klogin', '', '543:543', '');
-	$services[] = array('tcp', 'kpasswd', '', '464:464', '');
-	$services[] = array('tcp', 'krb524', '', '4444:4444', '');
-	$services[] = array('tcp', 'ksh', '', '544:544', '');
-	$services[] = array('udp', 'netbios-ns', '', '137:137', '');
-	$services[] = array('udp', 'netbios-dgm', '', '138:138', '');
-	$services[] = array('tcp', 'netbios-ssn', '', '139:139', '');
-	$services[] = array('udp', 'bootps', '', '67:67', '');
-	$services[] = array('udp', 'bootpc', '', '68:68', '');
-	$services[] = array('tcp', 'smb', '', '445:445', 'SMB over TCP');
-	$services[] = array('udp', 'ntp', '', '123:123', '');
-	$services[] = array('udp', 'snmp', '', '161:161', '');
-	$services[] = array('udp', 'snmp-trap', '', '162:162', '');
-	$services[] = array('udp', 'syslog', '', '514:514', '');
-	$services[] = array('udp', 'tftp', '', '69:69', '');
-	$services[] = array('udp', 'traceroute', '', '33434:33524', '');
-	$services[] = array('udp', 'kerberos', '', '88:88', '');
-	$services[] = array('tcp', 'radius', '', '1812:1812', 'Radius Protocol');
-	$services[] = array('tcp', 'radius acct', '', '1813:1813', 'Radius Accounting');
-	$services[] = array('udp', 'radius', '', '1645:1645', '');
-	$services[] = array('tcp', 'WINS replication', '', '42:42', '');
-	$services[] = array('tcp', 'microsoft-rpc', '', '135:135', '');
-	$services[] = array('udp', 'microsoft-rpc', '', '135:135', '');
-	$services[] = array('tcp', 'sunrpc', '', '111:111', '');
-	$services[] = array('udp', 'sunrpc', '', '111:111', '');
-	$services[] = array('tcp', 'cvsup', '', '5999:5999', 'CVSup file transfers (FreeBSD uses this)');
-	$services[] = array('tcp', 'irc', '', '6667:6667', '');
+	$services[] = array('tcp', 'Any TCP', '', '', NULL, '');
+	$services[] = array('udp', 'Any UDP', '', '', NULL, '');
+	$services[] = array('tcp', 'High TCP Ports', '', '1024:65535', NULL, '');
+	$services[] = array('udp', 'High UDP Ports', '', '1024:65535', NULL, '');
+	$services[] = array('tcp', 'ssh', '', '22:22', NULL, '');
+	$services[] = array('tcp', 'rdp', '', '3389:3389', NULL, '');
+	$services[] = array('tcp', 'http', '', '80:80', NULL, '');
+	$services[] = array('tcp', 'https', '', '443:443', NULL, '');
+	$services[] = array('tcp', 'mysql', '', '3306:3306', NULL, '');
+	$services[] = array('tcp', 'mssql', '', '1433:1433', NULL, '');
+	$services[] = array('tcp', 'postgre', '', '5432:5432', NULL, '');
+	$services[] = array('tcp', 'domain', '', '53:53', NULL, '');
+	$services[] = array('udp', 'domain', '', '53:53', NULL, '');
+	$services[] = array('tcp', 'ftp', '', '21:21', NULL, '');
+	$services[] = array('tcp', 'ftp-data', '20:20', '1024:65535', NULL, '');
+	$services[] = array('tcp', 'ftp-data passive', '', '20:20', NULL, '');
+	$services[] = array('tcp', 'smtp', '', '25:25', NULL, '');
+	$services[] = array('tcp', 'smtps', '', '465:465', NULL, '');
+	$services[] = array('tcp', 'pop3', '', '110:110', NULL, '');
+	$services[] = array('tcp', 'pop3s', '', '995:995', NULL, '');
+	$services[] = array('tcp', 'imap', '', '143:143', NULL, '');
+	$services[] = array('tcp', 'imaps', '', '993:993', NULL, '');
+	$services[] = array('tcp', 'squid', '', '3128:3128', NULL, 'Standard proxy server');
+	$services[] = array('tcp', 'telnet', '', '23:23', NULL, '');
+	$services[] = array('tcp', 'afp', '', '548:548', NULL, 'Apple File Sharing over TCP');
+	$services[] = array('tcp', 'nfs', '', '2049:2049', NULL, '');
+	$services[] = array('udp', 'nfs', '', '2049:2049', NULL, '');
+	$services[] = array('tcp', 'kerberos', '', '88:88', NULL, '');
+	$services[] = array('udp', 'kerberos', '', '88:88', NULL, '');
+	$services[] = array('udp', 'kerberos-adm', '', '749:750', NULL, '');
+	$services[] = array('tcp', 'ldap', '', '389:389', NULL, '');
+	$services[] = array('tcp', 'ldaps', '', '636:636', NULL, '');
+	$services[] = array('tcp', 'eklogin', '', '2105:2105', NULL, '');
+	$services[] = array('tcp', 'klogin', '', '543:543', NULL, '');
+	$services[] = array('tcp', 'kpasswd', '', '464:464', NULL, '');
+	$services[] = array('tcp', 'krb524', '', '4444:4444', NULL, '');
+	$services[] = array('tcp', 'ksh', '', '544:544', NULL, '');
+	$services[] = array('udp', 'netbios-ns', '', '137:137', NULL, '');
+	$services[] = array('udp', 'netbios-dgm', '', '138:138', NULL, '');
+	$services[] = array('tcp', 'netbios-ssn', '', '139:139', NULL, '');
+	$services[] = array('udp', 'bootps', '', '67:67', NULL, '');
+	$services[] = array('udp', 'bootpc', '', '68:68', NULL, '');
+	$services[] = array('tcp', 'smb', '', '445:445', NULL, 'SMB over TCP');
+	$services[] = array('udp', 'ntp', '', '123:123', NULL, '');
+	$services[] = array('udp', 'snmp', '', '161:161', NULL, '');
+	$services[] = array('udp', 'snmp-trap', '', '162:162', NULL, '');
+	$services[] = array('udp', 'syslog', '', '514:514', NULL, '');
+	$services[] = array('udp', 'tftp', '', '69:69', NULL, '');
+	$services[] = array('udp', 'traceroute', '', '33434:33524', NULL, '');
+	$services[] = array('udp', 'kerberos', '', '88:88', NULL, '');
+	$services[] = array('tcp', 'radius', '', '1812:1812', NULL, 'Radius Protocol');
+	$services[] = array('tcp', 'radius acct', '', '1813:1813', NULL, 'Radius Accounting');
+	$services[] = array('udp', 'radius', '', '1645:1645', NULL, '');
+	$services[] = array('tcp', 'WINS replication', '', '42:42', NULL, '');
+	$services[] = array('tcp', 'microsoft-rpc', '', '135:135', NULL, '');
+	$services[] = array('udp', 'microsoft-rpc', '', '135:135', NULL, '');
+	$services[] = array('tcp', 'sunrpc', '', '111:111', NULL, '');
+	$services[] = array('udp', 'sunrpc', '', '111:111', NULL, '');
+	$services[] = array('tcp', 'cvsup', '', '5999:5999', NULL, 'CVSup file transfers (FreeBSD uses this)');
+	$services[] = array('tcp', 'irc', '', '6667:6667', NULL, '');
+	$services[] = array('tcp', 'Christmas Tree', '', '', '63:37', 'Packets that are lit up like a Christmas Tree');
 
 	$groups[] = array('service',
 					array(
@@ -392,11 +393,11 @@ INSERT;
 
 
 	foreach ($services as $array) {
-		list($protocol, $name, $src_port, $dest_port, $comment) = $array;
+		list($protocol, $name, $src_port, $dest_port, $tcp_flags, $comment) = $array;
 		
 		$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_src_ports, service_dest_ports, service_comment) 
-	SELECT '1', '$protocol', '$name', '$src_port', '$dest_port', '$comment' FROM DUAL
+INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_src_ports, service_dest_ports, service_tcp_flags, service_comment) 
+	SELECT '1', '$protocol', '$name', '$src_port', '$dest_port', '$tcp_flags', '$comment' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = '$protocol' AND service_name = '$name' AND account_id = '1'
