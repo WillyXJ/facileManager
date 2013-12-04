@@ -259,17 +259,17 @@ function versionCheck($app_version, $serverhost, $compress) {
 function getStartupScript($fw) {
 	$distros = array(
 		'iptables' => array(
-			'Arch'      => 'systemctl reload iptables',
-			'Debian'    => '/etc/init.d/iptables restart',
-			'Ubuntu'    => '/etc/init.d/iptables restart',
-			'Fubuntu'   => '/etc/init.d/iptables restart',
+			'Arch'      => findProgram('systemctl') . ' reload iptables',
+			'Debian'    => findProgram('iptables-restore') . ' < __FILE__',
+			'Ubuntu'    => findProgram('iptables-restore') . ' < __FILE__',
+			'Fubuntu'   => findProgram('iptables-restore') . ' < __FILE__',
 			'Fedora'    => '/etc/init.d/iptables restart',
 			'Redhat'    => '/etc/init.d/iptables restart',
 			'CentOS'    => '/etc/init.d/iptables restart',
 			'ClearOS'   => '/etc/init.d/iptables restart',
 			'Oracle'    => '/etc/init.d/iptables restart',
-			'SUSE'      => '/sbin/service SuSEfirewall2 restart',
-			'Gentoo'    => '/etc/init.d/iptables restart',
+			'SUSE'      => findProgram('service') . ' SuSEfirewall2 restart',
+			'Gentoo'    => findProgram('iptables-restore') . ' < __FILE__',
 			'Slackware' => '/etc/rc.d/rc.iptables restart'
 		),
 		'pf' => array(
@@ -282,7 +282,7 @@ function getStartupScript($fw) {
 		),
 		'ipfw' => array(
 			'FreeBSD'   => findProgram('sh') . ' __FILE__',
-			'Apple'     => 'launchctl start org.isc.named'
+			'Apple'     => findProgram('sh') . ' __FILE__'
 		)
 	);
 	
