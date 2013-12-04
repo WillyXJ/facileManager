@@ -661,7 +661,7 @@ class fm_module_buildconf {
 			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep-state' : null;
 
 			/** Handle match inverses */
-			$services_not = ($policy_result[$i]->policy_services_not) ? 'not' : null;
+			$services_not = ($policy_result[$i]->policy_services_not) ? 'not ' : null;
 
 			/** Handle sources */
 			unset($policy_source);
@@ -742,17 +742,17 @@ class fm_module_buildconf {
 								
 								if ($direction_group == 's-d') {
 									if (@array_key_exists($l, $group_array['s'])) {
-										$multiports[$k][] = ' ' . $group_array['s'][$l] . '; ' . $group_array['d'][$l];
+										$multiports[$k][] = ' ' . $services_not . $group_array['s'][$l] . '; ' . $services_not . $group_array['d'][$l];
 										unset($group_array);
 									}
 									$l++;
 								} else {
 									if (strpos($port, '|') !== false) {
 										$k++;
-										$multiports[$k][] = ($direction_group == 's-any') ? ' ' . $port . ';' : '; ' . $port;
+										$multiports[$k][] = ($direction_group == 's-any') ? ' ' . $services_not . $port . ';' : '; ' . $services_not . $port;
 										$k++;
 									} else {
-										$multiports[$k][] = ($direction_group == 's-any') ? ' ' . $port . ';' : '; ' . $port;
+										$multiports[$k][] = ($direction_group == 's-any') ? ' ' . $services_not . $port . ';' : '; ' . $services_not . $port;
 									}
 								}
 							}
@@ -766,9 +766,9 @@ class fm_module_buildconf {
 										$service_ports = $port;
 									} else {
 										$service_ports = implode(',', $ports);
-										$service_ports = str_replace(',; ', ',', $service_ports);
+										$service_ports = str_replace(array(',; ', ',not '), ',', $service_ports);
 									}
-									$policy_services['processed'][$protocol][] = $services_not . $service_ports . $tcp_flags;
+									$policy_services['processed'][$protocol][] = $service_ports . $tcp_flags;
 								}
 							}
 							unset($multiports);
@@ -782,9 +782,11 @@ class fm_module_buildconf {
 			if (@is_array($policy_services['processed'])) {
 				foreach ($policy_services['processed'] as $protocol => $proto_array) {
 					foreach ($proto_array as $rule_ports) {
-						$source_ports = $destination_ports = null;
 						@list($source_ports, $destination_ports) = explode(';', $rule_ports);
 						$icmptypes = ($protocol == 'icmp') ? ' icmptypes ' . trim($services_not . ' ' . implode(',', $proto_array)) : null;
+						if ($protocol == 'icmp') {
+							$source_ports = $destination_ports = null;
+						}
 		
 						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . ' ' . $policy_result[$i]->policy_direction . $interface . $keep_state;
 					}
