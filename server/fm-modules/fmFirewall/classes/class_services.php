@@ -393,6 +393,7 @@ FORM;
 		foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
 			if (in_array($type, array('iptables', 'display')) && ($bit & $tcp_flag_mask)) $service_tcp_flags['mask'] .= $flag . ',';
 			if ($type == 'ipfw' && (($bit & $tcp_flag_mask) && !($bit & $tcp_flag_settings))) $service_tcp_flags['settings'] .= '!' . strtolower($flag) . ',';
+			if ($type == 'ipfilter' && ($bit & $tcp_flag_mask)) $service_tcp_flags['mask'] .= substr($flag, 0, 1);
 			if ($bit & $tcp_flag_settings) {
 				switch ($type) {
 					case 'iptables':
@@ -403,7 +404,7 @@ FORM;
 						$service_tcp_flags['settings'] .= strtolower($flag) . ',';
 						break;
 					case 'ipfilter':
-						$service_tcp_flags['settings'] .= substr($flag, 0, 1) . ',';
+						$service_tcp_flags['settings'] .= substr($flag, 0, 1);
 						break;
 				}
 			}
@@ -421,7 +422,8 @@ FORM;
 		
 		$service_tcp_flags['mask'] = rtrim($service_tcp_flags['mask'], ',');
 		$service_tcp_flags['settings'] = rtrim($service_tcp_flags['settings'], ',');
-		ksort($service_tcp_flags);
+		if ($type == 'ipfilter') krsort($service_tcp_flags);
+		else ksort($service_tcp_flags);
 		
 		$service_tcp_flags = trim(implode(' ', $service_tcp_flags));
 
@@ -433,6 +435,7 @@ FORM;
 				if (in_array($service_tcp_flags, array('!ack,syn', 'syn,!ack'))) return ' setup';
 				return ' tcpflags ' . $service_tcp_flags;
 			case 'ipfilter':
+				$service_tcp_flags = str_replace(' ', '/', $service_tcp_flags);
 				return ' flags ' . $service_tcp_flags;
 			default:
 				return $service_tcp_flags;
