@@ -216,7 +216,7 @@ class fm_module_buildconf {
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
 			unset($rule_comment);
 			
-			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) {
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) {
 				$log_rule = true;
 				$log_chain = 'RULE_' . $policy_result[$i]->policy_order_id;
 				$config[] = '-N ' . $log_chain;
@@ -236,7 +236,13 @@ class fm_module_buildconf {
 			}
 			
 			/** Handle keep-states */
-			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' -m state --state NEW,ESTABLISHED' : null;
+			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' -m state --state NEW' : null;
+
+			/** Handle established option */
+			$keep_state .= ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? ',ESTABLISHED' : null;
+
+			/** Handle frags */
+			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? ' -f' : null;
 
 			/** Handle sources */
 			unset($policy_source);
@@ -403,11 +409,11 @@ class fm_module_buildconf {
 					if (is_array($policy_services['processed'])) {
 						foreach ($policy_services['processed'] as $line_array) {
 							foreach ($line_array as $rule) {
-								$config[] = implode(' ', $line) . $source . $destination . $rule . $keep_state . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+								$config[] = implode(' ', $line) . $source . $destination . $rule . $keep_state . $frag . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination . $keep_state . ' -j ' . $rule_chain;
+						$config[] = implode(' ', $line) . $source . $destination . $keep_state . $frag . ' -j ' . $rule_chain;
 					}
 				}
 			}
@@ -458,7 +464,7 @@ class fm_module_buildconf {
 			$line[] = $policy_result[$i]->policy_direction;
 			
 			/** Handle logging */
-			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) {
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) {
 				$line[] = 'log';
 			}
 			
@@ -470,6 +476,9 @@ class fm_module_buildconf {
 			
 			/** Handle keep-states */
 			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep state' : null;
+
+			/** Handle frags */
+			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? ' with frag' : null;
 
 			/** Handle sources */
 			unset($policy_source);
@@ -504,7 +513,7 @@ class fm_module_buildconf {
 						$result = $fmdb->last_result[0];
 						
 						if ($result->service_type == 'icmp') {
-							$policy_services[$result->service_type][] = $result->service_icmp_type;
+							$policy_services[$result->service_type][] = $result->service_icmp_type . '|' . $result->service_icmp_code;
 						} else {
 							/** Source ports */
 							@list($start, $end) = explode(':', $result->service_src_ports);
@@ -546,7 +555,9 @@ class fm_module_buildconf {
 						foreach ($policy_services as $protocol => $proto_array) {
 							if ($protocol == 'icmp') {
 								foreach (@array_unique($proto_array) as $type) {
-									$config[] = implode(' ', $line) . " proto $protocol" . $source . $destination . ' icmp-type ' . $type . $keep_state;
+									list($icmp_type, $icmp_code) = explode('|', $type);
+									$icmp_code = ($icmp_code < 0) ? null : ' code ' . $icmp_code;
+									$config[] = implode(' ', $line) . " proto $protocol" . $source . $destination . ' icmp-type ' . $icmp_type . $icmp_code . $frag . $keep_state;
 								}
 							} else {
 								foreach ($proto_array as $direction_group => $direction_array) {
@@ -562,7 +573,7 @@ class fm_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
-											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $tcp_flags . $keep_state;
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $tcp_flags . $frag . $keep_state;
 										}
 									} elseif ($direction_group == 'any-d') {
 										$destination_port = ' port ' . $services_not . '= ';
@@ -575,7 +586,7 @@ class fm_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
-											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $keep_state;
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $frag . $keep_state;
 										}
 									} elseif ($direction_group == 's-d') {
 										$source_port = ' port ' . $services_not . '= ';
@@ -589,7 +600,7 @@ class fm_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
-											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $direction_array['d'][$index] . $tcp_flags . $keep_state;
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $direction_array['d'][$index] . $tcp_flags . $frag . $keep_state;
 										}
 									} elseif ($direction_group == 'flag_only') {
 										foreach (@array_unique($direction_array['f']) as $port) {
@@ -601,14 +612,14 @@ class fm_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
-											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $keep_state;
+											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $frag . $keep_state;
 										}
 									}
 								}
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination;
+						$config[] = implode(' ', $line) . $source . $destination. $frag . $keep_state;
 					}
 				}
 			}
@@ -618,7 +629,7 @@ class fm_module_buildconf {
 			$config[] = null;
 		}
 
-		return implode("\n", $config);
+		return str_replace('from any to any', 'all', implode("\n", $config));
 	}
 	
 	
@@ -650,7 +661,7 @@ class fm_module_buildconf {
 			$line[] = $fw_actions[$policy_result[$i]->policy_action];
 			
 			/** Handle logging */
-			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) {
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) {
 				$line[] = 'log';
 			}
 			
@@ -659,6 +670,12 @@ class fm_module_buildconf {
 			
 			/** Handle keep-states */
 			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep-state' : null;
+
+			/** Handle established option */
+			$established = ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? 'established ' : null;
+
+			/** Handle established option */
+			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? 'frag ' : null;
 
 			/** Handle match inverses */
 			$services_not = ($policy_result[$i]->policy_services_not) ? 'not ' : null;
@@ -788,12 +805,12 @@ class fm_module_buildconf {
 							$source_ports = $destination_ports = null;
 						}
 		
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . ' ' . $policy_result[$i]->policy_direction . $interface . $keep_state;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state;
 					}
 				}
 				unset($policy_services);
 			} else {
-				$config[] = implode(' ', $line) . " all from $source_address to $destination_address " . $policy_result[$i]->policy_direction . $interface . $keep_state;
+				$config[] = implode(' ', $line) . " all from $source_address to $destination_address " . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state;
 			}
 			
 			$config[] = null;

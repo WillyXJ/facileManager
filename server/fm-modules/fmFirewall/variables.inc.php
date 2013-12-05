@@ -73,7 +73,20 @@ $__FM_CONFIG['tcp_flags']				= array('URG' => 1, 'ACK' => 2, 'PSH' => 4,
 $__FM_CONFIG['weekdays']				= array('Mon' => 1, 'Tue' => 2, 'Wed' => 4,
 												'Thu' => 8, 'Fri' => 16, 'Sat' => 32, 'Sun' => 64);
 /** Policy options */
-$__FM_CONFIG['fw']['policy_options']	= array('log' => 1);
+$__FM_CONFIG['fw']['policy_options']	= array(
+											'log' => array(
+												'bit' => 1,
+												'desc' => 'Log packets processed by this rule'
+											),
+											'established' => array(
+												'bit' => 2,
+												'desc' => 'Established connection packets'
+											),
+											'frag' => array(
+												'bit' => 4,
+												'desc' => 'Matches packets that are fragments and not the first fragment of an IP datagram'
+											)
+										);
 
 /** Default values */
 $__FM_CONFIG['fw']['config_file'] 		= array(

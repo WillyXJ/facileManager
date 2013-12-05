@@ -259,7 +259,7 @@ HTML;
 		
 		$edit_status = $edit_actions . $edit_status;
 		
-		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action'][$row->policy_status]) : null;
+		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action'][$row->policy_status]) : null;
 		$action = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_status]);
 		$source = ($row->policy_source) ? $this->formatPolicyIDs($row->policy_source) : 'any';
 		$destination = ($row->policy_destination) ? $this->formatPolicyIDs($row->policy_destination) : 'any';
@@ -313,7 +313,6 @@ HTML;
 		
 		$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
 		$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
-		$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
 		$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
 
 		$source_items_assigned = getGroupItems($policy_source);
@@ -328,7 +327,6 @@ HTML;
 		$services_assigned_list = buildSelect(null, 'services_items_assigned', availableGroupItems('service', 'assigned', $services_items_assigned), null, 7, null, true);
 		$services_available_list = buildSelect(null, 'services_items_available', availableGroupItems('service', 'available', $services_items_assigned), null, 7, null, true);
 		
-		$log_check = ($policy_options & $__FM_CONFIG['fw']['policy_options']['log']) ? 'checked' : null;
 		$source_not_check = ($policy_source_not) ? 'checked' : null;
 		$destination_not_check = ($policy_destination_not) ? 'checked' : null;
 		$service_not_check = ($policy_services_not) ? 'checked' : null;
@@ -430,13 +428,24 @@ FORM;
 				</tr>
 
 FORM;
-			if ($server_firewall_type == 'iptables') $return_form .= <<<FORM
+			if ($server_firewall_type == 'iptables') {
+				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
+				$return_form .= <<<FORM
 				<tr>
 					<th width="33%" scope="row"><label for="policy_time">Time Restriction</label></th>
 					<td width="67%">$policy_time</td>
 				</tr>
 
 FORM;
+			}
+			
+			/** Parse options */
+			$options = null;
+			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
+				$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
+				$options .= '<label><input style="height: 10px;" name="policy_options[]" id="policy_options" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' />' . $opt_array['desc'] . "</label><br />\n";
+			}
+			
 			$return_form .= <<<FORM
 				<tr>
 					<th width="33%" scope="row"><label for="policy_action">Action</label></th>
@@ -445,7 +454,7 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Options</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="policy_options[]" id="policy_options" value="{$__FM_CONFIG['fw']['policy_options']['log']}" type="checkbox" $log_check />Log packets processed by this rule</label>
+						$options
 					</td>
 				</tr>
 				<tr>
