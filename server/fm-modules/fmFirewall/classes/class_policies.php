@@ -441,6 +441,10 @@ FORM;
 			
 			/** Parse options */
 			$options = null;
+			if ($server_firewall_type == 'pf') {
+				array_pop($__FM_CONFIG['fw']['policy_options']);
+				array_pop($__FM_CONFIG['fw']['policy_options']);
+			}
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
 				$options .= '<label><input style="height: 10px;" name="policy_options[]" id="policy_options" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' />' . $opt_array['desc'] . "</label><br />\n";

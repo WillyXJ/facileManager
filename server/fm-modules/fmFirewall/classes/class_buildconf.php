@@ -436,9 +436,226 @@ class fm_module_buildconf {
 	
 	
 	function pfBuildConfig($policy_result, $count) {
-		echo '<pre>';
-		echo "pf\n";
-		print_r($policy_result);
+		global $fmdb, $__FM_CONFIG;
+		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+
+		$fw_actions = array('pass' => 'pass',
+							'block' => 'block',
+							'reject' => 'block return-icmp');
+		
+		for ($i=0; $i<$count; $i++) {
+			$line = $label = null;
+			
+			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$config[] = '# ' . $rule_title;
+			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
+			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
+			unset($rule_comment);
+
+			$line[] = $fw_actions[$policy_result[$i]->policy_action];
+			$line[] = $policy_result[$i]->policy_direction;
+			
+			/** Handle logging */
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) {
+				$line[] = 'log';
+				$label = ' label "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ': "';
+			}
+			
+			$line[] = 'quick';
+			
+			/** Handle interface */
+			$interface = ($policy_result[$i]->policy_interface != 'any') ? 'on ' . $policy_result[$i]->policy_interface : null;
+			
+			if ($interface) $line[] = $interface;
+			$line[] = 'inet';
+			
+			/** Handle keep-states */
+			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep state' : null;
+
+			/** Handle match inverses */
+			$services_not = ($policy_result[$i]->policy_services_not) ? '!' : null;
+
+			/** Handle sources */
+			unset($policy_source);
+			if ($temp_source = trim($policy_result[$i]->policy_source, ';')) {
+				$policy_source = $this->buildAddressList($temp_source);
+			} else $policy_source = null;
+			$source_address = ($policy_result[$i]->policy_source_not) ? '! ' : null;
+			if (is_array($policy_source)) {
+				if (count($policy_source) > 1) {
+					$table[] = 'table <fM_r' . $policy_result[$i]->policy_order_id . '_src> { ' . implode(', ', $policy_source) . ' }';
+					$source_address .= '<fM_r' . $policy_result[$i]->policy_order_id . '_src>';
+				} else {
+					$source_address .= implode(', ', $policy_source);
+				}
+			} else {
+				$source_address .= 'any';
+			}
+			
+			/** Handle destinations */
+			unset($policy_destination);
+			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
+				$policy_destination = $this->buildAddressList($temp_destination);
+			} else $policy_destination = null;
+			$destination_address = ($policy_result[$i]->policy_destination_not) ? '! ' : null;
+			if (is_array($policy_destination)) {
+				if (count($policy_destination) > 1) {
+					$table[] = 'table <fM_r' . $policy_result[$i]->policy_order_id . '_dst> { ' . implode(', ', $policy_destination) . ' }';
+					$destination_address .= '<fM_r' . $policy_result[$i]->policy_order_id . '_dst>';
+				} else {
+					$destination_address .= implode(', ', $policy_destination);
+				}
+			} else {
+				$destination_address .= 'any';
+			}
+			
+			/** Handle services */
+			$tcp = $udp = $icmp = null;
+			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
+				foreach (explode(';', $assigned_services) as $temp_id) {
+					$temp_services = null;
+					if ($temp_id[0] == 'g') {
+						$temp_services[] = $this->extractItemsFromGroup($temp_id);
+					} else {
+						$temp_services[] = substr($temp_id, 1);
+					}
+					
+					if (is_array($temp_services[0])) $temp_services = $temp_services[0];
+					
+					foreach ($temp_services as $service_id) {
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $service_id, 'service_', 'service_id', 'active');
+						$result = $fmdb->last_result[0];
+						
+						if ($result->service_type == 'icmp') {
+							$policy_services['processed'][$result->service_type][] = $result->service_icmp_type . '|' . $result->service_icmp_code;
+						} else {
+							/** Source ports */
+							@list($start, $end) = explode(':', $result->service_src_ports);
+							if ($start && $end) {
+								$service_source = ($start == $end) ? $start : $result->service_src_ports;
+							} else $service_source = null;
+							
+							/** Destination ports */
+							@list($start, $end) = explode(':', $result->service_dest_ports);
+							if ($start && $end) {
+								$service_destination = ($start == $end) ? $start : $result->service_dest_ports;
+							} else $service_destination = null;
+							
+							/** TCP Flags */
+							$tcp_flags = ($result->service_tcp_flags) ? '|' . $result->service_tcp_flags : null;
+							
+							/** Determine which array to put the service in */
+							if ($service_source && $service_destination) {
+								$policy_services[$result->service_type]['s-d']['s'][] = $service_source . $tcp_flags;
+								$policy_services[$result->service_type]['s-d']['d'][] = $service_destination . $tcp_flags;
+							} elseif ($service_source && !$service_destination) {
+								$policy_services[$result->service_type]['s-any']['s'][] = $service_source . $tcp_flags;
+							} elseif (!$service_source && $service_destination) {
+								$policy_services[$result->service_type]['any-d']['d'][] = $service_destination . $tcp_flags;
+							} else {
+								$policy_services[$result->service_type]['flag_only']['f'][] = $tcp_flags;
+							}
+						}
+					}
+				}
+			}
+			
+			if (@is_array($policy_services)) {
+				foreach ($policy_services as $protocol => $proto_array) {
+					if ($protocol == 'processed') continue;
+					
+					foreach ($proto_array as $direction_group => $group_array) {
+						foreach ($group_array as $direction => $port_array) {
+							$l = $k = 0;
+							foreach ($port_array as $port) {
+								if ($l) break;
+								
+								if ($direction_group == 's-d') {
+									if (@array_key_exists($l, $group_array['s'])) {
+										$s_equals = (strpos($group_array['s'][$l], ':') === false) ? '= ' : null;
+										$d_equals = (strpos($group_array['d'][$l], ':') === false) ? '= ' : null;
+										
+										$multiports[$k][] = ' port ' . $services_not . $s_equals . $group_array['s'][$l] . '; ' . $services_not . $d_equals . $group_array['d'][$l];
+										unset($group_array);
+									}
+									$l++;
+								} else {
+									if (strpos($port, '|') !== false) {
+										if ($direction == 'f') {
+											$multiports[$k][] = '; ' . $port;
+										} else {
+											$k++;
+											$multiports[$k][] = ($direction_group == 's-any') ? ' port ' . $services_not . '= ' . $port . ';' : '; port ' . $services_not . '= ' . $port;
+											$k++;
+										}
+									} else {
+										$multiports[$k][] = ($direction_group == 's-any') ? ' port ' . $services_not . '= ' . $port . ';' : '; port ' . $services_not . '= ' . $port;
+									}
+								}
+							}
+							if (@is_array($multiports)) {
+								foreach ($multiports as $ports) {
+									$ports = array_unique($ports);
+									$tcp_flags = null;
+									if ($protocol == 'tcp' && strpos($ports[0], '|') !== false) {
+										list($port, $flags) = explode('|', $ports[0]);
+										$tcp_flags = $fm_module_services->getTCPFlags($flags, 'ipfilter');
+										$service_ports = $port;
+									} else {
+										$service_ports = implode(',', $ports);
+										$service_ports = str_replace(array(',; ', ',! '), ',', $service_ports);
+										if (strpos($service_ports, ',') !== false) $service_ports = str_replace('port =', '{', $service_ports) . ' }';
+										$service_ports = str_replace(',{', ',', $service_ports);
+										$service_ports = str_replace('{', 'port {', $service_ports);
+									}
+									$policy_services['processed'][$protocol][] = $service_ports . $tcp_flags;
+								}
+							}
+							unset($multiports);
+						}
+					}
+					unset($policy_services[$protocol]);
+				}
+			}
+			
+			/** Build the rules */
+			if (@is_array($policy_services['processed'])) {
+				foreach ($policy_services['processed'] as $protocol => $proto_array) {
+					$protocol = 'proto ' . $protocol;
+	
+					foreach ($proto_array as $rule_ports) {
+						@list($source_ports, $destination_ports) = explode(';', $rule_ports);
+						if (strpos($protocol, 'icmp') !== false) {
+							$icmptypes = ' icmp-type ';
+							if (count($proto_array) > 1) {
+								$icmptypes .= trim($services_not . ' { ' . implode(', ', str_replace('|', ' code ', $proto_array)) . ' }');
+							} else {
+								$icmptypes .= trim($services_not . ' ' . implode(', ', str_replace('|', ' code ', $proto_array)));
+							}
+							$source_ports = $destination_ports = null;
+						} else {
+							$icmptypes = null;
+						}
+						
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . $keep_state . $label;
+						
+						if (strpos($protocol, 'icmp') !== false) break;
+					}
+				}
+				unset($policy_services);
+			} else {
+				$config[] = implode(' ', $line) . " from $source_address to $destination_address" . $keep_state . $label;
+			}
+			
+			$config[] = null;
+		}
+		
+		$table[] = null;
+		
+		$config = array_merge($table, $config);
+		
+		return str_replace('from any to any', 'all', implode("\n", $config));
 	}
 	
 	

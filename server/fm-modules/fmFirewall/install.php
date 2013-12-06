@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
   `server_name` varchar(255) NOT NULL,
   `server_os` varchar(50) DEFAULT NULL,
   `server_os_distro` varchar(150) DEFAULT NULL,
-  `server_type` enum('iptables','ipfw','ipfilter') NOT NULL DEFAULT 'iptables',
+  `server_type` enum('iptables','ipfw','ipfilter','pf') NOT NULL DEFAULT 'iptables',
   `server_version` varchar(150) DEFAULT NULL,
   `server_config_file` varchar(255) NOT NULL DEFAULT '/usr/local/$fm_name/$module/rules.fw',
   `server_interfaces` text,
