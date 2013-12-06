@@ -44,7 +44,7 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 22) ? fmUpgrade_105($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 27) ? fmUpgrade_106($database) : true;
 	displayProgress('Upgrading Schema', $success);
 
 	echo "</table>\n</center>\n";
@@ -307,6 +307,36 @@ INSERT INTO $database.`fm_options` (`option_name`, `option_value`)
 WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'fm_temp_directory');
 INSERT;
+
+		if (count($inserts) && $inserts[0] && $success) {
+			foreach ($inserts as $query) {
+				$fmdb->query($query);
+				if (!$fmdb->result) {
+					$success = false;
+					break;
+				}
+			}
+		}
+	}
+
+	return $success;
+}
+
+
+/** fM v1.0 **/
+function fmUpgrade_106($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 22) ? fmUpgrade_105($database) : true;
+	
+	if ($success) {
+		/** Schema change */
+		$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_default_module` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `user_email` ;";
+
+		$inserts = $updates = null;
 
 		/** Create table schema */
 		if (count($table) && $table[0]) {

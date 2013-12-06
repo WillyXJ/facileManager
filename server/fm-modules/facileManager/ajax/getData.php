@@ -45,7 +45,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
-	$form_bits = array('user_login', 'user_password');
+	$form_bits = array('user_login', 'user_password', 'user_module');
 	$edit_form = '<div id="popup_response" style="display: none;"></div>' . "\n";
 	$edit_form .= '<h2>Change Password</h2>' . "\n";
 	basicGet('fm_users', $_SESSION['user']['id'], 'user_', 'user_id');
@@ -74,12 +74,12 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
 	if ($add_new) {
-		$form_bits = ($allowed_to_manage_users) ? array('user_login', 'user_email', 'user_password', 'user_options', 'user_perms') : array('user_password');
+		$form_bits = ($allowed_to_manage_users) ? array('user_login', 'user_email', 'user_password', 'user_options', 'user_perms', 'user_module') : array('user_password');
 
 		$edit_form = '<h2>Add ' . substr(ucfirst($item_type), 0, -1) . '</h2>' . "\n";
 		$edit_form .= $fm_users->printUsersForm(null, 'add', $form_bits);
 	} else {
-		$form_bits = ($allowed_to_manage_users) ? array('user_login', 'user_email', 'user_options', 'user_perms') : array('user_password');
+		$form_bits = ($allowed_to_manage_users) ? array('user_login', 'user_email', 'user_options', 'user_perms', 'user_module') : array('user_password');
 
 		$edit_form = '<h2>Edit ' . substr(ucfirst($item_type), 0, -1) . '</h2>' . "\n";
 		basicGet('fm_users', $id, 'user_', 'user_id');
@@ -87,7 +87,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 		if (!$fmdb->num_rows) returnError();
 		
 		$edit_form_data[] = $results[0];
-		if ($allowed_to_manage_users && $edit_form_data[0]->user_auth_type == 2) $form_bits = array('user_login', 'user_email', 'user_perms');
+		if ($allowed_to_manage_users && $edit_form_data[0]->user_auth_type == 2) $form_bits = array('user_login', 'user_email', 'user_perms', 'user_module');
 		$edit_form .= $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits);
 	}
 	

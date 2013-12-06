@@ -480,7 +480,11 @@ BODY;
 		$_SESSION['user']['ipaddr'] = isset($_SERVER['REMOTE_HOST']) ? $_SERVER['REMOTE_HOST'] : $_SERVER['REMOTE_ADDR'];
 
 		$modules = getActiveModules(true);
-		$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
+		if (@in_array($user->user_default_module, $modules)) {
+			$_SESSION['module'] = $user->user_default_module;
+		} else {
+			$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
+		}
 		if ($_SESSION['module'] != $fm_name) {
 			$_SESSION['user']['module_perms'] = $this->getModulePerms($user->user_id, null, true);
 		}

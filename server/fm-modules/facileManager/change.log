@@ -7,6 +7,8 @@
 * Server - Improved logging of settings changes.
 * Server - Customizable app update checks.
 * Server - CSS tweaks.
+* Server - fM software update checks are now customizable.
+* Server - User accounts can now set their default module to use.
 
 1.0-rc6-1 (2013-11-07)
 ======================

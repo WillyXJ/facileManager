@@ -373,7 +373,7 @@ HTML;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
-		$user_email = null;
+		$user_email = $user_module_form = $user_default_module = null;
 		$hidden = $user_form = $user_perm_form = $email_form = $user_options_form = $verbose_form = null;
 		$user_perms = $user_force_pwd_change = $password_form = $user_template_only = null;
 		
@@ -434,6 +434,19 @@ FORM_ROW;
 					<td width="67%">{$__FM_CONFIG['password_hint'][$strength]}</td>
 				</tr>
 			
+FORM_ROW;
+		}
+		
+		if (in_array('user_module', $form_bits)) {
+			$user_module_options = buildSelect('user_default_module', 'user_default_module', getActiveModules(), $user_default_module);
+			$user_module_form = <<<FORM_ROW
+				<tr>
+					<th width="33%" scope="row">Default Module</th>
+					<td width="67%">
+					$user_module_options
+					</td>
+				</tr>
+
 FORM_ROW;
 		}
 		
@@ -561,6 +574,7 @@ PERM;
 			$user_form
 			$email_form
 			$password_form
+			$user_module_form
 			$user_options_form
 			$verbose_form
 			$user_perm_form
