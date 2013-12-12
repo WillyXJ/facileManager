@@ -18,6 +18,8 @@
 * Both   - Added option to update client configs via SSH.
 * Server - Fixed an issue where the timezone was not set correctly for config
            builds.
+* Server - (Git Issue 47) Improved logging channel definitions regarding file
+           versions and size.
 
 1.0-rc6 (2013-11-06)
 ====================

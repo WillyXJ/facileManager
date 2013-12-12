@@ -89,7 +89,7 @@ $__FM_CONFIG['ns']['named_config_file']		= '/etc/named.conf';
 /** Logging Channel Options */
 $__FM_CONFIG['logging']['options']['destinations']		= array('file', 'syslog', 'stderr', 'null');
 $__FM_CONFIG['logging']['options']['file']				= array('versions', 'size');
-$__FM_CONFIG['logging']['options']['file_versions'] 	= array_merge(array('unlimited'), range(1, 10));
+$__FM_CONFIG['logging']['options']['file_versions'] 	= array_merge(array('', 'unlimited'), range(1, 10));
 $__FM_CONFIG['logging']['options']['file_sizes']	 	= array('K', 'M', 'G');
 $__FM_CONFIG['logging']['options']['syslog'] 			= array('kern', 'user', 'mail', 'daemon', 'auth', 'syslog', 'lpr', 'news', 'uucp', 'cron', 'authpriv',
 															'ftp', 'local0', 'local1', 'local2', 'local3', 'local4', 'local5', 'local6', 'local7');

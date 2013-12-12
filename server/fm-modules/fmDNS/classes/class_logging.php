@@ -77,7 +77,6 @@ class fm_module_logging {
 		
 		if ($post['cfg_destination'] == 'file') {
 			if (empty($post['cfg_file_path'][0])) return 'No file path defined.';
-			if (empty($post['cfg_file_path'][2])) return 'No file size defined.';
 		}
 		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'cfg_destination',
 					'cfg_file_path', 'cfg_syslog', 'severity', 'print-category', 'print-severity',
@@ -119,7 +118,8 @@ class fm_module_logging {
 			} elseif ($handler == 'cfg_destination' && $post[$handler] == 'file') {
 				list($file_path, $file_versions, $file_size, $file_size_spec) = $post['cfg_file_path'];
 				$filename = str_replace('"', '', $file_path);
-				$post['cfg_data'] = '"' . $filename . '" versions ' . $file_versions;
+				$post['cfg_data'] = '"' . $filename . '"';
+				if ($file_versions) $post['cfg_data'] .= ' versions ' . $file_versions;
 				if (!empty($file_size) && $file_size > 0) $post['cfg_data'] .= ' size ' . $file_size . $file_size_spec;
 			}
 			if ($handler == 'cfg_destination') {
@@ -235,7 +235,6 @@ class fm_module_logging {
 			if (empty($post['cfg_name'])) return 'No channel defined.';
 			if ($post['cfg_destination'] == 'file') {
 				if (empty($post['cfg_file_path'][0])) return 'No file path defined.';
-				if (empty($post['cfg_file_path'][2])) return 'No file size defined.';
 			}
 		}
 		if ($post['sub_type'] == 'category' && !isset($post['cfg_data'])) return 'No channel defined.';
@@ -320,9 +319,10 @@ class fm_module_logging {
 				if ($handler == 'cfg_destination' && $post[$handler] == 'syslog') {
 					$post['cfg_data'] = $post['cfg_syslog'];
 				} elseif ($handler == 'cfg_destination' && $post[$handler] == 'file') {
-					list($file_path, $file_versions, $file_size, $file_size_spec) = $post['cfg_file_path'];
+					@list($file_path, $file_versions, $file_size, $file_size_spec) = $post['cfg_file_path'];
 					$filename = str_replace('"', '', $file_path);
-					$post['cfg_data'] = '"' . $filename . '" versions ' . $file_versions;
+					$post['cfg_data'] = '"' . $filename . '"';
+					if ($file_versions) $post['cfg_data'] .= ' versions ' . $file_versions;
 					if (!empty($file_size) && $file_size > 0) $post['cfg_data'] .= ' size ' . $file_size . $file_size_spec;
 				}
 				if ($handler == 'cfg_destination') {
@@ -472,9 +472,9 @@ FORM;
 			$cfg_print_time = buildSelect('print-time', 'print-time', $__FM_CONFIG['logging']['options']['print-time'], $this->getChannel($cfg_id, 'print-time'));
 			$raw_cfg_file_path = explode(' ', str_replace('"', '', $this->getChannel($cfg_id, 'file')));
 			$cfg_file_path = $raw_cfg_file_path[0];
-			$cfg_file_versions = @buildSelect('cfg_file_path[]', 'cfg_file_path[]', $__FM_CONFIG['logging']['options']['file_versions'], $raw_cfg_file_path[2]);
-			$cfg_file_size = (isset($raw_cfg_file_path[4])) ? substr($raw_cfg_file_path[4], 0, -1) : null;
-			$cfg_file_size_spec = @buildSelect('cfg_file_path[]', 'cfg_file_path[]', $__FM_CONFIG['logging']['options']['file_sizes'], substr($raw_cfg_file_path[4], -1, 1));
+			$cfg_file_versions = @buildSelect('cfg_file_path[]', 'cfg_file_path[]', $__FM_CONFIG['logging']['options']['file_versions'], $raw_cfg_file_path[array_search('versions', $raw_cfg_file_path) + 1]);
+			$cfg_file_size = (isset($raw_cfg_file_path[array_search('size', $raw_cfg_file_path) + 1])) ? substr($raw_cfg_file_path[array_search('size', $raw_cfg_file_path) + 1], 0, -1) : null;
+			$cfg_file_size_spec = @buildSelect('cfg_file_path[]', 'cfg_file_path[]', $__FM_CONFIG['logging']['options']['file_sizes'], substr($raw_cfg_file_path[array_search('size', $raw_cfg_file_path) + 1], -1, 1));
 			
 			/** Show/hide divs */
 			if ($dest == 'file' || !$dest) {
@@ -500,7 +500,7 @@ FORM;
 							$cfg_destination
 							<div id="destination_option" style="display: $fileshow">
 								<input type="text" name="cfg_file_path[]" value="$cfg_file_path" placeholder="/path/to/file" /><br />
-								$cfg_file_versions <input type="number" name="cfg_file_path[]" value="$cfg_file_size" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
+								versions $cfg_file_versions <input type="number" name="cfg_file_path[]" value="$cfg_file_size" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
 								$cfg_file_size_spec
 							</div>
 							<div id="syslog_options" style="display: $syslogshow">$cfg_syslog</div></td>
