@@ -36,6 +36,7 @@ function upgradefmDNSSchema($module) {
 	return 'Success';
 }
 
+/** 1.0-b5 */
 function upgradefmDNS_100($__FM_CONFIG) {
 	global $fmdb;
 	
@@ -52,6 +53,7 @@ function upgradefmDNS_100($__FM_CONFIG) {
 	return true;
 }
 
+/** 1.0-b7 */
 function upgradefmDNS_101($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -73,6 +75,7 @@ CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  
 	return true;
 }
 
+/** 1.0-b10 */
 function upgradefmDNS_102($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -92,6 +95,7 @@ function upgradefmDNS_102($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.0-b11 */
 function upgradefmDNS_103($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -227,6 +231,7 @@ VALUES
 	return true;
 }
 
+/** 1.0-b13 */
 function upgradefmDNS_104($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -250,6 +255,7 @@ function upgradefmDNS_104($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.0-b14 */
 function upgradefmDNS_105($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -287,6 +293,7 @@ function upgradefmDNS_105($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.0-rc2 */
 function upgradefmDNS_106($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -335,6 +342,7 @@ VALUES
 	return true;
 }
 
+/** 1.0-rc3 */
 function upgradefmDNS_107($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -367,6 +375,7 @@ function upgradefmDNS_107($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.0-rc6 */
 function upgradefmDNS_108($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -405,6 +414,7 @@ function upgradefmDNS_108($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.0 */
 function upgradefmDNS_109($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -412,6 +422,7 @@ function upgradefmDNS_109($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_update_method`  `server_update_method` ENUM(  'http',  'https',  'cron',  'ssh' ) NOT NULL DEFAULT  'http';";
 
 	$inserts = null;
 	

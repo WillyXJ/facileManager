@@ -206,6 +206,7 @@ function buildModuleHelpFile() {
 			<ul>
 				<li><i>http(s) -</i> $fm_name will initiate a http(s) connection to the DNS server which updates the configs.</li>
 				<li><i>cron -</i> The DNS servers will initiate a http connection to $fm_name to update the configs.</li>
+				<li><i>ssh -</i> $fm_name will SSH to the DNS server which updates the configs.</li>
 			</ul>
 			<p>In order for the server to be enabled, the client app needs to be installed on the DNS server.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>

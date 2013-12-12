@@ -77,9 +77,9 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	echo "\n  --> Tests complete.  Continuing installation.\n\n";
 	
 	/** Update via cron or http/s? */
-	$update_choices = array('c', 'h');
+	$update_choices = array('c', 's', 'h');
 	while (!isset($update_method)) {
-		echo 'Will ' . $data['server_name'] . ' get updates via cron or http(s) [c|h]? ';
+		echo 'Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ';
 		$update_method = trim(strtolower(fgets(STDIN)));
 		
 		/** Must be a valid option */
@@ -87,7 +87,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	}
 	
 	/** Handle the update method */
-	$data['server_update_method'] = processUpdateMethod($module_name, $update_method);
+	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
 
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);

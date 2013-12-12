@@ -15,6 +15,7 @@
            getting created/updated.
 * Server - (Git Issue 44) Improved SOA create/update checks and updated help file.
 * Client - Updated Apple startup script.
+* Both   - Added option to update client configs via SSH.
 
 1.0-rc6 (2013-11-06)
 ====================

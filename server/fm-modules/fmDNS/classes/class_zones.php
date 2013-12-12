@@ -685,7 +685,7 @@ HTML;
 	}
 	
 	function buildZoneConfig($domain_id) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Check domain_id and soa */
 		$query = "select * from fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.domain_id=d.domain_id and d.domain_id=$domain_id";
@@ -718,16 +718,14 @@ HTML;
 				case 'http':
 				case 'https':
 					/** Test the port first */
-					$port = ($name_servers[$i]->server_update_method == 'https') ? 443 : 80;
-					if (!socketTest($name_servers[$i]->server_name, $port, 30)) {
-						$response .= '[' . $name_servers[$i]->server_name . '] Failed: could not access ' . $name_servers[$i]->server_update_method . ' (tcp/' . $port . ").\n";
+					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 30)) {
+						$response .= '[' . $name_servers[$i]->server_name . '] Failed: could not access ' . $name_servers[$i]->server_update_method . ' (tcp/' . $name_servers[$i]->server_update_port . ").\n";
 						$failures = true;
 						break;
-//						return '<div class="error"><p>Failed: could not access ' . $name_servers[$i]->server_name . ' using ' . $name_servers[$i]->server_update_method . ' (tcp/' . $port . ').</p></div>'. "\n";
 					}
 					
 					/** Remote URL to use */
-					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_name . '/' . $_SESSION['module'] . '/reload.php';
+					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_name . ':' . $name_servers[$i]->server_update_port . '/' . $_SESSION['module'] . '/reload.php';
 					
 					/** Data to post to $url */
 					$post_data = array('action'=>'reload', 'serial_no'=>$name_servers[$i]->server_serial_no, 'domain_id'=>$domain_id);
@@ -738,6 +736,52 @@ HTML;
 						/** Something went wrong */
 						return '<div class="error"><p>' . $post_result . '</p></div>'. "\n";
 					} else {
+						if (count($post_result) > 1) {
+							/** Loop through and format the output */
+							foreach ($post_result as $line) {
+								$response .= '[' . $name_servers[$i]->server_name . "] $line\n";
+								if (strpos(strtolower($line), 'fail')) $failures = true;
+							}
+						} else {
+							$response .= "[{$name_servers[$i]->server_name}] " . $post_result[0] . "\n";
+							if (strpos(strtolower($post_result[0]), 'fail')) $failures = true;
+						}
+					}
+					/** Set the server_update_config flag */
+					setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'update');
+					
+					break;
+				case 'ssh':
+					/** Test the port first */
+					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 30)) {
+						$response .= '[' . $name_servers[$i]->server_name . '] Failed: could not access ' . $name_servers[$i]->server_update_method . ' (tcp/' . $name_servers[$i]->server_update_port . ").\n";
+						$failures = true;
+						break;
+					}
+					
+					/** Get SSH key */
+					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
+					if (!$ssh_key) {
+						return $response . '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+					}
+					
+					$temp_ssh_key = '/tmp/fm_id_rsa';
+					if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
+						return $response . '<p class="error">Failed: could not load SSH key into ' . $temp_ssh_key . '.</p>'. "\n";
+					}
+					
+					@chmod($temp_ssh_key, 0400);
+					
+					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$name_servers[$i]->server_update_port} -l fm_user {$name_servers[$i]->server_name} 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php zones id=$domain_id'", $post_result, $retval);
+					
+					@unlink($temp_ssh_key);
+					
+					if ($retval) {
+						/** Something went wrong */
+						return '<p class="error">Zone reload failed.</p>'. "\n";
+					} else {
+						if (!count($post_result)) $post_result[] = 'Zone reload was successful.';
+						
 						if (count($post_result) > 1) {
 							/** Loop through and format the output */
 							foreach ($post_result as $line) {

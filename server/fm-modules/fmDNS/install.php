@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
   `server_root_dir` varchar(255) NOT NULL,
   `server_zones_dir` varchar(255) NOT NULL,
   `server_config_file` varchar(255) NOT NULL DEFAULT '/etc/named.conf',
-  `server_update_method` enum('http','https','cron') NOT NULL DEFAULT 'http',
+  `server_update_method` enum('http','https','cron','ssh') NOT NULL DEFAULT 'http',
   `server_update_port` int(5) NOT NULL DEFAULT '0',
   `server_build_config` enum('yes','no') NOT NULL DEFAULT 'no',
   `server_update_config` enum('yes','no') NOT NULL DEFAULT 'no',

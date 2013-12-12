@@ -242,6 +242,39 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$('#generate_ssh_key_pair').click(function() {
+		var form_data = {
+			item_type: 'fm_settings',
+			gen_ssh: true
+		};
+		$.ajax({
+			type: "POST",
+			url: 'fm-modules/facileManager/ajax/processPost.php',
+			data: form_data,
+			success: function(response)
+			{
+				if (response == 'Success') {
+					$('#gen_ssh_action').html('<p>SSH key pair is generated.</p>');
+				} else {
+					$('#response').html(response);
+					$('#response')
+						.css('opacity', 0)
+						.slideDown(400, function() {
+							$('#response').animate(
+								{ opacity: 1 },
+								{ queue: false, duration: 200 }
+							);
+						});
+					$('#response').delay(3000).fadeTo(200, 0.00, function() {
+						$('#response').slideUp(400);
+					});
+				}
+			}
+		});
+		
+		return false;
+	});
+	
 	/* Account settings */
     $('.account_settings').click(function() {
         var $this 		= $(this);

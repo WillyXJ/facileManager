@@ -98,6 +98,7 @@ class fm_module_servers {
 		if (empty($post['server_update_port'])) {
 			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
 			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
+			elseif ($post['server_update_method'] == 'ssh') $post['server_update_port'] = 22;
 		}
 		
 		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
@@ -170,6 +171,7 @@ class fm_module_servers {
 		if (empty($post['server_update_port'])) {
 			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
 			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
+			elseif ($post['server_update_method'] == 'ssh') $post['server_update_port'] = 22;
 		}
 		
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
@@ -425,7 +427,7 @@ FORM;
 	}
 
 	function buildServerConfig($serial_no) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
@@ -465,13 +467,12 @@ FORM;
 			case 'http':
 			case 'https':
 				/** Test the port first */
-				$port = ($server_update_method == 'https') ? 443 : 80;
-				if (!socketTest($server_name, $port, 30)) {
-					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $port . ').</p>'. "\n";
+				if (!socketTest($server_name, $server_update_port, 30)) {
+					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
 				}
 				
 				/** Remote URL to use */
-				$url = $server_update_method . '://' . $server_name . '/' . $_SESSION['module'] . '/reload.php';
+				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
 				
 				/** Data to post to $url */
 				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no, 'options'=>implode(' ', $options));
@@ -498,6 +499,50 @@ FORM;
 						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
 					}
 				}
+				break;
+			case 'ssh':
+				/** Test the port first */
+				if (!socketTest($server_name, $server_update_port, 30)) {
+					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
+				}
+				
+				/** Get SSH key */
+				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
+				if (!$ssh_key) {
+					return $response . '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+				}
+				
+				$temp_ssh_key = '/tmp/fm_id_rsa';
+				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
+					return $response . '<p class="error">Failed: could not load SSH key into ' . $temp_ssh_key . '.</p>'. "\n";
+				}
+				
+				@chmod($temp_ssh_key, 0400);
+				
+				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l fm_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php buildconf " . implode(' ', $options) . "'", $post_result, $retval);
+				
+				@unlink($temp_ssh_key);
+				
+				if ($retval) {
+					/** Something went wrong */
+					return $response . '<p class="error">Config build failed.</p>'. "\n";
+				} else {
+					if (!count($post_result)) $post_result[] = 'Config build was successful.';
+					
+					if (count($post_result) > 1) {
+						$response .= '<textarea rows="4" cols="100">';
+						
+						/** Loop through and format the output */
+						foreach ($post_result as $line) {
+							$response .= "[$server_name] $line\n";
+						}
+						
+						$response .= "</textarea>\n";
+					} else {
+						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
+					}
+				}
+				break;
 		}
 		
 		/* reset the server_build_config flag */

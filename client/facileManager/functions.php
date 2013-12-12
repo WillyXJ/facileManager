@@ -617,7 +617,7 @@ function initWebRequest() {
  * @param string $update_method User entered update method
  * @return string
  */
-function processUpdateMethod($module_name, $update_method) {
+function processUpdateMethod($module_name, $update_method, $data, $url) {
 	global $argv;
 	
 	switch($update_method) {
@@ -644,6 +644,72 @@ function processUpdateMethod($module_name, $update_method) {
 			
 			return 'cron';
 
+			break;
+		/** ssh */
+		case 's':
+			$user = 'fm_user';
+			
+			/** Get local users */
+			$passwd_users = explode("\n", preg_replace('/:.*/', '', @file_get_contents('/etc/passwd')));
+			
+			/** Add fm_user */
+			echo "  --> Attempting to create system user ($user)...";
+			if (! $ssh_dir = addUser(array($user, 'facileManager'), $passwd_users)) {
+				echo "failed\n";
+				echo "\nInstallation aborted.\n";
+				exit(1);
+			} else echo "ok\n";
+			
+			/** Add ssh public key */
+			echo "  --> Installing SSH key...";
+			$raw_data = getPostData(str_replace('genserial', 'sshkey', $url), $data);
+			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+			if (strpos($raw_data, 'ssh-rsa') !== false) {
+				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys2'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys2', $raw_data, FILE_APPEND) : true;
+				@chown($ssh_dir . '/authorized_keys2', $user);
+				@chmod($ssh_dir . '/authorized_keys2', 0600);
+				if ($result !== false) $result = 'ok';
+			} else {
+				$result = 'failed';
+			}
+			echo $result . "\n\n";
+			if ($result == 'failed') {
+				echo "Installation failed.  No SSH key found for this account.\n";
+				exit(1);
+			}
+			
+			/** Add an entry to sudoers */
+			$sudoers = findFile('sudoers');
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			
+			if (!$sudoers) {
+				echo "  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n";
+				echo "\n      $sudoers_line\n";
+				
+				echo "\nInstallation aborted.\n";
+				exit(1);
+			} else {
+				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
+				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
+					$sudoers_update = system($cmd, $retval);
+				
+					if ($retval) echo "  --> The sudoers entry cannot be added.\n$cmd\n";
+					else echo "  --> The sudoers entry has been added.\n";
+				} else echo "  --> The sudoers entry already exists...skipping\n";
+				
+				/** Check for bad settings and disable */
+				$bad_settings = array('requiretty', 'env_reset');
+				foreach ($bad_settings as $setting) {
+					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
+					if ($found_bad != 0) {
+						echo "  --> Disabling 'Defaults $setting' in $sudoers...\n";
+						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
+					}
+				}
+			}
+
+			return 'ssh';
+			
 			break;
 		/** http(s) */
 		case 'h':
@@ -731,6 +797,44 @@ function processUpdateMethod($module_name, $update_method) {
 
 			break;
 	}
+}
+
+
+/**
+ * Attempts to add a system user account
+ *
+ * @since 1.0
+ * @package facileManager
+ *
+ * @param string $user Username to add
+ * @return boolean
+ */
+function addUser($user_info, $passwd_users) {
+	list($user, $user_name) = $user_info;
+	
+	$retval = false;
+	
+	switch (PHP_OS) {
+		case 'Linux':
+			if (!in_array($user, $passwd_users)) {
+				$result = system(findProgram('useradd') . " -m -c '$username' $user", $retval);
+			}
+			if (!$retval) {
+				if (!is_dir("/home/$user/.ssh")) {
+					@mkdir("/home/$user/.ssh");
+					@chown("/home/$user/.ssh", $user);
+					@chgrp("/home/$user/.ssh", $user);
+				}
+				return "/home/$user/.ssh";
+			}
+			break;
+		case 'FreeBSD':
+			break;
+		case 'Darwin':
+			break;
+	}
+	
+	return false;
 }
 
 

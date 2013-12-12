@@ -41,8 +41,14 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	if (!$allowed_to_manage_settings) returnUnAuth(false);
 
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
-	$save_result = $fm_settings->save();
-	echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : '<p>These settings have been saved.</p>'. "\n";
+	
+	if (isset($_POST['gen_ssh']) && $_POST['gen_ssh'] == true) {
+		$save_result = $fm_settings->generateSSHKeyPair();
+		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : 'Success';
+	} else {
+		$save_result = $fm_settings->save();
+		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : '<p>These settings have been saved.</p>'. "\n";
+	}
 
 /** Handle module settings */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'module_settings') {

@@ -23,7 +23,7 @@
 */
 
 /** Handle client installations */
-if (arrayKeysExist(array('genserial', 'addserial', 'install'), $_GET)) {
+if (arrayKeysExist(array('genserial', 'addserial', 'install', 'sshkey'), $_GET)) {
 	if (!defined('CLIENT')) define('CLIENT', true);
 	
 	require_once('fm-init.php');
@@ -72,6 +72,17 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install'), $_GET)) {
 			if (function_exists('moduleCompleteInstallation')) {
 				moduleCompleteClientInstallation();
 			}
+		}
+	}
+	
+	if (array_key_exists('sshkey', $_GET)) {
+		include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
+		/** Check account key */
+		$account_status = $fm_accounts->verifyAccount($_POST['AUTHKEY']);
+		if ($account_status !== true) {
+			$data = $account_status;
+		} else {
+			$data = getOption('ssh_key_pub', $_SESSION['user']['account_id']);
 		}
 	}
 	

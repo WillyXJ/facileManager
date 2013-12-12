@@ -28,7 +28,7 @@ class fm_settings {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		$force_logout = false;
-		$exclude = array('save', 'item_type');
+		$exclude = array('save', 'item_type', 'gen_ssh');
 		$ports = array('ldap_port', 'ldap_port_ssl', 'fm_port_ssl');
 		
 		$log_message = "Set system settings to the following:\n";
@@ -112,6 +112,46 @@ class fm_settings {
 	}
 	
 	
+	function generateSSHKeyPair() {
+		global $fmdb, $__FM_CONFIG, $fm_name;
+		
+		/** Create the ssh key pair */
+		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f /tmp/fm_id_rsa -N ''", $exec_array, $retval);
+		$array['ssh_key_priv'] = @file_get_contents('/tmp/fm_id_rsa');
+		$array['ssh_key_pub'] = @file_get_contents('/tmp/fm_id_rsa.pub');
+		
+		@unlink('/tmp/fm_id_rsa');
+		@unlink('/tmp/fm_id_rsa.pub');
+		
+		if ($retval) {
+			return 'SSH key generation failed.';
+		}
+		
+		foreach ($array as $key => $data) {
+			/** Check if the option has changed */
+			$current_value = getOption($key);
+			if ($current_value == $data) continue;
+			
+			$new_array[$key] = ($current_value === false) ? array($data, 'insert') : array($data, 'update');
+		}
+		
+		if (isset($new_array) && is_array($new_array)) {
+			foreach ($new_array as $option => $value) {
+				list($option_value, $command) = $value;
+				
+				/** Update with the new value */
+				$result = setOption($option, $option_value, $command, $_SESSION['user']['account_id'], 'fm_options', 'option_', false);
+		
+				if (!$result) return 'Could not save settings because a database error occurred.';
+			}
+			
+			addLogEntry('Generated system SSH key pair.', $fm_name);
+		}
+		
+		return true;
+	}
+	
+	
 	/**
 	 * Displays the form to modify options
 	 */
@@ -121,7 +161,15 @@ class fm_settings {
 		$disabled = $allowed_to_manage_settings ? null : 'disabled';
 		$local_hostname = php_uname('n');
 		
-		$save_button = $disabled ? null : '<input type="submit" name="save" id="save_fm_settings" value="Save" class="button" />';
+		$save_button = $disabled ? null : '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button" /></p>';
+		$sshkey_button = $disabled ? null : '<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="Generate" class="button" />';
+		if ($sshkey_button !== null) {
+			$ssh_priv = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
+			if ($ssh_priv) {
+				$sshkey_button = '<p>SSH key pair is generated.</p>';
+				unset($ssh_priv);
+			}
+		}
 		
 		/** Authentication Method */
 		$auth_method = getOption('auth_method');
@@ -517,6 +565,18 @@ class fm_settings {
 								$software_update_list
 							</div>
 						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label>SSH Key Pair</label>
+							<p>If a ssh key pair is generated, clients can be updated over ssh.</p>
+						</div>
+						<div id="gen_ssh_action" class="choices">
+							$sshkey_button
+						</div>
+					</div>
 				</div>
 			$save_button
 			</div>
