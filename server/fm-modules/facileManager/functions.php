@@ -1737,6 +1737,7 @@ function printPageHeader($response, $title, $allowed_to_add = false, $name = nul
  * @param integer $serial_no Server serial number
  * @param string $flag Flag to set (yes or no)
  * @param string $build_update Are we building or updating
+ * @param integer $domain_id Domain ID to update DNS servers for
  * @return boolean
  */
 function setBuildUpdateConfigFlag($serial_no, $flag, $build_update, $domain_id = null) {
@@ -1771,6 +1772,30 @@ function setBuildUpdateConfigFlag($serial_no, $flag, $build_update, $domain_id =
 	
 	if ($fmdb->result) return true;
 	return false;
+}
+
+
+/**
+ * Sets the timezone
+ *
+ * @since 1.0
+ * @package facileManager
+ *
+ * @return null
+ */
+function setTimezone() {
+	if (isset($_SESSION['user'])) {
+		$default_timezone = getOption('timezone', $_SESSION['user']['account_id']);
+	}
+	if (!empty($default_timezone)) {
+		date_default_timezone_set($default_timezone);
+	} else {
+		if (ini_get('date.timezone')) {
+			date_default_timezone_set(ini_get('date.timezone'));
+		} else {
+			date_default_timezone_set('Europe/London');
+		}
+	}
 }
 
 

@@ -59,6 +59,8 @@ class fm_module_buildconf {
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		
+		setTimezone();
+		
 		$files = array();
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);

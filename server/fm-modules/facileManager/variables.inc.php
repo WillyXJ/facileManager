@@ -26,18 +26,7 @@
  *
  */
 
-if (isset($_SESSION['user'])) {
-	$default_timezone = getOption('timezone', $_SESSION['user']['account_id']);
-}
-if (!empty($default_timezone)) {
-	date_default_timezone_set($default_timezone);
-} else {
-	if (ini_get('date.timezone')) {
-		date_default_timezone_set(ini_get('date.timezone'));
-	} else {
-		date_default_timezone_set('Europe/London');
-	}
-}
+setTimezone();
 
 /**
  * The facileManager name string
