@@ -44,14 +44,13 @@ facileManager (server) requires the following:
     * facileManager-core
     * JavaScript enabled in your web browser
 
-fmDNS (client) requires the following:
+fM client requires the following:
 
-    * ISC BIND 9.3 or later
+    * ISC BIND 9.3 or later (for fmDNS)
     * PHP 5.0 or later
     * A running web server if using http(s) update methods
         - The install script supports the following web servers:
             ~ httpd
-            ~ lighttpd
 
 
 Server Installation
@@ -74,11 +73,12 @@ Ubuntu - Edit /etc/apache2/sites-available/default and change 'AllowOverride
 Client Installation
 --------------------
 
-1.  Move the contents of the client directory to /usr/local/ on your DNS
+1.  Move the contents of the client directory to /usr/local/ on your client
     servers to manage.
     `sudo mv facileManager/client/facileManager /usr/local/`
-2.  Run the following to complete the client installation.
-    `sudo php /usr/local/facileManager/fmDNS/dns.php install`
+2.  For each module you wish to use, run the following to complete the client
+    installation.
+    `sudo php /usr/local/facileManager/<module_name>/dns.php install`
 	
 
 
@@ -109,7 +109,7 @@ Client Upgrade
 ---------------
 
 1.  Make a backup of your config.inc.php file.
-2.  Move the contents of the client directory to /usr/local/ on your DNS
+2.  Move the contents of the client directory to /usr/local/ on your client
     servers to manage.
     `sudo mv facileManager/client/facileManager /usr/local/`
 3.  Copy your backup of config.inc.php to /usr/local/facileManager.
