@@ -35,7 +35,7 @@ class fm_accounts {
 		
 		/** Check serial number */
 		if (isset($data['SERIALNO'])) {
-			basicGet('fm_' . $__FM_CONFIG[$module_name]['prefix'] . 'servers', sanitize($SERIALNO), 'server_', 'server_serial_no', null, getAccountID($AUTHKEY));
+			basicGet('fm_' . $__FM_CONFIG[$module_name]['prefix'] . 'servers', sanitize($SERIALNO), 'server_', 'server_serial_no', "AND server_installed='yes'", getAccountID($AUTHKEY));
 			if (!$fmdb->num_rows) return "Server is not found.\n";
 		}
 		

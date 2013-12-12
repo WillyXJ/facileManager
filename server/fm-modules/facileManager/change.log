@@ -9,6 +9,8 @@
 * Server - CSS tweaks.
 * Server - fM software update checks are now customizable.
 * Server - User accounts can now set their default module to use.
+* Server - Fixed an issue where clients would report as installed
+           when the installation was not complete.
 
 1.0-rc6-1 (2013-11-07)
 ======================
