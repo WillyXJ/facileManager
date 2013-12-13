@@ -353,6 +353,14 @@ BODY;
 		
 		$return = null;
 		
+		/** Load ssh key for use */
+		$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
+		$temp_ssh_key = '/tmp/fm_id_rsa';
+		if ($ssh_key) {
+			$ssh_key_loaded = @file_put_contents($temp_ssh_key, $ssh_key);
+			@chmod($temp_ssh_key, 0400);
+		}
+
 		/** Get server list */
 		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
 		
@@ -368,18 +376,34 @@ BODY;
 			else $return .=  'failed';
 			$return .=  "\n";
 
-			/** http(s) tests */
-			$return .= "\thttp(s):\t\t";
+			/** remote port tests */
+			$return .= "\tRemote Port:\t";
 			if ($results[$x]->server_update_method != 'cron') {
 				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
 					$return .= 'success (tcp/' . $results[$x]->server_update_port . ")\n";
 					
-					/** php tests */
-					$return .= "\thttp page:\t\t";
-					$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
-								$_SESSION['module'] . '/reload.php', null);
-					if ($php_result == 'Incorrect parameters defined.') $return .= 'success';
-					else $return .= 'failed';
+					if ($results[$x]->server_update_method == 'ssh') {
+						$return .= "\tSSH Login:\t";
+						if (!$ssh_key) {
+							$return .= 'no SSH key defined';
+						} elseif ($ssh_key_loaded === false) {
+							$return .= 'could not load SSH key into ' . $temp_ssh_key;
+						} else {
+							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l fm_user {$results[$x]->server_name} uptime", $post_result, $retval);
+							if ($retval) {
+								$return .= 'ssh key login failed';
+							} else {
+								$return .= 'success';
+							}
+						}
+					} else {
+						/** php tests */
+						$return .= "\thttp page:\t\t";
+						$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
+									$_SESSION['module'] . '/reload.php', null);
+						if ($php_result == 'Incorrect parameters defined.') $return .= 'success';
+						else $return .= 'failed';
+					}
 					
 				} else $return .=  'failed (tcp/' . $results[$x]->server_update_port . ')';
 			} else $return .= 'skipping (host updates via cron)';
@@ -394,6 +418,8 @@ BODY;
 
 			$return .=  "\n";
 		}
+		
+		@unlink($temp_ssh_key);
 		
 		return $return;
 	}
