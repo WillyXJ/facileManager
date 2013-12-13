@@ -718,7 +718,7 @@ HTML;
 				case 'http':
 				case 'https':
 					/** Test the port first */
-					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 30)) {
+					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
 						$response .= '[' . $name_servers[$i]->server_name . '] Failed: could not access ' . $name_servers[$i]->server_update_method . ' (tcp/' . $name_servers[$i]->server_update_port . ").\n";
 						$failures = true;
 						break;
@@ -753,7 +753,7 @@ HTML;
 					break;
 				case 'ssh':
 					/** Test the port first */
-					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 30)) {
+					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
 						$response .= '[' . $name_servers[$i]->server_name . '] Failed: could not access ' . $name_servers[$i]->server_update_method . ' (tcp/' . $name_servers[$i]->server_update_port . ").\n";
 						$failures = true;
 						break;

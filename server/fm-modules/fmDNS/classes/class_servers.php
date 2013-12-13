@@ -467,7 +467,7 @@ FORM;
 			case 'http':
 			case 'https':
 				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 30)) {
+				if (!socketTest($server_name, $server_update_port, 10)) {
 					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
 				}
 				
@@ -502,7 +502,7 @@ FORM;
 				break;
 			case 'ssh':
 				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 30)) {
+				if (!socketTest($server_name, $server_update_port, 10)) {
 					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
 				}
 				
