@@ -55,7 +55,7 @@ function moduleFunctionalCheck() {
 function buildModuleDashboard() {
 	global $fmdb, $__FM_CONFIG;
 	
-	return '<p>' . $_SESSION['module'] . ' still needs to be written.</p>';
+	return '<p>' . $_SESSION['module'] . ' has no dashboard content yet.</p>';
 
 	/** Server stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
@@ -115,54 +115,71 @@ HTML;
 function buildModuleHelpFile() {
 	global $__FM_CONFIG;
 	
-	return 'This still needs to be implemented for ' . $_SESSION['module'];
-	
 	$body = <<<HTML
 <h3>{$_SESSION['module']}</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmsqlpass_config_servers', 'block');">Configure Servers</a>
-		<div id="fmsqlpass_config_servers">
-			<p>Database servers can be managed from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['URL']}">Servers</a> menu item. From 
+		<a class="list_title" onclick="javascript:toggleLayer('fmfw_config_servers', 'block');">Configure Firewalls</a>
+		<div id="fmfw_config_servers">
+			<p>Firewall servers can be managed from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
-			servers depending on your user permissions.</p>
+			firewalls depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
-			<p>Select the database server type from the list and associate the server with a group. You can also override the user credentials 
-			{$_SESSION['module']} should use for this server. If the credentials are left blank, {$_SESSION['module']} will use the credentials 
-			defined in the module settings.</p>
+			<p>Select the firewall type from the list, select the method the firewall will be updated, and define the firewall configuration file. All of 
+			these options are automatically defined during the client installation.</p>
 			<br />
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmsqlpass_config_groups', 'block');">Configure Server Groups</a>
-		<div id="fmsqlpass_config_groups">
-			<p>Server groups are used so you can change the user passwords on a subset of servers rather than all (or selecting individual servers on
-			each run). An example would be to create a group for each data center hosting your servers so you can change the password for all database
-			servers within that data center.</p>
-			<p>Database server groups can be managed from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['Server Groups']}">Server Groups</a> 
-			menu item. From there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete 
-			({$__FM_CONFIG['icons']['delete']}) servers depending on your user permissions.</p>
-			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete server groups.</i></p>
-			<br />
-		</div>
-	</li>
-	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmsqlpass_passwords', 'block');">Set Passwords</a>
-		<div id="fmsqlpass_passwords">
-			<p>Database user passwords can be updated from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['Passwords']}">Passwords</a> 
-			menu item. From there you can select the server groups, enter the username to change the password for, and enter the new password.</p>
-			<p><i>The 'Password Management' or 'Super Admin' permission is required to update database user passwords.</i></p>
-			<p>You can enter the username as "<code>username</code>" which will change the password for all users matching that string. If you want to 
-			change the password for "<code>username@localhost</code>" only and leave the password in tact for "<code>username@%</code>" then you can 
-			enter the username as "<code>username@localhost</code>"</p>
-			<br />
-		</div>
-	</li>
-	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_module_settings', 'block');">Module Settings</a>
-		<div id="fm_module_settings">
-			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['module']['menu']['Settings']['URL']}">Settings</a> 
+		<a class="list_title" onclick="javascript:toggleLayer('fmfw_config_policies', 'block');">Firewall Policies</a>
+		<div id="fmfw_config_policies">
+			<p>Policy Rules are managed by clicking on the firewall server name from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> 
+			menu item. From there, you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete 
+			({$__FM_CONFIG['icons']['delete']}), and reorder rules (drag and drop the row). When adding or editing a rule, you can select the 
+			firewall interface the rule applies to, the direction, source, destination, services, time restriction (iptables only), action, and
+			any options you want for the rule.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete firewall policies.</i></p>
+			<p>When the rules are defined and ready for deployment to the firewall server, you can preview ({$__FM_CONFIG['icons']['preview']}) the config
+			before building ({$__FM_CONFIG['icons']['build']}) it from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> 
 			menu item.</p>
+			<p><i>The 'Build Server Configs' or 'Super Admin' permission is required to build and deploy firewall policies.</i></p>
+			<br />
+		</div>
+	</li>
+	<li>
+		<a class="list_title" onclick="javascript:toggleLayer('fmfw_objects', 'block');">Objects</a>
+		<div id="fmfw_objects">
+			<p>Much like an appliance firewall, objects need to be defined before they can be used in policies. All objects 
+			(<a href="{$__FM_CONFIG['module']['menu']['Objects']['Hosts']}">Hosts</a> and <a href="{$__FM_CONFIG['module']['menu']['Objects']['Networks']}">Networks</a>)
+			are managed from the <a href="{$__FM_CONFIG['module']['menu']['Objects']['URL']}">Objects</a> menu item. Give the object a name and
+			specify the host or network address.</p>
+			<p><a href="{$__FM_CONFIG['module']['menu']['Objects']['URL']}">Object Groups</a> allow you to group object types together for easy policy 
+			creation. For example, you might want all of your web servers to be grouped together for a web server policy rule.</a>
+			<p><i>The 'Object Management' or 'Super Admin' permission is required to add, edit, and delete services and service groups.</i></p>
+			<br />
+		</div>
+	</li>
+	<li>
+		<a class="list_title" onclick="javascript:toggleLayer('fmfw_services', 'block');">Services</a>
+		<div id="fmfw_services">
+			<p>Much like an appliance firewall, services need to be defined before they can be used in policies. All services 
+			(<a href="{$__FM_CONFIG['module']['menu']['Services']['ICMP']}">ICMP</a>, <a href="{$__FM_CONFIG['module']['menu']['Services']['TCP']}">TCP</a>,
+			<a href="{$__FM_CONFIG['module']['menu']['Services']['UDP']}">UDP</a>) are managed from the 
+			<a href="{$__FM_CONFIG['module']['menu']['Services']['URL']}">Services</a> menu item. Give the service a name, specify the ports (or 
+			types/codes for ICMP) and any TCP flags.</p>
+			<p><a href="{$__FM_CONFIG['module']['menu']['Services']['URL']}">Service Groups</a> allow you to group services together for easy policy 
+			creation. For example, you might want http and https to be grouped together for a web server.</a>
+			<p><i>The 'Service Management' or 'Super Admin' permission is required to add, edit, and delete services and service groups.</i></p>
+			<br />
+		</div>
+	</li>
+	<li>
+		<a class="list_title" onclick="javascript:toggleLayer('fmfw_time', 'block');">Time Restrictions</a>
+		<div id="fmfw_time">
+			<p>Time restrictions can be defined from the <a href="{$__FM_CONFIG['module']['menu']['Time']['URL']}">Time</a> menu item. From there you can 
+			specify the start date and time, end date and time, and the weekdays of the restriction. Only iptables firewall type supports the use of time
+			restrictions in its policies.</p>
+			<p><i>The 'Time Management' or 'Super Admin' permission is required to add, edit, and delete time restrictions.</i></p>
 			<br />
 		</div>
 	</li>

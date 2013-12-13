@@ -1,3 +1,8 @@
+#fmfw_config_servers, #fmfw_objects, #fmfw_services, #fmfw_time,
+#fmfw_config_policies {
+	display: none;
+}
+
 .tcp-flags th, .tcp-flags td {
 	width: 1em;
 	font-size: 11px;
