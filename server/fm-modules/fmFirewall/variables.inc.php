@@ -28,10 +28,10 @@
  */
 
 /** Module Version */
-$__FM_CONFIG['fmFirewall']['version']				= '1.0-a1';
+$__FM_CONFIG['fmFirewall']['version']				= '1.0-b1';
 $__FM_CONFIG['fmFirewall']['description']			= 'Manage on or more software firewall servers through a web UI rather than configuration files individually.';
 $__FM_CONFIG['fmFirewall']['prefix']				= 'fw_';
-$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.0-rc3';
+$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.0';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';

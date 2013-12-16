@@ -28,10 +28,10 @@
  */
 
 /** Module Version */
-$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b4';
+$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b5';
 $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords across multiple servers.';
 $__FM_CONFIG['fmSQLPass']['prefix']					= 'sqlpass_';
-$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.0-rc5';
+$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.0';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';
