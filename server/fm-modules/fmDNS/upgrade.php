@@ -456,5 +456,52 @@ function upgradefmDNS_109($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.0.1 */
+function upgradefmDNS_110($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.0', '<') ? upgradefmDNS_109($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table = null;
+
+	$inserts[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_view_support`
+)
+VALUES 
+('options', 'dnssec-validation', '( yes | no | auto )', 'no', 'yes'),
+('options', 'bindkeys-file', '( quoted_string )', 'no', 'yes')";
+	
+	$updates = null;
+
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	return true;
+}
+
 
 ?>

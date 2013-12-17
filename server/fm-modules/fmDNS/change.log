@@ -1,3 +1,8 @@
+1.0.1 (2013-12-??)
+================
+* Server - (Git Issue 50) Added dnssec-validation config option.
+* Server - (Git Issue 51) Added bindkeys-file config option.
+
 1.0 (2013-12-16)
 ================
 * Server - (Git Issue 35) Added config option input validation.
