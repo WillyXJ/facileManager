@@ -225,7 +225,9 @@ function installFM($proto, $compress) {
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	echo $raw_data . "\n\n";
 	if ($raw_data != 'Success') {
-		echo "Installation failed.  Please check your account key.\n";
+		echo "Installation failed.  ";
+		echo (!strlen($raw_data)) ? "Could not communicate properly with $hostname.  Failed to\naccess $url." : "Please check your account key.";
+		echo "\n";
 		exit(1);
 	}
 

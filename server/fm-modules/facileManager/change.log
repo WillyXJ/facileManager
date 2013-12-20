@@ -1,3 +1,7 @@
+1.0.1 (2013-12-??)
+================
+* Client - Added more error handling in isolated install issues.
+
 1.0 (2013-12-16)
 ================
 * Server - Removed enable/disable option for template user accounts.
