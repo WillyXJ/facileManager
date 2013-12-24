@@ -28,7 +28,7 @@
  */
 
 /** Module Version */
-$__FM_CONFIG['fmFirewall']['version']				= '1.0-b1';
+$__FM_CONFIG['fmFirewall']['version']				= '1.0-b2';
 $__FM_CONFIG['fmFirewall']['description']			= 'Manage one or more software firewall servers through a web UI rather than configuration files individually.';
 $__FM_CONFIG['fmFirewall']['prefix']				= 'fw_';
 $__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.0';
