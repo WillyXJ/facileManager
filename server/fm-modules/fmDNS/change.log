@@ -2,6 +2,8 @@
 ================
 * Server - (Git Issue 50) Added dnssec-validation config option.
 * Server - (Git Issue 51) Added bindkeys-file config option.
+* Server - (Git Issue 55) Fixed issue where new installations would not
+           populate the database properly.
 
 1.0 (2013-12-16)
 ================
