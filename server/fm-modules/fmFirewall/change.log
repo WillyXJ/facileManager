@@ -1,4 +1,4 @@
-1.0-b2 (2013-12-??)
+1.0-b2 (2013-12-24)
 ===================
 * Server - (Git Issue 54) Server update method can no longer be changed
            from the webui if the server is installed.
