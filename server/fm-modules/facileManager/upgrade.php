@@ -44,7 +44,7 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 27) ? fmUpgrade_106($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_106($database) : true;
 	displayProgress('Upgrading Schema', $success);
 
 	echo "</table>\n</center>\n";
@@ -336,7 +336,47 @@ function fmUpgrade_106($database) {
 		/** Schema change */
 		$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_default_module` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `user_email` ;";
 
-		$inserts = $updates = null;
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result) {
+					if (!$fmdb->result) return false;
+				}
+			}
+		}
+	}
+
+	return $success;
+}
+
+
+/** fM v1.0.1 **/
+function fmUpgrade_107($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 27) ? fmUpgrade_106($database) : true;
+	
+	if ($success) {
+		/** Schema change */
+		$table = null;
+
+		$inserts[] = <<<INSERT
+INSERT INTO $database.`fm_options` (`account_id` ,`option_name`, `option_value`) 
+	SELECT 0, 'software_update', 1 FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'software_update');
+INSERT;
+
+		$inserts[] = <<<INSERT
+INSERT INTO $database.`fm_options` (`account_id` ,`option_name`, `option_value`) 
+	SELECT 0, 'software_update_interval', 'week' FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'software_update_interval');
+INSERT;
 
 		/** Create table schema */
 		if (count($table) && $table[0]) {
