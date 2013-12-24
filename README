@@ -65,7 +65,8 @@ Server Installation
 Additional Steps (OS-based)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Ubuntu - Edit /etc/apache2/sites-available/default and change 'AllowOverride 
+Debian-based/Ubuntu - 
+         Edit /etc/apache2/sites-available/default and change 'AllowOverride 
          None' to 'AllowOverride All' under <directory /var/www/> and reload 
          apache.
 
