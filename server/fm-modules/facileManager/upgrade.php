@@ -44,7 +44,7 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_106($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_107($database) : true;
 	displayProgress('Upgrading Schema', $success);
 
 	echo "</table>\n</center>\n";
