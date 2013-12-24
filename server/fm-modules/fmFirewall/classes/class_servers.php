@@ -255,6 +255,7 @@ HTML;
 		$server_name = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_config_file = $server_os = null;
 		$ucaction = ucfirst($action);
+		$server_installed = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -272,10 +273,12 @@ HTML;
 		}
 		$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
 		
+		$disabled = ($server_installed == 'yes') ? 'disabled' : null;
+		
 		$available_server_types = $this->getAvailableFirewalls(enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_type'), $server_os);
 		
 		$server_type = buildSelect('server_type', 'server_type', $available_server_types, $server_type, 1);
-		$server_update_method = buildSelect('server_update_method', 'server_update_method', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_update_method'), $server_update_method, 1);
+		$server_update_method = buildSelect('server_update_method', 'server_update_method', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_update_method'), $server_update_method, 1, $disabled);
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="config-servers">

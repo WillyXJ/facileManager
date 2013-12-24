@@ -4,6 +4,8 @@
 * Server - (Git Issue 51) Added bindkeys-file config option.
 * Server - (Git Issue 55) Fixed issue where new installations would not
            populate the database properly.
+* Server - (Git Issue 54) Server update method can no longer be changed
+           from the webui if the server is installed.
 
 1.0 (2013-12-16)
 ================
