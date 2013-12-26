@@ -39,6 +39,7 @@ class fm_dns_keys {
 						<th>Algorithm</th>
 						<th>Secret</th>
 						<th>View</th>
+						<th>Comment</th>
 						<th width="110" style="text-align: center;">Actions</th>
 					</tr>
 				</thead>
@@ -62,6 +63,8 @@ class fm_dns_keys {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$post['key_comment'] = trim($post['key_comment']);
+
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
 		if ($field_length !== false && strlen($post['key_name']) > $field_length) return 'Key name is too long (maximum ' . $field_length . ' characters).';
@@ -94,7 +97,8 @@ class fm_dns_keys {
 		
 		if (!$fmdb->result) return 'Could not add the key because a database error occurred.';
 
-		addLogEntry("Added key '{$post['key_name']}'.");
+		$view_name = $post['key_view'] ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
+		addLogEntry("Added key:\nName: {$post['key_name']}\nAlgorithm: {$post['key_algorithm']}\nSecret: {$post['key_secret']}\nView: $view_name\nComment: {$post['key_comment']}");
 		return true;
 	}
 
@@ -105,6 +109,7 @@ class fm_dns_keys {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (empty($post['key_name']) || empty($post['key_secret'])) return 'No key defined.';
+		$post['key_comment'] = trim($post['key_comment']);
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
@@ -139,7 +144,7 @@ class fm_dns_keys {
 		if (!$fmdb->rows_affected) return true;
 
 		$view_name = $post['key_view'] ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		addLogEntry("Updated key '$old_name' to name: '{$post['key_name']}'; algorithm: {$post['key_algorithm']}; secret: '{$post['key_secret']}'; view: $view_name.");
+		addLogEntry("Updated key '$old_name' to the following:\nName: {$post['key_name']}\nAlgorithm: {$post['key_algorithm']}\nSecret: {$post['key_secret']}\nView: $view_name\nComment: {$post['key_comment']}");
 		return true;
 	}
 	
@@ -189,6 +194,7 @@ class fm_dns_keys {
 			<td>$row->key_algorithm</td>
 			<td>$row->key_secret</td>
 			<td>$key_view</td>
+			<td>$row->key_comment</td>
 			$edit_status
 		</tr>
 HTML;
@@ -203,7 +209,7 @@ HTML;
 		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 		
 		$key_id = 0;
-		$key_name = $key_root_dir = $key_zones_dir = '';
+		$key_name = $key_root_dir = $key_zones_dir = $key_comment = null;
 		$ucaction = ucfirst($action);
 		$key_algorithm = $key_view = $key_secret = null;
 		
@@ -241,6 +247,10 @@ HTML;
 				<tr>
 					<th width="33%" scope="row"><label for="key_secret">Secret</label></th>
 					<td width="67%"><input name="key_secret" id="key_secret" type="text" value="$key_secret" size="40" maxlength="$key_secret_length" /></td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="key_comment">Comment</label></th>
+					<td width="67%"><textarea id="key_comment" name="key_comment" rows="4" cols="30">$key_comment</textarea></td>
 				</tr>
 			</table>
 			<input type="submit" name="submit" value="$ucaction Key" class="button" />

@@ -100,7 +100,7 @@ class fm_module_buildconf {
 				$config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $global_config_count; $i++) {
-					$global_config[$config_result[$i]->cfg_name] = $config_result[$i]->cfg_data;
+					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
 				}
 			} else $global_config = array();
 
@@ -110,7 +110,7 @@ class fm_module_buildconf {
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($j=0; $j < $global_config_count; $j++) {
-					$server_config[$server_config_result[0]->cfg_name] = $server_config_result[0]->cfg_data;
+					$server_config[$server_config_result[0]->cfg_name] = array($server_config_result[0]->cfg_data, $config_result[$i]->cfg_comment);
 				}
 			} else $server_config = array();
 
@@ -118,6 +118,7 @@ class fm_module_buildconf {
 			$config_array = array_merge($global_config, $server_config);
 			
 			foreach ($config_array as $cfg_name => $cfg_data) {
+				list($data, $cfg_comment) = $cfg_data;
 				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 				$fmdb->get_results($query);
 				if (!$fmdb->num_rows) $def_multiple_values = 'no';
@@ -125,11 +126,19 @@ class fm_module_buildconf {
 					$result = $fmdb->last_result[0];
 					$def_multiple_values = $result->def_multiple_values;
 				}
+				if ($cfg_comment) {
+					$comment = wordwrap($cfg_comment, 50, "\n");
+					$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+					unset($comment);
+				}
 				$config .= "\t" . $cfg_name . ' ';
-				if ($def_multiple_values == 'yes' && strpos($cfg_data, '{') === false) $config .= '{ ';
-				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_data), ';')));
-				if ($def_multiple_values == 'yes' && strpos($cfg_data, '}') === false) $config .= '; }';
+				if ($def_multiple_values == 'yes' && strpos($data, '{') === false) $config .= '{ ';
+				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($data), ';')));
+				if ($def_multiple_values == 'yes' && strpos($data, '}') === false) $config .= '; }';
 				$config .= ";\n";
+				
+				unset($data);
+				if ($cfg_comment) $config .= "\n";
 			}
 			$config .= "};\n\n";
 			
@@ -148,6 +157,11 @@ class fm_module_buildconf {
 				$logging_result = $fmdb->last_result;
 				$count = $fmdb->num_rows;
 				for ($i=0; $i < $count; $i++) {
+					if ($logging_result[$i]->cfg_comment) {
+						$comment = wordwrap($logging_result[$i]->cfg_comment, 50, "\n");
+						$logging .= "\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+						unset($comment);
+					}
 					$logging .= "\t" . $logging_result[$i]->cfg_name . ' ' . $logging_result[$i]->cfg_data . " {\n";
 					
 					/** Get logging config details */
@@ -188,6 +202,11 @@ class fm_module_buildconf {
 				$key_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $key_config_count; $i++) {
 					$key_name = trimFullStop($key_result[$i]->key_name) . '.';
+					if ($key_result[$i]->key_name) {
+						$comment = wordwrap($key_result[$i]->key_comment, 50, "\n");
+						$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
 					$keys .= $key_name . "\n";
 					$key_config .= "key $key_name {\n";
 					$key_config .= "\talgorithm " . $key_result[$i]->key_algorithm . ";\n";
@@ -214,24 +233,23 @@ class fm_module_buildconf {
 			if ($keys) {
 				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
 			
-				$config .= "\ninclude \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
+				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
 			}
 			
-
 			/** Build ACLs */
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no=0');
 			if ($fmdb->num_rows) {
 				$acl_result = $fmdb->last_result;
 				for ($i=0; $i < $fmdb->num_rows; $i++) {
 					if ($acl_result[$i]->acl_predefined != 'as defined:') {
-						$global_acl_array[$acl_result[$i]->acl_name] = $acl_result[$i]->acl_predefined;
+						$global_acl_array[$acl_result[$i]->acl_name] = array($acl_result[$i]->acl_predefined, $acl_result[$i]->acl_comment);
 					} else {
 						$addresses = explode(' ', $acl_result[$i]->acl_addresses);
 						$global_acl_array[$acl_result[$i]->acl_name] = null;
 						foreach($addresses as $address) {
 							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . "\n";
 						}
-						$global_acl_array[$acl_result[$i]->acl_name] = rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n");
+						$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
 					}
 				}
 
@@ -242,14 +260,14 @@ class fm_module_buildconf {
 					$acl_config_count = $fmdb->num_rows;
 					for ($j=0; $j < $acl_config_count; $j++) {
 						if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-							$server_acl_array[$server_acl_result[$j]->acl_name] = $server_acl_result[$j]->acl_predefined;
+							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $acl_result[$i]->acl_comment);
 						} else {
 							$addresses = explode(' ', $server_acl_result[$j]->acl_addresses);
 							$server_acl_addresses = null;
 							foreach($addresses as $address) {
 								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . "\n";
 							}
-							$server_acl_array[$server_acl_result[$j]->acl_name] = rtrim(ltrim($server_acl_addresses, "\t"), ";\n");
+							$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 						}
 					}
 				} else $server_acl_array = array();
@@ -259,8 +277,14 @@ class fm_module_buildconf {
 
 				/** Format ACL config */
 				foreach ($acl_array as $acl_name => $acl_data) {
+					list($acl_item, $acl_comment) = $acl_data;
+					if ($acl_comment) {
+						$comment = wordwrap($acl_comment, 50, "\n");
+						$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
 					$config .= 'acl "' . $acl_name . "\" {\n";
-					$config .= "\t" . $acl_data . ";\n";
+					$config .= "\t" . $acl_item . ";\n";
 					$config .= "};\n\n";
 				}
 			}
@@ -272,6 +296,11 @@ class fm_module_buildconf {
 				$view_result = $fmdb->last_result;
 				$view_count = $fmdb->num_rows;
 				for ($i=0; $i < $view_count; $i++) {
+					if ($view_result[$i]->view_comment) {
+						$comment = wordwrap($view_result[$i]->view_comment, 50, "\n");
+						$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
 					$config .= 'view "' . $view_result[$i]->view_name . "\" {\n";
 
 					/** Get cooresponding config records */
@@ -280,7 +309,7 @@ class fm_module_buildconf {
 						$config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
 						for ($j=0; $j < $view_config_count; $j++) {
-							$view_config[$config_result[$j]->cfg_name] = $config_result[$j]->cfg_data;
+							$view_config[$config_result[$j]->cfg_name] = array($config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 						}
 					} else $view_config = array();
 
@@ -290,7 +319,7 @@ class fm_module_buildconf {
 						$server_config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
 						for ($j=0; $j < $view_config_count; $j++) {
-							$server_view_config[$server_config_result[$j]->cfg_name] = $server_config_result[$j]->cfg_data;
+							$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 						}
 					} else $server_view_config = array();
 
@@ -298,6 +327,7 @@ class fm_module_buildconf {
 					$config_array = array_merge($view_config, $server_view_config);
 
 					foreach ($config_array as $cfg_name => $cfg_data) {
+						list($data, $cfg_comment) = $cfg_data;
 						$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 						$fmdb->get_results($query);
 						if (!$fmdb->num_rows) $def_multiple_values = 'no';
@@ -305,11 +335,19 @@ class fm_module_buildconf {
 							$result = $fmdb->last_result[0];
 							$def_multiple_values = $result->def_multiple_values;
 						}
+						if ($cfg_comment) {
+							$comment = wordwrap($cfg_comment, 50, "\n");
+							$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+							unset($comment);
+						}
 						$config .= "\t" . $cfg_name . ' ';
 						if ($def_multiple_values == 'yes') $config .= '{ ';
-						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_data), ';')));
+						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($data), ';')));
 						if ($def_multiple_values == 'yes') $config .= '; }';
 						$config .= ";\n";
+						
+						if ($cfg_comment) $config .= "\n";
+						unset($data);
 					}
 
 					/** Get cooresponding keys */
@@ -320,6 +358,11 @@ class fm_module_buildconf {
 						$key_count = $fmdb->num_rows;
 						for ($k=0; $k < $key_count; $k++) {
 							$key_name = trimFullStop($key_result[$k]->key_name) . '.';
+							if ($key_result[$k]->key_name) {
+								$comment = wordwrap($key_result[$k]->key_comment, 50, "\n");
+								$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+								unset($comment);
+							}
 							$key_config .= "key \"" . $key_name . "\" {\n";
 							$key_config .= "\talgorithm " . $key_result[$k]->key_algorithm . ";\n";
 							$key_config .= "\tsecret \"" . $key_result[$k]->key_secret . "\";\n";
@@ -349,7 +392,7 @@ class fm_module_buildconf {
 					if (is_array($tmp_files)) {
 						/** Include view keys if present */
 						if (@array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $data->files)) {
-							$config .= "\n\tinclude \"" . $server_zones_dir . "/views.conf." . $view_result[$i]->view_name . ".keys\";\n";
+							$config .= "\tinclude \"" . $server_zones_dir . "/views.conf." . $view_result[$i]->view_name . ".keys\";\n";
 						}
 						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . $view_result[$i]->view_name . "\";\n";
 						$files = array_merge($files, $tmp_files);

@@ -1,6 +1,8 @@
 1.1 (2013-12-??)
 ================
 * Server - Added visual badge to the menus that need user attention.
+* Server - (Git Issue 52) Comments can now be added to views, acls, keys,
+           options, and logging configs.
 
 1.0.2 (2013-12-??)
 ==================

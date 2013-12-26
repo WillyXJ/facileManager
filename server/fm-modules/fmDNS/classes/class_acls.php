@@ -37,6 +37,7 @@ class fm_dns_acls {
 					<tr>
 						<th>Name</th>
 						<th>Address List</th>
+						<th>Comment</th>
 						<th width="110" style="text-align: center;">Actions</th>
 					</tr>
 				</thead>
@@ -78,6 +79,8 @@ class fm_dns_acls {
 		$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
 		if ($post['acl_addresses'] === false) return 'Invalid address(es) specified.';
 		
+		$post['acl_comment'] = trim($post['acl_comment']);
+		
 		$exclude = array('submit', 'action', 'server_id');
 
 		foreach ($post as $key => $data) {
@@ -96,7 +99,8 @@ class fm_dns_acls {
 		
 		if (!$fmdb->result) return 'Could not add the ACL because a database error occurred.';
 
-		addLogEntry("Added ACL '{$post['acl_name']}'.");
+		$acl_addresses = $post['acl_predefined'] == 'as defined:' ? $post['acl_addresses'] : $post['acl_predefined'];
+		addLogEntry("Added ACL:\nName: {$post['acl_name']}\nAddresses: $acl_addresses\nComment: {$post['acl_comment']}");
 		return true;
 	}
 
@@ -124,10 +128,13 @@ class fm_dns_acls {
 		
 		if ($post['acl_predefined'] != 'as defined:') $post['acl_addresses'] = null;
 
+		$post['acl_comment'] = trim($post['acl_comment']);
+		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
 		$exclude = array('submit', 'action', 'server_id');
 
+		$sql_edit = null;
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . sanitize($data) . "',";
@@ -135,7 +142,7 @@ class fm_dns_acls {
 		}
 		$sql = rtrim($sql_edit, ',');
 		
-		// Update the user
+		// Update the acl
 		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET $sql WHERE `acl_id`={$post['acl_id']}";
 		$result = $fmdb->query($query);
@@ -146,7 +153,7 @@ class fm_dns_acls {
 		if (!$fmdb->rows_affected) return true;
 
 		$acl_addresses = $post['acl_predefined'] == 'as defined:' ? $post['acl_addresses'] : $post['acl_predefined'];
-		addLogEntry("Updated ACL '$old_name' to name: '{$post['acl_name']}'; addresses: $acl_addresses");
+		addLogEntry("Updated ACL '$old_name' to the following:\nName: {$post['acl_name']}\nAddresses: $acl_addresses\nComment: {$post['acl_comment']}");
 		return true;
 	}
 	
@@ -195,6 +202,7 @@ class fm_dns_acls {
 		<tr id="$row->acl_id"$disabled_class>
 			<td>$edit_name</td>
 			<td>$edit_addresses</td>
+			<td>$row->acl_comment</td>
 			$edit_status
 		</tr>
 HTML;
@@ -207,7 +215,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$acl_id = 0;
-		$acl_name = $acl_addresses = '';
+		$acl_name = $acl_addresses = $acl_comment = null;
 		$acl_predefined = 'as defined:';
 		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
@@ -239,6 +247,10 @@ HTML;
 					<th width="33%" scope="row"><label for="acl_predefined">Matched Address List</label></th>
 					<td width="67%">$acl_predefined
 					<textarea name="acl_addresses" rows="7" cols="28" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$acl_addresses</textarea></td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="acl_comment">Comment</label></th>
+					<td width="67%"><textarea id="acl_comment" name="acl_comment" rows="4" cols="30">$acl_comment</textarea></td>
 				</tr>
 			</table>
 			<input type="submit" name="submit" value="$ucaction ACL" class="button" />

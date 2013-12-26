@@ -37,6 +37,7 @@ class fm_module_logging {
 					<tr>
 						<th>Name</th>
 						<?php if ($channel_category == 'category') echo '<th>Channels</th>'; ?>
+						<th>Comment</th>
 						<th width="110" style="text-align: center;">Actions</th>
 					</tr>
 				</thead>
@@ -69,6 +70,7 @@ class fm_module_logging {
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_data'] = $channel_name = $post['cfg_name'];
 		$post['cfg_name'] = $post['sub_type'];
+		$post['cfg_comment'] = trim($post['cfg_comment']);
 		
 		if (empty($channel_name)) return 'No channel name defined.';
 		
@@ -172,6 +174,7 @@ class fm_module_logging {
 		$post['temp_data'] = $post['cfg_data'];
 		$post['cfg_data'] = $category_name = $post['cfg_name'];
 		$post['cfg_name'] = $post['sub_type'];
+		$post['cfg_comment'] = trim($post['cfg_comment']);
 		
 		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data');
 		
@@ -238,6 +241,8 @@ class fm_module_logging {
 			}
 		}
 		if ($post['sub_type'] == 'category' && !isset($post['cfg_data'])) return 'No channel defined.';
+
+		$post['cfg_comment'] = trim($post['cfg_comment']);
 
 		/** First delete all children since they will be replaced */
 		$query = "SELECT cfg_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_parent`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
@@ -430,6 +435,7 @@ class fm_module_logging {
 		<tr id="$row->cfg_id"$disabled_class>
 			<td>$edit_name</td>
 			$channels_row
+			<td>$row->cfg_comment</td>
 			$edit_status
 		</tr>
 HTML;
@@ -442,7 +448,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$cfg_id = 0;
-		$cfg_name = $cfg_root_dir = $cfg_zones_dir = '';
+		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
 		$cfg_data = null;
@@ -522,6 +528,10 @@ FORM;
 						<th width="33%" scope="row"><label for="print-time">Print Time (optional)</label></th>
 						<td width="67%">$cfg_print_time</td>
 					</tr>
+					<tr>
+						<th width="33%" scope="row"><label for="cfg_comment">Comment</label></th>
+						<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
+					</tr>
 				</table>
 				<input type="submit" name="submit" value="$ucaction Channel" class="button" />
 				<input value="Cancel" class="button cancel" id="cancel_button" />
@@ -540,6 +550,10 @@ FORM;
 					<tr>
 						<th width="33%" scope="row"><label for="cfg_data">Channels</label></th>
 						<td width="67%">$cfg_data</td>
+					</tr>
+					<tr>
+						<th width="33%" scope="row"><label for="cfg_comment">Comment</label></th>
+						<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
 					</tr>
 				</table>
 				<input type="submit" name="submit" value="$ucaction Category" class="button" />
