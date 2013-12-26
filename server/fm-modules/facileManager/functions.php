@@ -348,7 +348,7 @@ function printMenu($page_name, $page_name_sub) {
 		if ($top_menu == 'Break') {
 			$main_menu_html .= '<li><div class="separator"></div></li>' . "\n";
 		} else {
-			$main_menu_html .= '<li>' . $arrow . '<a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . '</a>' . "\n";
+			$main_menu_html .= '<li>' . $arrow . '<a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . '</a></li>' . "\n";
 		}
 	
 		if ($top_menu == $page_name) {
@@ -356,7 +356,7 @@ function printMenu($page_name, $page_name_sub) {
 			foreach ($sub_menu as $sub_menu_name => $sub_menu_url){
 				$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : '';
 				
-				$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . '</a>' . "\n";
+				$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . '</a></li>' . "\n";
 			}
 			$main_menu_html .= <<<HTML
 			<div id="submenu">
