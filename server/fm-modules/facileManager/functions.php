@@ -337,26 +337,32 @@ function printMenu($page_name, $page_name_sub) {
 	
 	$main_menu_html = $sub_menu_html = $domain = null;
 	
+	/** Get badge counts */
+	$badge_array = getBadgeCounts();
+
 	foreach ($__FM_CONFIG['menu'] as $top_menu => $sub_menu) {
 		if ($top_menu == 'Break' && $main_menu_html == null) continue;
 		
 		$class = ($page_name == $top_menu) ? ' class="current"' : null;
 		
-		$arrow = (!empty($class)) ? '<span class="arrow">></span>' : null ;
+		$arrow = (!empty($class) && count($sub_menu) > 1) ? '<span class="arrow"></span>' : null;
+		
+		$badge = (empty($class) && array_key_exists($top_menu, $badge_array)) ? '<span class="menu_badge"><p>' . array_sum($badge_array[$top_menu]) . '</p></span>' : null;
 		
 		/** Handle the styled break */
 		if ($top_menu == 'Break') {
 			$main_menu_html .= '<li><div class="separator"></div></li>' . "\n";
 		} else {
-			$main_menu_html .= '<li>' . $arrow . '<a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . '</a></li>' . "\n";
+			$main_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $arrow . $badge . '</a></li>' . "\n";
 		}
 	
 		if ($top_menu == $page_name) {
 			unset($sub_menu['URL']);
 			foreach ($sub_menu as $sub_menu_name => $sub_menu_url){
 				$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : '';
+				$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge submenu_badge"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
 				
-				$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . '</a></li>' . "\n";
+				$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
 			}
 			$main_menu_html .= <<<HTML
 			<div id="submenu">
@@ -1796,6 +1802,54 @@ function setTimezone() {
 			date_default_timezone_set('Europe/London');
 		}
 	}
+}
+
+
+/**
+ * Gets menu badge counts
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @return array
+ */
+function getBadgeCounts() {
+	global $fm_name;
+	
+	/** Get fM badge counts */
+	$modules = getAvailableModules();
+	foreach ($modules as $module_name) {
+		/** Include module variables */
+		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+		
+		/** Upgrades waiting */
+		$module_version = getOption(strtolower($module_name) . '_version', 0);
+		if ($module_version !== false) {
+			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
+				$badge_count['Admin']['Modules']++;
+			}
+		}
+		
+		/** New versions available */
+		if (isNewVersionAvailable($module_name, $module_version)) $badge_count['Admin']['Modules']++;
+	}
+	
+	$module_badge_count = null;
+	/** Get module badge counts */
+	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
+		$functions_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'functions.php';
+		if (is_file($functions_file)) {
+			if (!function_exists('moduleFunctionalCheck')) {
+				@include($functions_file);
+			}
+			if (function_exists('getModuleBadgeCounts')) {
+				$module_badge_count = getModuleBadgeCounts();
+			}
+			if (count($module_badge_count)) $badge_count = array_merge($badge_count, $module_badge_count);
+		}
+	}
+	
+	return $badge_count;
 }
 
 

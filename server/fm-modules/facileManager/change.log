@@ -1,5 +1,9 @@
-1.0.1 (2013-12-24)
+1.1 (2013-12-??)
 ================
+* Server - Added visual badge to the menus that need user attention.
+
+1.0.1 (2013-12-24)
+==================
 * Client - Added more error handling in isolated install issues.
 * Server - Enabled update checks by default.
 

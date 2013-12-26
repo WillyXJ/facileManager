@@ -157,9 +157,14 @@ label {
 
 #mainitems span.arrow {
 	float: right;
-	font-family: "Courier New";
+	position: relative;
 	margin-right: 1em;
-	margin-top: 2px;
+	top: 1.1em;
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid #efefef;
 }
 
 #mainitems div.separator {
@@ -219,6 +224,36 @@ label {
 #subdomain {
 	float: left;
 	margin: 0;
+}
+
+span.menu_badge {
+	float: right;
+	margin-right: 1em;
+	border: 1px solid #646464;
+	font-weight: normal;
+	padding: 0 8px;
+	top: 7px;
+	position: relative;
+	height: 15px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+	-moz-box-sizing: content-box;
+	-webkit-box-sizing: content-box;
+	box-sizing: content-box;
+	background-color: #646464;
+}
+span.menu_badge p {
+	margin-top: -8px;
+	margin-left: -1px;
+	padding: 0;
+	color: #fff;
+}
+
+span.submenu_badge {
+	top: 3px;
+}
+span.submenu_badge p {
+	margin-top: -5px;
 }
 
 #cssmenu{ display:block; padding:0; margin: 0; }

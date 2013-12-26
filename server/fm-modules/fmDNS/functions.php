@@ -458,6 +458,16 @@ function isDebianSystem($os) {
 }
 
 
+/**
+ * Returns if a zone reload is allowed or not
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param id $domain_id Domain ID to check
+ * @return boolean
+ */
 function reloadAllowed($domain_id = null) {
 	global $fmdb, $__FM_CONFIG;
 	
@@ -473,4 +483,36 @@ function reloadAllowed($domain_id = null) {
 	return $reload_allowed;
 }
 	
+
+/**
+ * Gets the menu badge counts
+ *
+ * @since 1.1
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @return boolean
+ */
+function getModuleBadgeCounts() {
+	global $fmdb, $__FM_CONFIG;
+	
+	/** Zone stats */
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', "AND `domain_reload`='yes'");
+	$domain_count = $fmdb->num_rows;
+	$domain_results = $fmdb->last_result;
+	for ($i=0; $i<$domain_count; $i++) {
+		$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
+	}
+	
+	/** Server stats */
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_status`='active' AND (`server_installed`!='yes' OR `server_build_config`='yes')");
+	$domain_count = $fmdb->num_rows;
+	$domain_results = $fmdb->last_result;
+	for ($i=0; $i<$domain_count; $i++) {
+		$badge_counts['Config']['Servers']++;
+	}
+	
+	return $badge_counts;
+}
+
 ?>

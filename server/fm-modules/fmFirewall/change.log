@@ -1,3 +1,7 @@
+1.0-b3 (2013-12-??)
+===================
+* Server - Added visual badge to the menus that need user attention.
+
 1.0-b2 (2013-12-24)
 ===================
 * Server - (Git Issue 54) Server update method can no longer be changed

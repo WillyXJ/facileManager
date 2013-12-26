@@ -292,5 +292,27 @@ function isItemInPolicy($id, $type) {
 }
 
 
+/**
+ * Gets the menu badge counts
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ *
+ * @return boolean
+ */
+function getModuleBadgeCounts() {
+	global $fmdb, $__FM_CONFIG;
+	
+	/** Server stats */
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_status`='active' AND (`server_installed`!='yes' OR `server_build_config`='yes')");
+	$domain_count = $fmdb->num_rows;
+	$domain_results = $fmdb->last_result;
+	for ($i=0; $i<$domain_count; $i++) {
+		$badge_counts['Firewalls']['URL']++;
+	}
+	
+	return $badge_counts;
+}
 
 ?>
