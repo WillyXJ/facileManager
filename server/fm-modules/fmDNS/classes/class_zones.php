@@ -420,8 +420,10 @@ class fm_dns_zones {
 		$disabled_class = ($row->domain_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$soa_count = getSOACount($row->domain_id);
+		$ns_count = getNSCount($row->domain_id);
 		$reload_allowed = reloadAllowed($row->domain_id);
 		$response = (!$soa_count && $row->domain_type == 'master') ? '** You still need to create the SOA for this zone **" style="background-color: #F5EBEB;' : null;
+		if (!$ns_count && $row->domain_type == 'master' && !$response) $response = '** You still need to create NS records for this zone **" style="background-color: #F5EBEB;';
 		$clones = $this->cloneDomainsList($row->domain_id);
 		$zone_access_allowed = true;
 		
@@ -442,9 +444,11 @@ FORM;
 */
 		$edit_status = null;
 		
-		if ($row->domain_mapping == 'forward') {
-			$type = (!$soa_count && $row->domain_type == 'master') ? 'SOA' : 'A';
-		} else $type = 'PTR';
+		if (!$soa_count && $row->domain_type == 'master') $type = 'SOA';
+		elseif (!$ns_count && $row->domain_type == 'master') $type = 'NS';
+		else {
+			$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
+		}
 		if ($allowed_to_manage_zones && $zone_access_allowed) {
 			$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 //			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&domain_id=' . $row->domain_id . '&map=' . $row->domain_mapping . '" onClick="return del(\'Are you sure you want to delete this zone and all associated records?\')">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
