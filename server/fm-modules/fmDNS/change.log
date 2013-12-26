@@ -4,6 +4,7 @@
 * Server - (Git Issue 52) Comments can now be added to views, acls, keys,
            options, and logging configs.
 * Server - Improved UI logging of logging channels and categories updates.
+* Server - Fixed PHP errors upon client installs.
 
 1.0.2 (2013-12-??)
 ==================
