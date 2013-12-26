@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption($module . '_version', 0);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0.1', '<') ? upgradefmDNS_110($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.1-b1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return 'Failed';
 	
 	return 'Success';
