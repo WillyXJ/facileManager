@@ -1,6 +1,8 @@
 1.1 (2013-12-??)
 ================
 * Server - Added visual badge to the menus that need user attention.
+* Server - Client installs now ensure the module is active before
+           continuing the installation process.
 
 1.0.1 (2013-12-24)
 ==================
