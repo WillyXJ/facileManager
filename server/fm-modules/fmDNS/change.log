@@ -6,6 +6,7 @@
 * Server - Improved UI logging of logging channels and categories updates.
 * Server - Fixed PHP errors upon client installs.
 * Server - Added name server checks to the dashboard.
+* Server - (Git Issue 48) Added support for zone delegation.
 
 1.0.2 (2013-12-??)
 ==================

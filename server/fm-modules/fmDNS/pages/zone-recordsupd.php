@@ -535,7 +535,7 @@ function buildInputReturn($action, $record_type, $i, $key, $val) {
 function verifyName($record_name, $allow_null = true, $record_type = null) {
 	if (!$allow_null && !strlen($record_name)) return false;
 	
-	if (preg_match("([_\.\!@#\$&\*\+\=\|/:;,'\"�%^\(\)])", $record_name) == false) {
+	if (preg_match("([_\!@#\$&\*\+\=\|/:;,'\"�%^\(\)])", $record_name) == false) {
 		return true;
 	} elseif ($record_name == '@') {
 		return true;
@@ -551,8 +551,8 @@ function verifyCNAME($Append, $Var2, $allow_null = true) {
 	if (!$allow_null && !strlen($Var2)) return false;
 	
 	if (preg_match("([_\!#\$&\*\+\=\|/:;,'\"�%^\(\)])", $Var2) == false) {
-		if ($Append == "yes") {
-			if (strstr($Var2, ".") == false) {
+		if ($Append == 'yes') {
+			if (strstr($Var2, '.') == false) {
 				return true;
 			} else {
 				return false;

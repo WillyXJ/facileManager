@@ -807,6 +807,7 @@ class fm_module_buildconf {
 						$ptr_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'NS':
+						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
 						if ($record_result[$i]->record_name[0] == '@') {
 							$record_name = $domain_name;
 						}
