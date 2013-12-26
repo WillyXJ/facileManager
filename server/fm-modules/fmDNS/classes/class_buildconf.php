@@ -202,12 +202,12 @@ class fm_module_buildconf {
 				$key_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $key_config_count; $i++) {
 					$key_name = trimFullStop($key_result[$i]->key_name) . '.';
+					$keys .= $key_name . "\n";
 					if ($key_result[$i]->key_name) {
 						$comment = wordwrap($key_result[$i]->key_comment, 50, "\n");
 						$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
 						unset($comment);
 					}
-					$keys .= $key_name . "\n";
 					$key_config .= "key $key_name {\n";
 					$key_config .= "\talgorithm " . $key_result[$i]->key_algorithm . ";\n";
 					$key_config .= "\tsecret \"" . $key_result[$i]->key_secret . "\";\n";
@@ -231,7 +231,7 @@ class fm_module_buildconf {
 			$config .= $logging . $servers;
 
 			if ($keys) {
-				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
+				$files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
 			
 				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
 			}
@@ -382,7 +382,7 @@ class fm_module_buildconf {
 								}
 							}
 						}
-						$data->files[$server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys'] = $key_config;
+						$files[$server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys'] = $key_config;
 					}
 					
 					/** Generate zone file */
@@ -391,7 +391,7 @@ class fm_module_buildconf {
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
 						/** Include view keys if present */
-						if (@array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $data->files)) {
+						if (@array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $files)) {
 							$config .= "\tinclude \"" . $server_zones_dir . "/views.conf." . $view_result[$i]->view_name . ".keys\";\n";
 						}
 						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . $view_result[$i]->view_name . "\";\n";
