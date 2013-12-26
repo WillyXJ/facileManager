@@ -3,6 +3,7 @@
 * Server - Added visual badge to the menus that need user attention.
 * Server - (Git Issue 52) Comments can now be added to views, acls, keys,
            options, and logging configs.
+* Server - Improved UI logging of logging channels and categories updates.
 
 1.0.2 (2013-12-??)
 ==================

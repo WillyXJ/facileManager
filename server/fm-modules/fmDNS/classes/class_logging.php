@@ -152,7 +152,19 @@ class fm_module_logging {
 		
 		if (!$fmdb->result) return 'Could not add the channel because a database error occurred.';
 		
-		addLogEntry("Added logging channel '$channel_name'.");
+		$log_message = "Added logging channel:\nName: $channel_name\nDestination: {$post['cfg_destination']}";
+		if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
+		if ($post['cfg_destination'] == 'file') {
+			$log_message .= "\nFile: {$post['cfg_file_path'][0]}";
+			if ($post['cfg_file_path'][1]) {
+				$log_message .= "\nVersions: {$post['cfg_file_path'][1]}";
+				if ($post['cfg_file_path'][2]) {
+					$log_message .= "\nFile Size: " . $post['cfg_file_path'][2] . $post['cfg_file_path'][3];
+				}
+			}
+		}
+		$log_message .= "\nSeverity: {$post['severity']}\nPrint Category: {$post['print-category']}\nPrint Severity: {$post['print-severity']}\nPrint Time: {$post['print-time']}\nComment: {$post['cfg_comment']}";
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -223,7 +235,7 @@ class fm_module_logging {
 		
 		if (!$fmdb->result) return 'Could not add the category because a database error occurred.';
 		
-		addLogEntry("Added logging category '$category_name'.");
+		addLogEntry("Added logging category:\nName: $category_name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		return true;
 	}
 
@@ -256,7 +268,7 @@ class fm_module_logging {
 		
 		/** Update category parent */
 		$post['temp_data'] = $post['cfg_data'];
-		$post['cfg_data'] = $post['cfg_name'];
+		$post['cfg_data'] = $name = $post['cfg_name'];
 		$post['cfg_name'] = $post['sub_type'];
 		
 		/** Ensure unique channel names */
@@ -278,6 +290,7 @@ class fm_module_logging {
 		$sql = rtrim($sql_edit, ',');
 		
 		/** Update the category */
+		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
@@ -309,6 +322,10 @@ class fm_module_logging {
 			
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
+		
+			if (!$fmdb->result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
+			
+			addLogEntry("Updated logging category '$old_name' to the following:\nName: $name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		} else {
 			/** Insert channel children */
 			$include = array('cfg_destination', 'severity', 'print-category', 'print-severity', 'print-time');
@@ -355,9 +372,23 @@ class fm_module_logging {
 			
 			$query = "$sql_insert $sql_fields VALUES $sql_values";
 			$result = $fmdb->query($query);
-		}
 		
-		if (!$fmdb->result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
+			if (!$fmdb->result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
+
+			$log_message = "Updated logging channel '$old_name' to the following:\nName: $name\nDestination: {$post['cfg_destination']}";
+			if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
+			if ($post['cfg_destination'] == 'file') {
+				$log_message .= "\nFile: {$post['cfg_file_path'][0]}";
+				if ($post['cfg_file_path'][1]) {
+					$log_message .= "\nVersions: {$post['cfg_file_path'][1]}";
+					if ($post['cfg_file_path'][2]) {
+						$log_message .= "\nFile Size: " . $post['cfg_file_path'][2] . $post['cfg_file_path'][3];
+					}
+				}
+			}
+			$log_message .= "\nSeverity: {$post['severity']}\nPrint Category: {$post['print-category']}\nPrint Severity: {$post['print-severity']}\nPrint Time: {$post['print-time']}\nComment: {$post['cfg_comment']}";
+			addLogEntry($log_message);
+		}
 		
 		return true;
 	}
