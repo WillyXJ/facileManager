@@ -44,7 +44,6 @@ if (array_key_exists('view_id', $_GET)) {
 	
 	$display_option_type = $view_info[0]->view_name;
 	$display_option_type_sql .= "$view_id";
-//	print_r($view_info[0]);
 } else {
 	$display_option_type_sql .= "0";
 	$view_id = null;

@@ -7,6 +7,8 @@
 * Server - Fixed PHP errors upon client installs.
 * Server - Added name server checks to the dashboard.
 * Server - (Git Issue 48) Added support for zone delegation.
+* Server - (Git Issue 46) View options can now be defined even when previously
+           defined in global options.
 
 1.0.2 (2013-12-??)
 ==================
