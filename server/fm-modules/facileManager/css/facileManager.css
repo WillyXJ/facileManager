@@ -252,6 +252,10 @@ span.menu_badge p {
 	padding: 0;
 	color: #fff;
 }
+span.badge_top_selected {
+	border: 1px solid #8F8F8F;
+	background-color: #8F8F8F;
+}
 
 span.submenu_badge {
 	top: 4px;
