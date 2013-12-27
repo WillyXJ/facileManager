@@ -66,7 +66,6 @@ class fm_module_buildconf {
 		extract($post_data);
 
 		$GLOBALS['built_domain_ids'] = null;
-		$data->server_build_all = true;
 		
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
@@ -118,7 +117,7 @@ class fm_module_buildconf {
 			$config_array = array_merge($global_config, $server_config);
 			
 			foreach ($config_array as $cfg_name => $cfg_data) {
-				list($data, $cfg_comment) = $cfg_data;
+				list($cfg_info, $cfg_comment) = $cfg_data;
 				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 				$fmdb->get_results($query);
 				if (!$fmdb->num_rows) $def_multiple_values = 'no';
@@ -132,12 +131,12 @@ class fm_module_buildconf {
 					unset($comment);
 				}
 				$config .= "\t" . $cfg_name . ' ';
-				if ($def_multiple_values == 'yes' && strpos($data, '{') === false) $config .= '{ ';
-				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($data), ';')));
-				if ($def_multiple_values == 'yes' && strpos($data, '}') === false) $config .= '; }';
+				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
+				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
 				$config .= ";\n";
 				
-				unset($data);
+				unset($cfg_info);
 				if ($cfg_comment) $config .= "\n";
 			}
 			$config .= "};\n\n";
@@ -231,7 +230,7 @@ class fm_module_buildconf {
 			$config .= $logging . $servers;
 
 			if ($keys) {
-				$files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
+				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
 			
 				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
 			}
@@ -327,7 +326,7 @@ class fm_module_buildconf {
 					$config_array = array_merge($view_config, $server_view_config);
 
 					foreach ($config_array as $cfg_name => $cfg_data) {
-						list($data, $cfg_comment) = $cfg_data;
+						list($cfg_info, $cfg_comment) = $cfg_data;
 						$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 						$fmdb->get_results($query);
 						if (!$fmdb->num_rows) $def_multiple_values = 'no';
@@ -342,12 +341,12 @@ class fm_module_buildconf {
 						}
 						$config .= "\t" . $cfg_name . ' ';
 						if ($def_multiple_values == 'yes') $config .= '{ ';
-						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($data), ';')));
+						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 						if ($def_multiple_values == 'yes') $config .= '; }';
 						$config .= ";\n";
 						
 						if ($cfg_comment) $config .= "\n";
-						unset($data);
+						unset($cfg_info);
 					}
 
 					/** Get cooresponding keys */
@@ -382,7 +381,7 @@ class fm_module_buildconf {
 								}
 							}
 						}
-						$files[$server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys'] = $key_config;
+						$data->files[$server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys'] = $key_config;
 					}
 					
 					/** Generate zone file */
@@ -391,7 +390,7 @@ class fm_module_buildconf {
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
 						/** Include view keys if present */
-						if (@array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $files)) {
+						if (@array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $data->files)) {
 							$config .= "\tinclude \"" . $server_zones_dir . "/views.conf." . $view_result[$i]->view_name . ".keys\";\n";
 						}
 						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . $view_result[$i]->view_name . "\";\n";
