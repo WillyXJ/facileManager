@@ -254,7 +254,7 @@ span.menu_badge p {
 }
 
 span.submenu_badge {
-	top: 3px;
+	top: 4px;
 }
 span.submenu_badge p {
 	margin-top: -5px;
@@ -1044,8 +1044,8 @@ pre {
 	span.submenu_badge {
 		top: -1.7em;
 	}
-	#mainitems span.arrow {
-		top: -1.2em;
+	#mainitems span.arrow, #mainitems span.arrow_selected {
+		top: -1.3em;
 	}
 }
 
