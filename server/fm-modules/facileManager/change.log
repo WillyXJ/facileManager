@@ -1,5 +1,11 @@
+1.0.2 (2013-12-??)
+==================
+* Server - Fixed issue where installer would report inability to write
+           the configuration file when the server directory had the
+           appropriate permissions.
+
 1.0.1 (2013-12-24)
-================
+==================
 * Client - Added more error handling in isolated install issues.
 * Server - Enabled update checks by default.
 

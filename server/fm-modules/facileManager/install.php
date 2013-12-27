@@ -39,7 +39,7 @@ function createConfig() {
 	$temp_file = ABSPATH . 'config.inc.php';
 	
 	if (!file_exists($temp_file) || !file_get_contents($temp_file)) {
-		if (!is_writable($temp_file)) {
+		if (file_put_contents($temp_file, '') === false) {
 			echo <<<CFG
 	<p>I cannot create <code>$temp_file</code> so please manually create it with the following contents:</p>
 	<textarea rows="20">$temp_config</textarea>
