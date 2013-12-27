@@ -345,10 +345,13 @@ function printMenu($page_name, $page_name_sub) {
 		
 		$class = ($page_name == $top_menu) ? ' class="current"' : null;
 		
-		$arrow = (!empty($class) && count($sub_menu) > 1) ? '<span class="arrow"></span>' : null;
+		$arrow = (!empty($class) && count($sub_menu) > 1) ? '<span class="arrow_selected"></span>' : null;
+		if (empty($arrow) && count($sub_menu) > 1) $arrow = '<span class="arrow"></span>';
 		
 		$badge = (empty($class) && array_key_exists($top_menu, $badge_array)) ? '<span class="menu_badge"><p>' . array_sum($badge_array[$top_menu]) . '</p></span>' : null;
 		
+		if (empty($class) && count($sub_menu) > 1) $class = ' class="menu-has-sub"';
+
 		/** Handle the styled break */
 		if ($top_menu == 'Break') {
 			$main_menu_html .= '<li><div class="separator"></div></li>' . "\n";

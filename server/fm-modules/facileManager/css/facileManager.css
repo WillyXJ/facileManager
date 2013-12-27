@@ -155,7 +155,7 @@ label {
 	box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
 }
 
-#mainitems span.arrow {
+#mainitems span.arrow, #mainitems span.arrow_selected {
 	float: right;
 	position: relative;
 	margin-right: 1em;
@@ -165,6 +165,10 @@ label {
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
 	border-top: 5px solid #efefef;
+}
+#mainitems span.arrow {
+	border-top: 5px solid #999;
+	display: none;
 }
 
 #mainitems div.separator {
@@ -228,7 +232,7 @@ label {
 
 span.menu_badge {
 	float: right;
-	margin-right: 1em;
+	margin-right: 2.1em;
 	border: 1px solid #646464;
 	font-weight: normal;
 	padding: 0 8px;
@@ -1030,5 +1034,18 @@ th {
 
 pre {
 	padding: 10px;
+}
+
+/** Firefox hacks :( */
+@-moz-document url-prefix() {
+	span.menu_badge {
+		top: -1.9em;
+	}
+	span.submenu_badge {
+		top: -1.7em;
+	}
+	#mainitems span.arrow {
+		top: -1.2em;
+	}
 }
 

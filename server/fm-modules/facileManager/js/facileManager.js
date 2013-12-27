@@ -547,6 +547,14 @@ $(document).ready(function() {
 		
 		return false;
     });
+    
+    $('#mainitems .menu-has-sub').hover(function() {
+    	$(this).find('span.arrow').show();
+    	$(this).find('span.menu_badge').css("margin-right", "5px");
+    }, function() {
+    	$('span.arrow').hide();
+    	$(this).find('span.menu_badge').css("margin-right", "2.1em");
+    });
 
 });
 
