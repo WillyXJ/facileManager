@@ -331,7 +331,7 @@ function socketTest($host, $port, $timeout = '20') {
  * @package facileManager
  */
 function getPostData($url, $data) {
-	global $module_name;
+	global $module_name, $debug;
 	
 	$data['module_name'] = $module_name;
 	$data['module_type'] = 'CLIENT';
@@ -344,6 +344,9 @@ function getPostData($url, $data) {
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 	$result = curl_exec($ch);
+	if ($debug && $result === false) {
+		echo "\n\n" . curl_error($ch);
+	}
 	curl_close($ch);
 	return $result;
 }
