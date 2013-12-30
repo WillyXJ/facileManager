@@ -3,6 +3,8 @@
 * Server - Fixed issue where installer would report inability to write
            the configuration file when the server directory had the
            appropriate permissions.
+* Both   - Fixed an issue where client installation would fail when 
+           checking account details.
 
 1.0.1 (2013-12-24)
 ==================
