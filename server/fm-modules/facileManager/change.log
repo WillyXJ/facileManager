@@ -1,4 +1,4 @@
-1.0.2 (2013-12-??)
+1.0.2 (2013-12-31)
 ==================
 * Server - Fixed issue where installer would report inability to write
            the configuration file when the server directory had the
