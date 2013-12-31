@@ -28,6 +28,8 @@
  *
  */
 
+error_reporting(0);
+
 $module_name = basename(dirname(__FILE__));
 
 $whoami = 'root';

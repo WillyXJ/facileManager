@@ -30,6 +30,12 @@
 error_reporting(0);
 $compress = true;
 
+/** Check if PHP is CGI */
+if (strpos(php_sapi_name(), 'cgi') !== false) {
+	echo "Your server is running a CGI version of PHP and the CLI version is required.\n\n";
+	exit(1);
+}
+
 /** Check for options */
 if (in_array('-h', $argv) || in_array('help', $argv)) printHelp();
 $debug = (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
