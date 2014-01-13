@@ -195,7 +195,7 @@ class fm_module_buildconf {
 					$key_config .= "};\n\n";
 					
 					/** Get associated servers */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_', 'AND server_key=' . $key_result[$i]->key_id . ' AND server_status="active"');
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_', 'AND server_serial_no!=' . $server_serial_no . ' AND server_key=' . $key_result[$i]->key_id . ' AND server_status="active"');
 					if ($fmdb->num_rows) {
 						$server_result = $fmdb->last_result;
 						$server_count = $fmdb->num_rows;
@@ -326,7 +326,7 @@ class fm_module_buildconf {
 							$key_config .= "};\n\n";
 					
 							/** Get associated servers */
-							basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_', 'AND server_key=' . $key_result[$k]->key_id . ' AND server_status="active"');
+							basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_', 'AND server_serial_no!=' . $server_serial_no . ' AND server_key=' . $key_result[$k]->key_id . ' AND server_status="active"');
 							if ($fmdb->num_rows) {
 								$server_result = $fmdb->last_result;
 								$server_count = $fmdb->num_rows;
