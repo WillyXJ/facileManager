@@ -201,7 +201,7 @@ class fm_module_buildconf {
 						$server_count = $fmdb->num_rows;
 						for ($j=0; $j < $server_count; $j++) {
 							$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
-							$servers .= "server " . $server_ip[0]['ip'] . " {\n";
+							$servers .= (count($server_ip)) ? "server " . $server_ip[0]['ip'] . " {\n" : "server [cannot resolve " . $server_result[$j]->server_name . "] {\n";
 							$servers .= "\tkeys { \"$key_name\"; };\n";
 							$servers .= "};\n";
 						}
@@ -333,7 +333,7 @@ class fm_module_buildconf {
 								$servers = null;
 								for ($j=0; $j < $server_count; $j++) {
 									$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
-									$config .= "\tserver " . $server_ip[0]['ip'] . " {\n";
+									$config .= (count($server_ip)) ? "server " . $server_ip[0]['ip'] . " {\n" : "server [cannot resolve " . $server_result[$j]->server_name . "] {\n";
 									$config .= "\t\tkeys { \"$key_name\"; };\n";
 									$config .= "\t};\n";
 								}
