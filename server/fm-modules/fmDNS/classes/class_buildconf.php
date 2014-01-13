@@ -202,7 +202,7 @@ class fm_module_buildconf {
 				for ($i=0; $i < $key_config_count; $i++) {
 					$key_name = trimFullStop($key_result[$i]->key_name) . '.';
 					$keys .= $key_name . "\n";
-					if ($key_result[$i]->key_name) {
+					if ($key_result[$i]->key_comment) {
 						$comment = wordwrap($key_result[$i]->key_comment, 50, "\n");
 						$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
 						unset($comment);
@@ -357,7 +357,7 @@ class fm_module_buildconf {
 						$key_count = $fmdb->num_rows;
 						for ($k=0; $k < $key_count; $k++) {
 							$key_name = trimFullStop($key_result[$k]->key_name) . '.';
-							if ($key_result[$k]->key_name) {
+							if ($key_result[$k]->key_comment) {
 								$comment = wordwrap($key_result[$k]->key_comment, 50, "\n");
 								$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
 								unset($comment);
