@@ -94,14 +94,11 @@ label {
 #menu {
 	width: 12em;
 	position: fixed;
-	top: 2.9em;
+	top: 3em;
 	float: left;
 	color: #fff;
 	font-size: 10pt;
-	moz-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
-	-webkit-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
-	-khtml-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
-	box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
+	z-index: 4;
 }
 
 #menu ul {
@@ -121,19 +118,6 @@ label {
 #menu a {
 	display: block;
 	text-decoration: none;
-}
-
-#mainitems {
-	text-align: left;
-}
-
-#mainitems a {
-	border-top: 1px #F9F9F9 solid;
-	border-bottom: 1px #DFDFDF solid;
-	padding-left: 1.5em;
-}
-
-#menu a {
 	font-weight: bold;
 	color: #00017B;
 }
@@ -142,7 +126,17 @@ label {
 	color: #4C4C4C;
 }
 
-#mainitems a.current {
+#mainitems {
+	text-align: left;
+}
+
+#mainitems > ul > li > a {
+	border-top: 1px #F9F9F9 solid;
+	border-bottom: 1px #DFDFDF solid;
+	padding-left: 1.5em;
+}
+
+#mainitems > ul > li > a.current {
 	background-color: #464646;
 	border-bottom: 1px #464646 solid;
 	border-top: 1px #464646 solid;
@@ -155,26 +149,31 @@ label {
 	box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
 }
 
-#mainitems span.arrow, #mainitems span.arrow_selected {
-	float: right;
-	position: relative;
-	margin-right: 1em;
-	top: 1.1em;
-	width: 0;
-	height: 0;
-	border-left: 5px solid transparent;
-	border-right: 5px solid transparent;
-	border-top: 5px solid #efefef;
-}
-#mainitems span.arrow {
-	border-top: 5px solid #999;
-	display: none;
-}
-
 #mainitems div.separator {
 	height: 0.5em;
 	background-color: #DFDFDF;
 	border-top: 1px #CFCFCF solid;
+}
+
+#mainitems > ul > li > div.arrow {
+	position: absolute;
+	display: none;
+	left: 11.6em;
+	top: 10px;
+	width: 0;
+	height: 0;
+	border-top: 8px solid transparent;
+	border-bottom: 8px solid transparent;
+	border-right: 6px solid rgba(70,70,70,0.95);
+}
+#mainitems > ul > li > div.current {
+	display: block;
+	left: 12.1em;
+	top: 0;
+	border-top: 17px solid transparent;
+	border-bottom: 17px solid transparent;
+	border-left: 10px solid #464646;
+	border-right: none;
 }
 
 #submenu {
@@ -225,18 +224,38 @@ label {
 	border-top: none;
 }
 
+#mainitems{ display:block; padding:0; margin: 0; }
+#mainitems > ul {list-style:inside none; padding:0; margin:0;}
+#mainitems > ul > li {list-style: none; padding:0; margin:0; display:block; position:relative;}
+#mainitems > ul > li > a{ outline:none; display:block; position:relative; text-decoration:none; }
+#mainitems ul li.has-sub:hover > a:after{top:0; bottom:0;}
+#mainitems > ul > li.has-sub:hover > a:before{top:18px;}
+#mainitems ul li.has-sub:hover > ul, #mainitems ul li.has-sub:hover > div{display:block;}
+#mainitems ul li > ul {
+	display:none; width:auto; position:absolute; top:-9px; left: 12em; padding:10px 0; background-color:rgba(70,70,70,0.95);
+	border-radius:0 5px 5px 0;
+	moz-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
+	-webkit-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
+	-khtml-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
+	box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
+	z-index: 6;
+}
+#mainitems ul li > ul{width:200px;}
+#mainitems ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
+#mainitems ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; }
+#mainitems > ul > li > ul > li a:hover{ background-color:rgba(200,200,200,0.95) };
+
 #subdomain {
 	float: left;
 	margin: 0;
 }
 
 span.menu_badge {
-	float: right;
-	margin-right: 2.1em;
+	display: inline-block;
+	margin-left: 1em;
 	border: 1px solid #646464;
 	font-weight: normal;
 	padding: 0 8px;
-	top: 7px;
 	position: relative;
 	height: 15px;
 	-webkit-border-radius: 10px;
@@ -257,11 +276,16 @@ span.badge_top_selected {
 	background-color: #8F8F8F;
 }
 
-span.submenu_badge {
-	top: 4px;
-}
-span.submenu_badge p {
+span.menu_badge_count p {
 	margin-top: -5px;
+}
+
+#mainitems > ul > li > ul > li > a span.menu_badge {
+	top: 0;
+}
+
+#mainitems > ul > li > ul > li > a > span.menu_badge p {
+	margin-top: 0;
 }
 
 #cssmenu{ display:block; padding:0; margin: 0; }
@@ -1042,14 +1066,5 @@ pre {
 
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
-	span.menu_badge {
-		top: -1.9em;
-	}
-	span.submenu_badge {
-		top: -1.7em;
-	}
-	#mainitems span.arrow, #mainitems span.arrow_selected {
-		top: -1.3em;
-	}
 }
 

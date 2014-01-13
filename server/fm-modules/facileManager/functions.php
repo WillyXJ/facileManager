@@ -345,8 +345,7 @@ function printMenu($page_name, $page_name_sub) {
 		
 		$class = ($page_name == $top_menu) ? ' class="current"' : null;
 		
-		$arrow = (!empty($class) && count($sub_menu) > 1) ? '<span class="arrow_selected"></span>' : null;
-		if (empty($arrow) && count($sub_menu) > 1) $arrow = '<span class="arrow"></span>';
+		$arrow = (!empty($class)) ? '<div class="arrow current"></div>' : '<div class="arrow"></div>';
 		
 		if ((empty($class) || count($sub_menu) <= 1) && array_key_exists($top_menu, $badge_array)) {
 			$badge = '<span class="menu_badge';
@@ -356,32 +355,49 @@ function printMenu($page_name, $page_name_sub) {
 			$badge = null;
 		}
 		
-		if (empty($class) && count($sub_menu) > 1) $class = ' class="menu-has-sub"';
+		$sub_menu_html = null;
 
 		/** Handle the styled break */
 		if ($top_menu == 'Break') {
 			$main_menu_html .= '<li><div class="separator"></div></li>' . "\n";
 		} else {
-			$main_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $arrow . $badge . '</a></li>' . "\n";
-		}
-	
-		if ($top_menu == $page_name) {
-			unset($sub_menu['URL']);
-			foreach ($sub_menu as $sub_menu_name => $sub_menu_url){
-				$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : '';
-				$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge submenu_badge"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
-				
-				$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
-			}
-			$main_menu_html .= <<<HTML
-			<div id="submenu">
-				<div id="subitems">
-					<ul>
+			if (empty($class) && count($sub_menu) > 1) {
+				$main_menu_html .= '<li class="has-sub"><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $badge . '</a>' . "\n";
+				unset($sub_menu['URL']);
+				foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
+					$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count badge_top_selected"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
+					$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
+				}
+				$main_menu_html .= <<<HTML
+				<div class="arrow $class"></div>
+				<ul>
 $sub_menu_html
-					</ul>
-				</div>
-			</div>
+
+				</ul>
+</li>
+
 HTML;
+			} else {
+				$main_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $badge . '</a>' . $arrow . '</li>' . "\n";
+				if ($top_menu == $page_name) {
+					unset($sub_menu['URL']);
+					foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
+						$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : null;
+						$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
+						
+						$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
+					}
+					$main_menu_html .= <<<HTML
+					<div id="submenu">
+						<div id="subitems">
+							<ul>
+$sub_menu_html
+							</ul>
+						</div>
+					</div>
+HTML;
+				}
+			}
 		}
 	}
 	
@@ -394,6 +410,7 @@ $main_menu_html
 			</ul>
 		</div>
 	</div>
+
 MENU;
 }
 
@@ -1824,6 +1841,8 @@ function setTimezone() {
  */
 function getBadgeCounts() {
 	global $fm_name;
+	
+	$badge_count = array();
 	
 	/** Get fM badge counts */
 	$modules = getAvailableModules();
