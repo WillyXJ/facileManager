@@ -235,7 +235,7 @@ function buildModuleHelpFile() {
 			
 			<p><b>Keys</b><br />
 			Currently, {$_SESSION['module']} does not generate server keys (TSIG), but once you create them on your server, you can define them in the UI 
-			at Config &rarr; <a href="{$__FM_CONFIG['menu']['Config']['Views']}">Views</a>.</p>
+			at Config &rarr; <a href="{$__FM_CONFIG['menu']['Config']['Keys']}">Keys</a>.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			
