@@ -232,7 +232,7 @@ label {
 #mainitems > ul > li.has-sub:hover > a:before{top:18px;}
 #mainitems ul li.has-sub:hover > ul, #mainitems ul li.has-sub:hover > div{display:block;}
 #mainitems ul li > ul {
-	display:none; width:auto; position:absolute; top:-9px; left: 12em; padding:10px 0; background-color:rgba(70,70,70,0.95);
+	display:none; width:auto; position:absolute; top:0; left: 12em; padding:2px 0; background-color:rgba(70,70,70,0.95);
 	border-radius:0 5px 5px 0;
 	moz-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
 	-webkit-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
@@ -240,10 +240,16 @@ label {
 	box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
 	z-index: 6;
 }
+#mainitems > ul > li > a:hover {
+	background: #e5e5e5;
+}
+#mainitems > ul > li > a.current:hover {
+	background: #464646;
+}
 #mainitems ul li > ul{width:200px;}
 #mainitems ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
 #mainitems ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; }
-#mainitems > ul > li > ul > li a:hover{ background-color:rgba(200,200,200,0.95) };
+#mainitems > ul > li > ul > li a:hover{ background-color:rgba(100,100,100,0.95); color: #fff; };
 
 #subdomain {
 	float: left;
