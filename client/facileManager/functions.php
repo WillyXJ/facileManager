@@ -846,4 +846,22 @@ function addUser($user_info, $passwd_users) {
 }
 
 
+/**
+ * Adds a log entry
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @param string $log_data Data to add to the log file
+ * @return boolean
+ */
+function addLogEntry($log_data) {
+	global $module_name;
+	
+	$log_file = '/var/log/fm.log';
+	$date = date('M d H:i:s');
+	
+	@file_put_contents($log_file, $date . ' ' $module_name . ': ' . $log_data . "\n", FILE_APPEND);
+}
+
 ?>
