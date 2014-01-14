@@ -610,6 +610,7 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD  `cfg_comment` TEXT NULL AFTER  `cfg_data` ;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD  `key_comment` TEXT NULL AFTER  `key_view` ;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD  `view_comment` TEXT NULL AFTER  `view_name` ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE  `domain_type`  `domain_type` ENUM(  'master',  'slave',  'forward',  'stub' ) NOT NULL DEFAULT  'master';";
 
 	$inserts = $updates = null;
 	

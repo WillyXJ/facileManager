@@ -162,7 +162,7 @@ class fm_dns_zones {
 			if ($_POST['createZone'][$id]['domain_type'] == 'forward' && empty($_POST['createZone'][$id]['domain_forward_servers'])) return 'No forward servers defined.';
 			
 			/** Slave zones require master servers */
-			if ($_POST['createZone'][$id]['domain_type'] == 'slave' && empty($_POST['createZone'][$id]['domain_master_servers'])) return 'No master servers defined.';
+			if (in_array($_POST['createZone'][$id]['domain_type'], array('slave', 'stub')) && empty($_POST['createZone'][$id]['domain_master_servers'])) return 'No master servers defined.';
 			
 			/** Format domain_view */
 			$log_message_views = null;

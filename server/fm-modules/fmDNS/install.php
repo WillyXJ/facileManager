@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
   `domain_mapping` enum('forward','reverse') NOT NULL DEFAULT 'forward',
-  `domain_type` enum('master','slave','forward') NOT NULL DEFAULT 'master',
+  `domain_type` enum('master','slave','forward','stub') NOT NULL DEFAULT 'master',
   `domain_check_names` enum('warn','fail','ignore') DEFAULT NULL,
   `domain_notify_slaves` enum('yes','no') DEFAULT NULL,
   `domain_multi_masters` enum('yes','no') DEFAULT NULL,

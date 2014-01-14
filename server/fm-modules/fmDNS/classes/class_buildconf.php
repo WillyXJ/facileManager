@@ -566,6 +566,10 @@ class fm_module_buildconf {
 							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
 							$zones .= $zone_result[$i]->domain_multi_masters ? "\tmulti-master " . $zone_result[$i]->domain_multi_masters . ";\n" : null;
 							break;
+						case 'stub':
+							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
+							$zones .= "\tfile \"$server_zones_dir/stubs/db." . $domain_name . "$file_ext\";\n";
+							break;
 						case 'forward':
 							$zones .= "\tforwarders { " . $zone_result[$i]->domain_forward_servers . "};\n";
 					}

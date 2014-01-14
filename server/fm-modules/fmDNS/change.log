@@ -9,6 +9,7 @@
 * Server - (Git Issue 48) Added support for zone delegation.
 * Server - (Git Issue 46) View options can now be defined even when previously
            defined in global options.
+* Server - (Git Issue 52) Added support for stub zones.
 
 1.0.2 (2013-12-??)
 ==================
