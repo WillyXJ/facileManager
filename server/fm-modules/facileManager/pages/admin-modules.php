@@ -22,8 +22,7 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Admin';
-$page_name_sub = 'Modules';
+$page_name = 'Modules';
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');

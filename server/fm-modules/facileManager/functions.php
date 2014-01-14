@@ -865,32 +865,32 @@ function buildHelpFile() {
 			
 			<p><b>Install</b><br />
 			Just extract the module into the 'fm-modules' directory on the server host (if not already present), go to Admin &rarr; 
-			<a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a>, and then click the 'Install' button next to the module 
+			<a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, and then click the 'Install' button next to the module 
 			you wish to install.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Activate</b><br />
 			In order for the module to be usable, it needs to be active in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a> and click the 'Activate' link next 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Activate' link next 
 			to the module you wish to activate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Upgrade</b><br />
 			Anytime module files are individually updated in the 'fm-modules' directory on the server host apart from updating $fm_name 
 			as a whole, they will need to be upgraded to ensure full compatibility and functionality.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a> and click the 'Upgrade' button next 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Upgrade' button next 
 			to the module you wish to upgrade. This will upgrade the database with any required changed.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Deactivate</b><br />
 			If you no longer want a module to be usable, it can be deactived in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a> and click the 'Deactivate' link next 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Deactivate' link next 
 			to the module you wish to deactivate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Uninstall</b><br />
 			If you no longer want a module to be installed, it can be uninstalled via the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a>, ensure the module is already 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, ensure the module is already 
 			deactivated, and then click the 'Uninstall' button next to the module you wish to remove. This will remove all associated 
 			entries and tables from the database.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
@@ -1854,12 +1854,12 @@ function getBadgeCounts() {
 		$module_version = getOption(strtolower($module_name) . '_version', 0);
 		if ($module_version !== false) {
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
-				$badge_count['Admin']['Modules']++;
+				$badge_count['Modules']['URL']++;
 			}
 		}
 		
 		/** New versions available */
-		if (isNewVersionAvailable($module_name, $module_version)) $badge_count['Admin']['Modules']++;
+		if (isNewVersionAvailable($module_name, $module_version)) $badge_count['Modules']['URL']++;
 	}
 	
 	$module_badge_count = null;
