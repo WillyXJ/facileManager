@@ -5,6 +5,7 @@
 * Server - Client installs now ensure the module is active before
            continuing the installation process.
 * Client - (Git Issue 45) Detects if PHP CGI is running instead of CLI.
+* Server - Added scroll to top link.
 
 1.0.1 (2013-12-24)
 ==================

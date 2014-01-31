@@ -179,6 +179,7 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 	</head>
 <body>
 $head
+<a href="#" id="scroll-to-top" class=""></a>
 HTML;
 }
 

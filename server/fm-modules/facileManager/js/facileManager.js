@@ -14,6 +14,17 @@ $(document).ready(function() {
 	
 	$('input:text, input:password, select').first().focus();
 	
+	// Everything we need for scrolling up and down.
+	$(window).scroll( function(){
+		if($(window).scrollTop() > 150) $('#scroll-to-top').addClass('displayed');
+		else $('#scroll-to-top').removeClass('displayed');
+	} );
+	
+	$('#scroll-to-top').click( function(){
+		$("html, body").animate( { scrollTop: "0px" } );
+		return false;
+	} );
+	
 	$("#loginbtn").click(function() {
 	
 		var action = $("#loginform").attr('action');

@@ -1070,6 +1070,42 @@ pre {
 	padding: 10px;
 }
 
+#scroll-to-top {
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	width: 48px;
+	height: 48px;
+	z-index: 99;
+	
+	background: url('../images/to-top.png') no-repeat;
+	opacity: 0;
+	-ms-transform: scale(0, 0);
+	-webkit-transform: scale(0, 0);
+	transform: scale(0, 0);
+	-webkit-transition: all 0.2s ease;
+	-moz-transition: all 0.2s ease;
+	-o-transition: all 0.2s ease;
+	transition: all 0.2s ease;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+	
+	#scroll-to-top {
+		background-image: url(../images/to-top-retina.png);
+		background-size: 48px 48px;
+	}
+
+}
+
+#scroll-to-top.displayed {
+	opacity: 1 !important;
+	-ms-transform: scale(1, 1);
+	-webkit-transform: scale(1, 1);
+	transform: scale(1, 1);
+}
+
+
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
 }
