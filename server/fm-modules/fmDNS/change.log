@@ -11,6 +11,7 @@
            defined in global options.
 * Server - (Git Issue 52) Added support for stub zones.
 * Server - (Git Issue 66) Improved cron updates.
+* Client - (Git Issue 57) Added client activity logging.
 
 1.0.2 (2013-12-??)
 ==================

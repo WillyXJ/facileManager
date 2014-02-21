@@ -277,6 +277,9 @@ function installFM($proto, $compress) {
 	$url = "${proto}://${hostname}/${path}admin-servers?install";
 	$raw_data = getPostData($url, $data);
 	
+	/** Add log entry */
+	addLogEntry('Client installed successfully.');
+	
 	echo "Installation is complete. Please login to the UI to ensure the server settings\nare correct.\n";
 	
 	/** chmod and prepend php to this file */
@@ -861,7 +864,54 @@ function addLogEntry($log_data) {
 	$log_file = '/var/log/fm.log';
 	$date = date('M d H:i:s');
 	
-	@file_put_contents($log_file, $date . ' ' $module_name . ': ' . $log_data . "\n", FILE_APPEND);
+	@file_put_contents($log_file, $date . ' ' . $module_name . ': ' . trim($log_data) . "\n", FILE_APPEND | LOCK_EX);
+}
+
+
+/**
+ * Writes files to the filesystem
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @param string $user User dirs/files should be chowned as
+ * @param array $chown_files dirs/files that should be chowned prior to writing
+ * @param array $files Files and contents to write
+ * @param boolean $dryrun Whether or not files should be written
+ * @return boolean
+ */
+function installFiles($user, $chown_files, $files, $dryrun) {
+	$message = "Setting directory and file permissions for $user.\n";
+	if ($debug) echo $message;
+	if (!$dryrun) {
+		addLogEntry($message);
+		/** chown the files/dirs */
+		foreach($chown_files as $file) {
+			@chown($file, $user);
+		}
+	}
+		
+	/** Process the files */
+	if (count($files)) {
+		foreach($files as $filename => $contents) {
+			$message = "Writing $filename.\n";
+			if ($debug) echo $message;
+			if (!$dryrun) {
+				addLogEntry($message);
+				@mkdir(dirname($filename), 0755, true);
+				@chown(dirname($filename), $user);
+				file_put_contents($filename, $contents);
+				@chown($filename, $user);
+			}
+		}
+	} else {
+		$message = "There are no files to save. Aborting.\n";
+		echo $message;
+		addLogEntry($message);
+		exit(1);
+	}
+	
+	return true;
 }
 
 ?>

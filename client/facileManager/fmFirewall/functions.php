@@ -104,6 +104,7 @@ function buildConf($url, $data) {
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
 		if ($debug) echo $raw_data;
+		addLogEntry($raw_data);
 		exit(1);
 	}
 	if ($debug) {
@@ -118,46 +119,32 @@ function buildConf($url, $data) {
 	extract($raw_data, EXTR_SKIP);
 	
 	$runas = 'root';
-		
-	if ($debug) echo "Setting directory and file permissions for $runas.\n";
-	if (!$data['dryrun']) {
-		/** chown the files/dirs */
-		$chown_files = array($server_root_dir, $server_zones_dir);
-		foreach($chown_files as $file) {
-			@chown($file, $runas);
-		}
-	}
-		
-	/** Process the files */
-	if (count($files)) {
-		foreach($files as $filename => $contents) {
-			if ($debug) echo "Writing $filename.\n";
-			if (!$data['dryrun']) {
-				@mkdir(dirname($filename), 0755, true);
-				@chown(dirname($filename), $runas);
-				file_put_contents($filename, $contents);
-				@chown($filename, $runas);
-			}
-		}
-	} else {
-		echo "There are no files to save. Aborting.\n";
-		exit(1);
-	}
+	$chown_files = array($server_root_dir);
 	
-	/** Reload the server */
-	if ($debug) echo "Reloading the server.\n";
+	/** Install the new files */
+	installFiles($runas, $chown_files, $files, $data['dryrun']);
+	
+	$message = "Reloading the server.\n";
+	if ($debug) echo $message;
 	$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
-	if ($debug) echo "$rc_script\n";
+	$message = "$rc_script\n";
+	if ($debug) echo $message;
 	if (!$data['dryrun']) {
+		addLogEntry($message);
 		$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
 		if ($rc_script === false) {
-			if ($debug) echo "Cannot locate the start script.\n";
+			$last_line = "Cannot locate the start script.\n";
+			if ($debug) echo $last_line;
+			addLogEntry($last_line);
 			$retval = true;
 		} else {
-			system($rc_script . ' 2>&1', $retval);
+			$last_line = system($rc_script . ' 2>&1', $retval);
+			addLogEntry($last_line);
 		}
 		if ($retval) {
-			if ($debug) echo "There was an error reloading the firewall.  Please check the logs for details.\n";
+			$message = "There was an error reloading the firewall.  Please check the logs for details.\n";
+			if ($debug) echo $message;
+			addLogEntry($message);
 			return false;
 		} else {
 			/** Update the server with a successful reload */

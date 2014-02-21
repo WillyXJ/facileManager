@@ -105,6 +105,7 @@ function buildConf($url, $data) {
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
 		if ($debug) echo $raw_data;
+		addLogEntry($raw_data);
 		exit(1);
 	}
 	if ($debug) {
@@ -119,18 +120,9 @@ function buildConf($url, $data) {
 	extract($raw_data, EXTR_SKIP);
 	
 	$runas = ($server_run_as_predefined == 'as defined:') ? $server_run_as : $server_run_as_predefined;
-		
-	if ($debug) echo "Setting directory and file permissions for $runas.\n";
-	if (!$data['dryrun']) {
-		/** chown the files/dirs */
-		$chown_files = array($server_root_dir, $server_zones_dir);
-		foreach($chown_files as $file) {
-			@chown($file, $runas);
-		}
-	}
+	$chown_files = array($server_root_dir, $server_zones_dir);
 		
 	/** Remove previous files so there are no stale files */
-	if ($purge) {
 	if ($purge || ($purge_config_files == 'yes' && $server_update_config == 'conf')) {
 		/** Server config files */
 		$path_parts = pathinfo($server_config_file);
@@ -140,8 +132,10 @@ function buildConf($url, $data) {
 		$config_file_pattern = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $path_parts['filename'] . '.*';
 		exec('ls ' . $config_file_pattern, $config_file_match);
 		foreach ($config_file_match as $config_file) {
-			if ($debug) echo "Deleting $config_file.\n";
+			$message = "Deleting $config_file.\n";
+			if ($debug) echo $message;
 			if 	(!$data['dryrun']) {
+				addLogEntry($message);
 				unlink($config_file);
 			}
 		}
@@ -150,46 +144,45 @@ function buildConf($url, $data) {
 		foreach (scandir($server_zones_dir) as $item) {
 			if (in_array($item, array('.', '..'))) continue;
 			$full_path_file = $server_zones_dir . DIRECTORY_SEPARATOR . $item;
-			if ($debug) echo "Deleting $full_path_file.\n";
+			$message = "Deleting $full_path_file.\n";
+			if ($debug) echo $message;
 			if 	(!$data['dryrun']) {
+				addLogEntry($message);
 				unlink($full_path_file);
 			}
 		}
 	}
 	
-	/** Process the files */
-	if (count($files)) {
-		foreach($files as $filename => $contents) {
-			if ($debug) echo "Writing $filename.\n";
-			if (!$data['dryrun']) {
-				@mkdir(dirname($filename), 0755, true);
-				@chown(dirname($filename), $runas);
-				file_put_contents($filename, $contents);
-				@chown($filename, $runas);
-			}
-		}
-	} else {
-		echo "There are no files to save. Aborting.\n";
-		exit(1);
-	}
+	/** Install the new files */
+	installFiles($runas, $chown_files, $files, $data['dryrun']);
 	
 	/** Reload the server */
-	if ($debug) echo "Reloading the server.\n";
+	$message = "Reloading the server.\n";
+	if ($debug) echo $message;
 	if (!$data['dryrun']) {
+		addLogEntry($message);
 		if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
-			system(findProgram('rndc') . ' reload 2>&1 > /dev/null', $retval);
+			$last_line = system(findProgram('rndc') . ' reload 2>&1', $retval);
+			addLogEntry($last_line);
 		} else {
-			if ($debug) echo "The server is not running. Attempting to start it.\n";
+			$message = "The server is not running. Attempting to start it.\n";
+			if ($debug) echo $message;
+			addLogEntry($message);
 			$named_rc_script = getStartupScript();
 			if ($named_rc_script === false) {
-				if ($debug) echo "Cannot locate the start script.\n";
+				$last_line = "Cannot locate the start script.\n";
+				if ($debug) echo $last_line;
+				addLogEntry($last_line);
 				$retval = true;
 			} else {
-				system($named_rc_script . ' 2>&1', $retval);
+				$last_line = system($named_rc_script . ' 2>&1', $retval);
 			}
 		}
 		if ($retval) {
-			if ($debug) echo "There was an error reloading the server.  Please check the logs for details.\n";
+			addLogEntry($last_line);
+			$message = "There was an error reloading the server.  Please check the logs for details.\n";
+			if ($debug) echo $message;
+			addLogEntry($message);
 			return false;
 		} else {
 			/** Only update reloaded zones */
@@ -202,6 +195,7 @@ function buildConf($url, $data) {
 			$data['action'] = 'update';
 			$raw_update = getPostData($url, $data);
 			$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
+			if ($debug) echo $raw_update;
 		}
 	}
 	return true;
