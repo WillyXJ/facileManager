@@ -814,7 +814,7 @@ class fm_module_buildconf {
 						$srv_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_weight . "\t" . $record_result[$i]->record_port . "\t" . $record_value . $record_comment . "\n";
 						break;
 					case 'PTR':
-						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name : $record_result[$i]->record_name;
+						$record_name = ($record_result[$i]->record_append == 'yes' && $domain->domain_mapping == 'reverse') ? $record_result[$i]->record_name . '.' . $domain_name : $record_result[$i]->record_name;
 						$ptr_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'NS':
@@ -839,7 +839,7 @@ class fm_module_buildconf {
 			
 			/** Zone file output */
 			$zone_file .= $ns_records;
-			$zone_file .= ($domain->domain_mapping == 'reverse') ? $ptr_records . "\n" : $mx_records . $txt_records . $a_records . $cname_records . $srv_records . "\n";
+			$zone_file .= ($domain->domain_mapping == 'reverse') ? $ptr_records . "\n" : $mx_records . $txt_records . $a_records . $cname_records . $srv_records . $ptr_records . "\n";
 		}
 		
 		return $zone_file;

@@ -13,6 +13,7 @@
 * Server - (Git Issue 66) Improved cron updates.
 * Client - (Git Issue 57) Added client activity logging.
 * Server - Prevent attempts to create non-existent record types for zones.
+* Server - (Git Issue 63) Added forward PTR support specifically for DNS-SD.
 
 1.0.2 (2013-12-??)
 ==================
