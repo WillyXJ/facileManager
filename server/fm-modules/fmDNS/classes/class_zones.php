@@ -339,7 +339,12 @@ class fm_dns_zones {
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		
-		// Update the zone
+		/* set the server_build_config flag for existing servers */
+		if (getSOACount($id) && getNSCount($id)) {
+			setBuildUpdateConfigFlag(null, 'yes', 'build', $id);
+		}
+
+		/** Update the zone */
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $sql_edit WHERE `domain_id`='$id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
@@ -348,8 +353,8 @@ class fm_dns_zones {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		/* set the server_build_config flag */
-		if (reloadAllowed($id) && getSOACount($id) && getNSCount($id)) {
+		/* set the server_build_config flag for new servers */
+		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(null, 'yes', 'build', $id);
 		}
 

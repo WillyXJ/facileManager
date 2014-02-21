@@ -1796,7 +1796,7 @@ function setBuildUpdateConfigFlag($serial_no, $flag, $build_update, $domain_id =
 		} else return false;
 	}
 
-	if ($serial_no = sanitize($serial_no)) {
+	if ($serial_no == sanitize($serial_no)) {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_serial_no` IN (" . $serial_no . ") AND `server_installed`='yes'";
 	} else {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_installed`='yes' AND `server_status`='active'";

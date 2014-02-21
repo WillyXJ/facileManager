@@ -425,6 +425,7 @@ class fm_module_buildconf {
 			/** Set variable containing all loaded domain_ids */
 			if (!$dryrun) {
 				$this->setBuiltDomainIDs($server_serial_no, array_unique($GLOBALS['built_domain_ids']));
+				$data->built_domain_ids = array_unique($GLOBALS['built_domain_ids']);
 			}
 			
 			return get_object_vars($data);
@@ -652,9 +653,12 @@ class fm_module_buildconf {
 				return;
 			}
 			
+			/** purge configs first? */
+			$data->purge_config_files = getOption('purge_config_files', getAccountID($post_data['AUTHKEY']), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options');
+			
 			/** process zone reloads if present */
 			$track_reloads = $this->getReloadRequests($server_serial_no);
-			if ($track_reloads) {
+			if ($track_reloads && $server_update_config == 'yes') {
 				/** process zone config build */
 				for ($i=0; $i < count($track_reloads); $i++) {
 					$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and `domain_id`=" . $track_reloads[$i]->domain_id;
@@ -667,6 +671,9 @@ class fm_module_buildconf {
 
 							/** Build zone file */
 							$data->files[$server_zones_dir . '/db.' . $domain_name . "$file_ext"] = $this->buildZoneFile($zone_result[0]);
+							
+							/** Track reloads */
+							$data->reload_domain_ids[] = $zone_result[0]->domain_id;
 						}
 					}
 				}
@@ -675,6 +682,7 @@ class fm_module_buildconf {
 				/** process server config build */
 				$config = $this->buildServerConfig($post_data);
 				$config['server_build_all'] = true;
+				$config['purge_config_files'] = $data->purge_config_files;
 				
 				return $config;
 			}
@@ -882,11 +890,15 @@ class fm_module_buildconf {
 //				$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database1.\n" : "Success.\n";
 //				$msg = "Success.\n";
 //			} else {
-				$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') && !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
+				$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') || !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
 				$msg = "Success.\n";
 //			}
 			if (isset($built_domain_ids)) {
 				$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
+			}
+			if (isset($reload_domain_ids)) {
+				$query = "DELETE FROM `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "track_reloads` WHERE `server_serial_no`='" . sanitize($server_serial_no) . "' AND domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
+				$fmdb->query($query);
 			}
 		} else $msg = "DNS server is not found.\n";
 		
@@ -965,6 +977,7 @@ class fm_module_buildconf {
 		if (!empty($built_domain_ids)) {
 			/** Delete old records first */
 			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false);
+			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_reloads', $server_serial_no, 'server_serial_no', false);
 
 			/** Add new records */
 			$sql = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds` VALUES ";

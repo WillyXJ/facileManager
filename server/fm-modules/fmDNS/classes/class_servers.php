@@ -465,7 +465,7 @@ FORM;
 		switch($server_update_method) {
 			case 'cron':
 				/* set the server_update_config flag */
-				setBuildUpdateConfigFlag($serial_no, 'yes', 'update');
+				setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
 				$response .= '<p>This server will be updated on the next cron run.</p>'. "\n";
 				break;
 			case 'http':

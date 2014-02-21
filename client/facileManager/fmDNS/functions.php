@@ -131,6 +131,7 @@ function buildConf($url, $data) {
 		
 	/** Remove previous files so there are no stale files */
 	if ($purge) {
+	if ($purge || ($purge_config_files == 'yes' && $server_update_config == 'conf')) {
 		/** Server config files */
 		$path_parts = pathinfo($server_config_file);
 		if (version_compare(PHP_VERSION, '5.2.0', '<')) {
@@ -192,7 +193,7 @@ function buildConf($url, $data) {
 			return false;
 		} else {
 			/** Only update reloaded zones */
-			$data['built_domain_ids'] = $built_domain_ids;
+			$data['reload_domain_ids'] = $reload_domain_ids;
 			if (!isset($server_build_all)) {
 				$data['zone'] = 'update';
 			}
