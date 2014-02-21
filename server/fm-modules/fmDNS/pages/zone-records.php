@@ -54,6 +54,7 @@ if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
 }
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
+if (!in_array($record_type, $__FM_CONFIG['records']['avail_types'])) $record_type = $__FM_CONFIG['records']['avail_types'][0];
 $avail_types = buildRecordTypes($record_type, $domain_id, $map);
 
 $response = $form_data = $action = null;

@@ -12,6 +12,7 @@
 * Server - (Git Issue 52) Added support for stub zones.
 * Server - (Git Issue 66) Improved cron updates.
 * Client - (Git Issue 57) Added client activity logging.
+* Server - Prevent attempts to create non-existent record types for zones.
 
 1.0.2 (2013-12-??)
 ==================
