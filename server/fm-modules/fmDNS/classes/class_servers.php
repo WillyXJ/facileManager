@@ -271,7 +271,7 @@ class fm_module_servers {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
+		$class = ($row->server_status == 'disabled') ? 'disabled' : null;
 		
 		$os_image = setOSIcon($row->server_os_distro);
 		
@@ -281,6 +281,7 @@ class fm_module_servers {
 		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
 				$edit_actions .= $__FM_CONFIG['icons']['build'];
+				$class = 'build';
 			}
 		}
 		if ($allowed_to_manage_servers) {
@@ -305,8 +306,10 @@ class fm_module_servers {
 		
 		$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
 		
+		if ($class) $class = 'class="' . $class . '"';
+		
 		echo <<<HTML
-		<tr id="$row->server_id"$disabled_class>
+		<tr id="$row->server_id" $class>
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>

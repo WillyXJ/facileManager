@@ -509,12 +509,10 @@ function getModuleBadgeCounts() {
 		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 			$domain_results[$i]->domain_type == 'master') {
 			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
-		}
-		if (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 			$domain_results[$i]->domain_type == 'master') {
 			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
-		}
-		if ($domain_results[$i]->domain_reload != 'no') {
+		} elseif ($domain_results[$i]->domain_reload != 'no') {
 			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
 		}
 	}

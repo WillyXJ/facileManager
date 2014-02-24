@@ -23,7 +23,8 @@ $(document).ready(function() {
 				$('#manage_item_contents').html(response);
 		
 				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
-					$this.hide();
+					$this.fadeOut(400);
+					$this.parent().parent().removeClass('build');
 				}
 			}
 		});

@@ -1856,6 +1856,7 @@ function getBadgeCounts() {
 		if ($module_version !== false) {
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
 				$badge_count['Modules']['URL']++;
+				continue;
 			}
 		}
 		

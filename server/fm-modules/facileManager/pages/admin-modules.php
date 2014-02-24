@@ -62,13 +62,11 @@ $modules = getAvailableModules();
 if (count($modules)) {
 	$module_display = <<<HTML
 			<p>The following modules have been detected:</p>
-			<table class="display_results">
+			<table class="display_results modules">
 				<thead>
 					<tr>
-						<td>Module Name</td>
-						<td>Description</td>
-						<td>Version</td>
-						<td>Status</td>
+						<th>Module</th>
+						<th>Description</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -78,55 +76,61 @@ HTML;
 		/** Include module variables */
 		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
 		
-		$activate_link = null;
+		$activate_link = $upgrade_link = $status_options = $class = null;
 		
 		/** Get module status */
 		$module_version = getOption(strtolower($module_name) . '_version', 0);
 		if ($module_version !== false) {
+			if (in_array($module_name, getActiveModules())) {
+				if ($allowed_to_manage_modules) {
+					$activate_link = '<a href="?action=deactivate&module=' . $module_name . '">Deactivate</a>' . "\n";
+				}
+				$class[] = 'active';
+			}
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
-				if (in_array($module_name, getActiveModules())) {
+				if (!in_array($module_name, getActiveModules())) {
 					if ($allowed_to_manage_modules) {
-						$activate_link = '<br /><a href="?action=deactivate&module=' . $module_name . '">Deactivate</a>' . "\n";
-					}
-				} else {
-					if ($allowed_to_manage_modules) {
-						$activate_link = '<br /><a href="?action=activate&module=' . $module_name . '">Activate</a>' . "\n";
-						$activate_link .= ' | <a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a>' . "\n";
+						$activate_link = '<a href="?action=activate&module=' . $module_name . '">Activate</a>' . "\n";
+						$activate_link .= '<span class="upgrade_link"><a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a></span>' . "\n";
 					}
 				}
 			} else {
 				if ($allowed_to_manage_modules) {
 					include(ABSPATH . 'fm-includes/version.php');
 					if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-						$activate_link = '<br /><input id="module_upgrade" name="' . $module_name . '" type="submit" value="Upgrade Now" class="button" />' . "\n";
+						$upgrade_link = '<span class="upgrade_link"><a href="#" id="module_upgrade" name="' . $module_name . '" />Upgrade Now</a></span>' . "\n";
 					} else {
-						$activate_link .= '<br />' . $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required<br />before this module can be upgraded.';
+						$upgrade_link .= '<span class="upgrade_link">' . $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required<br />before this module can be upgraded.</span>';
 					}
-				} else $activate_link = '<br />Upgrade available' . "\n";
+				} else $upgrade_link = '<span class="upgrade_link">Upgrade available</span>' . "\n";
+				$class[] = 'upgrade';
 			}
-			$status_options = '<p><span class="installed">Installed</span>' . $activate_link . "<p>\n";
+			$status_options = $activate_link . "\n";
 		} else {
-			$status_options = '<span class="not_installed">Not Installed</span> ';
 			$module_version = $__FM_CONFIG[$module_name]['version'];
 			if ($allowed_to_manage_modules) {
 				include(ABSPATH . 'fm-includes/version.php');
 				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-					$status_options .= '<input id="module_install" name="' . $module_name . '" type="submit" value="Install Now" class="button" />';
+					$status_options .= '<a href="#" id="module_install" name="' . $module_name . '" />Install Now</a>';
 				} else {
-					$status_options .= '<br />' . $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required.';
+					$status_options .= $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required.';
 				}
 			}
 		}
 		
-		$module_new_version_available = isNewVersionAvailable($module_name, $module_version);
+		if ($module_new_version_available = isNewVersionAvailable($module_name, $module_version)) {
+			$module_new_version_available = '<div class="upgrade_notice">' . $module_new_version_available . '</div>';
+			$class[] = 'upgrade';
+		}
+		$class = implode(' ', array_unique($class));
 		
 		$avail_modules .= <<<MODULE
-					<tr>
-						<td><b>$module_name</b></td>
-						<td><p>{$__FM_CONFIG[$module_name]['description']}</p>$module_new_version_available</td>
-						<td>$module_version</td>
-						<td>$status_options</td>
+					<tr class="$class">
+						<td><h3>$module_name</h3><div class="module_actions">$status_options</div></td>
+						<td><p>{$__FM_CONFIG[$module_name]['description']}</p><p>Version $module_version $upgrade_link</p>
+						$module_new_version_available</td>
 					</tr>
+
 MODULE;
 	}
 	

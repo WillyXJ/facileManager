@@ -422,13 +422,20 @@ class fm_dns_zones {
 	function displayRow($row, $map, $reload_allowed) {
 		global $__FM_CONFIG, $allowed_to_manage_zones, $allowed_to_reload_zones, $super_admin;
 		
-		$disabled_class = ($row->domain_status == 'disabled') ? ' class="disabled"' : null;
+		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
+		$response = null;
 		
 		$soa_count = getSOACount($row->domain_id);
 		$ns_count = getNSCount($row->domain_id);
 		$reload_allowed = reloadAllowed($row->domain_id);
-		$response = (!$soa_count && $row->domain_type == 'master') ? '** You still need to create the SOA for this zone **" style="background-color: #F5EBEB;' : null;
-		if (!$ns_count && $row->domain_type == 'master' && !$response) $response = '** You still need to create NS records for this zone **" style="background-color: #F5EBEB;';
+		if (!$soa_count && $row->domain_type == 'master') {
+			$response = '** You still need to create the SOA for this zone **';
+			$class = 'attention';
+		}
+		if (!$ns_count && $row->domain_type == 'master' && !$response) {
+			$response = '** You still need to create NS records for this zone **';
+			$class = 'attention';
+		}
 		$clones = $this->cloneDomainsList($row->domain_id);
 		$zone_access_allowed = true;
 		
@@ -438,6 +445,7 @@ class fm_dns_zones {
 				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($row->domain_id, $module_extra_perms['zone_access']) : true;
 		}
 		$reload_zone = ($soa_count && $row->domain_reload == 'yes' && $allowed_to_reload_zones && $reload_allowed && $zone_access_allowed) ? '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>' : null;
+		if ($reload_zone) $class = 'build';
 /*
 		$edit_status = <<<FORM
 <form method="post" action="{$GLOBALS['basename']}?map={$map}">
@@ -475,8 +483,10 @@ FORM;
 			} else $domain_view = getNameFromID($row->domain_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 		} else $domain_view = 'All Views';
 
+		if ($class) $class = 'class="' . $class . '"';
+		
 		echo <<<HTML
-		<tr title="$response" id="$row->domain_id"$disabled_class>
+		<tr title="$response" id="$row->domain_id" $class>
 			<td>$row->domain_id</td>
 			<td>$edit_name</td>
 			<td>$row->domain_type</td>
