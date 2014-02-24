@@ -595,14 +595,13 @@ tbody {
 	font-size: 14px;
 }
 #settings div {
-	font-size: 10px;
+	font-size: 12px;
 }
 #setting-row .description {
 	white-space: normal;
 	width: 400px;
 }
 #setting-row .description p {
-	font-size: 8pt;
 	margin-top: 3px;
 }
 #setting-row .choices {
