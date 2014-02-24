@@ -28,7 +28,7 @@ $page_name_sub = 'Passwords';
 
 $response = isset($response) ? $response : null;
 
-printHeader();
+printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_passwords.php');

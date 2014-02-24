@@ -52,7 +52,7 @@ if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
 require(ABSPATH . 'fm-includes/version.php');
 $fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version);
 
-printHeader();
+printHeader($page_name);
 @printMenu($page_name, $page_name_sub);
 
 echo '<div id="body_container">';
@@ -76,7 +76,8 @@ HTML;
 		/** Include module variables */
 		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
 		
-		$activate_link = $upgrade_link = $status_options = $class = null;
+		$activate_link = $upgrade_link = $status_options = null;
+		$class = array();
 		
 		/** Get module status */
 		$module_version = getOption(strtolower($module_name) . '_version', 0);

@@ -74,7 +74,7 @@ if ($allowed_to_manage_servers) {
 	}
 }
 
-printHeader();
+printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 echo printPageHeader($response, 'Firewall Servers', $allowed_to_manage_servers);

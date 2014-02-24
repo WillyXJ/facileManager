@@ -49,7 +49,7 @@ if (array_key_exists('submit', $_POST)) {
 	}
 }
 
-printHeader();
+printHeader($page_name_sub);
 @printMenu($page_name, $page_name_sub);
 
 if (!empty($response)) echo '<div id="response">' . $response . '</div>';

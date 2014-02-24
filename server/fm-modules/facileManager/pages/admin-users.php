@@ -66,7 +66,7 @@ if ($allowed_to_manage_users) {
 	}
 }
 
-printHeader();
+printHeader($page_name_sub);
 @printMenu($page_name, $page_name_sub);
 
 echo printPageHeader($response, 'Users', $allowed_to_manage_users);

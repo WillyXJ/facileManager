@@ -75,7 +75,7 @@ if ($allowed_to_manage_services) {
 	}
 }
 
-printHeader();
+printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 $group_type = substr(strtolower($page_name), 0, -1);

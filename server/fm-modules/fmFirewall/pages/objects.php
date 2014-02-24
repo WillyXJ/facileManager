@@ -80,7 +80,7 @@ if ($allowed_to_manage_objects) {
 	}
 }
 
-printHeader();
+printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 //$allowed_to_add = ($type == 'custom' && $allowed_to_manage_objects) ? true : false;

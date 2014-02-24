@@ -131,7 +131,7 @@ if ($allowed_to_manage_zones) {
 	}
 }
 
-printHeader();
+printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 /** Check if any servers need their configs built first */

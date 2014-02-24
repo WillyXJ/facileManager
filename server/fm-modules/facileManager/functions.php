@@ -143,7 +143,7 @@ function sanitize($data, $replace = null) {
 function printHeader($subtitle = null, $css = 'facileManager', $help = false, $menu = true) {
 	global $fm_name;
 	
-	$title = ($subtitle) ? " &rsaquo; $subtitle" : null;
+	$title = ($subtitle) ? "$subtitle &lsaquo; " : null;
 	
 	$head = $logo = null;
 	
@@ -168,7 +168,7 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>$fm_name$title</title>
+		<title>$title$fm_name</title>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
