@@ -93,6 +93,7 @@ $__FM_CONFIG['options']['ldap_referrals']				= array(array('Disabled', 0), array
 $__FM_CONFIG['options']['date_format']					= array(array(date('F j, Y'), 'F j, Y'), array(date('j F, Y'), 'j F, Y'), array(date('d/m/Y'), 'd/m/Y'), array(date('m/d/Y'), 'm/d/Y'), array(date('Y/m/d'), 'Y/m/d'), array(date('Y-m-d'), 'Y-m-d'), array(date('D, d M Y'), 'D, d M Y'));
 $__FM_CONFIG['options']['time_format']					= array(array(date('g:i a'), 'g:i a'), array(date('g:i:s a'), 'g:i:s a'), array(date('g:i A'), 'g:i A'), array(date('g:i:s A'), 'g:i:s A'), array(date('H:i'), 'H:i'), array(date('H:i:s'), 'H:i:s'), array(date('H:i:s O'), 'H:i:s O'), array(date('H:i:s T'), 'H:i:s T'));
 $__FM_CONFIG['options']['software_update_interval']		= array(array('Hourly', 'hour'), array('Daily', 'day'), array('Weekly', 'week'), array('Monthly', 'month'));
+$__FM_CONFIG['options']['software_update_tree']			= array('Stable', 'Release Candidate', 'Beta', 'Alpha');
 
 if (function_exists('ldap_connect')) array_push($__FM_CONFIG['options']['auth_method'], array('LDAP Authentication', 2));
 

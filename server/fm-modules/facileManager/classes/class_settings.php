@@ -256,6 +256,8 @@ class fm_settings {
 		/** Software Update Section */
 		if (!$software_update_interval = getOption('software_update_interval')) $software_update_interval = 'week';
 		$software_update_list = buildSelect('software_update_interval', 'software_update_interval', $__FM_CONFIG['options']['software_update_interval'], $software_update_interval);
+		if (!$software_update_tree = getOption('software_update_tree')) $software_update_tree = 'Stable';
+		$software_update_tree_list = buildSelect('software_update_tree', 'software_update_tree', $__FM_CONFIG['options']['software_update_tree'], $software_update_tree);
 		$software_update = getOption('software_update');
 		if ($software_update) {
 			 $software_update_checked = 'checked';
@@ -556,6 +558,15 @@ class fm_settings {
 						</div>
 					</div>
 					<div id="software_update_options" $software_update_options_style>
+						<div id="setting-row">
+							<div class="description">
+								<label for="software_update_tree">Software Tree</label>
+								<p>The minimum software tree $fm_name should check updates for.</p>
+							</div>
+							<div class="choices">
+								$software_update_tree_list
+							</div>
+						</div>
 						<div id="setting-row">
 							<div class="description">
 								<label for="software_update_interval">Update Check Interval</label>

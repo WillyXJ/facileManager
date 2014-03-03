@@ -104,6 +104,7 @@ function isNewVersionAvailable($package, $version) {
 		$last_version_check['timestamp'] = 0;
 	}
 	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
+		$data['software_update_tree'] = getOption('software_update_tree');
 		$result = getPostData($fm_site_url, $data);
 		
 		setOption($package . '_version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, 0);
