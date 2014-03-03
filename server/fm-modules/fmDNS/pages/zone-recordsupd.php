@@ -558,8 +558,9 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 		if (($record_type == 'TXT' || $record_type == 'SRV') && ereg("([\!@#\$&\*\+\=\|/:;,'\"�%^\(\)])", $record_name) == false) {
 			return true;
 		}
-		return false;
 	}
+	
+	return false;
 }
 
 function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = false) {
@@ -572,6 +573,8 @@ function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = f
 			if (strstr($record, '.') == false) {
 				return true;
 			} else {
+				if (preg_match('/\d{1,3}\.\d{1,3}\-\d{1,3}/', $record)) return true;
+				
 				return ($allow_underscore && substr($record, -1) != '.') ? true : false;
 			}
 		} else {

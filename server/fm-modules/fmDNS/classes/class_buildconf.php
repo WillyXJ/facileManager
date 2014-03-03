@@ -839,7 +839,7 @@ class fm_module_buildconf {
 			
 			/** Zone file output */
 			$zone_file .= $ns_records;
-			$zone_file .= ($domain->domain_mapping == 'reverse') ? $ptr_records . "\n" : $mx_records . $txt_records . $a_records . $cname_records . $srv_records . $ptr_records . "\n";
+			$zone_file .= ($domain->domain_mapping == 'reverse') ? $ptr_records . $cname_records . "\n" : $mx_records . $txt_records . $a_records . $cname_records . $srv_records . $ptr_records . "\n";
 		}
 		
 		return $zone_file;

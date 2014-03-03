@@ -67,7 +67,7 @@ if (isset($fm_name)) {
 $__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
 
-$__FM_CONFIG['records']['avail_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'PTR', 'SOA', 'NS') : array('PTR', 'SOA', 'NS');
+$__FM_CONFIG['records']['avail_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'PTR', 'SOA', 'NS') : array('PTR', 'CNAME', 'SOA', 'NS');
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
 
 $__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');

@@ -911,6 +911,21 @@ HTML;
 				if (!in_array($domain_pieces[$domain_parts - 2], array('e164', 'in-addr-servers', 'in-addr', 'ip6-servers', 'ip6', 'iris', 'uri', 'urn'))) return false;
 				
 				for ($i=0; $i<$domain_parts - 2; $i++) {
+					/** Check if using classless */
+					if ($i == 0) {
+						if (preg_match("/^(\d{1,3})\-(\d{1,3})$/", $domain_pieces[$i])) {
+							/** Validate octet range */
+							$octet_range = explode('-', $domain_pieces[$i]);
+							
+							if ($octet_range[0] >= $octet_range[1]) return false;
+							
+							foreach ($octet_range as $octet) {
+								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
+							}
+							continue;
+						}
+					}
+					
 					/** Remaining octects must be numeric */
 					if (filter_var($domain_pieces[$i], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
 				}

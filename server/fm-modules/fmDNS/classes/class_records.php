@@ -348,8 +348,8 @@ class fm_dns_records {
 		} else {
 			$action = 'create';
 			$SOAID = 0;
-			$yeschecked = 'checked';
-			$nochecked = '';
+			$yeschecked = ($_GET['map'] == 'forward') ? 'checked' : '';
+			$nochecked = ($yeschecked) ? '' : 'checked';
 			extract($__FM_CONFIG['soa']);
 		}
 	

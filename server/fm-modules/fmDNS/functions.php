@@ -423,6 +423,9 @@ function postReloadZones($server, $data, $proto = 'http') {
 
 
 function buildFullIPAddress($partial_ip, $domain) {
+	/** Remove range */
+	$domain = preg_replace('/\d{1,3}\-\d{1,3}\./', '', $domain);
+	
 	$domain_pieces = array_reverse(explode('.', $domain));
 	$domain_parts = count($domain_pieces);
 	
