@@ -550,7 +550,9 @@ function buildInputReturn($action, $record_type, $i, $key, $val) {
 function verifyName($record_name, $allow_null = true, $record_type = null) {
 	if (!$allow_null && !strlen($record_name)) return false;
 	
-	if (preg_match("([_\.\!@#\$&\+\=\|/:;,'\"�%^\(\)])", $record_name) == false) {
+	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
+		return true;
+	} elseif (preg_match("([_\.\*\!@#\$&\+\=\|/:;,'\"�%^\(\)])", $record_name) == false) {
 		return true;
 	} elseif ($record_name == '@') {
 		return true;
