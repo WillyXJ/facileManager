@@ -46,10 +46,9 @@ if (!empty($response)) echo '<div id="response"' . $style . '>' . $response . "<
 echo <<<HTML
 	<h2>$page_name</h2>
 	$dashboard
-<pre>
 HTML;
 
-echo '</pre><div>';
+echo '<div>';
 printFooter();
 
 ?>

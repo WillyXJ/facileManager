@@ -1,3 +1,21 @@
+1.1 (2014-02-??)
+================
+* Server - Added visual effects for things that need user attention.
+* Server - (Git Issue 52) Comments can now be added to views, acls, keys,
+           options, and logging configs.
+* Server - Improved UI logging of logging channels and categories updates.
+* Server - Fixed PHP errors upon client installs.
+* Server - Added name server checks to the dashboard.
+* Server - (Git Issue 48) Added support for zone delegation.
+* Server - (Git Issue 46) View options can now be defined even when previously
+           defined in global options.
+* Server - (Git Issue 52) Added support for stub zones.
+* Server - (Git Issue 66) Improved cron updates.
+* Client - (Git Issue 57) Added client activity logging.
+* Server - Prevent attempts to create non-existent record types for zones.
+* Server - (Git Issue 63) Added forward PTR support specifically for DNS-SD.
+* Server - (Git Issue 67) Added support for wildcard records.
+
 1.0.3 (2014-02-20)
 ==================
 * Server - (Git Issue 60) Improved server key configs.

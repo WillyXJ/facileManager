@@ -40,7 +40,7 @@ if (isset($_GET['record_type'])) {
 $domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 if (!isValidDomain($domain_id)) header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 
-printHeader();
+printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
@@ -54,6 +54,7 @@ if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
 }
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
+if (!in_array($record_type, $__FM_CONFIG['records']['avail_types'])) $record_type = $__FM_CONFIG['records']['avail_types'][0];
 $avail_types = buildRecordTypes($record_type, $domain_id, $map);
 
 $response = $form_data = $action = null;

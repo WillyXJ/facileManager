@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}acls` 
   `acl_name` VARCHAR(255) NOT NULL ,
   `acl_predefined` ENUM( 'none',  'any',  'localhost',  'localnets',  'as defined:') NOT NULL ,
   `acl_addresses` TEXT NOT NULL ,
+  `acl_comment` text,
   `acl_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active',
   PRIMARY KEY (`acl_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}config
   `cfg_parent` int(11) NOT NULL DEFAULT '0',
   `cfg_name` varchar(50) NOT NULL,
   `cfg_data` text NOT NULL,
+  `cfg_comment` text,
   `cfg_status` enum('hidden','active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`cfg_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
@@ -61,7 +63,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
   `domain_mapping` enum('forward','reverse') NOT NULL DEFAULT 'forward',
-  `domain_type` enum('master','slave','forward') NOT NULL DEFAULT 'master',
+  `domain_type` enum('master','slave','forward','stub') NOT NULL DEFAULT 'master',
   `domain_check_names` enum('warn','fail','ignore') DEFAULT NULL,
   `domain_notify_slaves` enum('yes','no') DEFAULT NULL,
   `domain_multi_masters` enum('yes','no') DEFAULT NULL,
@@ -96,6 +98,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}keys` 
   `key_algorithm` enum('hmac-md5') NOT NULL DEFAULT 'hmac-md5',
   `key_secret` varchar(255) NOT NULL,
   `key_view` int(11) NOT NULL DEFAULT '0',
+  `key_comment` text,
   `key_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`key_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
@@ -199,6 +202,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}views`
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` int(11) NOT NULL DEFAULT '0',
   `view_name` VARCHAR(255) NOT NULL ,
+  `view_comment` text,
   `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLE;

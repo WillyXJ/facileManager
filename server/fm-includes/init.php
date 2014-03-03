@@ -105,6 +105,52 @@ function checkAppVersions($single_check = true) {
 		if (!$single_check) $requirement_check .= displayProgress('Apache mod_rewrite Loaded', true, false);
 	}
 	
+	/** .htaccess file */
+	if (!file_exists(ABSPATH . '.htaccess')) {
+		if (is_writeable(ABSPATH)) {
+			file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_rewrite.c>
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.php [L]
+</IfModule>
+
+');
+		} else {
+			if ($single_check) {
+				bailOut(sprintf('<p style="text-align: center;">I cannot create the missing %1s.htaccess which is required by %2s so please create it with the following contents:</p>', ABSPATH, $fm_name) . 
+				'<textarea rows="8">&lt;IfModule mod_rewrite.c&gt;
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.php [L]
+&lt;/IfModule&gt;
+</textarea>');
+			} else {
+				$requirement_check .= displayProgress('.htaccess File Present', false, false);
+				$error = true;
+			}
+		}
+	} else {
+		if (!$single_check) $requirement_check .= displayProgress('.htaccess File Present', true, false);
+	}
+	
+	/** Test rewrites */
+	$test_output = getPostData($GLOBALS['FM_URL'] . 'admin-accounts?verify', array('module_type' => 'CLIENT'));
+	$test_output = isSerialized($test_output) ? unserialize($test_output) : $test_output;
+	if (strpos($test_output, 'Account is not found.') === false) {
+		if ($single_check) {
+			bailOut(sprintf('<p style="text-align: center;">The required .htaccess file appears to not work with your Apache configuration which is required by %1s.</p>', $fm_name));
+		} else {
+			$requirement_check .= displayProgress('Test Rewrites', false, false);
+			$error = true;
+		}
+	} else {
+		if (!$single_check) $requirement_check .= displayProgress('Test Rewrites', true, false);
+	}
+	
 	if ($error) {
 		$requirement_check = <<<HTML
 			<center><table class="form-table">

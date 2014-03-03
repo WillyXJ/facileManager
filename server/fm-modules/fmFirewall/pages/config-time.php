@@ -74,7 +74,7 @@ if ($allowed_to_manage_time) {
 	}
 }
 
-printHeader();
+printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 //$allowed_to_add = ($type == 'custom' && $allowed_to_manage_time) ? true : false;

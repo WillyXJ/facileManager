@@ -162,7 +162,7 @@ class fm_dns_zones {
 			if ($_POST['createZone'][$id]['domain_type'] == 'forward' && empty($_POST['createZone'][$id]['domain_forward_servers'])) return 'No forward servers defined.';
 			
 			/** Slave zones require master servers */
-			if ($_POST['createZone'][$id]['domain_type'] == 'slave' && empty($_POST['createZone'][$id]['domain_master_servers'])) return 'No master servers defined.';
+			if (in_array($_POST['createZone'][$id]['domain_type'], array('slave', 'stub')) && empty($_POST['createZone'][$id]['domain_master_servers'])) return 'No master servers defined.';
 			
 			/** Format domain_view */
 			$log_message_views = null;
@@ -339,7 +339,12 @@ class fm_dns_zones {
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		
-		// Update the zone
+		/* set the server_build_config flag for existing servers */
+		if (getSOACount($id) && getNSCount($id)) {
+			setBuildUpdateConfigFlag(null, 'yes', 'build', $id);
+		}
+
+		/** Update the zone */
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $sql_edit WHERE `domain_id`='$id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
@@ -348,8 +353,8 @@ class fm_dns_zones {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		/* set the server_build_config flag */
-		if (reloadAllowed($id) && getSOACount($id) && getNSCount($id)) {
+		/* set the server_build_config flag for new servers */
+		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(null, 'yes', 'build', $id);
 		}
 
@@ -417,11 +422,20 @@ class fm_dns_zones {
 	function displayRow($row, $map, $reload_allowed) {
 		global $__FM_CONFIG, $allowed_to_manage_zones, $allowed_to_reload_zones, $super_admin;
 		
-		$disabled_class = ($row->domain_status == 'disabled') ? ' class="disabled"' : null;
+		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
+		$response = null;
 		
 		$soa_count = getSOACount($row->domain_id);
+		$ns_count = getNSCount($row->domain_id);
 		$reload_allowed = reloadAllowed($row->domain_id);
-		$response = (!$soa_count && $row->domain_type == 'master') ? '** You still need to create the SOA for this zone **" style="background-color: #F5EBEB;' : null;
+		if (!$soa_count && $row->domain_type == 'master') {
+			$response = '** You still need to create the SOA for this zone **';
+			$class = 'attention';
+		}
+		if (!$ns_count && $row->domain_type == 'master' && !$response) {
+			$response = '** You still need to create NS records for this zone **';
+			$class = 'attention';
+		}
 		$clones = $this->cloneDomainsList($row->domain_id);
 		$zone_access_allowed = true;
 		
@@ -431,6 +445,7 @@ class fm_dns_zones {
 				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($row->domain_id, $module_extra_perms['zone_access']) : true;
 		}
 		$reload_zone = ($soa_count && $row->domain_reload == 'yes' && $allowed_to_reload_zones && $reload_allowed && $zone_access_allowed) ? '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>' : null;
+		if ($reload_zone) $class = 'build';
 /*
 		$edit_status = <<<FORM
 <form method="post" action="{$GLOBALS['basename']}?map={$map}">
@@ -442,9 +457,11 @@ FORM;
 */
 		$edit_status = null;
 		
-		if ($row->domain_mapping == 'forward') {
-			$type = (!$soa_count && $row->domain_type == 'master') ? 'SOA' : 'A';
-		} else $type = 'PTR';
+		if (!$soa_count && $row->domain_type == 'master') $type = 'SOA';
+		elseif (!$ns_count && $row->domain_type == 'master') $type = 'NS';
+		else {
+			$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
+		}
 		if ($allowed_to_manage_zones && $zone_access_allowed) {
 			$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 //			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&domain_id=' . $row->domain_id . '&map=' . $row->domain_mapping . '" onClick="return del(\'Are you sure you want to delete this zone and all associated records?\')">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
@@ -466,8 +483,10 @@ FORM;
 			} else $domain_view = getNameFromID($row->domain_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 		} else $domain_view = 'All Views';
 
+		if ($class) $class = 'class="' . $class . '"';
+		
 		echo <<<HTML
-		<tr title="$response" id="$row->domain_id"$disabled_class>
+		<tr title="$response" id="$row->domain_id" $class>
 			<td>$row->domain_id</td>
 			<td>$edit_name</td>
 			<td>$row->domain_type</td>

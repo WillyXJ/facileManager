@@ -37,6 +37,7 @@ class fm_module_options {
 					<tr>
 						<th>Option</th>
 						<th>Value</th>
+						<th>Comment</th>
 						<th width="110" style="text-align: center;">Actions</th>
 					</tr>
 				</thead>
@@ -79,7 +80,7 @@ class fm_module_options {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				if (!strlen($clean_data)) return false;
+				if (!strlen($clean_data) && $key != 'cfg_comment') return false;
 				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return false;
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -96,7 +97,7 @@ class fm_module_options {
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		addLogEntry("Added option:\nName: $tmp_name\nValue: {$post['cfg_data']}\nServer: $tmp_server_name\nView: $tmp_view_name");
+		addLogEntry("Added option:\nName: $tmp_name\nValue: {$post['cfg_data']}\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
 		return true;
 	}
 
@@ -147,7 +148,7 @@ class fm_module_options {
 
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$post['cfg_data']}\nServer: $tmp_server_name\nView: $tmp_view_name");
+		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$post['cfg_data']}\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
 		return $result;
 	}
 	
@@ -195,6 +196,7 @@ class fm_module_options {
 		<tr id="$row->cfg_id"$disabled_class>
 			<td>$row->cfg_name</td>
 			<td>$row->cfg_data</td>
+			<td>$row->cfg_comment</td>
 			$edit_status
 		</tr>
 HTML;
@@ -207,7 +209,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$cfg_id = 0;
-		$cfg_name = $cfg_root_dir = $cfg_zones_dir = '';
+		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
 		$server_serial_no_field = $cfg_isparent = $cfg_parent = $cfg_data = null;
 		
@@ -286,6 +288,10 @@ HTML;
 				</tr>
 				<tr class="value_placeholder">
 				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="cfg_comment">Comment</label></th>
+					<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
+				</tr>
 			</table>
 			<input type="submit" name="submit" value="$ucaction Option" class="button" />
 			<input value="Cancel" class="button cancel" id="cancel_button" />
@@ -342,11 +348,13 @@ FORM;
 		
 		if ($action == 'add') {
 			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) {
-				$cfg_view_sql = 'cfg_view IN (0,' . $_POST['item_id'] . ')';
-				if ($server_serial_no) $cfg_view_sql = 'cfg_view=0';
+				$cfg_view_sql = 'cfg_view = ' . $_POST['item_id'];
+//				$cfg_view_sql = 'cfg_view IN (0,' . $_POST['item_id'] . ')';
+//				if ($server_serial_no) $cfg_view_sql = 'cfg_view=0';
 			} else {
-				$cfg_view_sql = 'cfg_view>0';
+				$cfg_view_sql = 'cfg_view=0';
 			}
+/**
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options' AND def_option NOT IN (
 				SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='global' AND cfg_status IN (
 					'active', 'disabled'
@@ -354,12 +362,20 @@ FORM;
 					(server_serial_no=$server_serial_no AND cfg_view=0) OR (server_serial_no=0 AND $cfg_view_sql)
 				)
 			)";
+*/
+			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options' AND def_option NOT IN (
+				SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='global' AND cfg_status IN (
+					'active', 'disabled'
+				) AND account_id='{$_SESSION['user']['account_id']}' AND (
+					(server_serial_no=$server_serial_no AND $cfg_view_sql)
+				)
+			)";
 			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) $query .= " AND def_view_support='yes'";
 		} else {
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'";
 		}
 		$query .= " ORDER BY def_option ASC";
-
+		
 		$fmdb->get_results($query);
 		$def_result = $fmdb->last_result;
 		$def_result_count = $fmdb->num_rows;
@@ -377,6 +393,8 @@ FORM;
 	
 	function validatePost() {
 		global $fmdb, $__FM_CONFIG;
+		
+		$_POST['cfg_comment'] = trim($_POST['cfg_comment']);
 		
 		if (is_array($_POST['cfg_data'])) $_POST['cfg_data'] = join(' ', $_POST['cfg_data']);
 		

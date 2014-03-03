@@ -102,7 +102,7 @@ if ($allowed_to_manage_servers) {
 	}
 } $server_serial_no_uri = null;
 
-printHeader();
+printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 $avail_types = buildSubMenu($type, $server_serial_no_uri);

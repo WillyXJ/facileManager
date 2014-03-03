@@ -266,10 +266,15 @@ class fm_dns_records {
 
 		if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed) {
 			if ($type == 'PTR') {
-				$input_box = '<input style="width: 40px;" size="4" type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
+				$domain_map = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+				$input_box = '<input ';
+				$input_box .= ($domain_map == 'forward') ? 'size="40"' : 'style="width: 40px;" size="4"';
+				$input_box .= ' type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
 				$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 				if (strpos($domain, 'arpa')) {
 					$field_values['Record'] = '>' . $input_box . ' .' . $domain;
+				} elseif ($domain_map == 'forward') {
+					$field_values['Record'] = '>' . $input_box;
 				} else {
 					$field_values['Record'] = '>' . $domain . '. ' . $input_box;
 				}

@@ -28,11 +28,12 @@
  */
 
 /** Module Information */
-$__FM_CONFIG['fmDNS']['version'] = '1.0.3';
-$__FM_CONFIG['fmDNS']['description'] = 'Easily manage one or more ISC BIND servers through a web UI.  No more editing configuration and zone files manually.';
-$__FM_CONFIG['fmDNS']['prefix'] = 'dns_';
-$__FM_CONFIG['fmDNS']['required_dns_version'] = '9.3';
-$__FM_CONFIG['fmDNS']['required_fm_version'] = '1.0';
+$__FM_CONFIG['fmDNS']['version']				= '1.1-b1';
+$__FM_CONFIG['fmDNS']['description']			= 'Easily manage one or more ISC BIND servers through a web interface.  No more editing configuration
+													and zone files manually.';
+$__FM_CONFIG['fmDNS']['prefix']					= 'dns_';
+$__FM_CONFIG['fmDNS']['required_dns_version']	= '9.3';
+$__FM_CONFIG['fmDNS']['required_fm_version']	= '1.0';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']	= '';
@@ -66,7 +67,7 @@ if (isset($fm_name)) {
 $__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
 
-$__FM_CONFIG['records']['avail_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'SOA', 'NS') : array('PTR', 'SOA', 'NS');
+$__FM_CONFIG['records']['avail_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'PTR', 'SOA', 'NS') : array('PTR', 'SOA', 'NS');
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
 
 $__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');

@@ -14,6 +14,17 @@ $(document).ready(function() {
 	
 	$('input:text, input:password, select').first().focus();
 	
+	// Everything we need for scrolling up and down.
+	$(window).scroll( function(){
+		if($(window).scrollTop() > 150) $('#scroll-to-top').addClass('displayed');
+		else $('#scroll-to-top').removeClass('displayed');
+	} );
+	
+	$('#scroll-to-top').click( function(){
+		$("html, body").animate( { scrollTop: "0px" } );
+		return false;
+	} );
+	
 	$("#loginbtn").click(function() {
 	
 		var action = $("#loginform").attr('action');
@@ -381,7 +392,8 @@ $(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $('#admin-tools').delegate('form input.button:not("#import-records, #cancel, #import, #db-backup")','click tap',function(e){
+    $('#admin-tools').delegate('form input.button:not("#import-records, #cancel, #import, #db-backup"), #module_install, #module_upgrade',
+    'click tap',function(e){
         var $this 	= $(this);
         task		= $this.attr('id');
         item		= $this.attr('name');
@@ -522,23 +534,28 @@ $(document).ready(function() {
 						if (eachLine.length <= 2) {
 							var myDelay = 6000;
 							$('#response').html(response);
+							
+							$('#response').delay(3000).fadeTo(200, 0.00, function() {
+								$('#response').slideUp(400);
+							});
 						} else {
 							var myDelay = 0;
 		
 							$('#manage_item').fadeIn(200);
 							$('#manage_item_contents').fadeIn(200);
 							$('#manage_item_contents').html('<h2>Configuration Build Results</h2>' + response + '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />');
+							
+							$('#response').delay(300).fadeTo(200, 0.00, function() {
+								$('#response').slideUp(400);
+							});
 						}
 						
-						$('#response').delay(3000).fadeTo(200, 0.00, function() {
-							$('#response').slideUp(400);
-						});
-	
 						if (response.toLowerCase().indexOf("failed") == -1 && 
 							response.toLowerCase().indexOf("one or more errors") == -1 && 
 							response.toLowerCase().indexOf("you are not authorized") == -1
 							) {
 							$this.fadeOut(400);
+							$this.parent().parent().removeClass('build');
 						}
 					}
 				});
@@ -546,6 +563,12 @@ $(document).ready(function() {
 		}
 		
 		return false;
+    });
+    
+    $('#mainitems .has-sub').hover(function() {
+    	$(this).find('span.arrow').show();
+    }, function() {
+    	$('span.arrow').hide();
     });
 
 });

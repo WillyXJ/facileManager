@@ -174,9 +174,16 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 				if ($record_type == 'PTR') {
 					if ($key == 'record_name') {
-						if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain)) === false) {
-							$name_error = '<font color="red"><i>Invalid</i></font> ';
-							$input_return_error[$i] = 1;
+						if ($domain_map == 'reverse') {
+							if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain)) === false) {
+								$name_error = '<font color="red"><i>Invalid Record</i></font> ';
+								$input_return_error[$i] = 1;
+							}
+						} else {
+							if (!verifyCNAME('yes', $data['record_name'], false, true)) {
+								$name_error = '<font color="red"><i>Invalid Record</i></font> ';
+								$input_return_error[$i] = 1;
+							}
 						}
 					}
 
@@ -271,7 +278,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 		} elseif ($record_type == 'SOA') {
 			$HTMLOut.= $SOAHTMLOut;
 		} else {
-			$name = ($record_type == 'PTR') ? $value[$i]['record_name'] . '.' . $domain : $value[$i]['record_name'];
+			$name = ($record_type == 'PTR' && $domain_map == 'reverse') ? $value[$i]['record_name'] . '.' . $domain : $value[$i]['record_name'];
 			$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 		}
 
@@ -294,6 +301,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 	$HTMLOut = $SOAHTMLOut = null;
 	$input_return = array();
 	$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+	$domain_map = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
 	foreach ($value as $i => $data) {
 		$name_error = null;
 		$value_error = null;
@@ -390,9 +398,16 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 
 				if ($record_type == 'PTR') {
 					if ($key == 'record_name') {
-						if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain)) === false) {
-							$name_error = '<font color="red"><i>Invalid Record</i></font> ';
-							$input_return_error[$i] = 1;
+						if ($domain_map == 'reverse') {
+							if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain)) === false) {
+								$name_error = '<font color="red"><i>Invalid Record</i></font> ';
+								$input_return_error[$i] = 1;
+							}
+						} else {
+							if (!verifyCNAME('yes', $data['record_name'], false, true)) {
+								$name_error = '<font color="red"><i>Invalid Record</i></font> ';
+								$input_return_error[$i] = 1;
+							}
 						}
 					}
 
@@ -512,7 +527,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 			} elseif ($record_type == 'SOA') {
 				$HTMLOut.= $SOAHTMLOut;
 			} else {
-				$name = ($record_type == 'PTR') ? $value[$i]['record_name'] . '.' . $domain : $value[$i]['record_name'];
+				$name = ($record_type == 'PTR' && $domain_map == 'reverse') ? $value[$i]['record_name'] . '.' . $domain : $value[$i]['record_name'];
 				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 			}
 		}
@@ -547,19 +562,21 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 	}
 }
 
-function verifyCNAME($Append, $Var2, $allow_null = true) {
-	if (!$allow_null && !strlen($Var2)) return false;
+function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = false) {
+	if (!$allow_null && !strlen($record)) return false;
 	
-	if (preg_match("([_\!#\$&\*\+\=\|/:;,'\"�%^\(\)])", $Var2) == false) {
-		if ($Append == "yes") {
-			if (strstr($Var2, ".") == false) {
+	$pattern = $allow_underscore ? "([\!#\$&\*\+\=\|/:;,'\"�%^\(\)])" : "([_\!#\$&\*\+\=\|/:;,'\"�%^\(\)])";
+	
+	if (preg_match($pattern, $record) == false) {
+		if ($append == 'yes') {
+			if (strstr($record, '.') == false) {
 				return true;
 			} else {
-				return false;
+				return ($allow_underscore && substr($record, -1) != '.') ? true : false;
 			}
 		} else {
-			if ($Var2 == '@') return true;
-			if (substr($Var2, -1, 1) == ".") {
+			if ($record == '@') return true;
+			if (substr($record, -1, 1) == '.') {
 				return true;
 			} else {
 				return false;

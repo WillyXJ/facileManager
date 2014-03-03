@@ -75,7 +75,7 @@ if ($allowed_to_manage_servers) {
 	}
 }
 
-printHeader();
+printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 echo printPageHeader($response, 'Name Servers', $allowed_to_manage_servers);

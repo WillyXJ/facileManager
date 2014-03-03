@@ -54,11 +54,11 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	
 	extract($server_location);
 
-	echo "  --> Detecting firewall...";
+	echo fM('  --> Detecting firewall...');
 	$app = detectFWVersion(true);
 	if ($app === null) {
 		echo "failed\n\n";
-		echo "Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n";
+		echo fM("Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n");
 		exit(1);
 	}
 	extract($app);
@@ -73,12 +73,12 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	$data['server_version'] = $app_version;
 	$data['server_interfaces'] = implode(';', getInterfaceNames(PHP_OS));
 	
-	echo "\n  --> Detection complete.  Continuing installation.\n\n";
+	echo fM("\n  --> Detection complete.  Continuing installation.\n\n");
 	
 	/** Update via cron or http/s? */
 	$update_choices = array('c', 's', 'h');
 	while (!isset($update_method)) {
-		echo 'Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ';
+		echo fM('Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ');
 		$update_method = trim(strtolower(fgets(STDIN)));
 		
 		/** Must be a valid option */
@@ -98,12 +98,13 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 function buildConf($url, $data) {
 	global $proto, $debug;
 	
-	if ($data['dryrun'] && $debug) echo "Dryrun mode (nothing will be written to disk).\n\n";
+	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk).\n\n");
 	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
-		if ($debug) echo $raw_data;
+		if ($debug) echo fM($raw_data);
+		addLogEntry($raw_data);
 		exit(1);
 	}
 	if ($debug) {
@@ -118,46 +119,32 @@ function buildConf($url, $data) {
 	extract($raw_data, EXTR_SKIP);
 	
 	$runas = 'root';
-		
-	if ($debug) echo "Setting directory and file permissions for $runas.\n";
-	if (!$data['dryrun']) {
-		/** chown the files/dirs */
-		$chown_files = array($server_root_dir, $server_zones_dir);
-		foreach($chown_files as $file) {
-			@chown($file, $runas);
-		}
-	}
-		
-	/** Process the files */
-	if (count($files)) {
-		foreach($files as $filename => $contents) {
-			if ($debug) echo "Writing $filename.\n";
-			if (!$data['dryrun']) {
-				@mkdir(dirname($filename), 0755, true);
-				@chown(dirname($filename), $runas);
-				file_put_contents($filename, $contents);
-				@chown($filename, $runas);
-			}
-		}
-	} else {
-		echo "There are no files to save. Aborting.\n";
-		exit(1);
-	}
+	$chown_files = array($server_root_dir);
 	
-	/** Reload the server */
-	if ($debug) echo "Reloading the server.\n";
+	/** Install the new files */
+	installFiles($runas, $chown_files, $files, $data['dryrun']);
+	
+	$message = "Reloading the server.\n";
+	if ($debug) echo fM($message);
 	$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
-	if ($debug) echo "$rc_script\n";
+	$message = "$rc_script\n";
+	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
+		addLogEntry($message);
 		$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
 		if ($rc_script === false) {
-			if ($debug) echo "Cannot locate the start script.\n";
+			$last_line = "Cannot locate the start script.\n";
+			if ($debug) echo fM($last_line);
+			addLogEntry($last_line);
 			$retval = true;
 		} else {
-			system($rc_script . ' 2>&1', $retval);
+			$last_line = system($rc_script . ' 2>&1', $retval);
+			addLogEntry($last_line);
 		}
 		if ($retval) {
-			if ($debug) echo "There was an error reloading the firewall.  Please check the logs for details.\n";
+			$message = "There was an error reloading the firewall.  Please check the logs for details.\n";
+			if ($debug) echo fM($message);
+			addLogEntry($message);
 			return false;
 		} else {
 			/** Update the server with a successful reload */
@@ -225,7 +212,7 @@ function moduleAddServer($url, $data) {
 	$app = detectFWVersion(true);
 	if ($app === null) {
 		echo "failed\n\n";
-		echo "Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n";
+		echo fM("Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n");
 		exit(1);
 	}
 	$data['server_type'] = $app['server']['type'];

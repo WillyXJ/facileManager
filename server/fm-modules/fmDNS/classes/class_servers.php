@@ -151,6 +151,7 @@ class fm_module_servers {
 		if (empty($post['server_root_dir'])) $post['server_root_dir'] = $__FM_CONFIG['ns']['named_root_dir'];
 		if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
 		if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
+		if (empty($post['server_update_method'])) $post['server_update_method'] = 'cron';
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
@@ -270,7 +271,7 @@ class fm_module_servers {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
+		$class = ($row->server_status == 'disabled') ? 'disabled' : null;
 		
 		$os_image = setOSIcon($row->server_os_distro);
 		
@@ -280,6 +281,7 @@ class fm_module_servers {
 		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
 				$edit_actions .= $__FM_CONFIG['icons']['build'];
+				$class = 'build';
 			}
 		}
 		if ($allowed_to_manage_servers) {
@@ -304,8 +306,10 @@ class fm_module_servers {
 		
 		$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
 		
+		if ($class) $class = 'class="' . $class . '"';
+		
 		echo <<<HTML
-		<tr id="$row->server_id"$disabled_class>
+		<tr id="$row->server_id" $class>
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
@@ -464,7 +468,7 @@ FORM;
 		switch($server_update_method) {
 			case 'cron':
 				/* set the server_update_config flag */
-				setBuildUpdateConfigFlag($serial_no, 'yes', 'update');
+				setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
 				$response .= '<p>This server will be updated on the next cron run.</p>'. "\n";
 				break;
 			case 'http':

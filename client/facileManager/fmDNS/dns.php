@@ -28,6 +28,8 @@
  *
  */
 
+error_reporting(0);
+
 $module_name = basename(dirname(__FILE__));
 
 $whoami = 'root';
@@ -44,7 +46,7 @@ $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
 if (file_exists($fm_client_functions)) {
 	include_once($fm_client_functions);
 } else {
-	echo "The facileManager client scripts are not installed.\n";
+	echo fM("The facileManager client scripts are not installed.\n");
 	exit(1);
 }
 
@@ -57,7 +59,7 @@ for ($i=0; $i < count($argv); $i++) {
 
 /** Check running user */
 if (exec(findProgram('whoami')) != $whoami && !$dryrun) {
-	echo "This script must run as $whoami.\n";
+	echo fM("This script must run as $whoami.\n");
 	exit(1);
 }
 

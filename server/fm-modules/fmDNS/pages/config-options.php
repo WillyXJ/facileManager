@@ -44,7 +44,6 @@ if (array_key_exists('view_id', $_GET)) {
 	
 	$display_option_type = $view_info[0]->view_name;
 	$display_option_type_sql .= "$view_id";
-//	print_r($view_info[0]);
 } else {
 	$display_option_type_sql .= "0";
 	$view_id = null;
@@ -100,7 +99,7 @@ if ($allowed_to_manage_servers) {
 	}
 }
 
-printHeader();
+printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 $avail_servers = buildServerSubMenu($server_serial_no);

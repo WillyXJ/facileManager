@@ -143,7 +143,7 @@ function sanitize($data, $replace = null) {
 function printHeader($subtitle = null, $css = 'facileManager', $help = false, $menu = true) {
 	global $fm_name;
 	
-	$title = ($subtitle) ? " &rsaquo; $subtitle" : null;
+	$title = ($subtitle) ? "$subtitle &lsaquo; " : null;
 	
 	$head = $logo = null;
 	
@@ -168,7 +168,7 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>$fm_name$title</title>
+		<title>$title$fm_name</title>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
@@ -179,6 +179,7 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 	</head>
 <body>
 $head
+<a href="#" id="scroll-to-top" class=""></a>
 HTML;
 }
 
@@ -337,36 +338,67 @@ function printMenu($page_name, $page_name_sub) {
 	
 	$main_menu_html = $sub_menu_html = $domain = null;
 	
+	/** Get badge counts */
+	$badge_array = getBadgeCounts();
+
 	foreach ($__FM_CONFIG['menu'] as $top_menu => $sub_menu) {
 		if ($top_menu == 'Break' && $main_menu_html == null) continue;
 		
 		$class = ($page_name == $top_menu) ? ' class="current"' : null;
 		
-		$arrow = (!empty($class)) ? '<span class="arrow">></span>' : null ;
+		$arrow = (!empty($class)) ? '<div class="arrow current"></div>' : '<div class="arrow"></div>';
 		
+		if ((empty($class) || count($sub_menu) <= 1) && array_key_exists($top_menu, $badge_array)) {
+			$badge = '<span class="menu_badge';
+			if (!empty($class) && count($sub_menu) <= 1) $badge .= ' badge_top_selected';
+			$badge .= '"><p>' . array_sum($badge_array[$top_menu]) . '</p></span>';
+		} else {
+			$badge = null;
+		}
+		
+		$sub_menu_html = null;
+
 		/** Handle the styled break */
 		if ($top_menu == 'Break') {
 			$main_menu_html .= '<li><div class="separator"></div></li>' . "\n";
 		} else {
-			$main_menu_html .= '<li>' . $arrow . '<a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . '</a>' . "\n";
-		}
-	
-		if ($top_menu == $page_name) {
-			unset($sub_menu['URL']);
-			foreach ($sub_menu as $sub_menu_name => $sub_menu_url){
-				$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : '';
-				
-				$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . '</a>' . "\n";
-			}
-			$main_menu_html .= <<<HTML
-			<div id="submenu">
-				<div id="subitems">
-					<ul>
+			if (empty($class) && count($sub_menu) > 1) {
+				$main_menu_html .= '<li class="has-sub"><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $badge . '</a>' . "\n";
+				unset($sub_menu['URL']);
+				foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
+					$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count badge_top_selected"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
+					$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
+				}
+				$main_menu_html .= <<<HTML
+				<div class="arrow $class"></div>
+				<ul>
 $sub_menu_html
-					</ul>
-				</div>
-			</div>
+
+				</ul>
+</li>
+
 HTML;
+			} else {
+				$main_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $badge . '</a>' . $arrow . '</li>' . "\n";
+				if ($top_menu == $page_name) {
+					unset($sub_menu['URL']);
+					foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
+						$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : null;
+						$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
+						
+						$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
+					}
+					$main_menu_html .= <<<HTML
+					<div id="submenu">
+						<div id="subitems">
+							<ul>
+$sub_menu_html
+							</ul>
+						</div>
+					</div>
+HTML;
+				}
+			}
 		}
 	}
 	
@@ -379,6 +411,7 @@ $main_menu_html
 			</ul>
 		</div>
 	</div>
+
 MENU;
 }
 
@@ -834,32 +867,32 @@ function buildHelpFile() {
 			
 			<p><b>Install</b><br />
 			Just extract the module into the 'fm-modules' directory on the server host (if not already present), go to Admin &rarr; 
-			<a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a>, and then click the 'Install' button next to the module 
+			<a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, and then click the 'Install' button next to the module 
 			you wish to install.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Activate</b><br />
 			In order for the module to be usable, it needs to be active in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a> and click the 'Activate' link next 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Activate' link next 
 			to the module you wish to activate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Upgrade</b><br />
 			Anytime module files are individually updated in the 'fm-modules' directory on the server host apart from updating $fm_name 
 			as a whole, they will need to be upgraded to ensure full compatibility and functionality.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a> and click the 'Upgrade' button next 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Upgrade' button next 
 			to the module you wish to upgrade. This will upgrade the database with any required changed.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Deactivate</b><br />
 			If you no longer want a module to be usable, it can be deactived in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a> and click the 'Deactivate' link next 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Deactivate' link next 
 			to the module you wish to deactivate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Uninstall</b><br />
 			If you no longer want a module to be installed, it can be uninstalled via the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Modules']}">Modules</a>, ensure the module is already 
+			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, ensure the module is already 
 			deactivated, and then click the 'Uninstall' button next to the module you wish to remove. This will remove all associated 
 			entries and tables from the database.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
@@ -1764,7 +1797,7 @@ function setBuildUpdateConfigFlag($serial_no, $flag, $build_update, $domain_id =
 		} else return false;
 	}
 
-	if ($serial_no = sanitize($serial_no)) {
+	if ($serial_no == sanitize($serial_no)) {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_serial_no` IN (" . $serial_no . ") AND `server_installed`='yes'";
 	} else {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_installed`='yes' AND `server_status`='active'";
@@ -1797,6 +1830,57 @@ function setTimezone() {
 			date_default_timezone_set('Europe/London');
 		}
 	}
+}
+
+
+/**
+ * Gets menu badge counts
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @return array
+ */
+function getBadgeCounts() {
+	global $fm_name;
+	
+	$badge_count = array();
+	
+	/** Get fM badge counts */
+	$modules = getAvailableModules();
+	foreach ($modules as $module_name) {
+		/** Include module variables */
+		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+		
+		/** Upgrades waiting */
+		$module_version = getOption(strtolower($module_name) . '_version', 0);
+		if ($module_version !== false) {
+			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
+				$badge_count['Modules']['URL']++;
+				continue;
+			}
+		}
+		
+		/** New versions available */
+		if (isNewVersionAvailable($module_name, $module_version)) $badge_count['Modules']['URL']++;
+	}
+	
+	$module_badge_count = null;
+	/** Get module badge counts */
+	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
+		$functions_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'functions.php';
+		if (is_file($functions_file)) {
+			if (!function_exists('moduleFunctionalCheck')) {
+				@include($functions_file);
+			}
+			if (function_exists('getModuleBadgeCounts')) {
+				$module_badge_count = getModuleBadgeCounts();
+			}
+			if (count($module_badge_count)) $badge_count = array_merge($badge_count, $module_badge_count);
+		}
+	}
+	
+	return $badge_count;
 }
 
 

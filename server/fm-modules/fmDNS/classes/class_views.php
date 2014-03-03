@@ -36,6 +36,7 @@ class fm_dns_views {
 				<thead>
 					<tr>
 						<th>View Name</th>
+						<th>Comment</th>
 						<th width="110" style="text-align: center;">Actions</th>
 					</tr>
 				</thead>
@@ -64,6 +65,7 @@ class fm_dns_views {
 		$view_name = sanitize($view_name);
 		
 		if (empty($view_name)) return 'No view name defined.';
+		$view_comment = trim($view_comment);
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
@@ -73,12 +75,12 @@ class fm_dns_views {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_name, 'view_', 'view_name');
 		if ($fmdb->num_rows) return 'This view already exists.';
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`) VALUES('{$_SESSION['user']['account_id']}', $server_serial_no, '$view_name')";
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', $server_serial_no, '$view_name', '$view_comment')";
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return 'Could not add the view because a database error occurred.';
 
-		addLogEntry("Added view '$view_name'.");
+		addLogEntry("Added view:\nName: $view_name\nComment: $view_comment");
 		return true;
 	}
 
@@ -89,6 +91,7 @@ class fm_dns_views {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (empty($post['view_name'])) return 'No view name defined.';
+		$post['view_comment'] = trim($post['view_comment']);
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
@@ -122,7 +125,7 @@ class fm_dns_views {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		addLogEntry("Updated view '$old_name' to name: '{$post['view_name']}'.");
+		addLogEntry("Updated view '$old_name' to the following:\nName: {$post['view_name']}\nComment: {$post['view_comment']}");
 		return true;
 	}
 	
@@ -186,6 +189,7 @@ class fm_dns_views {
 		echo <<<HTML
 		<tr id="$row->view_id"$disabled_class>
 			<td>$edit_name</td>
+			<td>$row->view_comment</td>
 			$edit_status
 		</tr>
 HTML;
@@ -198,7 +202,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$view_id = 0;
-		$view_name = $view_root_dir = $view_zones_dir = '';
+		$view_name = $view_root_dir = $view_zones_dir = $view_comment = null;
 		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
 		
@@ -222,6 +226,10 @@ HTML;
 				<tr>
 					<th width="33%" scope="row"><label for="view_name">View Name</label></th>
 					<td width="67%"><input name="view_name" id="view_name" type="text" value="$view_name" size="40" placeholder="internal" maxlength="$view_name_length" /></td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="view_comment">Comment</label></th>
+					<td width="67%"><textarea id="view_comment" name="view_comment" rows="4" cols="30">$view_comment</textarea></td>
 				</tr>
 			</table>
 			<input type="submit" name="submit" id="submit" value="$ucaction View" class="button" />

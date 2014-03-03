@@ -27,62 +27,55 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'sshkey'), $_GET))
 	if (!defined('CLIENT')) define('CLIENT', true);
 	
 	require_once('fm-init.php');
-	include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/variables.inc.php');
-
-	if (array_key_exists('genserial', $_GET)) {
-		$module = ($_POST['module_name']) ? $_POST['module_name'] : $_SESSION['module'];
-		$data['server_serial_no'] = generateSerialNo($module);
+	if (file_exists(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/variables.inc.php')) {
+		include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/variables.inc.php');
 	}
 	
-	if (array_key_exists('addserial', $_GET)) {
-		/** Client expects an array for a good return */
-		$data = $_POST;
-		
-		include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-		/** Check account key */
-		$account_status = $fm_accounts->verifyAccount($_POST['AUTHKEY']);
-		if ($account_status !== true) {
-			$data = $account_status;
-		} else {
-			/** Does the record already exist for this account? */
-			basicGet('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['server_name'], 'server_', 'server_name');
-			if ($fmdb->num_rows) {
-				$server_array = $fmdb->last_result;
-				$_POST['server_id'] = $server_array[0]->server_id;
-				$update_server = moduleAddServer('update');
-			} else {
-				/** Add new server */
-				$add_server = moduleAddServer('add');
-				if ($add_server === false) {
-					$data = "Could not add server to account.\n";
+	/** Check account key */
+	include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
+	$account_status = $fm_accounts->verifyAccount($_POST['AUTHKEY']);
+
+	if ($account_status !== true) {
+		$data = $account_status;
+	} else {
+		if (in_array($_POST['module_name'], getActiveModules())) {
+			if (array_key_exists('genserial', $_GET)) {
+				$module = ($_POST['module_name']) ? $_POST['module_name'] : $_SESSION['module'];
+				$data['server_serial_no'] = generateSerialNo($module);
+			}
+			
+			if (array_key_exists('addserial', $_GET)) {
+				/** Client expects an array for a good return */
+				$data = $_POST;
+				
+				/** Does the record already exist for this account? */
+				basicGet('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['server_name'], 'server_', 'server_name');
+				if ($fmdb->num_rows) {
+					$server_array = $fmdb->last_result;
+					$_POST['server_id'] = $server_array[0]->server_id;
+					$update_server = moduleAddServer('update');
+				} else {
+					/** Add new server */
+					$add_server = moduleAddServer('add');
+					if ($add_server === false) {
+						$data = "Could not add server to account.\n";
+					}
 				}
 			}
-		}
-	}
-	
-	if (array_key_exists('install', $_GET)) {
-		include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-		/** Check account key */
-		$account_status = $fm_accounts->verifyAccount($_POST['AUTHKEY']);
-		if ($account_status !== true) {
-			$data = $account_status;
-		} else {
-			/** Set flags */
-			$data = basicUpdate('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['SERIALNO'], 'server_installed', 'yes', 'server_serial_no');
-			if (function_exists('moduleCompleteInstallation')) {
-				moduleCompleteClientInstallation();
+			
+			if (array_key_exists('install', $_GET)) {
+				/** Set flags */
+				$data = basicUpdate('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['SERIALNO'], 'server_installed', 'yes', 'server_serial_no');
+				if (function_exists('moduleCompleteInstallation')) {
+					moduleCompleteClientInstallation();
+				}
 			}
-		}
-	}
-	
-	if (array_key_exists('sshkey', $_GET)) {
-		include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-		/** Check account key */
-		$account_status = $fm_accounts->verifyAccount($_POST['AUTHKEY']);
-		if ($account_status !== true) {
-			$data = $account_status;
+			
+			if (array_key_exists('sshkey', $_GET)) {
+				$data = getOption('ssh_key_pub', $_SESSION['user']['account_id']);
+			}
 		} else {
-			$data = getOption('ssh_key_pub', $_SESSION['user']['account_id']);
+			$data = "failed\n\nInstallation aborted. {$_POST['module_name']} is not an active module.\n";
 		}
 	}
 	

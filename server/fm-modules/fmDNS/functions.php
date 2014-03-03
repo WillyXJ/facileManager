@@ -83,6 +83,11 @@ function buildModuleDashboard() {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if ($allowed_to_manage_zones) $errors .= '&record_type=SOA';
 			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have a SOA defined.' . "\n";
+		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+			$domain_results[$i]->domain_type == 'master') {
+			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
+			if ($allowed_to_manage_zones) $errors .= '&record_type=NS';
+			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have any NS records defined.' . "\n";
 		} elseif ($domain_results[$i]->domain_reload != 'no') {
 			$errors .= '<a href="' . $__FM_CONFIG['menu']['Zones'][ucfirst($domain_results[$i]->domain_mapping)] . '"><b>' . $domain_results[$i]->domain_name . '</b></a> needs to be reloaded.' . "\n";
 		}
@@ -458,6 +463,16 @@ function isDebianSystem($os) {
 }
 
 
+/**
+ * Returns if a zone reload is allowed or not
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param id $domain_id Domain ID to check
+ * @return boolean
+ */
 function reloadAllowed($domain_id = null) {
 	global $fmdb, $__FM_CONFIG;
 	
@@ -473,4 +488,44 @@ function reloadAllowed($domain_id = null) {
 	return $reload_allowed;
 }
 	
+
+/**
+ * Gets the menu badge counts
+ *
+ * @since 1.1
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @return boolean
+ */
+function getModuleBadgeCounts() {
+	global $fmdb, $__FM_CONFIG;
+	
+	/** Zones */
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
+	$domain_count = $fmdb->num_rows;
+	$domain_results = $fmdb->last_result;
+	for ($i=0; $i<$domain_count; $i++) {
+		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+			$domain_results[$i]->domain_type == 'master') {
+			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
+		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+			$domain_results[$i]->domain_type == 'master') {
+			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
+		} elseif ($domain_results[$i]->domain_reload != 'no') {
+			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
+		}
+	}
+	
+	/** Servers */
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_status`='active' AND (`server_installed`!='yes' OR `server_build_config`='yes')");
+	$domain_count = $fmdb->num_rows;
+	$domain_results = $fmdb->last_result;
+	for ($i=0; $i<$domain_count; $i++) {
+		$badge_counts['Config']['Servers']++;
+	}
+	
+	return $badge_counts;
+}
+
 ?>

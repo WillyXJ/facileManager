@@ -25,7 +25,7 @@
 $page_name = 'Admin';
 $page_name_sub = 'Logs';
 
-printHeader();
+printHeader($page_name_sub);
 @printMenu($page_name, $page_name_sub);
 
 $response = isset($response) ? $response : null;

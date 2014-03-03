@@ -1,3 +1,15 @@
+1.1 (2014-02-??)
+==================
+* Server - Updated menu navigation which also added visual badges that
+           require user attention.
+* Server - Updated some visual effects.
+* Server - Client installs now ensure the module is active before
+           continuing the installation process.
+* Client - (Git Issue 45) Detects if PHP CGI is running instead of CLI.
+* Server - Added scroll to top link.
+* Server - Checks for the required .htaccess file and attempts to create
+           it if missing.
+
 1.0.2 (2013-12-31)
 ==================
 * Server - Fixed issue where installer would report inability to write

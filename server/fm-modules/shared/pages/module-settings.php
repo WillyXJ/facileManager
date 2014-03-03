@@ -24,7 +24,7 @@
 
 $page_name = 'Settings';
 
-printHeader();
+printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 include(ABSPATH . 'fm-modules/shared/classes/class_settings.php');
