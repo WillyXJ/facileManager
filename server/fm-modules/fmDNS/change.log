@@ -14,6 +14,7 @@
 * Client - (Git Issue 57) Added client activity logging.
 * Server - Prevent attempts to create non-existent record types for zones.
 * Server - (Git Issue 63) Added forward PTR support specifically for DNS-SD.
+* Server - (Git Issue 67) Added support for wildcard records.
 
 1.0.2 (2013-12-??)
 ==================

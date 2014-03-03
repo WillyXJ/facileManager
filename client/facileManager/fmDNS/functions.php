@@ -56,11 +56,11 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	
 	extract($server_location);
 
-	echo "  --> Running version tests...";
+	echo fM('  --> Running version tests...');
 	$app = detectDaemonVersion(true);
 	if ($app === null) {
 		echo "failed\n\n";
-		echo "Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n";
+		echo fM("Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n");
 		exit(1);
 	}
 	extract($app);
@@ -74,12 +74,12 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	}
 	$data['server_version'] = $app_version;
 	
-	echo "\n  --> Tests complete.  Continuing installation.\n\n";
+	echo fM("\n  --> Tests complete.  Continuing installation.\n\n");
 	
 	/** Update via cron or http/s? */
 	$update_choices = array('c', 's', 'h');
 	while (!isset($update_method)) {
-		echo 'Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ';
+		echo fM('Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ');
 		$update_method = trim(strtolower(fgets(STDIN)));
 		
 		/** Must be a valid option */
@@ -99,12 +99,12 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 function buildConf($url, $data) {
 	global $proto, $debug, $purge;
 	
-	if ($data['dryrun'] && $debug) echo "Dryrun mode (nothing will be written to disk).\n\n";
+	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk).\n\n");
 	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
-		if ($debug) echo $raw_data;
+		if ($debug) echo fM($raw_data);
 		addLogEntry($raw_data);
 		exit(1);
 	}
@@ -133,7 +133,7 @@ function buildConf($url, $data) {
 		exec('ls ' . $config_file_pattern, $config_file_match);
 		foreach ($config_file_match as $config_file) {
 			$message = "Deleting $config_file.\n";
-			if ($debug) echo $message;
+			if ($debug) echo fM($message);
 			if 	(!$data['dryrun']) {
 				addLogEntry($message);
 				unlink($config_file);
@@ -145,7 +145,7 @@ function buildConf($url, $data) {
 			if (in_array($item, array('.', '..'))) continue;
 			$full_path_file = $server_zones_dir . DIRECTORY_SEPARATOR . $item;
 			$message = "Deleting $full_path_file.\n";
-			if ($debug) echo $message;
+			if ($debug) echo fM($message);
 			if 	(!$data['dryrun']) {
 				addLogEntry($message);
 				unlink($full_path_file);
@@ -158,7 +158,7 @@ function buildConf($url, $data) {
 	
 	/** Reload the server */
 	$message = "Reloading the server.\n";
-	if ($debug) echo $message;
+	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
 		addLogEntry($message);
 		if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
@@ -166,12 +166,12 @@ function buildConf($url, $data) {
 			addLogEntry($last_line);
 		} else {
 			$message = "The server is not running. Attempting to start it.\n";
-			if ($debug) echo $message;
+			if ($debug) echo fM($message);
 			addLogEntry($message);
 			$named_rc_script = getStartupScript();
 			if ($named_rc_script === false) {
 				$last_line = "Cannot locate the start script.\n";
-				if ($debug) echo $last_line;
+				if ($debug) echo fM($last_line);
 				addLogEntry($last_line);
 				$retval = true;
 			} else {
@@ -181,7 +181,7 @@ function buildConf($url, $data) {
 		if ($retval) {
 			addLogEntry($last_line);
 			$message = "There was an error reloading the server.  Please check the logs for details.\n";
-			if ($debug) echo $message;
+			if ($debug) echo fM($message);
 			addLogEntry($message);
 			return false;
 		} else {
@@ -256,7 +256,7 @@ function moduleAddServer($url, $data) {
 	$app = detectDaemonVersion(true);
 	if ($app === null) {
 		echo "failed\n\n";
-		echo "Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n";
+		echo fM("Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n");
 		exit(1);
 	}
 	$data['server_type'] = $app['server']['type'];

@@ -32,7 +32,7 @@ $compress = true;
 
 /** Check if PHP is CGI */
 if (strpos(php_sapi_name(), 'cgi') !== false) {
-	echo "Your server is running a CGI version of PHP and the CLI version is required.\n\n";
+	echo fM("Your server is running a CGI version of PHP and the CLI version is required.\n\n");
 	exit(1);
 }
 
@@ -46,13 +46,13 @@ if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
 /** Check if PHP version requirement is met */
 if (version_compare(PHP_VERSION, '5.0.0', '<')) {
-	echo 'Your server is running PHP version ' . PHP_VERSION . " but PHP >= 5.0.0 is required.\n";
+	echo fM('Your server is running PHP version ' . PHP_VERSION . " but PHP >= 5.0.0 is required.\n");
 	exit(1);
 }
 
 /** Check if zlib exists */
 if (!function_exists('gzuncompress')) {
-	if ($debug) echo "PHP 'zlib' module is missing; therefore, I'm not using compression and will attempt to enforce ssl.\n";
+	if ($debug) echo fM("PHP 'zlib' module is missing; therefore, I'm not using compression and will attempt to enforce ssl.\n");
 	$compress = false;
 	$proto = 'https';
 }
@@ -60,12 +60,12 @@ if (!function_exists('gzuncompress')) {
 /** Check if openssl exists */
 if ($proto == 'https') {
 	$proto = function_exists('openssl_open') ? 'https' : 'http';
-	if (($debug) && $proto == 'http') echo "PHP 'openssl' module is missing; therefore, I'm not using ssl.\n";
+	if (($debug) && $proto == 'http') echo fM("PHP 'openssl' module is missing; therefore, I'm not using ssl.\n");
 }
 
 /** Check if curl exists */
 if (!function_exists('curl_init')) {
-	echo "PHP 'curl' module is missing; therefore, I'm not able to continue.\n";
+	echo fM("PHP 'curl' module is missing; therefore, I'm not able to continue.\n");
 	exit(1);
 }
 
@@ -94,7 +94,7 @@ if (in_array('install', $argv)) {
 			$raw_data = getPostData($url, $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if ($raw_data == 'Success') {
-				exit("$module_name is already installed.\n");
+				exit(fM("$module_name is already installed.\n"));
 			}
 		}
 	}
@@ -103,7 +103,7 @@ if (in_array('install', $argv)) {
 
 /** Dependency on $config_file */
 if (!file_exists($config_file)) {
-	echo "The $module_name client is not installed. Please install it with the following:\nphp {$argv[0]} install\n";
+	echo fM("The $module_name client is not installed. Please install it with the following:\nphp {$argv[0]} install\n");
 	exit(1);
 } else require($config_file);
 
@@ -115,11 +115,11 @@ if (!socketTest($server_path['hostname'], $port, 20)) {
 		if (socketTest($server_path['hostname'], 80, 20)) {
 			$proto = 'http';
 		} else {
-			echo $server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n";
+			echo fM($server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n");
 			exit(1);
 		}
 	} else {
-		echo $server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n";
+		echo fM($server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n");
 		exit(1);
 	}
 }
@@ -132,7 +132,7 @@ function printHelp () {
 	global $argv, $module_name;
 	
 	echo <<<HELP
-{$argv[0]} [options]
+php {$argv[0]} [options]
   -h|help        Display this help
   -d|debug       Enter debug mode for more output
   -p|purge       Delete old configuration files before writing
@@ -168,9 +168,9 @@ HELP;
 function installFM($proto, $compress) {
 	global $argv, $module_name;
 
-	echo "Welcome to the $module_name installer.\n\n";
+	echo fM("Welcome to the $module_name installer.\n\n");
 	
-	echo "Please answer the following questions and the necessary configurations will be\nperformed for you.\n\n";
+	echo fM("Please answer the following questions and the necessary configurations will be performed for you.\n\n");
 	
 	/** facileManager host **/
 	echo "Please enter the location of the facileManager interface:\n";
@@ -194,19 +194,19 @@ function installFM($proto, $compress) {
 	$data['config'] = array();
 
 	/** Run tests */
-	echo "  --> Testing $hostname via https...";
+	echo fM("  --> Testing $hostname via https...");
 	if (socketTest($hostname, 443)) {
 		echo "ok\n";
 		$proto = 'https';
 	} else {
 		echo "failed\n";
-		echo "  --> Testing $hostname via http...";
+		echo fM("  --> Testing $hostname via http...");
 		if (socketTest($hostname, 80)) {
 			echo "ok\n";
 			$proto = 'http';
 		} else {
 			echo "failed\n\n";
-			echo "Cannot access $hostname with http or https.  Please correct this before proceeding.\n";
+			echo fM("Cannot access $hostname with http or https.  Please correct this before proceeding.\n");
 			exit(1);
 		}
 	}
@@ -216,7 +216,7 @@ function installFM($proto, $compress) {
 	/** Account key **/
 	$key = 'default';
 	while (!isset($key)) {
-		echo 'Please enter your account key: ';
+		echo fM('Please enter your account key: ');
 		$key = trim(fgets(STDIN));
 	}
 	
@@ -225,14 +225,14 @@ function installFM($proto, $compress) {
 	$data['config'][] = array('AUTHKEY', 'Account number', $key);
 	
 	/** Test the authentication */
-	echo "  --> Checking account details...";
+	echo fM('  --> Checking account details...');
 	$url = "${proto}://${hostname}/${path}admin-accounts?verify";
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	echo $raw_data . "\n\n";
 	if ($raw_data != 'Success') {
 		echo "Installation failed.  ";
-		echo (!strlen($raw_data)) ? "Could not communicate properly with $hostname.  Failed to\naccess $url." : "Please check your account key.";
+		echo (!strlen($raw_data)) ? fM("Could not communicate properly with $hostname.  Failed to access $url.") : fM('Please check your account key.');
 		echo "\n";
 		exit(1);
 	}
@@ -241,7 +241,7 @@ function installFM($proto, $compress) {
 	$data['server_name'] = php_uname('n');
 	$data['server_os'] = PHP_OS;
 	$data['server_os_distro'] = detectOSDistro();
-	echo 'Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ';
+	echo fM('Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ');
 	if (defined('SERIALNO')) {
 		$serialno = $data['server_serial_no'] = SERIALNO;
 		echo SERIALNO . "\n";
@@ -254,16 +254,16 @@ function installFM($proto, $compress) {
 	/** Process new server */
 	if (empty($serialno)) {
 		/** Generate new serial number */
-		echo '  --> Generating new serial number: ';
+		echo fM('  --> Generating new serial number: ');
 		$serialno = $data['server_serial_no'] = generateSerialNo($url, $data);
 		echo $serialno . "\n";
 	}
 
 	/** Add new server */
-	echo '  --> Adding ' . $data['server_name'] . ' to the database...';
+	echo fM('  --> Adding ' . $data['server_name'] . ' to the database...');
 	$add_server_result = moduleAddServer($url, $data);
 	extract($add_server_result, EXTR_OVERWRITE);
-	echo $add_result;
+	echo fM($add_result);
 
 	$data['SERIALNO'] = $serialno;
 	$data['config'][] = array('SERIALNO', 'Server unique serial number', $serialno);
@@ -280,7 +280,7 @@ function installFM($proto, $compress) {
 	/** Add log entry */
 	addLogEntry('Client installed successfully.');
 	
-	echo "Installation is complete. Please login to the UI to ensure the server settings\nare correct.\n";
+	echo fM("Installation is complete. Please login to the UI to ensure the server settings are correct.\n");
 	
 	/** chmod and prepend php to this file */
 	chmod($argv[0], 0755);
@@ -460,10 +460,10 @@ function saveFMConfigFile($data) {
 	global $config_file;
 	
 	if (file_put_contents($config_file, buildFMConfigFile($data)) === false) {
-		echo "\nInstallation failed.  Could not write $config_file.\n";
+		echo fM("\nInstallation failed.  Could not write $config_file.\n");
 		exit(1);
 	} else {
-		echo "\nConfiguration file has been saved.\n\n";
+		echo fM("\nConfiguration file has been saved.\n\n");
 	}
 }
 
@@ -484,7 +484,7 @@ function generateSerialNo($url, $data) {
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
 		if (empty($raw_data)) {
-			echo "Failed to retrieve $url.\n";
+			echo fM("Failed to retrieve $url.\n");
 		}
 		echo $raw_data;
 		exit(1);
@@ -597,7 +597,7 @@ function detectOSDistro() {
  */
 function initWebRequest() {
 	if (empty($_POST)) {
-		exit('Incorrect parameters defined.');
+		exit(fM('Incorrect parameters defined.'));
 	}
 	
 	/** Get the config file */
@@ -606,14 +606,14 @@ function initWebRequest() {
 	}
 	
 	if (!defined('SERIALNO')) {
-		exit(serialize('Cannot find the serial number for ' . php_uname('n') . '.'));
+		exit(serialize(fM('Cannot find the serial number for ' . php_uname('n') . '.')));
 	}
 	
 	extract($_POST, EXTR_SKIP);
 	
 	/** Ensure the serial numbers match so we don't work on the wrong server */
 	if ($serial_no != SERIALNO) {
-		exit(serialize('The serial numbers do not match for ' . php_uname('n') . '.'));
+		exit(serialize(fM('The serial numbers do not match for ' . php_uname('n') . '.')));
 	}
 }
 
@@ -650,8 +650,8 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			$cron_update = system($cmd, $retval);
 			unlink($tmpfile);
 			
-			if ($retval) echo "  --> The crontab cannot be created.\n  --> $cmd\n";
-			else echo "  --> The crontab has been created.\n";
+			if ($retval) echo fM("  --> The crontab cannot be created.\n  --> $cmd\n");
+			else echo fM("  --> The crontab has been created.\n");
 			
 			return 'cron';
 
@@ -664,15 +664,15 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			$passwd_users = explode("\n", preg_replace('/:.*/', '', @file_get_contents('/etc/passwd')));
 			
 			/** Add fm_user */
-			echo "  --> Attempting to create system user ($user)...";
+			echo fM("  --> Attempting to create system user ($user)...");
 			if (! $ssh_dir = addUser(array($user, 'facileManager'), $passwd_users)) {
 				echo "failed\n";
-				echo "\nInstallation aborted.\n";
+				echo fM("\nInstallation aborted.\n");
 				exit(1);
 			} else echo "ok\n";
 			
 			/** Add ssh public key */
-			echo "  --> Installing SSH key...";
+			echo fM("  --> Installing SSH key...");
 			$raw_data = getPostData(str_replace('genserial', 'sshkey', $url), $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if (strpos($raw_data, 'ssh-rsa') !== false) {
@@ -685,7 +685,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			}
 			echo $result . "\n\n";
 			if ($result == 'failed') {
-				echo "Installation failed.  No SSH key found for this account.\n";
+				echo fM("Installation failed.  No SSH key found for this account.\n");
 				exit(1);
 			}
 			
@@ -694,26 +694,26 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
 			if (!$sudoers) {
-				echo "  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n";
-				echo "\n      $sudoers_line\n";
+				echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
+				echo fM("\n      $sudoers_line\n");
 				
-				echo "\nInstallation aborted.\n";
+				echo fM("\nInstallation aborted.\n");
 				exit(1);
 			} else {
 				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
 				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
 					$sudoers_update = system($cmd, $retval);
 				
-					if ($retval) echo "  --> The sudoers entry cannot be added.\n$cmd\n";
-					else echo "  --> The sudoers entry has been added.\n";
-				} else echo "  --> The sudoers entry already exists...skipping\n";
+					if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
+					else echo fM("  --> The sudoers entry has been added.\n");
+				} else echo fM("  --> The sudoers entry already exists...skipping\n");
 				
 				/** Check for bad settings and disable */
 				$bad_settings = array('requiretty', 'env_reset');
 				foreach ($bad_settings as $setting) {
 					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
 					if ($found_bad != 0) {
-						echo "  --> Disabling 'Defaults $setting' in $sudoers...\n";
+						echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
 						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
 					}
 				}
@@ -727,41 +727,41 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			/** Detect which web server is running */
 			$web_server = detectHttpd();
 			if (!is_array($web_server)) {
-				echo "\nCannot find a supported web server - please check the README document for supported web servers.  Aborting.\n";
+				echo fM("\nCannot find a supported web server - please check the README document for supported web servers.  Aborting.\n");
 				exit(1);
 			}
 			
 			/** Add a symlink to the docroot */
 			$httpdconf = findFile($web_server['file']);
 			if (!$httpdconf) {
-				echo "\nCannot find " . $web_server['file'] . '.  Please enter the full path of ' . $web_server['file'] . ' (/etc/httpd/conf/httpd.conf): ';
+				echo fM("\nCannot find " . $web_server['file'] . '.  Please enter the full path of ' . $web_server['file'] . ' (/etc/httpd/conf/httpd.conf): ');
 				$httpdconf = trim(strtolower(fgets(STDIN)));
 				
 				/** Check if the file exists */
 				if (!is_file($httpdconf)) {
-					echo "  --> $httpdconf does not exist.  Aborting.\n";
+					echo fM("  --> $httpdconf does not exist.  Aborting.\n");
 					exit(1);
 				}
 			}
 			$raw_root = explode('"', shell_exec('grep ^DocumentRoot ' . $httpdconf));
 			/** Get the docroot from STDIN if it's not found */
 			if (count($raw_root) <= 1) {
-				echo "\nCannot find DocumentRoot in " . $web_server['file'] . ".  Please enter the full path of your\n default DocumentRoot (/var/www/html): ";
+				echo fM("\nCannot find DocumentRoot in " . $web_server['file'] . ".  Please enter the full path of your default DocumentRoot (/var/www/html): ");
 				$docroot = rtrim(trim(strtolower(fgets(STDIN))), '/');
 			} else $docroot = trim($raw_root[1]);
 				
 			/** Check if the docroot exists */
 			if (!is_dir($docroot)) {
-				echo "  --> $docroot does not exist.  Aborting.\n";
+				echo fM("  --> $docroot does not exist.  Aborting.\n");
 				exit(1);
 			}
 			$link_name = $docroot . DIRECTORY_SEPARATOR . $module_name;
 			
-			echo "  --> Creating $link_name link.\n";
+			echo fM("  --> Creating $link_name link.\n");
 			
 			if (!is_link($link_name)) {
 				symlink(dirname(__FILE__) . '/' . $module_name . '/www', $link_name);
-			} else echo "      --> $link_name already exists...skipping\n";
+			} else echo fM("      --> $link_name already exists...skipping\n");
 			
 			/** Add an entry to sudoers */
 			$sudoers = findFile('sudoers');
@@ -776,29 +776,29 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			}
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
-			echo '  --> Detected ' . $web_server['app'] . " runs as '$user'\n";
+			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
 			
 			if (!$sudoers) {
-				echo "  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n";
-				echo "\n      $sudoers_line\n";
+				echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
+				echo fM("\n      $sudoers_line\n");
 				
-				echo "\nInstallation aborted.\n";
+				echo fM("\nInstallation aborted.\n");
 				exit(1);
 			} else {
 				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
 				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
 					$sudoers_update = system($cmd, $retval);
 				
-					if ($retval) echo "  --> The sudoers entry cannot be added.\n$cmd\n";
-					else echo "  --> The sudoers entry has been added.\n";
-				} else echo "  --> The sudoers entry already exists...skipping\n";
+					if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
+					else echo fM("  --> The sudoers entry has been added.\n");
+				} else echo fM("  --> The sudoers entry already exists...skipping\n");
 				
 				/** Check for bad settings and disable */
 				$bad_settings = array('requiretty', 'env_reset');
 				foreach ($bad_settings as $setting) {
 					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
 					if ($found_bad != 0) {
-						echo "  --> Disabling 'Defaults $setting' in $sudoers...\n";
+						echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
 						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
 					}
 				}
@@ -905,7 +905,7 @@ function installFiles($user, $chown_files, $files, $dryrun) {
 			}
 		}
 	} else {
-		$message = "There are no files to save. Aborting.\n";
+		$message = fM("There are no files to save. Aborting.\n");
 		echo $message;
 		addLogEntry($message);
 		exit(1);
@@ -913,5 +913,20 @@ function installFiles($user, $chown_files, $files, $dryrun) {
 	
 	return true;
 }
+
+
+/**
+ * Formats a string for output
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @param string $message Data to format
+ * @return string
+ */
+function fM($message) {
+	return wordwrap($message, 90, "\n");
+}
+
 
 ?>
