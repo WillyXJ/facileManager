@@ -234,8 +234,9 @@ $(document).ready(function() {
 				if(response == 'force_logout') {
 					window.location = '?logout';
 				} else {
-					$('#response').html(response);
+					$('#response').removeClass('static').html(response);
 					$('#response')
+						.addClass('static')
 						.css('opacity', 0)
 						.slideDown(400, function() {
 							$('#response').animate(

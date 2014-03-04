@@ -685,6 +685,11 @@ tbody {
 #response p.error {
 	color: red;
 }
+#response.static {
+	position: fixed;
+	left: 12.5%;
+	width: 60%;
+}
 
 #response a {
 	text-decoration: underline;

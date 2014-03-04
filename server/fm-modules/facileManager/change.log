@@ -10,6 +10,7 @@
 * Server - Checks for the required .htaccess file and attempts to create
            it if missing.
 * Server - Added setting to choose which software tree to check updates for.
+* Server - Updated settings pages jquery.
 
 1.0.2 (2013-12-31)
 ==================
