@@ -30,6 +30,9 @@
 error_reporting(0);
 $compress = true;
 
+/** Client core version */
+$data['client_version']['core'] = '1.1-b1';
+
 /** Check if PHP is CGI */
 if (strpos(php_sapi_name(), 'cgi') !== false) {
 	echo fM("Your server is running a CGI version of PHP and the CLI version is required.\n\n");

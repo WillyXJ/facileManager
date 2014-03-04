@@ -32,6 +32,9 @@ error_reporting(0);
 
 $module_name = basename(dirname(__FILE__));
 
+/** Client version */
+$data['client_version'][$module_name] = '1.1-b1';
+
 $whoami = 'root';
 $url = null;
 
