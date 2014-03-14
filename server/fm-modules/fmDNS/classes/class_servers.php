@@ -356,6 +356,16 @@ HTML;
 		
 		$disabled = ($server_installed == 'yes') ? 'disabled' : null;
 		
+		if ($server_installed == 'yes') {
+			if (strpos($server_update_method, 'http') === false) {
+				$server_update_method_choices = array($server_update_method);
+			} else {
+				$server_update_method_choices = array('http', 'https');
+			}
+		} else {
+			$server_update_method_choices = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_update_method');
+		}
+		
 		/** Check name field length */
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
 		$server_config_file_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_config_file');
@@ -363,7 +373,7 @@ HTML;
 		$server_zones_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_zones_dir');
 
 		$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
-		$server_update_method = buildSelect('server_update_method', 'server_update_method', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_update_method'), $server_update_method, 1, $disabled);
+		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 		$server_key = buildSelect('server_key', 'server_key', $this->availableKeys(), $server_key);
 		$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 		

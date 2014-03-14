@@ -15,6 +15,7 @@
 * Server - Prevent attempts to create non-existent record types for zones.
 * Server - (Git Issue 63) Added forward PTR support specifically for DNS-SD.
 * Server - (Git Issue 67) Added support for wildcard records.
+* Server - (Git Issue 54) Improved interface for selecting server update method.
 
 1.0.3 (2014-02-20)
 ==================
