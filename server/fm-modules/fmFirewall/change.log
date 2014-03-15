@@ -1,6 +1,7 @@
-1.0-b3 (2013-12-??)
+1.0-b3 (2014-03-??)
 ===================
-* Server - Added visual badge to the menus that need user attention.
+* Server - Added visual effects for things that need user attention.
+* Both   - (Git Issue 53) Added support to auto-update client files.
 
 1.0-b2 (2013-12-24)
 ===================

@@ -33,7 +33,7 @@ error_reporting(0);
 $module_name = basename(dirname(__FILE__));
 
 /** Client version */
-$data['client_version'][$module_name] = '1.1-b1';
+$data['server_client_version'] = '1.1-b1';
 
 $whoami = 'root';
 $url = null;
@@ -78,9 +78,6 @@ if ($zones) {
 
 /** Set variables to pass */
 $url = $proto . '://' . FMHOST . 'buildconf';
-$data['AUTHKEY'] = AUTHKEY;
-$data['SERIALNO'] = SERIALNO;
-$data['compress'] = $compress;
 $data['dryrun'] = $dryrun;
 
 /** Build the configs provided by $url */

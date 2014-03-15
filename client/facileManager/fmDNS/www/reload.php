@@ -36,7 +36,7 @@ initWebRequest();
 if (isset($_POST['action'])) {
 	switch ($_POST['action']) {
 		case 'buildconf':
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php buildconf' . $_POST['options'], $output, $retval);
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php buildconf' . $_POST['options'] . ' 2>&1', $output, $retval);
 			if ($retval) {
 				/** Something went wrong */
 				$output[] = 'Config build failed.';
@@ -49,13 +49,16 @@ if (isset($_POST['action'])) {
 				exit(serialize('Zone ID is not found.'));
 			}
 			
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php zones id=' . $_POST['domain_id'], $output, $retval);
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php zones id=' . $_POST['domain_id'] . ' 2>&1', $output, $retval);
 			if ($retval) {
 				/** Something went wrong */
 				$output[] = 'Zone reload failed.';
 			} else {
 				$output[] = 'Zone reload was successful.';
 			}
+			break;
+		case 'upgrade':
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php upgrade 2>&1', $output);
 			break;
 	}
 }

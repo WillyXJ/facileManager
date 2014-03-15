@@ -39,6 +39,7 @@ function upgradefmFirewall_100() {
 	$table[] = null;
 	
 	$inserts[] = null;
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ;";
 	
 	$updates[] = null;
 	

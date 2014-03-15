@@ -566,11 +566,55 @@ $(document).ready(function() {
 		return false;
     });
     
-    $('#mainitems .has-sub').hover(function() {
-    	$(this).find('span.arrow').show();
-    }, function() {
-    	$('span.arrow').hide();
-    });
+	$('#mainitems .has-sub').hover(function() {
+		$(this).find('span.arrow').show();
+	}, function() {
+		$('span.arrow').hide();
+	});
+	
+	/* Bulk items */
+	$('#bulk_apply').click(function(event) {
+		/* Don't process if no action is selected */
+		if ($('#bulk_action').val() == 'Bulk Actions') {
+			return;
+		}
+		
+		/* Build array of checked items */
+		event.preventDefault();
+		var serverIDs = $('#table_edits input:checkbox:checked').map(function() {
+			return $(this).val();
+		}).get();
+		
+		/* Process items and action */
+        item_type		= $('#table_edits').attr('name');
+		if (serverIDs.length == 0) {
+			alert('You must select at least one ' + item_type.slice(0,-1) + '.');
+		} else {
+			if (confirm('Are you sure you want to ' + $('#bulk_action').val().toLowerCase() + ' these selected ' + item_type + '?')) {
+				$('#manage_item').fadeIn(200);
+				$('#manage_item_contents').fadeIn(200);
+				$('#manage_item_contents').html('<p>Processing Upgrades...</p>');
+		
+				var form_data = {
+					item_id: serverIDs,
+					action: 'bulk',
+					bulk_action: $('#bulk_action').val().toLowerCase(),
+					item_type: item_type,
+					is_ajax: 1
+				};
+				
+				$.ajax({
+					type: 'POST',
+					url: 'fm-modules/facileManager/ajax/processPost.php',
+					data: form_data,
+					success: function(response)
+					{
+						$('#manage_item_contents').html('<h2>' + $('#bulk_action').val() + ' Results</h2><textarea rows="20" cols="85">' + response + '</textarea><p><a href="" class="button">OK</a></p>');
+					}
+				});
+			}
+		}
+	});
 
 });
 

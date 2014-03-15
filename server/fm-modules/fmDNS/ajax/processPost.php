@@ -35,7 +35,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.ph
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
 if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
-	$table = 'dns_' . $_POST['item_type'];
+	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
 
@@ -121,6 +121,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 					$form_data = $fmdb->last_result;
 				}
 			}
+			break;
 	}
 
 	exit;

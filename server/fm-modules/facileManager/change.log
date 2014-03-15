@@ -11,6 +11,7 @@
            it if missing.
 * Server - Added setting to choose which software tree to check updates for.
 * Server - Updated settings pages jquery.
+* Both   - (Git Issue 53) Added support to auto-update client files.
 
 1.0.2 (2013-12-31)
 ==================

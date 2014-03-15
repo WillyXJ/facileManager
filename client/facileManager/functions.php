@@ -30,9 +30,6 @@
 error_reporting(0);
 $compress = true;
 
-/** Client core version */
-$data['client_version']['core'] = '1.1-b1';
-
 /** Check if PHP is CGI */
 if (strpos(php_sapi_name(), 'cgi') !== false) {
 	echo fM("Your server is running a CGI version of PHP and the CLI version is required.\n\n");
@@ -110,6 +107,10 @@ if (!file_exists($config_file)) {
 	exit(1);
 } else require($config_file);
 
+$data['AUTHKEY'] = AUTHKEY;
+$data['SERIALNO'] = SERIALNO;
+$data['compress'] = $compress;
+
 /** Check if the port is alive first */
 $port = ($proto == 'https') ? 443 : 80;
 $server_path = getServerPath(FMHOST);
@@ -125,6 +126,11 @@ if (!socketTest($server_path['hostname'], $port, 20)) {
 		echo fM($server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n");
 		exit(1);
 	}
+}
+
+/** Run the upgrader */
+if (in_array('upgrade', $argv)) {
+	upgradeFM($proto . '://' . FMHOST . 'admin-servers?upgrade', $data);
 }
 
 
@@ -156,6 +162,7 @@ HELP;
 	echo <<<HELP
   
      install     Install the client components
+     upgrade     Upgrade the client components
 
 HELP;
 	exit;
@@ -295,6 +302,66 @@ function installFM($proto, $compress) {
 	}
 	
 	exit;
+}
+
+
+/**
+ * Runs the upgrader
+ *
+ * @since 1.1
+ * @package facileManager
+ */
+function upgradeFM($url, $data) {
+	global $argv, $module_name, $proto;
+	
+	addLogEntry('Performing client upgrade');
+	$message = 'Currently installed version: ' . $data['server_client_version'] . "\n";
+	echo fM($message);
+	addLogEntry($message);
+	
+	$raw_data = getPostData($url, $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	if (!is_array($raw_data)) {
+		echo fM($raw_data);
+		addLogEntry($raw_data);
+		exit(1);
+	}
+	
+	extract($raw_data);
+	
+	echo fM('Latest version: ' . $latest_module_version . "\n");
+	
+	/** Download latest core files */
+	echo fM("Downloading ");
+	$core_file = 'facilemanager-core-latest.tar.gz';
+	downloadfMFile($core_file);
+	
+	/** Download latest module files */
+	echo fM("Downloading ");
+	$module_file = strtolower($module_name) . '-' . $latest_module_version . '.tar.gz';
+	downloadfMFile($module_file, true);
+	
+	/** Extract client files */
+	$message = "Extracting client files.\n";
+	echo fM($message);
+	addLogEntry($message);
+	extractFiles(array('/tmp/' . $core_file, '/tmp/' . $module_file));
+	
+	/** Cleanup */
+	$message = "Cleaning up.\n";
+	echo fM($message);
+	addLogEntry($message);
+	@unlink('/tmp/' . $core_file);
+	@unlink('/tmp/' . $module_file);
+	
+	$message = "Client upgrade complete.\n";
+	echo fM($message);
+	addLogEntry($message);
+	
+	/** Update the database with the new version */
+	$data['server_client_version'] = $latest_module_version;
+	$raw_data = getPostData($url, $data);
+	die();
 }
 
 
@@ -870,7 +937,10 @@ function addLogEntry($log_data) {
 	$log_file = '/var/log/fm.log';
 	$date = date('M d H:i:s');
 	
-	@file_put_contents($log_file, $date . ' ' . $module_name . ': ' . trim($log_data) . "\n", FILE_APPEND | LOCK_EX);
+	$log_data = explode("\n", trim($log_data));
+	foreach ($log_data as $log_line) {
+		@file_put_contents($log_file, $date . ' ' . $module_name . ': ' . trim($log_line) . "\n", FILE_APPEND | LOCK_EX);
+	}
 }
 
 
@@ -932,6 +1002,100 @@ function installFiles($user, $chown_files, $files, $dryrun) {
  */
 function fM($message) {
 	return wordwrap($message, 90, "\n");
+}
+
+
+/**
+ * Downloads a file from the fM website
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @param string $file File to download
+ * @param boolean $module Whether or not this is a module download
+ */
+function downloadfMFile($file, $module = false) {
+	$base_url = 'http://www.facilemanager.com/download/';
+	if ($module) $base_url .= 'module/';
+	$base_url .= $file;
+	
+	echo fM($base_url . "\n");
+	addLogEntry("Downloading $base_url\n");
+	
+	$local_file = '/tmp/' . $file;
+	@unlink($local_file);
+	
+	$ch = curl_init();
+	$options = array(
+		CURLOPT_URL				=> $base_url,
+		CURLOPT_FILE			=> $local_file,
+		CURLOPT_TIMEOUT			=> 3600,
+		CURLOPT_RETURNTRANSFER	=> 1,
+		CURLOPT_FOLLOWLOCATION	=> true
+	);
+	curl_setopt_array($ch, $options);
+	$result = curl_exec($ch);
+	if ($result === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+		$message = "Unable to download file.\n";
+		echo fM($message . "\n" . curl_error($ch) . "\n");
+		addLogEntry($message . "\n" . curl_error($ch));
+		exit(1);
+	}
+	curl_close($ch);
+	
+	file_put_contents($local_file, $result);
+}
+
+
+/**
+ * Extracts files
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @param array $files Files to extract
+ */
+function extractFiles($files = array()) {
+	$tmp_dir = '/tmp/fM_files';
+	mkdir($tmp_dir);
+	
+	foreach ($files as $filename) {
+		$path_parts = pathinfo($filename);
+		$untar_opt = '-C ' . $tmp_dir . ' -x';
+		switch($path_parts['extension']) {
+			case 'bz2':
+				$untar_opt .= 'j';
+				break;
+			case 'tgz':
+			case 'gz':
+				$untar_opt .= 'z';
+				break;
+		}
+		$untar_opt .= 'f';
+		
+		$command = findProgram('tar') . " $untar_opt $filename";
+		@system($command, $retval);
+		if ($retval) {
+			$message = "Failed to extract $filename. Exiting.\n";
+			echo fM($message);
+			addLogEntry($message);
+			exit(1);
+		}
+	}
+		
+	/** Move files */
+	$command = findProgram('cp') . " -r $tmp_dir/facileManager/client/facileManager " . dirname(dirname(__FILE__));
+	@system($command, $retval);
+	if ($retval) {
+		$message = "Failed to save files. Exiting.\n";
+		echo fM($message);
+		addLogEntry($message);
+		exit(1);
+	}
+	
+	if ($tmp_dir != '/') {
+		@system(findProgram('rm') . " -rf $tmp_dir");
+	}
 }
 
 

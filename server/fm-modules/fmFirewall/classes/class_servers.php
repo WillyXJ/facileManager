@@ -26,15 +26,19 @@ class fm_module_servers {
 	 * Displays the server list
 	 */
 	function rows($result) {
-		global $fmdb;
+		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		echo '			<table class="display_results" id="table_edits" name="servers">' . "\n";
+		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Upgrade';
+
 		if (!$result) {
 			echo '<p id="noresult">There are no firewall servers.</p>';
 		} else {
+			echo buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			?>
+			<table class="display_results" id="table_edits" name="servers">
 				<thead>
 					<tr>
+						<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, 'server_list[]')" /></th>
 						<th width="20" style="text-align: center;"></th>
 						<th>Hostname</th>
 						<th>Serial No</th>
@@ -53,6 +57,7 @@ class fm_module_servers {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
 		echo '</table>';
@@ -198,7 +203,7 @@ class fm_module_servers {
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
+		$class = ($row->server_status == 'disabled') ? 'disabled' : null;
 		
 		$os_image = setOSIcon($row->server_os_distro);
 		
@@ -208,6 +213,7 @@ class fm_module_servers {
 		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
 				$edit_actions .= $__FM_CONFIG['icons']['build'];
+				$class = 'build';
 			}
 		}
 		if ($allowed_to_manage_servers) {
@@ -223,6 +229,10 @@ class fm_module_servers {
 		}
 		$edit_name = '<a href="config-policy?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>';
 		
+		if (isset($row->server_client_version) && $row->server_client_version != getOption($_SESSION['module'] . '_version')) {
+			$edit_actions = 'Client Upgrade Available<br />';
+			$class = 'attention';
+		}
 		if ($row->server_installed != 'yes') {
 			$edit_actions = 'Client Install Required<br />';
 			$edit_name = $row->server_name;
@@ -231,8 +241,11 @@ class fm_module_servers {
 		
 		$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
 		
+		if ($class) $class = 'class="' . $class . '"';
+		
 		echo <<<HTML
-		<tr id="$row->server_id"$disabled_class>
+		<tr id="$row->server_id" $class>
+			<td><input type="checkbox" name="server_list[]" value="{$row->server_serial_no}" /></td>
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
@@ -275,10 +288,20 @@ HTML;
 		
 		$disabled = ($server_installed == 'yes') ? 'disabled' : null;
 		
+		if ($server_installed == 'yes') {
+			if (strpos($server_update_method, 'http') === false) {
+				$server_update_method_choices = array($server_update_method);
+			} else {
+				$server_update_method_choices = array('http', 'https');
+			}
+		} else {
+			$server_update_method_choices = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_update_method');
+		}
+		
 		$available_server_types = $this->getAvailableFirewalls(enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_type'), $server_os);
 		
 		$server_type = buildSelect('server_type', 'server_type', $available_server_types, $server_type, 1);
-		$server_update_method = buildSelect('server_update_method', 'server_update_method', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_update_method'), $server_update_method, 1, $disabled);
+		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="config-servers">

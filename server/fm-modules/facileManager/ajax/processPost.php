@@ -58,6 +58,19 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	$save_result = $fm_module_settings->save();
 	echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : '<p>These settings have been saved.</p>'. "\n";
 
+/** Handle client upgrades */
+} elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
+	array_key_exists('bulk_action', $_POST) && $_POST['bulk_action'] == 'upgrade') {
+	if (is_array($_POST['item_id'])) {
+		foreach ($_POST['item_id'] as $serial_no) {
+			if (!is_numeric($serial_no)) continue;
+			
+			echo $fm_shared_module_servers->doClientUpgrade($serial_no);
+			echo "\n";
+		}
+		echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.';
+	}
+
 /** Handle everything else */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
 	if (!$allowed_to_manage_users) returnUnAuth();

@@ -23,7 +23,7 @@
 */
 
 /** Handle client installations */
-if (arrayKeysExist(array('genserial', 'addserial', 'install', 'sshkey'), $_GET)) {
+if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey'), $_GET)) {
 	if (!defined('CLIENT')) define('CLIENT', true);
 	
 	require_once('fm-init.php');
@@ -63,12 +63,23 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'sshkey'), $_GET))
 				}
 			}
 			
+			/** Client installs */
 			if (array_key_exists('install', $_GET)) {
 				/** Set flags */
 				$data = basicUpdate('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['SERIALNO'], 'server_installed', 'yes', 'server_serial_no');
 				if (function_exists('moduleCompleteInstallation')) {
 					moduleCompleteClientInstallation();
 				}
+				$fm_shared_module_servers->updateClientVersion();
+			}
+			
+			/** Client upgrades */
+			if (array_key_exists('upgrade', $_GET)) {
+				$current_module_version = getOption($_POST['module_name'] . '_version');
+				$data = ($_POST['server_client_version'] == $current_module_version) ? "Latest version: $current_module_version\nNo upgrade available.\n" : array('latest_module_version' => $current_module_version);
+				
+				// Probably need to move/remove this
+				$fm_shared_module_servers->updateClientVersion();
 			}
 			
 			if (array_key_exists('sshkey', $_GET)) {

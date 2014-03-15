@@ -26,15 +26,21 @@ class fm_module_servers {
 	 * Displays the server list
 	 */
 	function rows($result) {
-		global $fmdb;
+		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		echo '			<table class="display_results" id="table_edits" name="servers">' . "\n";
+//		if ($allowed_to_manage_servers) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
+		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Upgrade';
+//		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Build Config';
+		
 		if (!$result) {
 			echo '<p id="noresult">There are no servers.</p>';
 		} else {
+			echo buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			?>
+			<table class="display_results" id="table_edits" name="servers">
 				<thead>
 					<tr>
+						<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, 'server_list[]')" /></th>
 						<th width="20" style="text-align: center;"></th>
 						<th>Hostname</th>
 						<th>Serial No</th>
@@ -57,9 +63,9 @@ class fm_module_servers {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '</table>';
 	}
 
 	/**
@@ -295,6 +301,10 @@ class fm_module_servers {
 			}
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 		}
+		if (isset($row->server_client_version) && $row->server_client_version != getOption($_SESSION['module'] . '_version')) {
+			$edit_actions = 'Client Upgrade Available<br />';
+			$class = 'attention';
+		}
 		if ($row->server_installed != 'yes') {
 			$edit_actions = 'Client Install Required<br />';
 		}
@@ -310,6 +320,7 @@ class fm_module_servers {
 		
 		echo <<<HTML
 		<tr id="$row->server_id" $class>
+			<td><input type="checkbox" name="server_list[]" value="{$row->server_serial_no}" /></td>
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
@@ -363,7 +374,7 @@ HTML;
 				$server_update_method_choices = array('http', 'https');
 			}
 		} else {
-			$server_update_method_choices = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_update_method');
+			$server_update_method_choices = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_update_method');
 		}
 		
 		/** Check name field length */

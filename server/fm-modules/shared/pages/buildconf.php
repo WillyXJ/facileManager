@@ -50,4 +50,6 @@ if (file_exists($module_buildconf_file)) {
 	include($module_buildconf_file);
 }
 
+$fm_shared_module_servers->updateClientVersion();
+
 ?>

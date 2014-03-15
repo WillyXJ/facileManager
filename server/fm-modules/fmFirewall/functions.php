@@ -304,11 +304,25 @@ function isItemInPolicy($id, $type) {
 function getModuleBadgeCounts() {
 	global $fmdb, $__FM_CONFIG;
 	
-	/** Server stats */
+	/** Servers */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
-	$domain_count = $fmdb->num_rows;
-	$domain_results = $fmdb->last_result;
-	for ($i=0; $i<$domain_count; $i++) {
+	$server_count = $fmdb->num_rows;
+	$server_results = $fmdb->last_result;
+	for ($i=0; $i<$server_count; $i++) {
+		$server_builds[] = $server_results[$i]->server_name;
+	}
+	if (version_compare(getOption($_SESSION['module'] . '_version'), '1.0-b3', '>=')) {
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_version') . "'");
+		$server_count = $fmdb->num_rows;
+		$server_results = $fmdb->last_result;
+		for ($i=0; $i<$server_count; $i++) {
+			$server_builds[] = $server_results[$i]->server_name;
+		}
+	}
+	
+	$servers = array_unique($server_builds);
+	
+	for ($i=0; $i<count($servers); $i++) {
 		$badge_counts['Firewalls']['URL']++;
 	}
 	

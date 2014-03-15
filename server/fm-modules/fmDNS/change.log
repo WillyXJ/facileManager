@@ -16,6 +16,7 @@
 * Server - (Git Issue 63) Added forward PTR support specifically for DNS-SD.
 * Server - (Git Issue 67) Added support for wildcard records.
 * Server - (Git Issue 54) Improved interface for selecting server update method.
+* Both   - (Git Issue 53) Added support to auto-update client files.
 
 1.0.3 (2014-02-20)
 ==================

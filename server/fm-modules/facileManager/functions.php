@@ -21,6 +21,14 @@
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 
+/** Include shared classes */
+$shared_classes_dir = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'classes';
+foreach (scandir($shared_classes_dir) as $file) {
+	if (is_file($shared_classes_dir . DIRECTORY_SEPARATOR . $file)) {
+		include_once($shared_classes_dir . DIRECTORY_SEPARATOR . $file);
+	}
+}
+
 /**
  * Includes the template file
  *
@@ -1882,6 +1890,24 @@ function getBadgeCounts() {
 	}
 	
 	return $badge_count;
+}
+
+
+/**
+ * Builds bulk action menu
+ *
+ * @since 1.1
+ * @package facileManager
+ *
+ * @return array
+ */
+function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
+	if (is_array($bulk_actions_list)) {
+		$bulk_actions[] = 'Bulk Actions';
+		
+		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1) . 
+			'<input type="submit" name="bulk_apply" id="bulk_apply" value="Apply" class="button" />' . "\n";
+	}
 }
 
 
