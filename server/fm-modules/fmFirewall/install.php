@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
   `server_build_config` enum('yes','no') NOT NULL DEFAULT 'no',
   `server_update_config` enum('yes','no') NOT NULL DEFAULT 'no',
   `server_installed` enum('yes','no') NOT NULL DEFAULT 'no',
+  `server_client_version` varchar(150) DEFAULT NULL,
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `server_serial_no` (`server_serial_no`)
