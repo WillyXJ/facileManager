@@ -40,9 +40,9 @@ class fm_shared_module_servers {
 		if (count($response) == 1) {
 			switch($server_update_method) {
 				case 'cron':
-					/* Set the server_update_config flag */
-//					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
-					$response[] = ' --> This server will be upgraded on the next cron run.';
+					/* Servers updated via cron require manual upgrades */
+					$response[] = ' --> This server needs to be upgrade manually with the following command:';
+					$response[] = " --> sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade";
 					addLogEntry('Upgraded client scripts on ' . $server_name . '.');
 					break;
 				case 'http':
