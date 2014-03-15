@@ -44,6 +44,11 @@ $purge = (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
 
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
+/** Display the client version */
+if (in_array('-v', $argv) || in_array('version', $argv)) {
+	exit(fM($module_name . ' ' . $data['server_client_version'] . "\n"));
+}
+
 /** Check if PHP version requirement is met */
 if (version_compare(PHP_VERSION, '5.0.0', '<')) {
 	echo fM('Your server is running PHP version ' . PHP_VERSION . " but PHP >= 5.0.0 is required.\n");
@@ -143,6 +148,7 @@ function printHelp () {
 	echo <<<HELP
 php {$argv[0]} [options]
   -h|help        Display this help
+  -v|version     Display the client version
   -d|debug       Enter debug mode for more output
   -p|purge       Delete old configuration files before writing
   -s|no-ssl      Do not use SSL to retrieve the configs
