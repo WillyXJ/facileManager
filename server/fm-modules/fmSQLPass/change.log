@@ -1,3 +1,7 @@
+1.0-b6 (2014-03-??)
+===================
+* Server - Moved js toggle function to be shared.
+
 1.0-b5 (2013-12-16)
 ===================
 * Server - (Git Issue 36) Fixed false error reporting.

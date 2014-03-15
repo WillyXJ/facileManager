@@ -699,3 +699,8 @@ function getUrlVars() {
 	return vars;
 }
 
+function toggle(source, element_id) {
+	checkboxes = document.getElementsByName(element_id);
+	for(var i in checkboxes)
+		checkboxes[i].checked = source.checked;
+}

@@ -39,8 +39,3 @@ $(document).ready(function() {
 	
 });
 
-function toggle(source) {
-	checkboxes = document.getElementsByName('group[]');
-	for(var i in checkboxes)
-		checkboxes[i].checked = source.checked;
-}

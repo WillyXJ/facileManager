@@ -35,7 +35,7 @@ class fm_sqlpass_passwords {
 			?>
 				<thead>
 					<tr>
-						<th width="70"><input style="height: 10px;" type="checkbox" onClick="toggle(this)" checked /></th>
+						<th width="70"><input style="height: 10px;" type="checkbox" onClick="toggle(this, 'group[]')" checked /></th>
 						<th>Server Group</th>
 						<th>Last Changed</th>
 					</tr>
