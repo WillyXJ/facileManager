@@ -229,7 +229,7 @@ class fm_module_servers {
 		}
 		$edit_name = '<a href="config-policy?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>';
 		
-		if (isset($row->server_client_version) && $row->server_client_version != getOption($_SESSION['module'] . '_version')) {
+		if (isset($row->server_client_version) && $row->server_client_version != getOption($_SESSION['module'] . '_client_version')) {
 			$edit_actions = 'Client Upgrade Available<br />';
 			$class = 'attention';
 		}

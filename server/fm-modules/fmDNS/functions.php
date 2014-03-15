@@ -528,7 +528,7 @@ function getModuleBadgeCounts() {
 		$server_builds[] = $server_results[$i]->server_name;
 	}
 	if (version_compare(getOption($_SESSION['module'] . '_version'), '1.1', '>=')) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_version') . "'");
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
 		$server_count = $fmdb->num_rows;
 		$server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {

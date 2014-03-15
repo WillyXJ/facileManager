@@ -71,7 +71,7 @@ class fm_shared_module_servers {
 						if (count($post_result) > 1) {
 							/** Loop through and format the output */
 							foreach ($post_result as $line) {
-								$response[] = " --> $line";
+								if (strlen(trim($line))) $response[] = " --> $line";
 							}
 						} else {
 							$response[] = " --> " . $post_result[0];
@@ -117,7 +117,7 @@ class fm_shared_module_servers {
 					if (count($post_result) > 1) {
 						/** Loop through and format the output */
 						foreach ($post_result as $line) {
-							$response[] = " --> $line";
+							if (strlen(trim($line))) $response[] = " --> $line";
 						}
 					} else {
 						$response[] = " --> " . $post_result[0];

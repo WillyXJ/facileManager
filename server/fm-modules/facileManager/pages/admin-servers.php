@@ -75,7 +75,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 			
 			/** Client upgrades */
 			if (array_key_exists('upgrade', $_GET)) {
-				$current_module_version = getOption($_POST['module_name'] . '_version');
+				$current_module_version = getOption($_POST['module_name'] . '_client_version');
 				$data = ($_POST['server_client_version'] == $current_module_version) ? "Latest version: $current_module_version\nNo upgrade available.\n" : array('latest_module_version' => $current_module_version);
 				
 				// Probably need to move/remove this
