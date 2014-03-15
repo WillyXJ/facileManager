@@ -35,7 +35,7 @@ class fm_module_servers {
 		if (!$result) {
 			echo '<p id="noresult">There are no servers.</p>';
 		} else {
-			echo buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			?>
 			<table class="display_results" id="table_edits" name="servers">
 				<thead>
