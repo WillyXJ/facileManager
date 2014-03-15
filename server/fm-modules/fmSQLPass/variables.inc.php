@@ -33,7 +33,7 @@ $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords acr
 														Password complexity requirements are enforced to ensure secure passwords. Currently supported
 														database servers include MySQL.';
 $__FM_CONFIG['fmSQLPass']['prefix']					= 'sqlpass_';
-$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.0';
+$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.1';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';

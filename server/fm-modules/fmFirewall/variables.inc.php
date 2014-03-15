@@ -33,7 +33,7 @@ $__FM_CONFIG['fmFirewall']['description']			= 'Managing software firewalls shoul
 														servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files
 														individually.';
 $__FM_CONFIG['fmFirewall']['prefix']				= 'fw_';
-$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.0';
+$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.1';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';

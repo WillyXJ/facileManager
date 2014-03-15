@@ -28,12 +28,12 @@
  */
 
 /** Module Information */
-$__FM_CONFIG['fmDNS']['version']				= '1.1-b1';
+$__FM_CONFIG['fmDNS']['version']				= '1.1';
 $__FM_CONFIG['fmDNS']['description']			= 'Easily manage one or more ISC BIND servers through a web interface.  No more editing configuration
 													and zone files manually.';
 $__FM_CONFIG['fmDNS']['prefix']					= 'dns_';
 $__FM_CONFIG['fmDNS']['required_dns_version']	= '9.3';
-$__FM_CONFIG['fmDNS']['required_fm_version']	= '1.0';
+$__FM_CONFIG['fmDNS']['required_fm_version']	= '1.1';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']	= '';

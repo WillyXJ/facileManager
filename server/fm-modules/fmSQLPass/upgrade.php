@@ -30,12 +30,13 @@ function upgradefmSQLPassSchema($module) {
 	$running_version = getOption($module . '_version', 0);
 
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_100($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-b4', '<') ? upgradefmSQLPass_100($__FM_CONFIG, $running_version) : true;
 	if (!$success) return 'Failed';
 	
 	return 'Success';
 }
 
+/** 1.0-b2 */
 function upgradefmSQLPass_100($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
@@ -54,6 +55,7 @@ function upgradefmSQLPass_100($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.0-b4 */
 function upgradefmSQLPass_101($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	

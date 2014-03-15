@@ -36,7 +36,7 @@ function upgradefmFirewallSchema($module) {
 	return 'Success';
 }
 
-/** 1.0-b5 */
+/** 1.0-b3 */
 function upgradefmFirewall_100($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
