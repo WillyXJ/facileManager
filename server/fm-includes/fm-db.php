@@ -29,6 +29,7 @@ class fmdb {
 	 * @param string $dbhost
 	 */
 	function fmdb($dbuser, $dbpassword, $dbname, $dbhost) {
+		$this->sql_errors = false;
 		return $this->connect($dbuser, $dbpassword, $dbname, $dbhost);
 	}
 
@@ -71,6 +72,7 @@ class fmdb {
 		// If there is an error then take note of it..
 		if (mysql_error($this->dbh)) {
 			$this->print_error($query);
+			$this->sql_errors = true;
 			return false;
 		}
 		

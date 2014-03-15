@@ -46,7 +46,7 @@ function upgradefmDNS_100($__FM_CONFIG) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -68,7 +68,7 @@ CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -88,7 +88,7 @@ function upgradefmDNS_102($__FM_CONFIG, $running_version) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -204,27 +204,18 @@ VALUES
 ('options',  'key-directory',  '( quoted_string )',  'no',  'yes')
 ;";
 	
-	$updates[] = null;
-	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $query) {
 			$fmdb->query($query);
-			if (!$fmdb->result) return false;
-		}
-	}
-
-	if (count($updates) && $updates[0]) {
-		foreach ($updates as $query) {
-			$fmdb->query($query);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -248,7 +239,7 @@ function upgradefmDNS_104($__FM_CONFIG, $running_version) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -264,29 +255,11 @@ function upgradefmDNS_105($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE  `domain_name`  `domain_name` VARCHAR( 255 ) NOT NULL DEFAULT  '';";
 	
-	$inserts[] = null;
-	
-	$updates[] = null;
-	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
-		}
-	}
-
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $query) {
-			$fmdb->query($query);
-			if (!$fmdb->result) return false;
-		}
-	}
-
-	if (count($updates) && $updates[0]) {
-		foreach ($updates as $query) {
-			$fmdb->query($query);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -328,14 +301,14 @@ VALUES
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -361,14 +334,14 @@ function upgradefmDNS_107($__FM_CONFIG, $running_version) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($updates) && $updates[0]) {
 		foreach ($updates as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -386,28 +359,12 @@ function upgradefmDNS_108($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_os` VARCHAR( 50 ) NULL DEFAULT NULL AFTER  `server_name` ;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'as defined:' ) NOT NULL DEFAULT  'named';";
 
-	$inserts = $updates = null;
-
 
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
-		}
-	}
-
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
-		}
-	}
-
-	if (count($updates) && $updates[0]) {
-		foreach ($updates as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -424,8 +381,6 @@ function upgradefmDNS_109($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_update_method`  `server_update_method` ENUM(  'http',  'https',  'cron',  'ssh' ) NOT NULL DEFAULT  'http';";
 
-	$inserts = null;
-	
 	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_option` IN ('match-mapped-addresses','transfer-format','check-names','preferred-glue','dialup','notify','forward');";
 	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_type` =  '( yes | no )';";
 	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_type` =  '( master | slave | response ) ( warn | fail | ignore )' WHERE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`.`def_option` =  'check-names';";
@@ -435,21 +390,14 @@ function upgradefmDNS_109($__FM_CONFIG, $running_version) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
-		}
-	}
-
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($updates) && $updates[0]) {
 		foreach ($updates as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -572,27 +520,18 @@ VALUES
 ;
 INSERT;
 
-	$updates = null;
-
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
-		}
-	}
-
-	if (count($updates) && $updates[0]) {
-		foreach ($updates as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -620,21 +559,21 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($updates) && $updates[0]) {
 		foreach ($updates as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 

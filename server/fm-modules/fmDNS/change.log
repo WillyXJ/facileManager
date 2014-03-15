@@ -17,6 +17,7 @@
 * Server - (Git Issue 67) Added support for wildcard records.
 * Server - (Git Issue 54) Improved interface for selecting server update method.
 * Both   - (Git Issue 53) Added support to auto-update client files.
+* Server - Improved upgrade error handling.
 
 1.0.3 (2014-02-20)
 ==================

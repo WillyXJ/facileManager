@@ -23,45 +23,46 @@
 function upgradefmFirewallSchema($module) {
 	global $fmdb;
 	
-	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$retval = upgradefmFirewall_100();
+	/** Include module variables */
+	@include(dirname(__FILE__) . '/variables.inc.php');
 	
-	if ($retval) {
-		return 'Success';
-	} else {
-		return 'Failed';
-	}
+	/** Get current version */
+	$running_version = getOption($module . '_version', 0);
+	
+	/** Checks to support older versions (ie n-3 upgrade scenarios */
+	$success = version_compare($running_version, '1.0-b5', '<') ? upgradefmFirewall_100($__FM_CONFIG, $running_version) : true;
+	if (!$success) return 'Failed';
+	
+	return 'Success';
 }
 
+/** 1.0-b5 */
 function upgradefmFirewall_100() {
-	global $fmdb;
+	global $fmdb, $__FM_CONFIG;
 	
-	$table[] = null;
-	
-	$inserts[] = null;
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ;";
 	
-	$updates[] = null;
+	$inserts = $updates = null;
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
-			$result = $fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $query) {
-			$result = $fmdb->query($query);
-			if (!$fmdb->result) return false;
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($updates) && $updates[0]) {
-		foreach ($updates as $query) {
-			$result = $fmdb->query($query);
-			if (!$fmdb->result) return false;
+		foreach ($updates as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 

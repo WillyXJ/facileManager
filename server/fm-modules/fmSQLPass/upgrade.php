@@ -47,7 +47,7 @@ function upgradefmSQLPass_100($__FM_CONFIG, $running_version) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
@@ -69,21 +69,21 @@ function upgradefmSQLPass_101($__FM_CONFIG, $running_version) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 
 	if (count($updates) && $updates[0]) {
 		foreach ($updates as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 

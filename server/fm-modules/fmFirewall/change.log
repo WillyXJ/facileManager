@@ -2,6 +2,7 @@
 ===================
 * Server - Added visual effects for things that need user attention.
 * Both   - (Git Issue 53) Added support to auto-update client files.
+* Server - Improved upgrade error handling.
 
 1.0-b2 (2013-12-24)
 ===================
