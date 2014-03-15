@@ -78,7 +78,7 @@ class fm_tools {
 			} else {
 				$query = "UPDATE `fm_options` SET option_value='{$__FM_CONFIG[$module_name]['version']}' WHERE option_name='{$module_name}_version'";
 				$fmdb->query($query);
-				setOption($module_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update', 0);
+				setOption($module_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
 			}
 
 			addLogEntry("$module_name was upgraded to {$__FM_CONFIG[$module_name]['version']}.", $module_name);

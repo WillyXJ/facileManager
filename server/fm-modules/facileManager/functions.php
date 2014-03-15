@@ -115,7 +115,7 @@ function isNewVersionAvailable($package, $version) {
 		$data['software_update_tree'] = getOption('software_update_tree');
 		$result = getPostData($fm_site_url, $data);
 		
-		setOption($package . '_version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, 0);
+		setOption($package . '_version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method);
 		
 		return $result;
 	}
@@ -1091,13 +1091,19 @@ function getOption($option = null, $account_id = 0, $table = 'fm_options', $pref
  * @since 1.0
  * @package facileManager
  */
-function setOption($option = null, $value = null, $insert_update = 'insert', $account_id = 0, $table = 'fm_options', $prefix = 'option_', $auto_serialize = true) {
+function setOption($option = null, $value = null, $insert_update = 'auto', $auto_serialize = true, $account_id = 0, $table = 'fm_options', $prefix = 'option_') {
 	global $fmdb;
 	
 	if ($auto_serialize) {
 		$value = isSerialized($value) ? sanitize($value) : serialize($value);
 	} else sanitize($value);
 	$option = sanitize($option);
+	
+	if ($insert_update == 'auto') {
+		$query = "SELECT * FROM $table WHERE {$prefix}name='$option' AND account_id=$account_id";
+		$result = $fmdb->query($query);
+		$insert_update = ($fmdb->num_rows) ? 'update' : 'insert';
+	}
 	
 	if ($insert_update == 'insert') {
 		$query = "INSERT INTO $table (account_id, {$prefix}name, {$prefix}value) VALUES ($account_id, '$option', '$value')";

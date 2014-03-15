@@ -51,7 +51,7 @@ function fmUpgrade($database) {
 
 	if ($success) {
 		upgradeConfig('fm_db_version', $fm_db_version);
-		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update', 0);
+		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
 		$URL = $GLOBALS['RELPATH'] . 'admin-modules';
 		
 		echo <<<HTML
