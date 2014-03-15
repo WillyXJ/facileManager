@@ -444,7 +444,9 @@ class fm_dns_zones {
 			$zone_access_allowed = (is_array($module_extra_perms) && 
 				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($row->domain_id, $module_extra_perms['zone_access']) : true;
 		}
-		$reload_zone = ($soa_count && $row->domain_reload == 'yes' && $allowed_to_reload_zones && $reload_allowed && $zone_access_allowed) ? '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>' : null;
+		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
+			$reload_zone = ($allowed_to_reload_zones && $zone_access_allowed) ? '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>' : 'Reload Available<br />';
+		} else $reload_zone = null;
 		if ($reload_zone) $class = 'build';
 /*
 		$edit_status = <<<FORM
@@ -464,7 +466,6 @@ FORM;
 		}
 		if ($allowed_to_manage_zones && $zone_access_allowed) {
 			$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-//			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=delete&domain_id=' . $row->domain_id . '&map=' . $row->domain_mapping . '" onClick="return del(\'Are you sure you want to delete this zone and all associated records?\')">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 			$edit_status .= '<a class="delete" href="#">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 		}
 		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">{$row->domain_name}</a>" : $row->domain_name;
