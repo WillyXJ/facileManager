@@ -59,7 +59,7 @@ class fmdb {
 	function select($db) {
 		global $__FM_CONFIG;
 		if (!@mysql_select_db($db, $this->dbh)) {
-			bailOut('<center>The database is not installed.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button">Start Setup</a></p>');
+			bailOut('<center>The database is not installed.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">Start Setup</a></p>');
 		}
 	}
 	

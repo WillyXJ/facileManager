@@ -62,7 +62,7 @@ switch ($step) {
 		echo <<<HTML
 	<center>
 	<p>I have detected you recently upgraded $fm_name, but have not upgraded the database.<br />Click 'Upgrade' to start the upgrade process.</p>
-	<p class="step"><a href="?step=2" class="button">Upgrade</a></p>
+	<p class="step"><a href="?step=2" class="button click_once">Upgrade</a></p>
 	</center>
 
 HTML;

@@ -81,8 +81,11 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$('.click_once').click(function() {
+	$('a.click_once').one('click', function() {
 		$(this).html('Processing...');
+		$(this).click(function() {
+			return false;
+		});
 	});
 	
 	/* Form adds */

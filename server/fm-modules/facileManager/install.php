@@ -44,7 +44,7 @@ function createConfig() {
 	<p>I cannot create <code>$temp_file</code> so please manually create it with the following contents:</p>
 	<textarea rows="20">$temp_config</textarea>
 	<p>Once done, click "Install."</p>
-	<p class="step"><a href="?step=3" class="button">Install</a></p>
+	<p class="step"><a href="?step=3" class="button click_once">Install</a></p>
 
 CFG;
 		} else {
@@ -58,7 +58,7 @@ CFG;
 			if ($retval) {
 				echo <<<HTML
 			<p style="text-align: center;">Config file has been created!  Now let's create the database schema.</p>
-			<p class="step"><a href="?step=3" class="button">Continue</a></p>
+			<p class="step"><a href="?step=3" class="button click_once">Continue</a></p>
 HTML;
 			} else {
 				echo <<<HTML
