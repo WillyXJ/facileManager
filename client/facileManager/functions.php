@@ -182,7 +182,9 @@ HELP;
  * @package facileManager
  */
 function installFM($proto, $compress) {
-	global $argv, $module_name;
+	global $argv, $module_name, $data;
+	
+	unset($data['SERIALNO']);
 
 	echo fM("Welcome to the $module_name installer.\n\n");
 	

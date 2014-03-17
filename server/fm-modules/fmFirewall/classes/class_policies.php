@@ -28,12 +28,12 @@ class fm_module_policies {
 	function rows($result, $type) {
 		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
 		
-		echo '			<table class="display_results';
-		if ($allowed_to_manage_servers && $fmdb->num_rows > 1) echo ' grab';
-		echo '" id="table_edits" name="policies">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no firewall policies.</p>';
+			echo '<p id="table_edits" class="noresult" name="policies">There are no firewall policies.</p>';
 		} else {
+			echo '<table class="display_results';
+			if ($allowed_to_manage_servers && $fmdb->num_rows > 1) echo ' grab';
+			echo '" id="table_edits" name="policies">' . "\n";
 			echo <<<HTML
 				<thead>
 					<tr>

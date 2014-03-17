@@ -28,10 +28,10 @@ class fm_module_objects {
 	function rows($result, $type) {
 		global $fmdb, $allowed_to_manage_objects;
 		
-		echo '			<table class="display_results" id="table_edits" name="objects">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no ' . $type . ' objects defined.</p>';
+			echo '<p id="table_edits" class="noresult" name="objects">There are no ' . $type . ' objects defined.</p>';
 		} else {
+			echo '<table class="display_results" id="table_edits" name="objects">' . "\n";
 			$title_array = ($type != 'address') ? array('Object Name', 'Address', 'Netmask', 'Comment') : array('Object Name', 'Address', 'Comment');
 			echo "<thead>\n<tr>\n";
 			
@@ -48,14 +48,14 @@ class fm_module_objects {
 				<tbody>
 
 HTML;
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					echo '</tbody>';
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			echo '</tbody>';
+			echo '</table>';
 		}
-		echo '</table>';
 	}
 
 	/**

@@ -28,11 +28,11 @@ class fm_module_logging {
 	function rows($result, $channel_category) {
 		global $fmdb, $__FM_CONFIG;
 		
-		echo '			<table class="display_results" id="table_edits" name="logging">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no ' . $__FM_CONFIG['logging']['avail_types'][$channel_category] . ' defined.</p>';
+			echo '<p id="table_edits" class="noresult" name="logging">There are no ' . $__FM_CONFIG['logging']['avail_types'][$channel_category] . ' defined.</p>';
 		} else {
 			?>
+			<table class="display_results" id="table_edits" name="logging">
 				<thead>
 					<tr>
 						<th>Name</th>
@@ -50,9 +50,9 @@ class fm_module_logging {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '			</table>' . "\n";
 	}
 
 	/**

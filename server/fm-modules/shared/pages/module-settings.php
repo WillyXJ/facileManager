@@ -27,7 +27,7 @@ $page_name = 'Settings';
 printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
-include(ABSPATH . 'fm-modules/shared/classes/class_settings.php');
+include_once(ABSPATH . 'fm-modules/shared/classes/class_settings.php');
 
 echo <<<HTML
 <div id="body_container">

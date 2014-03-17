@@ -81,6 +81,10 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$('.click_once').click(function() {
+		$(this).html('Processing...');
+	});
+	
 	/* Form adds */
     $('#plus').click(function() {
         var $this 		= $(this);

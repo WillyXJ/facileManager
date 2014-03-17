@@ -66,7 +66,7 @@ function upgradefmFirewall_100($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('fmFirewall_client_version', '1.0-b3', 'auto', false);
+	setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false);
 	
 	return true;
 }

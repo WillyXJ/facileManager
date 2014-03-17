@@ -28,11 +28,11 @@ class fm_sqlpass_passwords {
 	function rows($result) {
 		global $fmdb, $__FM_CONFIG, $fm_users, $allowed_to_manage_passwords;
 		
-		echo '			<table class="display_results" id="table_edits" name="servers">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no active database server groups.</p>';
+			echo '<p id="table_edits" class="noresult" name="servers">There are no active database server groups.</p>';
 		} else {
 			?>
+			<table class="display_results" id="table_edits" name="servers">
 				<thead>
 					<tr>
 						<th width="70"><input style="height: 10px;" type="checkbox" onClick="toggle(this, 'group[]')" checked /></th>
@@ -50,9 +50,9 @@ class fm_sqlpass_passwords {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '			</table>' . "\n";
 
 		if ($allowed_to_manage_passwords && $result) {
 			echo <<<HTML

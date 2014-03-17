@@ -28,7 +28,7 @@ class fm_users {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="noresult">There are no users.</p>';
+			echo '<p id="table_edits" class="noresult" name="users">There are no users.</p>';
 		} else {
 			?>
 			<table class="display_results" id="table_edits" name="users">

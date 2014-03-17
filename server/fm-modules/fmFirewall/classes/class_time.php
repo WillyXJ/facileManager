@@ -28,10 +28,10 @@ class fm_module_time {
 	function rows($result) {
 		global $fmdb, $allowed_to_manage_time;
 		
-		echo '			<table class="display_results" id="table_edits" name="time">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no time restrictions defined.</p>';
+			echo '<p id="table_edits" class="noresult" name="time">There are no time restrictions defined.</p>';
 		} else {
+			echo '<table class="display_results" id="table_edits" name="time">' . "\n";
 			$title_array = array('Restriction Name', 'Date Range', 'Time', 'Weekdays', 'Comment');
 			echo "<thead>\n<tr>\n";
 			
@@ -48,14 +48,14 @@ class fm_module_time {
 				<tbody>
 
 HTML;
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					echo '</tbody>';
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			echo '</tbody>';
+			echo '</table>';
 		}
-		echo '</table>';
 	}
 
 	/**

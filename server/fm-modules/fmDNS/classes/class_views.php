@@ -28,11 +28,11 @@ class fm_dns_views {
 	function rows($result) {
 		global $fmdb;
 		
-		echo '			<table class="display_results" id="table_edits" name="views">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no views.</p>';
+			echo '<p id="table_edits" class="noresult" name="views">There are no views.</p>';
 		} else {
 			?>
+			<table class="display_results" id="table_edits" name="views">
 				<thead>
 					<tr>
 						<th>View Name</th>
@@ -49,9 +49,9 @@ class fm_dns_views {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '			</table>' . "\n";
 	}
 
 	/**

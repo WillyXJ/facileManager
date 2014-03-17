@@ -801,7 +801,7 @@ a {
 	color: #9F9F9F;
 }
 
-#noresult {
+.noresult {
 	padding-top: 0.4em;
 	text-align: center;
 	font-weight: bold;

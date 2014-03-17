@@ -28,11 +28,11 @@ class fm_module_groups {
 	function rows($result, $type) {
 		global $fmdb, $allowed_to_manage_services;
 		
-		echo '			<table class="display_results" id="table_edits" name="groups">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no groups defined.</p>';
+			echo '<p id="table_edits" class="noresult" name="groups">There are no groups defined.</p>';
 		} else {
 			echo <<<HTML
+			<table class="display_results" id="table_edits" name="groups">
 				<thead>
 					<tr>
 						<th>Group Name</th>
@@ -44,14 +44,14 @@ class fm_module_groups {
 				<tbody>
 
 HTML;
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					echo '</tbody>';
+				$num_rows = $fmdb->num_rows;
+				$results = $fmdb->last_result;
+				for ($x=0; $x<$num_rows; $x++) {
+					$this->displayRow($results[$x]);
+				}
+				echo '</tbody>';
+				echo '</table>';
 		}
-		echo '</table>';
 	}
 
 	/**

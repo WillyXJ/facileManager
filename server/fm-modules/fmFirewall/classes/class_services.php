@@ -28,10 +28,10 @@ class fm_module_services {
 	function rows($result, $type) {
 		global $fmdb, $allowed_to_manage_services;
 		
-		echo '			<table class="display_results" id="table_edits" name="services">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no ' . strtoupper($type) . ' services defined.</p>';
+			echo '<p id="table_edits" class="noresult" name="services">There are no ' . strtoupper($type) . ' services defined.</p>';
 		} else {
+			echo '<table class="display_results" id="table_edits" name="services">' . "\n";
 			$title_array = ($type == 'icmp') ? array('Service Name', 'ICMP Type', 'ICMP Code', 'Comment') : array('Service Name', 'Source Ports', 'Dest Ports', 'Flags', 'Comment');
 			echo "<thead>\n<tr>\n";
 			
@@ -47,14 +47,14 @@ class fm_module_services {
 				<tbody>
 
 HTML;
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					echo '</tbody>';
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			echo '</tbody>';
+			echo '</table>';
 		}
-		echo '</table>';
 	}
 
 	/**

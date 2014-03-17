@@ -28,11 +28,11 @@ class fm_dns_keys {
 	function rows($result) {
 		global $fmdb;
 		
-		echo '			<table class="display_results" id="table_edits" name="keys">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no keys.</p>';
+			echo '<p id="table_edits" class="noresult" name="keys">There are no keys.</p>';
 		} else {
 			?>
+			<table class="display_results" id="table_edits" name="keys">
 				<thead>
 					<tr>
 						<th>Key</th>
@@ -52,9 +52,9 @@ class fm_dns_keys {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '			</table>' . "\n";
 	}
 
 	/**

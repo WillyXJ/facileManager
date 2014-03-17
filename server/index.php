@@ -50,8 +50,8 @@ if ($GLOBALS['basename'] == 'index') {
 	checkAppVersions();
 }
 
-if (file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename'] . '.php'))) {
-	include(includeModuleFile($_SESSION['module'], $GLOBALS['basename'] . '.php'));
+if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename'] . '.php'))) {
+	@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename'] . '.php'));
 } else throwHTTPError('404');
 
 ?>

@@ -577,7 +577,7 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('fmDNS_client_version', '1.1', 'auto', false);
+	setOption('fmDNS_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false);
 		
 	return true;
 }

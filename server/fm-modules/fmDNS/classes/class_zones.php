@@ -28,13 +28,13 @@ class fm_dns_zones {
 	function rows($result, $map, $reload_allowed) {
 		global $fmdb, $__FM_CONFIG;
 		
-		echo '			<table class="display_results" id="table_edits" name="domains">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no zones.</p>';
+			echo '<p id="table_edits" class="noresult" name="domains">There are no zones.</p>';
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			?>
+			<table class="display_results" id="table_edits" name="domains">
 				<thead>
 					<tr>
 						<th style="width: 50px;">ID</th>
@@ -53,9 +53,9 @@ class fm_dns_zones {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '</table>';
 	}
 
 	/**

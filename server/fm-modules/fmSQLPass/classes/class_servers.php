@@ -28,11 +28,11 @@ class fm_module_servers {
 	function rows($result) {
 		global $fmdb;
 		
-		echo '			<table class="display_results" id="table_edits" name="servers">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no servers defined.</p>';
+			echo '<p id="table_edits" class="noresult" name="servers">There are no servers defined.</p>';
 		} else {
 			echo <<<HEAD
+			<table class="display_results" id="table_edits" name="servers">
 				<thead>
 					<tr>
 						<th>Hostname</th>
@@ -41,9 +41,8 @@ class fm_module_servers {
 						<th width="110" style="text-align: center;">Actions</th>
 					</tr>
 				</thead>
+				<tbody>
 HEAD;
-
-			echo "<tbody>\n";
 
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -52,8 +51,8 @@ HEAD;
 			}
 
 			echo "</tbody>\n";
+			echo '</table>' . "\n";
 		}
-		echo '			</table>' . "\n";
 	}
 
 	/**

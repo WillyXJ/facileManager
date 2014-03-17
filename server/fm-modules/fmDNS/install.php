@@ -424,6 +424,12 @@ INSERT INTO $database.`fm_options` (option_name, option_value)
 WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = '{$module}_version');
 INSERT;
+	$inserts[] = <<<INSERT
+INSERT INTO $database.`fm_options` (option_name, option_value) 
+	SELECT '{$module}_client_version', '{$__FM_CONFIG[$module]['client_version']}' FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = '{$module}_client_version');
+INSERT;
 
 
 	/** Create table schema */

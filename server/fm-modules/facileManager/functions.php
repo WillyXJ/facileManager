@@ -1197,7 +1197,7 @@ function uninstallModuleSchema($database, $module) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$removes[] = <<<REMOVE
-DELETE FROM $database.`fm_options` WHERE `option_name`='{$module}_version';
+DELETE FROM $database.`fm_options` WHERE `option_name` LIKE '{$module}_%';
 REMOVE;
 
 	foreach ($removes as $query) {

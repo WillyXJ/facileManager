@@ -42,7 +42,7 @@ class fmdb {
 
 		$this->select($dbname);
 		if (!@mysql_query("SELECT * FROM `fm_options`", $this->dbh)) {
-			bailOut('<center>The database is installed; however, the associated application tables are missing.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button">Start Setup</a></p>');
+			bailOut('<center>The database is installed; however, the associated application tables are missing.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">Start Setup</a></p>');
 		}
 		
 		/** Check if there is an admin account */

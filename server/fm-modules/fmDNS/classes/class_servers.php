@@ -33,7 +33,7 @@ class fm_module_servers {
 //		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Build Config';
 		
 		if (!$result) {
-			echo '<p id="noresult">There are no servers.</p>';
+			echo '<p id="table_edits" class="noresult" name="servers">There are no servers.</p>';
 		} else {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			?>

@@ -28,11 +28,11 @@ class fm_dns_acls {
 	function rows($result) {
 		global $fmdb;
 		
-		echo '			<table class="display_results" id="table_edits" name="acls">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no ACLs.</p>';
+			echo '<p id="table_edits" class="noresult" name="acls">There are no ACLs.</p>';
 		} else {
 			?>
+			<table class="display_results" id="table_edits" name="acls">
 				<thead>
 					<tr>
 						<th>Name</th>
@@ -50,9 +50,9 @@ class fm_dns_acls {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '			</table>' . "\n";
 	}
 
 	/**

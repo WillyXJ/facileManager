@@ -69,7 +69,7 @@ class fm_module_settings {
 				} else $option_value = sanitize(trim($option_value));
 				
 				/** Update with the new value */
-				$result = setOption($option, $option_value, $command, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'options');
+				$result = setOption($option, $option_value, $command, true, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'options');
 	
 				if (!$result) {
 					if ($log_message != $log_message_head) addLogEntry($log_message);

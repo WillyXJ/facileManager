@@ -28,11 +28,11 @@ class fm_sqlpass_groups {
 	function rows($result) {
 		global $fmdb;
 		
-		echo '			<table class="display_results" id="table_edits" name="groups">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no server groups.</p>';
+			echo '<p id="table_edits" class="noresult" name="groups">There are no server groups.</p>';
 		} else {
 			?>
+			<table class="display_results" id="table_edits" name="groups">
 				<thead>
 					<tr>
 						<th>Group Name</th>
@@ -49,9 +49,9 @@ class fm_sqlpass_groups {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '			</table>' . "\n";
 	}
 
 	/**

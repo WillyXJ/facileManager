@@ -28,11 +28,11 @@ class fm_module_options {
 	function rows($result) {
 		global $fmdb;
 		
-		echo '			<table class="display_results" id="table_edits" name="options">' . "\n";
 		if (!$result) {
-			echo '<p id="noresult">There are no options.</p>';
+			echo '<p id="table_edits" class="noresult" name="options">There are no options.</p>';
 		} else {
 			?>
+			<table class="display_results" id="table_edits" name="options">
 				<thead>
 					<tr>
 						<th>Option</th>
@@ -50,9 +50,9 @@ class fm_module_options {
 					}
 					?>
 				</tbody>
+			</table>
 			<?php
 		}
-		echo '			</table>' . "\n";
 	}
 
 	/**
