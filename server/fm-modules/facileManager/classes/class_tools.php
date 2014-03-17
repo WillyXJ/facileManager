@@ -107,7 +107,7 @@ class fm_tools {
 //				if ($current_active_modules === false) $current_active_modules = array();
 				
 				$current_active_modules[] = $module_name;
-				return setOption('fm_active_modules', $current_active_modules, $command, $_SESSION['user']['account_id']);
+				return setOption('fm_active_modules', $current_active_modules, 'auto', true, $_SESSION['user']['account_id']);
 
 				break;
 			case 'deactivate':
@@ -119,7 +119,7 @@ class fm_tools {
 					$new_array[] = $module;
 				}
 
-				return setOption('fm_active_modules', $new_array, 'update', $_SESSION['user']['account_id']);
+				return setOption('fm_active_modules', $new_array, 'update', true, $_SESSION['user']['account_id']);
 
 				break;
 			case 'uninstall':
