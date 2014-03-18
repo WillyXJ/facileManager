@@ -1,5 +1,5 @@
-1.1 (2014-02-??)
-==================
+1.1 (2014-03-18)
+================
 * Server - Updated menu navigation which also added visual badges that
            require user attention.
 * Server - Updated some visual effects.
@@ -9,7 +9,7 @@
 * Server - Added scroll to top link.
 * Server - Checks for the required .htaccess file and attempts to create
            it if missing.
-* Server - Added setting to choose which software tree to check updates for.
+* Server - Added ability to update to non-stable releases.
 * Server - Updated settings pages jquery.
 * Both   - (Git Issue 53) Added support to auto-update client files.
 * Client - Added an argument to display the version.

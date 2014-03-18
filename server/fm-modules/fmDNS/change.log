@@ -1,4 +1,4 @@
-1.1 (2014-02-??)
+1.1 (2014-03-18)
 ================
 * Server - Added visual effects for things that need user attention.
 * Server - (Git Issue 52) Comments can now be added to views, acls, keys,

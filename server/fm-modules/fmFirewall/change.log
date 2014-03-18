@@ -1,4 +1,4 @@
-1.0-b3 (2014-03-??)
+1.0-b3 (2014-03-18)
 ===================
 * Server - Added visual effects for things that need user attention.
 * Both   - (Git Issue 53) Added support to auto-update client files.

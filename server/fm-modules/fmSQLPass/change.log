@@ -1,4 +1,4 @@
-1.0-b6 (2014-03-??)
+1.0-b6 (2014-03-18)
 ===================
 * Server - Moved js toggle function to be shared.
 * Server - Improved upgrade error handling.
