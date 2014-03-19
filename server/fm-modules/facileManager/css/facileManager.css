@@ -892,6 +892,10 @@ span.not_installed {
 	margin-left: 21em;
 }
 
+#userperms th {
+	text-transform: none;
+}
+
 #userperms td, .form-table:not(.zone-form) td label {
 	font-size: 11px;
 	white-space: nowrap;

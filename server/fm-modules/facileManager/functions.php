@@ -150,7 +150,9 @@ function sanitize($data, $replace = null) {
  * @package facileManager
  */
 function printHeader($subtitle = null, $css = 'facileManager', $help = false, $menu = true) {
-	global $fm_name;
+	global $fm_name, $__FM_CONFIG;
+	
+	include(ABSPATH . 'fm-includes/version.php');
 	
 	$title = ($subtitle) ? "$subtitle &lsaquo; " : null;
 	
@@ -165,9 +167,9 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 	/** Module css and js includes */
 	if (isset($_SESSION['module'])) {
 		$module_css_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'module.css';
-		$module_css = (file_exists(ABSPATH . $module_css_file)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '" type="text/css" />' : null;
+		$module_css = (file_exists(ABSPATH . $module_css_file)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/css" />' : null;
 		$module_js_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'module.js';
-		$module_js = (file_exists(ABSPATH . $module_js_file)) ? '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '" type="text/javascript" charset="utf-8"></script>' : null;
+		$module_js = (file_exists(ABSPATH . $module_js_file)) ? '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/javascript" charset="utf-8"></script>' : null;
 	} else {
 		$module_css = $module_js = null;
 	}
@@ -178,12 +180,12 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>$title$fm_name</title>
-		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css" type="text/css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 		$module_css
-		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js" type="text/javascript" charset="utf-8"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js?ver=$fm_version" type="text/javascript" charset="utf-8"></script>
 		$module_js
 	</head>
 <body>
