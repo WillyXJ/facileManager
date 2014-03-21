@@ -3,6 +3,8 @@
 * Server - (Issue #72) Databases can now be created outside of the
            installer.
 * Server - Improved installer and upgrader error handling.
+* Server - Added function comments.
+
 1.1 (2014-03-18)
 ================
 * Server - Updated menu navigation which also added visual badges that
@@ -10,13 +12,13 @@
 * Server - Updated some visual effects.
 * Server - Client installs now ensure the module is active before
            continuing the installation process.
-* Client - (Git Issue 45) Detects if PHP CGI is running instead of CLI.
+* Client - (Issue #45) Detects if PHP CGI is running instead of CLI.
 * Server - Added scroll to top link.
 * Server - Checks for the required .htaccess file and attempts to create
            it if missing.
 * Server - Added ability to update to non-stable releases.
 * Server - Updated settings pages jquery.
-* Both   - (Git Issue 53) Added support to auto-update client files.
+* Both   - (Issue #53) Added support to auto-update client files.
 * Client - Added an argument to display the version.
 
 1.0.2 (2013-12-31)
@@ -48,7 +50,7 @@
 
 1.0-rc6-1 (2013-11-07)
 ======================
-* Server - (Git Issue 34) Fixed an issue were servers could not be added.
+* Server - (Issue #34) Fixed an issue were servers could not be added.
 
 1.0-rc6 (2013-11-06)
 ====================
@@ -72,7 +74,7 @@
 ====================
 * Server - Fixed issue where modules could be 'upgraded' to an older version.
 * Server - Fixed issue with admin log searching.
-* Server - (Git Issue 23) Module upgrades now inform user to upgrade client files
+* Server - (Issue #23) Module upgrades now inform user to upgrade client files
            upon completion.
 * Server - Added support to show/hide application errors.
 
@@ -83,9 +85,9 @@
 
 1.0-rc2 (2013-09-18)
 ====================
-* Server - (Git Issue 18) Integrated installation and upgrade instructions into
+* Server - (Issue #18) Integrated installation and upgrade instructions into
            the README.
-* Server - (Git Issue 1) Added additional OS-specific installation instructions.
+* Server - (Issue #1) Added additional OS-specific installation instructions.
 * Server - Updated some jquery functions.
 
 1.0-rc1 (2013-09-13)
@@ -93,12 +95,12 @@
 * Server - Added ability to change the displayed datetime format and set the 
            timezone.
 * Server - Added ad-hoc database backup functionality.
-* Server - (Git Issue 10) Added LDAP authentication support.
+* Server - (Issue #10) Added LDAP authentication support.
 * Server - Updated help files.
 
 1.0-b15 (2013-09-04)
 ====================
-* Server - (Git Issue 3) Added search capabilities to the admin logs page.
+* Server - (Issue #3) Added search capabilities to the admin logs page.
 
 1.0-b14 (2013-09-03)
 ====================
@@ -112,8 +114,8 @@
 * Server - Can now disable authentication thus using only the default super-admin
            user account.
 * Server - Set several tables to INNODB.
-* Server - (Git Issue 12) Added support to email password reset links.
-* Server - (Git Issue 7) Added support for modules to have more granular user permissions.
+* Server - (Issue #12) Added support to email password reset links.
+* Server - (Issue #7) Added support for modules to have more granular user permissions.
 
 1.0-b12 (2013-08-23)
 ====================
@@ -124,7 +126,7 @@
 * Server - Redesigned user management page.
 * Server - Fixed an issue where user permissions could be removed unintentionally
            during a password change.
-* Server - (Git Issue 11) Super-admins can no longer be demoted by non-super-admins
+* Server - (Issue #11) Super-admins can no longer be demoted by non-super-admins
            nor themselves.
 * Server - Added option to enforce a user password change upon login.
 
@@ -145,12 +147,12 @@
 ===================
 * Server - Updated version checks.
 * Server - Improved installation to prevent duplicate entries.
-* Server - (Git Issue 1) Improved application requirement checks.
+* Server - (Issue #1) Improved application requirement checks.
 * Server - Improved user creation and modification.
 
 1.0-b6 (2013-08-13)
 ===================
-* Server - (Git Issue 1) Added mod_rewrite check.
+* Server - (Issue #1) Added mod_rewrite check.
 * Server - Fixed relative pathing issue.
 * Server - User no longer gets redirected to the dashboard after authentication.
 

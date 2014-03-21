@@ -22,6 +22,12 @@
  +-------------------------------------------------------------------------+
 */
 
+/**
+ * Displays an error
+ *
+ * @since 1.0
+ * @package facileManager
+ */
 function returnError($window = true) {
 	$msg = 'There was a problem with your request.'; 
 	if ($window) {
@@ -35,6 +41,12 @@ function returnError($window = true) {
 }
 
 
+/**
+ * Displays unauthorized message
+ *
+ * @since 1.0
+ * @package facileManager
+ */
 function returnUnAuth($window = true) {
 	$msg = 'You are not authorized to make changes.';
 	if ($window) {

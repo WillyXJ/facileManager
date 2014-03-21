@@ -23,6 +23,9 @@ class fm_users {
 	
 	/**
 	 * Displays the user list
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function rows($result) {
 		global $fmdb;
@@ -59,6 +62,9 @@ class fm_users {
 
 	/**
 	 * Adds the new user
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function add($data) {
 		global $fmdb, $fm_name, $fm_login;
@@ -156,6 +162,9 @@ class fm_users {
 
 	/**
 	 * Updates the selected user
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function update($post) {
 		global $fmdb, $fm_name, $fm_login;
@@ -281,6 +290,9 @@ class fm_users {
 	
 	/**
 	 * Deletes the selected user
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function delete($id) {
 		global $fm_name;
@@ -301,6 +313,12 @@ class fm_users {
 	}
 
 
+	/**
+	 * Displays the user rows
+	 *
+	 * @since 1.0
+	 * @package facileManager
+	 */
 	function displayRow($row) {
 		global $__FM_CONFIG, $allowed_to_manage_users, $fm_name;
 		
@@ -364,6 +382,9 @@ HTML;
 
 	/**
 	 * Displays the form to add new user
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function printUsersForm($data = '', $action = 'add', $form_bits = array(), $button_text = 'Save', $button_id = 'submit', $action_page = 'admin-users', $print_form_head = true) {
 		global $__FM_CONFIG, $fm_name, $fm_login, $super_admin;

@@ -112,6 +112,12 @@ class fm_settings {
 	}
 	
 	
+	/**
+	 * Generates a SSH key pair
+	 *
+	 * @since 1.0
+	 * @package facileManager
+	 */
 	function generateSSHKeyPair() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
@@ -154,6 +160,9 @@ class fm_settings {
 	
 	/**
 	 * Displays the form to modify options
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function printForm() {
 		global $fmdb, $__FM_CONFIG, $allowed_to_manage_settings, $fm_name;
@@ -598,6 +607,12 @@ FORM;
 	}
 	
 	
+	/**
+	 * Builds a timezone list
+	 *
+	 * @since 1.0
+	 * @package facileManager
+	 */
 	function buildTimezoneList($selected_zone = null) {
 		$continents = array('Africa', 'America', 'Antarctica', 'Arctic', 'Asia', 'Atlantic', 'Australia', 'Europe', 'Indian', 'Pacific');
 		
@@ -651,6 +666,12 @@ FORM;
 	}
 	
 	
+	/**
+	 * Builds a user list
+	 *
+	 * @since 1.0
+	 * @package facileManager
+	 */
 	function buildUserList() {
 		global $fmdb;
 		

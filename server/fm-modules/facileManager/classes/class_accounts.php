@@ -21,6 +21,12 @@
 
 class fm_accounts {
 	
+	/**
+	 * Verifies server account
+	 *
+	 * @since 1.0
+	 * @package facileManager
+	 */
 	function verify($data) {
 		global $fmdb, $__FM_CONFIG;
 		
@@ -42,6 +48,12 @@ class fm_accounts {
 		return 'Success';
 	}
 	
+	/**
+	 * Verifies account
+	 *
+	 * @since 1.0
+	 * @package facileManager
+	 */
 	function verifyAccount($AUTHKEY) {
 		global $fmdb;
 		

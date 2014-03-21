@@ -583,6 +583,12 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
 	return $values;
 }
 
+/**
+ * Builds a drop down menu
+ *
+ * @since 1.0
+ * @package facileManager
+ */
 function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $class = null) {
 	$type_options = null;
 	if (is_array($options[0])) {
@@ -614,11 +620,23 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 	return $build_select;
 }
 
+/**
+ * Removed trailing periods
+ *
+ * @since 1.0
+ * @package facileManager
+ */
 function trimFullStop($value){
 	return rtrim($value, '.');
 }
 
 
+/**
+ * Gets name from an id
+ *
+ * @since 1.0
+ * @package facileManager
+ */
 function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null) {
 	global $fmdb;
 	
@@ -634,6 +652,12 @@ function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null) 
 }
 
 
+/**
+ * Gets account id from key
+ *
+ * @since 1.0
+ * @package facileManager
+ */
 function getAccountID($value, $field = 'account_key', $key = 'account_id') {
 	global $fmdb;
 	
@@ -1475,7 +1499,7 @@ function bailOut($message, $title = 'Requirement Error') {
  * @return string
  */
 function displayProgress($step, $result, $noisy = true) {
-	$output = ($result) ? 'Success' : 'Failed';
+	$output = ($result == true) ? 'Success' : 'Failed';
 	$color = strtolower($output);
 	
 	$message = <<<HTML
@@ -1758,13 +1782,6 @@ function setOSIcon($server_os) {
 function printPageHeader($response, $title, $allowed_to_add = false, $name = null) {
 	global $__FM_CONFIG;
 	
-//	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-//	echo '<div id="response" style="display: none;"></div>' . "\n";
-//	echo '<div id="body_container"';
-//	if (!empty($response)) echo ' style="margin-top: 4em;"';
-//	echo ">
-//		<h2>$title";
-		
 	echo '<div id="body_container">' . "\n";
 	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
 	else echo '<div id="response" style="display: none;"></div>' . "\n";
