@@ -1,3 +1,7 @@
+1.1.1 (2014-03-??)
+==================
+* Server - (Issue #72) Databases can now be created outside of the
+           installer.
 1.1 (2014-03-18)
 ================
 * Server - Updated menu navigation which also added visual badges that

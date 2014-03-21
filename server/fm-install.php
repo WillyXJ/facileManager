@@ -207,9 +207,15 @@ function processSetup() {
 		exit(displaySetup('Could not connect to MySQL.<br />Please check your credentials.'));
 	} else {
 		$db_selected = @mysql_select_db($dbname, $link);
+		if (mysql_error()) {
+			exit(displaySetup(mysql_error()));
+		}
 		if ($db_selected) {
+			$tables = @mysql_query(sanitize('SHOW TABLES FROM ' . $dbname . ';'), $link);
 			@mysql_close($link);
-			exit(displaySetup('Database already exists.<br />Please choose a different name.'));
+			if (@mysql_num_rows($tables)) {
+				exit(displaySetup('Database already exists and contains one or more tables.<br />Please choose a different name.'));
+			}
 		}
 	}
 	
