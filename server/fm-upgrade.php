@@ -82,30 +82,4 @@ HTML;
 
 printFooter();
 
-
-/**
- * Processes installation.
- *
- * @since 1.0
- * @package facileManager
- * @subpackage Installer
- */
-function processSetup() {
-	extract($_POST);
-	
-	$link = @mysql_connect($dbhost, $dbuser, $dbpass);
-	if (!$link) {
-		exit(displaySetup('Could not connect to MySQL.  Please check your credentials.'));
-	} else {
-		$db_selected = @mysql_select_db($dbname, $link);
-		if ($db_selected) {
-			@mysql_close($link);
-			exit(displaySetup('Database already exists.  Please choose a different name.'));
-		}
-	}
-	
-	require_once(ABSPATH . 'fm-modules/facileManager/install.php');
-	createConfig();
-}
-
 ?>

@@ -31,9 +31,9 @@ function upgradefmSQLPassSchema($module) {
 
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = version_compare($running_version, '1.0-b4', '<') ? upgradefmSQLPass_100($__FM_CONFIG, $running_version) : true;
-	if (!$success) return 'Failed';
+	if (!$success) return $fmdb->last_error;
 	
-	return 'Success';
+	return true;
 }
 
 /** 1.0-b2 */

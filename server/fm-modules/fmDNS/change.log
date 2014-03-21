@@ -1,107 +1,111 @@
+1.1.1 (2014-03-??)
+==================
+* Server - Improved installer and upgrader error handling.
+
 1.1 (2014-03-18)
 ================
 * Server - Added visual effects for things that need user attention.
-* Server - (Git Issue 52) Comments can now be added to views, acls, keys,
+* Server - (Issue #52) Comments can now be added to views, acls, keys,
            options, and logging configs.
 * Server - Improved UI logging of logging channels and categories updates.
 * Server - Fixed PHP errors upon client installs.
 * Server - Added name server checks to the dashboard.
-* Server - (Git Issue 48) Added support for zone delegation.
-* Server - (Git Issue 46) View options can now be defined even when previously
+* Server - (Issue #48) Added support for zone delegation.
+* Server - (Issue #46) View options can now be defined even when previously
            defined in global options.
-* Server - (Git Issue 52) Added support for stub zones.
-* Server - (Git Issue 66) Improved cron updates.
-* Client - (Git Issue 57) Added client activity logging.
+* Server - (Issue #52) Added support for stub zones.
+* Server - (Issue #66) Improved cron updates.
+* Client - (Issue #57) Added client activity logging.
 * Server - Prevent attempts to create non-existent record types for zones.
-* Server - (Git Issue 63) Added forward PTR support specifically for DNS-SD.
-* Server - (Git Issue 67) Added support for wildcard records.
-* Server - (Git Issue 54) Improved interface for selecting server update method.
-* Both   - (Git Issue 53) Added support to auto-update client files.
+* Server - (Issue #63) Added forward PTR support specifically for DNS-SD.
+* Server - (Issue #67) Added support for wildcard records.
+* Server - (Issue #54) Improved interface for selecting server update method.
+* Both   - (Issue #53) Added support to auto-update client files.
 * Server - Improved upgrade error handling.
 
 1.0.3 (2014-02-20)
 ==================
-* Server - (Git Issue 60) Improved server key configs.
+* Server - (Issue #60) Improved server key configs.
 * Server - Fixed help file typo.
 
 1.0.2 (2013-12-31)
 ==================
-* Server - (Git Issue 56) Fixed named checks with slave zones.
+* Server - (Issue #56) Fixed named checks with slave zones.
 
 1.0.1 (2013-12-24)
 ==================
-* Server - (Git Issue 50) Added dnssec-validation config option.
-* Server - (Git Issue 51) Added bindkeys-file config option.
-* Server - (Git Issue 55) Fixed issue where new installations would not
+* Server - (Issue #50) Added dnssec-validation config option.
+* Server - (Issue #51) Added bindkeys-file config option.
+* Server - (Issue #55) Fixed issue where new installations would not
            populate the database properly.
-* Server - (Git Issue 54) Server update method can no longer be changed
+* Server - (Issue #54) Server update method can no longer be changed
            from the webui if the server is installed.
 
 1.0 (2013-12-16)
 ================
-* Server - (Git Issue 35) Added config option input validation.
-* Server - (Git Issue 36) Fixed false error reporting.
-* Server - (Git Issue 40) Fixed issue where server key definitions would be
+* Server - (Issue #35) Added config option input validation.
+* Server - (Issue #36) Fixed false error reporting.
+* Server - (Issue #40) Fixed issue where server key definitions would be
            incorrectly included in views.
 * Server - Updated jquery animations.
-* Server - (Git Issue 41) Fixed issue where views without zones defined would
+* Server - (Issue #41) Fixed issue where views without zones defined would
            cause the named-checks to fail.
 * Server - Fixed server key syntax.
-* Server - (Git Issue 42) Fixed 'Add more records' link.
+* Server - (Issue #42) Fixed 'Add more records' link.
 * Server - Fixed some PHP errors.
-* Both   - (Git Issue 43) Added option to purge configuration files.
-* Both   - (Git Issue 43) Fixed an issue where Debian-based files were not
+* Both   - (Issue #43) Added option to purge configuration files.
+* Both   - (Issue #43) Fixed an issue where Debian-based files were not
            getting created/updated.
-* Server - (Git Issue 44) Improved SOA create/update checks and updated help file.
+* Server - (Issue #44) Improved SOA create/update checks and updated help file.
 * Client - Updated Apple startup script.
 * Both   - Added option to update client configs via SSH.
 * Server - Fixed an issue where the timezone was not set correctly for config
            builds.
-* Server - (Git Issue 47) Improved logging channel definitions regarding file
+* Server - (Issue #47) Improved logging channel definitions regarding file
            versions and size.
 
 1.0-rc6 (2013-11-06)
 ====================
-* Server - (Git Issue 26) Added additional zone reload link.
+* Server - (Issue #26) Added additional zone reload link.
 * Server - Fixed show/hide of server build button.
-* Server - (Git Issue 30) Fixed server options config syntax with listen-on.
+* Server - (Issue #30) Fixed server options config syntax with listen-on.
 * Client - OS detection now separates OS from distro.
 * Server - Fixed some php errors.
-* Server - (Git Issue 31) Fixed an issue where zone imports could be performed
+* Server - (Issue #31) Fixed an issue where zone imports could be performed
            without any defined zones.
 * Client - Checks for posix support before attempting to use it.
 * Server - Added an unsupported note during zone imports if $GENERATE and/or
            $ORIGIN records are found.
-* Server - (Git Issue 32) Fixed an issue where the server config build icon
+* Server - (Issue #32) Fixed an issue where the server config build icon
            would not appear when expected to.
-* Server - (Git Issue 33) Fixed an issue where record comments could not be
+* Server - (Issue #33) Fixed an issue where record comments could not be
            deleted.
 
 1.0-rc5 (2013-10-16)
 ====================
 * Server - Changed color of disabled items.
-* Client - (Git Issue 25) Fixed broken zone reloads.
+* Client - (Issue #25) Fixed broken zone reloads.
 
 1.0-rc4-2 (2013-10-14)
 ======================
-* Both   - (Git Issue 24) Fixed broken config checks introduced in rc4  
+* Both   - (Issue #24) Fixed broken config checks introduced in rc4  
            regarding debian-based systems.
 
 1.0-rc4-1 (2013-10-14)
 ======================
 * Server - Creating zones now autoselects the correct zone type.
-* Server - (Git Issue 24) Fixed broken ACLs introduced in rc4 (doh!).
+* Server - (Issue #24) Fixed broken ACLs introduced in rc4 (doh!).
 
 1.0-rc4 (2013-10-14)
 ====================
 * Server - Added more validity checks.
 * Client - Fixed an issue where reinstallations would fail.
-* Client - (Git Issue 22) Ubuntu systems now have named options defined in 
+* Client - (Issue #22) Ubuntu systems now have named options defined in 
            named.conf.options.
 
 1.0-rc3 (2013-09-30)
 ====================
-* Both   - (Git Issue 20) Added support for server and clients to run http(s) on
+* Both   - (Issue #20) Added support for server and clients to run http(s) on
            non-standard ports.
 * Server - Improved jquery functions.
 * Client - Added more Linux distros to OS detection.
@@ -111,10 +115,10 @@
 
 1.0-rc2 (2013-09-18)
 ====================
-* Server - (Git Issue 16) Added missing view options.
-* Server - (Git Issue 17) Improved zone file imports.
+* Server - (Issue #16) Added missing view options.
+* Server - (Issue #17) Improved zone file imports.
 * Server - Server config builds now use jquery.
-* Server - (Git Issue 19) Added named-checkconf and named-checkzone support and the
+* Server - (Issue #19) Added named-checkconf and named-checkzone support and the
            ability to enable/disable the checks.
 
 1.0-rc1 (2013-09-13)
@@ -133,18 +137,18 @@
 
 1.0-b14 (2013-09-03)
 ====================
-* Server - (Git Issue 13) Added zone name checking during add/edit.
-* Server - (Git Issue 14) Added support for split-brain dns.
+* Server - (Issue #13) Added zone name checking during add/edit.
+* Server - (Issue #14) Added support for split-brain dns.
 * Client - Fixed an issue where under certain circumstances a zonefile does not get built
            when it has clones.
 * Server - Zone deletes now use same jQuery as other record deletions.
-* Server - (Git Issue 9) Cloned zones can now be deleted.
+* Server - (Issue #9) Cloned zones can now be deleted.
 * Server - Added more error checking.
 
 1.0-b13 (2013-08-28)
 ====================
 * Server - Set several tables to INNODB.
-* Server - (Git Issue 7) Users can now be limited to what zones they can manage.
+* Server - (Issue #7) Users can now be limited to what zones they can manage.
 * Both   - Added support for AAAA records.
 
 1.0-b12 (2013-08-23)
@@ -161,7 +165,7 @@
 
 1.0-b10 (2013-08-14)
 ====================
-* Client - (Git Issue 6) Attempts to start named if it's not running.
+* Client - (Issue #6) Attempts to start named if it's not running.
 * Server - No longer presents a blank message if php+httpd are not configured properly to 
            receive updates via http(s).
 
@@ -175,7 +179,7 @@
 
 1.0-b8 (2013-08-13)
 ===================
-* Client - (Git Issue 4) Fixed PHP redeclare error.
+* Client - (Issue #4) Fixed PHP redeclare error.
 
 1.0-b7 (2013-08-13)
 ===================

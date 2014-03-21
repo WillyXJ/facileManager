@@ -30,6 +30,7 @@ class fmdb {
 	 */
 	function fmdb($dbuser, $dbpassword, $dbname, $dbhost) {
 		$this->sql_errors = false;
+		$this->last_error = null;
 		return $this->connect($dbuser, $dbpassword, $dbname, $dbhost);
 	}
 
@@ -127,8 +128,8 @@ class fmdb {
 	 * Print SQL/DB error.
 	 */
 	function print_error($query = '') {
-		$str = mysql_error($this->dbh);
-		if ($query) $str .= " | Query: [$query]";
+		$this->last_error = mysql_error($this->dbh);
+		if ($query) $str = "{$this->last_error} | Query: [$query]";
 		$str = htmlspecialchars($str, ENT_QUOTES);
 
 		// Is error output turned on or not..

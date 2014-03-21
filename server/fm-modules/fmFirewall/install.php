@@ -417,18 +417,30 @@ INSERT;
 	foreach ($table as $schema) {
 		if ($link) {
 			$result = mysql_query($schema, $link);
+			if (mysql_error($link)) {
+				return mysql_error($link);
+			}
 		} else {
 			global $fmdb;
 			$result = $fmdb->query($schema);
+			if ($fmdb->last_error) {
+				return $fmdb->last_error;
+			}
 		}
 	}
 
-	/** Insert values if not already present */
+	/** Insert site values if not already present */
 	foreach ($inserts as $query) {
 		if ($link) {
 			$result = mysql_query($query, $link);
+			if (mysql_error($link)) {
+				return mysql_error($link);
+			}
 		} else {
 			$result = $fmdb->query($query);
+			if ($fmdb->last_error) {
+				return $fmdb->last_error;
+			}
 		}
 	}
 	
@@ -482,8 +494,14 @@ INSERT;
 	foreach ($group_inserts as $query) {
 		if ($link) {
 			$result = mysql_query($query, $link);
+			if (mysql_error($link)) {
+				return mysql_error($link);
+			}
 		} else {
 			$result = $fmdb->query($query);
+			if ($fmdb->last_error) {
+				return $fmdb->last_error;
+			}
 		}
 	}
 	

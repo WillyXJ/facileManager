@@ -31,9 +31,9 @@ function upgradefmDNSSchema($module) {
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
-	if (!$success) return 'Failed';
+	if (!$success) return $fmdb->last_error;
 	
-	return 'Success';
+	return true;
 }
 
 /** 1.0-b5 */
@@ -577,7 +577,7 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('fmDNS_client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false);
+	if (!setOption('fmDNS_client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false)) return false;
 		
 	return true;
 }

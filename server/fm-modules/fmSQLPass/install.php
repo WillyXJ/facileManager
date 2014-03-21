@@ -74,24 +74,32 @@ INSERT;
 	foreach ($table as $schema) {
 		if ($link) {
 			$result = mysql_query($schema, $link);
+			if (mysql_error($link)) {
+				return mysql_error($link);
+			}
 		} else {
 			global $fmdb;
 			$result = $fmdb->query($schema);
+			if ($fmdb->last_error) {
+				return $fmdb->last_error;
+			}
 		}
 	}
 
 	/** Insert site values if not already present */
-//	$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config";
-//	$temp_result = mysql_query($query, $link);
-//	if (!@mysql_num_rows($temp_result)) {
-		foreach ($inserts as $query) {
-			if ($link) {
-				$result = mysql_query($query, $link);
-			} else {
-				$result = $fmdb->query($query);
+	foreach ($inserts as $query) {
+		if ($link) {
+			$result = mysql_query($query, $link);
+			if (mysql_error($link)) {
+				return mysql_error($link);
+			}
+		} else {
+			$result = $fmdb->query($query);
+			if ($fmdb->last_error) {
+				return $fmdb->last_error;
 			}
 		}
-//	}
+	}
 
 	if (function_exists('displayProgress')) {
 		return displayProgress($module, $result, $noisy);

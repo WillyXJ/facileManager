@@ -23,6 +23,9 @@ class fm_tools {
 	
 	/**
 	 * Installs a module
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function installModule($module_name = null) {
 		global $__FM_CONFIG;
@@ -42,8 +45,9 @@ class fm_tools {
 			if (function_exists($function)) {
 				$output = $function(null, $__FM_CONFIG['db']['name'], $module_name, false);
 			}
-			if (!strpos($output, 'Success!')) {
-				return '<p>' . $module_name . ' installation failed!</p>';
+			if (strpos($output, 'Success') === false) {
+				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
+				return '<p>' . $module_name . ' installation failed!</p>' . $error;
 			}
 			
 			addLogEntry("$module_name {$__FM_CONFIG[$module_name]['version']} was born.", $module_name);
@@ -54,6 +58,9 @@ class fm_tools {
 	
 	/**
 	 * Upgrades a module
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function upgradeModule($module_name = null) {
 		global $fmdb;
@@ -73,11 +80,16 @@ class fm_tools {
 			if (function_exists($function)) {
 				$output = $function($module_name);
 			}
-			if ($output != 'Success') {
-				return '<p>' . $module_name . ' upgrade failed!</p>';
+			if ($output !== true) {
+				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
+				return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
 			} else {
 				$query = "UPDATE `fm_options` SET option_value='{$__FM_CONFIG[$module_name]['version']}' WHERE option_name='{$module_name}_version'";
 				$fmdb->query($query);
+				if ($fmdb->last_error) {
+					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
+					return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
+				}
 				setOption($module_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
 			}
 
@@ -89,6 +101,9 @@ class fm_tools {
 	
 	/**
 	 * Manages a module
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function manageModule($action = null, $module_name = null) {
 		global $__FM_CONFIG;
@@ -103,8 +118,6 @@ class fm_tools {
 		switch($action) {
 			case 'activate':
 				if (in_array($module_name, getActiveModules())) return;
-				
-//				if ($current_active_modules === false) $current_active_modules = array();
 				
 				$current_active_modules[] = $module_name;
 				return setOption('fm_active_modules', $current_active_modules, 'auto', true, $_SESSION['user']['account_id']);
@@ -140,6 +153,9 @@ class fm_tools {
 	
 	/**
 	 * Cleans up the database
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function cleanupDatabase() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
@@ -177,6 +193,9 @@ class fm_tools {
 
 	/**
 	 * Backs up the database
+	 *
+	 * @since 1.0
+	 * @package facileManager
 	 */
 	function backupDatabase() {
 		global $__FM_CONFIG, $allowed_to_run_tools, $fm_name;

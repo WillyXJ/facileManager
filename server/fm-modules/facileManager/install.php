@@ -39,7 +39,7 @@ function createConfig() {
 	$temp_file = ABSPATH . 'config.inc.php';
 	
 	if (!file_exists($temp_file) || !file_get_contents($temp_file)) {
-		if (file_put_contents($temp_file, '') === false) {
+		if (@file_put_contents($temp_file, '') === false) {
 			echo <<<CFG
 	<p>I cannot create <code>$temp_file</code> so please manually create it with the following contents:</p>
 	<textarea rows="20">$temp_config</textarea>
@@ -50,7 +50,7 @@ CFG;
 		} else {
 			echo '<form method="post" action="?step=3"><center><table class="form-table">' . "\n";
 			
-			$retval = file_put_contents($temp_file, $temp_config) ? true : false;
+			$retval = @file_put_contents($temp_file, $temp_config) ? true : false;
 			displayProgress('Creating Configuration File', $retval);
 			
 			echo "</table>\n</center>\n";
@@ -63,7 +63,7 @@ HTML;
 			} else {
 				echo <<<HTML
 			<p style="text-align: center;">Config file creation failed.  Please try again.</p>
-			<p class="step"><a href="?step=2" class="button">Try Again</a></p>
+			<p class="step"><a href="?step=2" class="button click_once">Try Again</a></p>
 HTML;
 			}
 			
@@ -131,7 +131,7 @@ HTML;
 	} else {
 		echo <<<HTML
 	<p style="text-align: center;">Database setup failed.  Please try again.</p>
-	<p class="step"><a href="?step=3" class="button">Try Again</a></p>
+	<p class="step"><a href="?step=3" class="button click_once">Try Again</a></p>
 HTML;
 	}
 	
@@ -142,9 +142,14 @@ HTML;
 function installDatabase($link, $database) {
 	global $fm_version, $fm_name;
 	
-	$query = sanitize("CREATE DATABASE IF NOT EXISTS $database DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
-	$result = mysql_query($query, $link);
-	$output = displayProgress('Creating Database', $result);
+	$db_selected = @mysql_select_db($database, $link);
+	if (!$db_selected) {
+		$query = sanitize("CREATE DATABASE IF NOT EXISTS $database DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
+		$result = mysql_query($query, $link);
+		$output = displayProgress('Creating Database', $result);
+	} else {
+		$output = 'Success';
+	}
 	
 	if ($output == 'Success') $output = installSchema($link, $database);
 	if ($output == 'Success') {
@@ -351,7 +356,11 @@ INSERT;
 
 	/** Create table schema */
 	foreach ($table as $schema) {
-		$result = mysql_query($schema, $link);
+		$result = @mysql_query($schema, $link);
+		if (mysql_error()) {
+			echo mysql_error();
+			return displayProgress('Creating ' . $fm_name . ' Schema', $result);
+		}
 	}
 
 	/** Insert site values if not already present */
@@ -359,7 +368,11 @@ INSERT;
 	$temp_result = mysql_query($query, $link);
 	if (!@mysql_num_rows($temp_result)) {
 		foreach ($inserts as $query) {
-			$result = mysql_query($query, $link);
+			$result = @mysql_query($query, $link);
+			if (mysql_error()) {
+				echo mysql_error();
+				return displayProgress('Creating ' . $fm_name . ' Schema', $result);
+			}
 		}
 	}
 	

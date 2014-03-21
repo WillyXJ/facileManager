@@ -2,6 +2,7 @@
 ==================
 * Server - (Issue #72) Databases can now be created outside of the
            installer.
+* Server - Improved installer and upgrader error handling.
 1.1 (2014-03-18)
 ================
 * Server - Updated menu navigation which also added visual badges that

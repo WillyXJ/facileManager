@@ -45,26 +45,20 @@ function fmUpgrade($database) {
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_107($database) : true;
+
+	if ($success) {
+		$success = upgradeConfig('fm_db_version', $fm_db_version);
+		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
+	}
+	
 	displayProgress('Upgrading Schema', $success);
 
 	echo "</table>\n</center>\n";
-
+	
 	if ($success) {
-		upgradeConfig('fm_db_version', $fm_db_version);
-		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
-		$URL = $GLOBALS['RELPATH'] . 'admin-modules';
-		
-		echo <<<HTML
-	<center>
-	<p>Database upgrade for $fm_name is complete!  Click 'Next' to start using $fm_name.</p>
-	<p class="step"><a href="$URL" class="button">Next</a></p>
-	</center>
-HTML;
+		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules');
 	} else {
-		echo <<<HTML
-	<p style="text-align: center;">Database upgrade failed.  Please try again.</p>
-	<p class="step"><a href="?step=2" class="button">Try Again</a></p>
-HTML;
+		displaySetupMessage(2);
 	}
 }
 
@@ -104,9 +98,7 @@ function fmUpgrade_101($database) {
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) {
-					if (!$fmdb->result) return false;
-				}
+				if (!$fmdb->result) return false;
 			}
 		}
 	}
@@ -311,10 +303,7 @@ INSERT;
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) {
-					$success = false;
-					break;
-				}
+				if (!$fmdb->result) return false;
 			}
 		}
 	}
@@ -340,9 +329,7 @@ function fmUpgrade_106($database) {
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) {
-					if (!$fmdb->result) return false;
-				}
+				if (!$fmdb->result) return false;
 			}
 		}
 	}
@@ -382,18 +369,16 @@ INSERT;
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) {
-					if (!$fmdb->result) return false;
-				}
+				if (!$fmdb->result) return false;
 			}
 		}
 	
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) {
-					$success = false;
-					break;
+				if ($fmdb->last_error) {
+					echo $fmdb->last_error;
+					return false;
 				}
 			}
 		}
@@ -403,11 +388,22 @@ INSERT;
 }
 
 
+/**
+ * Updates the database with the db version number.
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage Upgrader
+ */
 function upgradeConfig($field, $value, $logit = true) {
 	global $fmdb;
 	
 	$query = "UPDATE `fm_options` SET option_value='$value' WHERE option_name='$field'";
 	$fmdb->query($query);
+	if ($fmdb->last_error) {
+		echo $fmdb->last_error;
+		return false;
+	}
 
 	session_id($_COOKIE['myid']);
 	@session_start();
@@ -416,6 +412,39 @@ function upgradeConfig($field, $value, $logit = true) {
 		include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 		
 		addLogEntry("$fm_name was upgraded to $fm_version.", $fm_name);
+	}
+	
+	return true;
+}
+
+
+/**
+ * Displays a message during setup.
+ *
+ * @since 1.1.1
+ * @package facileManager
+ * @subpackage Upgrader
+ */
+function displaySetupMessage($message = 1, $url = null) {
+	global $fm_name;
+	
+	switch ($message) {
+		case 1:
+			echo <<<HTML
+	<center>
+	<p>Database upgrade for $fm_name is complete!  Click 'Next' to start using $fm_name.</p>
+	<p class="step"><a href="$url" class="button">Next</a></p>
+	</center>
+
+HTML;
+			break;
+		case 2:
+			echo <<<HTML
+	<p style="text-align: center;">Database upgrade failed.  Please try again.</p>
+	<p class="step"><a href="?step=2" class="button">Try Again</a></p>
+
+HTML;
+			break;
 	}
 }
 

@@ -31,9 +31,9 @@ function upgradefmFirewallSchema($module) {
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = version_compare($running_version, '1.0-b3', '<') ? upgradefmFirewall_100($__FM_CONFIG, $running_version) : true;
-	if (!$success) return 'Failed';
+	if (!$success) return $fmdb->last_error;
 	
-	return 'Success';
+	return true;
 }
 
 /** 1.0-b3 */
@@ -66,7 +66,7 @@ function upgradefmFirewall_100($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false);
+	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
 	
 	return true;
 }
