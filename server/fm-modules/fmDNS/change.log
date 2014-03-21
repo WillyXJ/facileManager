@@ -1,6 +1,7 @@
 1.1.1 (2014-03-??)
 ==================
 * Server - Improved installer and upgrader error handling.
+* Server - Fixed settings page typo.
 
 1.1 (2014-03-18)
 ================

@@ -117,7 +117,7 @@ $__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixe
 $named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkconf') . ', ' . findProgram('named-checkzone') : '/path/to/named-checkconf, /path/to/named-checkzone';
 $__FM_CONFIG['fmDNS']['default']['options'] = array(
 		'enable_named_checks' => array(
-				'description' => array('Enabled named Checks', 'Enable or disable named-checkconf and named-checkzone utilities.</p>
+				'description' => array('Enable named Checks', 'Enable or disable named-checkconf and named-checkzone utilities.</p>
 								<p>sudo must be installed on ' . php_uname('n') . ' with the following in sudoers:</p>
 								<pre>' . $__FM_CONFIG['webserver']['user_info']['name'] . ' ALL=(root) NOPASSWD: ' . $named_check_utils . '</pre>'),
 				'default_value' => 'no',
