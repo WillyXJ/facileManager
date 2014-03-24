@@ -1,4 +1,4 @@
-1.1.1 (2014-03-??)
+1.1.1 (2014-03-24)
 ==================
 * Server - (Issue #72) Databases can now be created outside of the
            installer.
