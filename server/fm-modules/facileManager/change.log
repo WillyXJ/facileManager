@@ -1,3 +1,7 @@
+1.1.2 (2014-04-??)
+==================
+* Server - Fixed password reset typo.
+
 1.1.1 (2014-03-24)
 ==================
 * Server - (Issue #72) Databases can now be created outside of the
