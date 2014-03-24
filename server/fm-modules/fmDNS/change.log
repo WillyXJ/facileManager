@@ -2,6 +2,8 @@
 ==================
 * Server - Improved installer and upgrader error handling.
 * Server - Fixed settings page typo.
+* Server - (Issue #77) Zones will now reload properly when using split
+           views.
 
 1.1 (2014-03-18)
 ================
