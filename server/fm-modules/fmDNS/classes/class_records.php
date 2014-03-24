@@ -118,7 +118,7 @@ class fm_dns_records {
 
 		if (in_array($record_type, array('SOA', 'NS')) && $soa_count && $ns_count) {
 			/** Update all associated DNS servers */
-			setBuildUpdateConfigFlag(null, 'yes', 'build', $insert_id);
+			setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
 		}
 
 		addLogEntry($log_message);

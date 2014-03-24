@@ -4,6 +4,8 @@
 * Server - Fixed settings page typo.
 * Server - (Issue #77) Zones will now reload properly when using split
            views.
+* Server - Fixed an issue where servers could not get built after new
+           zone creations.
 
 1.1 (2014-03-18)
 ================

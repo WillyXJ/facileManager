@@ -341,7 +341,7 @@ class fm_dns_zones {
 		
 		/* set the server_build_config flag for existing servers */
 		if (getSOACount($id) && getNSCount($id)) {
-			setBuildUpdateConfigFlag(null, 'yes', 'build', $id);
+			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
 
 		/** Update the zone */
@@ -355,7 +355,7 @@ class fm_dns_zones {
 
 		/* set the server_build_config flag for new servers */
 		if (getSOACount($id) && getNSCount($id)) {
-			setBuildUpdateConfigFlag(null, 'yes', 'build', $id);
+			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
 
 		addLogEntry($log_message);
@@ -394,7 +394,7 @@ class fm_dns_zones {
 			}
 			
 			/** Force buildconf for all associated DNS servers */
-			setBuildUpdateConfigFlag(null, 'yes', 'build', $domain_id);
+			setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
 			
 			/** Delete cloned zones */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');

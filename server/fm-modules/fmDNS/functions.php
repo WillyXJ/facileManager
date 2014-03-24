@@ -545,4 +545,47 @@ function getModuleBadgeCounts() {
 	return $badge_counts;
 }
 
+
+/**
+ * Gets the name servers hosting a zone
+ *
+ * @since 1.1.1
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param id $domain_id Domain ID to check
+ * @return string
+ */
+function getZoneServers($domain_id) {
+	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
+	
+	$serial_no = null;
+	
+	if ($domain_id) {
+		/** Force buildconf for all associated DNS servers */
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
+		if ($fmdb->num_rows) {
+			$result = $fmdb->last_result;
+			$domain_name_servers = $result[0]->domain_name_servers;
+			
+			if (!isset($fm_dns_zones)) {
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			}
+			$name_servers = $fm_dns_zones->getNameServers($domain_name_servers);
+			
+			/** Loop through name servers */
+			if ($name_servers) {
+				$name_server_count = $fmdb->num_rows;
+				for ($i=0; $i<$name_server_count; $i++) {
+					$serial_no[] = $name_servers[$i]->server_serial_no;
+				}
+				$serial_no = implode(',', $serial_no);
+			}
+		}
+	}
+	
+	return $serial_no;
+}
+
+
 ?>
