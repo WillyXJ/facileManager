@@ -79,6 +79,8 @@ HTML;
 		$activate_link = $upgrade_link = $status_options = null;
 		$class = array();
 		
+		$uninstall_link = '<a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a>' . "\n";
+		
 		/** Get module status */
 		$module_version = getOption(strtolower($module_name) . '_version', 0);
 		if ($module_version !== false) {
@@ -91,8 +93,7 @@ HTML;
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
 				if (!in_array($module_name, getActiveModules())) {
 					if ($allowed_to_manage_modules) {
-						$activate_link = '<a href="?action=activate&module=' . $module_name . '">Activate</a>' . "\n";
-						$activate_link .= '<span class="upgrade_link"><a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a></span>' . "\n";
+						$activate_link = '<span class="activate_link"><a href="?action=activate&module=' . $module_name . '">Activate</a></span>' . "\n" . $uninstall_link;
 					}
 				}
 			} else {
@@ -103,6 +104,7 @@ HTML;
 					} else {
 						$upgrade_link .= '<span class="upgrade_link">' . $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required<br />before this module can be upgraded.</span>';
 					}
+					$activate_link = $uninstall_link;
 				} else $upgrade_link = '<span class="upgrade_link">Upgrade available</span>' . "\n";
 				$class[] = 'upgrade';
 			}

@@ -475,6 +475,12 @@ h4 {
 	border-left: 1px #333 solid;
 	margin-left: 5px;
 	padding-left: 8px;
+	font-weight: bold;
+}
+.modules span.activate_link {
+	border-right: 1px #333 solid;
+	margin-right: 5px;
+	padding-right: 8px;
 }
 .modules .upgrade_notice {
 	background-color: #D9D9D9;

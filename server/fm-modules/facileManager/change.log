@@ -4,6 +4,8 @@
            installer.
 * Server - Improved installer and upgrader error handling.
 * Server - Added function comments.
+* Server - Modules can now be uninstalled if they are deactivated and
+           there is an upgrade available.
 
 1.1 (2014-03-18)
 ================
