@@ -28,7 +28,7 @@ class fm_module_servers {
 	function rows($result) {
 		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Upgrade';
+		if ($allowed_to_build_configs) $bulk_actions_list = array('Upgrade', 'Build Config');
 
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no firewall servers.</p>';

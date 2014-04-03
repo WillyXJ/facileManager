@@ -29,8 +29,7 @@ class fm_module_servers {
 		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
 //		if ($allowed_to_manage_servers) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
-		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Upgrade';
-//		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Build Config';
+		if ($allowed_to_build_configs) $bulk_actions_list = array('Upgrade', 'Build Config');
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no servers.</p>';
@@ -466,7 +465,8 @@ FORM;
 		$options[] = null;
 		
 		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') == 'yes') {
-			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
+			global $fm_module_buildconf;
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
 			
 			$data['SERIALNO'] = $server_serial_no;
 			$data['compress'] = 0;

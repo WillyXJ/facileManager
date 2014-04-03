@@ -600,7 +600,7 @@ $(document).ready(function() {
 			if (confirm('Are you sure you want to ' + $('#bulk_action').val().toLowerCase() + ' these selected ' + item_type + '?')) {
 				$('#manage_item').fadeIn(200);
 				$('#manage_item_contents').fadeIn(200);
-				$('#manage_item_contents').html('<p>Processing Upgrades...</p>');
+				$('#manage_item_contents').html('<p>Processing Bulk Action...</p>');
 		
 				var form_data = {
 					item_id: serverIDs,

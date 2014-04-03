@@ -1918,4 +1918,24 @@ function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 }
 
 
+/**
+ * Takes text and strips html and whitespace
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $text Text to clean up
+ * @param boolean $make_array Whether the output should be an array or not
+ * @return array
+ */
+function makePlainText($text, $make_array = false) {
+	$text = strip_tags($text);
+	$text = trim($text);
+	
+	if ($make_array == true) return explode("\n", $text);
+	
+	return $text;
+}
+
+
 ?>

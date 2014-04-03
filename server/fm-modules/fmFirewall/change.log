@@ -1,3 +1,7 @@
+1.0-b5 (2014-04-??)
+===================
+* Server - (Issue #71) Added support for bulk server config builds.
+
 1.0-b4 (2014-03-24)
 ===================
 * Server - Improved installer and upgrader error handling.
