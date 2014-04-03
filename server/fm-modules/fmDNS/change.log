@@ -2,6 +2,7 @@
 ================
 * Server - Fixed a SQL error when enabling/disabling keys.
 * Server - (Issue #75) Organizes zone files in respective directories.
+           (Upgrades will force server config builds.)
 
 1.1.1 (2014-03-24)
 ==================
