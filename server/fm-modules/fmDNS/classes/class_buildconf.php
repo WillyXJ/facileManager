@@ -559,21 +559,21 @@ class fm_module_buildconf {
 					
 					switch($zone_result[$i]->domain_type) {
 						case 'master':
-							$zones .= "\tfile \"$server_zones_dir/db." . $domain_name_file . "$file_ext\";\n";
+							$zones .= "\tfile \"$server_zones_dir/master/db." . $domain_name_file . "$file_ext\";\n";
 							$zones .= $zone_result[$i]->domain_check_names ? "\tcheck-names " . $zone_result[$i]->domain_check_names . ";\n" : null;
 							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
 							/** Build zone file */
-							$files[$server_zones_dir . '/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i]);
+							$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i]);
 							break;
 						case 'slave':
 							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
-							$zones .= "\tfile \"$server_zones_dir/slaves/db." . $domain_name . "$file_ext\";\n";
+							$zones .= "\tfile \"$server_zones_dir/slave/db." . $domain_name . "$file_ext\";\n";
 							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
 							$zones .= $zone_result[$i]->domain_multi_masters ? "\tmulti-master " . $zone_result[$i]->domain_multi_masters . ";\n" : null;
 							break;
 						case 'stub':
 							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
-							$zones .= "\tfile \"$server_zones_dir/stubs/db." . $domain_name . "$file_ext\";\n";
+							$zones .= "\tfile \"$server_zones_dir/stub/db." . $domain_name . "$file_ext\";\n";
 							break;
 						case 'forward':
 							$zones .= "\tforwarders { " . $zone_result[$i]->domain_forward_servers . "};\n";
