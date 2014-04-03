@@ -139,19 +139,17 @@ RewriteRule . index.php [L]
 	
 	/** Test rewrites */
 	if (!defined('INSTALL')) {
-		if (dns_get_record($_SERVER['SERVER_NAME'], DNS_A + DNS_AAAA)) {
-			$test_output = getPostData($GLOBALS['FM_URL'] . 'admin-accounts?verify', array('module_type' => 'CLIENT'));
-			$test_output = isSerialized($test_output) ? unserialize($test_output) : $test_output;
-			if (strpos($test_output, 'Account is not found.') === false) {
-				if ($single_check) {
-					bailOut(sprintf('<p style="text-align: center;">The required .htaccess file appears to not work with your Apache configuration which is required by %1s.</p>', $fm_name));
-				} else {
-					$requirement_check .= displayProgress('Test Rewrites', false, false);
-					$error = true;
-				}
+		$test_output = getPostData($GLOBALS['FM_URL'] . 'admin-accounts?verify', array('module_type' => 'CLIENT'));
+		$test_output = isSerialized($test_output) ? unserialize($test_output) : $test_output;
+		if (strpos($test_output, 'Account is not found.') === false) {
+			if ($single_check) {
+				bailOut(sprintf('<p style="text-align: center;">The required .htaccess file appears to not work with your Apache configuration which is required by %1s.</p>', $fm_name));
 			} else {
-				if (!$single_check) $requirement_check .= displayProgress('Test Rewrites', true, false);
+				$requirement_check .= displayProgress('Test Rewrites', false, false);
+				$error = true;
 			}
+		} else {
+			if (!$single_check) $requirement_check .= displayProgress('Test Rewrites', true, false);
 		}
 	}
 	
