@@ -70,10 +70,6 @@ if ($allowed_to_manage_servers) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $_GET['id'], 'key_', $_GET['status'], 'key_id')) {
 				$response = 'This item could not be '. $_GET['status'] . '.';
 			} else {
-				/* set the key_build_config flag */
-				$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET `key_build_config`='yes' WHERE `key_id`=" . sanitize($_GET['id']);
-				$result = $fmdb->query($query);
-				
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
 				addLogEntry("Set key '$tmp_name' status to " . $_GET['status'] . '.');
@@ -81,22 +77,6 @@ if ($allowed_to_manage_servers) {
 			}
 		}
 		break;
-	case 'build':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$build_status = buildKeyConfig(sanitize($_GET['id']));
-			
-			if ($build_status) {
-				/* reset the key_build_config flag */
-				$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET `key_build_config`='no',`key_update_config`='yes' WHERE `key_id`=" . sanitize($_GET['id']);
-				$result = $fmdb->query($query);
-	
-				$response = 'This is not yet implemented.' . "\n";
-			} else $response = 'Building key configs failed.' . "\n";
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-			}
-	}
 }
 
 printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);

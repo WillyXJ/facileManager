@@ -1,3 +1,7 @@
+1.2 (2014-04-??)
+================
+* Server - Fixed a SQL error when enabling/disabling keys.
+
 1.1.1 (2014-03-24)
 ==================
 * Server - Improved installer and upgrader error handling.
