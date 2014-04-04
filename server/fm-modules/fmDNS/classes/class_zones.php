@@ -26,17 +26,26 @@ class fm_dns_zones {
 	 * Displays the zone list
 	 */
 	function rows($result, $map, $reload_allowed) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $allowed_to_reload_zones;
 		
+		if ($allowed_to_reload_zones) {
+			$bulk_actions_list = array('Reload');
+			$checkbox_head = '<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, \'domain_list[]\')" /></th>';
+		} else {
+			$checkbox_head = $bulk_actions_list = null;
+		}
+
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="domains">There are no zones.</p>';
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			?>
 			<table class="display_results" id="table_edits" name="domains">
 				<thead>
 					<tr>
+						<?php echo $checkbox_head; ?>
 						<th style="width: 50px;">ID</th>
 						<th style="text-align:left;">Domain</th>
 						<th>Type</th>
@@ -425,6 +434,8 @@ class fm_dns_zones {
 		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
 		$response = null;
 		
+		$checkbox = ($allowed_to_reload_zones) ? '<td></td>' : null;
+		
 		$soa_count = getSOACount($row->domain_id);
 		$ns_count = getNSCount($row->domain_id);
 		$reload_allowed = reloadAllowed($row->domain_id);
@@ -445,9 +456,15 @@ class fm_dns_zones {
 				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($row->domain_id, $module_extra_perms['zone_access']) : true;
 		}
 		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
-			$reload_zone = ($allowed_to_reload_zones && $zone_access_allowed) ? '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>' : 'Reload Available<br />';
+			if ($allowed_to_reload_zones && $zone_access_allowed) {
+				$reload_zone = '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>';
+				$checkbox = '<td><input type="checkbox" name="domain_list[]" value="' . $row->domain_id .'" /></td>';
+			} else {
+				$reload_zone = 'Reload Available<br />';
+			}
 		} else $reload_zone = null;
 		if ($reload_zone) $class = 'build';
+		
 /*
 		$edit_status = <<<FORM
 <form method="post" action="{$GLOBALS['basename']}?map={$map}">
@@ -488,6 +505,7 @@ FORM;
 		
 		echo <<<HTML
 		<tr title="$response" id="$row->domain_id" $class>
+			$checkbox
 			<td>$row->domain_id</td>
 			<td>$edit_name</td>
 			<td>$row->domain_type</td>
@@ -992,6 +1010,58 @@ HTML;
 		return str_replace($typo, $fixed, $domain_name);
 	}
 	
+	/**
+	 * Process bulk zone reloads
+	 *
+	 * @since 1.2
+	 * @package facileManager
+	 */
+	function doBulkZoneReload($domain_id) {
+		global $fmdb, $__FM_CONFIG, $super_admin;
+		
+		/** Check serial number */
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($domain_id), 'domain_', 'domain_id');
+		if (!$fmdb->num_rows) return $domain_id . ' is not a valid zone ID.';
+
+		$server_details = $fmdb->last_result;
+		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+		
+		$response[] = $domain_name;
+		
+		/** Ensure domain is reloadable */
+		if ($domain_reload != 'yes') {
+			$response[] = ' --> Failed: Zone is not available for reload.';
+		}
+		
+		/** Ensure domain is master */
+		if (count($response) == 1 && $domain_type != 'master') {
+			$response[] = ' --> Failed: Zone is not a master zone.';
+		}
+		
+		/** Ensure user is allowed to reload zone */
+		$zone_access_allowed = true;
+		
+		if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
+			$module_extra_perms = isSerialized($_SESSION['user']['module_perms']['perm_extra']) ? unserialize($_SESSION['user']['module_perms']['perm_extra']) : $_SESSION['user']['module_perms']['perm_extra'];
+			$zone_access_allowed = (is_array($module_extra_perms) && 
+				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($domain_id, $module_extra_perms['zone_access']) : true;
+		}
+		if (count($response) == 1 && !$zone_access_allowed) {
+			$response[] = ' --> Failed: You do not have permission to reload this zone.';
+		}
+		
+		/** Format output */
+		if (count($response) == 1) {
+			foreach (makePlainText($this->buildZoneConfig($domain_id), true) as $line) {
+				$response[] = ' --> ' . $line;
+			}
+		}
+		
+		$response[] = "\n";
+		
+		return implode("\n", $response);
+	}
+
 }
 
 if (!isset($fm_dns_zones))

@@ -29,7 +29,12 @@ class fm_module_servers {
 		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
 //		if ($allowed_to_manage_servers) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
-		if ($allowed_to_build_configs) $bulk_actions_list = array('Upgrade', 'Build Config');
+		if ($allowed_to_build_configs) {
+			$bulk_actions_list = array('Upgrade', 'Build Config');
+			$checkbox_head = '<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, \'server_list[]\')" /></th>';
+		} else {
+			$checkbox_head = $bulk_actions_list = null;
+		}
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no servers.</p>';
@@ -39,7 +44,7 @@ class fm_module_servers {
 			<table class="display_results" id="table_edits" name="servers">
 				<thead>
 					<tr>
-						<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, 'server_list[]')" /></th>
+						<?php echo $checkbox_head; ?>
 						<th width="20" style="text-align: center;"></th>
 						<th>Hostname</th>
 						<th>Serial No</th>
@@ -283,6 +288,8 @@ class fm_module_servers {
 		$edit_status = null;
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
+		$checkbox = ($allowed_to_build_configs) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
+		
 		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
 				$edit_actions .= $__FM_CONFIG['icons']['build'];
@@ -319,7 +326,7 @@ class fm_module_servers {
 		
 		echo <<<HTML
 		<tr id="$row->server_id" $class>
-			<td><input type="checkbox" name="server_list[]" value="{$row->server_serial_no}" /></td>
+			$checkbox
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>

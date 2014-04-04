@@ -157,11 +157,11 @@ class fm_shared_module_servers {
 	/**
 	 * Process bulk server config build
 	 *
-	 * @since 1.1
+	 * @since 1.2
 	 * @package facileManager
 	 */
 	function doBulkServerBuild($server_serial_no) {
-		global $fmdb, $__FM_CONFIG, $fm_name, $fm_module_servers;
+		global $fmdb, $__FM_CONFIG, $fm_module_servers;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($server_serial_no), 'server_', 'server_serial_no');

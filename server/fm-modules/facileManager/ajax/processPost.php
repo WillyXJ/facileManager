@@ -60,7 +60,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 /** Handle bulk actions */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
-	array_key_exists('bulk_action', $_POST)) {
+	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('upgrade', 'build config'))) {
 	switch($_POST['bulk_action']) {
 		/** Handle client upgrades */
 		case 'upgrade':
