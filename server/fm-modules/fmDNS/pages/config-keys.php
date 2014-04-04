@@ -77,6 +77,7 @@ if ($allowed_to_manage_servers) {
 			}
 		}
 		break;
+	}
 }
 
 printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
