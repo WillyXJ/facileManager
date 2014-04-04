@@ -5,6 +5,7 @@
            (Upgrades will force server config builds.)
 * Server - (Issue #71) Added support for bulk server config builds
            and zone reloads.
+* Server - Fixed a page title.
 
 1.1.1 (2014-03-24)
 ==================

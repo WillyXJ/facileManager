@@ -40,7 +40,7 @@ if (isset($_GET['record_type'])) {
 $domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 if (!isValidDomain($domain_id)) header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 
-printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
+printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');

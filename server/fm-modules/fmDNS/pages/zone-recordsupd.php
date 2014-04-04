@@ -38,7 +38,7 @@ if (!$allowed_to_manage_records || empty($_POST)) {
 }
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
 
-printHeader();
+printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
 extract($_POST);
