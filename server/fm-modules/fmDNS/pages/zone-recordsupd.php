@@ -552,7 +552,7 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 	
 	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
 		return true;
-	} elseif (preg_match("([_\.\*\!@#\$&\+\=\|/:;,'\"�%^\(\)])", $record_name) == false) {
+	} elseif (preg_match("([_\*\!@#\$&\+\=\|/:;,'\"�%^\(\)])", $record_name) == false) {
 		return true;
 	} elseif ($record_name == '@') {
 		return true;
