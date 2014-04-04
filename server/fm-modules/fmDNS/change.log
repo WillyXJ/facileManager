@@ -1,3 +1,7 @@
+1.1.2 (2014-04-04)
+==================
+* Server - Fixed zone delegation support.
+
 1.1.1 (2014-03-24)
 ==================
 * Server - Improved installer and upgrader error handling.
