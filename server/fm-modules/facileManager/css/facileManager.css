@@ -83,7 +83,8 @@ label {
 	bottom: 0;
 	background-color: #ECECEC;
 	border-right: 1px #ccc solid;
-	width: 10em;
+	width: 12em;
+	font-size: 10pt;
 	z-index: -1;
 	moz-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
 	-webkit-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
@@ -401,7 +402,8 @@ h4 {
 	padding: 1em 2em;
 	position: absolute;
 	right: 0em;
-	left: 10em;
+	left: 12em;
+	font-size: 10pt;
 	float: left;
 	margin-top: 2.2em;
 }
