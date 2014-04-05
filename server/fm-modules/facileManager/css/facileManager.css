@@ -823,7 +823,7 @@ a {
 	opacity: 1.0;
 	padding: 2em;
 	max-width: 70%;
-	overflow: scroll;
+	overflow: auto;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	moz-box-shadow: 0 4px 10px -1px #000;
@@ -964,7 +964,7 @@ span.not_installed {
 	padding-left: 2em;
 	font-size: 10pt;
 	line-height: 18pt;
-	overflow: scroll;
+	overflow: auto;
 }
 
 #shadow_container h3 {
