@@ -33,7 +33,7 @@ function returnError($window = true) {
 	if ($window) {
 		echo '<h2>Error</h2>' . "\n";
 		echo '<p>' . $msg . "</p>\n";
-		echo '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />' . "\n";
+		echo '<br /><input type="submit" value="OK" class="button" id="cancel_button" />' . "\n";
 	} else {
 		echo '<p class="error">' . $msg . "</p>\n";
 	}

@@ -48,6 +48,6 @@ if (file_exists($module_ajax_file) && $_SESSION['module'] != $fm_name) {
 	include($module_ajax_file);
 }
 
-echo '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />' . "\n";
+echo '<br /><input type="submit" value="OK" class="button" id="cancel_button" />' . "\n";
 
 ?>

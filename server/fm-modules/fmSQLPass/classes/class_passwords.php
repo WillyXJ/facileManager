@@ -101,7 +101,7 @@ HTML;
 			else return <<<HTML
 				<h2>Password Change Results</h2>
 				<p>$error</p>
-				<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />
+				<br /><input type="submit" value="OK" class="button" id="cancel_button" />
 HTML;
 		}
 		

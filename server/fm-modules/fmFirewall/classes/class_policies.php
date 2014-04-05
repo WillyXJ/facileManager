@@ -472,7 +472,7 @@ FORM;
 		}
 		
 		$return_form .= <<<FORM
-			<input value="Cancel" class="button cancel" id="cancel_button" />
+			<input type="button" value="Cancel" class="button" id="cancel_button" />
 		</form>
 FORM;
 
