@@ -491,7 +491,7 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
  * @since 1.0
  * @package facileManager
  */
-function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', $ip_sort = false) {
+function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', $ip_sort = false, $direction = 'ASC') {
 	global $fmdb;
 	$id = sanitize($id);
 	
@@ -504,12 +504,12 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', 
 	}
 	
 	if ($ip_sort) {
-		$sort = "ORDER BY INET_ATON(`$id`) ASC";
+		$sort = "ORDER BY INET_ATON(`$id`)";
 	} else {
 		$sort = "ORDER BY `$id`";
 	}
 	
-	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $limit";
+	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
 	return $fmdb->query($disp_query);
 }
 

@@ -6,6 +6,7 @@
 * Server - (Issue #71) Added support for bulk server config builds
            and zone reloads.
 * Server - Fixed a page title.
+* Server - (Issue #81) Updated UI record sorting.
 
 1.1.1 (2014-03-24)
 ==================

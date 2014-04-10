@@ -92,14 +92,30 @@ echo "	<h2>Records</h2>
 	</form>' . "\n";
 		}
 	} else {
+		switch ($record_type) {
+			case 'NS':
+				$sort_field = 'record_value';
+				$ip_sort = false;
+				break;
+			case 'PTR':
+				$sort_field = 'record_name';
+				$ip_sort = true;
+				break;
+			case 'MX':
+				$sort_field = 'record_priority';
+				$ip_sort = true;
+				break;
+			default:
+				$sort_field = 'record_name';
+				$ip_sort = false;
+				break;
+		}
 		if (in_array($record_type, array('A', 'AAAA'))) {
-			$sort_field = 'record_value';
 			$record_sql = "AND domain_id='$domain_id' AND record_type IN ('A', 'AAAA')";
 		} else {
-			$sort_field = 'record_name';
 			$record_sql = "AND domain_id='$domain_id' AND record_type='$record_type'";
 		}
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $sort_field, 'record_', $record_sql, null, true);
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $sort_field, 'record_', $record_sql, null, $ip_sort);
 		$fm_dns_records->rows($result, $record_type, $domain_id);
 		
 		if ($allowed_to_manage_records && $zone_access_allowed) {
