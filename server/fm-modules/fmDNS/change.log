@@ -7,6 +7,7 @@
            and zone reloads.
 * Server - Fixed a page title.
 * Server - (Issue #81) Updated UI record sorting.
+* Server - Added support for the Hesiod class.
 
 1.1.1 (2014-03-24)
 ==================

@@ -589,7 +589,7 @@ function upgradefmDNS_120($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_class`  `record_class` ENUM(  'IN',  'CH',  'HS' ) NOT NULL DEFAULT  'IN';";
 
 	$inserts = $updates = null;
 	
