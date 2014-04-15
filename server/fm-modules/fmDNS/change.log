@@ -13,6 +13,8 @@
            server key definitions. (Issue #80)
 * Server - [feature] Separated A and AAAA records.
 * Server - [bug] Fixed config options could not be updated.
+* Server - [security] Fixed an issue where a record admin could modify
+           zone information.
 
 1.1.1 (2014-03-24)
 ==================

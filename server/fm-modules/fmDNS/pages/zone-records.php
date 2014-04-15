@@ -40,6 +40,8 @@ if (isset($_GET['record_type'])) {
 $domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 if (!isValidDomain($domain_id)) header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: ' . $GLOBALS['RELPATH']);
+
 printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
@@ -55,7 +57,6 @@ if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
 		!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($domain_id, $module_extra_perms['zone_access']) : true;
 }
 
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
 if (!in_array($record_type, $supported_record_types) && !in_array($record_type, $__FM_CONFIG['records']['common_types'])) $record_type = $__FM_CONFIG['records']['common_types'][0];
 $avail_types = buildRecordTypes($record_type, $domain_id, $map, $supported_record_types);
 
