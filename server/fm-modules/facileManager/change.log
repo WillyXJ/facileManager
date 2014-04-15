@@ -1,178 +1,182 @@
 1.2 (2014-04-??)
 ================
-* Server - Improved password strength settings description.
-* Server - Combined general and module settings in one menu.
+* Server - [feature] Improved password strength settings description.
+* Server - [feature] Combined general and module settings in one menu.
 
 1.1.2 (2014-04-03)
 ==================
-* Server - Fixed password reset typo.
-* Server - Added favicon.
-* Server - (Issue #76) Improved rewrite check.
+* Server - [bug] Fixed password reset typo.
+* Server - [feature] Added favicon.
+* Server - [feature] Improved rewrite check. (Issue #76)
 
 1.1.1 (2014-03-24)
 ==================
-* Server - (Issue #72) Databases can now be created outside of the
-           installer.
-* Server - Improved installer and upgrader error handling.
-* Server - Added function comments.
-* Server - Modules can now be uninstalled if they are deactivated and
+* Server - [feature] Databases can now be created outside of the
+           installer. (Issue #72)
+* Server - [bug] Improved installer and upgrader error handling.
+* Server - [feature] Added function comments.
+* Server - [feature] Modules can now be uninstalled if they are deactivated and
            there is an upgrade available.
 
 1.1 (2014-03-18)
 ================
-* Server - Updated menu navigation which also added visual badges that
+* Server - [feature] Updated menu navigation which also added visual badges that
            require user attention.
-* Server - Updated some visual effects.
-* Server - Client installs now ensure the module is active before
+* Server - [feature] Updated some visual effects.
+* Server - [feature] Client installs now ensure the module is active before
            continuing the installation process.
-* Client - (Issue #45) Detects if PHP CGI is running instead of CLI.
-* Server - Added scroll to top link.
-* Server - Checks for the required .htaccess file and attempts to create
+* Client - [feature] (Issue #45) Detects if PHP CGI is running instead of CLI.
+* Server - [feature] Added scroll to top link.
+* Server - [feature] Checks for the required .htaccess file and attempts to create
            it if missing.
-* Server - Added ability to update to non-stable releases.
-* Server - Updated settings pages jquery.
-* Both   - (Issue #53) Added support to auto-update client files.
-* Client - Added an argument to display the version.
+* Server - [feature] Added ability to update to non-stable releases.
+* Server - [feature] Updated settings pages jquery.
+* Both   - [feature] Added support to auto-update client files. (Issue #53)
+* Client - [feature] Added an argument to display the version.
 
 1.0.2 (2013-12-31)
 ==================
-* Server - Fixed issue where installer would report inability to write
+* Server - [bug] Fixed issue where installer would report inability to write
            the configuration file when the server directory had the
            appropriate permissions.
-* Both   - Fixed an issue where client installation would fail when 
+* Both   - [bug] Fixed an issue where client installation would fail when 
            checking account details.
 
 1.0.1 (2013-12-24)
 ==================
-* Client - Added more error handling in isolated install issues.
-* Server - Enabled update checks by default.
+* Client - [bug] Added more error handling in isolated install issues.
+* Server - [bug] Enabled update checks by default.
 
 1.0 (2013-12-16)
 ================
-* Server - Removed enable/disable option for template user accounts.
-* Server - Can no longer delete the active template user account.
-* Server - Updated css and jquery animations.
-* Server - User password strength is now selectable in the settings.
-* Server - Improved logging of settings changes.
-* Server - Customizable app update checks.
-* Server - CSS tweaks.
-* Server - fM software update checks are now customizable.
-* Server - User accounts can now set their default module to use.
-* Server - Fixed an issue where clients would report as installed
+* Server - [feature] Removed enable/disable option for template user accounts.
+* Server - [bug] Can no longer delete the active template user account.
+* Server - [feature] Updated css and jquery animations.
+* Server - [feature] User password strength is now selectable in the settings.
+* Server - [feature] Improved logging of settings changes.
+* Server - [feature] Customizable app update checks.
+* Server - [feature] CSS tweaks.
+* Server - [feature] fM software update checks are now customizable.
+* Server - [feature] User accounts can now set their default module to use.
+* Server - [bug] Fixed an issue where clients would report as installed
            when the installation was not complete.
 
 1.0-rc6-1 (2013-11-07)
 ======================
-* Server - (Issue #34) Fixed an issue were servers could not be added.
+* Server - [bug] Fixed an issue were servers could not be added. (Issue #34)
 
 1.0-rc6 (2013-11-06)
 ====================
-* Server - Server config builds now prompt for confirmation.
-* Server - Fixed installer password validity background display.
-* Server - Serial number generation now checks all module server tables for 
-           unique values.
-* Server - Fixed some PHP errors.
-* Server - Ensures current module is active.
-* Client - Added install support for multiple modules.
-* Client - Improved Linux distro detection.
+* Server - [feature] Server config builds now prompt for confirmation.
+* Server - [bug] Fixed installer password validity background display.
+* Server - [feature] Serial number generation now checks all module server tables
+           for unique values.
+* Server - [bug] Fixed some PHP errors.
+* Server - [bug] Ensures current module is active.
+* Client - [feature] Added install support for multiple modules.
+* Client - [feature] Improved Linux distro detection.
 
 1.0-rc5 (2013-10-16)
 ====================
-* Server - Code clean up.
-* Server - Changed date items to date type.
-* Client - Fixed client sudoers line.
-* Server - Added more graphical elements.
+* Server - [bug] Code clean up.
+* Server - [bug] Changed date items to date type.
+* Client - [bug] Fixed client sudoers line.
+* Server - [feature] Added more graphical elements.
 
 1.0-rc4 (2013-10-14)
 ====================
-* Server - Fixed issue where modules could be 'upgraded' to an older version.
-* Server - Fixed issue with admin log searching.
-* Server - (Issue #23) Module upgrades now inform user to upgrade client files
-           upon completion.
-* Server - Added support to show/hide application errors.
+* Server - [bug] Fixed issue where modules could be 'upgraded' to an older version.
+* Server - [bug] Fixed issue with admin log searching.
+* Server - [feature] Module upgrades now inform user to upgrade client files
+           upon completion. (Issue #23)
+* Server - [feature] Added support to show/hide application errors.
 
 1.0-rc3 (2013-09-30)
 ====================
-* Server - Improved validateNumber() javascript function.
-* Server - Added option to enforce HTTPS.
+* Server - [bug] Improved validateNumber() javascript function.
+* Server - [feature] Added option to enforce HTTPS.
 
 1.0-rc2 (2013-09-18)
 ====================
-* Server - (Issue #18) Integrated installation and upgrade instructions into
-           the README.
-* Server - (Issue #1) Added additional OS-specific installation instructions.
-* Server - Updated some jquery functions.
+* Server - [feature] Integrated installation and upgrade instructions into
+           the README. (Issue #18)
+* Server - [feature] Added additional OS-specific installation instructions.
+           (Issue #1)
+* Server - [feature] Updated some jquery functions.
 
 1.0-rc1 (2013-09-13)
 ====================
-* Server - Added ability to change the displayed datetime format and set the 
-           timezone.
-* Server - Added ad-hoc database backup functionality.
-* Server - (Issue #10) Added LDAP authentication support.
-* Server - Updated help files.
+* Server - [feature] Added ability to change the displayed datetime format and
+           set the timezone.
+* Server - [feature] Added ad-hoc database backup functionality.
+* Server - [feature] Added LDAP authentication support. (Issue #10)
+* Server - [feature] Updated help files.
 
 1.0-b15 (2013-09-04)
 ====================
-* Server - (Issue #3) Added search capabilities to the admin logs page.
+* Server - [feature] Added search capabilities to the admin logs page. (Issue #3)
 
 1.0-b14 (2013-09-03)
 ====================
-* Server - Minor change to forgotton password email.
-* Server - Fixed an issue with module upgrades.
-* Server - Added more error checking.
+* Server - [feature] Minor change to forgotton password email.
+* Server - [bug] Fixed an issue with module upgrades.
+* Server - [feature] Added more error checking.
 
 1.0-b13 (2013-08-28)
 ====================
-* Server - Added Admin->Settings menu item to set authentication and mailing methods.
-* Server - Can now disable authentication thus using only the default super-admin
-           user account.
-* Server - Set several tables to INNODB.
-* Server - (Issue #12) Added support to email password reset links.
-* Server - (Issue #7) Added support for modules to have more granular user permissions.
+* Server - [feature] Added Admin->Settings menu item to set authentication and
+           mailing methods.
+* Server - [feature] Can now disable authentication thus using only the default
+           super-admin user account.
+* Server - [feature] Set several tables to INNODB.
+* Server - [feature] Added support to email password reset links. (Issue #12)
+* Server - [feature] Added support for modules to have more granular user
+           permissions. (Issue #7)
 
 1.0-b12 (2013-08-23)
 ====================
-* Server - Fixed database clean up bug.
-* Server - Supports pressing the ESC button to cancel a window.
-* Server - Fixed module installation output.
-* Server - Replaced logout button with account menu.
-* Server - Redesigned user management page.
-* Server - Fixed an issue where user permissions could be removed unintentionally
-           during a password change.
-* Server - (Issue #11) Super-admins can no longer be demoted by non-super-admins
-           nor themselves.
-* Server - Added option to enforce a user password change upon login.
+* Server - [bug] Fixed database clean up bug.
+* Server - [feature] Supports pressing the ESC button to cancel a window.
+* Server - [bug] Fixed module installation output.
+* Server - [feature] Replaced logout button with account menu.
+* Server - [feature] Redesigned user management page.
+* Server - [security] Fixed an issue where user permissions could be removed
+           unintentionally during a password change.
+* Server - [security] Super-admins can no longer be demoted by non-super-admins
+           nor themselves. (Issue #11)
+* Server - [feature] Added option to enforce a user password change upon login.
 
 1.0-b11 (2013-08-21)
 ====================
-* Server - Help now pops out.
+* Server - [feature] Help now pops out.
 
 1.0-b10 (2013-08-14)
 ====================
-* Server - Fixed post-upgrade redirection.
+* Server - [bug] Fixed post-upgrade redirection.
 
 1.0-b9 (2013-08-14)
 ===================
-* Server - Decreased the update check interval.
-* Client - Added PHP version check.
+* Server - [feature] Decreased the update check interval.
+* Client - [feature] Added PHP version check.
 
 1.0-b7 (2013-08-13)
 ===================
-* Server - Updated version checks.
-* Server - Improved installation to prevent duplicate entries.
-* Server - (Issue #1) Improved application requirement checks.
-* Server - Improved user creation and modification.
+* Server - [feature] Updated version checks.
+* Server - [bug] Improved installation to prevent duplicate entries.
+* Server - [feature] Improved application requirement checks. (Issue #1)
+* Server - [feature] Improved user creation and modification.
 
 1.0-b6 (2013-08-13)
 ===================
-* Server - (Issue #1) Added mod_rewrite check.
-* Server - Fixed relative pathing issue.
-* Server - User no longer gets redirected to the dashboard after authentication.
+* Server - [feature] Added mod_rewrite check. (Issue #1)
+* Server - [bug] Fixed relative pathing issue.
+* Server - [feature] User no longer gets redirected to the dashboard after
+           authentication.
 
 1.0-b5 (2013-08-10)
 ===================
-* Server - Added module version checks.
-* Server - Improved upgrade process.
+* Server - [feature] Added module version checks.
+* Server - [feature] Improved upgrade process.
 
 1.0-b4 (2013-08-09)
 ===================
