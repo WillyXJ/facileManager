@@ -84,7 +84,7 @@ p.soa_import span {
 	background-color: #464646;
 	border-radius:5px 5px 0 0;
 }
-#recordmenu { display:block; padding:0; margin: -6px 0 0 3px; float: right; }
+#recordmenu { display:block; padding:0; margin: -6px 0 0 4px; float: right; }
 #recordmenu > ul {list-style:inside none; padding:0; margin:0;}
 #recordmenu > ul > li {list-style: none; padding:3px 1em 0 0; margin:0; display:block; position:relative;}
 #recordmenu > ul > li > a{ outline:none; display:block; position:relative; text-decoration:none; padding-bottom: 6px; }
