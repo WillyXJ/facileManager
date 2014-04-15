@@ -15,6 +15,7 @@
 * Server - [bug] Fixed config options could not be updated.
 * Server - [security] Fixed an issue where a record admin could modify
            zone information.
+* Server - [bug] Fixed incorrect redirection under certain circumstances.
 
 1.1.1 (2014-03-24)
 ==================

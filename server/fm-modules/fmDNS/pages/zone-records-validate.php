@@ -34,9 +34,9 @@ $record_type = (isset($_GET['record_type'])) ? strtoupper($_GET['record_type']) 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
 if (!$allowed_to_manage_records || empty($_POST)) {
-	header('Location: /');
+	header('Location: ' . $GLOBALS['RELPATH']);
 }
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: ' . $GLOBALS['RELPATH']);
 
 printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);

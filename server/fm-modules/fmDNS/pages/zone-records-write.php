@@ -33,7 +33,7 @@ if (array_key_exists('cancel', $_POST)) {
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
 extract($_POST);
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: ' . $GLOBALS['RELPATH']);
 
 if (isset($update) && is_array($update)) {
 	foreach ($update as $id => $data) {
