@@ -546,7 +546,8 @@ tbody {
 }
 
 .form-table input:not([type="image"]),
-.display_results input:not([type="image"]) {
+.display_results input:not([type="image"]),
+.display_results textarea {
 	line-height: 20px;
 	font-size: 12px;
 	padding: 2px;

@@ -563,7 +563,7 @@ class fm_module_buildconf {
 							$zones .= $zone_result[$i]->domain_check_names ? "\tcheck-names " . $zone_result[$i]->domain_check_names . ";\n" : null;
 							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
 							/** Build zone file */
-							$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i]);
+							$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 							break;
 						case 'slave':
 							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
@@ -601,7 +601,7 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildZoneFile($domain) {
+	function buildZoneFile($domain, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
 		include(ABSPATH . 'fm-includes/version.php');
@@ -617,7 +617,7 @@ class fm_module_buildconf {
 		$zone_file .= $this->buildSOA($domain);
 		
 		/** get the records */
-		$zone_file .= $this->buildRecords($domain);
+		$zone_file .= $this->buildRecords($domain, $server_serial_no);
 		
 		return $zone_file;
 	}
@@ -763,11 +763,12 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildRecords($domain) {
+	function buildRecords($domain, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$zone_file = null;
 		$domain_name_trim = trimFullStop($domain->domain_name);
+		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		
 		if ($domain->domain_mapping == 'reverse') {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->domain_id, 'record_', 'domain_id', "AND `record_status`='active' ORDER BY record_type,INET_ATON(record_name),record_value");
@@ -776,74 +777,106 @@ class fm_module_buildconf {
 		}
 		if ($fmdb->num_rows) {
 			$ns_records = $mx_records = $txt_records = $a_records = $cname_records = $srv_records = $ptr_records = null;
+			$hinfo_records = $cert_records = null;
 
 			$count = $fmdb->num_rows;
 			$record_result = $fmdb->last_result;
 			for ($i=0; $i < $count; $i++) {
 				$domain_name = $this->getDomainName($domain->domain_mapping, $domain_name_trim);
 				$record_comment = $record_result[$i]->record_comment ?  ' ; ' . $record_result[$i]->record_comment : null;
+				$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
+				if ($record_result[$i]->record_name[0] == '@') {
+					$record_name = $domain_name;
+				}
 				switch($record_result[$i]->record_type) {
 					case 'A':
 					case 'AAAA':
-						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
-						if ($record_result[$i]->record_name[0] == '@') {
-							$record_name = $domain_name;
-						}
-						$a_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Host addresses';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						break;
+					case 'CERT':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.7.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Certificates';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'CNAME':
-						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
-						$cname_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+					case 'DNAME':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Aliases';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						break;
+					case 'DHCID':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'DHCP ID records';
+//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						break;
+					case 'DLV':
+					case 'DS':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'DNSSEC Lookaside Validation';
+//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						break;
+					case 'DNSKEY':
+					case 'KEY':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Key records';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						break;
+					case 'HINFO':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Hardware information records';
+						$hardware = (strpos($record_result[$i]->record_value, ' ') === false) ? $record_result[$i]->record_value : '"' . $record_result[$i]->record_value . '"';
+						$os = (strpos($record_result[$i]->record_os, ' ') === false) ? $record_result[$i]->record_os : '"' . $record_result[$i]->record_os . '"';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $hardware . ' ' . $os . $record_comment . "\n";
+						break;
+					case 'KX':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Key Exchange records';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'MX':
-						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
-						if ($record_result[$i]->record_name[0] == '@') {
-							$record_name = $domain_name;
-						}
-						$mx_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[2 . $record_result[$i]->record_type]['Description'] = 'Mail Exchange records';
+						$record_array[2 . $record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'TXT':
-						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
-						if ($record_result[$i]->record_name[0] == '@') {
-							$record_name = $domain_name;
-						}
-						$txt_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . $record_comment . "\"\n";
+						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . "\"" . $record_comment . "\n";
 						break;
 					case 'SRV':
-						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
-						if ($record_result[$i]->record_name[0] == '@') {
-							$record_name = $domain_name;
-						}
-						$srv_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_weight . "\t" . $record_result[$i]->record_port . "\t" . $record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_weight . "\t" . $record_result[$i]->record_port . "\t" . $record_value . $record_comment . "\n";
 						break;
 					case 'PTR':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Addresses point to hosts';
 						$record_name = ($record_result[$i]->record_append == 'yes' && $domain->domain_mapping == 'reverse') ? $record_result[$i]->record_name . '.' . $domain_name : $record_result[$i]->record_name;
-						$ptr_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						break;
+					case 'RP':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Responsible Persons';
+						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
+						$text = (strpos($record_result[$i]->record_text, ' ') === false) ? $record_result[$i]->record_text : '"' . $record_result[$i]->record_text . '"';
+						if (!strlen($record_result[$i]->record_text)) $text = '.';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . "\t" . $text . $record_comment . "\n";
 						break;
 					case 'NS':
-						$record_name = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_name . '.' . $domain_name_trim . '.' : $record_result[$i]->record_name;
-						if ($record_result[$i]->record_name[0] == '@') {
-							$record_name = $domain_name;
-						}
+						$record_array[1 . $record_result[$i]->record_type]['Description'] = 'Name servers';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
-						$ns_records .= $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . $record_comment . "\n";
+						$record_array[1 . $record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . $record_comment . "\n";
 						break;
 				}
 			}
 			
-			/** Record labeling */
-			if ($ns_records) $ns_records = "; Name servers\n$ns_records";
-			if ($mx_records) $mx_records = "\n; Mail Exchange records\n$mx_records";
-			if ($txt_records) $txt_records = "\n; TXT records\n$txt_records";
-			if ($a_records) $a_records = "\n; Host addresses\n$a_records";
-			if ($cname_records) $cname_records = "\n; Aliases\n$cname_records";
-			if ($srv_records) $srv_records = "\n; Service records\n$srv_records";
-			if ($ptr_records) $ptr_records = "\n; Addresses point to hosts\n$ptr_records";
+			ksort($record_array);
 			
 			/** Zone file output */
-			$zone_file .= $ns_records;
-			$zone_file .= ($domain->domain_mapping == 'reverse') ? $ptr_records . $cname_records . "\n" : $mx_records . $txt_records . $a_records . $cname_records . $srv_records . $ptr_records . "\n";
+			foreach ($record_array as $rr=>$rr_array) {
+				/** Check if rr is supported by server_version */
+				if (array_key_exists('Version', $rr_array) && version_compare($server_version, $rr_array['Version'], '<')) {
+					$zone_file .= ";\n; BIND " . $rr_array['Version'] . ' or greater is required for ' . $rr . ' types.' . "\n;\n\n";
+					continue;
+				}
+				
+				$zone_file .= '; ' . $rr_array['Description'] . "\n";
+				$zone_file .= implode('', $rr_array['Data']);
+				$zone_file .= "\n";
+			}
 		}
 		
 		return $zone_file;

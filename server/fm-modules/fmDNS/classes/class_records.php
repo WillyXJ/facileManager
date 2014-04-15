@@ -193,7 +193,7 @@ class fm_dns_records {
 				<?php echo $body; ?>
 				<tr>
 					<td>
-						<p><a id="add_records" href="#">Add more records</a></p>
+						<p><a id="add_records" href="#">+ Add more records</a></p>
 					</td>
 				</tr>
 			</tbody>
@@ -202,15 +202,31 @@ class fm_dns_records {
 	}
 
 	function getHeader($type) {
+		$show_value = true;
 		$header = null;
 		$head_values['Record'] = null;
 		if ($type != 'SOA') {
 			$head_values['Class'] = $head_values['TTL'] = null;
 		}
-		$head_values['Value'] = null;
+		if ($type == 'CERT' ) {
+			$head_values['Algorithm'] = $head_values['Key Tag'] = $head_values['Type'] = null;
+		}
+		if ($type == 'HINFO') {
+			$head_values['OS'] = $head_values['Hardware'] = null;
+			$show_value = false;
+		}
+		if (in_array($type, array('DNSKEY', 'KEY'))) {
+			$head_values['Algorithm'] = $head_values['Flags'] = null;
+		}
+		
+		if ($show_value) $head_values['Value'] = null;
 				
-		$append = array('CNAME', 'NS', 'MX', 'SRV');
-		$priority = array('MX', 'SRV');
+		if ($type == 'RP' ) {
+			$head_values['Text'] = null;
+		}
+		
+		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
+		$priority = array('MX', 'SRV', 'KX');
 		
 		if (in_array($type, $priority)) $head_values['Priority'] = null;
 		
@@ -245,9 +261,10 @@ class fm_dns_records {
 		$record_value = $record_comment = $record_priority = $record_weight = $record_port = null;
 		$action = ($new) ? 'create' : 'update';
 		$end = ($new) ? $start + 3 : 1;
+		$show_value = true;
 				
-		$append = array('CNAME', 'NS', 'MX', 'SRV');
-		$priority = array('MX', 'SRV');
+		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
+		$priority = array('MX', 'SRV', 'KX');
 
 		if ($results) {
 			$results = get_object_vars($results);
@@ -283,7 +300,43 @@ class fm_dns_records {
 			}
 			$field_values['TTL'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_ttl]" value="' . $record_ttl . '" onkeydown="return validateNumber(event)" />';
 			$field_values['Class'] = '>' . $class;
-			$field_values['Value'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+			
+			if ($type == 'CERT') {
+				$field_values['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['cert_types'], $record_cert_type);
+				$field_values['Key Tag'] = '><input style="width: 45px;" type="text" name="' . $action . '[_NUM_][record_key_tag]" value="' . $record_key_tag . '" onkeydown="return validateNumber(event)" />';
+				$field_values['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['cert_algorithms'], $record_algorithm);
+				$field_values['Value'] = '><textarea rows="2" name="' . $action . '[_NUM_][record_value]">' . $record_value . '</textarea>';
+				$show_value = false;
+			}
+			
+			if ($type == 'HINFO') {
+				$field_values['Hardware'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+				$field_values['OS'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_os]" value="' . $record_os . '" />';
+				$show_value = false;
+			}
+			
+			if (in_array($type, array('DNSKEY', 'KEY'))) {
+				$flags = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_flags');
+				$algorithms = $__FM_CONFIG['records']['cert_algorithms'];
+				
+				if ($type == 'KEY') {
+					array_pop($flags);
+					for ($i=1; $i<=4; $i++) {
+						array_pop($algorithms);
+					}
+				}
+				
+				$field_values['Flags'] = '>' . buildSelect($action . '[_NUM_][record_flags]', '_NUM_', $flags, $record_flags);
+				$field_values['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $algorithms, $record_algorithm);
+			}
+			
+			if ($show_value) {
+				$field_values['Value'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+			}
+			
+			if ($type == 'RP') {
+				$field_values['Text'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_text]" value="' . $record_text . '" />';
+			}
 			
 			if (in_array($type, $priority)) $field_values['Priority'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_priority]" value="' . $record_priority . '" onkeydown="return validateNumber(event)" />';
 	
@@ -299,7 +352,7 @@ class fm_dns_records {
 			$field_values['Status'] = ' align="center">' . $status;
 
 			if ($new) {
-				$field_values['Actions'] = ($type == 'A') ? ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][PTR]" />Create PTR</label>' : null;
+				$field_values['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][PTR]" />Create PTR</label>' : null;
 			} else {
 				$field_values['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Delete]" />Delete</label>';
 			}
@@ -307,7 +360,7 @@ class fm_dns_records {
 			$field_values['Record'] = '>' . $record_name;
 			$field_values['TTL'] = '>' . $record_ttl;
 			$field_values['Class'] = '>' . $record_class;
-			$field_values['Value'] = '>' . $record_value;
+			if ($show_value) $field_values['Value'] = '>' . $record_value;
 			$field_values['Comment'] = '>' . $record_comment;
 			
 			if (in_array($type, $priority)) $field_values['Priority'] = '>' . $record_priority;

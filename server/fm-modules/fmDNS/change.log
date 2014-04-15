@@ -8,6 +8,7 @@
 * Server - Fixed a page title.
 * Server - (Issue #81) Updated UI record sorting.
 * Server - Added support for the Hesiod class.
+* Server - (Issue #84) Added support for additional RR types.
 
 1.1.1 (2014-03-24)
 ==================

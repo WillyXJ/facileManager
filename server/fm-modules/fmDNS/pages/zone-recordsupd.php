@@ -134,7 +134,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 					} else $ttl_error = null;
 				}
 
-				if ($record_type == 'CNAME') {
+				if (in_array($record_type, array('CNAME', 'DNAME'))) {
 					if ($key == 'record_append') {
 						if (!verifyCNAME($val, $_POST['update'][$i]['record_value'])) {
 							$value_error = '<font color="red"><i>Invalid</i></font> ';
@@ -338,7 +338,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 					} else $priority_error = null;
 				}
 
-				if ($record_type == 'CNAME') {
+				if (in_array($record_type, array('CNAME', 'DNAME'))) {
 					if (!isset($_POST['create'][$i]['record_append'])) {
 						$append_error = '<font color="red"><i>Invalid</i></font> ';
 						$input_return_error[$i] = 1;

@@ -46,6 +46,8 @@ printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
 $zone_access_allowed = true;
+$supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
+sort($supported_record_types);
 
 if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
 	$module_extra_perms = isSerialized($_SESSION['user']['module_perms']['perm_extra']) ? unserialize($_SESSION['user']['module_perms']['perm_extra']) : $_SESSION['user']['module_perms']['perm_extra'];
@@ -54,8 +56,8 @@ if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
 }
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
-if (!in_array($record_type, $__FM_CONFIG['records']['avail_types'])) $record_type = $__FM_CONFIG['records']['avail_types'][0];
-$avail_types = buildRecordTypes($record_type, $domain_id, $map);
+if (!in_array($record_type, $supported_record_types) && !in_array($record_type, $__FM_CONFIG['records']['common_types'])) $record_type = $__FM_CONFIG['records']['common_types'][0];
+$avail_types = buildRecordTypes($record_type, $domain_id, $map, $supported_record_types);
 
 $response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
@@ -136,16 +138,42 @@ echo '</div>' . "\n";
 printFooter();
 
 
-function buildRecordTypes($record_type = null, $domain_id = null, $map = 'forward') {
+function buildRecordTypes($record_type = null, $domain_id = null, $map = 'forward', $supported_record_types) {
 	global $__FM_CONFIG, $allowed_to_manage_zones;
 	
-	$menu_selects = null;
+	$menu_selects = $menu_sub_selects = null;
 	
 	if (isset($record_type) && $domain_id != null) {
-		foreach ($__FM_CONFIG['records']['avail_types'] as $type) {
+		foreach ($__FM_CONFIG['records']['common_types'] as $type) {
 			if (in_array($type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) continue;
 			$select = ($record_type == $type) ? ' class="selected"' : '';
 			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
+		}
+		
+		/** More record types menu */
+		if (count($__FM_CONFIG['records']['common_types']) < count($supported_record_types)) {
+			foreach ($supported_record_types as $type) {
+				if (!in_array($type, $__FM_CONFIG['records']['common_types'])) {
+					if ($record_type == $type) {
+						$menu_selects .= "<span class=\"selected\"><a class=\"selected\" href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
+					} else {
+						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\"><span>$type</span></a></li>\n";
+					}
+				}
+			}
+			$menu_selects = <<<MENU
+			<div id="recordmenu">
+			<ul>
+				<li class="has-sub"><a href="#"><span>...</span></a>
+					<ul>
+					$menu_sub_selects
+					</ul>
+				</li>
+			</ul>
+			</div>
+			$menu_selects
+
+MENU;
 		}
 	}
 	

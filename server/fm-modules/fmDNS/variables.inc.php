@@ -67,9 +67,27 @@ if (isset($fm_name)) {
 
 $__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
-
-$__FM_CONFIG['records']['avail_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'PTR', 'SOA', 'NS') : array('PTR', 'CNAME', 'SOA', 'NS');
+$__FM_CONFIG['records']['common_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'NS', 'SOA') : array('PTR', 'NS', 'SOA');
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
+$__FM_CONFIG['records']['cert_types'] = array(
+											array('X.509', 1),
+											array('SKPI', 2),
+											array('OpenPGP', 3),
+											array('IPKIX', 4),
+											array('ISPKI', 5),
+											array('IPGP', 6),
+											array('ACPKIX', 7),
+											array('IACPKIX', 8)
+											);
+$__FM_CONFIG['records']['cert_algorithms'] = array(
+											array('Diffie-Hellman', 2),
+											array('DSA/SHA-1', 3),
+											array('RSA/SHA-1', 5),
+											array('DSA-NSEC3-SHA1', 6),
+											array('RSASHA1-NSEC3-SHA1', 7),
+											array('RSA/SHA-256', 8),
+											array('RSA/SHA-512', 10)
+											);
 
 $__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');
 $__FM_CONFIG['options']['avail_types'] = array('Global');
