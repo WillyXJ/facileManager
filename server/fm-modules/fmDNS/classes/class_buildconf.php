@@ -851,9 +851,9 @@ class fm_module_buildconf {
 					case 'RP':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Responsible Persons';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
-						$text = (strpos($record_result[$i]->record_text, ' ') === false) ? $record_result[$i]->record_text : '"' . $record_result[$i]->record_text . '"';
-						if (!strlen($record_result[$i]->record_text)) $text = '.';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . "\t" . $text . $record_comment . "\n";
+						$record_text = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_text . '.' . $domain_name_trim . '.' : $record_result[$i]->record_text;
+						if (!strlen($record_result[$i]->record_text)) $record_text = '.';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . "\t" . $record_text . $record_comment . "\n";
 						break;
 					case 'NS':
 						$record_array[1 . $record_result[$i]->record_type]['Description'] = 'Name servers';
