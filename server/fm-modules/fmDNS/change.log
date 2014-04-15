@@ -12,6 +12,7 @@
 * Server - (Issue #80) Improved server name resolution for building
            server key definitions.
 * Server - Separated A and AAAA records.
+* Server - Fixed a bug where config options could not be updated.
 
 1.1.1 (2014-03-24)
 ==================

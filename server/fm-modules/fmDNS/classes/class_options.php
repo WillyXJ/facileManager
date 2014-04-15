@@ -129,7 +129,7 @@ class fm_module_options {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				if (!strlen($clean_data)) return false;
+				if (!strlen($clean_data) && $key != 'cfg_comment') return false;
 				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return false;
 				$sql_edit .= $key . "='" . $clean_data . "',";
 			}
