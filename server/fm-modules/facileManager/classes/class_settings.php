@@ -193,6 +193,11 @@ class fm_settings {
 			 $auth_fm_options_style = 'style="display: block;"';
 		} else $auth_fm_options_style = null;
 		
+		$password_strength_descriptions = "<p>Required password strength for user accounts.</p>\n";
+		foreach ($__FM_CONFIG['password_hint'] as $strength => $description) {
+			$password_strength_descriptions .= '<p><i>' . ucfirst($strength) . '</i> - ' . ucfirst(substr($description, 32)) . "</p>\n";
+		}
+		
 		/** LDAP Section */
 		if ($auth_method == 2) {
 			 $auth_ldap_options_style = 'style="display: block;"';
@@ -302,7 +307,7 @@ class fm_settings {
 						<div id="setting-row">
 							<div class="description">
 								<label for="auth_fm_pw_strength">Password Strength</label>
-								<p>Protocol version the server supports.</p>
+								$password_strength_descriptions
 							</div>
 							<div class="choices">
 								$auth_fm_pw_strength_list
