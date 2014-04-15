@@ -218,10 +218,7 @@ class fm_module_buildconf {
 						$server_result = $fmdb->last_result;
 						$server_count = $fmdb->num_rows;
 						for ($j=0; $j < $server_count; $j++) {
-							$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
-							$servers .= (count($server_ip)) ? "server " . $server_ip[0]['ip'] . " {\n" : "server [cannot resolve " . $server_result[$j]->server_name . "] {\n";
-							$servers .= "\tkeys { \"$key_name\"; };\n";
-							$servers .= "};\n";
+							$servers .= $this->formatServerKeys($server_result[$j]->server_name, $key_name);
 						}
 					}
 				}
@@ -374,10 +371,7 @@ class fm_module_buildconf {
 								$server_count = $fmdb->num_rows;
 								$servers = null;
 								for ($j=0; $j < $server_count; $j++) {
-									$server_ip = dns_get_record($server_result[$j]->server_name, DNS_A);
-									$config .= (count($server_ip)) ? "server " . $server_ip[0]['ip'] . " {\n" : "server [cannot resolve " . $server_result[$j]->server_name . "] {\n";
-									$config .= "\t\tkeys { \"$key_name\"; };\n";
-									$config .= "\t};\n";
+									$config .= $this->formatServerKeys($server_result[$j]->server_name, $key_name, true);
 								}
 							}
 						}
@@ -1162,6 +1156,28 @@ INFO;
 			</div>
 
 HTML;
+	}
+	
+	
+	/**
+	 * Formats the server key statements
+	 *
+	 * @since 1.2
+	 * @package fmDNS
+	 *
+	 * @param string $server_name The server name
+	 * @param string $key_name The key name
+	 * @param boolean $view Add extra tabs if this config is part of a view
+	 * @return string
+	 */
+	function formatServerKeys($server_name, $key_name, $view = false) {
+		$extra_tab = ($view == true) ? "\t" : null;
+		$server_ip = gethostbyname($server_name);
+		$servers = ($server_ip) ? $extra_tab . 'server ' . $server_ip . " {\n" : "server [cannot resolve " . $server_name . "] {\n";
+		$servers .= "$extra_tab\tkeys { \"$key_name\"; };\n";
+		$servers .= "$extra_tab};\n";
+		
+		return $servers;
 	}
 
 }

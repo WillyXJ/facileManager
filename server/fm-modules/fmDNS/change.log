@@ -9,6 +9,8 @@
 * Server - (Issue #81) Updated UI record sorting.
 * Server - Added support for the Hesiod class.
 * Server - (Issue #84) Added support for additional RR types.
+* Server - (Issue #80) Improved server name resolution for building
+           server key definitions.
 
 1.1.1 (2014-03-24)
 ==================
