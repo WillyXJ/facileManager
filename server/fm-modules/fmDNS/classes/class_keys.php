@@ -228,7 +228,7 @@ HTML;
 		$key_view = buildSelect('key_view', 'key_view', $fm_dns_zones->availableViews(), $key_view);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-keys">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="key_id" value="$key_id" />
 			<table class="form-table">

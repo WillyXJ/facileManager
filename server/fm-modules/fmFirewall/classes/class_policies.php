@@ -332,7 +332,7 @@ HTML;
 		$service_not_check = ($policy_services_not) ? 'checked' : null;
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-policy?server_serial_no={$_REQUEST['server_serial_no']}">
+		<form name="manage" id="manage" method="post" action="?server_serial_no={$_REQUEST['server_serial_no']}">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />

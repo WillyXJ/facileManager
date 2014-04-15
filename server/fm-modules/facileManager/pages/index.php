@@ -24,7 +24,7 @@
 
 /* Redirect to activate modules if none are active */
 if ($_SESSION['module'] == $fm_name) {
-	header('Location: admin-modules');
+	header('Location: admin-modules.php');
 }
 
 $page_name = 'Dashboard';

@@ -214,7 +214,7 @@ HTML;
 		$object_type = buildSelect('object_type', 'object_type', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'), $type, 1);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="objects?type=$type">
+		<form name="manage" id="manage" method="post" action="?type=$type">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="object_id" value="$object_id" />
 			<table class="form-table">

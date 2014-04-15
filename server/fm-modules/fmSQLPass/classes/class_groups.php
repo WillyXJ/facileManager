@@ -190,7 +190,7 @@ HTML;
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-groups">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="group_id" id="group_id" value="$group_id" />
 			<table class="form-table">

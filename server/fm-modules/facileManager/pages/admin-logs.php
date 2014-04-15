@@ -78,7 +78,7 @@ $user_list = buildSelect('log_search_user', 1, buildUserList(), $log_search_user
 echo printPageHeader($response, 'Logs');
 echo <<<HTML
 $pagination
-		<form class="search-form" id="date-range" action="admin-logs" method="post">
+		<form class="search-form" id="date-range" action="" method="post">
 		<table class="log_search_form" align="center">
 			<tbody>
 				<tr>

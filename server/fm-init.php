@@ -101,7 +101,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 				$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
 				if (is_array($logged_in)) {
 					list($reset_key, $user_login) = $logged_in;
-					echo "password_reset?key=$reset_key&login=$user_login";
+					echo "password_reset.php?key=$reset_key&login=$user_login";
 				} elseif (!$logged_in) {
 					echo 'failed';
 				} else echo $_SERVER['REQUEST_URI'];

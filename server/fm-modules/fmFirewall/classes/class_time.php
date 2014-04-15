@@ -250,7 +250,7 @@ HTML;
 		}
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-time">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="time_id" value="$time_id" />
 			<table class="form-table">

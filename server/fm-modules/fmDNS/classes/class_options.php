@@ -139,6 +139,7 @@ class fm_module_options {
 		// Update the config
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
+		echo $query;
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;
@@ -272,7 +273,7 @@ HTML;
 		<script>
 			displayOptionPlaceholder("$cfg_data");
 		</script>
-		<form name="manage" id="manage" method="post" action="config-options.php$request_uri">
+		<form name="manage" id="manage" method="post" action="$request_uri">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="cfg_id" value="$cfg_id" />
 			<input type="hidden" name="cfg_type" value="$cfg_type" />

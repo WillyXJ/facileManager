@@ -338,7 +338,7 @@ HTML;
 		}
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-servers">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="server_type" id="server_type" value="$server_type" />
 			<input type="hidden" name="server_id" id="server_id" value="$server_id" />

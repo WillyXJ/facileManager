@@ -304,7 +304,7 @@ HTML;
 		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-servers">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="server_id" value="$server_id" />
 			<table class="form-table">

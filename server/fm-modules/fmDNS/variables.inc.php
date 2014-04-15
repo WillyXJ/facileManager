@@ -40,23 +40,23 @@ $__FM_CONFIG['fmDNS']['required_fm_version']	= '1.1.1';
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']	= '';
 
 /** Zones Menu Options */
-$__FM_CONFIG['module']['menu']['Zones']['URL']		= 'zones';
-$__FM_CONFIG['module']['menu']['Zones']['Forward']	= 'zones';
-$__FM_CONFIG['module']['menu']['Zones']['Reverse']	= 'zones?map=reverse';
+$__FM_CONFIG['module']['menu']['Zones']['URL']		= 'zones.php';
+$__FM_CONFIG['module']['menu']['Zones']['Forward']	= 'zones.php';
+$__FM_CONFIG['module']['menu']['Zones']['Reverse']	= 'zones.php?map=reverse';
 
 /** Config Menu Options */
-$__FM_CONFIG['module']['menu']['Config']['URL']		= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Servers']	= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Views']	= 'config-views';
-$__FM_CONFIG['module']['menu']['Config']['ACLs']	= 'config-acls';
-$__FM_CONFIG['module']['menu']['Config']['Keys']	= 'config-keys';
-$__FM_CONFIG['module']['menu']['Config']['Options']	= 'config-options';
-$__FM_CONFIG['module']['menu']['Config']['Logging']	= 'config-logging';
+$__FM_CONFIG['module']['menu']['Config']['URL']		= 'config-servers.php';
+$__FM_CONFIG['module']['menu']['Config']['Servers']	= 'config-servers.php';
+$__FM_CONFIG['module']['menu']['Config']['Views']	= 'config-views.php';
+$__FM_CONFIG['module']['menu']['Config']['ACLs']	= 'config-acls.php';
+$__FM_CONFIG['module']['menu']['Config']['Keys']	= 'config-keys.php';
+$__FM_CONFIG['module']['menu']['Config']['Options']	= 'config-options.php';
+$__FM_CONFIG['module']['menu']['Config']['Logging']	= 'config-logging.php';
 
 $__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
 
 /** Settings Menu Options */
-$__FM_CONFIG['menu']['Settings']['fmDNS']	= 'module-settings';
+$__FM_CONFIG['menu']['Settings']['fmDNS']	= 'module-settings.php';
 
 /** Images */
 $__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';

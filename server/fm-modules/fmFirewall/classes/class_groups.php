@@ -237,7 +237,7 @@ HTML;
 		$available_list = buildSelect(null, 'group_items_available', availableGroupItems($group_type, 'available', $group_items_assigned, $group_id), null, 7, null, true);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="{$group_type}-groups">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="group_id" value="$group_id" />
 			<input type="hidden" name="group_type" value="$group_type" />

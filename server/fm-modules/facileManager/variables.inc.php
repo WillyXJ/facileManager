@@ -43,12 +43,12 @@ $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'
 $__FM_CONFIG['menu']['Break'][]				= null;
 
 /** Admin Menu Options */
-$__FM_CONFIG['menu']['Admin']['URL']		= 'admin-tools';
-$__FM_CONFIG['menu']['Admin']['Tools']		= 'admin-tools';
-$__FM_CONFIG['menu']['Admin']['Users']		= 'admin-users';
-$__FM_CONFIG['menu']['Admin']['Logs']		= 'admin-logs';
-$__FM_CONFIG['menu']['Settings']['URL']		= 'admin-settings';
-$__FM_CONFIG['menu']['Modules']['URL']		= 'admin-modules';
+$__FM_CONFIG['menu']['Admin']['URL']		= 'admin-tools.php';
+$__FM_CONFIG['menu']['Admin']['Tools']		= 'admin-tools.php';
+$__FM_CONFIG['menu']['Admin']['Users']		= 'admin-users.php';
+$__FM_CONFIG['menu']['Admin']['Logs']		= 'admin-logs.php';
+$__FM_CONFIG['menu']['Settings']['URL']		= 'admin-settings.php';
+$__FM_CONFIG['menu']['Modules']['URL']		= 'admin-modules.php';
 
 /** Images */
 $__FM_CONFIG['icons']['fail']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Failed" title="Failed" />';

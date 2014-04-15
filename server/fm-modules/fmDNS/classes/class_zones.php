@@ -569,7 +569,7 @@ HTML;
 		$domain_forward_servers = str_replace('; ', "\n", rtrim($domain_forward_servers, '; '));
 		
 		$return_form = <<<HTML
-		<form name="manage" id="manage" method="post" action="zones?map=$map">
+		<form name="manage" id="manage" method="post" action="?map=$map">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="{$action}Zone[ZoneID]" value="$domain_id" />
 			<table class="form-table zone-form">

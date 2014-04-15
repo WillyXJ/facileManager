@@ -492,7 +492,7 @@ HTML;
 		}
 		
 		$return_form = <<<FORM
-			<form name="manage" id="manage" method="post" action="config-logging.php?type=$type">
+			<form name="manage" id="manage" method="post" action="?type=$type">
 				<input type="hidden" name="action" value="$action" />
 				<input type="hidden" name="cfg_id" value="$cfg_id" />
 				<input type="hidden" name="cfg_type" value="logging" />

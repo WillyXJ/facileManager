@@ -234,7 +234,7 @@ HTML;
 		$acl_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-acls">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="acl_id" value="$acl_id" />
 			<input type="hidden" name="server_serial_no" value="$server_serial_no" />

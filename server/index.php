@@ -43,15 +43,15 @@ if (is_array($GLOBALS)) {
 
 $_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
 $path_parts = pathinfo($_SERVER['REQUEST_URI']);
-$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] : 'index';
+$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
 
-if ($GLOBALS['basename'] == 'index') {
+if ($GLOBALS['basename'] == 'index.php') {
 	require_once(ABSPATH . 'fm-includes/init.php');
 	checkAppVersions();
 }
 
-if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename'] . '.php'))) {
-	@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename'] . '.php'));
+if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename']))) {
+	@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename']));
 } else throwHTTPError('404');
 
 ?>

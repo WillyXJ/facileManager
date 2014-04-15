@@ -262,7 +262,7 @@ HTML;
 		}
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="services?type=$type">
+		<form name="manage" id="manage" method="post" action="?type=$type">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="service_id" value="$service_id" />
 			<table class="form-table">

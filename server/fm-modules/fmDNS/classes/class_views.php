@@ -217,7 +217,7 @@ HTML;
 		$view_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-views">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="page" id="page" value="views" />
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="view_id" id="view_id" value="$view_id" />

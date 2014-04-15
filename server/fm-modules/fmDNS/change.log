@@ -16,6 +16,7 @@
 * Server - [security] Fixed an issue where a record admin could modify
            zone information.
 * Server - [bug] Fixed incorrect redirection under certain circumstances.
+* Server - [feature] Added file extensions to all redirects and links.
 
 1.1.1 (2014-03-24)
 ==================
