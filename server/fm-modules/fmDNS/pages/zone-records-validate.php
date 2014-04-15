@@ -53,7 +53,7 @@ $header = $fm_dns_records->getHeader(strtoupper($record_type));
 echo <<<HTML
 <div id="body_container">
 	<h2>Record Validation</h2>
-	<form method="POST" action="zone-recordswrite">
+	<form method="POST" action="zone-records-write.php">
 	<input type="hidden" name="domain_id" value="$domain_id">
 	<input type="hidden" name="record_type" value="$record_type">
 	<input type="hidden" name="map" value="$map">
@@ -82,7 +82,6 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 	global $__FM_CONFIG;
 
-	$ErrorCode = '<font color="red"><b>**</b></font>';
 	$sql_records = buildSQLRecords($record_type, $domain_id);
 	$changes = compareValues($value, $sql_records);
 	if (count($changes)) {
@@ -297,7 +296,6 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 	global $__FM_CONFIG;
 
 	$value_tmp = $value;
-	$ErrorCode = '<font color="red"><b>*Invalid*</b></font>';
 	$HTMLOut = $SOAHTMLOut = null;
 	$input_return = array();
 	$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
@@ -672,6 +670,27 @@ function buildSQLRecords($record_type, $domain_id) {
 				}
 				if ($results[$i]->record_port != null) {
 					$sql_results[$results[$i]->record_id]['record_port'] = $results[$i]->record_port;
+				}
+				if ($results[$i]->record_port != null) {
+					$sql_results[$results[$i]->record_id]['record_port'] = $results[$i]->record_port;
+				}
+				if ($results[$i]->record_os != null) {
+					$sql_results[$results[$i]->record_id]['record_os'] = $results[$i]->record_os;
+				}
+				if ($results[$i]->record_cert_type != null) {
+					$sql_results[$results[$i]->record_id]['record_cert_type'] = $results[$i]->record_cert_type;
+				}
+				if ($results[$i]->record_key_tag != null) {
+					$sql_results[$results[$i]->record_id]['record_key_tag'] = $results[$i]->record_key_tag;
+				}
+				if ($results[$i]->record_algorithm != null) {
+					$sql_results[$results[$i]->record_id]['record_algorithm'] = $results[$i]->record_algorithm;
+				}
+				if ($results[$i]->record_flags != null) {
+					$sql_results[$results[$i]->record_id]['record_flags'] = $results[$i]->record_flags;
+				}
+				if ($results[$i]->record_text != null) {
+					$sql_results[$results[$i]->record_id]['record_text'] = $results[$i]->record_text;
 				}
 			}
 		}

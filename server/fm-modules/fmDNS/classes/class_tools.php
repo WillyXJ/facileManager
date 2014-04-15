@@ -287,7 +287,7 @@ ROW;
 		
 		$body = <<<BODY
 <h2>Import Verification</h2>
-		<form method="post" action="zone-recordswrite">
+		<form method="post" action="zone-records-write">
 			<input type="hidden" name="domain_id" value="{$_POST['domain_id']}">
 			<input type="hidden" name="map" value="$domain_map">
 			<input type="hidden" name="import_records" value="true">

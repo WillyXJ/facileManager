@@ -76,7 +76,7 @@ echo "	<h2>Records</h2>
 	$avail_types\n";
 	
 	if ($allowed_to_manage_records && $zone_access_allowed) {
-		echo '<form method="POST" action="zone-recordsupd">
+		echo '<form method="POST" action="zone-records-validate">
 	<input type="hidden" name="domain_id" value="' . $domain_id . '">
 	<input type="hidden" name="record_type" value="' . $record_type . '">
 	<input type="hidden" name="map" value="' . $map . '">' . "\n";
