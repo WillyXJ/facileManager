@@ -29,7 +29,7 @@ class fm_dns_records {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult">There are no records.</p>';
+			echo '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
 		} else {
 			$header = $this->getHeader(strtoupper($record_type));
 			?>

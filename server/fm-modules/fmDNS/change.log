@@ -11,6 +11,7 @@
 * Server - (Issue #84) Added support for additional RR types.
 * Server - (Issue #80) Improved server name resolution for building
            server key definitions.
+* Server - Separated A and AAAA records.
 
 1.1.1 (2014-03-24)
 ==================

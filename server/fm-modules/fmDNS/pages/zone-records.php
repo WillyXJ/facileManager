@@ -112,11 +112,8 @@ echo "	<h2>Records</h2>
 				$ip_sort = false;
 				break;
 		}
-		if (in_array($record_type, array('A', 'AAAA'))) {
-			$record_sql = "AND domain_id='$domain_id' AND record_type IN ('A', 'AAAA')";
-		} else {
-			$record_sql = "AND domain_id='$domain_id' AND record_type='$record_type'";
-		}
+		$record_sql = "AND domain_id='$domain_id' AND record_type='$record_type'";
+		
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $sort_field, 'record_', $record_sql, null, $ip_sort);
 		$fm_dns_records->rows($result, $record_type, $domain_id);
 		
