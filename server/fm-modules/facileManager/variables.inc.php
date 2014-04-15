@@ -42,12 +42,12 @@ $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'
 /** Styled break in menu listing */
 $__FM_CONFIG['menu']['Break'][]				= null;
 
-/** Users Menu Options */
+/** Admin Menu Options */
 $__FM_CONFIG['menu']['Admin']['URL']		= 'admin-tools';
 $__FM_CONFIG['menu']['Admin']['Tools']		= 'admin-tools';
 $__FM_CONFIG['menu']['Admin']['Users']		= 'admin-users';
-$__FM_CONFIG['menu']['Admin']['Settings']	= 'admin-settings';
 $__FM_CONFIG['menu']['Admin']['Logs']		= 'admin-logs';
+$__FM_CONFIG['menu']['Settings']['URL']		= 'admin-settings';
 $__FM_CONFIG['menu']['Modules']['URL']		= 'admin-modules';
 
 /** Images */

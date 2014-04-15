@@ -23,6 +23,7 @@
 */
 
 $page_name = 'Settings';
+$page_name_sub = $_SESSION['module'];
 
 printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);

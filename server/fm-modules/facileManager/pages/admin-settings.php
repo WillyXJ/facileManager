@@ -22,8 +22,8 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Admin';
-$page_name_sub = 'Settings';
+$page_name = 'Settings';
+$page_name_sub = 'General';
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
@@ -31,7 +31,7 @@ include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPA
 printHeader($page_name_sub);
 @printMenu($page_name, $page_name_sub);
 
-echo printPageHeader(null, $fm_name . ' Settings');
+echo printPageHeader(null, 'General Settings');
 	
 echo $fm_settings->printForm();
 

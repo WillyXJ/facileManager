@@ -547,7 +547,8 @@ tbody {
 
 .form-table input:not([type="image"]),
 .display_results input:not([type="image"]),
-.display_results textarea {
+.display_results textarea,
+#bulk_action {
 	line-height: 20px;
 	font-size: 12px;
 	padding: 2px;
@@ -1183,6 +1184,10 @@ pre {
 	transform: scale(1, 1);
 }
 
+#bulk_action {
+	font-size: 13px;
+	height: 28px;
+}
 
 /** Firefox hacks :( */
 @-moz-document url-prefix() {

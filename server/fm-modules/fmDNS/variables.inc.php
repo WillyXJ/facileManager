@@ -53,10 +53,10 @@ $__FM_CONFIG['module']['menu']['Config']['Keys']	= 'config-keys';
 $__FM_CONFIG['module']['menu']['Config']['Options']	= 'config-options';
 $__FM_CONFIG['module']['menu']['Config']['Logging']	= 'config-logging';
 
-/** Settings Menu Options */
-$__FM_CONFIG['module']['menu']['Settings']['URL']	= 'module-settings';
-
 $__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
+
+/** Settings Menu Options */
+$__FM_CONFIG['menu']['Settings']['fmDNS']	= 'module-settings';
 
 /** Images */
 $__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';
@@ -67,7 +67,7 @@ if (isset($fm_name)) {
 
 $__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
-$__FM_CONFIG['records']['common_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'NS', 'SOA') : array('PTR', 'NS', 'SOA');
+$__FM_CONFIG['records']['common_types'] = (isset($map) && $map == 'forward') ? array('A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA') : array('PTR', 'NS', 'SOA');
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
 $__FM_CONFIG['records']['cert_types'] = array(
 											array('X.509', 1),
