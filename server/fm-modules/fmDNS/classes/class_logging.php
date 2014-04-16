@@ -26,32 +26,31 @@ class fm_module_logging {
 	 * Displays the logging list
 	 */
 	function rows($result, $channel_category) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="logging">There are no ' . $__FM_CONFIG['logging']['avail_types'][$channel_category] . ' defined.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="logging">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<?php if ($channel_category == 'category') echo '<th>Channels</th>'; ?>
-						<th>Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x], $channel_category);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'logging'
+						);
+
+			$title_array[] = 'Name';
+			if ($channel_category == 'category') $title_array[] = 'Channels';
+			$title_array[] = 'Comment';
+			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x], $channel_category);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -444,7 +443,7 @@ class fm_module_logging {
 			}
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		$edit_name .= $row->cfg_data;

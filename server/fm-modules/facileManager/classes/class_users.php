@@ -33,30 +33,24 @@ class fm_users {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="users">There are no users.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="users">
-				<thead>
-					<tr>
-						<th width="10" style="text-align: center;"></th>
-						<th>Login</th>
-						<th>Last Session Date</th>
-						<th>Last Session Host</th>
-						<th>Authenticate With</th>
-						<th>Super Admin</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'users'
+						);
+
+			$title_array = array(array('class' => 'header-tiny'), 'Login', 'Last Session Date', 'Last Session Host', 'Authenticate With', 'Super Admin');
+			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 

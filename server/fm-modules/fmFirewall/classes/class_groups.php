@@ -31,26 +31,24 @@ class fm_module_groups {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="groups">There are no groups defined.</p>';
 		} else {
-			echo <<<HTML
-			<table class="display_results" id="table_edits" name="groups">
-				<thead>
-					<tr>
-						<th>Group Name</th>
-						<th>{$type}s</th>
-						<th style="width: 40%;">Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'groups'
+						);
 
-HTML;
-				$num_rows = $fmdb->num_rows;
-				$results = $fmdb->last_result;
-				for ($x=0; $x<$num_rows; $x++) {
-					$this->displayRow($results[$x]);
-				}
-				echo '</tbody>';
-				echo '</table>';
+			$title_array = array('Group Name', $type . 's', array('title' => 'Comment', 'style' => 'width: 40%;'));
+			if ($allowed_to_manage_services) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 

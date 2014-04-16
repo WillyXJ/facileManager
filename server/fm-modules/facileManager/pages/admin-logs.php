@@ -74,7 +74,11 @@ $log_search_user = isset($log_search_user) ? $log_search_user : 0;
 
 $module_list = buildSelect('log_search_module', 1, buildModuleList(), $log_search_module, 4, null, true);
 $user_list = buildSelect('log_search_user', 1, buildUserList(), $log_search_user, 4, null, true);
-	
+
+$table_info = array('class' => 'display_results');
+$title_array = array('Timestamp', 'Module', 'User', array('title' => 'Message', 'style' => 'width: 50%;'));
+$header = displayTableHeader($table_info, $title_array);
+
 echo printPageHeader($response, 'Logs');
 echo <<<HTML
 $pagination
@@ -100,16 +104,7 @@ $pagination
 			</tbody>
 		</table>
 		</form>
-		<table class="display_results">
-			<thead>
-				<tr>
-					<th>Timestamp</th>
-					<th>Module</th>
-					<th>User</th>
-					<th style="width: 50%;">Log Message</th>
-				</tr>
-			</thead>
-			<tbody>
+		$header
 
 HTML;
 

@@ -31,44 +31,43 @@ class fm_module_servers {
 //		if ($allowed_to_manage_servers) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
 		if ($allowed_to_build_configs) {
 			$bulk_actions_list = array('Upgrade', 'Build Config');
-			$checkbox_head = '<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, \'server_list[]\')" /></th>';
+			$title_array[] = array(
+								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
+								'class' => 'header-tiny'
+							);
 		} else {
-			$checkbox_head = $bulk_actions_list = null;
+			$bulk_actions_list = null;
 		}
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no servers.</p>';
 		} else {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
-			?>
-			<table class="display_results" id="table_edits" name="servers">
-				<thead>
-					<tr>
-						<?php echo $checkbox_head; ?>
-						<th width="20" style="text-align: center;"></th>
-						<th>Hostname</th>
-						<th>Serial No</th>
-						<th>Key</th>
-						<th>Server Type</th>
-						<th>Run-as</th>
-						<th>Method</th>
-						<th>Config File</th>
-						<th>Server Root</th>
-						<th>Zones Directory</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'servers'
+						);
+
+			$title_array[] = array('class' => 'header-tiny');
+			$title_array = array_merge($title_array, array('Hostname', 'Serial No', 'Method', 'Key', 'Server Type', 'Run-as',
+														'Config File', 'Server Root', 'Zones Directory'
+													));
+			$title_array[] = array(
+								'title' => 'Actions',
+								'class' => 'header-actions'
+							);
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 

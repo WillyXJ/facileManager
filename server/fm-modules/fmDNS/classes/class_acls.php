@@ -26,32 +26,29 @@ class fm_dns_acls {
 	 * Displays the acl list
 	 */
 	function rows($result) {
-		global $fmdb;
+		global $fmdb, $allowed_to_manage_servers;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="acls">There are no ACLs.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="acls">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Address List</th>
-						<th>Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'acls'
+						);
+
+			$title_array = array('Name', 'Address List', 'Comment');
+			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -192,7 +189,7 @@ class fm_dns_acls {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		$edit_name = $row->acl_name;

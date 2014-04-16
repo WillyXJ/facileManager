@@ -26,31 +26,29 @@ class fm_dns_views {
 	 * Displays the view list
 	 */
 	function rows($result) {
-		global $fmdb;
+		global $fmdb, $allowed_to_manage_servers;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="views">There are no views.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="views">
-				<thead>
-					<tr>
-						<th>View Name</th>
-						<th>Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'views'
+						);
+
+			$title_array = array('View Name', 'Comment');
+			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -183,7 +181,7 @@ class fm_dns_views {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		echo <<<HTML

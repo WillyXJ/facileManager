@@ -31,25 +31,17 @@ class fm_dns_records {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
 		} else {
-			$header = $this->getHeader(strtoupper($record_type));
-			?>
-			<table class="display_results">
-				<thead>
-					<tr>
-						<?php echo $header; ?>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
+			$table_info = array('class' => 'display_results');
+
+			echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
 						echo $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -180,78 +172,65 @@ class fm_dns_records {
 			extract(get_object_vars($data[0]));
 		}
 		
-		$header = $this->getHeader(strtoupper($record_type));
-		$body = $this->getInputForm(strtoupper($record_type), true, $domain_id);
+		$table_info = array('class' => 'display_results');
+
+		echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');
+		echo $this->getInputForm(strtoupper($record_type), true, $domain_id);
 		?>
-		<table class="display_results">
-			<thead>
-				<tr>
-					<?php echo $header; ?>
-				</tr>
-			</thead>
-			<tbody id="more_records">
-				<?php echo $body; ?>
-				<tr>
-					<td>
-						<p><a id="add_records" href="#">+ Add more records</a></p>
-					</td>
-				</tr>
 			</tbody>
 		</table>
+		<p class="add_records"><a id="add_records" href="#">+ Add more records</a></p>
 		<?php
 	}
 
 	function getHeader($type) {
+		global $allowed_to_manage_records, $allowed_to_manage_zones, $zone_access_allowed;
+		
 		$show_value = true;
-		$header = null;
-		$head_values['Record'] = null;
+		$title_array = array('Record');
 		if ($type != 'SOA') {
-			$head_values['Class'] = $head_values['TTL'] = null;
+			array_push($title_array, 'TTL', 'Class');
 		}
 		if ($type == 'CERT' ) {
-			$head_values['Algorithm'] = $head_values['Key Tag'] = $head_values['Type'] = null;
+			array_push($title_array, 'Type', 'Key Tag', 'Algorithm');
 		}
 		if ($type == 'HINFO') {
-			$head_values['OS'] = $head_values['Hardware'] = null;
+			array_push($title_array, 'Hardware', 'OS');
 			$show_value = false;
 		}
 		if (in_array($type, array('DNSKEY', 'KEY'))) {
-			$head_values['Algorithm'] = $head_values['Flags'] = null;
+			array_push($title_array, 'Flags', 'Algorithm');
 		}
 		
-		if ($show_value) $head_values['Value'] = null;
+		if ($show_value) array_push($title_array, 'Value');
 				
 		if ($type == 'RP' ) {
+			array_push($title_array, 'Text');
 			$head_values['Text'] = null;
 		}
 		
 		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
 		$priority = array('MX', 'SRV', 'KX');
 		
-		if (in_array($type, $priority)) $head_values['Priority'] = null;
+		if (in_array($type, $priority)) array_push($title_array, 'Priority');
 		
 		if ($type == 'SRV') {
-			$head_values['Weight'] = null;
-			$head_values['Port'] = null;
+			array_push($title_array, 'Weight', 'Port');
 		}
 		
-		$head_values['Comment'] = null;
+		array_push($title_array, 'Comment');
 		
-		if (in_array($type, $append)) $head_values['Append Domain'] = ' style="text-align: center;" nowrap';
+		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'style' => 'text-align: center;', 'nowrap' => null);
 		
-		if ($type != 'SOA') $head_values['Status'] = ' style="text-align: center;"';
+		if ($type != 'SOA') array_push($title_array, 'Status');
 		if (empty($_POST)) {
-			$head_values['Actions'] = ' style="text-align: center;"';
+			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 		} else {
-			$head_values['Valid'] = ' style="text-align: center;"';
-			$head_values = array_merge(array('Action' => null), $head_values);
+			$title_array[] = array('title' => 'Valid', 'style' => 'text-align: center;');
+			array_unshift($title_array, 'Action');
 		}
 		
-		foreach ($head_values as $key => $val) {
-			$header .= "<th$val>$key</th>\n";
-		}
-		
-		return $header;
+		return $title_array;
 	}
 
 	function getInputForm($type, $new, $domain_id, $results = null, $start = 1) {
@@ -349,7 +328,7 @@ class fm_dns_records {
 			
 			if (in_array($type, $append)) $field_values['Append Domain'] = ' align="center"><label><input ' . $yeschecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="yes" /> yes</label> <label><input ' . $nochecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="no" /> no</label>';
 			
-			$field_values['Status'] = ' align="center">' . $status;
+			$field_values['Status'] = '>' . $status;
 
 			if ($new) {
 				$field_values['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][PTR]" />Create PTR</label>' : null;
@@ -372,8 +351,7 @@ class fm_dns_records {
 		
 			if (in_array($type, $append)) $field_values['Append Domain'] = ' style="text-align: center;">' . $record_append;
 		
-			$field_values['Status'] = ' style="text-align: center;">' . $record_status;
-			$field_values['Actions'] = ' style="text-align: center;">N/A';
+			$field_values['Status'] = '>' . $record_status;
 		}
 		
 		for ($i=$start; $i<=$end; $i++) {

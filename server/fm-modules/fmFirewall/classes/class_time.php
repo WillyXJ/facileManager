@@ -31,30 +31,24 @@ class fm_module_time {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="time">There are no time restrictions defined.</p>';
 		} else {
-			echo '<table class="display_results" id="table_edits" name="time">' . "\n";
-			$title_array = array('Restriction Name', 'Date Range', 'Time', 'Weekdays', 'Comment');
-			echo "<thead>\n<tr>\n";
-			
-			foreach ($title_array as $title) {
-				$style = ($title == 'Comment') ? ' style="width: 30%;"' : null;
-				echo '<th' . $style . '>' . $title . '</th>' . "\n";
-			}
-			
-			if ($allowed_to_manage_time) echo '<th width="110" style="text-align: center;">Actions</th>' . "\n";
-			
-			echo <<<HTML
-					</tr>
-				</thead>
-				<tbody>
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'time'
+						);
 
-HTML;
+			$title_array = array('Restriction Name', 'Date Range', 'Time', 'Weekdays', array('title' => 'Comment', 'style' => 'width: 30%;'));
+			if ($allowed_to_manage_time) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
-			echo '</tbody>';
-			echo '</table>';
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 

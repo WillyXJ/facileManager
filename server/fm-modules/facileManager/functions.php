@@ -1949,4 +1949,48 @@ function makePlainText($text, $make_array = false) {
 }
 
 
+/**
+ * Displays a table header
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param array $table_info Values to build the <table> tag
+ * @param array $head_values Values to build the <th> tags
+ * @param string $tbody_id id for <tbody>
+ * @return string
+ */
+function displayTableHeader($table_info, $head_values, $tbody_id = null) {
+	if ($tbody_id) $tbody_id = ' id="' . $tbody_id . '"';
+	
+	$parameters = null;
+	if (is_array($table_info)) {
+		foreach ($table_info as $parameter => $value) {
+			$parameters .= ' ' . $parameter . '="' . $value . '"';
+		}
+	}
+	$html = '<table' . $parameters . ">\n";
+	$html .= "<thead>\n<tr>\n";
+	
+	foreach ($head_values as $thead) {
+		$parameters = null;
+		if (is_array($thead)) {
+			$temp_array = $thead;
+			$thead = null;
+			foreach ($temp_array as $parameter => $value) {
+				if ($parameter == 'title') {
+					$thead = $value;
+					continue;
+				}
+				$parameters .= (is_null($value)) ? ' ' . $parameter : ' ' . $parameter . '="' . $value . '"';
+			}
+		}
+		$html .= "<th$parameters>$thead</th>\n";
+	}
+	$html .= "</tr>\n</thead>\n<tbody$tbody_id>\n";
+	
+	return $html;
+}
+
+
 ?>

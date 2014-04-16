@@ -31,31 +31,25 @@ class fm_module_policies {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="policies">There are no firewall policies.</p>';
 		} else {
-			echo '<table class="display_results';
-			if ($allowed_to_manage_servers && $fmdb->num_rows > 1) echo ' grab';
-			echo '" id="table_edits" name="policies">' . "\n";
-			echo <<<HTML
-				<thead>
-					<tr>
-						<th width="20"></th>
-						<th>Source</th>
-						<th>Destination</th>
-						<th>Service</th>
-						<th>Interface</th>
-						<th>Direction</th>
-						<th>Time</th>
-						<th style="width: 20%;">Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'policies'
+						);
+			if ($allowed_to_manage_servers && $fmdb->num_rows > 1) $table_info['class'] .= ' grab';
 
-HTML;
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x], $type);
-					}
+			$title_array = array(array('class' => 'header-tiny'), 'Source', 'Destination', 'Service', 'Interface',
+									'Direction', 'Time', array('title' => 'Comment', 'style' => 'width: 20%;'));
+			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x], $type);
+			}
+			
 			echo "</tbody>\n";
 		}
 		

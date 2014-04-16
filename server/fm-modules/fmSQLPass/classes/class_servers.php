@@ -26,32 +26,29 @@ class fm_module_servers {
 	 * Displays the server list
 	 */
 	function rows($result) {
-		global $fmdb;
+		global $fmdb, $allowed_to_manage_servers;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no servers defined.</p>';
 		} else {
-			echo <<<HEAD
-			<table class="display_results" id="table_edits" name="servers">
-				<thead>
-					<tr>
-						<th>Hostname</th>
-						<th>Type</th>
-						<th>Groups</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-HEAD;
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'servers'
+						);
 
+			$title_array = array('Hostname', 'Type', 'Groups');
+			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
-
-			echo "</tbody>\n";
-			echo '</table>' . "\n";
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -253,7 +250,8 @@ HEAD;
 		$timezone = date("T");
 		
 		if ($allowed_to_manage_servers) {
-			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status = '<td id="edit_delete_img">';
+			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';
 			$edit_status .= ($row->server_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
@@ -261,8 +259,9 @@ HEAD;
 			$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<p style="text-align: center;">N/A</p>';
+			$edit_status = null;
 		}
 		
 		/** Get some options */
@@ -290,7 +289,7 @@ HEAD;
 			<td>{$row->server_name}</td>
 			<td>{$row->server_type} (tcp/{$row->server_port})</td>
 			<td>$groups</td>
-			<td id="edit_delete_img">$edit_status</td>
+			$edit_status
 		</tr>
 HTML;
 	}

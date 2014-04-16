@@ -58,18 +58,15 @@ printHeader($page_name);
 echo '<div id="body_container">';
 if (!empty($response) || !empty($fm_new_version_available)) echo '<div id="response">' . $fm_new_version_available . '<p>' . $response . '</p></div>';
 
+$table_info = array('class' => 'display_results modules');
+$title_array = array('Module', 'Description');
+$header = displayTableHeader($table_info, $title_array);
+
 $modules = getAvailableModules();
 if (count($modules)) {
 	$module_display = <<<HTML
 			<p>The following modules have been detected:</p>
-			<table class="display_results modules">
-				<thead>
-					<tr>
-						<th>Module</th>
-						<th>Description</th>
-					</tr>
-				</thead>
-				<tbody>
+			$header
 HTML;
 
 	foreach ($modules as $module_name) {

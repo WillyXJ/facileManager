@@ -31,27 +31,26 @@ class fm_sqlpass_passwords {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no active database server groups.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="servers">
-				<thead>
-					<tr>
-						<th width="70"><input style="height: 10px;" type="checkbox" onClick="toggle(this, 'group[]')" checked /></th>
-						<th>Server Group</th>
-						<th>Last Changed</th>
-					</tr>
-				</thead>
-				<tbody>
-				<form name="manage" id="manage" method="post" action="<?php echo $GLOBALS['basename']; ?>">
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits'
+						);
+
+			$title_array = array(array(
+								'title' => '<input type="checkbox" onClick="toggle(this, \'group[]\')" checked />',
+								'class' => 'header-tiny'
+							), 'Server Group', 'Last Changed');
+
+			echo displayTableHeader($table_info, $title_array);
+			echo '<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">' . "\n";
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 
 		if ($allowed_to_manage_passwords && $result) {
@@ -75,7 +74,7 @@ HTML;
 		
 		echo <<<HTML
 		<tr id="$row->group_id">
-			<td><input style="height: 10px;" type="checkbox" name="group[]" value="{$row->group_id}" checked /></td>
+			<td><input type="checkbox" name="group[]" value="{$row->group_id}" checked /></td>
 			<td>{$row->group_name}</td>
 			<td>$last_changed</td>
 		</tr>

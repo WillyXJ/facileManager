@@ -31,30 +31,26 @@ class fm_module_objects {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="objects">There are no ' . $type . ' objects defined.</p>';
 		} else {
-			echo '<table class="display_results" id="table_edits" name="objects">' . "\n";
-			$title_array = ($type != 'address') ? array('Object Name', 'Address', 'Netmask', 'Comment') : array('Object Name', 'Address', 'Comment');
-			echo "<thead>\n<tr>\n";
-			
-			foreach ($title_array as $title) {
-				$style = ($title == 'Comment') ? ' style="width: 40%;"' : null;
-				echo '<th' . $style . '>' . $title . '</th>' . "\n";
-			}
-			
-			if ($allowed_to_manage_objects) echo '<th width="110" style="text-align: center;">Actions</th>' . "\n";
-			
-			echo <<<HTML
-					</tr>
-				</thead>
-				<tbody>
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'objects'
+						);
 
-HTML;
+			$title_array = array('Object Name', 'Address');
+			if ($type != 'address') $title_array[] = 'Netmask';
+			$title_array[] = array('title' => 'Comment', 'style' => 'width: 40%;');
+			if ($allowed_to_manage_objects) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
-			echo '</tbody>';
-			echo '</table>';
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 

@@ -28,39 +28,44 @@ class fm_module_servers {
 	function rows($result) {
 		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
 		
-		if ($allowed_to_build_configs) $bulk_actions_list = array('Upgrade', 'Build Config');
+		if ($allowed_to_build_configs) {
+			$bulk_actions_list = array('Upgrade', 'Build Config');
+			$title_array[] = array(
+								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
+								'class' => 'header-tiny'
+							);
+		} else {
+			$bulk_actions_list = null;
+		}
 
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no firewall servers.</p>';
 		} else {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
-			?>
-			<table class="display_results" id="table_edits" name="servers">
-				<thead>
-					<tr>
-						<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, 'server_list[]')" /></th>
-						<th width="20" style="text-align: center;"></th>
-						<th>Hostname</th>
-						<th>Serial No</th>
-						<th>Firewall Type</th>
-						<th>Method</th>
-						<th>Config File</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'servers'
+						);
+
+			$title_array[] = array('class' => 'header-tiny');
+			$title_array = array_merge($title_array, array('Hostname', 'Serial No', 'Method', 'Firewall Type', 'Config File'));
+			$title_array[] = array(
+								'title' => 'Actions',
+								'class' => 'header-actions'
+							);
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
-		echo '</table>';
 	}
 
 	/**

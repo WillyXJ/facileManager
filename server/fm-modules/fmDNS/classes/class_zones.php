@@ -30,9 +30,12 @@ class fm_dns_zones {
 		
 		if ($allowed_to_reload_zones) {
 			$bulk_actions_list = array('Reload');
-			$checkbox_head = '<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, \'domain_list[]\')" /></th>';
+			$checkbox[] = array(
+								'title' => '<input type="checkbox" onClick="toggle(this, \'domain_list[]\')" />',
+								'class' => 'header-tiny'
+							);
 		} else {
-			$checkbox_head = $bulk_actions_list = null;
+			$checkbox = $bulk_actions_list = null;
 		}
 
 		if (!$result) {
@@ -41,29 +44,27 @@ class fm_dns_zones {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
-			?>
-			<table class="display_results" id="table_edits" name="domains">
-				<thead>
-					<tr>
-						<?php echo $checkbox_head; ?>
-						<th style="width: 50px;">ID</th>
-						<th style="text-align:left;">Domain</th>
-						<th>Type</th>
-						<th>Clones</th>
-						<th>Views</th>
-						<th style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody id="zones">
-					<?php
-					/* Display the zones */
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x], $map, $reload_allowed);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'domains'
+						);
+
+			$title_array = array(array('title' => 'ID', 'class' => 'header-small'), 'Domain', 'Type', 'Clones', 'Views');
+			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			
+			if (is_array($checkbox)) {
+				$title_array = array_merge($checkbox, $title_array);
+			}
+
+			echo displayTableHeader($table_info, $title_array, 'zones');
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x], $map, $reload_allowed);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 

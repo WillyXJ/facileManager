@@ -31,29 +31,24 @@ class fm_module_services {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="services">There are no ' . strtoupper($type) . ' services defined.</p>';
 		} else {
-			echo '<table class="display_results" id="table_edits" name="services">' . "\n";
-			$title_array = ($type == 'icmp') ? array('Service Name', 'ICMP Type', 'ICMP Code', 'Comment') : array('Service Name', 'Source Ports', 'Dest Ports', 'Flags', 'Comment');
-			echo "<thead>\n<tr>\n";
-			
-			foreach ($title_array as $title) {
-				echo '<th>' . $title . '</th>' . "\n";
-			}
-			
-			if ($allowed_to_manage_services) echo '<th width="110" style="text-align: center;">Actions</th>' . "\n";
-			
-			echo <<<HTML
-					</tr>
-				</thead>
-				<tbody>
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'services'
+						);
 
-HTML;
+			$title_array = ($type == 'icmp') ? array('Service Name', 'ICMP Type', 'ICMP Code', 'Comment') : array('Service Name', 'Source Ports', 'Dest Ports', 'Flags', 'Comment');
+			if ($allowed_to_manage_services) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
-			echo '</tbody>';
-			echo '</table>';
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 

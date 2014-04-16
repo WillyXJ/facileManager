@@ -26,31 +26,29 @@ class fm_sqlpass_groups {
 	 * Displays the group list
 	 */
 	function rows($result) {
-		global $fmdb;
+		global $fmdb, $allowed_to_manage_servers;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="groups">There are no server groups.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="groups">
-				<thead>
-					<tr>
-						<th>Group Name</th>
-						<th>Associated Servers</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'groups'
+						);
+
+			$title_array = array('Group Name', 'Associated Servers');
+			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -157,7 +155,7 @@ class fm_sqlpass_groups {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		echo <<<HTML
