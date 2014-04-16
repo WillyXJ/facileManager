@@ -441,11 +441,11 @@ class fm_dns_zones {
 		$ns_count = getNSCount($row->domain_id);
 		$reload_allowed = reloadAllowed($row->domain_id);
 		if (!$soa_count && $row->domain_type == 'master') {
-			$response = '** You still need to create the SOA for this zone **';
+			$response = 'The SOA record still needs to be created for this zone';
 			$class = 'attention';
 		}
 		if (!$ns_count && $row->domain_type == 'master' && !$response) {
-			$response = '** You still need to create NS records for this zone **';
+			$response = 'One more more NS records still needs to be created for this zone';
 			$class = 'attention';
 		}
 		$clones = $this->cloneDomainsList($row->domain_id);

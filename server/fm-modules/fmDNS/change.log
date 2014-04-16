@@ -16,14 +16,15 @@
 * Server - [security] Fixed an issue where a record admin could modify
            zone information.
 * Server - [bug] Fixed incorrect redirection under certain circumstances.
-* Server - [feature] Added file extensions to all redirects and links.
+* Server - Added file extensions to all redirects and links.
 * Server - [feature] More than eight records can be added now.
 * Server - [bug] Fixed an issue where record admins could not view the records
            for a zone without a SOA or NS records.
+* Server - Updated alert messages for misssing SOA and NS records.
 
 1.1.1 (2014-03-24)
 ==================
-* Server - [bug] Improved installer and upgrader error handling.
+* Server - Improved installer and upgrader error handling.
 * Server - [bug] Fixed settings page typo.
 * Server - [bug] Zones will now reload properly when using split
            views. (Issue #77)
@@ -50,11 +51,11 @@
 * Server - [feature] Added support for wildcard records. (Issue #67)
 * Server - [bug] Improved interface for selecting server update method. (Issue #54)
 * Both   - [feature] Added support to auto-update client files. (Issue #53)
-* Server - [bug] Improved upgrade error handling.
+* Server - Improved upgrade error handling.
 
 1.0.3 (2014-02-20)
 ==================
-* Server - [feature] Improved server key configs. (Issue #60)
+* Server - Improved server key configs. (Issue #60)
 * Server - [bug] Fixed help file typo.
 
 1.0.2 (2013-12-31)

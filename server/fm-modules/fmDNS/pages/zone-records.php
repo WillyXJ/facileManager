@@ -65,10 +65,10 @@ if (reloadZone($domain_id)) {
 	if (reloadAllowed($domain_id)) $response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
 }
 if (!getNSCount($domain_id)) {
-	$response = '** You still need to create NS records for this zone **';
+	$response = '** One more more NS records still needs to be created for this zone **';
 }
 if (!getSOACount($domain_id)) {
-	$response = '** You still need to create the SOA for this zone **';
+	$response = '** The SOA record still needs to be created for this zone **';
 }
 
 echo '<div id="body_container">' . "\n";
