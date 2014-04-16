@@ -115,7 +115,7 @@ Client Upgrade
     `sudo mv facileManager/client/facileManager /usr/local/`
 3.  Restore your backup of config.inc.php to /usr/local/facileManager.
 
-Alternatively, since v1.1, you can update the clients through the UI (servers page)
-or by running the following on the clients:
+Alternatively, since v1.1, you can update the clients through the UI (servers
+page) or by running the following on the clients:
 
 `sudo php /usr/local/facileManager/<module_name>/{dns,fw}.php upgrade`
