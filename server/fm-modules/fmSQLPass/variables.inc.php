@@ -44,10 +44,10 @@ $__FM_CONFIG['module']['menu']['Config']['Servers']			= 'config-servers';
 $__FM_CONFIG['module']['menu']['Config']['Server Groups']	= 'config-groups';
 $__FM_CONFIG['module']['menu']['Config']['Passwords']		= 'config-passwords';
 
-/** Settings Menu Options */
-$__FM_CONFIG['module']['menu']['Settings']['URL']	= 'module-settings';
-
 $__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
+
+/** Settings Menu Options */
+$__FM_CONFIG['menu']['Settings']['fmSQLPass']	= 'module-settings.php';
 
 /** Default values */
 $pwd_strength_desc = null;
