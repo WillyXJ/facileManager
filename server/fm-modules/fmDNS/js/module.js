@@ -1,5 +1,7 @@
 $(document).ready(function() {
 	
+	more_clicks = 0;
+	
 	/* Zone reload button */
     $('#zones').delegate('form', 'click tap', function(e) {
         var $this 	= $(this);
@@ -78,6 +80,7 @@ $(document).ready(function() {
 		var form_data = {
 			domain_id: item_id,
 			record_type: item_type,
+			clicks: more_clicks,
 			is_ajax: 1
 		};
 
@@ -88,7 +91,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#more_records').append(response);
-				$this.parent().parent().parent().remove();
+				more_clicks = more_clicks + 1;
 			}
 		});
 		

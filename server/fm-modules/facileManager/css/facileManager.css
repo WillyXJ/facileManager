@@ -461,6 +461,26 @@ h4 {
 .display_results tbody tr.build td:first-child {
 	border-color: #2ea2cc;
 }
+.display_results th.header-actions,
+.display_results th.header-small,
+.display_results th.header-tiny {
+	width: 110px;
+	text-align: center;
+}
+
+.display_results th.header-small {
+	width: 50px;
+}
+
+.display_results th.header-tiny {
+	width: 20px;
+}
+
+.display_results th input[type="checkbox"] {
+	margin-left: -3px;
+}
+
+
 .modules tr td {
 	vertical-align: top;
 	padding-right: 1em;
@@ -1190,6 +1210,11 @@ pre {
 #bulk_action {
 	font-size: 13px;
 	height: 28px;
+}
+
+.add_records {
+	font-size: 12px;
+	padding: 5px 6px 5px 2em;
 }
 
 /** Firefox hacks :( */
