@@ -251,8 +251,8 @@ class fm_module_servers {
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
-			<td>$row->server_type</td>
 			<td>$row->server_update_method $port</td>
+			<td>$row->server_type</td>
 			<td>$row->server_config_file</td>
 			<td id="edit_delete_img">$edit_status</td>
 		</tr>
