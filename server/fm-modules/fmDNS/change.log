@@ -18,6 +18,8 @@
 * Server - [bug] Fixed incorrect redirection under certain circumstances.
 * Server - [feature] Added file extensions to all redirects and links.
 * Server - [feature] More than eight records can be added now.
+* Server - [bug] Fixed an issue where record admins could not view the records
+           for a zone without a SOA or NS records.
 
 1.1.1 (2014-03-24)
 ==================

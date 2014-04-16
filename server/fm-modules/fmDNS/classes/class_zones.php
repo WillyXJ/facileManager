@@ -477,8 +477,8 @@ FORM;
 */
 		$edit_status = null;
 		
-		if (!$soa_count && $row->domain_type == 'master') $type = 'SOA';
-		elseif (!$ns_count && $row->domain_type == 'master') $type = 'NS';
+		if (!$soa_count && $row->domain_type == 'master' && $allowed_to_manage_zones) $type = 'SOA';
+		elseif (!$ns_count && $row->domain_type == 'master' && $allowed_to_manage_zones) $type = 'NS';
 		else {
 			$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
 		}
