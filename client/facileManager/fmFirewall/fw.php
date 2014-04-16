@@ -77,7 +77,7 @@ if ($zones) {
 }
 
 /** Set variables to pass */
-$url = $proto . '://' . FMHOST . 'buildconf';
+$url = $proto . '://' . FMHOST . 'buildconf.php';
 $data['dryrun'] = $dryrun;
 
 /** Build the configs provided by $url */
