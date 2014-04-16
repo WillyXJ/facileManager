@@ -1,9 +1,9 @@
 1.2 (2014-04-??)
 ================
-* Server - [feature] Improved password strength settings description.
-* Server - [feature] Combined general and module settings in one menu.
-* Server - [feature] Added file extensions to all redirects and links.
-* Server - [feature] Changed font to Open Sans.
+* Server - Improved password strength settings description.
+* Server - Combined general and module settings in one menu.
+* Server - Added file extensions to all redirects and links.
+* Server - Changed font to Open Sans.
 
 1.1.2 (2014-04-03)
 ==================
@@ -15,7 +15,7 @@
 ==================
 * Server - [feature] Databases can now be created outside of the
            installer. (Issue #72)
-* Server - [bug] Improved installer and upgrader error handling.
+* Server - Improved installer and upgrader error handling.
 * Server - [feature] Added function comments.
 * Server - [feature] Modules can now be uninstalled if they are deactivated and
            there is an upgrade available.
@@ -51,13 +51,13 @@
 
 1.0 (2013-12-16)
 ================
-* Server - [feature] Removed enable/disable option for template user accounts.
+* Server - Removed enable/disable option for template user accounts.
 * Server - [bug] Can no longer delete the active template user account.
-* Server - [feature] Updated css and jquery animations.
+* Server - Updated css and jquery animations.
 * Server - [feature] User password strength is now selectable in the settings.
-* Server - [feature] Improved logging of settings changes.
+* Server - Improved logging of settings changes.
 * Server - [feature] Customizable app update checks.
-* Server - [feature] CSS tweaks.
+* Server - CSS tweaks.
 * Server - [feature] fM software update checks are now customizable.
 * Server - [feature] User accounts can now set their default module to use.
 * Server - [bug] Fixed an issue where clients would report as installed
@@ -76,7 +76,7 @@
 * Server - [bug] Fixed some PHP errors.
 * Server - [bug] Ensures current module is active.
 * Client - [feature] Added install support for multiple modules.
-* Client - [feature] Improved Linux distro detection.
+* Client - Improved Linux distro detection.
 
 1.0-rc5 (2013-10-16)
 ====================
