@@ -449,7 +449,7 @@ h4 {
 .display_results tbody tr.build td:first-child,
 .modules .active.upgrade td:first-child {
 	border-left: 3px #CB3739 solid;
-	padding-left: 1.8em;
+	padding-left: 1.6em;
 }
 .display_results tbody tr.disabled td:first-child {
 	border-color: #aaa;
@@ -460,9 +460,7 @@ h4 {
 .display_results tbody tr.build td:first-child {
 	border-color: #2ea2cc;
 }
-.display_results th.header-actions,
-.display_results th.header-small,
-.display_results th.header-tiny {
+.display_results th.header-actions {
 	width: 110px;
 	text-align: center;
 }
@@ -473,6 +471,10 @@ h4 {
 
 .display_results th.header-tiny {
 	width: 20px;
+}
+.display_results th.header-tiny:first-child {
+	padding-left: 2.2em;
+	padding-right: 3px;
 }
 
 .display_results th input[type="checkbox"] {
@@ -494,8 +496,11 @@ h4 {
 .display_results.sortable th#header-sorted i,
 .display_results.sortable th:not(.header-nosort):hover i {
 	border: 3px solid transparent;
+	border-top: 3px solid #464646;
+	border-bottom: 3px solid #464646;
 }
 .display_results.sortable th#header-sorted i.asc,
+.display_results.sortable th#header-sorted:hover i.desc,
 .display_results.sortable th:not(.header-nosort):hover i.asc {
 	top: -3px;
 	border-bottom: 3px solid #fff;
@@ -504,7 +509,14 @@ h4 {
 .display_results.sortable th:not(.header-nosort):hover i.desc {
 	border-top: 3px solid #fff;
 }
-
+.display_results.sortable th#header-sorted:hover i.asc {
+	border-top: 3px solid #fff;
+	border-bottom: none;
+}
+.display_results.sortable th#header-sorted:hover i.desc {
+	border-top: none;
+	border-bottom: 3px solid #fff;
+}
 
 .modules tr td {
 	vertical-align: top;

@@ -502,7 +502,7 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
  * @since 1.0
  * @package facileManager
  */
-function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', $ip_sort = false, $direction = 'ASC') {
+function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = null, $ip_sort = false, $direction = 'ASC') {
 	global $fmdb;
 	
 	switch($sql) {
@@ -2037,7 +2037,7 @@ function handleSortOrder() {
 			);
 	}
 	
-	$temp_uri = str_replace(array('&sort_by=' . $_GET['sort_by'], '&sort_direction=' . $_GET['sort_direction']), '', $_SERVER['REQUEST_URI']);
+	$temp_uri = str_replace(array('?sort_by=' . $_GET['sort_by'], '&sort_by=' . $_GET['sort_by']), '', $_SERVER['REQUEST_URI']);
 	
 	header('Location: ' . $temp_uri);
 }

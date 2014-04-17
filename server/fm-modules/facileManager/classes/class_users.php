@@ -34,13 +34,15 @@ class fm_users {
 			echo '<p id="table_edits" class="noresult" name="users">There are no users.</p>';
 		} else {
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'users'
 						);
 
-			$title_array = array(array('class' => 'header-tiny'), 'Login', 'Last Session Date', 'Last Session Host', 'Authenticate With', 'Super Admin');
-			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array[] = array('class' => 'header-tiny');
+			$title_array[] = array('title' => 'Login', 'rel' => 'user_login');
+			array_push($title_array, array('title' => 'Last Session Date', 'rel' => 'user_last_login'), array('title' => 'Last Session Host', 'class' => 'header-nosort'), array('title' => 'Authenticate With', 'class' => 'header-nosort'), array('title' => 'Super Admin', 'class' => 'header-nosort'));
+			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			

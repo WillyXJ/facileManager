@@ -72,7 +72,14 @@ printHeader($page_name_sub);
 echo printPageHeader($response, 'Users', $allowed_to_manage_users);
 
 if ($allowed_to_manage_users) {
-	$result = basicGetList('fm_users', 'user_id', 'user_');
+	$sort_field = 'user_login';
+	$sort_direction = null;
+	
+	if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+		extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+	}
+	
+	$result = basicGetList('fm_users', $sort_field, 'user_', null, null, false, $sort_direction);
 } else {
 	$result = basicGet('fm_users', $_SESSION['user']['id'], 'user_', 'user_id');
 }

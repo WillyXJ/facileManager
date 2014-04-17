@@ -629,7 +629,12 @@ $(document).ready(function() {
     	var sort_direction = $(this).parent().parent().parent().attr('id');
     	
     	if (sort_by_field) {
-    		window.location = window.location.href + '&sort_by=' + sort_by_field;
+    		if (window.location.href.indexOf('?') != -1) {
+    			append_mark = '&';
+    		} else {
+    			append_mark = '?';
+    		}
+    		window.location = window.location.href + append_mark + 'sort_by=' + sort_by_field;
     	}
     });
     
