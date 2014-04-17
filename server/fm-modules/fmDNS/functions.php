@@ -180,15 +180,16 @@ function buildModuleHelpFile() {
 			<p>Records are managed from the <a href="{$__FM_CONFIG['module']['menu']['Zones']['URL']}">Zones</a> menu item. From 
 			there you can select the zone you want manage records for.  Select from the upper-right the type of record(s) you want to 
 			manage and then you can add, modify, and delete records depending on your user permissions.</p>
-			<p>IPv4 A type records and the IPv6 AAAA records are both managed under the same page. Select A from the upper-right and add your 
+			<p>You can add IPv4 A type and IPv6 AAAA type records under the same page. Select A or AAAA from the upper-right and add your 
 			IPv4 and IPv6 records and {$_SESSION['module']} will auto-detect their type.</p>
-			<p>When adding CNAME, MX, SRV, SOA, or NS records, you have the option append the domain to the record. This means {$_SESSION['module']} 
-			will automatically add the domain to the record so you don't have to give the fully qualified domain name in the record value.</p>
+			<p>When adding certain records (such as CNAME, MX, SRV, SOA, NS, etc.), you have the option append the domain to the record. This 
+			means {$_SESSION['module']} will automatically add the domain to the record so you don't have to give the fully qualified domain name 
+			in the record value.</p>
 			<p><i>The 'Record Management' or 'Super Admin' permission is required to add, edit, and delete records.</i></p>
 			<p>When adding or updating a SOA record for a zone, the domain can be appended to the Master Server and Email Address if selected. This
 			means you could simply enter 'ns1' and 'username' for the Master Server and Email Address respectively. If you prefer to enter the entire
 			entry, make sure you append a period (.) at the end of each and select 'no' for Append Domain.</p>
-			<p>Adding A records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
+			<p>Adding A and AAAA records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
 			exist in order for PTR records to automatically be created.</p>
 			<p>You can also import BIND-compatible zone files instead of adding records individually. Go to Admin &rarr; 
 			<a href="{$__FM_CONFIG['menu']['Admin']['Tools']}">Tools</a> and use the Import Zone Files utility. After selecting the file and zone 

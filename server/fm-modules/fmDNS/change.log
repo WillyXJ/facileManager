@@ -23,6 +23,7 @@
 * Server - Updated alert messages for misssing SOA and NS records.
 * Server - [bug] Removed non-master zones from the 'clone of' list.
 * Server - [feature] Disabled records now have the proper css class assigned.
+* Server - Updated help file text.
 
 1.1.1 (2014-03-24)
 ==================
