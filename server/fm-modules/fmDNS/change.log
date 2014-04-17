@@ -22,6 +22,7 @@
            for a zone without a SOA or NS records.
 * Server - Updated alert messages for misssing SOA and NS records.
 * Server - [bug] Removed non-master zones from the 'clone of' list.
+* Server - [feature] Disabled records now have the proper css class assigned.
 
 1.1.1 (2014-03-24)
 ==================

@@ -262,6 +262,7 @@ class fm_dns_records {
 		$statusopt[1][] = 'Disabled';
 		$statusopt[1][] = 'disabled';
 		$status = BuildSelect($action . '[_NUM_][record_status]', '_NUM_', $statusopt, $record_status);
+		$field_values['class'] = $record_status;
 		
 		$class = buildSelect($action . '[_NUM_][record_class]', '_NUM_', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $record_class);
 
@@ -273,29 +274,29 @@ class fm_dns_records {
 				$input_box .= ' type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
 				$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 				if (strpos($domain, 'arpa')) {
-					$field_values['Record'] = '>' . $input_box . ' .' . $domain;
+					$field_values['data']['Record'] = '>' . $input_box . ' .' . $domain;
 				} elseif ($domain_map == 'forward') {
-					$field_values['Record'] = '>' . $input_box;
+					$field_values['data']['Record'] = '>' . $input_box;
 				} else {
-					$field_values['Record'] = '>' . $domain . '. ' . $input_box;
+					$field_values['data']['Record'] = '>' . $domain . '. ' . $input_box;
 				}
 			} else {
-				$field_values['Record'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
+				$field_values['data']['Record'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
 			}
-			$field_values['TTL'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_ttl]" value="' . $record_ttl . '" onkeydown="return validateNumber(event)" />';
-			$field_values['Class'] = '>' . $class;
+			$field_values['data']['TTL'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_ttl]" value="' . $record_ttl . '" onkeydown="return validateNumber(event)" />';
+			$field_values['data']['Class'] = '>' . $class;
 			
 			if ($type == 'CERT') {
-				$field_values['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['cert_types'], $record_cert_type);
-				$field_values['Key Tag'] = '><input style="width: 45px;" type="text" name="' . $action . '[_NUM_][record_key_tag]" value="' . $record_key_tag . '" onkeydown="return validateNumber(event)" />';
-				$field_values['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['cert_algorithms'], $record_algorithm);
-				$field_values['Value'] = '><textarea rows="2" name="' . $action . '[_NUM_][record_value]">' . $record_value . '</textarea>';
+				$field_values['data']['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['cert_types'], $record_cert_type);
+				$field_values['data']['Key Tag'] = '><input style="width: 45px;" type="text" name="' . $action . '[_NUM_][record_key_tag]" value="' . $record_key_tag . '" onkeydown="return validateNumber(event)" />';
+				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['cert_algorithms'], $record_algorithm);
+				$field_values['data']['Value'] = '><textarea rows="2" name="' . $action . '[_NUM_][record_value]">' . $record_value . '</textarea>';
 				$show_value = false;
 			}
 			
 			if ($type == 'HINFO') {
-				$field_values['Hardware'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
-				$field_values['OS'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_os]" value="' . $record_os . '" />';
+				$field_values['data']['Hardware'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+				$field_values['data']['OS'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_os]" value="' . $record_os . '" />';
 				$show_value = false;
 			}
 			
@@ -310,58 +311,58 @@ class fm_dns_records {
 					}
 				}
 				
-				$field_values['Flags'] = '>' . buildSelect($action . '[_NUM_][record_flags]', '_NUM_', $flags, $record_flags);
-				$field_values['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $algorithms, $record_algorithm);
+				$field_values['data']['Flags'] = '>' . buildSelect($action . '[_NUM_][record_flags]', '_NUM_', $flags, $record_flags);
+				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $algorithms, $record_algorithm);
 			}
 			
 			if ($show_value) {
-				$field_values['Value'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+				$field_values['data']['Value'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
 			}
 			
 			if ($type == 'RP') {
-				$field_values['Text'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_text]" value="' . $record_text . '" />';
+				$field_values['data']['Text'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_text]" value="' . $record_text . '" />';
 			}
 			
-			if (in_array($type, $priority)) $field_values['Priority'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_priority]" value="' . $record_priority . '" onkeydown="return validateNumber(event)" />';
+			if (in_array($type, $priority)) $field_values['data']['Priority'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_priority]" value="' . $record_priority . '" onkeydown="return validateNumber(event)" />';
 	
 			if ($type == 'SRV') {
-				$field_values['Weight'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_weight]" value="' . $record_weight . '" onkeydown="return validateNumber(event)" />';
-				$field_values['Port'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_port]" value="' . $record_port . '" onkeydown="return validateNumber(event)" />';
+				$field_values['data']['Weight'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_weight]" value="' . $record_weight . '" onkeydown="return validateNumber(event)" />';
+				$field_values['data']['Port'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_port]" value="' . $record_port . '" onkeydown="return validateNumber(event)" />';
 			}
 		
-			$field_values['Comment'] = '><input maxlength="200" type="text" name="' . $action . '[_NUM_][record_comment]" value="' . $record_comment . '" />';
+			$field_values['data']['Comment'] = '><input maxlength="200" type="text" name="' . $action . '[_NUM_][record_comment]" value="' . $record_comment . '" />';
 			
-			if (in_array($type, $append)) $field_values['Append Domain'] = ' align="center"><label><input ' . $yeschecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="yes" /> yes</label> <label><input ' . $nochecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="no" /> no</label>';
+			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' align="center"><label><input ' . $yeschecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="yes" /> yes</label> <label><input ' . $nochecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="no" /> no</label>';
 			
-			$field_values['Status'] = '>' . $status;
+			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][PTR]" />Create PTR</label>' : null;
+				$field_values['data']['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][PTR]" />Create PTR</label>' : null;
 			} else {
-				$field_values['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Delete]" />Delete</label>';
+				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Delete]" />Delete</label>';
 			}
 		} else {
-			$field_values['Record'] = '>' . $record_name;
-			$field_values['TTL'] = '>' . $record_ttl;
-			$field_values['Class'] = '>' . $record_class;
-			if ($show_value) $field_values['Value'] = '>' . $record_value;
-			$field_values['Comment'] = '>' . $record_comment;
+			$field_values['data']['Record'] = '>' . $record_name;
+			$field_values['data']['TTL'] = '>' . $record_ttl;
+			$field_values['data']['Class'] = '>' . $record_class;
+			if ($show_value) $field_values['data']['Value'] = '>' . $record_value;
+			$field_values['data']['Comment'] = '>' . $record_comment;
 			
-			if (in_array($type, $priority)) $field_values['Priority'] = '>' . $record_priority;
+			if (in_array($type, $priority)) $field_values['data']['Priority'] = '>' . $record_priority;
 			
 			if ($type == 'SRV') {
-				$field_values['Weight'] = '>' . $record_weight;
-				$field_values['Port'] = '>' . $record_port;
+				$field_values['data']['Weight'] = '>' . $record_weight;
+				$field_values['data']['Port'] = '>' . $record_port;
 			}
 		
-			if (in_array($type, $append)) $field_values['Append Domain'] = ' style="text-align: center;">' . $record_append;
+			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' style="text-align: center;">' . $record_append;
 		
-			$field_values['Status'] = '>' . $record_status;
+			$field_values['data']['Status'] = '>' . $record_status;
 		}
 		
 		for ($i=$start; $i<=$end; $i++) {
-			$form .= "<tr>\n";
-			foreach ($field_values as $key => $val) {
+			$form .= '<tr class="' . $field_values['class'] . '">' . "\n";
+			foreach ($field_values['data'] as $key => $val) {
 				$val = (!$val) ? '>' : $val;
 				$num = ($new) ? $i : $record_id;
 				$val = str_replace('_NUM_', $num, $val);
