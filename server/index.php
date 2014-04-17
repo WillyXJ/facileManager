@@ -35,14 +35,15 @@ if (isset($_POST['module_name'])) {
 	$_SESSION['module'] = $_POST['module_name'];
 }
 
+$_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
+$path_parts = pathinfo($_SERVER['REQUEST_URI']);
+
 require('fm-init.php');
 
 if (is_array($GLOBALS)) {
 	if (@array_key_exists('logout', $GLOBALS['URI'])) exit;
 }
 
-$_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
-$path_parts = pathinfo($_SERVER['REQUEST_URI']);
 $GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
 
 if ($GLOBALS['basename'] == 'index.php') {

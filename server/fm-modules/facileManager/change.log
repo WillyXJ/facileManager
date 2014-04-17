@@ -5,6 +5,8 @@
 * Server - Added file extensions to all redirects and links.
 * Server - Changed font to Open Sans.
 * Server - CSS tweaks.
+* Server - [feature] Added framework for customizable UI record sorting for use
+           with all modules. (Issue #81)
 
 1.1.2 (2014-04-03)
 ==================

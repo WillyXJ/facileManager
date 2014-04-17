@@ -31,14 +31,14 @@ class fm_dns_records {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
 		} else {
-			$table_info = array('class' => 'display_results');
+			$table_info = array('class' => 'display_results sortable');
 
 			echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
 			
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
-						echo $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
+				echo $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -187,44 +187,49 @@ class fm_dns_records {
 		global $allowed_to_manage_records, $allowed_to_manage_zones, $zone_access_allowed;
 		
 		$show_value = true;
-		$title_array = array('Record');
+		$title_array[] = array('title' => 'Record', 'rel' => 'record_name');
 		if ($type != 'SOA') {
-			array_push($title_array, 'TTL', 'Class');
+			$title_array[] = array('title' => 'TTL', 'rel' => 'record_ttl');
+			$title_array[] = array('title' => 'Class', 'rel' => 'record_class');
 		}
 		if ($type == 'CERT' ) {
-			array_push($title_array, 'Type', 'Key Tag', 'Algorithm');
+			$title_array[] = array('title' => 'Type', 'rel' => 'record_cert_type');
+			$title_array[] = array('title' => 'Key Tag', 'rel' => 'record_key_tag');
+			$title_array[] = array('title' => 'Algorithm', 'rel' => 'record_algorithm');
 		}
 		if ($type == 'HINFO') {
-			array_push($title_array, 'Hardware', 'OS');
+			$title_array[] = array('title' => 'Hardware', 'rel' => 'record_value');
+			$title_array[] = array('title' => 'OS', 'rel' => 'record_os');
 			$show_value = false;
 		}
 		if (in_array($type, array('DNSKEY', 'KEY'))) {
-			array_push($title_array, 'Flags', 'Algorithm');
+			$title_array[] = array('title' => 'Flags', 'rel' => 'record_flags');
+			$title_array[] = array('title' => 'Algorithm', 'rel' => 'record_algorithm');
 		}
 		
-		if ($show_value) array_push($title_array, 'Value');
+		if ($show_value) $title_array[] = array('title' => 'Value', 'rel' => 'record_value');
 				
 		if ($type == 'RP' ) {
-			array_push($title_array, 'Text');
-			$head_values['Text'] = null;
+			$title_array[] = array('title' => 'Text', 'rel' => 'record_text');
 		}
 		
 		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
 		$priority = array('MX', 'SRV', 'KX');
 		
-		if (in_array($type, $priority)) array_push($title_array, 'Priority');
+		if (in_array($type, $priority)) $title_array[] = array('title' => 'Priority', 'rel' => 'record_priority');
 		
 		if ($type == 'SRV') {
-			array_push($title_array, 'Weight', 'Port');
+			$title_array[] = array('title' => 'Weight', 'rel' => 'record_weight');
+			$title_array[] = array('title' => 'Port', 'rel' => 'record_port');
 		}
 		
-		array_push($title_array, 'Comment');
+		$title_array[] = array('title' => 'Comment', 'rel' => 'record_comment');
 		
-		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'style' => 'text-align: center;', 'nowrap' => null);
+		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null);
 		
-		if ($type != 'SOA') array_push($title_array, 'Status');
+		if ($type != 'SOA') $title_array[] = array('title' => 'Status', 'rel' => 'record_status');
 		if (empty($_POST)) {
-			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 		} else {
 			$title_array[] = array('title' => 'Valid', 'style' => 'text-align: center;');
 			array_unshift($title_array, 'Action');

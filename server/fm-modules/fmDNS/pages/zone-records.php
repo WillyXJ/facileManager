@@ -114,8 +114,15 @@ echo "	<h2>Records</h2>
 				break;
 		}
 		$record_sql = "AND domain_id='$domain_id' AND record_type='$record_type'";
+		$sort_direction = null;
 		
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $sort_field, 'record_', $record_sql, null, $ip_sort);
+		if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+			extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+		}
+		
+		if (in_array($record_type, array('A', 'AAAA')) && $sort_field == 'record_value') $ip_sort = true;
+		
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
 		$fm_dns_records->rows($result, $record_type, $domain_id);
 		
 		if ($allowed_to_manage_records && $zone_access_allowed) {
@@ -184,7 +191,7 @@ function isValidDomain($domain_id) {
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		if ($result[0]->domain_type == 'master' && !$result[0]->domain_clone_domain_id) return true;
+		if ($result[0]->domain_type == 'master') return true;
 	}
 	
 	return false;

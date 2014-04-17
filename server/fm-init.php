@@ -165,6 +165,11 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			}
 		}
 		
+		/** Handle sort orders */
+		if (array_key_exists('sort_by', $_GET)) {
+			handleSortOrder();
+		}
+		
 		/** Debug mode */
 		if (array_key_exists('debug', $_GET)) {
 			echo '<pre>';

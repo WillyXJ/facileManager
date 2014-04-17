@@ -623,6 +623,16 @@ $(document).ready(function() {
 		}
 	});
 
+	/* Sortable table headers */
+    $('.sortable th:not(".header-nosort")').click(function() {
+    	var sort_by_field = $(this).attr('rel');
+    	var sort_direction = $(this).parent().parent().parent().attr('id');
+    	
+    	if (sort_by_field) {
+    		window.location = window.location.href + '&sort_by=' + sort_by_field;
+    	}
+    });
+    
 });
 
 function del(msg){

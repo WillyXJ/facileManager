@@ -504,7 +504,6 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
  */
 function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', $ip_sort = false, $direction = 'ASC') {
 	global $fmdb;
-	$id = sanitize($id);
 	
 	switch($sql) {
 		case 'active':
@@ -514,10 +513,19 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', 
 			break;
 	}
 	
-	if ($ip_sort) {
-		$sort = "ORDER BY INET_ATON(`$id`)";
+	if (is_array($id)) {
+		$primary_field = sanitize($id[0]);
+		$secondary_fields = implode(',', $id);
+		$secondary_fields = $direction . ' ' . sanitize(substr($secondary_fields, strlen($primary_field)));
 	} else {
-		$sort = "ORDER BY `$id`";
+		$primary_field = sanitize($id);
+		$secondary_fields = null;
+	}
+	
+	if ($ip_sort) {
+		$sort = "ORDER BY INET_ATON(`$primary_field`)" . $secondary_fields;
+	} else {
+		$sort = "ORDER BY `$primary_field`" . $secondary_fields;
 	}
 	
 	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
@@ -1963,6 +1971,8 @@ function makePlainText($text, $make_array = false) {
 function displayTableHeader($table_info, $head_values, $tbody_id = null) {
 	if ($tbody_id) $tbody_id = ' id="' . $tbody_id . '"';
 	
+	$sort_direction = isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']) ? strtolower($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']) : 'asc';
+	
 	$parameters = null;
 	if (is_array($table_info)) {
 		foreach ($table_info as $parameter => $value) {
@@ -1983,13 +1993,53 @@ function displayTableHeader($table_info, $head_values, $tbody_id = null) {
 					continue;
 				}
 				$parameters .= (is_null($value)) ? ' ' . $parameter : ' ' . $parameter . '="' . $value . '"';
+				if ($parameter == 'rel') {
+					if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) &&
+						$value == $_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) {
+							$parameters .= ' id="header-sorted"';
+					}
+				}
 			}
 		}
-		$html .= "<th$parameters>$thead</th>\n";
+		$html .= "<th$parameters>$thead <i class=\"$sort_direction\"></i></th>\n";
 	}
 	$html .= "</tr>\n</thead>\n<tbody$tbody_id>\n";
 	
 	return $html;
+}
+
+
+/**
+ * Displays a table header
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param array $table_info Values to build the <table> tag
+ * @param array $head_values Values to build the <th> tags
+ * @param string $tbody_id id for <tbody>
+ * @return string
+ */
+function handleSortOrder() {
+	if (array_key_exists('sort_by', $_GET)) {
+		$swap_direction = array('ASC' => 'DESC', 'DESC' => 'ASC');
+
+		if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) &&
+			$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field'] != $_GET['sort_by']) {
+			$sort_direction = $swap_direction[$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']];
+		} elseif (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'])) {
+			$sort_direction = $_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'];
+		} else {
+			$sort_direction = 'DESC';
+		}
+		$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']] = array(
+				'sort_field' => $_GET['sort_by'], 'sort_direction' => $swap_direction[$sort_direction]
+			);
+	}
+	
+	$temp_uri = str_replace(array('&sort_by=' . $_GET['sort_by'], '&sort_direction=' . $_GET['sort_direction']), '', $_SERVER['REQUEST_URI']);
+	
+	header('Location: ' . $temp_uri);
 }
 
 

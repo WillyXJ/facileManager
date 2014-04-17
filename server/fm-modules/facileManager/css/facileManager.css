@@ -478,6 +478,32 @@ h4 {
 .display_results th input[type="checkbox"] {
 	margin-left: -3px;
 }
+.display_results.sortable th:not(.header-nosort):hover {
+	cursor: pointer;
+}
+.display_results.sortable th:not(.header-nosort):hover i,
+.display_results.sortable th#header-sorted i {
+	display: inline-block;
+}
+.display_results.sortable th i {
+	display: none;
+	margin-left: 3px;
+	position: relative;
+	top: 0;
+}
+.display_results.sortable th#header-sorted i,
+.display_results.sortable th:not(.header-nosort):hover i {
+	border: 3px solid transparent;
+}
+.display_results.sortable th#header-sorted i.asc,
+.display_results.sortable th:not(.header-nosort):hover i.asc {
+	top: -3px;
+	border-bottom: 3px solid #fff;
+}
+.display_results.sortable th#header-sorted i.desc,
+.display_results.sortable th:not(.header-nosort):hover i.desc {
+	border-top: 3px solid #fff;
+}
 
 
 .modules tr td {

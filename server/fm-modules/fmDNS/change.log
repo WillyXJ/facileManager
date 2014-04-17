@@ -6,7 +6,7 @@
 * Server - [feature] Added support for bulk server config builds
            and zone reloads. (Issue #71)
 * Server - [bug] Fixed a page title.
-* Server - [feature] Updated UI record sorting. (Issue #81)
+* Server - [feature] Added customizable UI record sorting. (Issue #81)
 * Server - [feature] Added support for the Hesiod class.
 * Server - [feature] Added support for additional RR types. (Issue #84)
 * Server - [bug] Improved server name resolution for building
