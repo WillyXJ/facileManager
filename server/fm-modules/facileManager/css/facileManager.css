@@ -249,7 +249,7 @@ label {
 }
 #mainitems ul li > ul{width:200px;}
 #mainitems ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
-#mainitems ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; }
+#mainitems ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:0 20px; font-size:10pt; color:#fff; text-decoration:none; }
 #mainitems > ul > li > ul > li a:hover{ background-color:rgba(100,100,100,0.95); color: #fff; };
 
 #subdomain {
@@ -293,7 +293,7 @@ span.menu_badge_count p {
 }
 
 #mainitems > ul > li > ul > li > a > span.menu_badge p {
-	margin-top: 0;
+	margin-top: -8px;
 }
 
 #cssmenu{ display:block; padding:0; margin: 0; }
@@ -348,7 +348,6 @@ span.menu_badge_count p {
 }
 
 .button {
-	font-family: sans-serif;
 	text-decoration: none;
 	font-size: 14px !important;
 	line-height: 16px;
@@ -577,7 +576,6 @@ tbody {
 	border: 1px #DFDFDF solid;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	font-family: sans-serif;
 }
 
 .form-table input[type=text],
@@ -1003,7 +1001,7 @@ span.not_installed {
 	top: 1.5em;
 	bottom: 0;
 	right: 0em;
-	width: 19em;
+	width: 23em;
 	height: 100%;
 	background-color: #FEFEFE;
 	border-left: 1px #DDD solid;
@@ -1020,7 +1018,7 @@ span.not_installed {
 }
 
 #help_topbar {
-	height: 2em;
+	height: 2.5em;
 	background-color: #464646;
 	border-bottom: 1px #464646 solid;
 	border-top: 1px #464646 solid;
@@ -1048,7 +1046,7 @@ span.not_installed {
 	text-align: right;
 	float: right;
 	width: 49%;
-	margin-top: 14px;
+	margin-top: 16px;
 }
 
 #help_buttons img {

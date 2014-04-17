@@ -430,14 +430,14 @@ $(document).ready(function() {
     });
 
 	$("#topheadpartright .help_link").click(function() {
-		var $body_right		= $('#body_container').css('right');
-		var $help_right		= $('#help').css('right');
+		var body_right		= $('#body_container').css('right');
+		var help_right		= $('#help').css('right');
 		
-		if ($body_right == '304px') {
+		if (body_right == '299px') {
 			$('#body_container').animate({right: '0'}, 500);
 			$('#help').hide("slide", { direction: "right" }, 500);
 		} else {
-			$('#body_container').animate({right: '19em'}, 500);
+			$('#body_container').animate({right: '23em'}, 500);
 			$('#help').show("slide", { direction: "right" }, 500);
 		}
 		
