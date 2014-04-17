@@ -21,6 +21,7 @@
 * Server - [bug] Fixed an issue where record admins could not view the records
            for a zone without a SOA or NS records.
 * Server - Updated alert messages for misssing SOA and NS records.
+* Server - [bug] Removed non-master zones from the 'clone of' list.
 
 1.1.1 (2014-03-24)
 ==================
