@@ -444,6 +444,11 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$("#help_file_container ul li div a").click(function() {
+		window.opener.location.href = $(this).attr('href');
+		return false;
+	});
+	
 	$("#manage_item_contents").delegate('#user_template_only', 'click tap', function(e) {
 		$('input[type="submit"]').removeAttr('disabled');
 	});
