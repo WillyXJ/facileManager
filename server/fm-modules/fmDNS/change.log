@@ -24,6 +24,7 @@
 * Server - Updated help file text.
 * Server - [feature] Added support to modify cloned zones. (Issue #65)
 * Server - [bug] Added missing logging of clone zone creations.
+* Server - [bug] Adding cloned zones now requires a server config build.
 
 1.1.3 (2014-04-15)
 ==================

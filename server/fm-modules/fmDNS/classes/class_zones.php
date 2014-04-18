@@ -226,6 +226,13 @@ class fm_dns_zones {
 		$insert_id = $fmdb->insert_id;
 		
 		addLogEntry($log_message);
+		
+		/* Set the server_build_config flag for servers */
+		if ($_POST['createZone'][$id]['domain_clone_domain_id']) {
+			if (getSOACount($_POST['createZone'][$id]['domain_clone_domain_id']) && getNSCount($_POST['createZone'][$id]['domain_clone_domain_id'])) {
+				setBuildUpdateConfigFlag(getZoneServers($_POST['createZone'][$id]['domain_clone_domain_id']), 'yes', 'build');
+			}
+		}
 		return $insert_id;
 	}
 
@@ -351,7 +358,7 @@ class fm_dns_zones {
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		
-		/* set the server_build_config flag for existing servers */
+		/* Set the server_build_config flag for existing servers */
 		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
@@ -365,7 +372,7 @@ class fm_dns_zones {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		/* set the server_build_config flag for new servers */
+		/* Set the server_build_config flag for new servers */
 		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
