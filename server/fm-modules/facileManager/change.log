@@ -4,7 +4,7 @@
 * Server - Combined general and module settings in one menu.
 * Server - Added file extensions to all redirects and links.
 * Server - Changed font to Open Sans.
-* Server - CSS tweaks.
+* Server - CSS tweaks to improve UI on Linux systems. (Issue #86)
 * Server - [feature] Added framework for customizable UI record sorting for use
            with all modules. (Issue #81)
 
