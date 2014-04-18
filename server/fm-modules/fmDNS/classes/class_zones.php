@@ -619,7 +619,7 @@ HTML;
 				</tr>
 			</table>
 			<input type="submit" name="submit" value="$ucf_action Zone" class="button" />
-			<input value="Cancel" class="button cancel" id="cancel_button" />
+			<input type="button" value="Cancel" class="button" id="cancel_button" />
 		</form>
 HTML;
 

@@ -83,7 +83,8 @@ label {
 	bottom: 0;
 	background-color: #ECECEC;
 	border-right: 1px #ccc solid;
-	width: 10em;
+	width: 12em;
+	font-size: 10pt;
 	z-index: -1;
 	moz-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
 	-webkit-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
@@ -367,10 +368,6 @@ span.menu_badge_count p {
 	border-color: #666;
 }
 
-.cancel {
-	width: 45px;
-}
-
 #footer {
 	font-size: 11px;
 	position: relative;
@@ -401,7 +398,8 @@ h4 {
 	padding: 1em 2em;
 	position: absolute;
 	right: 0em;
-	left: 10em;
+	left: 12em;
+	font-size: 10pt;
 	float: left;
 	margin-top: 2.2em;
 }
@@ -823,7 +821,7 @@ a {
 	opacity: 1.0;
 	padding: 2em;
 	max-width: 70%;
-	overflow: scroll;
+	overflow: auto;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	moz-box-shadow: 0 4px 10px -1px #000;
@@ -964,7 +962,7 @@ span.not_installed {
 	padding-left: 2em;
 	font-size: 10pt;
 	line-height: 18pt;
-	overflow: scroll;
+	overflow: auto;
 }
 
 #shadow_container h3 {
