@@ -31,16 +31,18 @@ if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['mod
 $page_name = 'Zones';
 $page_name_sub = ($map == 'forward') ? 'Forward' : 'Reverse';
 
+$default_record_type = $map == 'forward' ? 'A' : 'PTR';
 if (isset($_GET['record_type'])) {
 	$record_type = strtoupper($_GET['record_type']);
 } else {
-	$record_type = $map == 'forward' ? 'A' : 'PTR';
+	$record_type = $default_record_type;
 }
 
 $domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 if (!isValidDomain($domain_id)) header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: ' . $GLOBALS['RELPATH']);
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) $record_type = $default_record_type;
+if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $record_type == 'SOA') $record_type = $default_record_type;
 
 printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
@@ -62,7 +64,7 @@ $avail_types = buildRecordTypes($record_type, $domain_id, $map, $supported_recor
 
 $response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
-	if (reloadAllowed($domain_id)) $response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
+	if (reloadAllowed($domain_id) && $allowed_to_reload_zones && $zone_access_allowed) $response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
 }
 if (!getNSCount($domain_id)) {
 	$response = '** One more more NS records still needs to be created for this zone **';
@@ -113,7 +115,9 @@ echo "	<h2>Records</h2>
 				$ip_sort = false;
 				break;
 		}
-		$record_sql = "AND domain_id='$domain_id' AND record_type='$record_type'";
+		$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+		$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
 		$sort_direction = null;
 		
 		if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
@@ -151,6 +155,8 @@ function buildRecordTypes($record_type = null, $domain_id = null, $map = 'forwar
 	if (isset($record_type) && $domain_id != null) {
 		foreach ($__FM_CONFIG['records']['common_types'] as $type) {
 			if (in_array($type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) continue;
+			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $type == 'SOA') continue;
+
 			$select = ($record_type == $type) ? ' class="selected"' : '';
 			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
 		}

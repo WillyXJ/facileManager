@@ -102,7 +102,11 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 		if (isset($data['Delete'])) {
 			$action = 'Delete';
-			$HTMLOut.= buildInputReturn('update', $record_type, $i ,'record_status', 'deleted');
+			$HTMLOut.= buildInputReturn('update', $i ,'record_status', 'deleted');
+		} elseif (isset($data['Skip'])) {
+			$action = 'Skip Import';
+			$HTMLOut.= buildInputReturn('update', $i ,'record_status', 'deleted');
+			$value[$i] = $changes[$i];
 		} else {
 			$y = 0;
 			$action = null;
@@ -255,7 +259,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 				if (!isset($input_return_error[$i]) || !$input_return_error[$i]) {
 					if ($key == 'soa_serial_no' && !$val) continue;
-					$input_return[$i][$y]= buildInputReturn('update', $record_type, $i, $key, $val);
+					$input_return[$i][$y]= buildInputReturn('update', $i, $key, $val);
 					$action = 'Update';
 				} else {
 					$action = 'None';
@@ -504,7 +508,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 				}
 				
 				if (!isset($input_return_error[$i]) || !$input_return_error[$i]) {
-					$input_return[$i][$y] = buildInputReturn('create', $record_type, $i, $key, $val);
+					$input_return[$i][$y] = buildInputReturn('create', $i, $key, $val);
 					$action = 'Create';
 				} else {
 					$action = 'None';
@@ -540,7 +544,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 	return $HTMLOut;
 }
 
-function buildInputReturn($action, $record_type, $i, $key, $val) {
+function buildInputReturn($action, $i, $key, $val) {
 
 	return "<input type='hidden' name='{$action}[$i][$key]' value='$val'>\n";
 }
@@ -643,10 +647,13 @@ function buildSQLRecords($record_type, $domain_id) {
 		array_shift($sql_results[$result[0]->soa_id]);
 		return $sql_results;
 	} else {
+		$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+		
 		if (in_array($record_type, array('A', 'AAAA'))) {
-			$record_sql = "AND domain_id='$domain_id' AND record_type IN ('A', 'AAAA')";
+			$record_sql = "AND domain_id $valid_domain_ids AND record_type IN ('A', 'AAAA')";
 		} else {
-			$record_sql = "AND domain_id='$domain_id' AND record_type='$record_type'";
+			$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
 		}
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_name', 'record_', $record_sql);
 		if ($result) {

@@ -653,7 +653,7 @@ HTML;
 		if ($fmdb->num_rows) {
 			$clone_results = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return .= '<p>' . $clone_results[$i]->domain_name;
+				$return .= '<p><a href="zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_results[$i]->domain_id . '" title="Edit zone records">' . $clone_results[$i]->domain_name . '</a>';
 				if ($allowed_to_manage_zones) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				$return .= "</p>\n";
 			}

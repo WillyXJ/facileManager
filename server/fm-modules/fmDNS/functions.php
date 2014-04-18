@@ -134,7 +134,7 @@ DASH;
  * @subpackage fmDNS
  */
 function buildModuleToolbar() {
-	global $__FM_CONFIG;
+	global $__FM_CONFIG, $fmdb;
 	
 	if (isset($_GET['domain_id'])) {
 		$domain = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
@@ -143,6 +143,16 @@ function buildModuleToolbar() {
 			<span class="single_line">Domain:&nbsp;&nbsp; $domain</span>
 		</div>
 HTML;
+		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
+			extract(get_object_vars($fmdb->last_result[0]));
+			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
+			$domain_menu .= <<<HTML
+		<div id="topheadpart">
+			<span class="single_line">Clone of:&nbsp;&nbsp; <a href="zone-records.php?map=$domain_mapping&domain_id=$parent_domain_id$record_type_uri" title="Edit parent zone records">$domain_name</a></span>
+		</div>
+HTML;
+		}
 	} else $domain_menu = null;
 	
 	return $domain_menu;
@@ -351,7 +361,10 @@ function reloadZone($domain_id) {
 function getSOACount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `domain_id`='$domain_id' AND `soa_status`!='deleted'";
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE (`domain_id`='$domain_id' OR
+			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`='$domain_id')
+		) AND `soa_status`!='deleted'";
 	$fmdb->get_results($query);
 	return $fmdb->num_rows;
 }
@@ -359,7 +372,10 @@ function getSOACount($domain_id) {
 function getNSCount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE `domain_id`='$domain_id' AND `record_type`='NS' AND `record_status`='active'";
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE (`domain_id`='$domain_id' OR
+			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`='$domain_id')
+		) AND `record_type`='NS' AND `record_status`='active'";
 	$fmdb->get_results($query);
 	return $fmdb->num_rows;
 }

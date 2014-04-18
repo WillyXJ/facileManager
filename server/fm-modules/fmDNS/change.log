@@ -24,6 +24,7 @@
 * Server - [bug] Removed non-master zones from the 'clone of' list.
 * Server - [feature] Disabled records now have the proper css class assigned.
 * Server - Updated help file text.
+* Server - [feature] Added support to modify cloned zones. (Issue #65)
 
 1.1.1 (2014-03-24)
 ==================

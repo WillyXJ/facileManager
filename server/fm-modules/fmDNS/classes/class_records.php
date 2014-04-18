@@ -238,7 +238,7 @@ class fm_dns_records {
 		return $title_array;
 	}
 
-	function getInputForm($type, $new, $domain_id, $results = null, $start = 1) {
+	function getInputForm($type, $new, $parent_domain_id, $results = null, $start = 1) {
 		global $allowed_to_manage_records, $allowed_to_manage_zones, $__FM_CONFIG, $zone_access_allowed;
 		
 		$form = $record_status = $record_class = $record_name = $record_ttl = null;
@@ -266,7 +266,7 @@ class fm_dns_records {
 		
 		$class = buildSelect($action . '[_NUM_][record_class]', '_NUM_', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $record_class);
 
-		if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed) {
+		if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed && ($new || $domain_id == $parent_domain_id)) {
 			if ($type == 'PTR') {
 				$domain_map = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
 				$input_box = '<input ';
@@ -358,6 +358,12 @@ class fm_dns_records {
 			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' style="text-align: center;">' . $record_append;
 		
 			$field_values['data']['Status'] = '>' . $record_status;
+			
+			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed && $domain_id != $parent_domain_id) {
+				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Skip]" ';
+				$field_values['data']['Actions'] .= in_array($parent_domain_id, explode(';', $record_skipped_by_domain_id)) ? ' checked' : null;
+				$field_values['data']['Actions'] .= '/>Skip Import</label>';
+			}
 		}
 		
 		for ($i=$start; $i<=$end; $i++) {
