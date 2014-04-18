@@ -289,8 +289,21 @@ ROW;
 			$count++;
 		}
 		
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'views'
+					);
+
+		$title_array = array('Record', 'TTL', 'Class', 'Type', 'Priority', 'Value', 'Weight', 'Port', 'Comment');
+		$title_array[] = array('title' => 'Append Domain', 'style' => 'text-align: center;', 'nowrap' => null);
+		$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+		
+		$table_header = displayTableHeader($table_info, $title_array);
+		
 		$body = <<<BODY
 <h2>Import Verification</h2>
+<p>Domain: $domain_name</p>
 		<form method="post" action="zone-records-write.php">
 			<input type="hidden" name="domain_id" value="{$_POST['domain_id']}">
 			<input type="hidden" name="map" value="$domain_map">
@@ -298,23 +311,7 @@ ROW;
 			<input type="hidden" name="import_file" value="{$_FILES['import-file']['name']}">
 			$unsupported
 			$soa_row
-			<table class="display_results">
-				<thead>
-					<tr>
-						<th>Record</th>
-						<th>TTL</th>
-						<th>Class</th>
-						<th>Type</th>
-						<th>Priority</th>
-						<th>Value</th>
-						<th>Weight</th>
-						<th>Port</th>
-						<th>Comment</th>
-						<th style="text-align: center;">Append Domain</th>
-						<th style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
+			$table_header
 				$rows
 				</tbody>
 			</table>
