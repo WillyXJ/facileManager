@@ -28,13 +28,13 @@
  */
 
 /** Module Version */
-$__FM_CONFIG['fmFirewall']['version']				= '1.0-b4';
-$__FM_CONFIG['fmFirewall']['client_version']		= '1.0-b3';
+$__FM_CONFIG['fmFirewall']['version']				= '1.0-b5';
+$__FM_CONFIG['fmFirewall']['client_version']		= '1.0-b5';
 $__FM_CONFIG['fmFirewall']['description']			= 'Managing software firewalls should not be difficult. Manage one or more software firewall
 														servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files
 														individually.';
 $__FM_CONFIG['fmFirewall']['prefix']				= 'fw_';
-$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.1.1';
+$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.2';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';

@@ -28,12 +28,12 @@
  */
 
 /** Module Version */
-$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b7';
+$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b8';
 $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords across a server farm running multiple database server types.
 														Password complexity requirements are enforced to ensure secure passwords. Currently supported
 														database servers include MySQL.';
 $__FM_CONFIG['fmSQLPass']['prefix']					= 'sqlpass_';
-$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.1.1';
+$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.2';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';
