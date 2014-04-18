@@ -45,6 +45,12 @@ if (isset($update) && is_array($update)) {
 	}
 }
 
+if (isset($skip) && is_array($skip)) {
+	foreach ($skip as $id => $data) {
+		$fm_dns_records->update($domain_id, $id, $record_type, $data, true);
+	}
+}
+
 if (isset($create) && is_array($create)) {
 	$record_count = 0;
 	foreach ($create as $new_id => $data) {
@@ -65,7 +71,7 @@ if (isset($create) && is_array($create)) {
 			
 			/** Are we auto-creating a PTR record? */
 			if ($record_type == 'A' && isset($data['PTR'])) {
-				$domain = '.' . TrimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
+				$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
 				if ($data['record_name'][0] == '@') {
 					$data['record_name'] = null;
 					$domain = substr($domain, 1);
@@ -73,7 +79,7 @@ if (isset($create) && is_array($create)) {
 				
 				/** Get reverse zone */
 				if (!strrpos($data['record_value'], ':')) {
-					$rev_domain = TrimFullStop(getNameFromID($data['PTR'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+					$rev_domain = trimFullStop(getNameFromID($data['PTR'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 					$domain_pieces = array_reverse(explode('.', $rev_domain));
 					$domain_parts = count($domain_pieces);
 					

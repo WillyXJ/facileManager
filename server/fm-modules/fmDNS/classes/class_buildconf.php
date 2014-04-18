@@ -785,7 +785,7 @@ class fm_module_buildconf {
 			$valid_domain_ids = "='{$domain->domain_id}'";
 		}
 		$order_sql = ($domain->domain_mapping == 'reverse') ? array('record_type', 'INET_ATON(record_name)', 'record_value') : array('record_type', 'record_name', 'INET_ATON(record_value)');
-		$record_sql = "AND domain_id $valid_domain_ids";
+		$record_sql = "AND domain_id $valid_domain_ids AND record_status='active'";
 		$record_sql .= $skipped_records ? ' AND record_id NOT IN (' . implode(',', $skipped_records) . ')' : null;
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $order_sql, 'record_', $record_sql);
 		

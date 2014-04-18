@@ -83,10 +83,10 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 	global $__FM_CONFIG;
 
 	$sql_records = buildSQLRecords($record_type, $domain_id);
-	$changes = compareValues($value, $sql_records);
-	if (count($changes)) {
-		foreach ($changes as $i => $array) {
-			$changes[$i] = array_merge($sql_records[$i], $changes[$i]);
+	$raw_changes = compareValues($value, $sql_records);
+	if (count($raw_changes)) {
+		foreach ($raw_changes as $i => $array) {
+			$changes[$i] = array_merge($sql_records[$i], $raw_changes[$i]);
 		}
 	} else {
 		return false;
@@ -103,9 +103,14 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 		if (isset($data['Delete'])) {
 			$action = 'Delete';
 			$HTMLOut.= buildInputReturn('update', $i ,'record_status', 'deleted');
-		} elseif (isset($data['Skip'])) {
-			$action = 'Skip Import';
-			$HTMLOut.= buildInputReturn('update', $i ,'record_status', 'deleted');
+		} elseif (array_key_exists('record_skipped', $raw_changes[$i])) {
+			if ($data['record_skipped'] == 'on') {
+				$action = 'Skip Import';
+				$HTMLOut.= buildInputReturn('skip', $i ,'record_status', 'active');
+			} else {
+				$action = 'Include';
+				$HTMLOut.= buildInputReturn('skip', $i ,'record_status', 'deleted');
+			}
 			$value[$i] = $changes[$i];
 		} else {
 			$y = 0;
@@ -699,6 +704,10 @@ function buildSQLRecords($record_type, $domain_id) {
 				if ($results[$i]->record_text != null) {
 					$sql_results[$results[$i]->record_id]['record_text'] = $results[$i]->record_text;
 				}
+				
+				/** Skipped record? */
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $results[$i]->record_id, 'record_', 'record_id', "AND domain_id=$domain_id");
+				$sql_results[$results[$i]->record_id]['record_skipped'] = ($fmdb->num_rows) ? 'on' : 'off';
 			}
 		}
 		return $sql_results;

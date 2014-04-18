@@ -120,7 +120,7 @@ class fm_dns_records {
 	/**
 	 * Updates the selected record
 	 */
-	function update($domain_id, $id, $record_type, $array) {
+	function update($domain_id, $id, $record_type, $array, $skipped_record = false) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$domain_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
@@ -135,13 +135,21 @@ class fm_dns_records {
 		$sql_edit = null;
 		
 		foreach ($array as $key => $data) {
+			if ($key == 'record_skipped') continue;
 			$sql_edit .= $key . "='" . mysql_real_escape_string($data) . "',";
-			$log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
+			if ($key != 'record_status' && !$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		
-		// Update the record
-		$query = "UPDATE `$table` SET $sql_edit $record_type_sql WHERE `$field`='$id' AND `account_id`='{$_SESSION['user']['account_id']}'";
+		/** Update the record */
+		if ($skipped_record) {
+			$table .= '_skipped';
+			$query = "REPLACE INTO `$table` VALUES({$_SESSION['user']['account_id']}, $domain_id, $id, '{$array['record_status']}')";
+			$data = $array['record_status'] == 'active' ? 'no' : 'yes';
+			$log_message .= formatLogKeyData(null, 'Included', $data);
+		} else {
+			$query = "UPDATE `$table` SET $sql_edit $record_type_sql WHERE `$field`='$id' AND `account_id`='{$_SESSION['user']['account_id']}'";
+		}
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;
@@ -360,7 +368,7 @@ class fm_dns_records {
 			$field_values['data']['Status'] = '>' . $record_status;
 			
 			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed && $domain_id != $parent_domain_id) {
-				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Skip]" ';
+				$field_values['data']['Actions'] = ' align="center"><input type="hidden" name="' . $action . '[_NUM_][record_skipped]" value="off" /><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][record_skipped]" ';
 				$field_values['data']['Actions'] .= in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id)) ? ' checked' : null;
 				$field_values['data']['Actions'] .= '/>Skip Import</label>';
 			}
