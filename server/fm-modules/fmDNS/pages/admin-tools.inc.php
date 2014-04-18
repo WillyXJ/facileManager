@@ -28,7 +28,7 @@ if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
 	include($module_tools_file);
 }
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-$available_zones = $fm_dns_zones->availableZones();
+$available_zones = $fm_dns_zones->availableZones(true, 'master');
 $button = null;
 if ($available_zones) {
 	$zone_options = buildSelect('domain_id', 1, $available_zones);

@@ -902,10 +902,13 @@ HTML;
 		$result = $fmdb->query($query);
 	}
 	
-	function availableZones() {
+	function availableZones($include_clones = false, $zone_type = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND domain_clone_domain_id=0 ORDER BY domain_name ASC";
+		$include_clones_sql = $include_clones ? null : "AND domain_clone_domain_id=0";
+		$zone_type_sql = $zone_type ? "AND domain_type='$zone_type'" : null;
+		
+		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_clones_sql $zone_type_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
