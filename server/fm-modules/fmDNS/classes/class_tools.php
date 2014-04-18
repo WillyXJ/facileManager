@@ -195,8 +195,13 @@ HTML;
 							list($array['record_class'], $array['record_type'], $array['record_value']) = $parts;
 					}
 					$array['record_value'] = str_replace('"', '', $array['record_value']);
-				} elseif (in_array('A', $parts) || in_array('CNAME', $parts)) {
-					$key = (in_array('A', $parts)) ? array_search('A', $parts) : array_search('CNAME', $parts);
+				} elseif (in_array('A', $parts) || in_array('CNAME', $parts) || in_array('AAAA', $parts)) {
+					if (in_array('AAAA', $parts))
+					{
+						$key = array_search('AAAA', $parts);
+					} else {
+						$key = (in_array('A', $parts)) ? array_search('A', $parts) : array_search('CNAME', $parts);
+					}
 					switch($key) {
 						case 3:
 							list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;

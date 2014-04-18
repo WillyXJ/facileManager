@@ -89,6 +89,7 @@ label {
 	background-color: #ECECEC;
 	border-right: 1px #ccc solid;
 	width: 160px;
+	font-size: 10pt;
 	z-index: -1;
 	moz-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
 	-webkit-box-shadow: rgba(200,200,200,0.7) 2px 0 3px -1px;
@@ -368,10 +369,6 @@ span.menu_badge_count p {
 	border-color: #666;
 }
 
-.cancel {
-	width: 45px;
-}
-
 #footer {
 	font-size: 11px;
 	position: relative;
@@ -403,6 +400,7 @@ h4 {
 	position: absolute;
 	right: 0em;
 	left: 12.7em;
+	font-size: 10pt;
 	float: left;
 	margin-top: 3.2em;
 }

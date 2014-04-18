@@ -198,7 +198,7 @@ HTML;
 				</tr>
 			</table>
 			<input type="submit" name="submit" id="submit" value="$ucaction Group" class="button" />
-			<input value="Cancel" class="button cancel" id="cancel_button" />
+			<input type="button" value="Cancel" class="button" id="cancel_button" />
 		</form>
 FORM;
 

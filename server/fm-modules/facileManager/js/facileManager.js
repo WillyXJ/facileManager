@@ -214,7 +214,7 @@ $(document).ready(function() {
 						} else {
 							$('#manage_item').fadeIn(200);
 							$('#manage_item_contents').fadeIn(200);
-							$('#manage_item_contents').html('<h2>Delete Results</h2>' + response + '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />');
+							$('#manage_item_contents').html('<h2>Delete Results</h2>' + response + '<br /><input type="submit" value="OK" class="button" id="cancel_button" />');
 						}
 					}
 				}
@@ -551,7 +551,7 @@ $(document).ready(function() {
 		
 							$('#manage_item').fadeIn(200);
 							$('#manage_item_contents').fadeIn(200);
-							$('#manage_item_contents').html('<h2>Configuration Build Results</h2>' + response + '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />');
+							$('#manage_item_contents').html('<h2>Configuration Build Results</h2>' + response + '<br /><input type="submit" value="OK" class="button" id="cancel_button" />');
 							
 							$('#response').delay(300).fadeTo(200, 0.00, function() {
 								$('#response').slideUp(400);

@@ -598,7 +598,7 @@ PERM;
 			</table>
 			<p>
 				<input type="submit" id="$button_id" name="submit" value="$button_text" class="button" $button_disabled />
-				<input value="Cancel" class="button cancel" id="cancel_button" />
+				<input type="button" value="Cancel" class="button" id="cancel_button" />
 			</p>
 			</div>
 		</form>
