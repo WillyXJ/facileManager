@@ -342,6 +342,9 @@ function moduleAddServer($action) {
 
 
 function moduleCompleteClientInstallation() {
+	/** Install default config option overrides based on OS distro */
+	setDefaultOverrideOptions();
+	
 	setBuildUpdateConfigFlag($_POST['SERIALNO'], 'yes', 'build');
 }
 
@@ -608,6 +611,36 @@ function getZoneServers($domain_id) {
 	}
 	
 	return $serial_no;
+}
+
+
+/**
+ * Sets default override configuration options based on OS distro
+ *
+ * @since 1.2
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function setDefaultOverrideOptions() {
+	global $fm_module_options;
+	
+	$config = null;
+	$server_os_distro = isDebianSystem($_POST['server_os_distro']) ? 'debian' : strtolower($_POST['server_os_distro']);
+	
+	switch ($server_os_distro) {
+		case 'debian':
+			$config = array(
+							array('cfg_type' => 'global', 'server_serial_no' => $_POST['SERIALNO'], 'cfg_name' => 'pid-file', 'cfg_data' => '/var/run/named/named.pid')
+						);
+	}
+	
+	if (is_array($config)) {
+		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		
+		foreach ($config as $config_data) {
+			$fm_module_options->add($config_data);
+		}
+	}
 }
 
 

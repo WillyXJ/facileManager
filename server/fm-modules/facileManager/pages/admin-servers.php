@@ -67,7 +67,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 			if (array_key_exists('install', $_GET)) {
 				/** Set flags */
 				$data = basicUpdate('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['SERIALNO'], 'server_installed', 'yes', 'server_serial_no');
-				if (function_exists('moduleCompleteInstallation')) {
+				if (function_exists('moduleCompleteClientInstallation')) {
 					moduleCompleteClientInstallation();
 				}
 				$fm_shared_module_servers->updateClientVersion();

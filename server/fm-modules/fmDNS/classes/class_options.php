@@ -58,8 +58,9 @@ class fm_module_options {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$_POST = $post;
 		/** Validate post */
-		if (!$this->validatePost()) return false;
+		if (!$this->validatePost($post)) return false;
 		$post = $_POST;
 		
 		/** Does the record already exist for this account? */
@@ -104,8 +105,9 @@ class fm_module_options {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$_POST = $post;
 		/** Validate post */
-		if (!$this->validatePost()) return false;
+		if (!$this->validatePost($post)) return false;
 		$post = $_POST;
 		
 		if (isset($post['cfg_id']) && !isset($post['cfg_name'])) {
@@ -136,7 +138,6 @@ class fm_module_options {
 		// Update the config
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		echo $query;
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;
@@ -389,7 +390,7 @@ FORM;
 	}
 	
 	
-	function validatePost() {
+	function validatePost($_POST) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$_POST['cfg_comment'] = trim($_POST['cfg_comment']);
