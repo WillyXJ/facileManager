@@ -125,7 +125,7 @@ class fm_module_servers {
 						$clean_data = rtrim($clean_data, '; ');
 					} else $clean_data = 'None';
 				}
-				$log_message .= ($clean_data && $key != 'account_id') ? ucwords(str_replace('_', ' ', str_replace('server_', '', $key))) . ": $clean_data\n" : null;
+				$log_message .= ($clean_data && $key != 'account_id') ? formatLogKeyData('server_', $key, $clean_data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ',') . ')';
@@ -201,7 +201,7 @@ class fm_module_servers {
 						$data = rtrim($clean_data, '; ');
 					} else $data = 'None';
 				}
-				$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('server_', '', $key))) . ": $data\n" : null;
+				$log_message .= $data ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql = rtrim($sql_edit, ',');

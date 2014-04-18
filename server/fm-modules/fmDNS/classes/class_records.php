@@ -90,7 +90,7 @@ class fm_dns_records {
 			$sql_fields .= $key . ',';
 			$sql_values .= "'" . mysql_real_escape_string($data) . "',";
 			if ($key != 'account_id') {
-				$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('record_', '', $key))) . ": $data\n" : null;
+				$log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ',') . ')';
@@ -136,7 +136,7 @@ class fm_dns_records {
 		
 		foreach ($array as $key => $data) {
 			$sql_edit .= $key . "='" . mysql_real_escape_string($data) . "',";
-			$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('record_', '', $key))) . ": $data\n" : null;
+			$log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		

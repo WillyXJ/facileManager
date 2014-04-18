@@ -2043,4 +2043,20 @@ function handleSortOrder() {
 }
 
 
+/**
+ * Formats log data
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $strip Text to strip out
+ * @param string $key Logging key
+ * @param string $data Logging data
+ * @return string
+ */
+function formatLogKeyData($strip, $key, $data) {
+	return ucwords(str_replace('_', ' ', str_replace($strip, '', $key))) . ": $data\n";
+}
+
+
 ?>

@@ -212,7 +212,7 @@ class fm_dns_zones {
 				$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
 				if ($key == 'domain_view') $data = $log_message_views;
 				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
-				$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('domain_', '', $key))) . ": $data\n" : null;
+				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 			}
 			$sql_fields .= 'account_id)';
 			$sql_values .= "'{$_SESSION['user']['account_id']}'";
@@ -354,7 +354,7 @@ class fm_dns_zones {
 			$sql_edit .= strlen(sanitize($data)) ? $key . "='" . mysql_real_escape_string($data) . "'," : $key . '=NULL,';
 			if ($key == 'domain_view') $data = $log_message_views;
 			if ($key == 'domain_name_servers') $data = $log_message_name_servers;
-			$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('domain_', '', $key))) . ": $data\n" : null;
+			$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		

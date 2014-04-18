@@ -2,6 +2,7 @@
 ===================
 * Server - [feature] Added support for bulk server config builds. (Issue #71)
 * Server - Added file extensions to all redirects and links.
+* Server - Cleaned up code.
 
 1.0-b4 (2014-03-24)
 ===================

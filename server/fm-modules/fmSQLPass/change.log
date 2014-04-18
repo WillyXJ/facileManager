@@ -1,6 +1,7 @@
 1.0-b8 (2014-04-??)
 ===================
 * Server - Added file extensions to all redirects and links.
+* Server - Cleaned up code.
 
 1.0-b7 (2014-03-24)
 ===================
