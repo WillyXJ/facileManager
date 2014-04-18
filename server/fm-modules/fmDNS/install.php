@@ -135,6 +135,15 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}record
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
 TABLE;
 
+	$table[] = <<<TABLE;
+CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}records_skipped` (
+  `account_id` int(11) NOT NULL,
+  `domain_id` int(11) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  `record_status` enum('active','deleted') NOT NULL DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+TABLE;
+
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,

@@ -361,7 +361,7 @@ class fm_dns_records {
 			
 			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed && $domain_id != $parent_domain_id) {
 				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Skip]" ';
-				$field_values['data']['Actions'] .= in_array($parent_domain_id, explode(';', $record_skipped_by_domain_id)) ? ' checked' : null;
+				$field_values['data']['Actions'] .= in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id)) ? ' checked' : null;
 				$field_values['data']['Actions'] .= '/>Skip Import</label>';
 			}
 		}
@@ -457,6 +457,32 @@ HTML;
 		}
 
 		reloadZoneSQL($domain_id, $status);
+	}
+	
+	
+	/**
+	 * Builds an array of skipped record IDs
+	 *
+	 * @since 1.2
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $domain_id Domain ID to check
+	 * @return array
+	 */
+	function getSkippedRecordIDs($domain_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$skipped_records = null;
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $domain_id, 'record_', 'domain_id');
+		if ($fmdb->num_rows) {
+			$result = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$skipped_records[] = $result[$i]->record_id;
+			}
+		}
+		
+		return $skipped_records;
 	}
 }
 

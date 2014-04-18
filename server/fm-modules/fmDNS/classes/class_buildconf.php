@@ -758,23 +758,54 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildRecords($domain, $server_serial_no) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_records;
 		
 		$zone_file = null;
 		$domain_name_trim = trimFullStop($domain->domain_name);
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		
-		if ($domain->domain_mapping == 'reverse') {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->domain_id, 'record_', 'domain_id', "AND `record_status`='active' ORDER BY record_type,INET_ATON(record_name),record_value");
-		} else {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->domain_id, 'record_', 'domain_id', "AND `record_status`='active' ORDER BY record_type,INET_ATON(record_value),record_name");
+		/** Is this a cloned zone */
+		if (isset($domain->parent_domain_id)) {
+			$full_zone_clone = true;
+			
+			/** Are there any additional records? */
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->parent_domain_id, 'record_', 'domain_id', "AND `record_status`='active'");
+			if ($fmdb->num_rows) {
+				$full_zone_clone = false;
+			}
+			
+			/** Are there any skipped records? */
+			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			if ($skipped_records = $fm_dns_records->getSkippedRecordIDs($domain->parent_domain_id)) $full_zone_clone = false;
 		}
+		
+		if (isset($domain->parent_domain_id)) {
+			$valid_domain_ids = $full_zone_clone == false ? "IN ('{$domain->domain_id}', '{$domain->parent_domain_id}')" : "='{$domain->domain_id}' AND record_type='NS'";
+		} else {
+			$valid_domain_ids = "='{$domain->domain_id}'";
+		}
+		$order_sql = ($domain->domain_mapping == 'reverse') ? array('record_type', 'INET_ATON(record_name)', 'record_value') : array('record_type', 'record_name', 'INET_ATON(record_value)');
+		$record_sql = "AND domain_id $valid_domain_ids";
+		$record_sql .= $skipped_records ? ' AND record_id NOT IN (' . implode(',', $skipped_records) . ')' : null;
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $order_sql, 'record_', $record_sql);
+		
 		if ($fmdb->num_rows) {
-			$ns_records = $mx_records = $txt_records = $a_records = $cname_records = $srv_records = $ptr_records = null;
-			$hinfo_records = $cert_records = null;
-
 			$count = $fmdb->num_rows;
 			$record_result = $fmdb->last_result;
+			
+			/** Add full zone clone dname record */
+			if (isset($domain->parent_domain_id) && $full_zone_clone == true) {
+				$record_result[$count]->record_name = '@';
+				$record_result[$count]->record_value = trimFullStop(getNameFromID($domain->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
+				$record_result[$count]->record_ttl = null;
+				$record_result[$count]->record_class = 'IN';
+				$record_result[$count]->record_type = 'DNAME';
+				$record_result[$count]->record_append = 'no';
+				$record_result[$count]->record_comment = null;
+				
+				$count++;
+			}
+			
 			for ($i=0; $i < $count; $i++) {
 				$domain_name = $this->getDomainName($domain->domain_mapping, $domain_name_trim);
 				$record_comment = $record_result[$i]->record_comment ?  ' ; ' . $record_result[$i]->record_comment : null;
@@ -947,6 +978,7 @@ class fm_module_buildconf {
 	function mergeZoneDetails($zone, $all_zones, $count) {
 		for ($i = 0; $i < $count; $i++) {
 			if ($all_zones[$i]->domain_id == $zone->domain_clone_domain_id) {
+				$all_zones[$i]->parent_domain_id = $zone->domain_id;
 				$all_zones[$i]->domain_id = $zone->domain_clone_domain_id;
 				$all_zones[$i]->domain_name = $zone->domain_name;
 				$all_zones[$i]->domain_name_file = $zone->domain_name;

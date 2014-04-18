@@ -596,9 +596,16 @@ ADD  `record_cert_type` TINYINT NULL AFTER  `record_os` ,
 ADD  `record_key_tag` INT NULL AFTER  `record_cert_type` ,
 ADD  `record_algorithm` TINYINT NULL AFTER  `record_key_tag`,
 ADD  `record_flags` ENUM(  '0',  '256',  '257' ) NULL AFTER  `record_algorithm`,
-ADD  `record_text` VARCHAR( 255 ) NULL AFTER  `record_flags`,
-ADD  `record_skipped_by_domain_id` TEXT NULL AFTER  `record_comment` ;";
+ADD  `record_text` VARCHAR( 255 ) NULL AFTER  `record_flags` ;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_value`  `record_value` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ;";
+	$table[] = <<<TABLE;
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` (
+  `account_id` int(11) NOT NULL,
+  `domain_id` int(11) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  `record_status` enum('active','deleted') NOT NULL DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+TABLE;
 
 	$inserts = $updates = null;
 	
