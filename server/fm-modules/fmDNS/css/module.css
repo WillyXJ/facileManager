@@ -11,7 +11,6 @@ tr.import_swap select {
 	display: none;
 }
 
-#fmdns_config_zones, #fmdns_manage_records, #fmdns_config_servers,
 #server_update_port_style {
 	display: none;
 }

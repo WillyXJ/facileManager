@@ -67,10 +67,6 @@ $(document).ready(function() {
 		return false;
     });
 
-	$('#show_output').click(function() {
-		toggleLayer('import_output', 'block');
-	});
-
 	/* Add more records */
     $('#add_records').click(function() {
         var $this 		= $(this);

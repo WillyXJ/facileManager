@@ -444,6 +444,15 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$("#help_file_container a.list_title").click(function() {
+		help_block = $(this).next();
+		if ($(help_block).is(":visible")) {
+			$(help_block).slideUp('slow');
+		} else {
+			$(help_block).slideDown('slow');
+		}
+	});
+	
 	$("#help_file_container ul li div a").click(function() {
 		window.opener.location.href = $(this).attr('href');
 		return false;
@@ -713,24 +722,6 @@ function exchange(el){
 	}
 	el.style.display='none';
 	toObj.style.display='inline';
-}
-
-function toggleLayer(whichLayer, view) {
-   if (document.getElementById) {
-      // this is the way the standards work
-      var style2 = document.getElementById(whichLayer).style;
-      style2.display = style2.display? "":view;
-   }
-   else if (document.all) {
-      // this is the way old msie versions work
-      var style2 = document.all[whichLayer].style;
-      style2.display = style2.display? "":view;
-   }
-   else if (document.layers) {
-      // this is the way nn4 works
-      var style2 = document.layers[whichLayer].style;
-      style2.display = style2.display? "":view;
-   }
 }
 
 function validateNumber(event) {

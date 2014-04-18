@@ -119,7 +119,7 @@ function buildModuleHelpFile() {
 <h3>{$_SESSION['module']}</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_config_servers', 'block');">Configure Firewalls</a>
+		<a class="list_title">Configure Firewalls</a>
 		<div id="fmfw_config_servers">
 			<p>Firewall servers can be managed from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
@@ -131,7 +131,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_config_policies', 'block');">Firewall Policies</a>
+		<a class="list_title">Firewall Policies</a>
 		<div id="fmfw_config_policies">
 			<p>Policy Rules are managed by clicking on the firewall server name from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> 
 			menu item. From there, you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete 
@@ -147,7 +147,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_objects', 'block');">Objects</a>
+		<a class="list_title">Objects</a>
 		<div id="fmfw_objects">
 			<p>Much like an appliance firewall, objects need to be defined before they can be used in policies. All objects 
 			(<a href="{$__FM_CONFIG['module']['menu']['Objects']['Hosts']}">Hosts</a> and <a href="{$__FM_CONFIG['module']['menu']['Objects']['Networks']}">Networks</a>)
@@ -160,7 +160,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_services', 'block');">Services</a>
+		<a class="list_title">Services</a>
 		<div id="fmfw_services">
 			<p>Much like an appliance firewall, services need to be defined before they can be used in policies. All services 
 			(<a href="{$__FM_CONFIG['module']['menu']['Services']['ICMP']}">ICMP</a>, <a href="{$__FM_CONFIG['module']['menu']['Services']['TCP']}">TCP</a>,
@@ -174,7 +174,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_time', 'block');">Time Restrictions</a>
+		<a class="list_title">Time Restrictions</a>
 		<div id="fmfw_time">
 			<p>Time restrictions can be defined from the <a href="{$__FM_CONFIG['module']['menu']['Time']['URL']}">Time</a> menu item. From there you can 
 			specify the start date and time, end date and time, and the weekdays of the restriction. Only iptables firewall type supports the use of time

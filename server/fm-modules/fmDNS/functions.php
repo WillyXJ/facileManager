@@ -172,8 +172,8 @@ function buildModuleHelpFile() {
 <h3>{$_SESSION['module']}</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmdns_config_zones', 'block');">Configure Zones</a>
-		<div id="fmdns_config_zones">
+		<a class="list_title">Configure Zones</a>
+		<div>
 			<p>Zones (aka domains) can be managed from the <a href="{$__FM_CONFIG['module']['menu']['Zones']['URL']}">Zones</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete ({$__FM_CONFIG['icons']['delete']}), 
 			and reload ({$__FM_CONFIG['icons']['reload']}) zones depending on your user permissions.</p>
@@ -185,8 +185,8 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmdns_manage_records', 'block');">Manage Zone Records</a>
-		<div id="fmdns_manage_records">
+		<a class="list_title">Manage Zone Records</a>
+		<div>
 			<p>Records are managed from the <a href="{$__FM_CONFIG['module']['menu']['Zones']['URL']}">Zones</a> menu item. From 
 			there you can select the zone you want manage records for.  Select from the upper-right the type of record(s) you want to 
 			manage and then you can add, modify, and delete records depending on your user permissions.</p>
@@ -208,8 +208,8 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmdns_config_servers', 'block');">Configure Servers</a>
-		<div id="fmdns_config_servers">
+		<a class="list_title">Configure Servers</a>
+		<div>
 			<p>All aspects of server configuration takes place in the <a href="{$__FM_CONFIG['module']['menu']['Config']['URL']}">Config</a> menu 
 			item. From there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete ({$__FM_CONFIG['icons']['delete']}) 
 			servers and options depending on your user permissions.</p>
@@ -271,9 +271,9 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_module_settings', 'block');">Module Settings</a>
-		<div id="fm_module_settings">
-			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['module']['menu']['Settings']['URL']}">Settings</a> 
+		<a class="list_title">Module Settings</a>
+		<div>
+			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['menu']['Settings']['fmDNS']}">Settings</a> 
 			menu item.</p>
 			<br />
 		</div>

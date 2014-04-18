@@ -916,8 +916,8 @@ function buildHelpFile() {
 <h3>$fm_name</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_modules', 'block');">Configure Modules</a>
-		<div id="fm_config_modules">
+		<a class="list_title">Configure Modules</a>
+		<div>
 			<p>Modules are what gives $fm_name purpose. They can be installed, activated, upgraded, deactivated, and uninstalled.</p>
 			
 			<p><b>Install</b><br />
@@ -954,8 +954,8 @@ function buildHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_users', 'block');">Manage Users</a>
-		<div id="fm_config_users">
+		<a class="list_title">Manage Users</a>
+		<div>
 			<p>$fm_name incorporates the use of multiple user accounts with granular permissions. This way you can limit access to your 
 			environment.</p>
 			
@@ -988,8 +988,8 @@ function buildHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_settings', 'block');">Manage Settings</a>
-		<div id="fm_config_settings">
+		<a class="list_title">Manage Settings</a>
+		<div>
 			<p>There are several settings available to set at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Settings']}">Settings</a>.</p>
 			<p><i>The 'Manage Settings' or 'Super Admin' permission is required to change settings.</i></p>
 			<p><b>Authentication</b><br />
@@ -1025,8 +1025,8 @@ function buildHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_logs', 'block');">Review Logs</a>
-		<div id="fm_config_logs">
+		<a class="list_title">Review Logs</a>
+		<div>
 			<p>Every action performed within the $fm_name UI will be logged for auditing purposes.</p>
 			<p>You can view and search the logs at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Logs']}">Logs</a></p>
 		</div>
