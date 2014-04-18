@@ -177,10 +177,14 @@ function buildModuleHelpFile() {
 			<p>Zones (aka domains) can be managed from the <a href="{$__FM_CONFIG['module']['menu']['Zones']['URL']}">Zones</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete ({$__FM_CONFIG['icons']['delete']}), 
 			and reload ({$__FM_CONFIG['icons']['reload']}) zones depending on your user permissions.</p>
+			<p>You can define a zone as a clone of another previously defined master zone.  The cloned zone will contain all of the same records
+			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
+			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa).</p>
-			<p>Zones that are missing SOA records will be highlighted with a red background and will not be built or reloaded until the SOA exists.</p>
+			<p>Zones that are missing SOA and NS records will be highlighted with a red background and will not be built or reloaded until the 
+			records exists.</p>
 			<br />
 		</div>
 	</li>
@@ -201,6 +205,8 @@ function buildModuleHelpFile() {
 			entry, make sure you append a period (.) at the end of each and select 'no' for Append Domain.</p>
 			<p>Adding A and AAAA records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
 			exist in order for PTR records to automatically be created.</p>
+			<p>When viewing the records of a cloned zone, the parent records will not be editable, but you can choose to skip them or add new records
+			that impacts the cloned zone only.</p>
 			<p>You can also import BIND-compatible zone files instead of adding records individually. Go to Admin &rarr; 
 			<a href="{$__FM_CONFIG['menu']['Admin']['Tools']}">Tools</a> and use the Import Zone Files utility. After selecting the file and zone 
 			to import to, you have one final chance to review what gets imported before the records are actually imported.</p>

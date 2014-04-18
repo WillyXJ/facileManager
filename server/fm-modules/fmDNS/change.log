@@ -27,6 +27,7 @@
 * Server - [bug] Adding cloned zones now requires a server config build.
 * Server - [bug] Fixed an issue where cloned zones may not get built.
 * Server - Cleaned up code.
+* Server - Updated help file content to reflect new features.
 
 1.1.3 (2014-04-15)
 ==================
