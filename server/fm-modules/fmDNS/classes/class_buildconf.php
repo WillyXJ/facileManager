@@ -535,7 +535,7 @@ class fm_module_buildconf {
 			for ($i=0; $i < $count; $i++) {
 				/** Is this a clone id? */
 				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], $zone_result, $count);
-				if ($zone_result[$i] == false) break;
+				if ($zone_result[$i] == false) continue;
 				
 				/** Valid SOA and NS records must exist */
 				if ((getSOACount($zone_result[$i]->domain_id) && getNSCount($zone_result[$i]->domain_id)) ||
