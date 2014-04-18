@@ -148,6 +148,8 @@ class fm_dns_zones {
 				if ($field == 'domain_clone_domain_id') {
 					$sql_values .= sanitize($_POST['createZone'][$id]['domain_clone_domain_id']) . ',';
 				} elseif ($field == 'domain_name') {
+					$log_message .= 'Name: ' . sanitize($_POST['createZone'][$id]['domain_name']) . "\n";
+					$log_message .= "Clone of: $value\n";
 					$sql_values .= "'" . sanitize($_POST['createZone'][$id]['domain_name']) . "',";
 				} elseif ($field == 'domain_reload') {
 					$sql_values .= "'no',";

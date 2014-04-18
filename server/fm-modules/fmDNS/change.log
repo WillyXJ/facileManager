@@ -23,6 +23,7 @@
 * Server - [feature] Disabled records now have the proper css class assigned.
 * Server - Updated help file text.
 * Server - [feature] Added support to modify cloned zones. (Issue #65)
+* Server - [bug] Added missing logging of clone zone creations.
 
 1.1.3 (2014-04-15)
 ==================
