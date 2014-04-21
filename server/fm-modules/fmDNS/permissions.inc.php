@@ -34,6 +34,7 @@ if (!defined('PERM_DNS_BUILD_SERVER_CONFIGS'))	define('PERM_DNS_BUILD_SERVER_CON
 if (!defined('PERM_DNS_ZONE_MANAGEMENT'))		define('PERM_DNS_ZONE_MANAGEMENT', 8);
 if (!defined('PERM_DNS_RECORD_MANAGEMENT'))		define('PERM_DNS_RECORD_MANAGEMENT', 16);
 if (!defined('PERM_DNS_RELOAD_ZONES'))			define('PERM_DNS_RELOAD_ZONES', 32);
+if (!defined('PERM_DNS_MANAGE_SETTINGS'))		define('PERM_DNS_MANAGE_SETTINGS', 64);
 
 /** Get permissions */
 if (isset($_SESSION['user']['module_perms'])) {
@@ -42,8 +43,7 @@ if (isset($_SESSION['user']['module_perms'])) {
 	$allowed_to_manage_zones = ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_ZONE_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
 	$allowed_to_manage_records = ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_RECORD_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
 	$allowed_to_reload_zones = ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_RELOAD_ZONES) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
-	
-	$allowed_to_manage_module_settings = $allowed_to_build_configs;
+	$allowed_to_manage_module_settings = ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_MANAGE_SETTINGS) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN);
 }
 require(ABSPATH . 'fm-modules/facileManager/permissions.inc.php');
 

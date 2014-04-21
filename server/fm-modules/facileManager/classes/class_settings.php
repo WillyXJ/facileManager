@@ -25,7 +25,9 @@ class fm_settings {
 	 * Saves the options
 	 */
 	function save() {
-		global $fmdb, $__FM_CONFIG, $fm_name;
+		global $fmdb, $__FM_CONFIG, $fm_name, $allowed_to_manage_settings;
+		
+		if (!$allowed_to_manage_settings) return 'You do not have permission to make these changes.';
 		
 		$force_logout = false;
 		$exclude = array('save', 'item_type', 'gen_ssh');
@@ -167,11 +169,10 @@ class fm_settings {
 	function printForm() {
 		global $fmdb, $__FM_CONFIG, $allowed_to_manage_settings, $fm_name;
 		
-		$disabled = $allowed_to_manage_settings ? null : 'disabled';
 		$local_hostname = php_uname('n');
 		
-		$save_button = $disabled ? null : '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button" /></p>';
-		$sshkey_button = $disabled ? null : '<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="Generate" class="button" />';
+		$save_button = $allowed_to_manage_settings ? '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button" /></p>' : null;
+		$sshkey_button = $allowed_to_manage_settings ? '<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="Generate" class="button" />' : null;
 		if ($sshkey_button !== null) {
 			$ssh_priv = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 			if ($ssh_priv) {

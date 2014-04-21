@@ -48,7 +48,7 @@ function returnError($window = true) {
  * @package facileManager
  */
 function returnUnAuth($window = true) {
-	$msg = 'You are not authorized to make changes.';
+	$msg = 'You do not have permission to make these changes.';
 	if ($window) {
 		echo '<h2>Error</h2>' . "\n";
 		echo '<p>' . $msg . "</p>\n";
