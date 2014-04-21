@@ -251,6 +251,7 @@ label {
 #mainitems ul li > ul{width:200px;}
 #mainitems ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
 #mainitems ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:0 20px; font-size:10pt; color:#fff; text-decoration:none; }
+#mainitems ul li.has-sub > ul li a { font-weight: normal; }
 #mainitems > ul > li > ul > li a:hover{ background-color:rgba(100,100,100,0.95); color: #fff; };
 
 #subdomain {
