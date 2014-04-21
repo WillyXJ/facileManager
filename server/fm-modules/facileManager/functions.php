@@ -2059,4 +2059,39 @@ function formatLogKeyData($strip, $key, $data) {
 }
 
 
+/**
+ * Displays an error page message
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $message Text to display
+ * @param boolean $show_page_back_link Whether or not to show the page back link
+ * @return string
+ */
+function displayErrorPage($message = 'An unknown error occurred.', $show_page_back_link = true) {
+	global $fm_name;
+	
+	printHeader('Error', 'error', false, false);
+	
+	echo '<p>' . $message . '</p>';
+	if ($show_page_back_link) echo '<p><a href="javascript:history.back();">&laquo; Back</a></p>';
+	
+	exit;
+}
+
+
+/**
+ * Displays an error page message
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return string
+ */
+function unAuth() {
+	displayErrorPage('You do not have permission to view this page. Please contact your administrator for access.');
+}
+
+
 ?>

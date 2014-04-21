@@ -1,0 +1,30 @@
+html {
+	background: #6D6D6D;
+}
+
+body {
+	background: #efefef;
+	color: #333;
+	font-family: "Open Sans",sans-serif;
+	margin: 5em auto;
+	padding: 1.7em 2.5em;
+	font-size: 13px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid #dfdfdf;
+	max-width: 700px;
+	moz-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 20px;
+	-webkit-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 20px;
+	-khtml-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 20px;
+	box-shadow: rgba(10,10,10,0.4) 0 15px 40px 20px;
+}
+
+p {
+	padding-bottom: 2px;
+	line-height: 1.5;
+}
+
+a {
+	text-decoration: none;
+	color: #888;
+}

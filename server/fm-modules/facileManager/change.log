@@ -9,6 +9,7 @@
            with all modules. (Issue #81)
 * Server - Cleaned up code.
 * Server - Help file links now open in the parent window instead of the popup.
+* Server - Created error page template.
 
 1.1.2 (2014-04-03)
 ==================
