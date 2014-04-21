@@ -9,7 +9,7 @@ body {
 	background-repeat: no-repeat;
 	background-position: 6em 2.3em;
 	color: #333;
-	font-family: sans-serif;
+	font-family: "Open Sans",sans-serif;
 	margin: 5em auto;
 	padding: 12.8em 2em 1em;
 	-webkit-border-radius: 3px;
@@ -128,7 +128,7 @@ strong {
 }
 
 .button {
-	font-family: sans-serif;
+	font-family: "Open Sans",sans-serif;
 	text-decoration: none;
 	font-size: 14px !important;
 	line-height: 16px;
@@ -187,3 +187,4 @@ strong {
 	width: 200px;
 	text-align: center;
 }
+
