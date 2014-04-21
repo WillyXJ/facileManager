@@ -274,13 +274,16 @@ class fm_dns_records {
 		
 		$class = buildSelect($action . '[_NUM_][record_class]', '_NUM_', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $record_class);
 
+		if ($type == 'PTR') {
+			$domain_map = getNameFromID($parent_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+			$domain = getNameFromID($parent_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		}
+		
 		if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed && ($new || $domain_id == $parent_domain_id)) {
 			if ($type == 'PTR') {
-				$domain_map = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
 				$input_box = '<input ';
 				$input_box .= ($domain_map == 'forward') ? 'size="40"' : 'style="width: 40px;" size="4"';
 				$input_box .= ' type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
-				$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 				if (strpos($domain, 'arpa')) {
 					$field_values['data']['Record'] = '>' . $input_box . ' .' . $domain;
 				} elseif ($domain_map == 'forward') {
@@ -350,7 +353,7 @@ class fm_dns_records {
 				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Delete]" />Delete</label>';
 			}
 		} else {
-			$field_values['data']['Record'] = '>' . $record_name;
+			$field_values['data']['Record'] = '>' . $record_name . '.' . $domain;
 			$field_values['data']['TTL'] = '>' . $record_ttl;
 			$field_values['data']['Class'] = '>' . $record_class;
 			if ($show_value) $field_values['data']['Value'] = '>' . $record_value;

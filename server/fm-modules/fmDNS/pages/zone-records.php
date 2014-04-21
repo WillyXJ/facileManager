@@ -42,7 +42,7 @@ $domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location
 if (!isValidDomain($domain_id)) header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) unAuth();
-if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $record_type == 'SOA') unAuth();
+if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $record_type == 'SOA') $record_type = $default_record_type;
 
 printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
