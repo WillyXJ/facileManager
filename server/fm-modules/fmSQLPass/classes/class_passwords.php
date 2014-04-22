@@ -61,7 +61,7 @@ class fm_sqlpass_passwords {
 				<h2>Set User Password</h2>
 			
 HTML;
-			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options')) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
+			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], $_SESSION['module'])) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
 			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'Set Password', 'set_sql_password', 'config-passwords', false);
 			echo '</form>';
 		}
@@ -105,8 +105,8 @@ HTML;
 		}
 		
 		/** Get default credentials */
-		$default_admin_user = getOption('admin_username', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options');
-		$default_admin_pass = getOption('admin_password', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options');
+		$default_admin_user = getOption('admin_username', $_SESSION['user']['account_id'], $_SESSION['module']);
+		$default_admin_pass = getOption('admin_password', $_SESSION['user']['account_id'], $_SESSION['module']);
 		
 		/** Process password change */
 		foreach ($group as $key => $server_group) {

@@ -79,7 +79,7 @@ HTML;
 		$uninstall_link = '<a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a>' . "\n";
 		
 		/** Get module status */
-		$module_version = getOption(strtolower($module_name) . '_version', 0);
+		$module_version = getOption('version', 0, $module_name);
 		if ($module_version !== false) {
 			if (in_array($module_name, getActiveModules())) {
 				if ($allowed_to_manage_modules) {

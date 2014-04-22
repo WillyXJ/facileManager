@@ -269,8 +269,8 @@ class fm_module_servers {
 		if (!empty($server_backup_credentials[0])) {
 			list($backup_username, $backup_password) = $server_backup_credentials;
 		} else {
-			$backup_username = getOption('backup_username', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options');
-			$backup_password = getOption('backup_password', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options');
+			$backup_username = getOption('backup_username', $_SESSION['user']['account_id'], $_SESSION['module']);
+			$backup_password = getOption('backup_password', $_SESSION['user']['account_id'], $_SESSION['module']);
 		}
 		
 		/** Get group associations */

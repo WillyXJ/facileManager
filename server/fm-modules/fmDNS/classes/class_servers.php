@@ -470,7 +470,7 @@ FORM;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
 		$options[] = null;
 		
-		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') == 'yes') {
+		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
 			global $fm_module_buildconf;
 			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
 			
@@ -488,7 +488,7 @@ FORM;
 			if (strpos($response, 'error') !== false) return $response;
 		} else $response = null;
 		
-		if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') == 'yes') {
+		if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
 			$options[] = 'purge';
 		}
 		

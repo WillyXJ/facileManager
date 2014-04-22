@@ -4,6 +4,7 @@
 * Server - Cleaned up code.
 * Server - [security] Fixed an issue where unpriviledged users could save module
            settings.
+* Server - Moved module options into fM options table.
 
 1.0-b7 (2014-03-24)
 ===================

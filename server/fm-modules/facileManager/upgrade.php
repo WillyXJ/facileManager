@@ -44,11 +44,11 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_107($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 31) ? fmUpgrade_120($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
-		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
+		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update');
 	}
 	
 	displayProgress('Upgrading Schema', $success);
@@ -56,7 +56,7 @@ function fmUpgrade($database) {
 	echo "</table>\n</center>\n";
 	
 	if ($success) {
-		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules');
+		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules.php');
 	} else {
 		displaySetupMessage(2);
 	}
@@ -349,8 +349,6 @@ function fmUpgrade_107($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table = null;
-
 		$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'software_update', 1 FROM DUAL
@@ -365,6 +363,34 @@ WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'software_update_interval');
 INSERT;
 
+		if (count($inserts) && $inserts[0] && $success) {
+			foreach ($inserts as $query) {
+				$fmdb->query($query);
+				if ($fmdb->last_error) {
+					echo $fmdb->last_error;
+					return false;
+				}
+			}
+		}
+	}
+
+	return $success;
+}
+
+
+/** fM v1.2 **/
+function fmUpgrade_120($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_107($database) : true;
+	
+	if ($success) {
+		/** Schema change */
+		$table[] = "ALTER TABLE  $database.`fm_options` ADD  `module_name` VARCHAR( 255 ) NULL AFTER  `account_id` ;";
+
 		/** Create table schema */
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
@@ -373,6 +399,7 @@ INSERT;
 			}
 		}
 	
+		$inserts = null;
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
@@ -380,6 +407,35 @@ INSERT;
 					echo $fmdb->last_error;
 					return false;
 				}
+			}
+		}
+		
+		/** Update fm_options */
+		$version_check = getOption($fm_name . '_version_check');
+		if ($version_check !== false) {
+			if (!setOption('version_check', $version_check, 'auto', true, 0, $fm_name)) return false;
+			$query = "DELETE FROM $database.`fm_options` WHERE option_name='{$fm_name}_version_check'";
+			$fmdb->query($query);
+			if (!$fmdb->result) return false;
+		}
+		$modules = getAvailableModules();
+		if (count($modules)) {
+			foreach ($modules as $module_name) {
+				$module_version = getOption($module_name . '_version');
+				if ($module_version !== false) {
+					if (!setOption('version', $module_version, 'auto', false, 0, $module_name)) return false;
+				}
+				$module_version_check = getOption($module_name . '_version_check');
+				if ($module_version_check !== false) {
+					if (!setOption('version_check', $module_version_check, 'auto', true, 0, $module_name)) return false;
+				}
+				$module_client_version = getOption($module_name . '_client_version');
+				if ($module_client_version !== false) {
+					if (!setOption('client_version', $module_client_version, 'auto', false, 0, $module_name)) return false;
+				}
+				$query = "DELETE FROM $database.`fm_options` WHERE option_name LIKE '{$module_name}%_version%'";
+				$fmdb->query($query);
+				if (!$fmdb->result) return false;
 			}
 		}
 	}

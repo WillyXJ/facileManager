@@ -33,6 +33,7 @@
            (Issue #79)
 * Server - [security] Fixed an issue where unpriviledged users could save module
            settings.
+* Server - Moved module options into fM options table.
 
 1.1.3 (2014-04-15)
 ==================

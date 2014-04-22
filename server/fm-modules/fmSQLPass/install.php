@@ -36,16 +36,6 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}gr
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}options` (
-  `option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL,
-  `option_name` varchar(255) NOT NULL,
-  `option_value` varchar(255) NOT NULL,
-  PRIMARY KEY (`option_id`)
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
-
-	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -62,10 +52,11 @@ TABLE;
 
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value) 
-	SELECT '{$module}_version', '{$__FM_CONFIG[$module]['version']}' FROM DUAL
+INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = '{$module}_version');
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'version'
+		AND module_name='$module');
 INSERT;
 
 

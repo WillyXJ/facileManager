@@ -652,7 +652,7 @@ class fm_module_buildconf {
 			}
 			
 			/** purge configs first? */
-			$data->purge_config_files = getOption('purge_config_files', getAccountID($post_data['AUTHKEY']), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options');
+			$data->purge_config_files = getOption('purge_config_files', getAccountID($post_data['AUTHKEY']), 'fmDNS');
 			
 			/** process zone reloads if present */
 			$track_reloads = $this->getReloadRequests($server_serial_no);
@@ -1065,7 +1065,7 @@ class fm_module_buildconf {
 	function namedSyntaxChecks($files_array) {
 		global $__FM_CONFIG;
 		
-		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'options') != 'yes') return;
+		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
 		
 		$die = false;
 		$named_checkconf = findProgram('named-checkconf');

@@ -48,7 +48,7 @@ class fm_module_settings {
 				if (empty($data)) return 'Empty values are not allowed.';
 				
 				/** Check if the option has changed */
-				$current_value = getOption($key, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'options');
+				$current_value = getOption($key, $_SESSION['user']['account_id'], $_SESSION['module']);
 				if (is_array($current_value)) $current_value = implode("\n", $current_value);
 				if ($current_value == $data) continue;
 				
@@ -71,7 +71,7 @@ class fm_module_settings {
 				} else $option_value = sanitize(trim($option_value));
 				
 				/** Update with the new value */
-				$result = setOption($option, $option_value, $command, true, $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'options');
+				$result = setOption($option, $option_value, $command, true, $_SESSION['user']['account_id'], $_SESSION['module']);
 	
 				if (!$result) {
 					if ($log_message != $log_message_head) addLogEntry($log_message);
@@ -108,7 +108,7 @@ class fm_module_settings {
 		
 		$save_button = $allowed_to_manage_module_settings ? '<input type="submit" name="save" id="save_module_settings" value="Save" class="button" />' : null;
 		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}options WHERE account_id={$_SESSION['user']['account_id']}";
+		$query = "SELECT * FROM fm_options WHERE account_id={$_SESSION['user']['account_id']} AND module_name='{$_SESSION['module']}'";
 		$fmdb->get_results($query);
 		
 		if ($fmdb->num_rows) {

@@ -219,6 +219,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_options` (
   `option_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '0',
+  `module_name` varchar(255) DEFAULT NULL,
   `option_name` varchar(50) NOT NULL,
   `option_value` text NOT NULL,
   PRIMARY KEY (`option_id`)

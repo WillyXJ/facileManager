@@ -99,11 +99,11 @@ function isNewVersionAvailable($package, $version) {
 	$method = 'update';
 	
 	/** Are software updates enabled? */
-	if (!getOption('software_update', 0)) return false;
+	if (!getOption('software_update')) return false;
 	
 	/** Should we be running this check now? */
-	$last_version_check = getOption($package . '_version_check', 0);
-	if (!$software_update_interval = getOption('software_update_interval', 0)) $software_update_interval = 'week';
+	$last_version_check = getOption('version_check', 0, $package);
+	if (!$software_update_interval = getOption('software_update_interval')) $software_update_interval = 'week';
 	if (!$last_version_check) {
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
@@ -115,7 +115,7 @@ function isNewVersionAvailable($package, $version) {
 		$data['software_update_tree'] = getOption('software_update_tree');
 		$result = getPostData($fm_site_url, $data);
 		
-		setOption($package . '_version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method);
+		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, true, 0, $package);
 		
 		return $result;
 	}
@@ -1110,26 +1110,27 @@ function getAvailableModules() {
  * @since 1.0
  * @package facileManager
  */
-function getOption($option = null, $account_id = 0, $table = 'fm_options', $prefix = 'option_') {
+function getOption($option = null, $account_id = 0, $module_name = null) {
 	global $fmdb;
 	
-	$value = $prefix . 'value';
+	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
 	
-	$query = "SELECT * FROM $table WHERE {$prefix}name='$option' AND account_id=$account_id LIMIT 1";
+	$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql LIMIT 1";
 	$fmdb->get_results($query);
 	
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
 		
-		if (isSerialized($results[0]->$value)) {
-			return unserialize($results[0]->$value);
+		if (isSerialized($results[0]->option_value)) {
+			return unserialize($results[0]->option_value);
 		}
 		
-		return $results[0]->$value;
+		return $results[0]->option_value;
 	}
 	
 	return false;
 }
+
 
 /**
  * Sets an option value
@@ -1137,7 +1138,7 @@ function getOption($option = null, $account_id = 0, $table = 'fm_options', $pref
  * @since 1.0
  * @package facileManager
  */
-function setOption($option = null, $value = null, $insert_update = 'auto', $auto_serialize = true, $account_id = 0, $table = 'fm_options', $prefix = 'option_') {
+function setOption($option = null, $value = null, $insert_update = 'auto', $auto_serialize = true, $account_id = 0, $module_name = null) {
 	global $fmdb;
 	
 	if ($auto_serialize) {
@@ -1145,16 +1146,24 @@ function setOption($option = null, $value = null, $insert_update = 'auto', $auto
 	} else sanitize($value);
 	$option = sanitize($option);
 	
+	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
+	
 	if ($insert_update == 'auto') {
-		$query = "SELECT * FROM $table WHERE {$prefix}name='$option' AND account_id=$account_id";
+		$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql";
 		$result = $fmdb->query($query);
 		$insert_update = ($fmdb->num_rows) ? 'update' : 'insert';
 	}
 	
 	if ($insert_update == 'insert') {
-		$query = "INSERT INTO $table (account_id, {$prefix}name, {$prefix}value) VALUES ($account_id, '$option', '$value')";
+		$keys = array('account_id', 'option_name', 'option_value');
+		$values = array($account_id, $option, $value);
+		if ($module_name) {
+			$keys[] = 'module_name';
+			$values[] = $module_name;
+		}
+		$query = "INSERT INTO fm_options (" . implode(',', $keys) . ") VALUES ('" . implode("','", $values) . "')";
 	} else {
-		$query = "UPDATE $table SET {$prefix}name='$option', {$prefix}value='$value' WHERE {$prefix}name='$option' AND account_id=$account_id";
+		$query = "UPDATE fm_options SET option_name='$option', option_value='$value' WHERE option_name='$option' AND account_id=$account_id $module_sql";
 	}
 	$result = $fmdb->query($query);
 	
@@ -1265,6 +1274,9 @@ REMOVE;
 		$result = $fmdb->query($drop_query);
 		if (!$fmdb->rows_affected) return false;
 	}
+	
+	$query = "DELETE FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `module_name`='{$module}'";
+	$fmdb->query($query);
 	
 	return 'Success';
 }
@@ -1888,7 +1900,7 @@ function getBadgeCounts() {
 		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
 		
 		/** Upgrades waiting */
-		$module_version = getOption(strtolower($module_name) . '_version', 0);
+		$module_version = getOption('version', 0, $module_name);
 		if ($module_version !== false) {
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
 				$badge_count['Modules']['URL']++;

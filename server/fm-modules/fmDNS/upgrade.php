@@ -27,7 +27,7 @@ function upgradefmDNSSchema($module) {
 	@include(dirname(__FILE__) . '/variables.inc.php');
 	
 	/** Get current version */
-	$running_version = getOption($module . '_version', 0);
+	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = version_compare($running_version, '1.2', '<') ? upgradefmDNS_120($__FM_CONFIG, $running_version) : true;
@@ -598,7 +598,7 @@ ADD  `record_algorithm` TINYINT NULL AFTER  `record_key_tag`,
 ADD  `record_flags` ENUM(  '0',  '256',  '257' ) NULL AFTER  `record_algorithm`,
 ADD  `record_text` VARCHAR( 255 ) NULL AFTER  `record_flags` ;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_value`  `record_value` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ;";
-	$table[] = <<<TABLE;
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` (
   `account_id` int(11) NOT NULL,
   `domain_id` int(11) NOT NULL,
@@ -634,8 +634,20 @@ TABLE;
 	
 	/** Force rebuild of server configs for Issue #75 */
 	setBuildUpdateConfigFlag(null, 'yes', 'build');
+	
+	/** Move module options */
+	$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");
+	if ($fmdb->num_rows) {
+		$count = $fmdb->num_rows;
+		$result = $fmdb->last_result;
+		for ($i=0; $i<$count; $i++) {
+			if (!setOption($result[$i]->option_name, $result[$i]->option_value, 'auto', true, $result[$i]->account_id, 'fmDNS')) return false;
+		}
+	}
+	$fmdb->query("DROP TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");
+	if (!$fmdb->result || $fmdb->sql_errors) return false;
 
-	if (!setOption('fmDNS_client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false)) return false;
+	if (!setOption('fmDNS_client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
 		
 	return true;
 }

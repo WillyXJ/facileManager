@@ -84,13 +84,12 @@ class fm_tools {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
 				return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
 			} else {
-				$query = "UPDATE `fm_options` SET option_value='{$__FM_CONFIG[$module_name]['version']}' WHERE option_name='{$module_name}_version'";
-				$fmdb->query($query);
+				setOption('version', $__FM_CONFIG[$module_name]['version'], 'auto', false, 0, $module_name);
 				if ($fmdb->last_error) {
 					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
 					return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
 				}
-				setOption($module_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
+				setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update', true, 0, $module_name);
 			}
 
 			addLogEntry("$module_name was upgraded to {$__FM_CONFIG[$module_name]['version']}.", $module_name);
