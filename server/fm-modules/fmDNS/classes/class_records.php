@@ -254,7 +254,8 @@ class fm_dns_records {
 		$action = ($new) ? 'create' : 'update';
 		$end = ($new) ? $start + 3 : 1;
 		$show_value = true;
-				
+		$value_textarea = false;
+		
 		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
 		$priority = array('MX', 'SRV', 'KX');
 
@@ -301,8 +302,7 @@ class fm_dns_records {
 				$field_values['data']['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['cert_types'], $record_cert_type);
 				$field_values['data']['Key Tag'] = '><input style="width: 45px;" type="text" name="' . $action . '[_NUM_][record_key_tag]" value="' . $record_key_tag . '" onkeydown="return validateNumber(event)" />';
 				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['cert_algorithms'], $record_algorithm);
-				$field_values['data']['Value'] = '><textarea rows="2" name="' . $action . '[_NUM_][record_value]">' . $record_value . '</textarea>';
-				$show_value = false;
+				$value_textarea = true;
 			}
 			
 			if ($type == 'HINFO') {
@@ -314,6 +314,7 @@ class fm_dns_records {
 			if (in_array($type, array('DNSKEY', 'KEY'))) {
 				$flags = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_flags');
 				$algorithms = $__FM_CONFIG['records']['cert_algorithms'];
+				$value_textarea = true;
 				
 				if ($type == 'KEY') {
 					array_pop($flags);
@@ -327,7 +328,11 @@ class fm_dns_records {
 			}
 			
 			if ($show_value) {
-				$field_values['data']['Value'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+				if ($value_textarea) {
+					$field_values['data']['Value'] = '><textarea rows="2" name="' . $action . '[_NUM_][record_value]">' . $record_value . '</textarea>';
+				} else {
+					$field_values['data']['Value'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+				}
 			}
 			
 			if ($type == 'RP') {
