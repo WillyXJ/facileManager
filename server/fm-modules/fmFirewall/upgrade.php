@@ -90,7 +90,7 @@ function upgradefmFirewall_0105($__FM_CONFIG, $running_version) {
 	$fmdb->query("DROP TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}options`");
 	if (!$fmdb->result || $fmdb->sql_errors) return false;
 
-	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
+	if (!setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall')) return false;
 	
 	return true;
 }

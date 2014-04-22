@@ -647,7 +647,7 @@ TABLE;
 	$fmdb->query("DROP TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");
 	if (!$fmdb->result || $fmdb->sql_errors) return false;
 
-	if (!setOption('fmDNS_client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
+	if (!setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
 		
 	return true;
 }

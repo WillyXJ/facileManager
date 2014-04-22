@@ -306,7 +306,7 @@ class fm_module_servers {
 			}
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 		}
-		if (isset($row->server_client_version) && $row->server_client_version != getOption($_SESSION['module'] . '_client_version')) {
+		if (isset($row->server_client_version) && $row->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
 			$edit_actions = 'Client Upgrade Available<br />';
 			$class = 'attention';
 		}
