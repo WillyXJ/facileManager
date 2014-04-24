@@ -162,7 +162,9 @@ class fm_module_groups {
 		
 		$edit_status = $group_items = null;
 		
-		if ($allowed_to_manage_services) {
+		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_groups';
+		
+		if (currentUserCan($permission, $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->group_id, 'group')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
