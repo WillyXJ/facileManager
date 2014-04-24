@@ -323,19 +323,8 @@ $(document).ready(function() {
     });
     
     /* Account password changes */
-    $('#manage_item_contents').delegate('#change_user_password', 'click tap', function(e) {
-        var user_id			= $('input[name=user_id]').val();
-        var user_login		= $('input[name=user_login]').val();
-        var user_pwd		= $('input[name=user_password]').val();
-        var user_cpwd		= $('input[name=cpassword]').val();
-        
-		var form_data = {
-			user_id: user_id,
-			user_login: user_login,
-			user_password: user_pwd,
-			cpassword: user_cpwd,
-			is_ajax: 1
-		};
+    $('#manage_item_contents').delegate('#update_user_profile', 'click tap', function(e) {
+		var form_data = $('#fm_user_profile').serialize();
 
 		$.ajax({
 			type: 'POST',
@@ -344,7 +333,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				if (response == 'Success') {
-					$('#popup_response').html('<p>Password has been updated.</p>');
+					$('#popup_response').html('<p>Profile has been updated.</p>');
 				} else {
 					$('#popup_response').html('<p>' + response + '</p>');
 				}
