@@ -34,6 +34,7 @@
 * Server - [security] Fixed an issue where unpriviledged users could save module
            settings.
 * Server - Moved module options into fM options table.
+* Server - Added server client upgrade status to the dashboard.
 
 1.1.3 (2014-04-15)
 ==================

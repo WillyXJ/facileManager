@@ -66,8 +66,9 @@ function buildModuleDashboard() {
 	for ($i=0; $i<$server_count; $i++) {
 		if ($server_results[$i]->server_installed != 'yes') {
 			$errors .= '<b>' . $server_results[$i]->server_name . '</b> client is not installed.' . "\n";
-		}
-		if ($server_results[$i]->server_build_config != 'no') {
+		} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
+			$errors .= '<a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '"><b>' . $server_results[$i]->server_name . '</b></a> client needs to be upgraded.' . "\n";
+		} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
 			$errors .= '<a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '"><b>' . $server_results[$i]->server_name . '</b></a> needs a new configuration built.' . "\n";
 		}
 	}

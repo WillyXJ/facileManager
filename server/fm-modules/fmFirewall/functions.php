@@ -57,28 +57,6 @@ function buildModuleDashboard() {
 	
 	return '<p>' . $_SESSION['module'] . ' has no dashboard content yet.</p>';
 
-	/** Server stats */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
-	$summary = '<li>You have <b>' . $fmdb->num_rows . '</b> database server';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' configured.</li>' . "\n";
-	
-	/** Group stats */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_');
-	$summary .= '<li>You have <b>' . $fmdb->num_rows . '</b> group';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' defined.</li>' . "\n";
-	
-	$dashboard = <<<DASH
-	<div id="shadow_box" class="leftbox">
-		<div id="shadow_container">
-		<h3>Summary</h3>
-		$summary
-		</div>
-	</div>
-DASH;
-
-	return $dashboard;
 }
 
 
