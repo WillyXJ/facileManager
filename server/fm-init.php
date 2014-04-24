@@ -52,7 +52,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		// A config file is empty
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 	}
-
+	
 	$GLOBALS['URI'] = convertURIToArray();
 
 	if (!defined('INSTALL') && !defined('CLIENT')) {
@@ -76,6 +76,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			checkAppVersions();
 		}
 			
+		/** Do the logout */
+		if (isset($_GET) && array_key_exists('logout', $_GET)) {
+			$fm_login->logout();
+			header('Location: ' . $GLOBALS['RELPATH']);
+		}
+		
 		/** Process password resets */
 		if (!$fm_login->isLoggedIn() && array_key_exists('forgot_password', $_GET)) {
 			$message = array_key_exists('keyInvalid', $_GET) ? '<p class="failed">That key is invalid.</p>' : null;
@@ -120,12 +126,6 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 		/** Enforce authentication */
 		if (!$fm_login->isLoggedIn()) $fm_login->printLoginForm();
-		
-		/** Do the logout */
-		if (isset($_GET) && array_key_exists('logout', $_GET)) {
-			$fm_login->logout();
-			header('Location: ' . $GLOBALS['RELPATH']);
-		}
 		
 		/** Show/Hide errors */
 		if (getOption('show_errors')) {

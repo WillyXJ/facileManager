@@ -17,6 +17,8 @@
 * Server - Built-in users can edit more of their profile information.
 * Server - Added support for a flag to reset the authentication method to 'none'
            in case of a lockout.
+* Server - [bug] Fixed a case where changing authentication method would throw
+           an error.
 
 1.1.2 (2014-04-03)
 ==================

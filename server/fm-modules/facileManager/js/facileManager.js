@@ -238,7 +238,7 @@ $(document).ready(function() {
 			data: $('#manage').serialize(),
 			success: function(response)
 			{
-				if(response == 'force_logout') {
+				if (response.indexOf('force_logout') >=0) {
 					window.location = '?logout';
 				} else {
 					$('#response').removeClass('static').html(response);
