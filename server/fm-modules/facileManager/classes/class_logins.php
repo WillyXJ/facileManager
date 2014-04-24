@@ -169,9 +169,7 @@ HTML;
 	
 					$_SESSION['user']['logged_in'] = true;
 					$_SESSION['user']['id'] = 1;
-					$_SESSION['user']['fm_perms'] = 1;
 					$_SESSION['user']['account_id'] = 1;
-					$_SESSION['user']['module_perms']['perm_value'] = 0;
 		
 					$modules = getActiveModules(true);
 					if (!isset($_SESSION['module'])) {
@@ -206,6 +204,10 @@ HTML;
 					$_SESSION['user']['ipaddr'] = isset($_SERVER['REMOTE_HOST']) ? $_SERVER['REMOTE_HOST'] : $_SERVER['REMOTE_ADDR'];
 //					$this->updateSessionDB($_SESSION['user']);
 				}
+				
+				/** Should the user be logged in? */
+				if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_status') != 'active') header('Location: ' . $GLOBALS['RELPATH'] . '?logout');
+				
 				return true;
 			}
 		}
@@ -271,37 +273,6 @@ HTML;
 		}
 		
 		return false;
-	}
-	
-	
-	/**
-	 * Gets the module permissions for the user
-	 *
-	 * @since 1.0
-	 * @package facileManager
-	 *
-	 * @param integer $user_id User ID to get permissions for
-	 * @param string $module_name Module name to get permissions for
-	 * @param boolean $include_extra Whether or not to include extra permissions
-	 * @return boolean
-	 */
-	function getModulePerms($user_id, $module_name = null, $include_extra = false) {
-		global $fmdb, $__FM_CONFIG;
-		
-		if (empty($module_name)) {
-			$module_name = $_SESSION['module'];
-		}
-		
-		$result = $fmdb->get_results("SELECT * FROM `fm_perms` WHERE user_id=$user_id AND perm_module='$module_name'");
-		if (!$fmdb->num_rows) {
-			@mysql_free_result($result);
-			return false;
-		} else {
-			$perm_row = $fmdb->last_result[0];
-			@mysql_free_result($result);
-			if ($include_extra) return array('perm_value' => $perm_row->perm_value, 'perm_extra' => $perm_row->perm_extra);
-			else return $perm_row->perm_value;
-		}
 	}
 	
 	
@@ -474,19 +445,18 @@ BODY;
 		$_SESSION['user']['logged_in'] = true;
 		$_SESSION['user']['id'] = $user->user_id;
 		$_SESSION['user']['name'] = $user->user_login;
-		$_SESSION['user']['fm_perms'] = $user->user_perms;
 		$_SESSION['user']['last_login'] = $user->user_last_login;
 		$_SESSION['user']['account_id'] = $user->account_id;
 		$_SESSION['user']['ipaddr'] = isset($_SERVER['REMOTE_HOST']) ? $_SERVER['REMOTE_HOST'] : $_SERVER['REMOTE_ADDR'];
+		
+		/** Upgrade compatibility */
+		if (getOption('fm_db_version') < 31) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
 		$modules = getActiveModules(true);
 		if (@in_array($user->user_default_module, $modules)) {
 			$_SESSION['module'] = $user->user_default_module;
 		} else {
 			$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
-		}
-		if ($_SESSION['module'] != $fm_name) {
-			$_SESSION['user']['module_perms'] = $this->getModulePerms($user->user_id, null, true);
 		}
 		setcookie('myid', session_id(), time() + 60 * 60 * 24 * 7);
 	}
@@ -599,8 +569,8 @@ BODY;
 		if (!$fmdb->num_rows) return false;
 		
 		/** Attempt to add the new LDAP user to the database based on the template */
-		$fmdb->query("INSERT INTO `fm_users` (`account_id`,`user_login`, `user_password`, `user_email`, `user_auth_type`, `user_perms`) 
-					SELECT `account_id`, '$username', '', '', 2, `user_perms` from `fm_users` WHERE `user_id`=" . getOption('ldap_user_template'));
+		$fmdb->query("INSERT INTO `fm_users` (`account_id`,`user_login`, `user_password`, `user_email`, `user_auth_type`, `user_caps`) 
+					SELECT `account_id`, '$username', '', '', 2, `user_caps` from `fm_users` WHERE `user_id`=" . getOption('ldap_user_template'));
 		if (!$fmdb->rows_affected) return false;
 		
 		/** Attempt to add the new LDAP user permissions to the database based on the template */

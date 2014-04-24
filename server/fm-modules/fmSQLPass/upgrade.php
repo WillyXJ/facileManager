@@ -111,6 +111,40 @@ function upgradefmSQLPass_0108($__FM_CONFIG, $running_version) {
 	$fmdb->query("DROP TABLE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}options`");
 	if (!$fmdb->result || $fmdb->sql_errors) return false;
 
+	$fm_user_caps = getOption('fm_user_caps');
+	
+	/** Update user capabilities */
+	$fm_user_caps['fmSQLPass'] = array(
+				'do_nothing'			=> '<b>Access Denied</b>',
+				'manage_servers'		=> 'Server Management',
+				'manage_passwords'		=> 'Password Management',
+				'manage_settings'		=> 'Manage Settings'
+		);
+	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+	
+	$fmdb->get_results("SELECT * FROM `fm_users`");
+	if ($fmdb->num_rows) {
+		$count = $fmdb->num_rows;
+		$result = $fmdb->last_result;
+		for ($i=0; $i<$count; $i++) {
+			$user_caps = null;
+			/** Update user capabilities */
+			$j = 1;
+			$temp_caps = null;
+			foreach ($fm_user_caps['fmSQLPass'] as $slug => $trash) {
+				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
+				if (array_key_exists('fmSQLPass', $user_caps)) {
+					if ($j & $user_caps['fmSQLPass']['imported_perms']) $temp_caps['fmSQLPass'][$slug] = 1;
+					$j = $j*2 ;
+				}
+			}
+			if (@array_key_exists('fmSQLPass', $temp_caps)) $user_caps['fmSQLPass'] = array_merge($temp_caps['fmSQLPass'], $user_caps['fmSQLPass']);
+			unset($user_caps['fmSQLPass']['imported_perms']);
+			$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+			if (!$fmdb->result) return false;
+		}
+	}
+	
 	return true;
 }
 

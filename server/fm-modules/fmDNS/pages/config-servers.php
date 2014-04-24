@@ -29,7 +29,7 @@ $page_name_sub = 'Servers';
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
@@ -78,7 +78,7 @@ if ($allowed_to_manage_servers) {
 printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
-echo printPageHeader($response, 'Name Servers', $allowed_to_manage_servers);
+echo printPageHeader($response, 'Name Servers', currentUserCan('manage_servers', $_SESSION['module']));
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
 $fm_module_servers->rows($result);

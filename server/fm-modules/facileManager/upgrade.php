@@ -390,6 +390,7 @@ function fmUpgrade_120($database) {
 	if ($success) {
 		/** Schema change */
 		$table[] = "ALTER TABLE  $database.`fm_options` ADD  `module_name` VARCHAR( 255 ) NULL AFTER  `account_id` ;";
+		$table[] = "ALTER TABLE  `fm_users` ADD  `user_caps` TEXT NULL AFTER  `user_auth_type` ;";
 
 		/** Create table schema */
 		if (count($table) && $table[0]) {
@@ -438,6 +439,53 @@ function fmUpgrade_120($database) {
 				if (!$fmdb->result) return false;
 			}
 		}
+		
+		/** Update user capabilities */
+		$fm_user_caps[$fm_name] = array(
+				'do_everything'		=> 'Super Admin',
+				'manage_modules'	=> 'Module Management',
+				'manage_users'		=> 'User Management',
+				'run_tools'			=> 'Run Tools',
+				'manage_settings'	=> 'Manage Settings'
+			);
+		if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+		
+		$fmdb->get_results("SELECT * FROM `fm_users`");
+		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
+			$result = $fmdb->last_result;
+			for ($i=0; $i<$count; $i++) {
+				$user_caps = null;
+				/** Update user capabilities */
+				$j = 1;
+				foreach ($fm_user_caps[$fm_name] as $slug => $trash) {
+					if ($j & $result[$i]->user_perms) $user_caps[$fm_name][$slug] = 1;
+					$j = $j*2 ;
+				}
+				$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+				if (!$fmdb->result) return false;
+			}
+		}
+		$fmdb->query("ALTER TABLE `fm_users` DROP `user_perms`;");
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+		
+		/** Temporarily move the module user capabilities to fm_users */
+		$fmdb->get_results("SELECT * FROM `fm_perms`");
+		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
+			$result = $fmdb->last_result;
+			for ($i=0; $i<$count; $i++) {
+				if (!$user_info = getUserInfo($result[$i]->user_id)) continue;
+				/** Update user capabilities */
+				$user_caps = isSerialized($user_info['user_caps']) ? unserialize($user_info['user_caps']) : $user_info['user_caps'];
+				$user_caps[$result[$i]->perm_module] = isSerialized($result[$i]->perm_extra) ? unserialize($result[$i]->perm_extra) : $result[$i]->perm_extra;
+				$user_caps[$result[$i]->perm_module]['imported_perms'] = $result[$i]->perm_value;
+
+				$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+				if (!$fmdb->result) return false;
+			}
+		}
+		
 	}
 
 	return $success;
@@ -463,6 +511,8 @@ function upgradeConfig($field, $value, $logit = true) {
 
 	session_id($_COOKIE['myid']);
 	@session_start();
+	unset($_SESSION['user']['fm_perms']);
+	
 	if ($logit) {
 		include(ABSPATH . 'fm-includes/version.php');
 		include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');

@@ -33,15 +33,17 @@ $record_type = (isset($_GET['record_type'])) ? strtoupper($_GET['record_type']) 
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
-if (!$allowed_to_manage_records || empty($_POST)) {
-	header('Location: ' . $GLOBALS['RELPATH']);
-}
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: ' . $GLOBALS['RELPATH']);
+if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
+extract($_POST);
+
+/** Should the user be here? */
+if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
+if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 
 printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
-extract($_POST);
 $html_out_create = $html_out_update = null;
 foreach($_POST as $name => $value) {
 	if (strtolower($name) == 'update') $html_out_update = buildReturnUpdate($domain_id, $record_type, $value);

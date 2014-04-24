@@ -27,6 +27,8 @@
  *
  */
 
+if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+
 /** Module Version */
 $__FM_CONFIG['fmFirewall']['version']				= '1.0-b5';
 $__FM_CONFIG['fmFirewall']['client_version']		= '1.0-b5';
@@ -132,10 +134,5 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFire
 											'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'services'=>'service', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'time'=>'time'
 											);
 $__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
-
-/** Module Permissions */
-if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
-	include(dirname(__FILE__) . '/permissions.inc.php');
-}
 
 ?>

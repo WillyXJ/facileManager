@@ -28,7 +28,7 @@ $page_name = 'Time';
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_time) {
+if (currentUserCan('manage_time', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
@@ -77,8 +77,8 @@ if ($allowed_to_manage_time) {
 printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
-//$allowed_to_add = ($type == 'custom' && $allowed_to_manage_time) ? true : false;
-echo printPageHeader($response, 'Time Restrictions', $allowed_to_manage_time);
+//$allowed_to_add = ($type == 'custom' && currentUserCan('manage_time', $_SESSION['module'])) ? true : false;
+echo printPageHeader($response, 'Time Restrictions', currentUserCan('manage_time', $_SESSION['module']));
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name', 'time_');
 $fm_module_time->rows($result);

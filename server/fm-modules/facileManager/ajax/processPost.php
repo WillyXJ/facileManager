@@ -38,7 +38,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	}
 /** Handle fM settings */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_settings') {
-	if (!$allowed_to_manage_settings) returnUnAuth(false);
+	if (!currentUserCan('manage_settings')) returnUnAuth(false);
 
 	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 	
@@ -52,7 +52,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 /** Handle module settings */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'module_settings') {
-	if (!$allowed_to_manage_module_settings) returnUnAuth(false);
+	if (!currentUserCan('manage_settings', $_SESSION['module'])) returnUnAuth(false);
 
 	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 	$save_result = $fm_module_settings->save();
@@ -84,7 +84,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
-	if (!$allowed_to_manage_users) returnUnAuth();
+	if (!currentUserCan('manage_users')) returnUnAuth();
 	
 	if (isset($_POST['item_id'])) {
 		$id = sanitize($_POST['item_id']);

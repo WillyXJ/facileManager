@@ -27,6 +27,8 @@
  *
  */
 
+if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+
 /** Module Information */
 $__FM_CONFIG['fmDNS']['version']				= '1.2';
 $__FM_CONFIG['fmDNS']['client_version']			= '1.2';
@@ -150,10 +152,5 @@ $__FM_CONFIG['fmDNS']['default']['options'] = array(
 
 /** Array sorts */
 sort($__FM_CONFIG['logging']['categories']);
-
-/** Module Permissions */
-if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
-	include(dirname(__FILE__) . '/permissions.inc.php');
-}
 
 ?>

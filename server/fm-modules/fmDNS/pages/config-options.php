@@ -49,7 +49,7 @@ if (array_key_exists('view_id', $_GET)) {
 	$view_id = null;
 }
 
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$view_id_uri = (array_key_exists('view_id', $_GET)) ? '?view_id=' . $view_id : null;
 	if (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) {
@@ -104,7 +104,7 @@ printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, $display_option_type . ' Options', $allowed_to_manage_servers, $view_id);
+echo printPageHeader($response, $display_option_type . ' Options', currentUserCan('manage_servers', $_SESSION['module']), $view_id);
 echo "$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no=$server_serial_no");

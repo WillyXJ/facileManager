@@ -31,12 +31,13 @@ class fm_dns_records {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
 			$table_info = array('class' => 'display_results sortable');
 
 			echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				echo $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
 			}
@@ -192,7 +193,7 @@ class fm_dns_records {
 	}
 
 	function getHeader($type) {
-		global $allowed_to_manage_records, $allowed_to_manage_zones, $zone_access_allowed;
+		global $zone_access_allowed;
 		
 		$show_value = true;
 		$title_array[] = array('title' => 'Record', 'rel' => 'record_name');
@@ -237,7 +238,7 @@ class fm_dns_records {
 		
 		if ($type != 'SOA') $title_array[] = array('title' => 'Status', 'rel' => 'record_status');
 		if (empty($_POST)) {
-			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
+			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 		} else {
 			$title_array[] = array('title' => 'Valid', 'style' => 'text-align: center;');
 			array_unshift($title_array, 'Action');
@@ -247,7 +248,7 @@ class fm_dns_records {
 	}
 
 	function getInputForm($type, $new, $parent_domain_id, $results = null, $start = 1) {
-		global $allowed_to_manage_records, $allowed_to_manage_zones, $__FM_CONFIG, $zone_access_allowed;
+		global $__FM_CONFIG, $zone_access_allowed;
 		
 		$form = $record_status = $record_class = $record_name = $record_ttl = null;
 		$record_value = $record_comment = $record_priority = $record_weight = $record_port = null;
@@ -277,10 +278,10 @@ class fm_dns_records {
 
 		if ($type == 'PTR') {
 			$domain_map = getNameFromID($parent_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
-			$domain = getNameFromID($parent_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 		}
+		$domain = getNameFromID($parent_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 		
-		if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed && ($new || $domain_id == $parent_domain_id)) {
+		if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed && ($new || $domain_id == $parent_domain_id)) {
 			if ($type == 'PTR') {
 				$input_box = '<input ';
 				$input_box .= ($domain_map == 'forward') ? 'size="40"' : 'style="width: 40px;" size="4"';
@@ -358,7 +359,8 @@ class fm_dns_records {
 				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Delete]" />Delete</label>';
 			}
 		} else {
-			$field_values['data']['Record'] = '>' . $record_name . '.' . $domain;
+			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
+			$field_values['data']['Record'] = '>' . $record_name . '<span class="grey">.' . $domain . '</span>';
 			$field_values['data']['TTL'] = '>' . $record_ttl;
 			$field_values['data']['Class'] = '>' . $record_class;
 			if ($show_value) $field_values['data']['Value'] = '>' . $record_value;
@@ -375,7 +377,7 @@ class fm_dns_records {
 		
 			$field_values['data']['Status'] = '>' . $record_status;
 			
-			if (($allowed_to_manage_records || $allowed_to_manage_zones) && $zone_access_allowed && $domain_id != $parent_domain_id) {
+			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed && $domain_id != $parent_domain_id) {
 				$field_values['data']['Actions'] = ' align="center"><input type="hidden" name="' . $action . '[_NUM_][record_skipped]" value="off" /><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][record_skipped]" ';
 				$field_values['data']['Actions'] .= in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id)) ? ' checked' : null;
 				$field_values['data']['Actions'] .= '/>Skip Import</label>';

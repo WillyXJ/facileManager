@@ -24,16 +24,13 @@
 
 $page_name = 'Modules';
 
-include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 
 $output = $avail_modules = $response = null;
 $import_output = '<p>Processing...</p>';
 
-$disabled = $super_admin ? null : 'disabled';
-
 if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
-	if ($allowed_to_manage_modules) {
+	if (currentUserCan('manage_modules')) {
 		if ($fm_tools->manageModule(sanitize($_GET['action']), sanitize($_GET['module']))) {
 			$response = $_GET['module'] . ' was ' . sanitize($_GET['action']);
 			$response .= substr(sanitize($_GET['action']), -1) == 'e' ? 'd.' : 'ed.';
@@ -82,19 +79,19 @@ HTML;
 		$module_version = getOption('version', 0, $module_name);
 		if ($module_version !== false) {
 			if (in_array($module_name, getActiveModules())) {
-				if ($allowed_to_manage_modules) {
+				if (currentUserCan('manage_modules')) {
 					$activate_link = '<a href="?action=deactivate&module=' . $module_name . '">Deactivate</a>' . "\n";
 				}
 				$class[] = 'active';
 			}
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
 				if (!in_array($module_name, getActiveModules())) {
-					if ($allowed_to_manage_modules) {
+					if (currentUserCan('manage_modules')) {
 						$activate_link = '<span class="activate_link"><a href="?action=activate&module=' . $module_name . '">Activate</a></span>' . "\n" . $uninstall_link;
 					}
 				}
 			} else {
-				if ($allowed_to_manage_modules) {
+				if (currentUserCan('manage_modules')) {
 					include(ABSPATH . 'fm-includes/version.php');
 					if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
 						$upgrade_link = '<span class="upgrade_link"><a href="#" id="module_upgrade" name="' . $module_name . '" />Upgrade Now</a></span>' . "\n";
@@ -108,7 +105,7 @@ HTML;
 			$status_options = $activate_link . "\n";
 		} else {
 			$module_version = $__FM_CONFIG[$module_name]['version'];
-			if ($allowed_to_manage_modules) {
+			if (currentUserCan('manage_modules')) {
 				include(ABSPATH . 'fm-includes/version.php');
 				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
 					$status_options .= '<a href="#" id="module_install" name="' . $module_name . '" />Install Now</a>';

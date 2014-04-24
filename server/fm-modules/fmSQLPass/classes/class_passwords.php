@@ -26,7 +26,7 @@ class fm_sqlpass_passwords {
 	 * Displays the server group list
 	 */
 	function rows($result) {
-		global $fmdb, $__FM_CONFIG, $fm_users, $allowed_to_manage_passwords;
+		global $fmdb, $__FM_CONFIG, $fm_users;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no active database server groups.</p>';
@@ -53,7 +53,7 @@ class fm_sqlpass_passwords {
 			echo "</tbody>\n</table>\n";
 		}
 
-		if ($allowed_to_manage_passwords && $result) {
+		if (currentUserCan('manage_passwords', $_SESSION['module']) && $result) {
 			echo <<<HTML
 				<br /><br />
 				<a name="#manage"></a>

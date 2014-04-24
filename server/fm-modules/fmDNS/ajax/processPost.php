@@ -50,7 +50,7 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	exit;
 }
 
-if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
+if (is_array($_POST) && count($_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';

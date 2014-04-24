@@ -28,7 +28,7 @@ $page_name = 'Firewalls';
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
@@ -77,7 +77,7 @@ if ($allowed_to_manage_servers) {
 printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
 @printMenu($page_name, $page_name_sub);
 
-echo printPageHeader($response, 'Firewall Servers', $allowed_to_manage_servers);
+echo printPageHeader($response, 'Firewall Servers', currentUserCan('manage_servers', $_SESSION['module']));
 	
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
 $fm_module_servers->rows($result);

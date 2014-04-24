@@ -6,6 +6,7 @@
 * Server - Moved module options into fM options table.
 * Server - [security] Fixed a bug that could allow a user to manage object groups
            without permission to manage objects.
+* Server - Uses new fM user capabilities backend.
 
 1.0-b4 (2014-03-24)
 ===================

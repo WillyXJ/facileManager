@@ -22,10 +22,12 @@
  +-------------------------------------------------------------------------+
 */
 
+/** Don't display if there's no authentication service */
+if (!getOption('auth_method')) unAuth();
+
 $page_name = 'Admin';
 $page_name_sub = 'Users';
 
-include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'permissions.inc.php');
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -33,7 +35,7 @@ $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 $form_data = null;
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_users) {
+if (currentUserCan('manage_users')) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
@@ -69,9 +71,9 @@ if ($allowed_to_manage_users) {
 printHeader($page_name_sub);
 @printMenu($page_name, $page_name_sub);
 
-echo printPageHeader($response, 'Users', $allowed_to_manage_users);
+echo printPageHeader($response, 'Users', currentUserCan('manage_users'));
 
-if ($allowed_to_manage_users) {
+if (currentUserCan('manage_users')) {
 	$sort_field = 'user_login';
 	$sort_direction = null;
 	

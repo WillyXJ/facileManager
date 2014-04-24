@@ -26,9 +26,12 @@ class fm_module_servers {
 	 * Displays the server list
 	 */
 	function rows($result) {
-		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $fmdb;
 		
-		if ($allowed_to_build_configs) {
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+		
+		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
 			$bulk_actions_list = array('Upgrade', 'Build Config');
 			$title_array[] = array(
 								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
@@ -58,8 +61,6 @@ class fm_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
@@ -206,7 +207,7 @@ class fm_module_servers {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $__FM_CONFIG;
 		
 		$class = ($row->server_status == 'disabled') ? 'disabled' : null;
 		
@@ -215,15 +216,15 @@ class fm_module_servers {
 		$edit_status = $edit_actions = null;
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
-		$checkbox = ($allowed_to_build_configs) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
+		$checkbox = (currentUserCan('build_server_configs', $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		
-		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
+		if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
 				$edit_actions .= $__FM_CONFIG['icons']['build'];
 				$class = 'build';
 			}
 		}
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if ($row->server_installed == 'yes') {
 				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';

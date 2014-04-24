@@ -32,8 +32,13 @@ if (array_key_exists('cancel', $_POST)) {
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
+if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
 extract($_POST);
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: ' . $GLOBALS['RELPATH']);
+
+/** Should the user be here? */
+if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
+if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 
 if (isset($update) && is_array($update)) {
 	foreach ($update as $id => $data) {

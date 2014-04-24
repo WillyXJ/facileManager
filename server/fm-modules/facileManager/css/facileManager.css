@@ -436,7 +436,8 @@ h4 {
 .display_results tbody tr:nth-child(odd) {
 	background-color:#fff;
 }
-.display_results tbody tr.disabled {
+.display_results tbody tr.disabled,
+span.grey {
 	color: #aaa;
 }
 .display_results tbody tr.attention,
@@ -879,7 +880,7 @@ a {
 	border: 1px #cecece solid;
 	z-index: 1002;
 	position: absolute;
-	margin: 5.5em 11em;
+	margin: 6.5em 13.5em;
 	display: none;
 	opacity: 1.0;
 	padding: 2em;
@@ -1199,6 +1200,7 @@ table.log_search_form th {
 	border-radius: 3px;
 	width: 150px;
 	text-align: center;
+	font-size: 12px;
 }
 
 th {

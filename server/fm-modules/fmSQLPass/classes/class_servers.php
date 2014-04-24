@@ -26,7 +26,7 @@ class fm_module_servers {
 	 * Displays the server list
 	 */
 	function rows($result) {
-		global $fmdb, $allowed_to_manage_servers;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no servers defined.</p>';
@@ -38,7 +38,7 @@ class fm_module_servers {
 						);
 
 			$title_array = array('Hostname', 'Type', 'Groups');
-			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -243,13 +243,13 @@ class fm_module_servers {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_servers, $fm_sqlpass_backup_jobs;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->server_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$timezone = date("T");
 		
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';

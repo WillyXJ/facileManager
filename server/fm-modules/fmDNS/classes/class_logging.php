@@ -26,11 +26,14 @@ class fm_module_logging {
 	 * Displays the logging list
 	 */
 	function rows($result, $channel_category) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
+		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="logging">There are no ' . $__FM_CONFIG['logging']['avail_types'][$channel_category] . ' defined.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -40,12 +43,10 @@ class fm_module_logging {
 			$title_array[] = 'Name';
 			if ($channel_category == 'category') $title_array[] = 'Channels';
 			$title_array[] = 'Comment';
-			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x], $channel_category);
 			}
@@ -422,12 +423,12 @@ class fm_module_logging {
 
 
 	function displayRow($row, $channel_category) {
-		global $__FM_CONFIG, $allowed_to_manage_servers;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_name = ($row->cfg_parent) ? '&nbsp;&nbsp;&nbsp;' : null;
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" name="' . $channel_category . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';

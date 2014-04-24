@@ -26,9 +26,12 @@ class fm_dns_zones {
 	 * Displays the zone list
 	 */
 	function rows($result, $map, $reload_allowed) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_reload_zones;
+		global $fmdb, $__FM_CONFIG;
 		
-		if ($allowed_to_reload_zones) {
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		if (currentUserCan('reload_zones', $_SESSION['module'])) {
 			$bulk_actions_list = array('Reload');
 			$checkbox[] = array(
 								'title' => '<input type="checkbox" onClick="toggle(this, \'domain_list[]\')" />',
@@ -41,8 +44,6 @@ class fm_dns_zones {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="domains">There are no zones.</p>';
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
 			$table_info = array(
@@ -439,12 +440,12 @@ class fm_dns_zones {
 	
 	
 	function displayRow($row, $map, $reload_allowed) {
-		global $__FM_CONFIG, $allowed_to_manage_zones, $allowed_to_reload_zones, $super_admin;
+		global $__FM_CONFIG;
 		
 		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
 		$response = null;
 		
-		$checkbox = ($allowed_to_reload_zones) ? '<td></td>' : null;
+		$checkbox = (currentUserCan('reload_zones', $_SESSION['module'])) ? '<td></td>' : null;
 		
 		$soa_count = getSOACount($row->domain_id);
 		$ns_count = getNSCount($row->domain_id);
@@ -457,16 +458,12 @@ class fm_dns_zones {
 			$response = 'One more more NS records still needs to be created for this zone';
 			$class = 'attention';
 		}
-		$clones = $this->cloneDomainsList($row->domain_id);
-		$zone_access_allowed = true;
 		
-		if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
-			$module_extra_perms = isSerialized($_SESSION['user']['module_perms']['perm_extra']) ? unserialize($_SESSION['user']['module_perms']['perm_extra']) : $_SESSION['user']['module_perms']['perm_extra'];
-			$zone_access_allowed = (is_array($module_extra_perms) && 
-				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($row->domain_id, $module_extra_perms['zone_access']) : true;
-		}
+		$clones = $this->cloneDomainsList($row->domain_id);
+		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $row->domain_id));
+		
 		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
-			if ($allowed_to_reload_zones && $zone_access_allowed) {
+			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {
 				$reload_zone = '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>';
 				$checkbox = '<td><input type="checkbox" name="domain_list[]" value="' . $row->domain_id .'" /></td>';
 			} else {
@@ -486,12 +483,12 @@ FORM;
 */
 		$edit_status = null;
 		
-		if (!$soa_count && $row->domain_type == 'master' && $allowed_to_manage_zones) $type = 'SOA';
-		elseif (!$ns_count && $row->domain_type == 'master' && $allowed_to_manage_zones) $type = 'NS';
+		if (!$soa_count && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
+		elseif (!$ns_count && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
 		else {
 			$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
 		}
-		if ($allowed_to_manage_zones && $zone_access_allowed) {
+		if (currentUserCan('manage_zones', $_SESSION['module']) && $zone_access_allowed) {
 			$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="delete" href="#">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 		}
@@ -655,15 +652,16 @@ HTML;
 	}
 
 	function cloneDomainsList($domain_id) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_zones;
+		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
 		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
 			$clone_results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
+			for ($i=0; $i<$count; $i++) {
 				$return .= '<p><a href="zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_results[$i]->domain_id . '" title="Edit zone records">' . $clone_results[$i]->domain_name . '</a>';
-				if ($allowed_to_manage_zones) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
+				if (currentUserCan('manage_zones', $_SESSION['module'])) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				$return .= "</p>\n";
 			}
 		}
@@ -1030,7 +1028,7 @@ HTML;
 	 * @package facileManager
 	 */
 	function doBulkZoneReload($domain_id) {
-		global $fmdb, $__FM_CONFIG, $super_admin;
+		global $fmdb, $__FM_CONFIG;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($domain_id), 'domain_', 'domain_id');
@@ -1052,13 +1050,8 @@ HTML;
 		}
 		
 		/** Ensure user is allowed to reload zone */
-		$zone_access_allowed = true;
+		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id));
 		
-		if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
-			$module_extra_perms = isSerialized($_SESSION['user']['module_perms']['perm_extra']) ? unserialize($_SESSION['user']['module_perms']['perm_extra']) : $_SESSION['user']['module_perms']['perm_extra'];
-			$zone_access_allowed = (is_array($module_extra_perms) && 
-				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($domain_id, $module_extra_perms['zone_access']) : true;
-		}
 		if (count($response) == 1 && !$zone_access_allowed) {
 			$response[] = ' --> Failed: You do not have permission to reload this zone.';
 		}

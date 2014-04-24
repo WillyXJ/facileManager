@@ -32,6 +32,8 @@
  * @package facileManager
  */
 
+ini_set('memory_limit', '26M');
+
 /** Define ABSPATH as this files directory */
 if (!defined('ABSPATH')) define('ABSPATH', dirname(__FILE__) . '/');
 if (!defined('AJAX')) {
@@ -138,9 +140,6 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		/** Handle module change request */
 		if (isset($_REQUEST['module']) && !isset($_REQUEST['action'])) {
 			$_SESSION['module'] = in_array($_REQUEST['module'], getActiveModules(true)) ? $_REQUEST['module'] : $fm_name;
-			if ($_SESSION['module'] != $fm_name) {
-				$_SESSION['user']['module_perms'] = $fm_login->getModulePerms($_SESSION['user']['id'], null, true);
-			}
 			header('Location: ' . $GLOBALS['RELPATH']);
 			exit;
 		}
@@ -156,7 +155,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			/** Once logged in process the menuing */
 			if ($fm_login->isLoggedIn()) {
 				if (isUpgradeAvailable()) {
-					if ($super_admin) {
+					if (currentUserCan('do_everything') || (getOption('fm_db_version') < 31 && $_SESSION['user']['fm_perms'] & 1)) {
 						header('Location: ' . $GLOBALS['RELPATH'] . 'fm-upgrade.php');
 					} else {
 						$response = '<p class="error">** The database for ' . $fm_name . ' still needs to be upgraded.  Please contact a super-admin. **</p>';

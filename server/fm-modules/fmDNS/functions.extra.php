@@ -32,12 +32,17 @@
 function printfmDNSUsersForm($user_module_perms, $module_name) {
 	global $__FM_CONFIG, $fmdb;
 	
+	if (!array_key_exists($module_name, $__FM_CONFIG)) {
+		/** Include module variables */
+		@include(dirname(__FILE__) . '/variables.inc.php');
+	}
+	
 	$available_zones_perms = 0;
 	
 	if (isSerialized($user_module_perms)) {
 		$user_module_perms = unserialize($user_module_perms);
-		$available_zones_perms = $user_module_perms['zone_access'];
 	}
+	$available_zones_perms = isset($user_module_perms[$module_name]['access_specific_zones']) ? $user_module_perms[$module_name]['access_specific_zones'] : null;
 	
 	/** Get available zones */
 	$available_zones[0][] = 'All Zones';
@@ -51,7 +56,7 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 			$available_zones[$i+1][] = $results[$i]->domain_id;
 		}
 	}
-	$zones_list = buildSelect("fm_perm[$module_name][extra_zone_access]", 1, $available_zones, $available_zones_perms, 5, null, true);
+	$zones_list = buildSelect("user_caps[$module_name][access_specific_zones]", 1, $available_zones, $available_zones_perms, 5, null, true);
 	
 	return <<<HTML
 							<tr>

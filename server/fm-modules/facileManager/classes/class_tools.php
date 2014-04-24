@@ -197,9 +197,9 @@ class fm_tools {
 	 * @package facileManager
 	 */
 	function backupDatabase() {
-		global $__FM_CONFIG, $allowed_to_run_tools, $fm_name;
+		global $__FM_CONFIG, $fm_name;
 		
-		if (!$allowed_to_run_tools) return '<p class="error">You are not authorized to run these tools.</p>';
+		if (!currentUserCan('run_tools')) return '<p class="error">You are not authorized to run these tools.</p>';
 		
 		/** Temporary fix for MySQL 5.6 warnings */
 		$exclude_warnings = array('Warning: Using a password on the command line interface can be insecure.' . "\n");

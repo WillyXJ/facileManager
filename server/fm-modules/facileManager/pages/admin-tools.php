@@ -25,7 +25,6 @@
 $page_name = 'Admin';
 $page_name_sub = 'Tools';
 
-include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'permissions.inc.php');
 if (!class_exists('fm_tools')) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 }
@@ -35,7 +34,7 @@ $response = isset($response) ? $response : null;
 $tools_option = array();
 $import_output = '<p>Processing...</p>';
 
-$disabled = ($allowed_to_run_tools) ? null : 'disabled';
+$disabled = (currentUserCan('run_tools')) ? null : 'disabled';
 
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {

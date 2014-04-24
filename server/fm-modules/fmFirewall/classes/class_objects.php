@@ -26,11 +26,14 @@ class fm_module_objects {
 	 * Displays the object list
 	 */
 	function rows($result, $type) {
-		global $fmdb, $allowed_to_manage_objects;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="objects">There are no ' . $type . ' objects defined.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -40,12 +43,10 @@ class fm_module_objects {
 			$title_array = array('Object Name', 'Address');
 			if ($type != 'address') $title_array[] = 'Netmask';
 			$title_array[] = array('title' => 'Comment', 'style' => 'width: 40%;');
-			if ($allowed_to_manage_objects) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
@@ -156,13 +157,13 @@ class fm_module_objects {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_objects, $allowed_to_build_configs;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->object_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = null;
 		
-		if ($allowed_to_manage_objects) {
+		if (currentUserCan('manage_objects', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->object_id, 'object')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';

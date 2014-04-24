@@ -101,6 +101,9 @@ function isNewVersionAvailable($package, $version) {
 	/** Are software updates enabled? */
 	if (!getOption('software_update')) return false;
 	
+	/** Disable check until user has upgraded database to 1.2 */
+	if (getOption('fm_db_version') < 31) return false;
+	
 	/** Should we be running this check now? */
 	$last_version_check = getOption('version_check', 0, $package);
 	if (!$software_update_interval = getOption('software_update_interval')) $software_update_interval = 'week';
@@ -220,7 +223,7 @@ FOOT;
  * @package facileManager
  */
 function getTopHeader($help) {
-	global $fm_login, $__FM_CONFIG, $super_admin;
+	global $fm_login, $__FM_CONFIG;
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
@@ -238,8 +241,8 @@ function getTopHeader($help) {
 HTML;
 			}
 
-			$star = $super_admin ? $__FM_CONFIG['icons']['star'] . ' ' : null;
-			$change_pwd_link = ($auth_method == 1) ? '<li><a class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#"><span>Change Password</span></a></li>' . "\n" : null;
+			$star = currentUserCan('do_everything') ? $__FM_CONFIG['icons']['star'] . ' ' : null;
+			$change_pwd_link = ($auth_method == 1) ? '<li><a class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#"><span>Edit Profile</span></a></li>' . "\n" : null;
 			$user_account_menu = <<<HTML
 		<div id="topheadpartright" style="padding: 0 1px 0 0;">
 			<div id="cssmenu">
@@ -257,17 +260,15 @@ HTML;
 HTML;
 		}
 		
-		// Build app dropdown menu
+		/** Build app dropdown menu */
 		$modules = getAvailableModules();
 		$avail_modules = null;
 		
 		if (count($modules)) {
 			foreach ($modules as $module_name) {
 				if ($module_name == $_SESSION['module']) continue;
-				if (in_array($module_name, getActiveModules())) {
-					$module_perms = $fm_login->getModulePerms($_SESSION['user']['id'], $module_name);
-					include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
-					if ($module_perms & PERM_MODULE_ACCESS_DENIED) continue;
+				if (in_array($module_name, getActiveModules(true))) {
+//					if (currentUserCan('do_nothing', $_SESSION['module'])) continue;
 					$avail_modules .= "<li class='last'><a href='{$GLOBALS['RELPATH']}?module=$module_name'><span>$module_name</span></a></li>\n";
 				}
 			}
@@ -667,8 +668,10 @@ function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null) 
 	basicGet($table, $id, $prefix, $field, null, $account_id);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		return $result[0]->$data;
+		if (isset($result[0]->$data)) return $result[0]->$data;
 	}
+	
+	return false;
 }
 
 
@@ -1114,7 +1117,7 @@ function getOption($option = null, $account_id = 0, $module_name = null) {
 	global $fmdb;
 	
 	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
-	
+
 	$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql LIMIT 1";
 	$fmdb->get_results($query);
 	
@@ -1232,9 +1235,7 @@ function getActiveModules($allowed_modules = false) {
 		
 		$excluded_modules = array();
 		foreach ($modules as $module_name) {
-			$module_perms = $fm_login->getModulePerms($_SESSION['user']['id'], $module_name);
-			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
-			if ($module_perms & PERM_MODULE_ACCESS_DENIED) $excluded_modules[] = $module_name;
+			if (currentUserCan('do_nothing', $module_name))	$excluded_modules[] = $module_name;
 		}
 		return array_merge(array_diff($modules, $excluded_modules), array());
 	} else {
@@ -1275,8 +1276,23 @@ REMOVE;
 		if (!$fmdb->rows_affected) return false;
 	}
 	
+	/** Delete entries from fm_options */
 	$query = "DELETE FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `module_name`='{$module}'";
 	$fmdb->query($query);
+	
+	/** Delete capability entries from fm_users */
+	$query = "SELECT * FROM `{$__FM_CONFIG['db']['name']}`.`fm_users`";
+	$fmdb->query($query);
+	$count = $fmdb->num_rows;
+	$result = $fmdb->last_result;
+	for ($i=0; $i<=$count, $i++) {
+		$current_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
+		if (array_key_exists($module, $current_caps)) {
+			unset($current_caps[$module]);
+			$fmdb->query("UPDATE `{$__FM_CONFIG['db']['name']}`.`fm_users` SET user_caps='" . serialize($current_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+			if (!$fmdb->rows_affected) return false;
+		}
+	}
 	
 	return 'Success';
 }
@@ -2103,6 +2119,88 @@ function displayErrorPage($message = 'An unknown error occurred.', $show_page_ba
  */
 function unAuth() {
 	displayErrorPage('You do not have permission to view this page. Please contact your administrator for access.');
+}
+
+
+/**
+ * Whether current user has capability
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $capability Capability name.
+ * @param string $module Module name to check capability for
+ * @param string $extra_perm Extra capability to check
+ * @return boolean
+ */
+function currentUserCan($capability, $module = 'facileManager', $extra_perm = null) {
+	return userCan($_SESSION['user']['id'], $capability, $module, $extra_perm);
+}
+
+
+/**
+ * Whether a user has capability
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param integer $user_id User ID to check.
+ * @param string $capability Capability name.
+ * @param string $module Module name to check capability for
+ * @param string $extra_perm Extra capability to check
+ * @return boolean
+ */
+function userCan($user_id, $capability, $module = 'facileManager', $extra_perm = null) {
+	global $fm_name;
+	
+	$user_capabilities = getUserCapabilities($user_id);
+	
+	/** Check if super admin */
+	if ($capability != 'do_nothing') {
+		if (@array_key_exists('do_everything', $user_capabilities[$fm_name])) return true;
+		
+		/** If no authentication then return full access */
+		if (!getOption('auth_method')) return true;
+	}
+	
+	/** Check user capability */
+	if (@array_key_exists($capability, $user_capabilities[$module])) {
+		if (is_array($user_capabilities[$module][$capability])) {
+			if (is_array($extra_perm)) {
+				$found = false;
+				
+				foreach ($extra_perm as $needle) {
+					if (in_array($needle, $user_capabilities[$module][$capability]))
+						$found = true;
+				}
+				
+				return $found;
+			} else {
+				return in_array($extra_perm, $user_capabilities[$module][$capability]);
+			}
+		}
+		
+		return true;
+	}
+	
+	return false;
+}
+
+
+/**
+ * Gets the user capabilities
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param integer $user_id User ID to retrieve.
+ * @return array
+ */
+function getUserCapabilities($user_id) {
+	$user_capabilities = getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_caps');
+	if (isSerialized($user_capabilities)) $user_capabilities = unserialize($user_capabilities);
+	
+	return $user_capabilities;
 }
 
 

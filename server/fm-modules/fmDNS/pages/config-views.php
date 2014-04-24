@@ -33,7 +33,7 @@ $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST[
 $response = isset($response) ? $response : null;
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
 	switch ($action) {
 	case 'add':
@@ -85,7 +85,7 @@ printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, 'Views', $allowed_to_manage_servers);
+echo printPageHeader($response, 'Views', currentUserCan('manage_servers', $_SESSION['module']));
 echo "$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND server_serial_no=$server_serial_no");

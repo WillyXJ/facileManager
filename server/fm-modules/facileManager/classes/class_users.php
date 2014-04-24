@@ -100,14 +100,9 @@ class fm_users {
 		if ($fmdb->num_rows) return 'This user already exists.';
 		
 		/** Process user permissions */
-		$user_perms = 0;
-		if (isset($fm_perm[$fm_name])) {
-			foreach ($fm_perm[$fm_name] as $dec => $checked) {
-				if ($dec == 1) {
-					$user_perms = 1;
-					break;
-				}
-				$user_perms += $dec;
+		if (isset($user_caps[$fm_name])) {
+			if (array_key_exists('do_everything', $user_caps[$fm_name])) {
+				$user_caps = array($fm_name => array('do_everything' => 1));
 			}
 		}
 		
@@ -117,38 +112,6 @@ class fm_users {
 		
 		if (!$result) return 'Could not add the user to the database.';
 
-		/** Process user module permissions */
-		if (isset($fm_perm)) {
-			$new_user_id = $fmdb->insert_id;
-			foreach ($fm_perm as $module => $perm_array) {
-				$perm_dec = 0;
-				$perm_extra = null;
-				foreach ($perm_array as $dec => $checked) {
-					if ($dec == 1) {
-						$perm_dec = 1;
-						break;
-					}
-					if (substr($dec, 0, 5) == 'extra') {
-						$perm_extra[substr($dec, 6)] = in_array(0, $checked) ? array(0) : $checked;
-						continue;
-					}
-					$perm_dec += $dec;
-				}
-				/** If super-admin then no module perms should be defined */
-				if ($user_perms == 1 || $perm_dec == 1) {
-					if ($user_perms == 1) $perm_dec = 0;
-					if (is_array($perm_extra)) {
-						foreach ($perm_extra as $key => $value) {
-							$perm_extra[$key] = array(0);
-						}
-					}
-				}
-				
-				$query = "INSERT INTO `fm_perms` (`user_id`, `perm_module`, `perm_value`, `perm_extra`) VALUES ($new_user_id, '$module', $perm_dec, '" . serialize($perm_extra) . "')";
-				$result = $fmdb->query($query);
-			}
-		}
-		
 		/** Process forced password change */
 		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login);
 		
@@ -200,7 +163,7 @@ class fm_users {
 		
 		$sql_edit = null;
 		
-		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'fm_perm', 'is_ajax');
+		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -210,17 +173,12 @@ class fm_users {
 		$sql = rtrim($sql_edit . $sql_pwd, ',');
 		
 		/** Process user permissions */
-		$user_perms = 0;
-		if (isset($post['fm_perm'][$fm_name])) {
-			foreach ($post['fm_perm'][$fm_name] as $dec => $checked) {
-				if ($dec == 1) {
-					$user_perms = 1;
-					break;
-				}
-				$user_perms += $dec;
+		if (isset($post['user_caps'][$fm_name])) {
+			if (array_key_exists('do_everything', $post['user_caps'][$fm_name])) {
+				$post['user_caps'] = array($fm_name => array('do_everything' => 1));
 			}
 		}
-		if (isset($post['fm_perm'])) $sql .= ',user_perms=' . $user_perms;
+		if (isset($post['user_caps'])) $sql .= ",user_caps='" . serialize($post['user_caps']) . "'";
 		
 		// Update the user
 		$query = "UPDATE `fm_users` SET $sql WHERE `user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
@@ -228,57 +186,10 @@ class fm_users {
 		
 		if (!$fmdb->last_result) return 'Could not update the user in the database.';
 		
-		/** Process user module permissions */
-		if (isset($post['fm_perm'])) {
-			foreach ($post['fm_perm'] as $module => $perm_array) {
-				if ($module == $fm_name) continue;
-				
-				$perm_dec = 0;
-				$perm_extra = null;
-				foreach ($perm_array as $dec => $checked) {
-					if ($dec == 1) {
-						$perm_dec = 1;
-						break;
-					}
-					if (substr($dec, 0, 5) == 'extra') {
-						$perm_extra[substr($dec, 6)] = in_array(0, $checked) ? array(0) : $checked;
-						continue;
-					}
-					$perm_dec += $dec;
-				}
-				/** If super-admin then no module perms should be defined */
-				if ($user_perms == 1 || $perm_dec == 1) {
-					if ($user_perms == 1) $perm_dec = 0;
-					if (is_array($perm_extra)) {
-						foreach ($perm_extra as $key => $value) {
-							$perm_extra[$key] = array(0);
-						}
-					}
-				}
-				
-				/** Are we inserting or updating? */
-				$query = "SELECT * FROM fm_perms WHERE user_id={$post['user_id']} AND perm_module='$module'";
-				$fmdb->get_results($query);
-				
-				if ($fmdb->num_rows) {
-					$result = $fmdb->last_result;
-					if ($result[0]->perm_value == $perm_dec && $result[0]->perm_extra == serialize($perm_dec)) {
-						$query = null;
-						break;
-					}
-					
-					$query = "UPDATE `fm_perms` SET `perm_module`='$module', `perm_value`=$perm_dec, `perm_extra`='" . serialize($perm_extra) . "' WHERE `user_id`={$post['user_id']}";
-				} else {
-					$query = "INSERT INTO `fm_perms` (`user_id`, `perm_module`, `perm_value`, `perm_extra`) VALUES ({$post['user_id']}, '$module', $perm_dec, '" . serialize($perm_extra) . "')";
-				}
-				$result = $fmdb->query($query);
-
-				if (!$fmdb->last_result) return 'Could not update the user in the database.';
-			}
-		}
-
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($post['user_login']);
+		
+		addLogEntry("Updated user '$user_login'.");
 		
 		return true;
 	}
@@ -316,11 +227,11 @@ class fm_users {
 	 * @package facileManager
 	 */
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_users, $fm_name;
+		global $__FM_CONFIG, $fm_name;
 		
 		$disabled_class = ($row->user_status == 'disabled') ? ' class="disabled"' : null;
 
-		if ($allowed_to_manage_users && $_SESSION['user']['id'] != $row->user_id) {
+		if (currentUserCan('manage_users') && $_SESSION['user']['id'] != $row->user_id) {
 			$edit_status = null;
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if ($row->user_template_only == 'no') {
@@ -345,14 +256,14 @@ class fm_users {
 			$edit_status = $user_actions;
 		}
 		
-		$star = ($row->user_perms & PERM_FM_SUPER_ADMIN) ? $__FM_CONFIG['icons']['star'] : null;
+		$star = (userCan($row->user_id, 'do_everything')) ? $__FM_CONFIG['icons']['star'] : null;
 		$template_user = ($row->user_template_only == 'yes') ? $__FM_CONFIG['icons']['template_user'] : null;
 		
 		$last_login = ($row->user_last_login == 0) ? 'Never' : date("F d, Y \a\\t H:i T", $row->user_last_login);
 		if ($row->user_ipaddr) {
 			$user_ipaddr = (verifyIPAddress($row->user_ipaddr) !== false) ? @gethostbyaddr($row->user_ipaddr) : $row->user_ipaddr;
 		} else $user_ipaddr = 'None';
-		$super_admin_status = ($row->user_perms & PERM_FM_SUPER_ADMIN) ? 'yes' : 'no';
+		$super_admin_status = (userCan($row->user_id, 'do_everything')) ? 'yes' : 'no';
 		
 		if ($row->user_auth_type == 2) {
 			$user_auth_type = 'LDAP';
@@ -382,8 +293,8 @@ HTML;
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function printUsersForm($data = '', $action = 'add', $form_bits = array(), $button_text = 'Save', $button_id = 'submit', $action_page = 'admin-users', $print_form_head = true) {
-		global $__FM_CONFIG, $fm_name, $fm_login, $super_admin;
+	function printUsersForm($data = '', $action = 'add', $form_bits = array(), $button_text = 'Save', $button_id = 'submit', $action_page = 'admin-users.php', $print_form_head = true) {
+		global $__FM_CONFIG, $fm_name, $fm_login;
 
 		$user_id = 0;
 		$user_login = $user_password = $cpassword = null;
@@ -392,7 +303,7 @@ HTML;
 		$button_disabled = null;
 		$user_email = $user_module_form = $user_default_module = null;
 		$hidden = $user_form = $user_perm_form = $email_form = $user_options_form = $verbose_form = null;
-		$user_perms = $user_force_pwd_change = $password_form = $user_template_only = null;
+		$user_force_pwd_change = $password_form = $user_template_only = null;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -495,23 +406,20 @@ FORM_ROW;
 		
 		do if (in_array('user_perms', $form_bits)) {
 			/** Cannot edit perms of super-admin if logged in user is not a super-admin */
-			if (($user_perms & PERM_FM_SUPER_ADMIN) && !$super_admin) break;
+			if ((userCan($user_id, 'do_everything')) && !currentUserCan('do_everything')) break;
 			
-			/** Disable all perms if logged in user is super-admin editing self */
-			$disabled = ($user_id == $_SESSION['user']['id'] && $super_admin) ? 'disabled' : null;
-			
-			$all_constants = get_defined_constants(true);
 			$fm_perm_boxes = $perm_boxes = null;
 			$i = 1;
-			/** Process facileManager permissions */
-			foreach ($all_constants['user'] as $key => $value) {
-				if (preg_match('/^PERM_FM_/', $key)) {
-					$fm_perm_name = ucwords(strtolower(str_replace('_', ' ', str_replace('PERM_FM_', '', $key))));
-					$checked = ($user_perms & $value) ? 'checked' : null;
-					$fm_perm_boxes .= ' <input name="fm_perm[' . $fm_name . '][' . $value . ']" id="fm_perm_' . $value . '" type="checkbox" ' . $checked . ' ' . $disabled . '/> <label for="fm_perm_' . $value . '">' . $fm_perm_name . '</label>' . "\n";
-					if ($i == 3) $fm_perm_boxes .= "<br />\n";
-					$i++;
+			$fm_user_caps = getOption('fm_user_caps');
+			foreach ($fm_user_caps[$fm_name] as $key => $title) {
+				$checked = (userCan($user_id, $key)) ? 'checked' : null;
+				$fm_perm_boxes .= ' <input name="user_caps[' . $fm_name . '][' . $key . ']" id="fm_perm_' . $key . '" type="checkbox" value="1" ' . $checked . '/> <label for="fm_perm_' . $key . '">' . $title . '</label>' . "\n";
+				/** Display checkboxes three per row */
+				if ($i == 3) {
+					$fm_perm_boxes .= "<br />\n";
+					$i = 0;
 				}
+				$i++;
 			}
 			if (!empty($fm_perm_boxes)) {
 				$perm_boxes .= <<<PERM
@@ -529,25 +437,17 @@ PERM;
 			$active_modules = getActiveModules();
 			foreach ($active_modules as $module_name) {
 				$module_perm_boxes = null;
-				/** Get available module variables */
-				$module_var_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'variables.inc.php';
-				if (file_exists($module_var_file)) {
-					include($module_var_file);
-					$all_constants = get_defined_constants(true);
-					$user_module_perms = $user_id ? $fm_login->getModulePerms($user_id, $module_name, true) : 0;
-					
-					$j = 1;
-					foreach ($all_constants['user'] as $key => $value) {
-						if (preg_match('/^PERM_' . strtoupper($__FM_CONFIG[$module_name]['prefix']) . '/', $key) || preg_match('/^PERM_MODULE_/', $key)) {
-							$module_perm_name = ucwords(strtolower(str_replace('_', ' ', str_replace('PERM_' . strtoupper($__FM_CONFIG[$module_name]['prefix']), '', str_replace('PERM_MODULE_', '', $key)))));
-							$checked = ($user_module_perms['perm_value'] & $value) ? 'checked' : null;
-							if ($module_perm_name == 'Access Denied') {
-								$module_perm_name = '<b>' . $module_perm_name . '</b>';
-							}
-							$module_perm_boxes .= ' <input name="fm_perm[' . $module_name . '][' . $value . ']" id="fm_' . $__FM_CONFIG[$module_name]['prefix'] . 'perm_' . $value . '" type="checkbox" ' . $checked . '/> <label for="fm_' . $__FM_CONFIG[$module_name]['prefix'] . 'perm_' . $value . '">' . $module_perm_name . '</label>' . "\n";
-							if ($j == 3) $module_perm_boxes .= "<br />\n";
-							$j++;
+				$i = 1;
+				if (array_key_exists($module_name, $fm_user_caps)) {
+					foreach ($fm_user_caps[$module_name] as $key => $title) {
+						$checked = (userCan($user_id, $key, $module_name)) ? 'checked' : null;
+						$module_perm_boxes .= ' <input name="user_caps[' . $module_name . '][' . $key . ']" id="fm_perm_' . $module_name . '_' . $key . '" type="checkbox" value="1" ' . $checked . '/> <label for="fm_perm_' . $module_name . '_' . $key . '">' . $title . '</label>' . "\n";
+						/** Display checkboxes three per row */
+						if ($i == 3) {
+							$module_perm_boxes .= "<br />\n";
+							$i = 0;
 						}
+						$i++;
 					}
 					$module_extra_functions = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'functions.extra.php';
 					if (file_exists($module_extra_functions)) {
@@ -555,10 +455,12 @@ PERM;
 
 						$function = 'print' . $module_name . 'UsersForm';
 						if (function_exists($function)) {
-							$module_perm_boxes .= $function($user_module_perms['perm_extra'], $module_name);
+							$module_perm_boxes .= $function(getUserCapabilities($user_id), $module_name);
 						}
 					}
 				}
+				
+				
 				if (!empty($module_perm_boxes)) {
 					$perm_boxes .= <<<PERM
 					<tr id="userperms">
@@ -584,6 +486,7 @@ PERM;
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
 		$return_form .= <<<FORM
 			<div class="leftbox">
+			<form id="fm_user_profile">
 			<input type="hidden" name="action" value="$action" />
 			$hidden
 			<table class="form-table" width="495px">
@@ -596,6 +499,7 @@ PERM;
 			$verbose_form
 			$user_perm_form
 			</table>
+			</form>
 			<p>
 				<input type="submit" id="$button_id" name="submit" value="$button_text" class="button" $button_disabled />
 				<input type="button" value="Cancel" class="button" id="cancel_button" />

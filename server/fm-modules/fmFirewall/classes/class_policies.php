@@ -26,26 +26,27 @@ class fm_module_policies {
 	 * Displays the policy list
 	 */
 	function rows($result, $type) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
+		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="policies">There are no firewall policies.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
 							'name' => 'policies'
 						);
-			if ($allowed_to_manage_servers && $fmdb->num_rows > 1) $table_info['class'] .= ' grab';
+			if (currentUserCan('manage_servers', $_SESSION['module']) && $fmdb->num_rows > 1) $table_info['class'] .= ' grab';
 
 			$title_array = array(array('class' => 'header-tiny'), 'Source', 'Destination', 'Service', 'Interface',
 									'Direction', 'Time', array('title' => 'Comment', 'style' => 'width: 20%;'));
-			if ($allowed_to_manage_servers) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x], $type);
 			}
@@ -234,13 +235,13 @@ HTML;
 
 
 	function displayRow($row, $type) {
-		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = $edit_actions = null;
 		
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 //			$edit_status = '<a id="plus" href="#" title="Add New" name="' . $type . '">' . $__FM_CONFIG['icons']['add'] . '</a>';
 			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->policy_id . '&status=';
@@ -249,9 +250,8 @@ HTML;
 			$edit_status .= ($row->policy_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
-		
-		$edit_status = $edit_actions . $edit_status;
 		
 		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action'][$row->policy_status]) : null;
 		$action = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_status]);
@@ -275,7 +275,7 @@ HTML;
 			<td>$row->policy_direction</td>
 			<td>$policy_time</td>
 			<td>$row->policy_comment</td>
-			<td id="edit_delete_img">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;

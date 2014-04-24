@@ -30,7 +30,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.
 
 if (is_array($_POST) && count($_POST)) {
 	if (isset($_POST['action']) && $_POST['action'] == 'build') {
-		if (!$allowed_to_build_configs) {
+		if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
 			exit('<p class="error">You are not authorized to build server configs.</p>');
 		}
 		$server_serial_no = getNameFromID($_POST['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');

@@ -295,7 +295,7 @@ function processAccountSetup($link, $database) {
 	$pass = sanitize($_POST['user_password']);
 	$email = sanitize($_POST['user_email']);
 	
-	$query = "INSERT INTO $database.fm_users (user_login, user_password, user_email, user_perms, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', 1, '{$_SERVER['REMOTE_ADDR']}', 'active')";
+	$query = "INSERT INTO $database.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
 	$result = mysql_query($query, $link) or die(mysql_error());
 	
 	addLogEntry("Installer created user '$user'", $fm_name, $link);

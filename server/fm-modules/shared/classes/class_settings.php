@@ -25,9 +25,9 @@ class fm_module_settings {
 	 * Saves the options
 	 */
 	function save() {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_module_settings;
+		global $fmdb, $__FM_CONFIG;
 		
-		if (!$allowed_to_manage_module_settings) return 'You do not have permission to make these changes.';
+		if (!currentUserCan('manage_settings', $_SESSION['module'])) return 'You do not have permission to make these changes.';
 		
 		$exclude = array('save', 'item_type');
 		
@@ -104,9 +104,9 @@ class fm_module_settings {
 	 * Displays the form to modify options
 	 */
 	function printForm() {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_module_settings;
+		global $fmdb, $__FM_CONFIG;
 		
-		$save_button = $allowed_to_manage_module_settings ? '<input type="submit" name="save" id="save_module_settings" value="Save" class="button" />' : null;
+		$save_button = currentUserCan('manage_settings', $_SESSION['module']) ? '<input type="submit" name="save" id="save_module_settings" value="Save" class="button" />' : null;
 		
 		$query = "SELECT * FROM fm_options WHERE account_id={$_SESSION['user']['account_id']} AND module_name='{$_SESSION['module']}'";
 		$fmdb->get_results($query);

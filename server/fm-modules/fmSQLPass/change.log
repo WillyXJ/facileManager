@@ -5,6 +5,7 @@
 * Server - [security] Fixed an issue where unpriviledged users could save module
            settings.
 * Server - Moved module options into fM options table.
+* Server - Uses new fM user capabilities backend.
 
 1.0-b7 (2014-03-24)
 ===================

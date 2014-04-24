@@ -37,7 +37,7 @@ if (getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_policies.php');
 
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
@@ -79,7 +79,7 @@ $avail_types = buildSubMenu($type, $server_serial_no);
 
 $response = $form_data = $action = null;
 
-echo printPageHeader($response, 'Firewall Policy', $allowed_to_manage_servers, $type);
+echo printPageHeader($response, 'Firewall Policy', currentUserCan('manage_servers', $_SESSION['module']), $type);
 //echo "$avail_types\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_type='$type'");

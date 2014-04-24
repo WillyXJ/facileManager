@@ -27,6 +27,8 @@
  *
  */
 
+if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+
 /** Module Version */
 $__FM_CONFIG['fmSQLPass']['version']				= '1.0-b8';
 $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords across a server farm running multiple database server types.
@@ -73,10 +75,5 @@ $__FM_CONFIG['fmSQLPass']['default']['ports'] = array('MySQL' => 3306,
 													'PostgreSQL' => 5432,
 													'MSSQL' => 1433
 												);
-
-/** Module Permissions */
-if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
-	include(dirname(__FILE__) . '/permissions.inc.php');
-}
 
 ?>

@@ -26,11 +26,14 @@ class fm_module_time {
 	 * Displays the time list
 	 */
 	function rows($result) {
-		global $fmdb, $allowed_to_manage_time;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="time">There are no time restrictions defined.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -38,12 +41,10 @@ class fm_module_time {
 						);
 
 			$title_array = array('Restriction Name', 'Date Range', 'Time', 'Weekdays', array('title' => 'Comment', 'style' => 'width: 30%;'));
-			if ($allowed_to_manage_time) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_time', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
@@ -161,13 +162,13 @@ class fm_module_time {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_time;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->time_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = null;
 		
-		if ($allowed_to_manage_time) {
+		if (currentUserCan('manage_time', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->time_id . '&status=';
 			$edit_status .= ($row->time_status == 'active') ? 'disabled' : 'active';

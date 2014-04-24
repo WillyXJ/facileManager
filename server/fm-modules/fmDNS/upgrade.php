@@ -646,6 +646,45 @@ TABLE;
 	}
 	$fmdb->query("DROP TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");
 	if (!$fmdb->result || $fmdb->sql_errors) return false;
+	
+	$fm_user_caps = getOption('fm_user_caps');
+	
+	/** Update user capabilities */
+	$fm_user_caps['fmDNS'] = array(
+			'do_nothing'			=> '<b>Access Denied</b>',
+			'manage_servers'		=> 'Server Management',
+			'build_server_configs'	=> 'Build Server Configs',
+			'manage_zones'			=> 'Zone Management',
+			'manage_records'		=> 'Record Management',
+			'reload_zones'			=> 'Reload Zones',
+			'manage_settings'		=> 'Manage Settings'
+		);
+	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+	
+	$fmdb->get_results("SELECT * FROM `fm_users`");
+	if ($fmdb->num_rows) {
+		$count = $fmdb->num_rows;
+		$result = $fmdb->last_result;
+		for ($i=0; $i<$count; $i++) {
+			$user_caps = null;
+			/** Update user capabilities */
+			$j = 1;
+			$temp_caps = null;
+			foreach ($fm_user_caps['fmDNS'] as $slug => $trash) {
+				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
+				if (array_key_exists('fmDNS', $user_caps)) {
+					if ($j & $user_caps['fmDNS']['imported_perms']) $temp_caps['fmDNS'][$slug] = 1;
+					$j = $j*2 ;
+				}
+			}
+			if (@array_key_exists('fmDNS', $temp_caps)) $user_caps['fmDNS'] = array_merge($temp_caps['fmDNS'], $user_caps['fmDNS']);
+			if (@array_key_exists('zone_access', $user_caps['fmDNS'])) $user_caps['fmDNS']['access_specific_zones'] = $user_caps['fmDNS']['zone_access'];
+			unset($user_caps['fmDNS']['imported_perms'], $user_caps['fmDNS']['zone_access']);
+			
+			$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+			if (!$fmdb->result) return false;
+		}
+	}
 
 	if (!setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
 		

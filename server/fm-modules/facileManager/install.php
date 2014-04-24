@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_users` (
   `user_email` varchar(255) NOT NULL,
   `user_default_module` varchar(255) DEFAULT NULL,
   `user_auth_type` int(1) NOT NULL DEFAULT '1',
-  `user_perms` int(10) NOT NULL DEFAULT '0',
+  `user_caps` text,
   `user_last_login` int(10) NOT NULL DEFAULT '0',
   `user_ipaddr` varchar(255) DEFAULT NULL,
   `user_force_pwd_change` enum('yes','no') NOT NULL DEFAULT 'no',

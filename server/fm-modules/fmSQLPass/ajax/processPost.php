@@ -35,13 +35,13 @@ if (!function_exists('returnUnAuth')) {
 
 /** Handle password changes */
 if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'set_mysql_password') {
-	if (!$allowed_to_manage_passwords) returnUnAuth(true);
+	if (!currentUserCan('manage_passwords', $_SESSION['module'])) returnUnAuth(true);
 
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_passwords.php');
 	echo $fm_sqlpass_passwords->setPassword();
 
 /** Handle everything else */
-} elseif (is_array($_POST) && count($_POST) && ($allowed_to_manage_servers || $allowed_to_manage_backups)) {
+} elseif (is_array($_POST) && count($_POST) && (currentUserCan('manage_servers', $_SESSION['module']) || $allowed_to_manage_backups)) {
 	$table = 'sqlpass_' . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
@@ -73,7 +73,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 			}
 			break;
 		case 'edit':
-			if (!empty($_POST) && $allowed_to_manage_servers) {
+			if (!empty($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 				if (!$post_class->update($_POST)) {
 					$response = '<div class="error"><p>This ' . $item_type . ' could not be updated.</p></div>'. "\n";
 					$form_data = $_POST;

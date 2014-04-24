@@ -26,11 +26,14 @@ class fm_module_groups {
 	 * Displays the group list
 	 */
 	function rows($result, $type) {
-		global $fmdb, $allowed_to_manage_services;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="groups">There are no groups defined.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -38,12 +41,10 @@ class fm_module_groups {
 						);
 
 			$title_array = array('Group Name', $type . 's', array('title' => 'Comment', 'style' => 'width: 40%;'));
-			if ($allowed_to_manage_services) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
@@ -57,8 +58,6 @@ class fm_module_groups {
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
-		echo '<pre>';
-		print_r($post);
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -156,7 +155,7 @@ class fm_module_groups {
 
 
 	function displayRow($row) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_services;
+		global $fmdb, $__FM_CONFIG;
 		
 		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
 		

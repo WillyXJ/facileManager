@@ -55,7 +55,7 @@ function moduleFunctionalCheck() {
  * @subpackage fmDNS
  */
 function buildModuleDashboard() {
-	global $fmdb, $__FM_CONFIG, $allowed_to_manage_zones;
+	global $fmdb, $__FM_CONFIG;
 
 	$dashboard = $errors = null;
 	
@@ -82,12 +82,12 @@ function buildModuleDashboard() {
 		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 			$domain_results[$i]->domain_type == 'master') {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
-			if ($allowed_to_manage_zones) $errors .= '&record_type=SOA';
+			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=SOA';
 			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have a SOA defined.' . "\n";
 		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 			$domain_results[$i]->domain_type == 'master') {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
-			if ($allowed_to_manage_zones) $errors .= '&record_type=NS';
+			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=NS';
 			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have any NS records defined.' . "\n";
 		} elseif ($domain_results[$i]->domain_reload != 'no') {
 			$errors .= '<a href="' . $__FM_CONFIG['menu']['Zones'][ucfirst($domain_results[$i]->domain_mapping)] . '"><b>' . $domain_results[$i]->domain_name . '</b></a> needs to be reloaded.' . "\n";

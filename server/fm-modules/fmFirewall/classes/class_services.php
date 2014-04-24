@@ -26,11 +26,14 @@ class fm_module_services {
 	 * Displays the service list
 	 */
 	function rows($result, $type) {
-		global $fmdb, $allowed_to_manage_services;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="services">There are no ' . strtoupper($type) . ' services defined.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -38,12 +41,10 @@ class fm_module_services {
 						);
 
 			$title_array = ($type == 'icmp') ? array('Service Name', 'ICMP Type', 'ICMP Code', 'Comment') : array('Service Name', 'Source Ports', 'Dest Ports', 'Flags', 'Comment');
-			if ($allowed_to_manage_services) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
@@ -154,13 +155,13 @@ class fm_module_services {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_services, $allowed_to_build_configs;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->service_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = null;
 		
-		if ($allowed_to_manage_services) {
+		if (currentUserCan('manage_services', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->service_id, 'service')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';

@@ -11,6 +11,8 @@
 * Server - Help file links now open in the parent window instead of the popup.
 * Server - Created error page template.
 * Server - Added support for module options in fM options table.
+* Server - Redesigned how user capabilities are handled which also supports
+           user changes without the need for reauthentication.
 * Server - [bug] New user creations would not save the defined default module.
 * Server - Built-in users can edit more of their profile information.
 
