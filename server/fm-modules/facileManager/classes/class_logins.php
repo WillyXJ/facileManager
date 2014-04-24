@@ -452,7 +452,7 @@ BODY;
 		/** Upgrade compatibility */
 		if (getOption('fm_db_version') < 31) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
-		$modules = getActiveModules(true);
+		$modules = @getActiveModules(true);
 		if (@in_array($user->user_default_module, $modules)) {
 			$_SESSION['module'] = $user->user_default_module;
 		} else {

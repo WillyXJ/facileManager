@@ -633,7 +633,11 @@ TABLE;
 	}
 	
 	/** Force rebuild of server configs for Issue #75 */
-	setBuildUpdateConfigFlag(null, 'yes', 'build');
+	$current_module = $_SESSION['module'];
+	$_SESSION['module'] = 'fmDNS';
+	setBuildUpdateConfigFlag(null, 'yes', 'build', $__FM_CONFIG);
+	$_SESSION['module'] = $current_module;
+	unset($current_module);
 	
 	/** Move module options */
 	$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");

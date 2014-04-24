@@ -32,7 +32,7 @@
  * @package facileManager
  */
 
-ini_set('memory_limit', '26M');
+//ini_set('memory_limit', '26M');
 
 /** Define ABSPATH as this files directory */
 if (!defined('ABSPATH')) define('ABSPATH', dirname(__FILE__) . '/');
@@ -99,8 +99,8 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			$user_login = sanitize($_POST['username']);
 			$user_pass  = sanitize($_POST['password']);
 			
+			$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
 			if ($_POST['is_ajax']) {
-				$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
 				if (is_array($logged_in)) {
 					list($reset_key, $user_login) = $logged_in;
 					echo "password_reset.php?key=$reset_key&login=$user_login";
@@ -108,8 +108,8 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 					echo 'failed';
 				} else echo $_SERVER['REQUEST_URI'];
 			} else {
-				if (!$fm_login->checkPassword($user_login, $user_pass, false)) $fm_login->printLoginForm();
-				else header('Location: ' . $GLOBALS['RELPATH']);
+				if (!$logged_in) $fm_login->printLoginForm();
+				else header('Location: ' . $_SERVER['REQUEST_URI']);
 			}
 			
 			exit;
