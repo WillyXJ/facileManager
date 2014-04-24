@@ -75,7 +75,7 @@ if (isset($create) && is_array($create)) {
 			$fm_dns_records->add($domain_id, $record_type, $data);
 			
 			/** Are we auto-creating a PTR record? */
-			if ($record_type == 'A' && isset($data['PTR'])) {
+			if ($record_type == 'A' && isset($data['PTR']) && currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $data['PTR']))) {
 				$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
 				if ($data['record_name'][0] == '@') {
 					$data['record_name'] = null;
@@ -120,7 +120,6 @@ if (isset($create) && is_array($create)) {
 }
 
 if (isset($record_type) && !isset($import_records)) {
-	if ($record_type == 'AAAA') $record_type = 'A';
 	header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);
 } else header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);
 

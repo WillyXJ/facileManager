@@ -36,6 +36,8 @@
 * Server - Moved module options into fM options table.
 * Server - Added server client upgrade status to the dashboard.
 * Server - Uses new fM user capabilities backend.
+* Server - [security] Fixed issue where users could automatically add PTR records
+           into zones without having proper rights.
 
 1.1.3 (2014-04-15)
 ==================
