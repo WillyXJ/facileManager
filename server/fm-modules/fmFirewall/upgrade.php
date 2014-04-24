@@ -94,12 +94,12 @@ function upgradefmFirewall_0105($__FM_CONFIG, $running_version) {
 	
 	/** Update user capabilities */
 	$fm_user_caps['fmFirewall'] = array(
-				'do_nothing'			=> '<b>Access Denied</b>',
-				'manage_servers'		=> 'Server Management',
-				'build_server_configs'	=> 'Build Server Configs',
-				'manage_objects'		=> 'Object Management',
-				'manage_services'		=> 'Service Management',
-				'manage_time'			=> 'Time Management'
+			'read_only'				=> '<b>Read Only</b>',
+			'manage_servers'		=> 'Server Management',
+			'build_server_configs'	=> 'Build Server Configs',
+			'manage_objects'		=> 'Object Management',
+			'manage_services'		=> 'Service Management',
+			'manage_time'			=> 'Time Management'
 		);
 	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
 	
@@ -114,9 +114,15 @@ function upgradefmFirewall_0105($__FM_CONFIG, $running_version) {
 			$temp_caps = null;
 			foreach ($fm_user_caps['fmFirewall'] as $slug => $trash) {
 				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
-				if (array_key_exists('fmFirewall', $user_caps)) {
-					if ($j & $user_caps['fmFirewall']['imported_perms']) $temp_caps['fmFirewall'][$slug] = 1;
-					$j = $j*2 ;
+				if (@array_key_exists('fmFirewall', $user_caps)) {
+					if ($user_caps['fmFirewall']['imported_perms'] == 0) {
+						$temp_caps['fmFirewall']['read_only'] = 1;
+					} else {
+						if ($j & $user_caps['fmFirewall']['imported_perms'] && $j > 1) $temp_caps['fmFirewall'][$slug] = 1;
+						$j = $j*2 ;
+					}
+				} else {
+					$temp_caps['fmFirewall']['read_only'] = $user_caps['fmFirewall']['read_only'] = 1;
 				}
 			}
 			if (@array_key_exists('fmFirewall', $temp_caps)) $user_caps['fmFirewall'] = array_merge($temp_caps['fmFirewall'], $user_caps['fmFirewall']);

@@ -105,6 +105,13 @@ class fm_users {
 				$user_caps = array($fm_name => array('do_everything' => 1));
 			}
 		}
+		if (isset($user_caps)) {
+			foreach ($user_caps as $module => $caps_array) {
+				if (array_key_exists('read_only', $caps_array)) {
+					$user_caps[$module] = array('read_only' => 1);
+				}
+			}
+		}
 		
 		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_email`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
 				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
@@ -178,7 +185,14 @@ class fm_users {
 				$post['user_caps'] = array($fm_name => array('do_everything' => 1));
 			}
 		}
-		if (isset($post['user_caps'])) $sql .= ",user_caps='" . serialize($post['user_caps']) . "'";
+		if (isset($post['user_caps'])) {
+			foreach ($post['user_caps'] as $module => $caps_array) {
+				if (array_key_exists('read_only', $caps_array)) {
+					$post['user_caps'][$module] = array('read_only' => 1);
+				}
+			}
+			$sql .= ",user_caps='" . serialize($post['user_caps']) . "'";
+		}
 		
 		// Update the user
 		$query = "UPDATE `fm_users` SET $sql WHERE `user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
@@ -189,7 +203,7 @@ class fm_users {
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($post['user_login']);
 		
-		addLogEntry("Updated user '$user_login'.");
+		addLogEntry("Updated user '{$post['user_login']}'.");
 		
 		return true;
 	}

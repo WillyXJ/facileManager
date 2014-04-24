@@ -268,7 +268,6 @@ HTML;
 			foreach ($modules as $module_name) {
 				if ($module_name == $_SESSION['module']) continue;
 				if (in_array($module_name, getActiveModules(true))) {
-//					if (currentUserCan('do_nothing', $_SESSION['module'])) continue;
 					$avail_modules .= "<li class='last'><a href='{$GLOBALS['RELPATH']}?module=$module_name'><span>$module_name</span></a></li>\n";
 				}
 			}
@@ -1233,9 +1232,10 @@ function getActiveModules($allowed_modules = false) {
 			return $modules;
 		}
 		
+		$user_capabilities = getUserCapabilities($_SESSION['user']['id']);
 		$excluded_modules = array();
 		foreach ($modules as $module_name) {
-			if (currentUserCan('do_nothing', $module_name))	$excluded_modules[] = $module_name;
+			if (!array_key_exists($module_name, $user_capabilities) && !currentUserCan('do_everything')) $excluded_modules[] = $module_name;
 		}
 		return array_merge(array_diff($modules, $excluded_modules), array());
 	} else {
@@ -1856,8 +1856,10 @@ function printPageHeader($response, $title, $allowed_to_add = false, $name = nul
  * @param integer $domain_id Domain ID to update DNS servers for
  * @return boolean
  */
-function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update) {
-	global $fmdb, $__FM_CONFIG, $fm_dns_zones;
+function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM_CONFIG = null) {
+	global $fmdb, $fm_dns_zones;
+	
+	if (!$__FM_CONFIG) global $__FM_CONFIG;
 	
 	$serial_no = sanitize($serial_no);
 	if ($serial_no) {
@@ -2156,12 +2158,10 @@ function userCan($user_id, $capability, $module = 'facileManager', $extra_perm =
 	$user_capabilities = getUserCapabilities($user_id);
 	
 	/** Check if super admin */
-	if ($capability != 'do_nothing') {
-		if (@array_key_exists('do_everything', $user_capabilities[$fm_name])) return true;
+	if (@array_key_exists('do_everything', $user_capabilities[$fm_name])) return true;
 		
-		/** If no authentication then return full access */
-		if (!getOption('auth_method')) return true;
-	}
+	/** If no authentication then return full access */
+	if (!getOption('auth_method')) return true;
 	
 	/** Check user capability */
 	if (@array_key_exists($capability, $user_capabilities[$module])) {

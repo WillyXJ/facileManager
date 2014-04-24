@@ -442,7 +442,7 @@ function fmUpgrade_120($database) {
 		
 		/** Update user capabilities */
 		$fm_user_caps[$fm_name] = array(
-				'do_everything'		=> 'Super Admin',
+				'do_everything'		=> '<b>Super Admin</b>',
 				'manage_modules'	=> 'Module Management',
 				'manage_users'		=> 'User Management',
 				'run_tools'			=> 'Run Tools',
