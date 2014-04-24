@@ -900,13 +900,24 @@ HTML;
 		$result = $fmdb->query($query);
 	}
 	
-	function availableZones($include_clones = false, $zone_type = null) {
+	function availableZones($include_clones = false, $zone_type = null, $restricted = false) {
 		global $fmdb, $__FM_CONFIG;
+		
+		/** Get restricted zones only */
+		$restricted_sql = null;
+		if ($restricted && !currentUserCan('do_everything')) {
+			$user_capabilities = getUserCapabilities($_SESSION['user']['id']);
+			if (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']])) {
+				if (!in_array(0, $user_capabilities[$_SESSION['module']]['access_specific_zones'])) {
+					$restricted_sql = "AND domain_id IN ('" . implode("','", $user_capabilities[$_SESSION['module']]['access_specific_zones']) . "')";
+				}
+			}
+		}
 		
 		$include_clones_sql = $include_clones ? null : "AND domain_clone_domain_id=0";
 		$zone_type_sql = $zone_type ? "AND domain_type='$zone_type'" : null;
 		
-		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_clones_sql $zone_type_sql ORDER BY domain_name ASC";
+		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_clones_sql $zone_type_sql $restricted_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;

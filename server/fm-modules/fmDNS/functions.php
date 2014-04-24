@@ -645,4 +645,18 @@ function setDefaultOverrideOptions() {
 }
 
 
+/**
+ * Sets default override configuration options based on OS distro
+ *
+ * @since 1.2
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function removeRestrictedRR($rr) {
+	global $__FM_CONFIG;
+	
+	return (!in_array($rr, $__FM_CONFIG['records']['require_zone_rights']) || currentUserCan('manage_zones', $_SESSION['module'])) ? true : false;
+}
+
+
 ?>
