@@ -11,6 +11,7 @@
 * Server - Help file links now open in the parent window instead of the popup.
 * Server - Created error page template.
 * Server - Added support for module options in fM options table.
+* Server - [bug] New user creations would not save the defined default module.
 
 1.1.2 (2014-04-03)
 ==================

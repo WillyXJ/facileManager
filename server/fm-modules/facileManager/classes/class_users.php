@@ -111,8 +111,8 @@ class fm_users {
 			}
 		}
 		
-		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_email`, `user_force_pwd_change`, `user_perms`, `user_template_only`, `user_status`, `user_auth_type`) 
-				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_force_pwd_change', $user_perms, '$user_template_only', '$user_status', $user_auth_type)";
+		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_email`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
+				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
 		$result = $fmdb->query($query);
 		
 		if (!$result) return 'Could not add the user to the database.';
