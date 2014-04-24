@@ -58,6 +58,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	if (!defined('INSTALL') && !defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 		
+		/** Handle special cases with config.inc.php */
+		handleHiddenFlags();
+	
 		/** Enforce SSL if applicable */
 		if (getOption('fm_db_version') >= 23 && getOption('enforce_ssl')) {
 			if (!isSiteSecure()) {

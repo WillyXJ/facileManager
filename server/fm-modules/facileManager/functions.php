@@ -2204,4 +2204,21 @@ function getUserCapabilities($user_id) {
 }
 
 
+/**
+ * Handles features defined in config.inc.php
+ *
+ * @since 1.2
+ * @package facileManager
+ */
+function handleHiddenFlags() {
+	global $fm_name;
+	
+	/** Recover authentication in case of lockout */
+	if (defined('FM_NO_AUTH') && FM_NO_AUTH) {
+		setOption('auth_method', 0);
+		@addLogEntry('Manually reset authentication method.', $fm_name);
+	}
+}
+
+
 ?>
