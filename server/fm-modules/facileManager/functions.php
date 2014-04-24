@@ -1285,7 +1285,7 @@ REMOVE;
 	$fmdb->query($query);
 	$count = $fmdb->num_rows;
 	$result = $fmdb->last_result;
-	for ($i=0; $i<=$count, $i++) {
+	for ($i=0; $i<=$count; $i++) {
 		$current_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
 		if (array_key_exists($module, $current_caps)) {
 			unset($current_caps[$module]);
