@@ -39,7 +39,7 @@ $fm_name = 'facileManager';
 $GLOBALS['REQUEST_PROTOCOL'] = isSiteSecure() ? 'https' : 'http';
 $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'] . $GLOBALS['RELPATH'];
 
-if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Styled break in menu listing */
 $__FM_CONFIG['menu']['Break'][]				= null;

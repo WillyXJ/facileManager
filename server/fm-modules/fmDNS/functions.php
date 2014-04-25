@@ -137,8 +137,8 @@ DASH;
 function buildModuleToolbar() {
 	global $__FM_CONFIG, $fmdb;
 	
-	if (isset($_GET['domain_id'])) {
-		$domain = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+	if (isset($_REQUEST['domain_id'])) {
+		$domain = getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 		$domain_menu = <<<HTML
 		<div id="topheadpart">
 			<span class="single_line">Domain:&nbsp;&nbsp; $domain</span>
@@ -528,45 +528,51 @@ function reloadAllowed($domain_id = null) {
  *
  * @return boolean
  */
-function getModuleBadgeCounts() {
+function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
 	
-	/** Zones */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
-	$domain_count = $fmdb->num_rows;
-	$domain_results = $fmdb->last_result;
-	for ($i=0; $i<$domain_count; $i++) {
-		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-			$domain_results[$i]->domain_type == 'master') {
-			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
-		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-			$domain_results[$i]->domain_type == 'master') {
-			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
-		} elseif ($domain_results[$i]->domain_reload != 'no') {
-			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
+	if ($type == 'zones') {
+		$badge_counts = array('forward' => 0, 'reverse' => 0);
+		
+		/** Zones */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
+		$domain_count = $fmdb->num_rows;
+		$domain_results = $fmdb->last_result;
+		for ($i=0; $i<$domain_count; $i++) {
+			if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+				$domain_results[$i]->domain_type == 'master') {
+				$badge_counts[$domain_results[$i]->domain_mapping]++;
+			} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+				$domain_results[$i]->domain_type == 'master') {
+				$badge_counts[$domain_results[$i]->domain_mapping]++;
+			} elseif ($domain_results[$i]->domain_reload != 'no') {
+				$badge_counts[$domain_results[$i]->domain_mapping]++;
+			}
 		}
-	}
-	
-	/** Servers */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
-	$server_count = $fmdb->num_rows;
-	$server_results = $fmdb->last_result;
-	for ($i=0; $i<$server_count; $i++) {
-		$server_builds[] = $server_results[$i]->server_name;
-	}
-	if (version_compare(getOption('version', 0, $_SESSION['module']), '1.1', '>=')) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+		unset($domain_results, $domain_count);
+	} elseif ($type == 'servers') {
+		$badge_counts = null;
+		
+		/** Servers */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
 		$server_count = $fmdb->num_rows;
 		$server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {
 			$server_builds[] = $server_results[$i]->server_name;
 		}
-	}
-	
-	$servers = array_unique($server_builds);
-	
-	for ($i=0; $i<count($servers); $i++) {
-		$badge_counts['Config']['Servers']++;
+		if (version_compare(getOption('version', 0, $_SESSION['module']), '1.1', '>=')) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+			$server_count = $fmdb->num_rows;
+			$server_results = $fmdb->last_result;
+			for ($i=0; $i<$server_count; $i++) {
+				$server_builds[] = $server_results[$i]->server_name;
+			}
+		}
+		
+		$servers = array_unique($server_builds);
+		$badge_counts = count($servers);
+		
+		unset($server_builds, $servers, $server_count, $server_results);
 	}
 	
 	return $badge_counts;
@@ -656,6 +662,33 @@ function removeRestrictedRR($rr) {
 	global $__FM_CONFIG;
 	
 	return (!in_array($rr, $__FM_CONFIG['records']['require_zone_rights']) || currentUserCan('manage_zones', $_SESSION['module'])) ? true : false;
+}
+
+
+/**
+ * Adds the module menu items
+ *
+ * @since 1.2
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function buildModuleMenu() {
+	$badge_counts = getModuleBadgeCounts('zones');
+	addObjectPage('Zones', 'Zones', null, $_SESSION['module'], 'zones.php');
+		addSubmenuPage('zones.php', 'Forward', 'Forward Zones', null, $_SESSION['module'], 'zones-forward.php', null, null, $badge_counts['forward']);
+		addSubmenuPage('zones.php', 'Reverse', 'Reverse Zones', null, $_SESSION['module'], 'zones-reverse.php', null, null, $badge_counts['reverse']);
+		addSubmenuPage('zones.php', null, 'Records', null, $_SESSION['module'], 'zone-records.php');
+		addSubmenuPage('zones.php', null, 'Record Validation', null, $_SESSION['module'], 'zone-records-validate.php');
+	
+	addObjectPage('Config', 'Name Servers', null, $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Servers', 'Name Servers', null, $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
+		addSubmenuPage('config-servers.php', 'Views', 'Views', null, $_SESSION['module'], 'config-views.php');
+		addSubmenuPage('config-servers.php', 'ACLs', 'Access Control Lists', null, $_SESSION['module'], 'config-acls.php');
+		addSubmenuPage('config-servers.php', 'Keys', 'Keys', null, $_SESSION['module'], 'config-keys.php');
+		addSubmenuPage('config-servers.php', 'Options', 'Options', null, $_SESSION['module'], 'config-options.php');
+		addSubmenuPage('config-servers.php', 'Logging', 'Logging', null, $_SESSION['module'], 'config-logging.php');
+
+	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', 'manage_settings', $_SESSION['module'], 'module-settings.php');
 }
 
 

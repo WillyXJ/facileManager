@@ -23,9 +23,6 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Options';
-
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
 
 $option_type = $display_option_type = $display_option_type_sql = (isset($_GET['option_type'])) ? sanitize(ucfirst($_GET['option_type'])) : 'Global';
@@ -99,12 +96,12 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, $display_option_type . ' Options', currentUserCan('manage_servers', $_SESSION['module']), $view_id);
+echo printPageHeader($response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $view_id);
 echo "$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no=$server_serial_no");

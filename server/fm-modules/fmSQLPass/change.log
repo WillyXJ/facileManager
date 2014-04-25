@@ -6,6 +6,7 @@
            settings.
 * Server - Moved module options into fM options table.
 * Server - Uses new fM user capabilities backend.
+* Server - Uses new fM menu platform.
 
 1.0-b7 (2014-03-24)
 ===================

@@ -23,9 +23,6 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Views';
-
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_views.php');
 
 $view_option = (isset($_GET['view_option'])) ? ucfirst($_GET['view_option']) : 'Views';
@@ -80,12 +77,12 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, 'Views', currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 echo "$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND server_serial_no=$server_serial_no");

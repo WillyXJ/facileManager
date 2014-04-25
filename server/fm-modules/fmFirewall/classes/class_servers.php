@@ -235,7 +235,7 @@ class fm_module_servers {
 			}
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 		}
-		$edit_name = '<a href="config-policy?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>';
+		$edit_name = '<a href="config-policy.php?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>';
 		
 		if (isset($row->server_client_version) && $row->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
 			$edit_actions = 'Client Upgrade Available<br />';

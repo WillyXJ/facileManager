@@ -23,9 +23,6 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Services';
-$page_name_sub = 'Groups';
-
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
 $response = isset($response) ? $response : null;
 
@@ -75,12 +72,12 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-$group_type = substr(strtolower($page_name), 0, -1);
+$group_type = 'service';
 
-echo printPageHeader($response, 'Service Groups', currentUserCan('manage_services', $_SESSION['module']), $group_type);
+echo printPageHeader($response, null, currentUserCan('manage_services', $_SESSION['module']), $group_type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='service'");
 $fm_module_groups->rows($result, $group_type);

@@ -38,33 +38,6 @@ $__FM_CONFIG['fmFirewall']['description']			= 'Managing software firewalls shoul
 $__FM_CONFIG['fmFirewall']['prefix']				= 'fw_';
 $__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.2';
 
-/** Dashboard Menu Options */
-$__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';
-
-/** Firewalls Menu Options */
-$__FM_CONFIG['module']['menu']['Firewalls']['URL']			= 'config-servers';
-
-/** Objects Menu Options */
-$__FM_CONFIG['module']['menu']['Objects']['URL']			= 'object-groups';
-$__FM_CONFIG['module']['menu']['Objects']['Groups']			= 'object-groups';
-$__FM_CONFIG['module']['menu']['Objects']['Hosts']			= 'objects?type=host';
-$__FM_CONFIG['module']['menu']['Objects']['Networks']		= 'objects?type=network';
-
-/** Firewalls Menu Options */
-$__FM_CONFIG['module']['menu']['Services']['URL']			= 'service-groups';
-$__FM_CONFIG['module']['menu']['Services']['Groups']		= 'service-groups';
-$__FM_CONFIG['module']['menu']['Services']['ICMP']			= 'services?type=icmp';
-$__FM_CONFIG['module']['menu']['Services']['TCP']			= 'services?type=tcp';
-$__FM_CONFIG['module']['menu']['Services']['UDP']			= 'services?type=udp';
-
-/** Time Menu Options */
-$__FM_CONFIG['module']['menu']['Time']['URL']				= 'config-time';
-
-/** Settings Menu Options */
-//$__FM_CONFIG['module']['menu']['Settings']['URL']			= 'module-settings';
-
-$__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
-
 /** Images */
 $__FM_CONFIG['module']['icons']['action']['active']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
 $__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action___d.png" border="0" alt="__Action__ (disabled)" title="__Action__ (disabled)" width="12" />';

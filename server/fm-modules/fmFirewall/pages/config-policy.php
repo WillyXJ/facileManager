@@ -26,14 +26,13 @@
 /** Include module variables */
 if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
 
-$page_name = 'Firewalls';
-
+$server_config_page = $GLOBALS['RELPATH'] . $menu[getParentMenuKey()][4];
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'rules';
-$server_serial_no = (isset($_GET['server_serial_no'])) ? sanitize($_GET['server_serial_no']) : header('Location: ' . $__FM_CONFIG['menu'][$page_name]['URL']);
-if (!$server_id = getServerID($server_serial_no, $_SESSION['module'])) header('Location: ' . $__FM_CONFIG['menu'][$page_name]['URL']);
+$server_serial_no = (isset($_GET['server_serial_no'])) ? sanitize($_GET['server_serial_no']) : header('Location: ' . $server_config_page);
+if (!$server_id = getServerID($server_serial_no, $_SESSION['module'])) header('Location: ' . $server_config_page);
 
 /** Should not be here if the client has not been installed */
-if (getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_installed') != 'yes') header('Location: ' . $__FM_CONFIG['menu'][$page_name]['URL']);
+if (getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_installed') != 'yes') header('Location: ' . $server_config_page);
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_policies.php');
 
@@ -72,14 +71,14 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	}
 }
 
-printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $avail_types = buildSubMenu($type, $server_serial_no);
 
 $response = $form_data = $action = null;
 
-echo printPageHeader($response, 'Firewall Policy', currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']), $type);
 //echo "$avail_types\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_type='$type'");

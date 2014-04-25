@@ -23,9 +23,6 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Keys';
-
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
@@ -80,10 +77,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-echo printPageHeader($response, 'Keys', currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name', 'key_');
 $fm_dns_keys->rows($result);

@@ -279,32 +279,62 @@ function isItemInPolicy($id, $type) {
  *
  * @return boolean
  */
-function getModuleBadgeCounts() {
+function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
 	
-	/** Servers */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
-	$server_count = $fmdb->num_rows;
-	$server_results = $fmdb->last_result;
-	for ($i=0; $i<$server_count; $i++) {
-		$server_builds[] = $server_results[$i]->server_name;
-	}
-	if (version_compare(getOption('version', 0, $_SESSION['module']), '1.0-b3', '>=')) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+	if ($type == 'servers') {
+		$badge_counts = null;
+		
+		/** Servers */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
 		$server_count = $fmdb->num_rows;
 		$server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {
 			$server_builds[] = $server_results[$i]->server_name;
 		}
-	}
-	
-	$servers = array_unique($server_builds);
-	
-	for ($i=0; $i<count($servers); $i++) {
-		$badge_counts['Firewalls']['URL']++;
+		if (version_compare(getOption('version', 0, $_SESSION['module']), '1.0-b3', '>=')) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+			$server_count = $fmdb->num_rows;
+			$server_results = $fmdb->last_result;
+			for ($i=0; $i<$server_count; $i++) {
+				$server_builds[] = $server_results[$i]->server_name;
+			}
+		}
+		
+		$servers = array_unique($server_builds);
+		$badge_counts = count($servers);
+		
+		unset($server_builds, $servers, $server_count, $server_results);
 	}
 	
 	return $badge_counts;
 }
+
+
+/**
+ * Adds the module menu items
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ */
+function buildModuleMenu() {
+	addObjectPage('Firewalls', 'Firewall Servers', null, $_SESSION['module'], 'config-servers.php', null, true);
+		addSubmenuPage('config-servers.php', null, 'Firewall Policy', null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
+
+	addObjectPage('Objects', 'Object Groups', 'manage_objects', $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', 'Groups', 'Object Groups', 'manage_objects', $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', 'Hosts', 'Host Objects', 'manage_objects', $_SESSION['module'], 'objects-host.php');
+		addSubmenuPage('object-groups.php', 'Networks', 'Network Objects', 'manage_objects', $_SESSION['module'], 'objects-network.php');
+
+	addObjectPage('Services', 'Service Groups', 'manage_services', $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', 'Groups', 'Service Groups', 'manage_services', $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', 'ICMP', 'ICMP Services', 'manage_services', $_SESSION['module'], 'services-icmp.php');
+		addSubmenuPage('service-groups.php', 'TCP', 'TCP Services', 'manage_services', $_SESSION['module'], 'services-tcp.php');
+		addSubmenuPage('service-groups.php', 'UDP', 'UDP Services', 'manage_services', $_SESSION['module'], 'services-udp.php');
+
+	addObjectPage('Time', 'Time Restrictions', 'manage_time', $_SESSION['module'], 'config-time.php');
+}
+
 
 ?>

@@ -27,12 +27,10 @@
  * will be displayed asking the visitor to set up the
  * config.php file.
  *
- * @internal This file must be parsable by PHP4.
+ * @internal This file must be parsable by PHP5.
  *
  * @package facileManager
  */
-
-//ini_set('memory_limit', '26M');
 
 /** Define ABSPATH as this files directory */
 if (!defined('ABSPATH')) define('ABSPATH', dirname(__FILE__) . '/');
@@ -49,7 +47,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	if (!function_exists('functionalCheck') && is_array($__FM_CONFIG['db'])) {
 		require_once(ABSPATH . 'fm-modules/facileManager/functions.php');
 	} elseif (!function_exists('functionalCheck') && !is_array($__FM_CONFIG['db'])) {
-		// A config file is empty
+		/** A config file is empty */
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 	}
 	
@@ -184,6 +182,11 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 	}
 
+	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
+	
+	/** Build the user menu */
+	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
+
 	/** Include module functions file */
 	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
 		/** Get available module variables */
@@ -197,11 +200,15 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		if (is_file($module_functions_file) && !function_exists('moduleFunctionalCheck')) {
 			include_once($module_functions_file);
 		}
+
+		if (function_exists('buildModuleMenu')) {
+			buildModuleMenu();
+		}
 	}
 
 } else {
 
-	// A config file doesn't exist
+	/** A config file doesn't exist */
 
 	require_once(ABSPATH . 'fm-includes/init.php');
 	require_once(ABSPATH . 'fm-includes/version.php');

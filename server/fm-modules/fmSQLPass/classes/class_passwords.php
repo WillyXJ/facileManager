@@ -31,6 +31,9 @@ class fm_sqlpass_passwords {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no active database server groups.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits'
@@ -44,8 +47,6 @@ class fm_sqlpass_passwords {
 			echo displayTableHeader($table_info, $title_array);
 			echo '<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">' . "\n";
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}

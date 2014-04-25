@@ -26,10 +26,7 @@
 
 $map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
 
-$page_name = 'Zones';
-$page_name_sub = ($map == 'forward') ? 'Forward' : 'Reverse';
-
-$record_type = (isset($_GET['record_type'])) ? strtoupper($_GET['record_type']) : 'A';
+$record_type = (isset($_GET['record_type'])) ? strtoupper($_GET['record_type']) : array_shift(array_values($__FM_CONFIG['records']['common_types']));
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
@@ -41,8 +38,8 @@ if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
 if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 
-printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $html_out_create = $html_out_update = null;
 foreach($_POST as $name => $value) {

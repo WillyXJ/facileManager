@@ -28,10 +28,7 @@ $map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
 /** Include module variables */
 if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
 
-$page_name = 'Zones';
-$page_name_sub = ($map == 'forward') ? 'Forward' : 'Reverse';
-
-$default_record_type = $map == 'forward' ? 'A' : 'PTR';
+$default_record_type = array_shift(array_values($__FM_CONFIG['records']['common_types']));
 if (isset($_GET['record_type'])) {
 	$record_type = strtoupper($_GET['record_type']);
 } else {
@@ -44,8 +41,8 @@ if (!isValidDomain($domain_id)) header('Location: ' . $__FM_CONFIG['menu']['Zone
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $record_type == 'SOA') $record_type = $default_record_type;
 
-printHeader('Records' . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 

@@ -280,5 +280,21 @@ function changePostgreSQLUserPassword($server_name, $server_port, $admin_user, $
 }
 
 
+/**
+ * Adds the module menu items
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmSQLPass
+ */
+function buildModuleMenu() {
+	addObjectPage('Config', 'Database Servers', null, $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Servers', 'Database Servers', null, $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Groups', 'Server Groups', null, $_SESSION['module'], 'config-groups.php');
+		addSubmenuPage('config-servers.php', 'Passwords', 'Passwords', null, $_SESSION['module'], 'config-passwords.php');
+
+	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', 'manage_settings', $_SESSION['module'], 'module-settings.php');
+}
+
 
 ?>

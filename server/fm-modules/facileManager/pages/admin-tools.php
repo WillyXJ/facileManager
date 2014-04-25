@@ -22,8 +22,7 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Admin';
-$page_name_sub = 'Tools';
+if (!currentUserCan('run_tools')) unAuth();
 
 if (!class_exists('fm_tools')) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
@@ -33,8 +32,6 @@ $admin_tools = $output = $block_style = null;
 $response = isset($response) ? $response : null;
 $tools_option = array();
 $import_output = '<p>Processing...</p>';
-
-$disabled = (currentUserCan('run_tools')) ? null : 'disabled';
 
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
@@ -48,14 +45,14 @@ if (array_key_exists('submit', $_POST)) {
 	}
 }
 
-printHeader($page_name_sub);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 if (!empty($response)) echo '<div id="response">' . $response . '</div>';
 echo '<div id="body_container"';
 if (!empty($response)) echo ' style="margin-top: 4em;"';
 
-$backup_button = findProgram('mysqldump') ? '<p class="step"><input id="db-backup" name="submit" type="submit" value="Backup Database" class="button" ' . $disabled . ' /></p>' : '<p>The required mysqldump utility is not found on ' . php_uname('n') . '.</p>';
+$backup_button = findProgram('mysqldump') ? '<p class="step"><input id="db-backup" name="submit" type="submit" value="Backup Database" class="button" /></p>' : '<p>The required mysqldump utility is not found on ' . php_uname('n') . '.</p>';
 
 $tools_option[] = <<<HTML
 			<h2>Backup Database</h2>
@@ -67,7 +64,7 @@ HTML;
 $tools_option[] = <<<HTML
 			<h2>Clean Up Database</h2>
 			<p>You should periodically clean up your database to permanently remove deleted items. Make sure you backup your database first!</p>
-			<p class="step"><input id="db-cleanup" name="submit" type="submit" value="Clean Up Database" class="button" $disabled /></p>
+			<p class="step"><input id="db-cleanup" name="submit" type="submit" value="Clean Up Database" class="button" /></p>
 			<br />
 HTML;
 

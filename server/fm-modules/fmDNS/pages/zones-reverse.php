@@ -14,28 +14,17 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmSQLPass: Change database user passwords across multiple servers.      |
+ | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmsqlpass/                         |
+ | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes password management page                                      |
+ | Processes zone management page                                          |
  | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
-$response = isset($response) ? $response : null;
+$map = 'reverse';
 
-printHeader();
-@printMenu();
-
-include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_passwords.php');
-include(ABSPATH . 'fm-modules/facileManager/classes/class_users.php');
-
-echo printPageHeader($response);
-
-$result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_', 'active');
-$fm_sqlpass_passwords->rows($result);
-
-printFooter();
+include(dirname(__FILE__) . '/zones.php');
 
 ?>

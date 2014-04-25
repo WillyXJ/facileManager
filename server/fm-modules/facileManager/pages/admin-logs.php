@@ -22,11 +22,8 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Admin';
-$page_name_sub = 'Logs';
-
-printHeader($page_name_sub);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $response = isset($response) ? $response : null;
 
@@ -79,7 +76,7 @@ $table_info = array('class' => 'display_results');
 $title_array = array('Timestamp', 'Module', 'User', array('title' => 'Message', 'style' => 'width: 50%;'));
 $header = displayTableHeader($table_info, $title_array);
 
-echo printPageHeader($response, 'Logs');
+echo printPageHeader($response);
 echo <<<HTML
 $pagination
 		<form class="search-form" id="date-range" action="" method="post">

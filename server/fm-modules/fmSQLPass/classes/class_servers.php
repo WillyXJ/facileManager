@@ -31,6 +31,9 @@ class fm_module_servers {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no servers defined.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -42,8 +45,6 @@ class fm_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}

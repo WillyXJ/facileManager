@@ -23,9 +23,6 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Server Groups';
-
 include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_groups.php');
 $response = isset($response) ? $response : null;
 
@@ -69,10 +66,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-echo printPageHeader($response, 'Server Groups', currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_id', 'group_');
 $fm_sqlpass_groups->rows($result);

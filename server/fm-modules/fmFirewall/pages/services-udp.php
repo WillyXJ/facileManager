@@ -14,28 +14,17 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmSQLPass: Change database user passwords across multiple servers.      |
+ | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmsqlpass/                         |
+ | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
- | Processes password management page                                      |
+ | Processes object groups management page                                 |
  | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
-$response = isset($response) ? $response : null;
+$type = 'udp';
 
-printHeader();
-@printMenu();
-
-include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_passwords.php');
-include(ABSPATH . 'fm-modules/facileManager/classes/class_users.php');
-
-echo printPageHeader($response);
-
-$result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_', 'active');
-$fm_sqlpass_passwords->rows($result);
-
-printFooter();
+include(dirname(__FILE__) . '/services.php');
 
 ?>

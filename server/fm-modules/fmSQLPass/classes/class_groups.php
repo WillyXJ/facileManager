@@ -31,6 +31,9 @@ class fm_sqlpass_groups {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="groups">There are no server groups.</p>';
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -42,8 +45,6 @@ class fm_sqlpass_groups {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}

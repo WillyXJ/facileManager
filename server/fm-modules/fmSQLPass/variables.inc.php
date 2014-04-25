@@ -37,20 +37,6 @@ $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords acr
 $__FM_CONFIG['fmSQLPass']['prefix']					= 'sqlpass_';
 $__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.2';
 
-/** Dashboard Menu Options */
-$__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';
-
-/** Config Menu Options */
-$__FM_CONFIG['module']['menu']['Config']['URL']				= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Servers']			= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Server Groups']	= 'config-groups';
-$__FM_CONFIG['module']['menu']['Config']['Passwords']		= 'config-passwords';
-
-$__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
-
-/** Settings Menu Options */
-$__FM_CONFIG['menu']['Settings']['fmSQLPass']	= 'module-settings.php';
-
 /** Default values */
 $pwd_strength_desc = null;
 foreach ($__FM_CONFIG['password_hint'] as $strength => $desc) {

@@ -44,8 +44,6 @@ if (is_array($GLOBALS)) {
 	if (@array_key_exists('logout', $GLOBALS['URI'])) exit;
 }
 
-$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
-
 if ($GLOBALS['basename'] == 'index.php') {
 	require_once(ABSPATH . 'fm-includes/init.php');
 	checkAppVersions();

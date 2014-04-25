@@ -152,12 +152,17 @@ function sanitize($data, $replace = null) {
  * @since 1.0
  * @package facileManager
  */
-function printHeader($subtitle = null, $css = 'facileManager', $help = false, $menu = true) {
+function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, $menu = true) {
 	global $fm_name, $__FM_CONFIG;
 	
 	include(ABSPATH . 'fm-includes/version.php');
 	
-	$title = ($subtitle) ? "$subtitle &lsaquo; " : null;
+	$title = $fm_name;
+	
+	if (!empty($subtitle)) {
+		if ($subtitle == 'auto') $subtitle = getPageTitle();
+		$title = "$subtitle &lsaquo; $title";
+	}
 	
 	$head = $logo = null;
 	
@@ -182,7 +187,7 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>$title$fm_name</title>
+		<title>$title</title>
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
@@ -346,81 +351,89 @@ HTML;
  * @since 1.0
  * @package facileManager
  */
-function printMenu($page_name, $page_name_sub) {
-	global $__FM_CONFIG;
+function printMenu() {
+	global $__FM_CONFIG, $menu, $submenu;
 	
-	$main_menu_html = $sub_menu_html = $domain = null;
+	$main_menu_html = null;
 	
-	/** Get badge counts */
-	$badge_array = getBadgeCounts();
+	list($filtered_menu, $filtered_submenu) = getCurrentUserMenu();
+	ksort($filtered_menu);
+	ksort($filtered_submenu);
 	
-	if (count($__FM_CONFIG['menu']['Settings']) > 1) {
-		$temp_menu['General'] = $temp_menu['URL'] = $__FM_CONFIG['menu']['Settings']['URL'];
-		foreach ($__FM_CONFIG['menu']['Settings'] as $item => $link) {
-			if ($item == 'URL') continue;
-			$temp_menu[$item] = $link;
-		}
-		$__FM_CONFIG['menu']['Settings'] = $temp_menu;
-		unset($temp_menu);
-	}
-
-	foreach ($__FM_CONFIG['menu'] as $top_menu => $sub_menu) {
-		if ($top_menu == 'Break' && $main_menu_html == null) continue;
+	foreach ($filtered_menu as $position => $main_menu_array) {
+		$sub_menu_html = '</li>';
+		$show_top_badge_count = true;
 		
-		$class = ($page_name == $top_menu) ? ' class="current"' : null;
-		
-		$arrow = (!empty($class)) ? '<div class="arrow current"></div>' : '<div class="arrow"></div>';
-		
-		if ((empty($class) || count($sub_menu) <= 1) && array_key_exists($top_menu, $badge_array)) {
-			$badge = '<span class="menu_badge';
-			if (!empty($class) && count($sub_menu) <= 1) $badge .= ' badge_top_selected';
-			$badge .= '"><p>' . array_sum($badge_array[$top_menu]) . '</p></span>';
-		} else {
-			$badge = null;
+		list($menu_title, $page_title, $capability, $module, $slug, $class, $badge_count) = $main_menu_array;
+		if (!is_array($class)) {
+			$class = !empty($class) ? array_fill(0, 1, $class) : array();
 		}
 		
-		$sub_menu_html = null;
-
-		/** Handle the styled break */
-		if ($top_menu == 'Break') {
-			$main_menu_html .= '<li><div class="separator"></div></li>' . "\n";
-		} else {
-			if (empty($class) && count($sub_menu) > 1) {
-				$main_menu_html .= '<li class="has-sub"><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . $top_menu . $badge . '</a>' . "\n";
-				unset($sub_menu['URL']);
-				foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
-					$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count badge_top_selected"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
-					$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . $sub_menu_name . $sub_badge . '</a></li>' . "\n";
-				}
-				$main_menu_html .= <<<HTML
-				<div class="arrow $class"></div>
-				<ul>
-$sub_menu_html
-
-				</ul>
-</li>
-
-HTML;
-			} else {
-				$main_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . $top_menu . $badge . '</a>' . $arrow . '</li>' . "\n";
-				if ($top_menu == $page_name) {
-					unset($sub_menu['URL']);
-					foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
-						$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : null;
-						$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
-						
-						$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . $sub_menu_name . $sub_badge . '</a></li>' . "\n";
+		/** Check if menu item is current page */
+		if ($slug == findTopLevelMenuSlug($filtered_submenu)) {
+			array_push($class, 'current', 'arrow');
+			
+			if (array_key_exists($slug, $filtered_submenu)) {
+				$show_top_badge_count = false;
+				$k = 0;
+				foreach ($filtered_submenu[$slug] as $submenu_array) {
+					if (!empty($submenu_array[0])) {
+						$submenu_class = ($submenu_array[4] == $GLOBALS['basename']) ? ' class="current"' : null;
+						if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
+						$sub_menu_html .= sprintf('<li%s><a href="%s">%s</a></li>' . "\n", $submenu_class, $submenu_array[4], $submenu_array[0]);
+					} elseif (!$k) {
+						$show_top_badge_count = true;
 					}
-					$main_menu_html .= <<<HTML
+					$k++;
+				}
+				
+				$sub_menu_html = <<<HTML
+					</li>
 					<div id="submenu">
 						<div id="subitems">
 							<ul>
-$sub_menu_html
+							$sub_menu_html
 							</ul>
 						</div>
 					</div>
 HTML;
+			}
+		}
+		
+		/** Build submenus */
+		if (!count($class) && count($filtered_submenu[$slug]) > 1) {
+			array_push($class, 'has-sub');
+			foreach ($filtered_submenu[$slug] as $submenu_array) {
+				if (!empty($submenu_array[0])) {
+					if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
+					$sub_menu_html .= sprintf('<li><a href="%s">%s</a></li>' . "\n", $submenu_array[4], $submenu_array[0]);
 				}
+			}
+			
+			$sub_menu_html = <<<HTML
+				<div class="arrow"></div>
+				<ul>
+				$sub_menu_html
+				</ul>
+</li>
+
+HTML;
+		}
+		
+		$arrow = (in_array('arrow', $class)) ? '<u></u>' : null;
+		
+		/** Join all of the classes */
+		if (count($class)) $class = ' class="' . implode(' ', $class) . '"';
+		else $class = null;
+		
+		if (empty($slug) && !empty($class)) {
+			/** Ideally this should be the separator */
+			$main_menu_html .= '<li' . $class . '></li>' . "\n";
+		} else {
+			/** Display the menu item if allowed */
+			if (currentUserCan($capability, $module)) {
+				if ($badge_count && $show_top_badge_count) $menu_title = sprintf($menu_title . ' <span class="menu_badge"><p>%d</p></span>', $badge_count);
+				$main_menu_html .= sprintf('<li%s><a href="%s">%s</a>%s%s' . "\n", $class, $slug, $menu_title, $arrow, $sub_menu_html);
 			}
 		}
 	}
@@ -438,35 +451,82 @@ $main_menu_html
 MENU;
 }
 
+
 /**
- * Handles the config pages
+ * Removes non-permitted menu items
  *
- * @since 1.0
+ * @since 1.2
  * @package facileManager
+ *
+ * @param array $element Menu array to check.
+ * @return bool
  */
-function outputConfig($config = 'users') {
-	if (empty($config)) $config = 'users';
-	$action = (isset($_GET['action'])) ? $_GET['action'] : 'add';
-	include(ABSPATH . 'fm-includes/class_' . $config . '.php');
-	
-	if ($config == 'users') {
-	?>
+function filterMenu($element) {
+	return currentUserCan($element[2], $element[3]);
+}
 
-	<div id="body_container">
-		<h2>Users</h2>
-		<div id="response"><?php if (!empty($response)) echo $response; else echo '<br />'; ?></div>
-		<?php
-		$result = basic_get_list('fm_users', 'user_id', 'user_');
-		$fm_users->rows($result);
-		?>
-		<br /><br />
-		<a name="#manage"></a>
-		<h2><?php echo ucfirst($action); ?> User</h2>
-		<?php $fm_users->print_users_form($form_data, $action); ?>
-	</div>
 
-	<?php
+/**
+ * Finds the top level menu for selection
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param array $menu_array Menu array to search.
+ * @return string
+ */
+function findTopLevelMenuSlug($menu_array) {
+	foreach ($menu_array as $slug => $menu_items) {
+		foreach ($menu_items as $element) {
+			if (array_search($GLOBALS['basename'], $element, true)) {
+				return $slug;
+			}
+		}
 	}
+	
+	return $GLOBALS['basename'];
+}
+
+
+/**
+ * Gets the user menu based on capabilities
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return array
+ */
+function getCurrentUserMenu() {
+	global $menu, $submenu;
+	
+	$filtered_menus = array(null, null);
+	
+	/** Submenus */
+	foreach ($submenu as $slug => $submenu_array) {
+		ksort($submenu_array);
+		$filtered_menus[1][$slug] = array_filter($submenu_array, 'filterMenu');
+	}
+	
+	/** Main menu */
+	$temp_menu = $menu;
+	foreach ($menu as $position => $element) {
+		list($menu_title, $page_title, $capability, $module, $slug, $class) = $element;
+		if (array_key_exists($slug, $filtered_menus[1])) {
+			if (count($filtered_menus[1][$slug]) == 1) {
+				$single_element = array_values($filtered_menus[1][$slug]);
+				if (!empty($single_element[0][0])) {
+					$temp_menu[$position] = array_shift($filtered_menus[1][$slug]);
+					if (isset($element[7]) && $element[7]) $temp_menu[$position][0] = $menu_title;
+				}
+			}
+		}
+	}
+	
+	$filtered_menus[0] = array_filter($temp_menu, 'filterMenu');
+	
+	unset($temp_menu, $element, $submenu_array, $slug, $position, $single_element);
+
+	return $filtered_menus;
 }
 
 
@@ -1827,13 +1887,15 @@ function setOSIcon($server_os) {
  * @param string $server_os Server OS to return the icon for
  * @return string
  */
-function printPageHeader($response, $title, $allowed_to_add = false, $name = null) {
+function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null) {
 	global $__FM_CONFIG;
+	
+	if (empty($title)) $title = getPageTitle();
 	
 	echo '<div id="body_container">' . "\n";
 	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
 	else echo '<div id="response" style="display: none;"></div>' . "\n";
-	echo "<h2>$title";
+	echo '<h2>' . $title;
 	
 	if ($allowed_to_add) {
 		if ($name) $name = ' name="' . $name . '"';
@@ -1906,42 +1968,29 @@ function setTimezone() {
  *
  * @return array
  */
-function getBadgeCounts() {
+function getBadgeCounts($type) {
 	global $fm_name;
 	
-	$badge_count = array();
+	$badge_count = 0;
 	
-	/** Get fM badge counts */
-	$modules = getAvailableModules();
-	foreach ($modules as $module_name) {
-		/** Include module variables */
-		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
-		
-		/** Upgrades waiting */
-		$module_version = getOption('version', 0, $module_name);
-		if ($module_version !== false) {
-			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
-				$badge_count['Modules']['URL']++;
-				continue;
+	if ($type == 'modules') {
+		/** Get fM badge counts */
+		$modules = getAvailableModules();
+		foreach ($modules as $module_name) {
+			/** Include module variables */
+			@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+			
+			/** Upgrades waiting */
+			$module_version = getOption('version', 0, $module_name);
+			if ($module_version !== false) {
+				if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
+					$badge_count++;
+					continue;
+				}
 			}
-		}
-		
-		/** New versions available */
-		if (isNewVersionAvailable($module_name, $module_version)) $badge_count['Modules']['URL']++;
-	}
-	
-	$module_badge_count = null;
-	/** Get module badge counts */
-	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
-		$functions_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'functions.php';
-		if (is_file($functions_file)) {
-			if (!function_exists('moduleFunctionalCheck')) {
-				@include($functions_file);
-			}
-			if (function_exists('getModuleBadgeCounts')) {
-				$module_badge_count = getModuleBadgeCounts();
-			}
-			if (count($module_badge_count)) $badge_count = array_merge($badge_count, $module_badge_count);
+			
+			/** New versions available */
+			if (isNewVersionAvailable($module_name, $module_version)) $badge_count++;
 		}
 	}
 	
@@ -2102,10 +2151,10 @@ function formatLogKeyData($strip, $key, $data) {
 function displayErrorPage($message = 'An unknown error occurred.', $show_page_back_link = true) {
 	global $fm_name;
 	
-	printHeader('Error', 'error', false, false);
+	printHeader('Error', 'install', false, false);
 	
 	echo '<p>' . $message . '</p>';
-	if ($show_page_back_link) echo '<p><a href="javascript:history.back();">&laquo; Back</a></p>';
+	if ($show_page_back_link) echo '<p><a href="javascript:history.back();">&larr; Back</a></p>';
 	
 	exit;
 }
@@ -2183,6 +2232,8 @@ function userCan($user_id, $capability, $module = 'facileManager', $extra_perm =
 		return true;
 	}
 	
+	if ($capability === null) return true;
+	
 	return false;
 }
 
@@ -2218,6 +2269,220 @@ function handleHiddenFlags() {
 		setOption('auth_method', 0);
 		@addLogEntry('Manually reset authentication method.', $fm_name);
 	}
+}
+
+
+/**
+ * Adds a menu item
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param bool $sticky Whether or not to keep the menu title when there's only one submenu item or to take on the submenu item title
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $sticky = false, $position = null, $badge_count = 0) {
+	global $menu;
+	
+	$new_menu = array($menu_title, $page_title, $capability, $module, $menu_slug, $class, $badge_count, $sticky);
+	
+	if ($position === null) {
+		$menu[] = $new_menu;
+	} else {
+		$menu[$position] = $new_menu;
+	}
+}
+
+
+/**
+ * Adds a menu item under the objects section
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param bool $sticky Whether or not to keep the menu title when there's only one submenu item or to take on the submenu item title
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addObjectPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $sticky = false, $badge_count = 0) {
+	global $_fm_last_object_menu;
+	
+	$_fm_last_object_menu++;
+	
+	addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class, $sticky, $_fm_last_object_menu, $badge_count);
+}
+
+
+/**
+ * Adds a submenu item
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $parent_slug The slug name for the parent menu
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $position = null, $badge_count = 0) {
+	global $submenu;
+	
+	$new_menu = array($menu_title, $page_title, $capability, $module, $menu_slug, $class, $badge_count);
+	
+	if ($position === null) {
+		$submenu[$parent_slug][] = $new_menu;
+	} else {
+		$submenu[$parent_slug][$position] = $new_menu;
+	}
+	
+	/** Update parent menu badge count */
+	if ($badge_count > 1) {
+		global $menu;
+		
+		$parent_menu_key = getParentMenuKey($parent_slug);
+		if ($parent_menu_key !== false) {
+			$menu[$parent_menu_key][6] += $badge_count;
+		}
+	}
+}
+
+
+/**
+ * Adds a submenu item to the Dashboard menu
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addDashboardPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
+	addSubmenuPage('index.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
+}
+
+
+/**
+ * Adds a submenu item to the Admin menu
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addAdminPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
+	addSubmenuPage('admin-tools.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
+}
+
+
+/**
+ * Adds a submenu item to the Settings menu
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addSettingsPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
+	addSubmenuPage('admin-settings.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
+}
+
+
+/**
+ * Gets the page title from the menu item
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return string|bool
+ */
+function getPageTitle() {
+	global $menu, $submenu;
+	
+	/** Search submenus first */
+	foreach ($submenu as $slug => $submenu_items) {
+		foreach ($submenu_items as $element) {
+			if (array_search($GLOBALS['basename'], $element, true) !== false) {
+				return $element[1];
+			}
+		}
+	}
+	
+	/** Search menus */
+	foreach ($menu as $position => $menu_items) {
+		if (array_search($GLOBALS['basename'], $menu_items, true) !== false) {
+			return $menu[$position][1];
+		}
+	}
+	
+	return false;
+}
+
+
+/**
+ * Returns the top level menu key
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return integer|bool Returns the badge count or false if the menu item is not found
+ */
+function getParentMenuKey($search_slug = null) {
+	global $menu, $submenu;
+	
+	if (!$search_slug) $search_slug = $GLOBALS['basename'];
+	
+	foreach ($menu as $position => $menu_items) {
+		if ($parent_key = array_search($search_slug, $menu_items, true)) {
+			return $position;
+		}
+	}
+	
+	foreach ($submenu as $parent_slug => $menu_items) {
+		foreach ($menu_items as $element) {
+			if (array_search($search_slug, $element, true) !== false) {
+				return getParentMenuKey($parent_slug);
+			}
+		}
+	}
+	
+	return false;
 }
 
 

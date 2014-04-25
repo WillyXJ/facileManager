@@ -22,7 +22,7 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Modules';
+if (!currentUserCan('manage_modules')) unAuth();
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 
@@ -49,8 +49,8 @@ if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
 require(ABSPATH . 'fm-includes/version.php');
 $fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version);
 
-printHeader($page_name);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 echo '<div id="body_container">';
 if (!empty($response) || !empty($fm_new_version_available)) echo '<div id="response">' . $fm_new_version_available . '<p>' . $response . '</p></div>';
@@ -79,39 +79,31 @@ HTML;
 		$module_version = getOption('version', 0, $module_name);
 		if ($module_version !== false) {
 			if (in_array($module_name, getActiveModules())) {
-				if (currentUserCan('manage_modules')) {
-					$activate_link = '<a href="?action=deactivate&module=' . $module_name . '">Deactivate</a>' . "\n";
-				}
+				$activate_link = '<a href="?action=deactivate&module=' . $module_name . '">Deactivate</a>' . "\n";
 				$class[] = 'active';
 			}
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
 				if (!in_array($module_name, getActiveModules())) {
-					if (currentUserCan('manage_modules')) {
-						$activate_link = '<span class="activate_link"><a href="?action=activate&module=' . $module_name . '">Activate</a></span>' . "\n" . $uninstall_link;
-					}
+					$activate_link = '<span class="activate_link"><a href="?action=activate&module=' . $module_name . '">Activate</a></span>' . "\n" . $uninstall_link;
 				}
 			} else {
-				if (currentUserCan('manage_modules')) {
-					include(ABSPATH . 'fm-includes/version.php');
-					if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-						$upgrade_link = '<span class="upgrade_link"><a href="#" id="module_upgrade" name="' . $module_name . '" />Upgrade Now</a></span>' . "\n";
-					} else {
-						$upgrade_link .= '<span class="upgrade_link">' . $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required<br />before this module can be upgraded.</span>';
-					}
-					$activate_link = $uninstall_link;
-				} else $upgrade_link = '<span class="upgrade_link">Upgrade available</span>' . "\n";
+				include(ABSPATH . 'fm-includes/version.php');
+				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
+					$upgrade_link = '<span class="upgrade_link"><a href="#" id="module_upgrade" name="' . $module_name . '" />Upgrade Now</a></span>' . "\n";
+				} else {
+					$upgrade_link .= '<span class="upgrade_link">' . $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required<br />before this module can be upgraded.</span>';
+				}
+				$activate_link = $uninstall_link;
 				$class[] = 'upgrade';
 			}
 			$status_options = $activate_link . "\n";
 		} else {
 			$module_version = $__FM_CONFIG[$module_name]['version'];
-			if (currentUserCan('manage_modules')) {
-				include(ABSPATH . 'fm-includes/version.php');
-				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-					$status_options .= '<a href="#" id="module_install" name="' . $module_name . '" />Install Now</a>';
-				} else {
-					$status_options .= $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required.';
-				}
+			include(ABSPATH . 'fm-includes/version.php');
+			if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
+				$status_options .= '<a href="#" id="module_install" name="' . $module_name . '" />Install Now</a>';
+			} else {
+				$status_options .= $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required.';
 			}
 		}
 		
@@ -141,15 +133,14 @@ HTML;
 	$module_display .= '<p>If you don\'t have any modules, you can download them from the <a href="http://www.facilemanager.com/modules/">module directory</a>.</p>' . "\n";
 }
 
-echo <<<HTML
+echo '
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="">
-			<h2>Module Configuration</h2>
-			$module_display
+			<h2>' . getPageTitle() . '</h2>
+			' . $module_display . '
 		</form>
 	</div>
-</div>
-HTML;
+</div>' . "\n";
 
 printFooter($output);
 
