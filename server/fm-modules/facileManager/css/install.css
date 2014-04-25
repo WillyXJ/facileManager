@@ -10,8 +10,9 @@ body {
 	background-position: 6em 2.3em;
 	color: #333;
 	font-family: "Open Sans",sans-serif;
+	font-size: 13px;
 	margin: 5em auto;
-	padding: 12.8em 2em 1em;
+	padding: 14.8em 2em 1.7em;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	border: 1px solid #dfdfdf;
@@ -24,8 +25,12 @@ body {
 
 p {
 	padding-bottom: 2px;
-	font-size: 14px;
 	line-height: 1.5;
+}
+
+a {
+	text-decoration: none;
+	color: #a0a0a0;
 }
 
 code {
@@ -155,13 +160,11 @@ strong {
 
 
 #forgotton_link a {
-	color: #a0a0a0;
 	font-size: 8pt;
-	text-decoration: none;
 }
 
 #message p {
-	margin: -1em 0 -.5em 0;
+	margin: 0 0 -.5em 0;
 }
 
 #install_module_list {
