@@ -2148,7 +2148,7 @@ function formatLogKeyData($strip, $key, $data) {
  * @param boolean $show_page_back_link Whether or not to show the page back link
  * @return string
  */
-function displayErrorPage($message = 'An unknown error occurred.', $show_page_back_link = true) {
+function fMDie($message = 'An unknown error occurred.', $show_page_back_link = true) {
 	global $fm_name;
 	
 	printHeader('Error', 'install', false, false);
@@ -2169,7 +2169,7 @@ function displayErrorPage($message = 'An unknown error occurred.', $show_page_ba
  * @return string
  */
 function unAuth() {
-	displayErrorPage('You do not have permission to view this page. Please contact your administrator for access.');
+	fMDie('You do not have permission to view this page. Please contact your administrator for access.');
 }
 
 
@@ -2483,6 +2483,39 @@ function getParentMenuKey($search_slug = null) {
 	}
 	
 	return false;
+}
+
+
+/**
+ * Checks if max_input_vars has been exceeded
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return integer|bool Returns the number of input vars required or false if not exceeded
+ */
+function hasExceededMaxInputVars() {
+	$max_input_vars = ini_get('max_input_vars') + 1;
+	if ($max_input_vars == false) return false;
+	
+	$php_input = substr_count(file_get_contents('php://input'), '&');
+	
+	return $php_input > $max_input_vars ? $php_input : false;
+}
+
+
+/**
+ * Checks if max_input_vars has been exceeded
+ *
+ * @since 1.2
+ * @package facileManager
+ */
+function checkMaxInputVars() {
+	if ($required_input_vars = hasExceededMaxInputVars()) {
+		fMDie('PHP max_input_vars (' . ini_get('max_input_vars') . ') has been reached and ' . $required_input_vars . ' or more are required. Please 
+			increase the limit to fulfill this request. One method is to set the following in ' . ABSPATH . '.htaccess:
+			<p><code>php_value max_input_vars ' . $required_input_vars . '</code></p>', true);
+	}
 }
 
 

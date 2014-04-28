@@ -33,6 +33,10 @@ if (array_key_exists('cancel', $_POST)) {
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
 if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
+
+/** Make sure we can handle all of the variables */
+checkMaxInputVars();
+
 extract($_POST);
 
 /** Should the user be here? */

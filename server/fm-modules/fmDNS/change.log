@@ -41,6 +41,9 @@
 * Server - [security] Fixed issue where users could automatically add PTR records
            into zones without having proper rights.
 * Server - Uses new fM menu platform.
+* Server - [bug] Records could not be added or imported due to high number of
+           submitted variables (php max_input_vars).  Added check for usability.
+           (Issue #87)
 
 1.1.3 (2014-04-15)
 ==================

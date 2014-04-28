@@ -21,6 +21,7 @@
            an error.
 * Server - Redesigned menuing platform for more flexibility.  This includes
            hiding menu items to users without proper access.
+* Server - Added functions to check for php max_input_vars.
 
 1.1.2 (2014-04-03)
 ==================
