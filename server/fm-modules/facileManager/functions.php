@@ -975,6 +975,9 @@ function buildHelpFile() {
 	
 	/** facileManager help */
 	$body = <<<HTML
+<div id="issue_tracker">
+	<p>Have an idea for a new feature?  Find a bug?  Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
+</div>
 <h3>$fm_name</h3>
 <ul>
 	<li>
@@ -1110,7 +1113,7 @@ HTML;
 		}
 	}
 
-	return $body;
+	return $body . '<br />';
 }
 
 

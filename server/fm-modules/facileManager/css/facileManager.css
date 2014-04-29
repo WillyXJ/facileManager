@@ -1262,6 +1262,26 @@ pre {
 	padding: 5px 6px 5px 2em;
 }
 
+#issue_tracker {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	padding: 10px;
+	color: #ccc;
+	text-align: center;
+	background: #fff;
+	width: 100%;
+}
+#issue_tracker a {
+	color: #999;
+}
+#help #issue_tracker {
+	position: absolute;
+	width: auto;
+	padding-top: 5px;
+	padding-bottom: 20px;
+}
+
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
 }
