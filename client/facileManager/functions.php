@@ -135,7 +135,7 @@ if (!socketTest($server_path['hostname'], $port, 20)) {
 
 /** Run the upgrader */
 if (in_array('upgrade', $argv)) {
-	upgradeFM($proto . '://' . FMHOST . 'admin-servers?upgrade', $data);
+	upgradeFM($proto . '://' . FMHOST . 'admin-servers.php?upgrade', $data);
 }
 
 
@@ -341,7 +341,7 @@ function upgradeFM($url, $data) {
 	
 	/** Download latest core files */
 	echo fM("Downloading ");
-	$core_file = 'facilemanager-core-latest.tar.gz';
+	$core_file = 'facilemanager-core-' . $latest_module_version . '.tar.gz';
 	downloadfMFile($core_file);
 	
 	/** Download latest module files */
@@ -1041,7 +1041,7 @@ function downloadfMFile($file, $module = false) {
 		CURLOPT_RETURNTRANSFER	=> 1,
 		CURLOPT_FOLLOWLOCATION	=> true
 	);
-	curl_setopt_array($ch, $options);
+	@curl_setopt_array($ch, $options);
 	$result = curl_exec($ch);
 	if ($result === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
 		$message = "Unable to download file.\n";

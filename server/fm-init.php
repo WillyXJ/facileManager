@@ -56,6 +56,8 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 	$GLOBALS['URI'] = convertURIToArray();
 
+	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
+		
 	if (!defined('INSTALL') && !defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 		
@@ -181,14 +183,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 		
 		$page = isset($_GET['p']) ? intval($_GET['p']) : 1;
+		
+		/** Build the user menu */
+		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 	} elseif (defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 	}
-
-	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
-	
-	/** Build the user menu */
-	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 
 	/** Include module functions file */
 	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
@@ -204,8 +204,10 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			include_once($module_functions_file);
 		}
 
-		if (function_exists('buildModuleMenu')) {
-			buildModuleMenu();
+		if (!defined('CLIENT') && !defined('INSTALL') && !defined('UPGRADE')) {
+			if (function_exists('buildModuleMenu')) {
+				buildModuleMenu();
+			}
 		}
 	}
 
