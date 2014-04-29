@@ -1976,24 +1976,26 @@ function getBadgeCounts($type) {
 	
 	$badge_count = 0;
 	
-	if ($type == 'modules') {
-		/** Get fM badge counts */
-		$modules = getAvailableModules();
-		foreach ($modules as $module_name) {
-			/** Include module variables */
-			@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
-			
-			/** Upgrades waiting */
-			$module_version = getOption('version', 0, $module_name);
-			if ($module_version !== false) {
-				if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
-					$badge_count++;
-					continue;
+	if (!defined('INSTALL') && !defined('UPGRADE')) {
+		if ($type == 'modules') {
+			/** Get fM badge counts */
+			$modules = getAvailableModules();
+			foreach ($modules as $module_name) {
+				/** Include module variables */
+				@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+				
+				/** Upgrades waiting */
+				$module_version = getOption('version', 0, $module_name);
+				if ($module_version !== false) {
+					if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
+						$badge_count++;
+						continue;
+					}
 				}
+				
+				/** New versions available */
+				if (isNewVersionAvailable($module_name, $module_version)) $badge_count++;
 			}
-			
-			/** New versions available */
-			if (isNewVersionAvailable($module_name, $module_version)) $badge_count++;
 		}
 	}
 	
@@ -2472,7 +2474,8 @@ function getParentMenuKey($search_slug = null) {
 	if (!$search_slug) $search_slug = $GLOBALS['basename'];
 	
 	foreach ($menu as $position => $menu_items) {
-		if ($parent_key = array_search($search_slug, $menu_items, true)) {
+		$parent_key = array_search($search_slug, $menu_items, true);
+		if ($parent_key !== false) {
 			return $position;
 		}
 	}
