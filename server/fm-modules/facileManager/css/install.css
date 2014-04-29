@@ -7,7 +7,7 @@ body {
 	background: #eff0f0;
 	background-image: url('../images/logo.png');
 	background-repeat: no-repeat;
-	background-position: 10em 2.3em;
+	background-position: 6em 2.3em;
 	color: #333;
 	font-family: "Open Sans",sans-serif;
 	font-size: 13px;
@@ -16,7 +16,7 @@ body {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	border: 1px solid #dfdfdf;
-	max-width: 500px;
+	max-width: 400px;
 	moz-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 20px;
 	-webkit-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 20px;
 	-khtml-box-shadow: rgba(10,10,10,0.4) 0 15px 40px 20px;
@@ -86,7 +86,7 @@ code {
 .form-table input[type=text],
 .form-table input[type=password],
 .form-table input[type=email] {
-	width: 280px;
+	width: 206px;
 	background: #fff;
 }
 
@@ -115,7 +115,7 @@ textarea {
 	border-radius: 3px;
 	font-family: courier;
 	font-size: 9pt;
-	width: 490px;
+	width: 390px;
 }
 
 .success {
@@ -187,7 +187,7 @@ strong {
 	padding: 5px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	width: 275px;
+	width: 200px;
 	text-align: center;
 }
 
