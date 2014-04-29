@@ -1,5 +1,5 @@
-1.2 (2014-04-??)
-================
+1.2-beta1 (2014-04-29)
+======================
 * Server - Improved password strength settings description.
 * Server - Combined general and module settings in one menu.
 * Server - Added file extensions to all redirects and links.

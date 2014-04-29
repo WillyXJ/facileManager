@@ -30,13 +30,13 @@
 if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
-$__FM_CONFIG['fmFirewall']['version']				= '1.0';
-$__FM_CONFIG['fmFirewall']['client_version']		= '1.0';
+$__FM_CONFIG['fmFirewall']['version']				= '1.0-beta5';
+$__FM_CONFIG['fmFirewall']['client_version']		= '1.0-beta5';
 $__FM_CONFIG['fmFirewall']['description']			= 'Managing software firewalls should not be difficult. Manage one or more software firewall
 														servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files
 														individually.';
 $__FM_CONFIG['fmFirewall']['prefix']				= 'fw_';
-$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.2';
+$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.2-beta1';
 
 /** Images */
 $__FM_CONFIG['module']['icons']['action']['active']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';

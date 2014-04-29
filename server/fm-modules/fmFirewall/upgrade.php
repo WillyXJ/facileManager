@@ -30,14 +30,14 @@ function upgradefmFirewallSchema($module) {
 	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-b5', '<') ? upgradefmFirewall_0105($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-beta5', '<') ? upgradefmFirewall_01005($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	return true;
 }
 
 /** 1.0-b3 */
-function upgradefmFirewall_0103($__FM_CONFIG, $running_version) {
+function upgradefmFirewall_01003($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ;";
@@ -71,11 +71,11 @@ function upgradefmFirewall_0103($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 1.0-b5 */
-function upgradefmFirewall_0105($__FM_CONFIG, $running_version) {
+/** 1.0-beta5 */
+function upgradefmFirewall_01005($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
-	$success = version_compare($running_version, '1.0-b3', '<') ? upgradefmFirewall_0103($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-b3', '<') ? upgradefmFirewall_01003($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
 	/** Move module options */

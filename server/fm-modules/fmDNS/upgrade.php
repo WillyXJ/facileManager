@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.2', '<') ? upgradefmDNS_120($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.2-beta1', '<') ? upgradefmDNS_120($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	return true;
@@ -589,7 +589,8 @@ function upgradefmDNS_120($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DHCID',  'DLV',  'DNAME',  'DNSKEY', 'DS',  'HIP',  'IPSECKEY',  'KEY',  'KX',  'MX',  'NAPTR',  'NS',  'NSEC',  'NSEC3',  'NSEC3PARAM',  'PTR',  'RSIG',  'RP',  'SIG',  'SRV',  'SSHFP',  'TA',  'TKEY', 'TLSA',  'TSIG',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
+//	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DHCID',  'DLV',  'DNAME',  'DNSKEY', 'DS',  'HIP',  'IPSECKEY',  'KEY',  'KX',  'MX',  'NAPTR',  'NS',  'NSEC',  'NSEC3',  'NSEC3PARAM',  'PTR',  'RSIG',  'RP',  'SIG',  'SRV',  'SSHFP',  'TA',  'TKEY', 'TLSA',  'TSIG',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_class`  `record_class` ENUM(  'IN',  'CH',  'HS' ) NOT NULL DEFAULT  'IN';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD  `record_os` VARCHAR( 255 ) NULL AFTER  `record_port`,
 ADD  `record_cert_type` TINYINT NULL AFTER  `record_os` ,

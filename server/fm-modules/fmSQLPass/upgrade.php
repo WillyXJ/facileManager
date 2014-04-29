@@ -30,14 +30,14 @@ function upgradefmSQLPassSchema($module) {
 	$running_version = getOption('version', 0, $module);
 
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-b8', '<') ? upgradefmSQLPass_0108($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-beta8', '<') ? upgradefmSQLPass_01008($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	return true;
 }
 
 /** 1.0-b2 */
-function upgradefmSQLPass_0102($__FM_CONFIG, $running_version) {
+function upgradefmSQLPass_01002($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` ADD  `server_port` INT( 5 ) NULL DEFAULT NULL AFTER  `server_type` ;";
@@ -56,10 +56,10 @@ function upgradefmSQLPass_0102($__FM_CONFIG, $running_version) {
 }
 
 /** 1.0-b4 */
-function upgradefmSQLPass_0104($__FM_CONFIG, $running_version) {
+function upgradefmSQLPass_01004($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
-	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_0102($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_01002($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_type`  `server_type` ENUM(  'MySQL',  'PostgreSQL',  'MSSQL' ) NOT NULL ;";
@@ -92,11 +92,11 @@ function upgradefmSQLPass_0104($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 1.0-b8 */
-function upgradefmSQLPass_0108($__FM_CONFIG, $running_version) {
+/** 1.0-beta8 */
+function upgradefmSQLPass_01008($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
-	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_0104($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_01004($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
 	/** Move module options */
