@@ -21,7 +21,6 @@
 * Server - Updated alert messages for misssing SOA and NS records.
 * Server - [bug] Removed non-master zones from the 'clone of' list.
 * Server - [feature] Disabled records now have the proper css class assigned.
-* Server - Updated help file text.
 * Server - [feature] Added support to modify cloned zones. (Issue #65)
 * Server - [bug] Added missing logging of clone zone creations.
 * Server - [bug] Adding cloned zones now requires a server config build.
