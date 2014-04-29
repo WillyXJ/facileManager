@@ -72,7 +72,7 @@ function fmUpgrade_100($database) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 	
@@ -98,7 +98,7 @@ function fmUpgrade_101($database) {
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -256,21 +256,21 @@ INSERT;
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	
 		if (count($updates) && $updates[0] && $success) {
 			foreach ($updates as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -303,7 +303,7 @@ INSERT;
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -329,7 +329,7 @@ function fmUpgrade_106($database) {
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -396,7 +396,7 @@ function fmUpgrade_120($database) {
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	
@@ -417,7 +417,7 @@ function fmUpgrade_120($database) {
 			if (!setOption('version_check', $version_check, 'auto', true, 0, $fm_name)) return false;
 			$query = "DELETE FROM $database.`fm_options` WHERE option_name='{$fm_name}_version_check'";
 			$fmdb->query($query);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 		$modules = getAvailableModules();
 		if (count($modules)) {
@@ -436,7 +436,7 @@ function fmUpgrade_120($database) {
 				}
 				$query = "DELETE FROM $database.`fm_options` WHERE option_name LIKE '{$module_name}%_version%'";
 				$fmdb->query($query);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 		
@@ -463,7 +463,7 @@ function fmUpgrade_120($database) {
 					$j = $j*2 ;
 				}
 				$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 		$fmdb->query("ALTER TABLE `fm_users` DROP `user_perms`;");
@@ -482,9 +482,11 @@ function fmUpgrade_120($database) {
 				$user_caps[$result[$i]->perm_module]['imported_perms'] = $result[$i]->perm_value;
 
 				$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
+		$fmdb->query("DROP TABLE `fm_perms`");
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
 		
 	}
 

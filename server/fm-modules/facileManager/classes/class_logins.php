@@ -573,11 +573,6 @@ BODY;
 					SELECT `account_id`, '$username', '', '', 2, `user_caps` from `fm_users` WHERE `user_id`=" . getOption('ldap_user_template'));
 		if (!$fmdb->rows_affected) return false;
 		
-		/** Attempt to add the new LDAP user permissions to the database based on the template */
-		$fmdb->query("INSERT INTO `fm_perms` (`user_id`,`perm_module`, `perm_value`, `perm_extra`) 
-					SELECT {$fmdb->insert_id}, `perm_module`, `perm_value`, `perm_extra` from `fm_perms` WHERE `user_id`=" . getOption('ldap_user_template'));
-		if (!$fmdb->last_result) return false;
-		
 		/** Get the user results now */
 		$fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=2 AND `user_template_only`='no' AND `user_login`='$username'");
 		if (!$fmdb->num_rows) return false;

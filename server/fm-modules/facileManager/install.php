@@ -227,17 +227,6 @@ CREATE TABLE IF NOT EXISTS $database.`fm_options` (
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_perms` (
-  `perm_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `perm_module` varchar(255) NOT NULL,
-  `perm_value` int(11) NOT NULL,
-  `perm_extra` text,
-  PRIMARY KEY (`perm_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-TABLE;
-
-	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_pwd_resets` (
   `pwd_id` varchar(255) NOT NULL,
   `pwd_login` int(11) NOT NULL,

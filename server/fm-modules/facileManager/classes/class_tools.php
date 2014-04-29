@@ -181,11 +181,6 @@ class fm_tools {
 		$fmdb->query($query);
 		$record_count += $fmdb->rows_affected;
 		
-		/** Remove permissions for deleted users */
-		$query = 'DELETE FROM `fm_perms` WHERE user_id NOT IN (SELECT user_id FROM fm_users)';
-		$fmdb->query($query);
-		$record_count += $fmdb->rows_affected;
-		
 		addLogEntry('Cleaned up the database.', $fm_name);
 		return 'Total number of records purged from the database: <b>' . $record_count . '</b>';
 	}
