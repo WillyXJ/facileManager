@@ -40,6 +40,9 @@ if (!defined('AJAX')) {
 	$GLOBALS['RELPATH'] = rtrim(substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], 'fm-modules')), '/') . '/';
 }
 
+$_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
+$path_parts = pathinfo($_SERVER['REQUEST_URI']);
+
 if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 	/** The config file resides in ABSPATH */

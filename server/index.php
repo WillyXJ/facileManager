@@ -35,9 +35,6 @@ if (isset($_POST['module_name'])) {
 	$_SESSION['module'] = $_POST['module_name'];
 }
 
-$_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
-$path_parts = pathinfo($_SERVER['REQUEST_URI']);
-
 require('fm-init.php');
 
 if (is_array($GLOBALS)) {
