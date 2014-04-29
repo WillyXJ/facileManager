@@ -19,6 +19,7 @@
            in case of a lockout.
 * Server - [bug] Fixed a case where changing authentication method would throw
            an error.
+* Both   - Added file extensions to all redirects and links.
 * Server - Redesigned menuing platform for more flexibility.  This includes
            hiding menu items to users without proper access.
 * Server - Added functions to check for php max_input_vars.
