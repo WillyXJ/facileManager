@@ -102,7 +102,7 @@ function isNewVersionAvailable($package, $version) {
 	if (!getOption('software_update')) return false;
 	
 	/** Disable check until user has upgraded database to 1.2 */
-	if (getOption('fm_db_version') < 31) return false;
+	if (getOption('fm_db_version') < 32) return false;
 	
 	/** Should we be running this check now? */
 	$last_version_check = getOption('version_check', 0, $package);

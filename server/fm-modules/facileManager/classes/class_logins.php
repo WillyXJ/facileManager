@@ -450,7 +450,7 @@ BODY;
 		$_SESSION['user']['ipaddr'] = isset($_SERVER['REMOTE_HOST']) ? $_SERVER['REMOTE_HOST'] : $_SERVER['REMOTE_ADDR'];
 		
 		/** Upgrade compatibility */
-		if (getOption('fm_db_version') < 31) $_SESSION['user']['fm_perms'] = $user->user_perms;
+		if (getOption('fm_db_version') < 32) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
 		$modules = @getActiveModules(true);
 		if (@in_array($user->user_default_module, $modules)) {

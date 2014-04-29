@@ -159,7 +159,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			/** Once logged in process the menuing */
 			if ($fm_login->isLoggedIn()) {
 				if (isUpgradeAvailable()) {
-					if (currentUserCan('do_everything') || (getOption('fm_db_version') < 31 && $_SESSION['user']['fm_perms'] & 1)) {
+					if (currentUserCan('do_everything') || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
 						header('Location: ' . $GLOBALS['RELPATH'] . 'fm-upgrade.php');
 					} else {
 						$response = '<p class="error">** The database for ' . $fm_name . ' still needs to be upgraded.  Please contact a super-admin. **</p>';

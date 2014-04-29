@@ -1,5 +1,5 @@
-1.0-b8 (2014-04-??)
-===================
+1.0 (2014-04-??)
+================
 * Server - Added file extensions to all redirects and links.
 * Server - Cleaned up code.
 * Server - [security] Fixed an issue where unpriviledged users could save module

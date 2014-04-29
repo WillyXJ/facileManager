@@ -40,7 +40,7 @@ require_once('fm-init.php');
 ini_set('display_errors', false);
 error_reporting(0);
 
-if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('fm_db_version') >= 31)) header('Location: ' . dirname($_SERVER['PHP_SELF']));
+if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('fm_db_version') >= 32)) header('Location: ' . dirname($_SERVER['PHP_SELF']));
 
 /** Ensure we meet the requirements */
 require_once(ABSPATH . 'fm-includes/init.php');
