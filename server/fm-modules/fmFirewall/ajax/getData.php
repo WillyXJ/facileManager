@@ -33,7 +33,7 @@ foreach (scandir($class_dir) as $class_file) {
 }
 
 /** Edits */
-if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
+if (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	if (array_key_exists('add_form', $_POST)) {
 		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
 		$add_new = true;

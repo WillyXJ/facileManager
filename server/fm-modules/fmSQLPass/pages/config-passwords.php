@@ -23,18 +23,15 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Passwords';
-
 $response = isset($response) ? $response : null;
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_passwords.php');
 include(ABSPATH . 'fm-modules/facileManager/classes/class_users.php');
 
-echo printPageHeader($response, 'Password Manager');
+echo printPageHeader($response);
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_', 'active');
 $fm_sqlpass_passwords->rows($result);

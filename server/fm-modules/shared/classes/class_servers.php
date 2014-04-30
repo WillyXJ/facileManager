@@ -21,6 +21,12 @@
 
 class fm_shared_module_servers {
 	
+	/**
+	 * Upgrades the client sotware
+	 *
+	 * @since 1.1
+	 * @package facileManager
+	 */
 	function doClientUpgrade($serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
@@ -147,6 +153,43 @@ class fm_shared_module_servers {
 		}
 	}
 	
+	
+	/**
+	 * Process bulk server config build
+	 *
+	 * @since 1.2
+	 * @package facileManager
+	 */
+	function doBulkServerBuild($server_serial_no) {
+		global $fmdb, $__FM_CONFIG, $fm_module_servers;
+		
+		/** Check serial number */
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($server_serial_no), 'server_', 'server_serial_no');
+		if (!$fmdb->num_rows) return $server_serial_no . ' is not a valid serial number.';
+
+		$server_details = $fmdb->last_result;
+		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+		
+		$response[] = $server_name;
+		
+		if ($server_installed != 'yes') {
+			$response[] = ' --> Failed: Client is not installed.';
+		}
+		
+		if (count($response) == 1 && $server_status != 'active') {
+			$response[] = ' --> Failed: Server is ' . $server_status . '.';
+		}
+		
+		if (count($response) == 1) {
+			foreach (makePlainText($fm_module_servers->buildServerConfig($server_serial_no), true) as $line) {
+				$response[] = ' --> ' . $line;
+			}
+		}
+		
+		$response[] = "\n";
+		
+		return implode("\n", $response);
+	}
 	
 }
 

@@ -219,21 +219,11 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_options` (
   `option_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '0',
+  `module_name` varchar(255) DEFAULT NULL,
   `option_name` varchar(50) NOT NULL,
   `option_value` text NOT NULL,
   PRIMARY KEY (`option_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
-
-	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_perms` (
-  `perm_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `perm_module` varchar(255) NOT NULL,
-  `perm_value` int(11) NOT NULL,
-  `perm_extra` text,
-  PRIMARY KEY (`perm_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLE;
 
 	$table[] = <<<TABLE
@@ -254,7 +244,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_users` (
   `user_email` varchar(255) NOT NULL,
   `user_default_module` varchar(255) DEFAULT NULL,
   `user_auth_type` int(1) NOT NULL DEFAULT '1',
-  `user_perms` int(10) NOT NULL DEFAULT '0',
+  `user_caps` text,
   `user_last_login` int(10) NOT NULL DEFAULT '0',
   `user_ipaddr` varchar(255) DEFAULT NULL,
   `user_force_pwd_change` enum('yes','no') NOT NULL DEFAULT 'no',

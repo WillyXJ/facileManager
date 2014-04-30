@@ -39,16 +39,18 @@ $fm_name = 'facileManager';
 $GLOBALS['REQUEST_PROTOCOL'] = isSiteSecure() ? 'https' : 'http';
 $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'] . $GLOBALS['RELPATH'];
 
+if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+
 /** Styled break in menu listing */
 $__FM_CONFIG['menu']['Break'][]				= null;
 
-/** Users Menu Options */
-$__FM_CONFIG['menu']['Admin']['URL']		= 'admin-tools';
-$__FM_CONFIG['menu']['Admin']['Tools']		= 'admin-tools';
-$__FM_CONFIG['menu']['Admin']['Users']		= 'admin-users';
-$__FM_CONFIG['menu']['Admin']['Settings']	= 'admin-settings';
-$__FM_CONFIG['menu']['Admin']['Logs']		= 'admin-logs';
-$__FM_CONFIG['menu']['Modules']['URL']		= 'admin-modules';
+/** Admin Menu Options */
+$__FM_CONFIG['menu']['Admin']['URL']		= 'admin-tools.php';
+$__FM_CONFIG['menu']['Admin']['Tools']		= 'admin-tools.php';
+$__FM_CONFIG['menu']['Admin']['Users']		= 'admin-users.php';
+$__FM_CONFIG['menu']['Admin']['Logs']		= 'admin-logs.php';
+$__FM_CONFIG['menu']['Settings']['URL']		= 'admin-settings.php';
+$__FM_CONFIG['menu']['Modules']['URL']		= 'admin-modules.php';
 
 /** Images */
 $__FM_CONFIG['icons']['fail']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Failed" title="Failed" />';
@@ -61,8 +63,8 @@ $__FM_CONFIG['icons']['enable']			= '<img src="fm-modules/' . $fm_name . '/image
 $__FM_CONFIG['icons']['disable']		= '<img src="fm-modules/' . $fm_name . '/images/disable24.png" border="0" alt="Disable" title="Disable" width="20" />';
 $__FM_CONFIG['icons']['popout']			= '<img src="fm-modules/' . $fm_name . '/images/popout24.png" border="0" alt="Popout" title="Popout" width="20" class="popout" />';
 $__FM_CONFIG['icons']['close']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Close" title="Close" width="20" class="close" />';
-$__FM_CONFIG['icons']['pwd_change']		= '<img src="fm-modules/' . $fm_name . '/images/password-change24.png" border="0" alt="Change Password" title="Change Password" height="20" />';
-$__FM_CONFIG['icons']['pwd_reset']		= '<img src="fm-modules/' . $fm_name . '/images/password-reset24.png" border="0" alt="Send Password Reset Email" title="Send Password Reset Email" width="20" />';
+$__FM_CONFIG['icons']['pwd_change']		= '<img src="fm-modules/' . $fm_name . '/images/profile24.png" border="0" alt="Edit Profile" title="Edit Profile" width="20" />';
+$__FM_CONFIG['icons']['pwd_reset']		= '<img src="fm-modules/' . $fm_name . '/images/password-change24.png" border="0" alt="Send Password Reset Email" title="Send Password Reset Email" height="20" />';
 $__FM_CONFIG['icons']['account']		= '<img src="fm-modules/' . $fm_name . '/images/account24.png" border="0" alt="Account Settings" title="Account Settings" width="20" />';
 $__FM_CONFIG['icons']['star']			= '<img src="fm-modules/' . $fm_name . '/images/star16.png" border="0" alt="Super Admin" title="Super Admin" width="12" style="padding-right: 2px;" />';
 $__FM_CONFIG['icons']['template_user']	= '<img src="fm-modules/' . $fm_name . '/images/template_user16.png" border="0" alt="Template Account" title="Template Account" width="12" style="padding-right: 2px;" />';
@@ -112,7 +114,5 @@ if (!defined('TMP_FILE_EXPORTS')) {
 /** PWD_STRENGTH */
 if (class_exists('fmdb')) $auth_fm_pw_strength = getOption('auth_fm_pw_strength');
 $GLOBALS['PWD_STRENGTH'] = (isset($auth_fm_pw_strength) && !empty($auth_fm_pw_strength)) ? $auth_fm_pw_strength : 'strong';
-
-include(dirname(__FILE__) . '/permissions.inc.php');
 
 ?>

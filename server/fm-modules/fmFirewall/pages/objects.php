@@ -23,18 +23,16 @@
  +-------------------------------------------------------------------------+
 */
 
-$type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'host';
+if (!isset($type)) header('Location: objects-host.php');
+if (isset($_GET['type'])) header('Location: objects-' . sanitize(strtolower($_GET['type'])) . '.php');
 
 /** Ensure we have a valid type */
 if (!in_array($type, enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'))) header('Location: ' . $GLOBALS['basename']);
 
-$page_name = 'Objects';
-$page_name_sub = ucfirst($type) . 's';
-
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_objects.php');
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_objects) {
+if (currentUserCan('manage_objects', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
@@ -80,11 +78,11 @@ if ($allowed_to_manage_objects) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-//$allowed_to_add = ($type == 'custom' && $allowed_to_manage_objects) ? true : false;
-echo printPageHeader($response, ucfirst($type) . ' Objects', $allowed_to_manage_objects, $type);
+//$allowed_to_add = ($type == 'custom' && currentUserCan('manage_objects', $_SESSION['module'])) ? true : false;
+echo printPageHeader($response, null, currentUserCan('manage_objects', $_SESSION['module']), $type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name', 'object_', "AND object_type='$type'");
 $fm_module_objects->rows($result, $type);

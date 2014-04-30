@@ -26,41 +26,47 @@ class fm_module_servers {
 	 * Displays the server list
 	 */
 	function rows($result) {
-		global $fmdb, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $fmdb;
 		
-		if ($allowed_to_build_configs) $bulk_actions_list[] = 'Upgrade';
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+		
+		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+			$bulk_actions_list = array('Upgrade', 'Build Config');
+			$title_array[] = array(
+								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
+								'class' => 'header-tiny'
+							);
+		} else {
+			$bulk_actions_list = null;
+		}
 
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no firewall servers.</p>';
 		} else {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
-			?>
-			<table class="display_results" id="table_edits" name="servers">
-				<thead>
-					<tr>
-						<th width="20"><input style="margin-left: 1px;" type="checkbox" onClick="toggle(this, 'server_list[]')" /></th>
-						<th width="20" style="text-align: center;"></th>
-						<th>Hostname</th>
-						<th>Serial No</th>
-						<th>Firewall Type</th>
-						<th>Method</th>
-						<th>Config File</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'servers'
+						);
+
+			$title_array[] = array('class' => 'header-tiny');
+			$title_array = array_merge($title_array, array('Hostname', 'Serial No', 'Method', 'Firewall Type', 'Config File'));
+			$title_array[] = array(
+								'title' => 'Actions',
+								'class' => 'header-actions'
+							);
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
-		echo '</table>';
 	}
 
 	/**
@@ -201,7 +207,7 @@ class fm_module_servers {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $__FM_CONFIG;
 		
 		$class = ($row->server_status == 'disabled') ? 'disabled' : null;
 		
@@ -210,13 +216,15 @@ class fm_module_servers {
 		$edit_status = $edit_actions = null;
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
-		if ($allowed_to_build_configs && $row->server_installed == 'yes') {
+		$checkbox = (currentUserCan('build_server_configs', $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
+		
+		if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
 				$edit_actions .= $__FM_CONFIG['icons']['build'];
 				$class = 'build';
 			}
 		}
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if ($row->server_installed == 'yes') {
 				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';
@@ -227,9 +235,9 @@ class fm_module_servers {
 			}
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 		}
-		$edit_name = '<a href="config-policy?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>';
+		$edit_name = '<a href="config-policy.php?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>';
 		
-		if (isset($row->server_client_version) && $row->server_client_version != getOption($_SESSION['module'] . '_client_version')) {
+		if (isset($row->server_client_version) && $row->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
 			$edit_actions = 'Client Upgrade Available<br />';
 			$class = 'attention';
 		}
@@ -245,12 +253,12 @@ class fm_module_servers {
 		
 		echo <<<HTML
 		<tr id="$row->server_id" $class>
-			<td><input type="checkbox" name="server_list[]" value="{$row->server_serial_no}" /></td>
+			$checkbox
 			<td>$os_image</td>
 			<td>$edit_name</td>
 			<td>$row->server_serial_no</td>
-			<td>$row->server_type</td>
 			<td>$row->server_update_method $port</td>
+			<td>$row->server_type</td>
 			<td>$row->server_config_file</td>
 			<td id="edit_delete_img">$edit_status</td>
 		</tr>
@@ -304,7 +312,7 @@ HTML;
 		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-servers">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="server_id" value="$server_id" />
 			<table class="form-table">

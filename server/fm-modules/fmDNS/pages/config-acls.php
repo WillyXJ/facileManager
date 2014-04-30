@@ -23,15 +23,12 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'ACLs';
-
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
 	switch ($action) {
@@ -81,12 +78,12 @@ if ($allowed_to_manage_servers) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, 'Access Control Lists', $allowed_to_manage_servers);
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 echo "\n$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', "AND server_serial_no=$server_serial_no");

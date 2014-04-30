@@ -28,7 +28,7 @@ require_once('../../../fm-init.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_tools.php');
 
 $response = null;
-if (is_array($_POST) && count($_POST) && $allowed_to_run_tools) {
+if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
 			case 'connect-test':

@@ -27,7 +27,7 @@
  * will be displayed asking the visitor to set up the
  * config.php file.
  *
- * @internal This file must be parsable by PHP4.
+ * @internal This file must be parsable by PHP5.
  *
  * @package facileManager
  */
@@ -40,6 +40,9 @@ if (!defined('AJAX')) {
 	$GLOBALS['RELPATH'] = rtrim(substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], 'fm-modules')), '/') . '/';
 }
 
+$_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
+$path_parts = pathinfo($_SERVER['REQUEST_URI']);
+
 if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 	/** The config file resides in ABSPATH */
@@ -47,15 +50,20 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	if (!function_exists('functionalCheck') && is_array($__FM_CONFIG['db'])) {
 		require_once(ABSPATH . 'fm-modules/facileManager/functions.php');
 	} elseif (!function_exists('functionalCheck') && !is_array($__FM_CONFIG['db'])) {
-		// A config file is empty
+		/** A config file is empty */
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 	}
-
+	
 	$GLOBALS['URI'] = convertURIToArray();
 
+	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
+		
 	if (!defined('INSTALL') && !defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 		
+		/** Handle special cases with config.inc.php */
+		handleHiddenFlags();
+	
 		/** Enforce SSL if applicable */
 		if (getOption('fm_db_version') >= 23 && getOption('enforce_ssl')) {
 			if (!isSiteSecure()) {
@@ -71,6 +79,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			checkAppVersions();
 		}
 			
+		/** Do the logout */
+		if (isset($_GET) && array_key_exists('logout', $_GET)) {
+			$fm_login->logout();
+			header('Location: ' . $GLOBALS['RELPATH']);
+		}
+		
 		/** Process password resets */
 		if (!$fm_login->isLoggedIn() && array_key_exists('forgot_password', $_GET)) {
 			$message = array_key_exists('keyInvalid', $_GET) ? '<p class="failed">That key is invalid.</p>' : null;
@@ -97,17 +111,17 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			$user_login = sanitize($_POST['username']);
 			$user_pass  = sanitize($_POST['password']);
 			
+			$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
 			if ($_POST['is_ajax']) {
-				$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
 				if (is_array($logged_in)) {
 					list($reset_key, $user_login) = $logged_in;
-					echo "password_reset?key=$reset_key&login=$user_login";
+					echo "password_reset.php?key=$reset_key&login=$user_login";
 				} elseif (!$logged_in) {
 					echo 'failed';
 				} else echo $_SERVER['REQUEST_URI'];
 			} else {
-				if (!$fm_login->checkPassword($user_login, $user_pass, false)) $fm_login->printLoginForm();
-				else header('Location: ' . $GLOBALS['RELPATH']);
+				if (!$logged_in) $fm_login->printLoginForm();
+				else header('Location: ' . $_SERVER['REQUEST_URI']);
 			}
 			
 			exit;
@@ -115,12 +129,6 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 		/** Enforce authentication */
 		if (!$fm_login->isLoggedIn()) $fm_login->printLoginForm();
-		
-		/** Do the logout */
-		if (isset($_GET) && array_key_exists('logout', $_GET)) {
-			$fm_login->logout();
-			header('Location: ' . $GLOBALS['RELPATH']);
-		}
 		
 		/** Show/Hide errors */
 		if (getOption('show_errors')) {
@@ -138,9 +146,6 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		/** Handle module change request */
 		if (isset($_REQUEST['module']) && !isset($_REQUEST['action'])) {
 			$_SESSION['module'] = in_array($_REQUEST['module'], getActiveModules(true)) ? $_REQUEST['module'] : $fm_name;
-			if ($_SESSION['module'] != $fm_name) {
-				$_SESSION['user']['module_perms'] = $fm_login->getModulePerms($_SESSION['user']['id'], null, true);
-			}
 			header('Location: ' . $GLOBALS['RELPATH']);
 			exit;
 		}
@@ -156,13 +161,18 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			/** Once logged in process the menuing */
 			if ($fm_login->isLoggedIn()) {
 				if (isUpgradeAvailable()) {
-					if ($super_admin) {
+					if (currentUserCan('do_everything') || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
 						header('Location: ' . $GLOBALS['RELPATH'] . 'fm-upgrade.php');
 					} else {
 						$response = '<p class="error">** The database for ' . $fm_name . ' still needs to be upgraded.  Please contact a super-admin. **</p>';
 					}
 				}
 			}
+		}
+		
+		/** Handle sort orders */
+		if (array_key_exists('sort_by', $_GET)) {
+			handleSortOrder();
 		}
 		
 		/** Debug mode */
@@ -173,6 +183,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 		
 		$page = isset($_GET['p']) ? intval($_GET['p']) : 1;
+		
+		/** Build the user menu */
+		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 	} elseif (defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 	}
@@ -190,11 +203,17 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		if (is_file($module_functions_file) && !function_exists('moduleFunctionalCheck')) {
 			include_once($module_functions_file);
 		}
+
+		if (!defined('CLIENT') && !defined('INSTALL') && !defined('UPGRADE')) {
+			if (function_exists('buildModuleMenu')) {
+				buildModuleMenu();
+			}
+		}
 	}
 
 } else {
 
-	// A config file doesn't exist
+	/** A config file doesn't exist */
 
 	require_once(ABSPATH . 'fm-includes/init.php');
 	require_once(ABSPATH . 'fm-includes/version.php');

@@ -26,35 +26,35 @@ class fm_sqlpass_passwords {
 	 * Displays the server group list
 	 */
 	function rows($result) {
-		global $fmdb, $__FM_CONFIG, $fm_users, $allowed_to_manage_passwords;
+		global $fmdb, $__FM_CONFIG, $fm_users;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="servers">There are no active database server groups.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="servers">
-				<thead>
-					<tr>
-						<th width="70"><input style="height: 10px;" type="checkbox" onClick="toggle(this, 'group[]')" checked /></th>
-						<th>Server Group</th>
-						<th>Last Changed</th>
-					</tr>
-				</thead>
-				<tbody>
-				<form name="manage" id="manage" method="post" action="<?php echo $GLOBALS['basename']; ?>">
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits'
+						);
+
+			$title_array = array(array(
+								'title' => '<input type="checkbox" onClick="toggle(this, \'group[]\')" checked />',
+								'class' => 'header-tiny'
+							), 'Server Group', 'Last Changed');
+
+			echo displayTableHeader($table_info, $title_array);
+			echo '<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">' . "\n";
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 
-		if ($allowed_to_manage_passwords && $result) {
+		if (currentUserCan('manage_passwords', $_SESSION['module']) && $result) {
 			echo <<<HTML
 				<br /><br />
 				<a name="#manage"></a>
@@ -62,7 +62,7 @@ class fm_sqlpass_passwords {
 				<h2>Set User Password</h2>
 			
 HTML;
-			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options')) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
+			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], $_SESSION['module'])) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
 			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'Set Password', 'set_sql_password', 'config-passwords', false);
 			echo '</form>';
 		}
@@ -75,7 +75,7 @@ HTML;
 		
 		echo <<<HTML
 		<tr id="$row->group_id">
-			<td><input style="height: 10px;" type="checkbox" name="group[]" value="{$row->group_id}" checked /></td>
+			<td><input type="checkbox" name="group[]" value="{$row->group_id}" checked /></td>
 			<td>{$row->group_name}</td>
 			<td>$last_changed</td>
 		</tr>
@@ -106,8 +106,8 @@ HTML;
 		}
 		
 		/** Get default credentials */
-		$default_admin_user = getOption('admin_username', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options');
-		$default_admin_pass = getOption('admin_password', $_SESSION['user']['account_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'options');
+		$default_admin_user = getOption('admin_username', $_SESSION['user']['account_id'], $_SESSION['module']);
+		$default_admin_pass = getOption('admin_password', $_SESSION['user']['account_id'], $_SESSION['module']);
 		
 		/** Process password change */
 		foreach ($group as $key => $server_group) {

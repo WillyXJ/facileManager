@@ -33,7 +33,7 @@ function returnError($window = true) {
 	if ($window) {
 		echo '<h2>Error</h2>' . "\n";
 		echo '<p>' . $msg . "</p>\n";
-		echo '<br /><input type="submit" value="OK" class="button" id="cancel_button" />' . "\n";
+		echo '<br /><input type="button" value="OK" class="button" id="cancel_button" />' . "\n";
 	} else {
 		echo '<p class="error">' . $msg . "</p>\n";
 	}
@@ -48,11 +48,11 @@ function returnError($window = true) {
  * @package facileManager
  */
 function returnUnAuth($window = true) {
-	$msg = 'You are not authorized to make changes.';
+	$msg = 'You do not have permission to make these changes.';
 	if ($window) {
 		echo '<h2>Error</h2>' . "\n";
 		echo '<p>' . $msg . "</p>\n";
-		echo '<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />' . "\n";
+		echo '<br /><input type="button" value="OK" class="button" id="cancel_button" />' . "\n";
 	} else {
 		echo '<p class="error">' . $msg . "</p>\n";
 	}

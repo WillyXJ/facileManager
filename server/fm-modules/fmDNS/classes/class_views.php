@@ -31,26 +31,25 @@ class fm_dns_views {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="views">There are no views.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="views">
-				<thead>
-					<tr>
-						<th>View Name</th>
-						<th>Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'views'
+						);
+
+			$title_array = array('View Name', 'Comment');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -164,14 +163,14 @@ class fm_dns_views {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_servers;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->view_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_name = '<a href="config-options.php?view_id=' . $row->view_id;
 		$edit_name .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		$edit_name .= '">' . $row->view_name . '</a>';
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->view_id . '&status=';
@@ -183,7 +182,7 @@ class fm_dns_views {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		echo <<<HTML
@@ -217,7 +216,7 @@ HTML;
 		$view_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-views">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="page" id="page" value="views" />
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="view_id" id="view_id" value="$view_id" />

@@ -26,35 +26,32 @@ class fm_module_objects {
 	 * Displays the object list
 	 */
 	function rows($result, $type) {
-		global $fmdb, $allowed_to_manage_objects;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="objects">There are no ' . $type . ' objects defined.</p>';
 		} else {
-			echo '<table class="display_results" id="table_edits" name="objects">' . "\n";
-			$title_array = ($type != 'address') ? array('Object Name', 'Address', 'Netmask', 'Comment') : array('Object Name', 'Address', 'Comment');
-			echo "<thead>\n<tr>\n";
-			
-			foreach ($title_array as $title) {
-				$style = ($title == 'Comment') ? ' style="width: 40%;"' : null;
-				echo '<th' . $style . '>' . $title . '</th>' . "\n";
-			}
-			
-			if ($allowed_to_manage_objects) echo '<th width="110" style="text-align: center;">Actions</th>' . "\n";
-			
-			echo <<<HTML
-					</tr>
-				</thead>
-				<tbody>
-
-HTML;
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'objects'
+						);
+
+			$title_array = array('Object Name', 'Address');
+			if ($type != 'address') $title_array[] = 'Netmask';
+			$title_array[] = array('title' => 'Comment', 'style' => 'width: 40%;');
+			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
-			echo '</tbody>';
-			echo '</table>';
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -160,13 +157,13 @@ HTML;
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_objects, $allowed_to_build_configs;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->object_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = null;
 		
-		if ($allowed_to_manage_objects) {
+		if (currentUserCan('manage_objects', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->object_id, 'object')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
@@ -214,7 +211,7 @@ HTML;
 		$object_type = buildSelect('object_type', 'object_type', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'), $type, 1);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="objects?type=$type">
+		<form name="manage" id="manage" method="post" action="?type=$type">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="object_id" value="$object_id" />
 			<table class="form-table">

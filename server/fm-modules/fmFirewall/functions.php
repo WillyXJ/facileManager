@@ -57,28 +57,6 @@ function buildModuleDashboard() {
 	
 	return '<p>' . $_SESSION['module'] . ' has no dashboard content yet.</p>';
 
-	/** Server stats */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
-	$summary = '<li>You have <b>' . $fmdb->num_rows . '</b> database server';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' configured.</li>' . "\n";
-	
-	/** Group stats */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_');
-	$summary .= '<li>You have <b>' . $fmdb->num_rows . '</b> group';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' defined.</li>' . "\n";
-	
-	$dashboard = <<<DASH
-	<div id="shadow_box" class="leftbox">
-		<div id="shadow_container">
-		<h3>Summary</h3>
-		$summary
-		</div>
-	</div>
-DASH;
-
-	return $dashboard;
 }
 
 
@@ -119,7 +97,7 @@ function buildModuleHelpFile() {
 <h3>{$_SESSION['module']}</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_config_servers', 'block');">Configure Firewalls</a>
+		<a class="list_title">Configure Firewalls</a>
 		<div id="fmfw_config_servers">
 			<p>Firewall servers can be managed from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
@@ -131,7 +109,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_config_policies', 'block');">Firewall Policies</a>
+		<a class="list_title">Firewall Policies</a>
 		<div id="fmfw_config_policies">
 			<p>Policy Rules are managed by clicking on the firewall server name from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> 
 			menu item. From there, you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete 
@@ -147,7 +125,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_objects', 'block');">Objects</a>
+		<a class="list_title">Objects</a>
 		<div id="fmfw_objects">
 			<p>Much like an appliance firewall, objects need to be defined before they can be used in policies. All objects 
 			(<a href="{$__FM_CONFIG['module']['menu']['Objects']['Hosts']}">Hosts</a> and <a href="{$__FM_CONFIG['module']['menu']['Objects']['Networks']}">Networks</a>)
@@ -160,7 +138,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_services', 'block');">Services</a>
+		<a class="list_title">Services</a>
 		<div id="fmfw_services">
 			<p>Much like an appliance firewall, services need to be defined before they can be used in policies. All services 
 			(<a href="{$__FM_CONFIG['module']['menu']['Services']['ICMP']}">ICMP</a>, <a href="{$__FM_CONFIG['module']['menu']['Services']['TCP']}">TCP</a>,
@@ -174,7 +152,7 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmfw_time', 'block');">Time Restrictions</a>
+		<a class="list_title">Time Restrictions</a>
 		<div id="fmfw_time">
 			<p>Time restrictions can be defined from the <a href="{$__FM_CONFIG['module']['menu']['Time']['URL']}">Time</a> menu item. From there you can 
 			specify the start date and time, end date and time, and the weekdays of the restriction. Only iptables firewall type supports the use of time
@@ -301,32 +279,62 @@ function isItemInPolicy($id, $type) {
  *
  * @return boolean
  */
-function getModuleBadgeCounts() {
+function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
 	
-	/** Servers */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
-	$server_count = $fmdb->num_rows;
-	$server_results = $fmdb->last_result;
-	for ($i=0; $i<$server_count; $i++) {
-		$server_builds[] = $server_results[$i]->server_name;
-	}
-	if (version_compare(getOption($_SESSION['module'] . '_version'), '1.0-b3', '>=')) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+	if ($type == 'servers') {
+		$badge_counts = null;
+		
+		/** Servers */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
 		$server_count = $fmdb->num_rows;
 		$server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {
 			$server_builds[] = $server_results[$i]->server_name;
 		}
-	}
-	
-	$servers = array_unique($server_builds);
-	
-	for ($i=0; $i<count($servers); $i++) {
-		$badge_counts['Firewalls']['URL']++;
+		if (version_compare(getOption('version', 0, $_SESSION['module']), '1.0-b3', '>=')) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+			$server_count = $fmdb->num_rows;
+			$server_results = $fmdb->last_result;
+			for ($i=0; $i<$server_count; $i++) {
+				$server_builds[] = $server_results[$i]->server_name;
+			}
+		}
+		
+		$servers = array_unique($server_builds);
+		$badge_counts = count($servers);
+		
+		unset($server_builds, $servers, $server_count, $server_results);
 	}
 	
 	return $badge_counts;
 }
+
+
+/**
+ * Adds the module menu items
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ */
+function buildModuleMenu() {
+	addObjectPage('Firewalls', 'Firewall Servers', null, $_SESSION['module'], 'config-servers.php', null, true);
+		addSubmenuPage('config-servers.php', null, 'Firewall Policy', null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
+
+	addObjectPage('Objects', 'Object Groups', 'manage_objects', $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', 'Groups', 'Object Groups', 'manage_objects', $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', 'Hosts', 'Host Objects', 'manage_objects', $_SESSION['module'], 'objects-host.php');
+		addSubmenuPage('object-groups.php', 'Networks', 'Network Objects', 'manage_objects', $_SESSION['module'], 'objects-network.php');
+
+	addObjectPage('Services', 'Service Groups', 'manage_services', $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', 'Groups', 'Service Groups', 'manage_services', $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', 'ICMP', 'ICMP Services', 'manage_services', $_SESSION['module'], 'services-icmp.php');
+		addSubmenuPage('service-groups.php', 'TCP', 'TCP Services', 'manage_services', $_SESSION['module'], 'services-tcp.php');
+		addSubmenuPage('service-groups.php', 'UDP', 'UDP Services', 'manage_services', $_SESSION['module'], 'services-udp.php');
+
+	addObjectPage('Time', 'Time Restrictions', 'manage_time', $_SESSION['module'], 'config-time.php');
+}
+
 
 ?>

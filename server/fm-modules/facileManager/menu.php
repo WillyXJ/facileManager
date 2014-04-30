@@ -20,34 +20,35 @@
 */
 
 /**
- * Processes main page
+ * Constructs the menu.
  *
- * @author		Jon LaBass
- * @version		$Id:$
- * @copyright	2013
+ * The elements in the array are :
+ *     0: Menu item name
+ *     1: Page title
+ *     2: Minimum level or capability required
+ *     3: Module the menu item is for
+ *     4: The URL of the item's file
+ *     5: CSS class
+ *     6: Menu title sticky bit
+ *     7: Badge count (optional)
  *
+ * @global array $menu
  */
 
-if (isset($_POST['module_type']) && $_POST['module_type'] == 'CLIENT') {
-	define('CLIENT', true);
-}
-if (isset($_POST['module_name'])) {
-	$_SESSION['module'] = $_POST['module_name'];
-}
+$menu[2] = array('Dashboard', 'Dashboard', null, $fm_name, 'index.php', null, null, true);
 
-require('fm-init.php');
+$_fm_last_object_menu = 2;
 
-if (is_array($GLOBALS)) {
-	if (@array_key_exists('logout', $GLOBALS['URI'])) exit;
-}
+$menu[45] = array(null, null, null, null, null, 'separator');
 
-if ($GLOBALS['basename'] == 'index.php') {
-	require_once(ABSPATH . 'fm-includes/init.php');
-	checkAppVersions();
-}
+$menu[50] = array('Admin', null, null, $fm_name, 'admin-tools.php');
+	$submenu['admin-tools.php'][5] = array('Tools', 'Tools', 'run_tools', $fm_name, 'admin-tools.php');
+	$submenu['admin-tools.php'][10] = array('Users', 'Users', 'manage_users', $fm_name, 'admin-users.php');
+	$submenu['admin-tools.php'][15] = array('Logs', 'Logs', null, $fm_name, 'admin-logs.php');
 
-if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename']))) {
-	@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename']));
-} else throwHTTPError('404');
+$menu[70] = array('Settings', 'General Settings', 'manage_settings', $fm_name, 'admin-settings.php', null, null, true);
+	$submenu['admin-settings.php'][5] = array('General', 'General Settings', 'manage_settings', $fm_name, 'admin-settings.php');
+
+$menu[99] = array('Modules', 'Module Configuration', 'manage_modules', $fm_name, 'admin-modules.php', null, getBadgeCounts('modules'), true);
 
 ?>

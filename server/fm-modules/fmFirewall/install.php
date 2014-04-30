@@ -54,16 +54,6 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}object
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}options` (
-  `option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL DEFAULT '1',
-  `option_name` varchar(255) NOT NULL,
-  `option_value` varchar(255) NOT NULL,
-  PRIMARY KEY (`option_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
-
-	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}policies` (
   `policy_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -146,16 +136,18 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}time` 
 TABLE;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value) 
-	SELECT '{$module}_version', '{$__FM_CONFIG[$module]['version']}' FROM DUAL
+INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = '{$module}_version');
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'version'
+		AND module_name='$module');
 INSERT;
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value) 
-	SELECT '{$module}_client_version', '{$__FM_CONFIG[$module]['client_version']}' FROM DUAL
+INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = '{$module}_client_version');
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'client_version'
+		AND module_name='$module');
 INSERT;
 
 	$inserts[] = <<<INSERT

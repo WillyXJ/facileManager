@@ -27,10 +27,10 @@ function upgradefmDNSSchema($module) {
 	@include(dirname(__FILE__) . '/variables.inc.php');
 	
 	/** Get current version */
-	$running_version = getOption($module . '_version', 0);
+	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.2-beta1', '<') ? upgradefmDNS_120($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	return true;
@@ -578,6 +578,126 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 	}
 
 	if (!setOption('fmDNS_client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false)) return false;
+		
+	return true;
+}
+
+/** 1.2 */
+function upgradefmDNS_120($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+//	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DHCID',  'DLV',  'DNAME',  'DNSKEY', 'DS',  'HIP',  'IPSECKEY',  'KEY',  'KX',  'MX',  'NAPTR',  'NS',  'NSEC',  'NSEC3',  'NSEC3PARAM',  'PTR',  'RSIG',  'RP',  'SIG',  'SRV',  'SSHFP',  'TA',  'TKEY', 'TLSA',  'TSIG',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_class`  `record_class` ENUM(  'IN',  'CH',  'HS' ) NOT NULL DEFAULT  'IN';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD  `record_os` VARCHAR( 255 ) NULL AFTER  `record_port`,
+ADD  `record_cert_type` TINYINT NULL AFTER  `record_os` ,
+ADD  `record_key_tag` INT NULL AFTER  `record_cert_type` ,
+ADD  `record_algorithm` TINYINT NULL AFTER  `record_key_tag`,
+ADD  `record_flags` ENUM(  '0',  '256',  '257' ) NULL AFTER  `record_algorithm`,
+ADD  `record_text` VARCHAR( 255 ) NULL AFTER  `record_flags` ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_value`  `record_value` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ;";
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` (
+  `account_id` int(11) NOT NULL,
+  `domain_id` int(11) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  `record_status` enum('active','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+TABLE;
+
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Force rebuild of server configs for Issue #75 */
+	$current_module = $_SESSION['module'];
+	$_SESSION['module'] = 'fmDNS';
+	setBuildUpdateConfigFlag(null, 'yes', 'build', $__FM_CONFIG);
+	$_SESSION['module'] = $current_module;
+	unset($current_module);
+	
+	/** Move module options */
+	$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");
+	if ($fmdb->num_rows) {
+		$count = $fmdb->num_rows;
+		$result = $fmdb->last_result;
+		for ($i=0; $i<$count; $i++) {
+			if (!setOption($result[$i]->option_name, $result[$i]->option_value, 'auto', true, $result[$i]->account_id, 'fmDNS')) return false;
+		}
+	}
+	$fmdb->query("DROP TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");
+	if (!$fmdb->result || $fmdb->sql_errors) return false;
+	
+	$fm_user_caps = getOption('fm_user_caps');
+	
+	/** Update user capabilities */
+	$fm_user_caps['fmDNS'] = array(
+			'read_only'				=> '<b>Read Only</b>',
+			'manage_servers'		=> 'Server Management',
+			'build_server_configs'	=> 'Build Server Configs',
+			'manage_zones'			=> 'Zone Management',
+			'manage_records'		=> 'Record Management',
+			'reload_zones'			=> 'Reload Zones',
+			'manage_settings'		=> 'Manage Settings'
+		);
+	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+	
+	$fmdb->get_results("SELECT * FROM `fm_users`");
+	if ($fmdb->num_rows) {
+		$count = $fmdb->num_rows;
+		$result = $fmdb->last_result;
+		for ($i=0; $i<$count; $i++) {
+			$user_caps = null;
+			/** Update user capabilities */
+			$j = 1;
+			$temp_caps = null;
+			foreach ($fm_user_caps['fmDNS'] as $slug => $trash) {
+				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
+				if (@array_key_exists('fmDNS', $user_caps)) {
+					if ($user_caps['fmDNS']['imported_perms'] == 0) {
+						$temp_caps['fmDNS']['read_only'] = 1;
+					} else {
+						if ($j & $user_caps['fmDNS']['imported_perms'] && $j > 1) $temp_caps['fmDNS'][$slug] = 1;
+						$j = $j*2 ;
+					}
+				} else {
+					$temp_caps['fmDNS']['read_only'] = $user_caps['fmDNS']['read_only'] = 1;
+				}
+			}
+			if (@array_key_exists('fmDNS', $temp_caps)) $user_caps['fmDNS'] = array_merge($temp_caps['fmDNS'], $user_caps['fmDNS']);
+			if (@array_key_exists('zone_access', $user_caps['fmDNS'])) $user_caps['fmDNS']['access_specific_zones'] = $user_caps['fmDNS']['zone_access'];
+			unset($user_caps['fmDNS']['imported_perms'], $user_caps['fmDNS']['zone_access']);
+			
+			$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+			if (!$fmdb->result) return false;
+		}
+	}
+
+	if (!setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
 		
 	return true;
 }

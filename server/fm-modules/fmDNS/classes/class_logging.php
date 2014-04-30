@@ -31,27 +31,27 @@ class fm_module_logging {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="logging">There are no ' . $__FM_CONFIG['logging']['avail_types'][$channel_category] . ' defined.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="logging">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<?php if ($channel_category == 'category') echo '<th>Channels</th>'; ?>
-						<th>Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x], $channel_category);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'logging'
+						);
+
+			$title_array[] = 'Name';
+			if ($channel_category == 'category') $title_array[] = 'Channels';
+			$title_array[] = 'Comment';
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x], $channel_category);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -423,12 +423,12 @@ class fm_module_logging {
 
 
 	function displayRow($row, $channel_category) {
-		global $__FM_CONFIG, $allowed_to_manage_servers;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_name = ($row->cfg_parent) ? '&nbsp;&nbsp;&nbsp;' : null;
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" name="' . $channel_category . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -444,7 +444,7 @@ class fm_module_logging {
 			}
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		$edit_name .= $row->cfg_data;
@@ -492,7 +492,7 @@ HTML;
 		}
 		
 		$return_form = <<<FORM
-			<form name="manage" id="manage" method="post" action="config-logging.php?type=$type">
+			<form name="manage" id="manage" method="post" action="?type=$type">
 				<input type="hidden" name="action" value="$action" />
 				<input type="hidden" name="cfg_id" value="$cfg_id" />
 				<input type="hidden" name="cfg_type" value="logging" />

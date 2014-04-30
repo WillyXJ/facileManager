@@ -22,16 +22,14 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Admin';
-$page_name_sub = 'Settings';
+if (!currentUserCan('manage_settings')) unAuth();
 
-include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 
-printHeader($page_name_sub);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-echo printPageHeader(null, $fm_name . ' Settings');
+echo printPageHeader();
 	
 echo $fm_settings->printForm();
 

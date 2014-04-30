@@ -22,11 +22,8 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Admin';
-$page_name_sub = 'Logs';
-
-printHeader($page_name_sub);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $response = isset($response) ? $response : null;
 
@@ -74,11 +71,15 @@ $log_search_user = isset($log_search_user) ? $log_search_user : 0;
 
 $module_list = buildSelect('log_search_module', 1, buildModuleList(), $log_search_module, 4, null, true);
 $user_list = buildSelect('log_search_user', 1, buildUserList(), $log_search_user, 4, null, true);
-	
-echo printPageHeader($response, 'Logs');
+
+$table_info = array('class' => 'display_results');
+$title_array = array('Timestamp', 'Module', 'User', array('title' => 'Message', 'style' => 'width: 50%;'));
+$header = displayTableHeader($table_info, $title_array);
+
+echo printPageHeader($response);
 echo <<<HTML
 $pagination
-		<form class="search-form" id="date-range" action="admin-logs" method="post">
+		<form class="search-form" id="date-range" action="" method="post">
 		<table class="log_search_form" align="center">
 			<tbody>
 				<tr>
@@ -100,16 +101,7 @@ $pagination
 			</tbody>
 		</table>
 		</form>
-		<table class="display_results">
-			<thead>
-				<tr>
-					<th>Timestamp</th>
-					<th>Module</th>
-					<th>User</th>
-					<th style="width: 50%;">Log Message</th>
-				</tr>
-			</thead>
-			<tbody>
+		$header
 
 HTML;
 

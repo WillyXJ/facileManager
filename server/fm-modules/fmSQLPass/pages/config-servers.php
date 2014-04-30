@@ -23,14 +23,11 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Servers';
-
 include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_servers.php');
 $response = isset($response) ? $response : null;
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
@@ -70,10 +67,10 @@ if ($allowed_to_manage_servers) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-echo printPageHeader($response, 'Database Servers', $allowed_to_manage_servers);
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name', 'server_');
 $fm_module_servers->rows($result);

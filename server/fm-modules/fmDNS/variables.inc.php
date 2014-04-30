@@ -27,36 +27,38 @@
  *
  */
 
+if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+
 /** Module Information */
-$__FM_CONFIG['fmDNS']['version']				= '1.1.3';
-$__FM_CONFIG['fmDNS']['client_version']			= '1.1';
+$__FM_CONFIG['fmDNS']['version']				= '1.2-beta1';
+$__FM_CONFIG['fmDNS']['client_version']			= '1.2-beta1';
 $__FM_CONFIG['fmDNS']['description']			= 'Easily manage one or more ISC BIND servers through a web interface.  No more editing configuration
 													and zone files manually.';
 $__FM_CONFIG['fmDNS']['prefix']					= 'dns_';
 $__FM_CONFIG['fmDNS']['required_dns_version']	= '9.3';
-$__FM_CONFIG['fmDNS']['required_fm_version']	= '1.1.1';
+$__FM_CONFIG['fmDNS']['required_fm_version']	= '1.2-beta1';
 
 /** Dashboard Menu Options */
 $__FM_CONFIG['module']['menu']['Dashboard']['URL']	= '';
 
 /** Zones Menu Options */
-$__FM_CONFIG['module']['menu']['Zones']['URL']		= 'zones';
-$__FM_CONFIG['module']['menu']['Zones']['Forward']	= 'zones';
-$__FM_CONFIG['module']['menu']['Zones']['Reverse']	= 'zones?map=reverse';
+$__FM_CONFIG['module']['menu']['Zones']['URL']		= 'zones.php';
+$__FM_CONFIG['module']['menu']['Zones']['Forward']	= 'zones.php';
+$__FM_CONFIG['module']['menu']['Zones']['Reverse']	= 'zones.php?map=reverse';
 
 /** Config Menu Options */
-$__FM_CONFIG['module']['menu']['Config']['URL']		= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Servers']	= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Views']	= 'config-views';
-$__FM_CONFIG['module']['menu']['Config']['ACLs']	= 'config-acls';
-$__FM_CONFIG['module']['menu']['Config']['Keys']	= 'config-keys';
-$__FM_CONFIG['module']['menu']['Config']['Options']	= 'config-options';
-$__FM_CONFIG['module']['menu']['Config']['Logging']	= 'config-logging';
-
-/** Settings Menu Options */
-$__FM_CONFIG['module']['menu']['Settings']['URL']	= 'module-settings';
+$__FM_CONFIG['module']['menu']['Config']['URL']		= 'config-servers.php';
+$__FM_CONFIG['module']['menu']['Config']['Servers']	= 'config-servers.php';
+$__FM_CONFIG['module']['menu']['Config']['Views']	= 'config-views.php';
+$__FM_CONFIG['module']['menu']['Config']['ACLs']	= 'config-acls.php';
+$__FM_CONFIG['module']['menu']['Config']['Keys']	= 'config-keys.php';
+$__FM_CONFIG['module']['menu']['Config']['Options']	= 'config-options.php';
+$__FM_CONFIG['module']['menu']['Config']['Logging']	= 'config-logging.php';
 
 $__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
+
+/** Settings Menu Options */
+$__FM_CONFIG['menu']['Settings']['fmDNS']	= 'module-settings.php';
 
 /** Images */
 $__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';
@@ -67,9 +69,27 @@ if (isset($fm_name)) {
 
 $__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
-
-$__FM_CONFIG['records']['avail_types'] = (isset($map) && $map == 'forward') ? array('A', 'CNAME', 'MX', 'TXT', 'SRV', 'PTR', 'SOA', 'NS') : array('PTR', 'CNAME', 'SOA', 'NS');
+$__FM_CONFIG['records']['common_types'] = (isset($map) && $map == 'forward') ? array('A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA') : array('PTR', 'NS', 'SOA');
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
+$__FM_CONFIG['records']['cert_types'] = array(
+											array('X.509', 1),
+											array('SKPI', 2),
+											array('OpenPGP', 3),
+											array('IPKIX', 4),
+											array('ISPKI', 5),
+											array('IPGP', 6),
+											array('ACPKIX', 7),
+											array('IACPKIX', 8)
+											);
+$__FM_CONFIG['records']['cert_algorithms'] = array(
+											array('Diffie-Hellman', 2),
+											array('DSA/SHA-1', 3),
+											array('RSA/SHA-1', 5),
+											array('DSA-NSEC3-SHA1', 6),
+											array('RSASHA1-NSEC3-SHA1', 7),
+											array('RSA/SHA-256', 8),
+											array('RSA/SHA-512', 10)
+											);
 
 $__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');
 $__FM_CONFIG['options']['avail_types'] = array('Global');
@@ -109,7 +129,8 @@ $__FM_CONFIG['logging']['channels']['reserved']			= array('null', 'default_syslo
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls'=>'acl', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config'=>'cfg',
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains'=>'domain', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys'=>'key',
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records'=>'record', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers'=>'server',
-											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa'=>'soa', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views'=>'view'
+											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa'=>'soa', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views'=>'view',
+											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped'=>'record'
 											);
 $__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
 
@@ -131,10 +152,5 @@ $__FM_CONFIG['fmDNS']['default']['options'] = array(
 
 /** Array sorts */
 sort($__FM_CONFIG['logging']['categories']);
-
-/** Module Permissions */
-if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
-	include(dirname(__FILE__) . '/permissions.inc.php');
-}
 
 ?>

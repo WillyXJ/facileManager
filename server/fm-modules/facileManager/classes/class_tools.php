@@ -84,13 +84,12 @@ class fm_tools {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
 				return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
 			} else {
-				$query = "UPDATE `fm_options` SET option_value='{$__FM_CONFIG[$module_name]['version']}' WHERE option_name='{$module_name}_version'";
-				$fmdb->query($query);
+				setOption('version', $__FM_CONFIG[$module_name]['version'], 'auto', false, 0, $module_name);
 				if ($fmdb->last_error) {
 					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
 					return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
 				}
-				setOption($module_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
+				setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update', true, 0, $module_name);
 			}
 
 			addLogEntry("$module_name was upgraded to {$__FM_CONFIG[$module_name]['version']}.", $module_name);
@@ -182,11 +181,6 @@ class fm_tools {
 		$fmdb->query($query);
 		$record_count += $fmdb->rows_affected;
 		
-		/** Remove permissions for deleted users */
-		$query = 'DELETE FROM `fm_perms` WHERE user_id NOT IN (SELECT user_id FROM fm_users)';
-		$fmdb->query($query);
-		$record_count += $fmdb->rows_affected;
-		
 		addLogEntry('Cleaned up the database.', $fm_name);
 		return 'Total number of records purged from the database: <b>' . $record_count . '</b>';
 	}
@@ -198,9 +192,9 @@ class fm_tools {
 	 * @package facileManager
 	 */
 	function backupDatabase() {
-		global $__FM_CONFIG, $allowed_to_run_tools, $fm_name;
+		global $__FM_CONFIG, $fm_name;
 		
-		if (!$allowed_to_run_tools) return '<p class="error">You are not authorized to run these tools.</p>';
+		if (!currentUserCan('run_tools')) return '<p class="error">You are not authorized to run these tools.</p>';
 		
 		/** Temporary fix for MySQL 5.6 warnings */
 		$exclude_warnings = array('Warning: Using a password on the command line interface can be insecure.' . "\n");

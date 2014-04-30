@@ -31,29 +31,25 @@ class fm_dns_keys {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="keys">There are no keys.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="keys">
-				<thead>
-					<tr>
-						<th>Key</th>
-						<th>Algorithm</th>
-						<th>Secret</th>
-						<th>View</th>
-						<th>Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'keys'
+						);
+
+			$title_array = array('Key', 'Algorithm', 'Secret', 'View', 'Comment');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -167,11 +163,11 @@ class fm_dns_keys {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_servers;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->key_status == 'disabled') ? ' class="disabled"' : null;
 		
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->key_id . '&status=';
@@ -182,7 +178,7 @@ class fm_dns_keys {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		$edit_name = $row->key_name;
@@ -228,7 +224,7 @@ HTML;
 		$key_view = buildSelect('key_view', 'key_view', $fm_dns_zones->availableViews(), $key_view);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-keys">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="key_id" value="$key_id" />
 			<table class="form-table">

@@ -23,15 +23,12 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Keys';
-
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST)) ? '?server_serial_no=' . $server_serial_no : null;
 	switch ($action) {
@@ -70,10 +67,6 @@ if ($allowed_to_manage_servers) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $_GET['id'], 'key_', $_GET['status'], 'key_id')) {
 				$response = 'This item could not be '. $_GET['status'] . '.';
 			} else {
-				/* set the key_build_config flag */
-				$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET `key_build_config`='yes' WHERE `key_id`=" . sanitize($_GET['id']);
-				$result = $fmdb->query($query);
-				
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
 				addLogEntry("Set key '$tmp_name' status to " . $_GET['status'] . '.');
@@ -81,28 +74,13 @@ if ($allowed_to_manage_servers) {
 			}
 		}
 		break;
-	case 'build':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$build_status = buildKeyConfig(sanitize($_GET['id']));
-			
-			if ($build_status) {
-				/* reset the key_build_config flag */
-				$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET `key_build_config`='no',`key_update_config`='yes' WHERE `key_id`=" . sanitize($_GET['id']);
-				$result = $fmdb->query($query);
-	
-				$response = 'This is not yet implemented.' . "\n";
-			} else $response = 'Building key configs failed.' . "\n";
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-			}
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-echo printPageHeader($response, 'Keys', $allowed_to_manage_servers);
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name', 'key_');
 $fm_dns_keys->rows($result);

@@ -32,8 +32,17 @@ if (array_key_exists('cancel', $_POST)) {
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
+if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
+
+/** Make sure we can handle all of the variables */
+checkMaxInputVars();
+
 extract($_POST);
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
+
+/** Should the user be here? */
+if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
+if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 
 if (isset($update) && is_array($update)) {
 	foreach ($update as $id => $data) {
@@ -42,6 +51,12 @@ if (isset($update) && is_array($update)) {
 		elseif ($record_type == 'AAAA' && !strrpos($data['record_value'], ':')) $record_type = 'A';
 
 		$fm_dns_records->update($domain_id, $id, $record_type, $data);
+	}
+}
+
+if (isset($skip) && is_array($skip)) {
+	foreach ($skip as $id => $data) {
+		$fm_dns_records->update($domain_id, $id, $record_type, $data, true);
 	}
 }
 
@@ -64,8 +79,8 @@ if (isset($create) && is_array($create)) {
 			$fm_dns_records->add($domain_id, $record_type, $data);
 			
 			/** Are we auto-creating a PTR record? */
-			if ($record_type == 'A' && isset($data['PTR'])) {
-				$domain = '.' . TrimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
+			if ($record_type == 'A' && isset($data['PTR']) && currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $data['PTR']))) {
+				$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
 				if ($data['record_name'][0] == '@') {
 					$data['record_name'] = null;
 					$domain = substr($domain, 1);
@@ -73,7 +88,7 @@ if (isset($create) && is_array($create)) {
 				
 				/** Get reverse zone */
 				if (!strrpos($data['record_value'], ':')) {
-					$rev_domain = TrimFullStop(getNameFromID($data['PTR'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+					$rev_domain = trimFullStop(getNameFromID($data['PTR'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 					$domain_pieces = array_reverse(explode('.', $rev_domain));
 					$domain_parts = count($domain_pieces);
 					
@@ -109,7 +124,6 @@ if (isset($create) && is_array($create)) {
 }
 
 if (isset($record_type) && !isset($import_records)) {
-	if ($record_type == 'AAAA') $record_type = 'A';
 	header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);
 } else header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);
 

@@ -105,34 +105,40 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}keys` 
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}options` (
-  `option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL,
-  `option_name` varchar(255) NOT NULL,
-  `option_value` varchar(255) NOT NULL,
-  PRIMARY KEY (`option_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
-
-	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}records` (
   `record_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `domain_id` int(11) NOT NULL DEFAULT '0',
   `record_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `record_name` varchar(255) DEFAULT '@',
-  `record_value` varchar(255) DEFAULT NULL,
+  `record_value` text,
   `record_ttl` varchar(50) NOT NULL DEFAULT '',
-  `record_class` enum('IN','CH') NOT NULL DEFAULT 'IN',
-  `record_type` enum('A','AAAA','CNAME','TXT','MX','PTR','SRV','NS') NOT NULL DEFAULT 'A',
+  `record_class` enum('IN','CH','HS') NOT NULL DEFAULT 'IN',
+  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A',
   `record_priority` int(4) DEFAULT NULL,
   `record_weight` int(4) DEFAULT NULL,
   `record_port` int(4) DEFAULT NULL,
+  `record_os` varchar(255) DEFAULT NULL,
+  `record_cert_type` tinyint(4) DEFAULT NULL,
+  `record_key_tag` int(11) DEFAULT NULL,
+  `record_algorithm` tinyint(4) DEFAULT NULL,
+  `record_flags` enum('0','256','257') DEFAULT NULL,
+  `record_text` varchar(255) DEFAULT NULL,
   `record_comment` varchar(200) NOT NULL,
   `record_append` enum('yes','no') NOT NULL DEFAULT 'yes',
   `record_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`record_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
+TABLE;
+
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}records_skipped` (
+  `account_id` int(11) NOT NULL,
+  `domain_id` int(11) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  `record_status` enum('active','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 TABLE;
 
 	$table[] = <<<TABLE
@@ -419,16 +425,18 @@ INSERT;
 	
 	/** fm_options inserts */
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value) 
-	SELECT '{$module}_version', '{$__FM_CONFIG[$module]['version']}' FROM DUAL
+INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = '{$module}_version');
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'version'
+		AND module_name='$module');
 INSERT;
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value) 
-	SELECT '{$module}_client_version', '{$__FM_CONFIG[$module]['client_version']}' FROM DUAL
+INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = '{$module}_client_version');
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'client_version'
+		AND module_name='$module');
 INSERT;
 
 
@@ -462,10 +470,6 @@ INSERT;
 			}
 		}
 	}
-
-//	$current_value = getOption('enable_named_checks', 1, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'options');
-//	$command = ($current_value === false) ? 'insert' : 'update';
-//	setOption('enable_named_checks', 'no', $command, 1, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'options');
 
 	if (function_exists('displayProgress')) {
 		return displayProgress($module, $result, $noisy);

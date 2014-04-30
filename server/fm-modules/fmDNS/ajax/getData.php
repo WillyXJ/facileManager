@@ -28,7 +28,7 @@ require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
-if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && $allowed_to_manage_servers) {
+if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
 	$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
@@ -76,7 +76,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.ph
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
 /** Edits */
-if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
+if (is_array($_POST) && count($_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
 	if (array_key_exists('add_form', $_POST)) {
 		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
 		$add_new = true;
@@ -127,8 +127,6 @@ if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
 			$item_type = $_POST['item_sub_type'] . ' ';
 			break;
 	}
-	
-//	if ($post_class != $fm_dns_zones && !$super_admin) returnUnAuth();
 	
 	if ($add_new) {
 		$edit_form = '<h2>Add ' . substr(ucfirst($item_type), 0, -1) . '</h2>' . "\n";

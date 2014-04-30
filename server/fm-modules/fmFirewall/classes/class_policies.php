@@ -26,36 +26,31 @@ class fm_module_policies {
 	 * Displays the policy list
 	 */
 	function rows($result, $type) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
+		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="policies">There are no firewall policies.</p>';
 		} else {
-			echo '<table class="display_results';
-			if ($allowed_to_manage_servers && $fmdb->num_rows > 1) echo ' grab';
-			echo '" id="table_edits" name="policies">' . "\n";
-			echo <<<HTML
-				<thead>
-					<tr>
-						<th width="20"></th>
-						<th>Source</th>
-						<th>Destination</th>
-						<th>Service</th>
-						<th>Interface</th>
-						<th>Direction</th>
-						<th>Time</th>
-						<th style="width: 20%;">Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'policies'
+						);
+			if (currentUserCan('manage_servers', $_SESSION['module']) && $fmdb->num_rows > 1) $table_info['class'] .= ' grab';
 
-HTML;
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x], $type);
-					}
+			$title_array = array(array('class' => 'header-tiny'), 'Source', 'Destination', 'Service', 'Interface',
+									'Direction', 'Time', array('title' => 'Comment', 'style' => 'width: 20%;'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x], $type);
+			}
+			
 			echo "</tbody>\n";
 		}
 		
@@ -131,7 +126,7 @@ HTML;
 					} elseif ($key == 'policy_time') {
 						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 					}
-					$log_message .= ucwords(str_replace('_', ' ', str_replace('policy_', '', $key))) . ": $clean_data\n";
+					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
 				}
 			}
 		}
@@ -196,7 +191,7 @@ HTML;
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
 						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
 					}
-					$log_message .= ucwords(str_replace('_', ' ', str_replace('policy_', '', $key))) . ": $clean_data\n";
+					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
 				}
 			}
 		}
@@ -240,13 +235,13 @@ HTML;
 
 
 	function displayRow($row, $type) {
-		global $__FM_CONFIG, $allowed_to_manage_servers, $allowed_to_build_configs;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = $edit_actions = null;
 		
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 //			$edit_status = '<a id="plus" href="#" title="Add New" name="' . $type . '">' . $__FM_CONFIG['icons']['add'] . '</a>';
 			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->policy_id . '&status=';
@@ -255,9 +250,8 @@ HTML;
 			$edit_status .= ($row->policy_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
-		
-		$edit_status = $edit_actions . $edit_status;
 		
 		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action'][$row->policy_status]) : null;
 		$action = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_status]);
@@ -281,7 +275,7 @@ HTML;
 			<td>$row->policy_direction</td>
 			<td>$policy_time</td>
 			<td>$row->policy_comment</td>
-			<td id="edit_delete_img">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;
@@ -332,7 +326,7 @@ HTML;
 		$service_not_check = ($policy_services_not) ? 'checked' : null;
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-policy?server_serial_no={$_REQUEST['server_serial_no']}">
+		<form name="manage" id="manage" method="post" action="?server_serial_no={$_REQUEST['server_serial_no']}">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />

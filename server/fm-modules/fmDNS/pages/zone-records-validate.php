@@ -26,34 +26,37 @@
 
 $map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
 
-$page_name = 'Zones';
-$page_name_sub = ($map == 'forward') ? 'Forward' : 'Reverse';
-
-$record_type = (isset($_GET['record_type'])) ? strtoupper($_GET['record_type']) : 'A';
+$record_type = (isset($_GET['record_type'])) ? strtoupper($_GET['record_type']) : array_shift(array_values($__FM_CONFIG['records']['common_types']));
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
-if (!$allowed_to_manage_records || empty($_POST)) {
-	header('Location: /');
-}
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !$allowed_to_manage_zones) header('Location: /');
+if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
+extract($_POST);
+
+/** Should the user be here? */
+if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
+if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
+
+/** Make sure we can handle all of the variables */
+checkMaxInputVars();
 
 printHeader();
-@printMenu($page_name, $page_name_sub);
+@printMenu();
 
-extract($_POST);
 $html_out_create = $html_out_update = null;
 foreach($_POST as $name => $value) {
 	if (strtolower($name) == 'update') $html_out_update = buildReturnUpdate($domain_id, $record_type, $value);
 	if (strtolower($name) == 'create') $html_out_create = buildReturnCreate($domain_id, $record_type, $value);
 }
 
-$header = $fm_dns_records->getHeader(strtoupper($record_type));
+$table_info = array('class' => 'display_results');
+$header = displayTableHeader($table_info, $fm_dns_records->getHeader(strtoupper($record_type)));
 
 echo <<<HTML
 <div id="body_container">
 	<h2>Record Validation</h2>
-	<form method="POST" action="zone-recordswrite">
+	<form method="POST" action="zone-records-write.php">
 	<input type="hidden" name="domain_id" value="$domain_id">
 	<input type="hidden" name="record_type" value="$record_type">
 	<input type="hidden" name="map" value="$map">
@@ -82,12 +85,11 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 	global $__FM_CONFIG;
 
-	$ErrorCode = '<font color="red"><b>**</b></font>';
 	$sql_records = buildSQLRecords($record_type, $domain_id);
-	$changes = compareValues($value, $sql_records);
-	if (count($changes)) {
-		foreach ($changes as $i => $array) {
-			$changes[$i] = array_merge($sql_records[$i], $changes[$i]);
+	$raw_changes = compareValues($value, $sql_records);
+	if (count($raw_changes)) {
+		foreach ($raw_changes as $i => $array) {
+			$changes[$i] = array_merge($sql_records[$i], $raw_changes[$i]);
 		}
 	} else {
 		return false;
@@ -103,7 +105,16 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 		if (isset($data['Delete'])) {
 			$action = 'Delete';
-			$HTMLOut.= buildInputReturn('update', $record_type, $i ,'record_status', 'deleted');
+			$HTMLOut.= buildInputReturn('update', $i ,'record_status', 'deleted');
+		} elseif (array_key_exists('record_skipped', $raw_changes[$i])) {
+			if ($data['record_skipped'] == 'on') {
+				$action = 'Skip Import';
+				$HTMLOut.= buildInputReturn('skip', $i ,'record_status', 'active');
+			} else {
+				$action = 'Include';
+				$HTMLOut.= buildInputReturn('skip', $i ,'record_status', 'deleted');
+			}
+			$value[$i] = $changes[$i];
 		} else {
 			$y = 0;
 			$action = null;
@@ -134,7 +145,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 					} else $ttl_error = null;
 				}
 
-				if ($record_type == 'CNAME') {
+				if (in_array($record_type, array('CNAME', 'DNAME'))) {
 					if ($key == 'record_append') {
 						if (!verifyCNAME($val, $_POST['update'][$i]['record_value'])) {
 							$value_error = '<font color="red"><i>Invalid</i></font> ';
@@ -256,7 +267,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 
 				if (!isset($input_return_error[$i]) || !$input_return_error[$i]) {
 					if ($key == 'soa_serial_no' && !$val) continue;
-					$input_return[$i][$y]= buildInputReturn('update', $record_type, $i, $key, $val);
+					$input_return[$i][$y]= buildInputReturn('update', $i, $key, $val);
 					$action = 'Update';
 				} else {
 					$action = 'None';
@@ -269,17 +280,27 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 		if ($record_type != 'SOA') {
 			$value[$i]['record_name'] = (!$value[$i]['record_name'] && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
 		}
-		if ($record_type == 'MX') {
-			$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+		if (in_array($record_type, array('MX', 'KX'))) {
+			$HTMLOut .= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>{$value[$i]['record_comment']}</td>";
+			if ($record_type == 'MX') $HTMLOut .= "<td style=\"text-align: center;\">{$value[$i]['record_append']}</td>";
+			$HTMLOut .= "<td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 		} elseif ($record_type == 'SRV') {
-			$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$number_error {$value[$i]['record_priority']}</td><td>$number_error {$value[$i]['record_weight']}</td><td>$number_error {$value[$i]['record_port']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">$append_error {$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
-		} elseif ($record_type == 'CNAME' || $record_type == 'NS') {
-			$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			$HTMLOut .= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$number_error {$value[$i]['record_priority']}</td><td>$number_error {$value[$i]['record_weight']}</td><td>$number_error {$value[$i]['record_port']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">$append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+		} elseif (in_array($record_type, array('CNAME', 'NS', 'DNAME'))) {
+			$HTMLOut .= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+		} elseif ($record_type == 'HINFO') {
+			$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_os']}</td><td>{$value[$i]['record_comment']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+		} elseif ($record_type == 'RP') {
+			$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_text']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\"> $append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+		} elseif (in_array($record_type, array('KEY', 'DNSKEY'))) {
+			$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>{$value[$i]['record_flags']}</td><td>{$value[$i]['record_algorithm']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+		} elseif (in_array($record_type, array('CERT'))) {
+			$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>{$value[$i]['record_cert_type']}</td><td>{$value[$i]['record_key_tag']}</td><td>{$value[$i]['record_algorithm']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\"> $append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 		} elseif ($record_type == 'SOA') {
-			$HTMLOut.= $SOAHTMLOut;
+			$HTMLOut .= $SOAHTMLOut;
 		} else {
 			$name = ($record_type == 'PTR' && $domain_map == 'reverse') ? $value[$i]['record_name'] . '.' . $domain : $value[$i]['record_name'];
-			$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			$HTMLOut .= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 		}
 
 	}
@@ -297,7 +318,6 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 	global $__FM_CONFIG;
 
 	$value_tmp = $value;
-	$ErrorCode = '<font color="red"><b>*Invalid*</b></font>';
 	$HTMLOut = $SOAHTMLOut = null;
 	$input_return = array();
 	$domain = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
@@ -338,7 +358,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 					} else $priority_error = null;
 				}
 
-				if ($record_type == 'CNAME') {
+				if (in_array($record_type, array('CNAME', 'DNAME'))) {
 					if (!isset($_POST['create'][$i]['record_append'])) {
 						$append_error = '<font color="red"><i>Invalid</i></font> ';
 						$input_return_error[$i] = 1;
@@ -506,7 +526,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 				}
 				
 				if (!isset($input_return_error[$i]) || !$input_return_error[$i]) {
-					$input_return[$i][$y] = buildInputReturn('create', $record_type, $i, $key, $val);
+					$input_return[$i][$y] = buildInputReturn('create', $i, $key, $val);
 					$action = 'Create';
 				} else {
 					$action = 'None';
@@ -518,17 +538,25 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 			if ($record_type != 'SOA') {
 				$value[$i]['record_name'] = (empty($value[$i]['record_name']) && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
 			}
-			if ($record_type == 'MX') {
-				$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">$append_error {$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			if (in_array($record_type, array('MX', 'KX'))) {
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">$append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 			} elseif ($record_type == 'SRV') {
-				$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>$number_error {$value[$i]['record_weight']}</td><td>$number_error {$value[$i]['record_port']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">$append_error {$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
-			} elseif ($record_type == 'CNAME' || $record_type == 'NS') {
-				$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\"> $append_error {$value[$i]['record_append']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>$priority_error {$value[$i]['record_priority']}</td><td>$number_error {$value[$i]['record_weight']}</td><td>$number_error {$value[$i]['record_port']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">$append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			} elseif (in_array($record_type, array('CNAME', 'NS', 'DNAME'))) {
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error {$value[$i]['record_name']}</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\"> $append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			} elseif ($record_type == 'HINFO') {
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_os']}</td><td>{$value[$i]['record_comment']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			} elseif ($record_type == 'RP') {
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_text']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\"> $append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			} elseif (in_array($record_type, array('KEY', 'DNSKEY'))) {
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>{$value[$i]['record_flags']}</td><td>{$value[$i]['record_algorithm']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+			} elseif (in_array($record_type, array('CERT'))) {
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>{$value[$i]['record_cert_type']}</td><td>{$value[$i]['record_key_tag']}</td><td>{$value[$i]['record_algorithm']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\"> $append_error {$value[$i]['record_append']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 			} elseif ($record_type == 'SOA') {
 				$HTMLOut.= $SOAHTMLOut;
 			} else {
 				$name = ($record_type == 'PTR' && $domain_map == 'reverse') ? $value[$i]['record_name'] . '.' . $domain : $value[$i]['record_name'];
-				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td style=\"text-align: center;\">{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
+				$HTMLOut.= "<tr><td>$action</td><td>$name_error $name</td><td>$ttl_error {$value[$i]['record_ttl']}</td><td>{$value[$i]['record_class']}</td><td>$value_error {$value[$i]['record_value']}</td><td>{$value[$i]['record_comment']}</td><td>{$value[$i]['record_status']}</td><td style=\"text-align: center;\">$img</td></tr>\n";
 			}
 		}
 	}
@@ -542,7 +570,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 	return $HTMLOut;
 }
 
-function buildInputReturn($action, $record_type, $i, $key, $val) {
+function buildInputReturn($action, $i, $key, $val) {
 
 	return "<input type='hidden' name='{$action}[$i][$key]' value='$val'>\n";
 }
@@ -645,10 +673,13 @@ function buildSQLRecords($record_type, $domain_id) {
 		array_shift($sql_results[$result[0]->soa_id]);
 		return $sql_results;
 	} else {
+		$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+		
 		if (in_array($record_type, array('A', 'AAAA'))) {
-			$record_sql = "AND domain_id='$domain_id' AND record_type IN ('A', 'AAAA')";
+			$record_sql = "AND domain_id $valid_domain_ids AND record_type IN ('A', 'AAAA')";
 		} else {
-			$record_sql = "AND domain_id='$domain_id' AND record_type='$record_type'";
+			$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
 		}
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_name', 'record_', $record_sql);
 		if ($result) {
@@ -673,6 +704,31 @@ function buildSQLRecords($record_type, $domain_id) {
 				if ($results[$i]->record_port != null) {
 					$sql_results[$results[$i]->record_id]['record_port'] = $results[$i]->record_port;
 				}
+				if ($results[$i]->record_port != null) {
+					$sql_results[$results[$i]->record_id]['record_port'] = $results[$i]->record_port;
+				}
+				if ($results[$i]->record_os != null) {
+					$sql_results[$results[$i]->record_id]['record_os'] = $results[$i]->record_os;
+				}
+				if ($results[$i]->record_cert_type != null) {
+					$sql_results[$results[$i]->record_id]['record_cert_type'] = $results[$i]->record_cert_type;
+				}
+				if ($results[$i]->record_key_tag != null) {
+					$sql_results[$results[$i]->record_id]['record_key_tag'] = $results[$i]->record_key_tag;
+				}
+				if ($results[$i]->record_algorithm != null) {
+					$sql_results[$results[$i]->record_id]['record_algorithm'] = $results[$i]->record_algorithm;
+				}
+				if ($results[$i]->record_flags != null) {
+					$sql_results[$results[$i]->record_id]['record_flags'] = $results[$i]->record_flags;
+				}
+				if ($results[$i]->record_text != null) {
+					$sql_results[$results[$i]->record_id]['record_text'] = $results[$i]->record_text;
+				}
+				
+				/** Skipped record? */
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $results[$i]->record_id, 'record_', 'record_id', "AND domain_id=$domain_id");
+				$sql_results[$results[$i]->record_id]['record_skipped'] = ($fmdb->num_rows) ? 'on' : 'off';
 			}
 		}
 		return $sql_results;

@@ -14,40 +14,17 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
+ | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | http://www.facilemanager.com/modules/fmfirewall/                        |
+ +-------------------------------------------------------------------------+
+ | Processes object groups management page                                 |
+ | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
-/**
- * Processes main page
- *
- * @author		Jon LaBass
- * @version		$Id:$
- * @copyright	2013
- *
- */
+$type = 'udp';
 
-if (isset($_POST['module_type']) && $_POST['module_type'] == 'CLIENT') {
-	define('CLIENT', true);
-}
-if (isset($_POST['module_name'])) {
-	$_SESSION['module'] = $_POST['module_name'];
-}
-
-require('fm-init.php');
-
-if (is_array($GLOBALS)) {
-	if (@array_key_exists('logout', $GLOBALS['URI'])) exit;
-}
-
-if ($GLOBALS['basename'] == 'index.php') {
-	require_once(ABSPATH . 'fm-includes/init.php');
-	checkAppVersions();
-}
-
-if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename']))) {
-	@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename']));
-} else throwHTTPError('404');
+include(dirname(__FILE__) . '/services.php');
 
 ?>

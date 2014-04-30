@@ -238,7 +238,7 @@ $(document).ready(function() {
 			data: $('#manage').serialize(),
 			success: function(response)
 			{
-				if(response == 'force_logout') {
+				if (response.indexOf('force_logout') >=0) {
 					window.location = '?logout';
 				} else {
 					$('#response').removeClass('static').html(response);
@@ -323,19 +323,8 @@ $(document).ready(function() {
     });
     
     /* Account password changes */
-    $('#manage_item_contents').delegate('#change_user_password', 'click tap', function(e) {
-        var user_id			= $('input[name=user_id]').val();
-        var user_login		= $('input[name=user_login]').val();
-        var user_pwd		= $('input[name=user_password]').val();
-        var user_cpwd		= $('input[name=cpassword]').val();
-        
-		var form_data = {
-			user_id: user_id,
-			user_login: user_login,
-			user_password: user_pwd,
-			cpassword: user_cpwd,
-			is_ajax: 1
-		};
+    $('#manage_item_contents').delegate('#update_user_profile', 'click tap', function(e) {
+		var form_data = $('#fm_user_profile').serialize();
 
 		$.ajax({
 			type: 'POST',
@@ -344,7 +333,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				if (response == 'Success') {
-					$('#popup_response').html('<p>Password has been updated.</p>');
+					$('#popup_response').html('<p>Profile has been updated.</p>');
 				} else {
 					$('#popup_response').html('<p>' + response + '</p>');
 				}
@@ -430,17 +419,31 @@ $(document).ready(function() {
     });
 
 	$("#topheadpartright .help_link").click(function() {
-		var $body_right		= $('#body_container').css('right');
-		var $help_right		= $('#help').css('right');
+		var body_right		= $('#body_container').css('right');
+		var help_right		= $('#help').css('right');
 		
-		if ($body_right == '304px') {
+		if (body_right == '300px') {
 			$('#body_container').animate({right: '0'}, 500);
 			$('#help').hide("slide", { direction: "right" }, 500);
 		} else {
-			$('#body_container').animate({right: '19em'}, 500);
+			$('#body_container').animate({right: '300px'}, 500);
 			$('#help').show("slide", { direction: "right" }, 500);
 		}
 		
+		return false;
+	});
+	
+	$("#help_file_container a.list_title").click(function() {
+		help_block = $(this).next();
+		if ($(help_block).is(":visible")) {
+			$(help_block).slideUp('slow');
+		} else {
+			$(help_block).slideDown('slow');
+		}
+	});
+	
+	$("#help_file_container ul li div a").click(function() {
+		window.opener.location.href = $(this).attr('href');
 		return false;
 	});
 	
@@ -600,7 +603,7 @@ $(document).ready(function() {
 			if (confirm('Are you sure you want to ' + $('#bulk_action').val().toLowerCase() + ' these selected ' + item_type + '?')) {
 				$('#manage_item').fadeIn(200);
 				$('#manage_item_contents').fadeIn(200);
-				$('#manage_item_contents').html('<p>Processing Upgrades...</p>');
+				$('#manage_item_contents').html('<p>Processing Bulk Action...</p>');
 		
 				var form_data = {
 					item_id: serverIDs,
@@ -623,6 +626,21 @@ $(document).ready(function() {
 		}
 	});
 
+	/* Sortable table headers */
+    $('.sortable th:not(".header-nosort")').click(function() {
+    	var sort_by_field = $(this).attr('rel');
+    	var sort_direction = $(this).parent().parent().parent().attr('id');
+    	
+    	if (sort_by_field) {
+    		if (window.location.href.indexOf('?') != -1) {
+    			append_mark = '&';
+    		} else {
+    			append_mark = '?';
+    		}
+    		window.location = window.location.href + append_mark + 'sort_by=' + sort_by_field;
+    	}
+    });
+    
 });
 
 function del(msg){
@@ -693,24 +711,6 @@ function exchange(el){
 	}
 	el.style.display='none';
 	toObj.style.display='inline';
-}
-
-function toggleLayer(whichLayer, view) {
-   if (document.getElementById) {
-      // this is the way the standards work
-      var style2 = document.getElementById(whichLayer).style;
-      style2.display = style2.display? "":view;
-   }
-   else if (document.all) {
-      // this is the way old msie versions work
-      var style2 = document.all[whichLayer].style;
-      style2.display = style2.display? "":view;
-   }
-   else if (document.layers) {
-      // this is the way nn4 works
-      var style2 = document.layers[whichLayer].style;
-      style2.display = style2.display? "":view;
-   }
 }
 
 function validateNumber(event) {

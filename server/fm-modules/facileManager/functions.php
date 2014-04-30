@@ -99,11 +99,14 @@ function isNewVersionAvailable($package, $version) {
 	$method = 'update';
 	
 	/** Are software updates enabled? */
-	if (!getOption('software_update', 0)) return false;
+	if (!getOption('software_update')) return false;
+	
+	/** Disable check until user has upgraded database to 1.2 */
+	if (getOption('fm_db_version') < 32) return false;
 	
 	/** Should we be running this check now? */
-	$last_version_check = getOption($package . '_version_check', 0);
-	if (!$software_update_interval = getOption('software_update_interval', 0)) $software_update_interval = 'week';
+	$last_version_check = getOption('version_check', 0, $package);
+	if (!$software_update_interval = getOption('software_update_interval')) $software_update_interval = 'week';
 	if (!$last_version_check) {
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
@@ -115,7 +118,7 @@ function isNewVersionAvailable($package, $version) {
 		$data['software_update_tree'] = getOption('software_update_tree');
 		$result = getPostData($fm_site_url, $data);
 		
-		setOption($package . '_version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method);
+		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, true, 0, $package);
 		
 		return $result;
 	}
@@ -149,12 +152,17 @@ function sanitize($data, $replace = null) {
  * @since 1.0
  * @package facileManager
  */
-function printHeader($subtitle = null, $css = 'facileManager', $help = false, $menu = true) {
+function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, $menu = true) {
 	global $fm_name, $__FM_CONFIG;
 	
 	include(ABSPATH . 'fm-includes/version.php');
 	
-	$title = ($subtitle) ? "$subtitle &lsaquo; " : null;
+	$title = $fm_name;
+	
+	if (!empty($subtitle)) {
+		if ($subtitle == 'auto') $subtitle = getPageTitle();
+		$title = "$subtitle &lsaquo; $title";
+	}
 	
 	$head = $logo = null;
 	
@@ -179,10 +187,11 @@ function printHeader($subtitle = null, $css = 'facileManager', $help = false, $m
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>$title$fm_name</title>
+		<title>$title</title>
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version' rel='stylesheet' type='text/css'>
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 		$module_css
@@ -219,7 +228,7 @@ FOOT;
  * @package facileManager
  */
 function getTopHeader($help) {
-	global $fm_login, $__FM_CONFIG, $super_admin;
+	global $fm_login, $__FM_CONFIG;
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
@@ -237,8 +246,8 @@ function getTopHeader($help) {
 HTML;
 			}
 
-			$star = $super_admin ? $__FM_CONFIG['icons']['star'] . ' ' : null;
-			$change_pwd_link = ($auth_method == 1) ? '<li><a class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#"><span>Change Password</span></a></li>' . "\n" : null;
+			$star = currentUserCan('do_everything') ? $__FM_CONFIG['icons']['star'] . ' ' : null;
+			$change_pwd_link = ($auth_method == 1) ? '<li><a class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#"><span>Edit Profile</span></a></li>' . "\n" : null;
 			$user_account_menu = <<<HTML
 		<div id="topheadpartright" style="padding: 0 1px 0 0;">
 			<div id="cssmenu">
@@ -256,17 +265,14 @@ HTML;
 HTML;
 		}
 		
-		// Build app dropdown menu
+		/** Build app dropdown menu */
 		$modules = getAvailableModules();
 		$avail_modules = null;
 		
 		if (count($modules)) {
 			foreach ($modules as $module_name) {
 				if ($module_name == $_SESSION['module']) continue;
-				if (in_array($module_name, getActiveModules())) {
-					$module_perms = $fm_login->getModulePerms($_SESSION['user']['id'], $module_name);
-					include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
-					if ($module_perms & PERM_MODULE_ACCESS_DENIED) continue;
+				if (in_array($module_name, getActiveModules(true))) {
 					$avail_modules .= "<li class='last'><a href='{$GLOBALS['RELPATH']}?module=$module_name'><span>$module_name</span></a></li>\n";
 				}
 			}
@@ -345,71 +351,89 @@ HTML;
  * @since 1.0
  * @package facileManager
  */
-function printMenu($page_name, $page_name_sub) {
-	global $__FM_CONFIG;
+function printMenu() {
+	global $__FM_CONFIG, $menu, $submenu;
 	
-	$main_menu_html = $sub_menu_html = $domain = null;
+	$main_menu_html = null;
 	
-	/** Get badge counts */
-	$badge_array = getBadgeCounts();
-
-	foreach ($__FM_CONFIG['menu'] as $top_menu => $sub_menu) {
-		if ($top_menu == 'Break' && $main_menu_html == null) continue;
+	list($filtered_menu, $filtered_submenu) = getCurrentUserMenu();
+	ksort($filtered_menu);
+	ksort($filtered_submenu);
+	
+	foreach ($filtered_menu as $position => $main_menu_array) {
+		$sub_menu_html = '</li>';
+		$show_top_badge_count = true;
 		
-		$class = ($page_name == $top_menu) ? ' class="current"' : null;
-		
-		$arrow = (!empty($class)) ? '<div class="arrow current"></div>' : '<div class="arrow"></div>';
-		
-		if ((empty($class) || count($sub_menu) <= 1) && array_key_exists($top_menu, $badge_array)) {
-			$badge = '<span class="menu_badge';
-			if (!empty($class) && count($sub_menu) <= 1) $badge .= ' badge_top_selected';
-			$badge .= '"><p>' . array_sum($badge_array[$top_menu]) . '</p></span>';
-		} else {
-			$badge = null;
+		list($menu_title, $page_title, $capability, $module, $slug, $class, $badge_count) = $main_menu_array;
+		if (!is_array($class)) {
+			$class = !empty($class) ? array_fill(0, 1, $class) : array();
 		}
 		
-		$sub_menu_html = null;
-
-		/** Handle the styled break */
-		if ($top_menu == 'Break') {
-			$main_menu_html .= '<li><div class="separator"></div></li>' . "\n";
-		} else {
-			if (empty($class) && count($sub_menu) > 1) {
-				$main_menu_html .= '<li class="has-sub"><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $badge . '</a>' . "\n";
-				unset($sub_menu['URL']);
-				foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
-					$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count badge_top_selected"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
-					$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
-				}
-				$main_menu_html .= <<<HTML
-				<div class="arrow $class"></div>
-				<ul>
-$sub_menu_html
-
-				</ul>
-</li>
-
-HTML;
-			} else {
-				$main_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu['URL'] . '">' . ucfirst($top_menu) . $badge . '</a>' . $arrow . '</li>' . "\n";
-				if ($top_menu == $page_name) {
-					unset($sub_menu['URL']);
-					foreach ($sub_menu as $sub_menu_name => $sub_menu_url) {
-						$class = ($page_name_sub == $sub_menu_name) ? ' class="current"' : null;
-						$sub_badge = (array_key_exists($sub_menu_name, $badge_array[$top_menu])) ? '<span class="menu_badge menu_badge_count"><p>' . $badge_array[$top_menu][$sub_menu_name] . '</p></span>' : null;
-						
-						$sub_menu_html .= '<li><a' . $class . ' href="' . $GLOBALS['RELPATH'] . $sub_menu_url . '">' . ucfirst($sub_menu_name) . $sub_badge . '</a></li>' . "\n";
+		/** Check if menu item is current page */
+		if ($slug == findTopLevelMenuSlug($filtered_submenu)) {
+			array_push($class, 'current', 'arrow');
+			
+			if (array_key_exists($slug, $filtered_submenu)) {
+				$show_top_badge_count = false;
+				$k = 0;
+				foreach ($filtered_submenu[$slug] as $submenu_array) {
+					if (!empty($submenu_array[0])) {
+						$submenu_class = ($submenu_array[4] == $GLOBALS['basename']) ? ' class="current"' : null;
+						if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
+						$sub_menu_html .= sprintf('<li%s><a href="%s">%s</a></li>' . "\n", $submenu_class, $submenu_array[4], $submenu_array[0]);
+					} elseif (!$k) {
+						$show_top_badge_count = true;
 					}
-					$main_menu_html .= <<<HTML
+					$k++;
+				}
+				
+				$sub_menu_html = <<<HTML
+					</li>
 					<div id="submenu">
 						<div id="subitems">
 							<ul>
-$sub_menu_html
+							$sub_menu_html
 							</ul>
 						</div>
 					</div>
 HTML;
+			}
+		}
+		
+		/** Build submenus */
+		if (!count($class) && count($filtered_submenu[$slug]) > 1) {
+			array_push($class, 'has-sub');
+			foreach ($filtered_submenu[$slug] as $submenu_array) {
+				if (!empty($submenu_array[0])) {
+					if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
+					$sub_menu_html .= sprintf('<li><a href="%s">%s</a></li>' . "\n", $submenu_array[4], $submenu_array[0]);
 				}
+			}
+			
+			$sub_menu_html = <<<HTML
+				<div class="arrow"></div>
+				<ul>
+				$sub_menu_html
+				</ul>
+</li>
+
+HTML;
+		}
+		
+		$arrow = (in_array('arrow', $class)) ? '<u></u>' : null;
+		
+		/** Join all of the classes */
+		if (count($class)) $class = ' class="' . implode(' ', $class) . '"';
+		else $class = null;
+		
+		if (empty($slug) && !empty($class)) {
+			/** Ideally this should be the separator */
+			$main_menu_html .= '<li' . $class . '></li>' . "\n";
+		} else {
+			/** Display the menu item if allowed */
+			if (currentUserCan($capability, $module)) {
+				if ($badge_count && $show_top_badge_count) $menu_title = sprintf($menu_title . ' <span class="menu_badge"><p>%d</p></span>', $badge_count);
+				$main_menu_html .= sprintf('<li%s><a href="%s">%s</a>%s%s' . "\n", $class, $slug, $menu_title, $arrow, $sub_menu_html);
 			}
 		}
 	}
@@ -427,35 +451,82 @@ $main_menu_html
 MENU;
 }
 
+
 /**
- * Handles the config pages
+ * Removes non-permitted menu items
  *
- * @since 1.0
+ * @since 1.2
  * @package facileManager
+ *
+ * @param array $element Menu array to check.
+ * @return bool
  */
-function outputConfig($config = 'users') {
-	if (empty($config)) $config = 'users';
-	$action = (isset($_GET['action'])) ? $_GET['action'] : 'add';
-	include(ABSPATH . 'fm-includes/class_' . $config . '.php');
-	
-	if ($config == 'users') {
-	?>
+function filterMenu($element) {
+	return currentUserCan($element[2], $element[3]);
+}
 
-	<div id="body_container">
-		<h2>Users</h2>
-		<div id="response"><?php if (!empty($response)) echo $response; else echo '<br />'; ?></div>
-		<?php
-		$result = basic_get_list('fm_users', 'user_id', 'user_');
-		$fm_users->rows($result);
-		?>
-		<br /><br />
-		<a name="#manage"></a>
-		<h2><?php echo ucfirst($action); ?> User</h2>
-		<?php $fm_users->print_users_form($form_data, $action); ?>
-	</div>
 
-	<?php
+/**
+ * Finds the top level menu for selection
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param array $menu_array Menu array to search.
+ * @return string
+ */
+function findTopLevelMenuSlug($menu_array) {
+	foreach ($menu_array as $slug => $menu_items) {
+		foreach ($menu_items as $element) {
+			if (array_search($GLOBALS['basename'], $element, true)) {
+				return $slug;
+			}
+		}
 	}
+	
+	return $GLOBALS['basename'];
+}
+
+
+/**
+ * Gets the user menu based on capabilities
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return array
+ */
+function getCurrentUserMenu() {
+	global $menu, $submenu;
+	
+	$filtered_menus = array(null, null);
+	
+	/** Submenus */
+	foreach ($submenu as $slug => $submenu_array) {
+		ksort($submenu_array);
+		$filtered_menus[1][$slug] = array_filter($submenu_array, 'filterMenu');
+	}
+	
+	/** Main menu */
+	$temp_menu = $menu;
+	foreach ($menu as $position => $element) {
+		list($menu_title, $page_title, $capability, $module, $slug, $class) = $element;
+		if (array_key_exists($slug, $filtered_menus[1])) {
+			if (count($filtered_menus[1][$slug]) == 1) {
+				$single_element = array_values($filtered_menus[1][$slug]);
+				if (!empty($single_element[0][0])) {
+					$temp_menu[$position] = array_shift($filtered_menus[1][$slug]);
+					if (isset($element[7]) && $element[7]) $temp_menu[$position][0] = $menu_title;
+				}
+			}
+		}
+	}
+	
+	$filtered_menus[0] = array_filter($temp_menu, 'filterMenu');
+	
+	unset($temp_menu, $element, $submenu_array, $slug, $position, $single_element);
+
+	return $filtered_menus;
 }
 
 
@@ -491,9 +562,8 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
  * @since 1.0
  * @package facileManager
  */
-function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', $ip_sort = false) {
+function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = null, $ip_sort = false, $direction = 'ASC') {
 	global $fmdb;
-	$id = sanitize($id);
 	
 	switch($sql) {
 		case 'active':
@@ -503,13 +573,22 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = '', $limit = '', 
 			break;
 	}
 	
-	if ($ip_sort) {
-		$sort = "ORDER BY INET_ATON(`$id`) ASC";
+	if (is_array($id)) {
+		$primary_field = sanitize($id[0]);
+		$secondary_fields = implode(',', $id);
+		$secondary_fields = $direction . ' ' . sanitize(substr($secondary_fields, strlen($primary_field)));
 	} else {
-		$sort = "ORDER BY `$id`";
+		$primary_field = sanitize($id);
+		$secondary_fields = null;
 	}
 	
-	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $limit";
+	if ($ip_sort) {
+		$sort = "ORDER BY INET_ATON(`$primary_field`)" . $secondary_fields;
+	} else {
+		$sort = "ORDER BY `$primary_field`" . $secondary_fields;
+	}
+	
+	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
 	return $fmdb->query($disp_query);
 }
 
@@ -648,8 +727,10 @@ function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null) 
 	basicGet($table, $id, $prefix, $field, null, $account_id);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		return $result[0]->$data;
+		if (isset($result[0]->$data)) return $result[0]->$data;
 	}
+	
+	return false;
 }
 
 
@@ -894,11 +975,14 @@ function buildHelpFile() {
 	
 	/** facileManager help */
 	$body = <<<HTML
+<div id="issue_tracker">
+	<p>Have an idea for a new feature?  Find a bug?  Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
+</div>
 <h3>$fm_name</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_modules', 'block');">Configure Modules</a>
-		<div id="fm_config_modules">
+		<a class="list_title">Configure Modules</a>
+		<div>
 			<p>Modules are what gives $fm_name purpose. They can be installed, activated, upgraded, deactivated, and uninstalled.</p>
 			
 			<p><b>Install</b><br />
@@ -935,8 +1019,8 @@ function buildHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_users', 'block');">Manage Users</a>
-		<div id="fm_config_users">
+		<a class="list_title">Manage Users</a>
+		<div>
 			<p>$fm_name incorporates the use of multiple user accounts with granular permissions. This way you can limit access to your 
 			environment.</p>
 			
@@ -969,8 +1053,8 @@ function buildHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_settings', 'block');">Manage Settings</a>
-		<div id="fm_config_settings">
+		<a class="list_title">Manage Settings</a>
+		<div>
 			<p>There are several settings available to set at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Settings']}">Settings</a>.</p>
 			<p><i>The 'Manage Settings' or 'Super Admin' permission is required to change settings.</i></p>
 			<p><b>Authentication</b><br />
@@ -1006,8 +1090,8 @@ function buildHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_config_logs', 'block');">Review Logs</a>
-		<div id="fm_config_logs">
+		<a class="list_title">Review Logs</a>
+		<div>
 			<p>Every action performed within the $fm_name UI will be logged for auditing purposes.</p>
 			<p>You can view and search the logs at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Logs']}">Logs</a></p>
 		</div>
@@ -1029,7 +1113,7 @@ HTML;
 		}
 	}
 
-	return $body;
+	return $body . '<br />';
 }
 
 
@@ -1091,26 +1175,27 @@ function getAvailableModules() {
  * @since 1.0
  * @package facileManager
  */
-function getOption($option = null, $account_id = 0, $table = 'fm_options', $prefix = 'option_') {
+function getOption($option = null, $account_id = 0, $module_name = null) {
 	global $fmdb;
 	
-	$value = $prefix . 'value';
-	
-	$query = "SELECT * FROM $table WHERE {$prefix}name='$option' AND account_id=$account_id LIMIT 1";
+	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
+
+	$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql LIMIT 1";
 	$fmdb->get_results($query);
 	
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
 		
-		if (isSerialized($results[0]->$value)) {
-			return unserialize($results[0]->$value);
+		if (isSerialized($results[0]->option_value)) {
+			return unserialize($results[0]->option_value);
 		}
 		
-		return $results[0]->$value;
+		return $results[0]->option_value;
 	}
 	
 	return false;
 }
+
 
 /**
  * Sets an option value
@@ -1118,7 +1203,7 @@ function getOption($option = null, $account_id = 0, $table = 'fm_options', $pref
  * @since 1.0
  * @package facileManager
  */
-function setOption($option = null, $value = null, $insert_update = 'auto', $auto_serialize = true, $account_id = 0, $table = 'fm_options', $prefix = 'option_') {
+function setOption($option = null, $value = null, $insert_update = 'auto', $auto_serialize = true, $account_id = 0, $module_name = null) {
 	global $fmdb;
 	
 	if ($auto_serialize) {
@@ -1126,16 +1211,24 @@ function setOption($option = null, $value = null, $insert_update = 'auto', $auto
 	} else sanitize($value);
 	$option = sanitize($option);
 	
+	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
+	
 	if ($insert_update == 'auto') {
-		$query = "SELECT * FROM $table WHERE {$prefix}name='$option' AND account_id=$account_id";
+		$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql";
 		$result = $fmdb->query($query);
 		$insert_update = ($fmdb->num_rows) ? 'update' : 'insert';
 	}
 	
 	if ($insert_update == 'insert') {
-		$query = "INSERT INTO $table (account_id, {$prefix}name, {$prefix}value) VALUES ($account_id, '$option', '$value')";
+		$keys = array('account_id', 'option_name', 'option_value');
+		$values = array($account_id, $option, $value);
+		if ($module_name) {
+			$keys[] = 'module_name';
+			$values[] = $module_name;
+		}
+		$query = "INSERT INTO fm_options (" . implode(',', $keys) . ") VALUES ('" . implode("','", $values) . "')";
 	} else {
-		$query = "UPDATE $table SET {$prefix}name='$option', {$prefix}value='$value' WHERE {$prefix}name='$option' AND account_id=$account_id";
+		$query = "UPDATE fm_options SET option_name='$option', option_value='$value' WHERE option_name='$option' AND account_id=$account_id $module_sql";
 	}
 	$result = $fmdb->query($query);
 	
@@ -1202,11 +1295,10 @@ function getActiveModules($allowed_modules = false) {
 			return $modules;
 		}
 		
+		$user_capabilities = getUserCapabilities($_SESSION['user']['id']);
 		$excluded_modules = array();
 		foreach ($modules as $module_name) {
-			$module_perms = $fm_login->getModulePerms($_SESSION['user']['id'], $module_name);
-			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'permissions.inc.php');
-			if ($module_perms & PERM_MODULE_ACCESS_DENIED) $excluded_modules[] = $module_name;
+			if (!array_key_exists($module_name, $user_capabilities) && !currentUserCan('do_everything')) $excluded_modules[] = $module_name;
 		}
 		return array_merge(array_diff($modules, $excluded_modules), array());
 	} else {
@@ -1245,6 +1337,24 @@ REMOVE;
 		$drop_query = "DROP TABLE `{$__FM_CONFIG['db']['name']}`.`{$table_info[0]}`";
 		$result = $fmdb->query($drop_query);
 		if (!$fmdb->rows_affected) return false;
+	}
+	
+	/** Delete entries from fm_options */
+	$query = "DELETE FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `module_name`='{$module}'";
+	$fmdb->query($query);
+	
+	/** Delete capability entries from fm_users */
+	$query = "SELECT * FROM `{$__FM_CONFIG['db']['name']}`.`fm_users`";
+	$fmdb->query($query);
+	$count = $fmdb->num_rows;
+	$result = $fmdb->last_result;
+	for ($i=0; $i<=$count; $i++) {
+		$current_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
+		if (array_key_exists($module, $current_caps)) {
+			unset($current_caps[$module]);
+			$fmdb->query("UPDATE `{$__FM_CONFIG['db']['name']}`.`fm_users` SET user_caps='" . serialize($current_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+			if (!$fmdb->rows_affected) return false;
+		}
 	}
 	
 	return 'Success';
@@ -1780,13 +1890,15 @@ function setOSIcon($server_os) {
  * @param string $server_os Server OS to return the icon for
  * @return string
  */
-function printPageHeader($response, $title, $allowed_to_add = false, $name = null) {
+function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null) {
 	global $__FM_CONFIG;
+	
+	if (empty($title)) $title = getPageTitle();
 	
 	echo '<div id="body_container">' . "\n";
 	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
 	else echo '<div id="response" style="display: none;"></div>' . "\n";
-	echo "<h2>$title";
+	echo '<h2>' . $title;
 	
 	if ($allowed_to_add) {
 		if ($name) $name = ' name="' . $name . '"';
@@ -1809,8 +1921,10 @@ function printPageHeader($response, $title, $allowed_to_add = false, $name = nul
  * @param integer $domain_id Domain ID to update DNS servers for
  * @return boolean
  */
-function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update) {
-	global $fmdb, $__FM_CONFIG, $fm_dns_zones;
+function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM_CONFIG = null) {
+	global $fmdb, $fm_dns_zones;
+	
+	if (!$__FM_CONFIG) global $__FM_CONFIG;
 	
 	$serial_no = sanitize($serial_no);
 	if ($serial_no) {
@@ -1857,42 +1971,31 @@ function setTimezone() {
  *
  * @return array
  */
-function getBadgeCounts() {
+function getBadgeCounts($type) {
 	global $fm_name;
 	
-	$badge_count = array();
+	$badge_count = 0;
 	
-	/** Get fM badge counts */
-	$modules = getAvailableModules();
-	foreach ($modules as $module_name) {
-		/** Include module variables */
-		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
-		
-		/** Upgrades waiting */
-		$module_version = getOption(strtolower($module_name) . '_version', 0);
-		if ($module_version !== false) {
-			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
-				$badge_count['Modules']['URL']++;
-				continue;
+	if (!defined('INSTALL') && !defined('UPGRADE')) {
+		if ($type == 'modules') {
+			/** Get fM badge counts */
+			$modules = getAvailableModules();
+			foreach ($modules as $module_name) {
+				/** Include module variables */
+				@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+				
+				/** Upgrades waiting */
+				$module_version = getOption('version', 0, $module_name);
+				if ($module_version !== false) {
+					if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '<')) {
+						$badge_count++;
+						continue;
+					}
+				}
+				
+				/** New versions available */
+				if (isNewVersionAvailable($module_name, $module_version)) $badge_count++;
 			}
-		}
-		
-		/** New versions available */
-		if (isNewVersionAvailable($module_name, $module_version)) $badge_count['Modules']['URL']++;
-	}
-	
-	$module_badge_count = null;
-	/** Get module badge counts */
-	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
-		$functions_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'functions.php';
-		if (is_file($functions_file)) {
-			if (!function_exists('moduleFunctionalCheck')) {
-				@include($functions_file);
-			}
-			if (function_exists('getModuleBadgeCounts')) {
-				$module_badge_count = getModuleBadgeCounts();
-			}
-			if (count($module_badge_count)) $badge_count = array_merge($badge_count, $module_badge_count);
 		}
 	}
 	
@@ -1914,6 +2017,510 @@ function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 		
 		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1) . 
 			'<input type="submit" name="bulk_apply" id="bulk_apply" value="Apply" class="button" />' . "\n";
+	}
+}
+
+
+/**
+ * Takes text and strips html and whitespace
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $text Text to clean up
+ * @param boolean $make_array Whether the output should be an array or not
+ * @return array
+ */
+function makePlainText($text, $make_array = false) {
+	$text = strip_tags($text);
+	$text = trim($text);
+	
+	if ($make_array == true) return explode("\n", $text);
+	
+	return $text;
+}
+
+
+/**
+ * Displays a table header
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param array $table_info Values to build the <table> tag
+ * @param array $head_values Values to build the <th> tags
+ * @param string $tbody_id id for <tbody>
+ * @return string
+ */
+function displayTableHeader($table_info, $head_values, $tbody_id = null) {
+	if ($tbody_id) $tbody_id = ' id="' . $tbody_id . '"';
+	
+	$sort_direction = isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']) ? strtolower($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']) : 'asc';
+	
+	$parameters = null;
+	if (is_array($table_info)) {
+		foreach ($table_info as $parameter => $value) {
+			$parameters .= ' ' . $parameter . '="' . $value . '"';
+		}
+	}
+	$html = '<table' . $parameters . ">\n";
+	$html .= "<thead>\n<tr>\n";
+	
+	foreach ($head_values as $thead) {
+		$parameters = null;
+		if (is_array($thead)) {
+			$temp_array = $thead;
+			$thead = null;
+			foreach ($temp_array as $parameter => $value) {
+				if ($parameter == 'title') {
+					$thead = $value;
+					continue;
+				}
+				$parameters .= (is_null($value)) ? ' ' . $parameter : ' ' . $parameter . '="' . $value . '"';
+				if ($parameter == 'rel') {
+					if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) &&
+						$value == $_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) {
+							$parameters .= ' id="header-sorted"';
+					}
+				}
+			}
+		}
+		$html .= "<th$parameters>$thead <i class=\"$sort_direction\"></i></th>\n";
+	}
+	$html .= "</tr>\n</thead>\n<tbody$tbody_id>\n";
+	
+	return $html;
+}
+
+
+/**
+ * Displays a table header
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param array $table_info Values to build the <table> tag
+ * @param array $head_values Values to build the <th> tags
+ * @param string $tbody_id id for <tbody>
+ * @return string
+ */
+function handleSortOrder() {
+	if (array_key_exists('sort_by', $_GET)) {
+		$swap_direction = array('ASC' => 'DESC', 'DESC' => 'ASC');
+
+		if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) &&
+			$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field'] != $_GET['sort_by']) {
+			$sort_direction = $swap_direction[$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']];
+		} elseif (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'])) {
+			$sort_direction = $_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'];
+		} else {
+			$sort_direction = 'DESC';
+		}
+		$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']] = array(
+				'sort_field' => $_GET['sort_by'], 'sort_direction' => $swap_direction[$sort_direction]
+			);
+	}
+	
+	$temp_uri = str_replace(array('?sort_by=' . $_GET['sort_by'], '&sort_by=' . $_GET['sort_by']), '', $_SERVER['REQUEST_URI']);
+	
+	header('Location: ' . $temp_uri);
+}
+
+
+/**
+ * Formats log data
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $strip Text to strip out
+ * @param string $key Logging key
+ * @param string $data Logging data
+ * @return string
+ */
+function formatLogKeyData($strip, $key, $data) {
+	return ucwords(str_replace('_', ' ', str_replace($strip, '', $key))) . ": $data\n";
+}
+
+
+/**
+ * Displays an error page message
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $message Text to display
+ * @param boolean $show_page_back_link Whether or not to show the page back link
+ * @return string
+ */
+function fMDie($message = 'An unknown error occurred.', $show_page_back_link = true) {
+	global $fm_name;
+	
+	printHeader('Error', 'install', false, false);
+	
+	echo '<p>' . $message . '</p>';
+	if ($show_page_back_link) echo '<p><a href="javascript:history.back();">&larr; Back</a></p>';
+	
+	exit;
+}
+
+
+/**
+ * Displays an error page message
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return string
+ */
+function unAuth() {
+	fMDie('You do not have permission to view this page. Please contact your administrator for access.');
+}
+
+
+/**
+ * Whether current user has capability
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $capability Capability name.
+ * @param string $module Module name to check capability for
+ * @param string $extra_perm Extra capability to check
+ * @return boolean
+ */
+function currentUserCan($capability, $module = 'facileManager', $extra_perm = null) {
+	return userCan($_SESSION['user']['id'], $capability, $module, $extra_perm);
+}
+
+
+/**
+ * Whether a user has capability
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param integer $user_id User ID to check.
+ * @param string $capability Capability name.
+ * @param string $module Module name to check capability for
+ * @param string $extra_perm Extra capability to check
+ * @return boolean
+ */
+function userCan($user_id, $capability, $module = 'facileManager', $extra_perm = null) {
+	global $fm_name;
+	
+	$user_capabilities = getUserCapabilities($user_id);
+	
+	/** Check if super admin */
+	if (@array_key_exists('do_everything', $user_capabilities[$fm_name])) return true;
+		
+	/** If no authentication then return full access */
+	if (!getOption('auth_method')) return true;
+	
+	/** Check user capability */
+	if (@array_key_exists($capability, $user_capabilities[$module])) {
+		if (is_array($user_capabilities[$module][$capability])) {
+			if (is_array($extra_perm)) {
+				$found = false;
+				
+				foreach ($extra_perm as $needle) {
+					if (in_array($needle, $user_capabilities[$module][$capability]))
+						$found = true;
+				}
+				
+				return $found;
+			} else {
+				return in_array($extra_perm, $user_capabilities[$module][$capability]);
+			}
+		}
+		
+		return true;
+	}
+	
+	if ($capability === null) return true;
+	
+	return false;
+}
+
+
+/**
+ * Gets the user capabilities
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param integer $user_id User ID to retrieve.
+ * @return array
+ */
+function getUserCapabilities($user_id) {
+	$user_capabilities = getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_caps');
+	if (isSerialized($user_capabilities)) $user_capabilities = unserialize($user_capabilities);
+	
+	return $user_capabilities;
+}
+
+
+/**
+ * Handles features defined in config.inc.php
+ *
+ * @since 1.2
+ * @package facileManager
+ */
+function handleHiddenFlags() {
+	global $fm_name;
+	
+	/** Recover authentication in case of lockout */
+	if (defined('FM_NO_AUTH') && FM_NO_AUTH) {
+		setOption('auth_method', 0);
+		@addLogEntry('Manually reset authentication method.', $fm_name);
+	}
+}
+
+
+/**
+ * Adds a menu item
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param bool $sticky Whether or not to keep the menu title when there's only one submenu item or to take on the submenu item title
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $sticky = false, $position = null, $badge_count = 0) {
+	global $menu;
+	
+	$new_menu = array($menu_title, $page_title, $capability, $module, $menu_slug, $class, $badge_count, $sticky);
+	
+	if ($position === null) {
+		$menu[] = $new_menu;
+	} else {
+		$menu[$position] = $new_menu;
+	}
+}
+
+
+/**
+ * Adds a menu item under the objects section
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param bool $sticky Whether or not to keep the menu title when there's only one submenu item or to take on the submenu item title
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addObjectPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $sticky = false, $badge_count = 0) {
+	global $_fm_last_object_menu;
+	
+	$_fm_last_object_menu++;
+	
+	addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class, $sticky, $_fm_last_object_menu, $badge_count);
+}
+
+
+/**
+ * Adds a submenu item
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $parent_slug The slug name for the parent menu
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $position = null, $badge_count = 0) {
+	global $submenu;
+	
+	$new_menu = array($menu_title, $page_title, $capability, $module, $menu_slug, $class, $badge_count);
+	
+	if ($position === null) {
+		$submenu[$parent_slug][] = $new_menu;
+	} else {
+		$submenu[$parent_slug][$position] = $new_menu;
+	}
+	
+	/** Update parent menu badge count */
+	if ($badge_count > 1) {
+		global $menu;
+		
+		$parent_menu_key = getParentMenuKey($parent_slug);
+		if ($parent_menu_key !== false) {
+			$menu[$parent_menu_key][6] += $badge_count;
+		}
+	}
+}
+
+
+/**
+ * Adds a submenu item to the Dashboard menu
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addDashboardPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
+	addSubmenuPage('index.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
+}
+
+
+/**
+ * Adds a submenu item to the Admin menu
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addAdminPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
+	addSubmenuPage('admin-tools.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
+}
+
+
+/**
+ * Adds a submenu item to the Settings menu
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $menu_title Text used to display the menu item
+ * @param string $page_title Text used to display the page title when the page loads
+ * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string $module Module name the menu item is for
+ * @param string $menu_slug Menu item slug name to used to reference this item
+ * @param string $class Class name to apply to the menu item
+ * @param integer $position Menu position for the item
+ * @param integer $badge_count Number of items to display in the badge
+ */
+function addSettingsPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
+	addSubmenuPage('admin-settings.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
+}
+
+
+/**
+ * Gets the page title from the menu item
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return string|bool
+ */
+function getPageTitle() {
+	global $menu, $submenu;
+	
+	/** Search submenus first */
+	foreach ($submenu as $slug => $submenu_items) {
+		foreach ($submenu_items as $element) {
+			if (array_search($GLOBALS['basename'], $element, true) !== false) {
+				return $element[1];
+			}
+		}
+	}
+	
+	/** Search menus */
+	foreach ($menu as $position => $menu_items) {
+		if (array_search($GLOBALS['basename'], $menu_items, true) !== false) {
+			return $menu[$position][1];
+		}
+	}
+	
+	return false;
+}
+
+
+/**
+ * Returns the top level menu key
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return integer|bool Returns the badge count or false if the menu item is not found
+ */
+function getParentMenuKey($search_slug = null) {
+	global $menu, $submenu;
+	
+	if (!$search_slug) $search_slug = $GLOBALS['basename'];
+	
+	foreach ($menu as $position => $menu_items) {
+		$parent_key = array_search($search_slug, $menu_items, true);
+		if ($parent_key !== false) {
+			return $position;
+		}
+	}
+	
+	foreach ($submenu as $parent_slug => $menu_items) {
+		foreach ($menu_items as $element) {
+			if (array_search($search_slug, $element, true) !== false) {
+				return getParentMenuKey($parent_slug);
+			}
+		}
+	}
+	
+	return false;
+}
+
+
+/**
+ * Checks if max_input_vars has been exceeded
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @return integer|bool Returns the number of input vars required or false if not exceeded
+ */
+function hasExceededMaxInputVars() {
+	$max_input_vars = ini_get('max_input_vars') + 1;
+	if ($max_input_vars == false) return false;
+	
+	$php_input = substr_count(file_get_contents('php://input'), '&');
+	
+	return $php_input > $max_input_vars ? $php_input : false;
+}
+
+
+/**
+ * Checks if max_input_vars has been exceeded
+ *
+ * @since 1.2
+ * @package facileManager
+ */
+function checkMaxInputVars() {
+	if ($required_input_vars = hasExceededMaxInputVars()) {
+		fMDie('PHP max_input_vars (' . ini_get('max_input_vars') . ') has been reached and ' . $required_input_vars . ' or more are required. Please 
+			increase the limit to fulfill this request. One method is to set the following in ' . ABSPATH . '.htaccess:
+			<p><code>php_value max_input_vars ' . $required_input_vars . '</code></p>', true);
 	}
 }
 

@@ -23,9 +23,6 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Config';
-$page_name_sub = 'Logging';
-
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_logging.php');
 
 $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'channel';
@@ -39,7 +36,7 @@ if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {
 	header('Location: ' . $GLOBALS['basename']);
 }
 
-if ($allowed_to_manage_servers) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '&server_serial_no=' . $server_serial_no : null;
 	switch ($action) {
@@ -102,13 +99,13 @@ if ($allowed_to_manage_servers) {
 	}
 } $server_serial_no_uri = null;
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 $avail_types = buildSubMenu($type, $server_serial_no_uri);
 $avail_servers = buildServerSubMenu($server_serial_no, 'log_space');
 
-echo printPageHeader($response, 'Logging ' . $display_type, $allowed_to_manage_servers, $type);
+echo printPageHeader($response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 echo "$avail_types\n$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', 'AND cfg_type="logging" AND cfg_name="' . $channel_category . '" AND server_serial_no=' . $server_serial_no);

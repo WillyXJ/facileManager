@@ -23,19 +23,15 @@
  +-------------------------------------------------------------------------+
 */
 
-$map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
-
-$page_name = 'Zones';
-$page_name_sub = ($map == 'forward') ? 'Forward' : 'Reverse';
-
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 
-$map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
-$map = (isset($_POST['createZone'][0]['domain_mapping'])) ? strtolower($_POST['createZone'][0]['domain_mapping']) : $map;
+if (!isset($map)) header('Location: zones-forward.php');
+if (isset($_GET['map'])) header('Location: zones-' . sanitize(strtolower($_GET['map'])) . '.php');
+$map = (isset($_POST['createZone'][0]['domain_mapping'])) ? sanitize(strtolower($_POST['createZone'][0]['domain_mapping'])) : $map;
 
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_zones) {
+if (currentUserCan('manage_zones', $_SESSION['module'])) {
 	if (isset($_POST['action']) && $_POST['action'] == 'reload') {
 		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
 //			$response = $fm_dns_zones->buildZoneConfig($_POST['domain_id']);
@@ -131,14 +127,14 @@ if ($allowed_to_manage_zones) {
 	}
 }
 
-printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
 if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to manage one or more servers.</p>';
 
-echo printPageHeader($response, 'Zones', $allowed_to_manage_zones, $map);
+echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='$map' AND domain_clone_domain_id='0'");
 $fm_dns_zones->rows($result, $map, $reload_allowed);

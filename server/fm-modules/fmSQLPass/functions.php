@@ -94,8 +94,8 @@ function buildModuleHelpFile() {
 <h3>{$_SESSION['module']}</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmsqlpass_config_servers', 'block');">Configure Servers</a>
-		<div id="fmsqlpass_config_servers">
+		<a class="list_title">Configure Servers</a>
+		<div>
 			<p>Database servers can be managed from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['URL']}">Servers</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
 			servers depending on your user permissions.</p>
@@ -107,8 +107,8 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmsqlpass_config_groups', 'block');">Configure Server Groups</a>
-		<div id="fmsqlpass_config_groups">
+		<a class="list_title">Configure Server Groups</a>
+		<div>
 			<p>Server groups are used so you can change the user passwords on a subset of servers rather than all (or selecting individual servers on
 			each run). An example would be to create a group for each data center hosting your servers so you can change the password for all database
 			servers within that data center.</p>
@@ -120,8 +120,8 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmsqlpass_passwords', 'block');">Set Passwords</a>
-		<div id="fmsqlpass_passwords">
+		<a class="list_title">Set Passwords</a>
+		<div>
 			<p>Database user passwords can be updated from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['Passwords']}">Passwords</a> 
 			menu item. From there you can select the server groups, enter the username to change the password for, and enter the new password.</p>
 			<p><i>The 'Password Management' or 'Super Admin' permission is required to update database user passwords.</i></p>
@@ -132,8 +132,8 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_module_settings', 'block');">Module Settings</a>
-		<div id="fm_module_settings">
+		<a class="list_title">Module Settings</a>
+		<div>
 			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['module']['menu']['Settings']['URL']}">Settings</a> 
 			menu item.</p>
 			<br />
@@ -279,6 +279,22 @@ function changePostgreSQLUserPassword($server_name, $server_port, $admin_user, $
 	return $verbose_output;
 }
 
+
+/**
+ * Adds the module menu items
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmSQLPass
+ */
+function buildModuleMenu() {
+	addObjectPage('Config', 'Database Servers', null, $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Servers', 'Database Servers', null, $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Groups', 'Server Groups', null, $_SESSION['module'], 'config-groups.php');
+		addSubmenuPage('config-servers.php', 'Passwords', 'Passwords', null, $_SESSION['module'], 'config-passwords.php');
+
+	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', 'manage_settings', $_SESSION['module'], 'module-settings.php');
+}
 
 
 ?>

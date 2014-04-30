@@ -27,6 +27,8 @@ class fm_settings {
 	function save() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
+		if (!currentUserCan('manage_settings')) return 'You do not have permission to make these changes.';
+		
 		$force_logout = false;
 		$exclude = array('save', 'item_type', 'gen_ssh');
 		$ports = array('ldap_port', 'ldap_port_ssl', 'fm_port_ssl');
@@ -165,13 +167,12 @@ class fm_settings {
 	 * @package facileManager
 	 */
 	function printForm() {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_settings, $fm_name;
+		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		$disabled = $allowed_to_manage_settings ? null : 'disabled';
 		$local_hostname = php_uname('n');
 		
-		$save_button = $disabled ? null : '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button" /></p>';
-		$sshkey_button = $disabled ? null : '<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="Generate" class="button" />';
+		$save_button = currentUserCan('manage_settings') ? '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button" /></p>' : null;
+		$sshkey_button = currentUserCan('manage_settings') ? '<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="Generate" class="button" />' : null;
 		if ($sshkey_button !== null) {
 			$ssh_priv = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 			if ($ssh_priv) {
@@ -192,6 +193,11 @@ class fm_settings {
 		if ($auth_method == 1) {
 			 $auth_fm_options_style = 'style="display: block;"';
 		} else $auth_fm_options_style = null;
+		
+		$password_strength_descriptions = "<p>Required password strength for user accounts.</p>\n";
+		foreach ($__FM_CONFIG['password_hint'] as $strength => $description) {
+			$password_strength_descriptions .= '<p><i>' . ucfirst($strength) . '</i> - ' . ucfirst(substr($description, 32)) . "</p>\n";
+		}
 		
 		/** LDAP Section */
 		if ($auth_method == 2) {
@@ -302,7 +308,7 @@ class fm_settings {
 						<div id="setting-row">
 							<div class="description">
 								<label for="auth_fm_pw_strength">Password Strength</label>
-								<p>Protocol version the server supports.</p>
+								$password_strength_descriptions
 							</div>
 							<div class="choices">
 								$auth_fm_pw_strength_list

@@ -26,31 +26,30 @@ class fm_module_groups {
 	 * Displays the group list
 	 */
 	function rows($result, $type) {
-		global $fmdb, $allowed_to_manage_services;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="groups">There are no groups defined.</p>';
 		} else {
-			echo <<<HTML
-			<table class="display_results" id="table_edits" name="groups">
-				<thead>
-					<tr>
-						<th>Group Name</th>
-						<th>{$type}s</th>
-						<th style="width: 40%;">Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'groups'
+						);
 
-HTML;
-				$num_rows = $fmdb->num_rows;
-				$results = $fmdb->last_result;
-				for ($x=0; $x<$num_rows; $x++) {
-					$this->displayRow($results[$x]);
-				}
-				echo '</tbody>';
-				echo '</table>';
+			$title_array = array('Group Name', $type . 's', array('title' => 'Comment', 'style' => 'width: 40%;'));
+			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -59,8 +58,6 @@ HTML;
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
-		echo '<pre>';
-		print_r($post);
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -158,13 +155,15 @@ HTML;
 
 
 	function displayRow($row) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_services;
+		global $fmdb, $__FM_CONFIG;
 		
 		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = $group_items = null;
 		
-		if ($allowed_to_manage_services) {
+		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_groups';
+		
+		if (currentUserCan($permission, $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->group_id, 'group')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
@@ -237,7 +236,7 @@ HTML;
 		$available_list = buildSelect(null, 'group_items_available', availableGroupItems($group_type, 'available', $group_items_assigned, $group_id), null, 7, null, true);
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="{$group_type}-groups">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="group_id" value="$group_id" />
 			<input type="hidden" name="group_type" value="$group_type" />

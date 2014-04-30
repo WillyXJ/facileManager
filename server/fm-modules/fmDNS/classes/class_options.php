@@ -31,27 +31,25 @@ class fm_module_options {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="options">There are no options.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="options">
-				<thead>
-					<tr>
-						<th>Option</th>
-						<th>Value</th>
-						<th>Comment</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'options'
+						);
+
+			$title_array = array('Option', 'Value', 'Comment');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -61,8 +59,9 @@ class fm_module_options {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$_POST = $post;
 		/** Validate post */
-		if (!$this->validatePost()) return false;
+		if (!$this->validatePost($post)) return false;
 		$post = $_POST;
 		
 		/** Does the record already exist for this account? */
@@ -107,8 +106,9 @@ class fm_module_options {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$_POST = $post;
 		/** Validate post */
-		if (!$this->validatePost()) return false;
+		if (!$this->validatePost($post)) return false;
 		$post = $_POST;
 		
 		if (isset($post['cfg_id']) && !isset($post['cfg_name'])) {
@@ -173,11 +173,11 @@ class fm_module_options {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_servers;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
 		
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -189,7 +189,7 @@ class fm_module_options {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		echo <<<HTML
@@ -272,7 +272,7 @@ HTML;
 		<script>
 			displayOptionPlaceholder("$cfg_data");
 		</script>
-		<form name="manage" id="manage" method="post" action="config-options.php$request_uri">
+		<form name="manage" id="manage" method="post" action="$request_uri">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="cfg_id" value="$cfg_id" />
 			<input type="hidden" name="cfg_type" value="$cfg_type" />
@@ -391,7 +391,7 @@ FORM;
 	}
 	
 	
-	function validatePost() {
+	function validatePost($_POST) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$_POST['cfg_comment'] = trim($_POST['cfg_comment']);

@@ -44,11 +44,11 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_107($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 32) ? fmUpgrade_120($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
-		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update');
+		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update');
 	}
 	
 	displayProgress('Upgrading Schema', $success);
@@ -56,7 +56,7 @@ function fmUpgrade($database) {
 	echo "</table>\n</center>\n";
 	
 	if ($success) {
-		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules');
+		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules.php');
 	} else {
 		displaySetupMessage(2);
 	}
@@ -72,7 +72,7 @@ function fmUpgrade_100($database) {
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result) return false;
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
 	
@@ -98,7 +98,7 @@ function fmUpgrade_101($database) {
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -256,21 +256,21 @@ INSERT;
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	
 		if (count($updates) && $updates[0] && $success) {
 			foreach ($updates as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -303,7 +303,7 @@ INSERT;
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -329,7 +329,7 @@ function fmUpgrade_106($database) {
 		if (count($table) && $table[0]) {
 			foreach ($table as $schema) {
 				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
@@ -349,8 +349,6 @@ function fmUpgrade_107($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table = null;
-
 		$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'software_update', 1 FROM DUAL
@@ -365,14 +363,6 @@ WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'software_update_interval');
 INSERT;
 
-		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
-				$fmdb->query($schema);
-				if (!$fmdb->result) return false;
-			}
-		}
-	
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
 				$fmdb->query($query);
@@ -382,6 +372,122 @@ INSERT;
 				}
 			}
 		}
+	}
+
+	return $success;
+}
+
+
+/** fM v1.2 **/
+function fmUpgrade_120($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 28) ? fmUpgrade_107($database) : true;
+	
+	if ($success) {
+		/** Schema change */
+		$table[] = "ALTER TABLE  $database.`fm_options` ADD  `module_name` VARCHAR( 255 ) NULL AFTER  `account_id` ;";
+		$table[] = "ALTER TABLE  `fm_users` ADD  `user_caps` TEXT NULL AFTER  `user_auth_type` ;";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	
+		$inserts = null;
+		if (count($inserts) && $inserts[0] && $success) {
+			foreach ($inserts as $query) {
+				$fmdb->query($query);
+				if ($fmdb->last_error) {
+					echo $fmdb->last_error;
+					return false;
+				}
+			}
+		}
+		
+		/** Update fm_options */
+		$version_check = getOption($fm_name . '_version_check');
+		if ($version_check !== false) {
+			if (!setOption('version_check', $version_check, 'auto', true, 0, $fm_name)) return false;
+			$query = "DELETE FROM $database.`fm_options` WHERE option_name='{$fm_name}_version_check'";
+			$fmdb->query($query);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+		$modules = getAvailableModules();
+		if (count($modules)) {
+			foreach ($modules as $module_name) {
+				$module_version = getOption($module_name . '_version');
+				if ($module_version !== false) {
+					if (!setOption('version', $module_version, 'auto', false, 0, $module_name)) return false;
+				}
+				$module_version_check = getOption($module_name . '_version_check');
+				if ($module_version_check !== false) {
+					if (!setOption('version_check', $module_version_check, 'auto', true, 0, $module_name)) return false;
+				}
+				$module_client_version = getOption($module_name . '_client_version');
+				if ($module_client_version !== false) {
+					if (!setOption('client_version', $module_client_version, 'auto', false, 0, $module_name)) return false;
+				}
+				$query = "DELETE FROM $database.`fm_options` WHERE option_name LIKE '{$module_name}%_version%'";
+				$fmdb->query($query);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+		
+		/** Update user capabilities */
+		$fm_user_caps[$fm_name] = array(
+				'do_everything'		=> '<b>Super Admin</b>',
+				'manage_modules'	=> 'Module Management',
+				'manage_users'		=> 'User Management',
+				'run_tools'			=> 'Run Tools',
+				'manage_settings'	=> 'Manage Settings'
+			);
+		if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+		
+		$fmdb->get_results("SELECT * FROM `fm_users`");
+		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
+			$result = $fmdb->last_result;
+			for ($i=0; $i<$count; $i++) {
+				$user_caps = null;
+				/** Update user capabilities */
+				$j = 1;
+				foreach ($fm_user_caps[$fm_name] as $slug => $trash) {
+					if ($j & $result[$i]->user_perms) $user_caps[$fm_name][$slug] = 1;
+					$j = $j*2 ;
+				}
+				$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+		$fmdb->query("ALTER TABLE `fm_users` DROP `user_perms`;");
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+		
+		/** Temporarily move the module user capabilities to fm_users */
+		$fmdb->get_results("SELECT * FROM `fm_perms`");
+		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
+			$result = $fmdb->last_result;
+			for ($i=0; $i<$count; $i++) {
+				if (!$user_info = getUserInfo($result[$i]->user_id)) continue;
+				/** Update user capabilities */
+				$user_caps = isSerialized($user_info['user_caps']) ? unserialize($user_info['user_caps']) : $user_info['user_caps'];
+				$user_caps[$result[$i]->perm_module] = isSerialized($result[$i]->perm_extra) ? unserialize($result[$i]->perm_extra) : $result[$i]->perm_extra;
+				$user_caps[$result[$i]->perm_module]['imported_perms'] = $result[$i]->perm_value;
+
+				$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+		$fmdb->query("DROP TABLE `fm_perms`");
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+		
 	}
 
 	return $success;
@@ -407,6 +513,8 @@ function upgradeConfig($field, $value, $logit = true) {
 
 	session_id($_COOKIE['myid']);
 	@session_start();
+	unset($_SESSION['user']['fm_perms']);
+	
 	if ($logit) {
 		include(ABSPATH . 'fm-includes/version.php');
 		include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');

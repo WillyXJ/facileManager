@@ -28,11 +28,11 @@ if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
 	include($module_tools_file);
 }
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-$available_zones = $fm_dns_zones->availableZones();
+$available_zones = $fm_dns_zones->availableZones(true, 'master', true);
 $button = null;
 if ($available_zones) {
 	$zone_options = buildSelect('domain_id', 1, $available_zones);
-	if (($_SESSION['user']['fm_perms'] & PERM_FM_RUN_TOOLS) && ($_SESSION['user']['module_perms']['perm_value'] & PERM_DNS_RECORD_MANAGEMENT) || ($_SESSION['user']['fm_perms'] & PERM_FM_SUPER_ADMIN)) {
+	if (currentUserCan('run_tools') && currentUserCan('manage_records', $_SESSION['module'])) {
 		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="Import Records" class="button" /></p>';
 	}
 } else {

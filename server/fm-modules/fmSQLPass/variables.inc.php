@@ -27,27 +27,15 @@
  *
  */
 
+if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+
 /** Module Version */
-$__FM_CONFIG['fmSQLPass']['version']				= '1.0-b7';
+$__FM_CONFIG['fmSQLPass']['version']				= '1.0-beta8';
 $__FM_CONFIG['fmSQLPass']['description']			= 'Change database user passwords across a server farm running multiple database server types.
 														Password complexity requirements are enforced to ensure secure passwords. Currently supported
 														database servers include MySQL.';
 $__FM_CONFIG['fmSQLPass']['prefix']					= 'sqlpass_';
-$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.1.1';
-
-/** Dashboard Menu Options */
-$__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';
-
-/** Config Menu Options */
-$__FM_CONFIG['module']['menu']['Config']['URL']				= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Servers']			= 'config-servers';
-$__FM_CONFIG['module']['menu']['Config']['Server Groups']	= 'config-groups';
-$__FM_CONFIG['module']['menu']['Config']['Passwords']		= 'config-passwords';
-
-/** Settings Menu Options */
-$__FM_CONFIG['module']['menu']['Settings']['URL']	= 'module-settings';
-
-$__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
+$__FM_CONFIG['fmSQLPass']['required_fm_version']	= '1.2-beta1';
 
 /** Default values */
 $pwd_strength_desc = null;
@@ -73,10 +61,5 @@ $__FM_CONFIG['fmSQLPass']['default']['ports'] = array('MySQL' => 3306,
 													'PostgreSQL' => 5432,
 													'MSSQL' => 1433
 												);
-
-/** Module Permissions */
-if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
-	include(dirname(__FILE__) . '/permissions.inc.php');
-}
 
 ?>

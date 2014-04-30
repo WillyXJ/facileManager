@@ -28,33 +28,44 @@ class fm_dns_zones {
 	function rows($result, $map, $reload_allowed) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		if (currentUserCan('reload_zones', $_SESSION['module'])) {
+			$bulk_actions_list = array('Reload');
+			$checkbox[] = array(
+								'title' => '<input type="checkbox" onClick="toggle(this, \'domain_list[]\')" />',
+								'class' => 'header-tiny'
+							);
+		} else {
+			$checkbox = $bulk_actions_list = null;
+		}
+
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="domains">There are no zones.</p>';
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			?>
-			<table class="display_results" id="table_edits" name="domains">
-				<thead>
-					<tr>
-						<th style="width: 50px;">ID</th>
-						<th style="text-align:left;">Domain</th>
-						<th>Type</th>
-						<th>Clones</th>
-						<th>Views</th>
-						<th style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody id="zones">
-					<?php
-					/* Display the zones */
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x], $map, $reload_allowed);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'domains'
+						);
+
+			$title_array = array(array('title' => 'ID', 'class' => 'header-small'), 'Domain', 'Type', 'Clones', 'Views');
+			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			
+			if (is_array($checkbox)) {
+				$title_array = array_merge($checkbox, $title_array);
+			}
+
+			echo displayTableHeader($table_info, $title_array, 'zones');
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x], $map, $reload_allowed);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -138,6 +149,8 @@ class fm_dns_zones {
 				if ($field == 'domain_clone_domain_id') {
 					$sql_values .= sanitize($_POST['createZone'][$id]['domain_clone_domain_id']) . ',';
 				} elseif ($field == 'domain_name') {
+					$log_message .= 'Name: ' . sanitize($_POST['createZone'][$id]['domain_name']) . "\n";
+					$log_message .= "Clone of: $value\n";
 					$sql_values .= "'" . sanitize($_POST['createZone'][$id]['domain_name']) . "',";
 				} elseif ($field == 'domain_reload') {
 					$sql_values .= "'no',";
@@ -200,7 +213,7 @@ class fm_dns_zones {
 				$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
 				if ($key == 'domain_view') $data = $log_message_views;
 				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
-				$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('domain_', '', $key))) . ": $data\n" : null;
+				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 			}
 			$sql_fields .= 'account_id)';
 			$sql_values .= "'{$_SESSION['user']['account_id']}'";
@@ -214,6 +227,13 @@ class fm_dns_zones {
 		$insert_id = $fmdb->insert_id;
 		
 		addLogEntry($log_message);
+		
+		/* Set the server_build_config flag for servers */
+		if ($_POST['createZone'][$id]['domain_clone_domain_id']) {
+			if (getSOACount($_POST['createZone'][$id]['domain_clone_domain_id']) && getNSCount($_POST['createZone'][$id]['domain_clone_domain_id'])) {
+				setBuildUpdateConfigFlag(getZoneServers($_POST['createZone'][$id]['domain_clone_domain_id']), 'yes', 'build');
+			}
+		}
 		return $insert_id;
 	}
 
@@ -335,11 +355,11 @@ class fm_dns_zones {
 			$sql_edit .= strlen(sanitize($data)) ? $key . "='" . mysql_real_escape_string($data) . "'," : $key . '=NULL,';
 			if ($key == 'domain_view') $data = $log_message_views;
 			if ($key == 'domain_name_servers') $data = $log_message_name_servers;
-			$log_message .= $data ? ucwords(str_replace('_', ' ', str_replace('domain_', '', $key))) . ": $data\n" : null;
+			$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		
-		/* set the server_build_config flag for existing servers */
+		/* Set the server_build_config flag for existing servers */
 		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
@@ -353,7 +373,7 @@ class fm_dns_zones {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		/* set the server_build_config flag for new servers */
+		/* Set the server_build_config flag for new servers */
 		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
@@ -420,34 +440,38 @@ class fm_dns_zones {
 	
 	
 	function displayRow($row, $map, $reload_allowed) {
-		global $__FM_CONFIG, $allowed_to_manage_zones, $allowed_to_reload_zones, $super_admin;
+		global $__FM_CONFIG;
 		
 		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
 		$response = null;
+		
+		$checkbox = (currentUserCan('reload_zones', $_SESSION['module'])) ? '<td></td>' : null;
 		
 		$soa_count = getSOACount($row->domain_id);
 		$ns_count = getNSCount($row->domain_id);
 		$reload_allowed = reloadAllowed($row->domain_id);
 		if (!$soa_count && $row->domain_type == 'master') {
-			$response = '** You still need to create the SOA for this zone **';
+			$response = 'The SOA record still needs to be created for this zone';
 			$class = 'attention';
 		}
 		if (!$ns_count && $row->domain_type == 'master' && !$response) {
-			$response = '** You still need to create NS records for this zone **';
+			$response = 'One more more NS records still needs to be created for this zone';
 			$class = 'attention';
 		}
-		$clones = $this->cloneDomainsList($row->domain_id);
-		$zone_access_allowed = true;
 		
-		if (isset($_SESSION['user']['module_perms']['perm_extra'])) {
-			$module_extra_perms = isSerialized($_SESSION['user']['module_perms']['perm_extra']) ? unserialize($_SESSION['user']['module_perms']['perm_extra']) : $_SESSION['user']['module_perms']['perm_extra'];
-			$zone_access_allowed = (is_array($module_extra_perms) && 
-				!in_array(0, $module_extra_perms['zone_access']) && !$super_admin) ? in_array($row->domain_id, $module_extra_perms['zone_access']) : true;
-		}
+		$clones = $this->cloneDomainsList($row->domain_id);
+		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $row->domain_id));
+		
 		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
-			$reload_zone = ($allowed_to_reload_zones && $zone_access_allowed) ? '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>' : 'Reload Available<br />';
+			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {
+				$reload_zone = '<form name="reload" id="' . $row->domain_id . '" method="post" action="' . $GLOBALS['basename'] . '?map=' . $map . '"><input type="hidden" name="action" value="reload" /><input type="hidden" name="domain_id" id="domain_id" value="' . $row->domain_id . '" />' . $__FM_CONFIG['icons']['reload'] . '</form>';
+				$checkbox = '<td><input type="checkbox" name="domain_list[]" value="' . $row->domain_id .'" /></td>';
+			} else {
+				$reload_zone = 'Reload Available<br />';
+			}
 		} else $reload_zone = null;
 		if ($reload_zone) $class = 'build';
+		
 /*
 		$edit_status = <<<FORM
 <form method="post" action="{$GLOBALS['basename']}?map={$map}">
@@ -459,12 +483,12 @@ FORM;
 */
 		$edit_status = null;
 		
-		if (!$soa_count && $row->domain_type == 'master') $type = 'SOA';
-		elseif (!$ns_count && $row->domain_type == 'master') $type = 'NS';
+		if (!$soa_count && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
+		elseif (!$ns_count && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
 		else {
 			$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
 		}
-		if ($allowed_to_manage_zones && $zone_access_allowed) {
+		if (currentUserCan('manage_zones', $_SESSION['module']) && $zone_access_allowed) {
 			$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="delete" href="#">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 		}
@@ -488,6 +512,7 @@ FORM;
 		
 		echo <<<HTML
 		<tr title="$response" id="$row->domain_id" $class>
+			$checkbox
 			<td>$row->domain_id</td>
 			<td>$edit_name</td>
 			<td>$row->domain_type</td>
@@ -551,7 +576,7 @@ HTML;
 		$domain_forward_servers = str_replace('; ', "\n", rtrim($domain_forward_servers, '; '));
 		
 		$return_form = <<<HTML
-		<form name="manage" id="manage" method="post" action="zones?map=$map">
+		<form name="manage" id="manage" method="post" action="?map=$map">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="{$action}Zone[ZoneID]" value="$domain_id" />
 			<table class="form-table zone-form">
@@ -627,15 +652,16 @@ HTML;
 	}
 
 	function cloneDomainsList($domain_id) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_zones;
+		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
 		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
 			$clone_results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return .= '<p>' . $clone_results[$i]->domain_name;
-				if ($allowed_to_manage_zones) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
+			for ($i=0; $i<$count; $i++) {
+				$return .= '<p><a href="zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_results[$i]->domain_id . '" title="Edit zone records">' . $clone_results[$i]->domain_name . '</a>';
+				if (currentUserCan('manage_zones', $_SESSION['module'])) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				$return .= "</p>\n";
 			}
 		}
@@ -653,7 +679,7 @@ HTML;
 		
 		$domain_id_sql = (!empty($domain_id)) ? "AND domain_id!=$domain_id" : null;
 		
-		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE domain_clone_domain_id=0 AND domain_mapping='$map' AND domain_status='active' $domain_id_sql ORDER BY domain_name ASC";
+		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE domain_clone_domain_id=0 AND domain_mapping='$map' AND domain_type='master' AND domain_status='active' $domain_id_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$clone_results = $fmdb->last_result;
@@ -874,10 +900,24 @@ HTML;
 		$result = $fmdb->query($query);
 	}
 	
-	function availableZones() {
+	function availableZones($include_clones = false, $zone_type = null, $restricted = false) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND domain_clone_domain_id=0 ORDER BY domain_name ASC";
+		/** Get restricted zones only */
+		$restricted_sql = null;
+		if ($restricted && !currentUserCan('do_everything')) {
+			$user_capabilities = getUserCapabilities($_SESSION['user']['id']);
+			if (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']])) {
+				if (!in_array(0, $user_capabilities[$_SESSION['module']]['access_specific_zones'])) {
+					$restricted_sql = "AND domain_id IN ('" . implode("','", $user_capabilities[$_SESSION['module']]['access_specific_zones']) . "')";
+				}
+			}
+		}
+		
+		$include_clones_sql = $include_clones ? null : "AND domain_clone_domain_id=0";
+		$zone_type_sql = $zone_type ? "AND domain_type='$zone_type'" : null;
+		
+		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_clones_sql $zone_type_sql $restricted_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
@@ -992,6 +1032,53 @@ HTML;
 		return str_replace($typo, $fixed, $domain_name);
 	}
 	
+	/**
+	 * Process bulk zone reloads
+	 *
+	 * @since 1.2
+	 * @package facileManager
+	 */
+	function doBulkZoneReload($domain_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Check serial number */
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($domain_id), 'domain_', 'domain_id');
+		if (!$fmdb->num_rows) return $domain_id . ' is not a valid zone ID.';
+
+		$server_details = $fmdb->last_result;
+		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+		
+		$response[] = $domain_name;
+		
+		/** Ensure domain is reloadable */
+		if ($domain_reload != 'yes') {
+			$response[] = ' --> Failed: Zone is not available for reload.';
+		}
+		
+		/** Ensure domain is master */
+		if (count($response) == 1 && $domain_type != 'master') {
+			$response[] = ' --> Failed: Zone is not a master zone.';
+		}
+		
+		/** Ensure user is allowed to reload zone */
+		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id));
+		
+		if (count($response) == 1 && !$zone_access_allowed) {
+			$response[] = ' --> Failed: You do not have permission to reload this zone.';
+		}
+		
+		/** Format output */
+		if (count($response) == 1) {
+			foreach (makePlainText($this->buildZoneConfig($domain_id), true) as $line) {
+				$response[] = ' --> ' . $line;
+			}
+		}
+		
+		$response[] = "\n";
+		
+		return implode("\n", $response);
+	}
+
 }
 
 if (!isset($fm_dns_zones))

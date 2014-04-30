@@ -28,6 +28,9 @@ class fm_module_tools {
 	function zoneImportWizard() {
 		global $__FM_CONFIG, $fm_name;
 		
+		if (!currentUserCan('manage_records', $_SESSION['module'])) return $this->unAuth('zone');
+		if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $_POST['domain_id']))) return $this->unAuth('zone');
+		
 		$raw_contents = file_get_contents($_FILES['import-file']['tmp_name']);
 		/** Strip commented lines */
 		$clean_contents = preg_replace('/^;.*\n?/m', '', $raw_contents);
@@ -51,7 +54,9 @@ class fm_module_tools {
 		$count = 1;
 
 		/** Detect SOA */
-		if (!getSOACount($_POST['domain_id']) && strpos($clean_contents, ' SOA ') !== false) {
+		if ((!getSOACount($_POST['domain_id']) && strpos($clean_contents, ' SOA ') !== false) &&
+			(in_array('SOA', $__FM_CONFIG['records']['require_zone_rights']) && currentUserCan('manage_zones', $_SESSION['module']))) {
+			
 			$raw_soa = preg_replace("/SOA(.+?)\)/esim", "str_replace(PHP_EOL, ' ', '\\1')", $clean_contents);
 			preg_match("/SOA(.+?)\)/esim", $clean_contents, $raw_soa);
 			preg_match("/TTL(.+?)$/esim", $clean_contents, $raw_ttl);
@@ -103,6 +108,9 @@ HTML;
 
 		$clean_contents = str_replace('.' . trimFullStop($domain_name) . '.', '', $clean_contents);
 		$clean_contents = str_replace(trimFullStop($domain_name) . '.', '', $clean_contents);
+		
+		$available_record_types = array_filter(enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type'), 'removeRestrictedRR');
+		sort($available_record_types);
 
 		/** Loop through the lines */
 		$lines = explode(PHP_EOL, $clean_contents);
@@ -196,8 +204,7 @@ HTML;
 					}
 					$array['record_value'] = str_replace('"', '', $array['record_value']);
 				} elseif (in_array('A', $parts) || in_array('CNAME', $parts) || in_array('AAAA', $parts)) {
-					if (in_array('AAAA', $parts))
-					{
+					if (in_array('AAAA', $parts)) {
 						$key = array_search('AAAA', $parts);
 					} else {
 						$key = (in_array('A', $parts)) ? array_search('A', $parts) : array_search('CNAME', $parts);
@@ -239,7 +246,7 @@ HTML;
 					}
 				}
 			}
-			if (in_array('NS', $parts)) {
+			if (in_array('NS', $parts) && in_array('NS', $__FM_CONFIG['records']['require_zone_rights']) && currentUserCan('manage_zones', $_SESSION['module'])) {
 				switch(array_search('NS', $parts)) {
 					case 3:
 						list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
@@ -269,7 +276,7 @@ HTML;
 			$checked = $this->checkDuplicates($array, $_POST['domain_id']);
 			
 			$class = buildSelect('create[' . $count . '][record_class]', 'class' . $count . 'b', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $array['record_class'], 1, null, false, 'exchange(this);');
-			$type = buildSelect('create[' . $count . '][record_type]', 'type' . $count . 'b', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type'), $array['record_type'], 1, null, false, 'exchange(this);');
+			$type = buildSelect('create[' . $count . '][record_type]', 'type' . $count . 'b', $available_record_types, $array['record_type'], 1, null, false, 'exchange(this);');
 
 			$rows .= <<<ROW
 					<tr class="import_swap">
@@ -290,36 +297,33 @@ ROW;
 			$count++;
 		}
 		
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'views'
+					);
+
+		$title_array = array('Record', 'TTL', 'Class', 'Type', 'Priority', 'Value', 'Weight', 'Port', 'Comment');
+		$title_array[] = array('title' => 'Append Domain', 'style' => 'text-align: center;', 'nowrap' => null);
+		$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+		
+		$table_header = displayTableHeader($table_info, $title_array);
+		
 		$body = <<<BODY
 <h2>Import Verification</h2>
-		<form method="post" action="zone-recordswrite">
+<p>Domain: $domain_name</p>
+		<form method="post" action="zone-records-write.php">
 			<input type="hidden" name="domain_id" value="{$_POST['domain_id']}">
 			<input type="hidden" name="map" value="$domain_map">
 			<input type="hidden" name="import_records" value="true">
 			<input type="hidden" name="import_file" value="{$_FILES['import-file']['name']}">
 			$unsupported
 			$soa_row
-			<table class="display_results">
-				<thead>
-					<tr>
-						<th>Record</th>
-						<th>TTL</th>
-						<th>Class</th>
-						<th>Type</th>
-						<th>Priority</th>
-						<th>Value</th>
-						<th>Weight</th>
-						<th>Port</th>
-						<th>Comment</th>
-						<th style="text-align: center;">Append Domain</th>
-						<th style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
+			$table_header
 				$rows
 				</tbody>
 			</table>
-			<br /><input id="import" type="submit" value="Import" class="button" /> <input id="cancel" name="cancel" type="submit" value="Cancel" class="button" id="cancel_button" />
+			<br /><input id="import" type="submit" value="Import" class="button" /> <input id="cancel_button" name="cancel" type="button" value="Cancel" class="button" id="cancel_button" />
 		</form>
 BODY;
 
@@ -427,6 +431,15 @@ BODY;
 		@unlink($temp_ssh_key);
 		
 		return $return;
+	}
+	
+	
+	function unAuth($message) {
+		return <<<HTML
+			<h2>Error</h2>
+			<p>You do not have permission to access this $message.</p>
+			<br /><input type="button" value="OK" class="button" id="cancel_button" />
+HTML;
 	}
 	
 }

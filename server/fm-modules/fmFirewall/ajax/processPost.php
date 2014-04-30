@@ -32,7 +32,7 @@ foreach (scandir($class_dir) as $class_file) {
 	include($class_dir . $class_file);
 }
 
-if (is_array($_POST) && count($_POST) && $allowed_to_manage_servers) {
+if (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$table = 'dns_' . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';

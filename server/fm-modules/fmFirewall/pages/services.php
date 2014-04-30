@@ -23,15 +23,13 @@
  +-------------------------------------------------------------------------+
 */
 
-$type = (isset($_GET['type'])) ? strtolower($_GET['type']) : 'custom';
-
-$page_name = 'Services';
-$page_name_sub = ($type == 'custom') ? 'Custom' : strtoupper($type);
+if (!isset($type)) header('Location: services-icmp.php');
+if (isset($_GET['type'])) header('Location: services-' . sanitize(strtolower($_GET['type'])) . '.php');
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
 $response = isset($response) ? $response : null;
 
-if ($allowed_to_manage_services) {
+if (currentUserCan('manage_services', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
@@ -77,11 +75,11 @@ if ($allowed_to_manage_services) {
 	}
 }
 
-printHeader($page_name_sub . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
-//$allowed_to_add = ($type == 'custom' && $allowed_to_manage_services) ? true : false;
-echo printPageHeader($response, $page_name_sub . ' Services', $allowed_to_manage_services, $type);
+//$allowed_to_add = ($type == 'custom' && currentUserCan('manage_services', $_SESSION['module'])) ? true : false;
+echo printPageHeader($response, null, currentUserCan('manage_services', $_SESSION['module']), $type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name', 'service_', "AND service_type='$type'");
 $fm_module_services->rows($result, $type);

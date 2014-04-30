@@ -55,7 +55,7 @@ function moduleFunctionalCheck() {
  * @subpackage fmDNS
  */
 function buildModuleDashboard() {
-	global $fmdb, $__FM_CONFIG, $allowed_to_manage_zones;
+	global $fmdb, $__FM_CONFIG;
 
 	$dashboard = $errors = null;
 	
@@ -66,8 +66,9 @@ function buildModuleDashboard() {
 	for ($i=0; $i<$server_count; $i++) {
 		if ($server_results[$i]->server_installed != 'yes') {
 			$errors .= '<b>' . $server_results[$i]->server_name . '</b> client is not installed.' . "\n";
-		}
-		if ($server_results[$i]->server_build_config != 'no') {
+		} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
+			$errors .= '<a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '"><b>' . $server_results[$i]->server_name . '</b></a> client needs to be upgraded.' . "\n";
+		} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
 			$errors .= '<a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '"><b>' . $server_results[$i]->server_name . '</b></a> needs a new configuration built.' . "\n";
 		}
 	}
@@ -81,12 +82,12 @@ function buildModuleDashboard() {
 		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 			$domain_results[$i]->domain_type == 'master') {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
-			if ($allowed_to_manage_zones) $errors .= '&record_type=SOA';
+			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=SOA';
 			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have a SOA defined.' . "\n";
 		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 			$domain_results[$i]->domain_type == 'master') {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
-			if ($allowed_to_manage_zones) $errors .= '&record_type=NS';
+			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=NS';
 			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have any NS records defined.' . "\n";
 		} elseif ($domain_results[$i]->domain_reload != 'no') {
 			$errors .= '<a href="' . $__FM_CONFIG['menu']['Zones'][ucfirst($domain_results[$i]->domain_mapping)] . '"><b>' . $domain_results[$i]->domain_name . '</b></a> needs to be reloaded.' . "\n";
@@ -134,15 +135,25 @@ DASH;
  * @subpackage fmDNS
  */
 function buildModuleToolbar() {
-	global $__FM_CONFIG;
+	global $__FM_CONFIG, $fmdb;
 	
-	if (isset($_GET['domain_id'])) {
-		$domain = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+	if (isset($_REQUEST['domain_id'])) {
+		$domain = getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 		$domain_menu = <<<HTML
 		<div id="topheadpart">
 			<span class="single_line">Domain:&nbsp;&nbsp; $domain</span>
 		</div>
 HTML;
+		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
+			extract(get_object_vars($fmdb->last_result[0]));
+			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
+			$domain_menu .= <<<HTML
+		<div id="topheadpart">
+			<span class="single_line">Clone of:&nbsp;&nbsp; <a href="zone-records.php?map=$domain_mapping&domain_id=$parent_domain_id$record_type_uri" title="Edit parent zone records">$domain_name</a></span>
+		</div>
+HTML;
+		}
 	} else $domain_menu = null;
 	
 	return $domain_menu;
@@ -162,34 +173,41 @@ function buildModuleHelpFile() {
 <h3>{$_SESSION['module']}</h3>
 <ul>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmdns_config_zones', 'block');">Configure Zones</a>
-		<div id="fmdns_config_zones">
+		<a class="list_title">Configure Zones</a>
+		<div>
 			<p>Zones (aka domains) can be managed from the <a href="{$__FM_CONFIG['module']['menu']['Zones']['URL']}">Zones</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete ({$__FM_CONFIG['icons']['delete']}), 
 			and reload ({$__FM_CONFIG['icons']['reload']}) zones depending on your user permissions.</p>
+			<p>You can define a zone as a clone of another previously defined master zone.  The cloned zone will contain all of the same records
+			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
+			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa).</p>
-			<p>Zones that are missing SOA records will be highlighted with a red background and will not be built or reloaded until the SOA exists.</p>
+			<p>Zones that are missing SOA and NS records will be highlighted with a red background and will not be built or reloaded until the 
+			records exists.</p>
 			<br />
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmdns_manage_records', 'block');">Manage Zone Records</a>
-		<div id="fmdns_manage_records">
+		<a class="list_title">Manage Zone Records</a>
+		<div>
 			<p>Records are managed from the <a href="{$__FM_CONFIG['module']['menu']['Zones']['URL']}">Zones</a> menu item. From 
 			there you can select the zone you want manage records for.  Select from the upper-right the type of record(s) you want to 
 			manage and then you can add, modify, and delete records depending on your user permissions.</p>
-			<p>IPv4 A type records and the IPv6 AAAA records are both managed under the same page. Select A from the upper-right and add your 
+			<p>You can add IPv4 A type and IPv6 AAAA type records under the same page. Select A or AAAA from the upper-right and add your 
 			IPv4 and IPv6 records and {$_SESSION['module']} will auto-detect their type.</p>
-			<p>When adding CNAME, MX, SRV, SOA, or NS records, you have the option append the domain to the record. This means {$_SESSION['module']} 
-			will automatically add the domain to the record so you don't have to give the fully qualified domain name in the record value.</p>
+			<p>When adding certain records (such as CNAME, MX, SRV, SOA, NS, etc.), you have the option append the domain to the record. This 
+			means {$_SESSION['module']} will automatically add the domain to the record so you don't have to give the fully qualified domain name 
+			in the record value.</p>
 			<p><i>The 'Record Management' or 'Super Admin' permission is required to add, edit, and delete records.</i></p>
 			<p>When adding or updating a SOA record for a zone, the domain can be appended to the Master Server and Email Address if selected. This
 			means you could simply enter 'ns1' and 'username' for the Master Server and Email Address respectively. If you prefer to enter the entire
 			entry, make sure you append a period (.) at the end of each and select 'no' for Append Domain.</p>
-			<p>Adding A records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
+			<p>Adding A and AAAA records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
 			exist in order for PTR records to automatically be created.</p>
+			<p>When viewing the records of a cloned zone, the parent records will not be editable, but you can choose to skip them or add new records
+			that impacts the cloned zone only.</p>
 			<p>You can also import BIND-compatible zone files instead of adding records individually. Go to Admin &rarr; 
 			<a href="{$__FM_CONFIG['menu']['Admin']['Tools']}">Tools</a> and use the Import Zone Files utility. After selecting the file and zone 
 			to import to, you have one final chance to review what gets imported before the records are actually imported.</p>
@@ -197,8 +215,8 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fmdns_config_servers', 'block');">Configure Servers</a>
-		<div id="fmdns_config_servers">
+		<a class="list_title">Configure Servers</a>
+		<div>
 			<p>All aspects of server configuration takes place in the <a href="{$__FM_CONFIG['module']['menu']['Config']['URL']}">Config</a> menu 
 			item. From there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete ({$__FM_CONFIG['icons']['delete']}) 
 			servers and options depending on your user permissions.</p>
@@ -260,9 +278,9 @@ function buildModuleHelpFile() {
 		</div>
 	</li>
 	<li>
-		<a class="list_title" onclick="javascript:toggleLayer('fm_module_settings', 'block');">Module Settings</a>
-		<div id="fm_module_settings">
-			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['module']['menu']['Settings']['URL']}">Settings</a> 
+		<a class="list_title">Module Settings</a>
+		<div>
+			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['menu']['Settings']['fmDNS']}">Settings</a> 
 			menu item.</p>
 			<br />
 		</div>
@@ -325,6 +343,9 @@ function moduleAddServer($action) {
 
 
 function moduleCompleteClientInstallation() {
+	/** Install default config option overrides based on OS distro */
+	setDefaultOverrideOptions();
+	
 	setBuildUpdateConfigFlag($_POST['SERIALNO'], 'yes', 'build');
 }
 
@@ -350,7 +371,10 @@ function reloadZone($domain_id) {
 function getSOACount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `domain_id`='$domain_id' AND `soa_status`!='deleted'";
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE (`domain_id`='$domain_id' OR
+			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`='$domain_id')
+		) AND `soa_status`!='deleted'";
 	$fmdb->get_results($query);
 	return $fmdb->num_rows;
 }
@@ -358,7 +382,10 @@ function getSOACount($domain_id) {
 function getNSCount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE `domain_id`='$domain_id' AND `record_type`='NS' AND `record_status`='active'";
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE (`domain_id`='$domain_id' OR
+			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`='$domain_id')
+		) AND `record_type`='NS' AND `record_status`='active'";
 	$fmdb->get_results($query);
 	return $fmdb->num_rows;
 }
@@ -501,45 +528,51 @@ function reloadAllowed($domain_id = null) {
  *
  * @return boolean
  */
-function getModuleBadgeCounts() {
+function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
 	
-	/** Zones */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
-	$domain_count = $fmdb->num_rows;
-	$domain_results = $fmdb->last_result;
-	for ($i=0; $i<$domain_count; $i++) {
-		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-			$domain_results[$i]->domain_type == 'master') {
-			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
-		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-			$domain_results[$i]->domain_type == 'master') {
-			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
-		} elseif ($domain_results[$i]->domain_reload != 'no') {
-			$badge_counts['Zones'][ucfirst($domain_results[$i]->domain_mapping)]++;
+	if ($type == 'zones') {
+		$badge_counts = array('forward' => 0, 'reverse' => 0);
+		
+		/** Zones */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
+		$domain_count = $fmdb->num_rows;
+		$domain_results = $fmdb->last_result;
+		for ($i=0; $i<$domain_count; $i++) {
+			if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+				$domain_results[$i]->domain_type == 'master') {
+				$badge_counts[$domain_results[$i]->domain_mapping]++;
+			} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+				$domain_results[$i]->domain_type == 'master') {
+				$badge_counts[$domain_results[$i]->domain_mapping]++;
+			} elseif ($domain_results[$i]->domain_reload != 'no') {
+				$badge_counts[$domain_results[$i]->domain_mapping]++;
+			}
 		}
-	}
-	
-	/** Servers */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
-	$server_count = $fmdb->num_rows;
-	$server_results = $fmdb->last_result;
-	for ($i=0; $i<$server_count; $i++) {
-		$server_builds[] = $server_results[$i]->server_name;
-	}
-	if (version_compare(getOption($_SESSION['module'] . '_version'), '1.1', '>=')) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+		unset($domain_results, $domain_count);
+	} elseif ($type == 'servers') {
+		$badge_counts = null;
+		
+		/** Servers */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
 		$server_count = $fmdb->num_rows;
 		$server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {
 			$server_builds[] = $server_results[$i]->server_name;
 		}
-	}
-	
-	$servers = array_unique($server_builds);
-	
-	for ($i=0; $i<count($servers); $i++) {
-		$badge_counts['Config']['Servers']++;
+		if (version_compare(getOption('version', 0, $_SESSION['module']), '1.1', '>=')) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+			$server_count = $fmdb->num_rows;
+			$server_results = $fmdb->last_result;
+			for ($i=0; $i<$server_count; $i++) {
+				$server_builds[] = $server_results[$i]->server_name;
+			}
+		}
+		
+		$servers = array_unique($server_builds);
+		$badge_counts = count($servers);
+		
+		unset($server_builds, $servers, $server_count, $server_results);
 	}
 	
 	return $badge_counts;
@@ -585,6 +618,77 @@ function getZoneServers($domain_id) {
 	}
 	
 	return $serial_no;
+}
+
+
+/**
+ * Sets default override configuration options based on OS distro
+ *
+ * @since 1.2
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function setDefaultOverrideOptions() {
+	global $fm_module_options;
+	
+	$config = null;
+	$server_os_distro = isDebianSystem($_POST['server_os_distro']) ? 'debian' : strtolower($_POST['server_os_distro']);
+	
+	switch ($server_os_distro) {
+		case 'debian':
+			$config = array(
+							array('cfg_type' => 'global', 'server_serial_no' => $_POST['SERIALNO'], 'cfg_name' => 'pid-file', 'cfg_data' => '/var/run/named/named.pid')
+						);
+	}
+	
+	if (is_array($config)) {
+		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		
+		foreach ($config as $config_data) {
+			$fm_module_options->add($config_data);
+		}
+	}
+}
+
+
+/**
+ * Sets default override configuration options based on OS distro
+ *
+ * @since 1.2
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function removeRestrictedRR($rr) {
+	global $__FM_CONFIG;
+	
+	return (!in_array($rr, $__FM_CONFIG['records']['require_zone_rights']) || currentUserCan('manage_zones', $_SESSION['module'])) ? true : false;
+}
+
+
+/**
+ * Adds the module menu items
+ *
+ * @since 1.2
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function buildModuleMenu() {
+	$badge_counts = getModuleBadgeCounts('zones');
+	addObjectPage('Zones', 'Zones', null, $_SESSION['module'], 'zones.php');
+		addSubmenuPage('zones.php', 'Forward', 'Forward Zones', null, $_SESSION['module'], 'zones-forward.php', null, null, $badge_counts['forward']);
+		addSubmenuPage('zones.php', 'Reverse', 'Reverse Zones', null, $_SESSION['module'], 'zones-reverse.php', null, null, $badge_counts['reverse']);
+		addSubmenuPage('zones.php', null, 'Records', null, $_SESSION['module'], 'zone-records.php');
+		addSubmenuPage('zones.php', null, 'Record Validation', null, $_SESSION['module'], 'zone-records-validate.php');
+	
+	addObjectPage('Config', 'Name Servers', null, $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Servers', 'Name Servers', null, $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
+		addSubmenuPage('config-servers.php', 'Views', 'Views', null, $_SESSION['module'], 'config-views.php');
+		addSubmenuPage('config-servers.php', 'ACLs', 'Access Control Lists', null, $_SESSION['module'], 'config-acls.php');
+		addSubmenuPage('config-servers.php', 'Keys', 'Keys', null, $_SESSION['module'], 'config-keys.php');
+		addSubmenuPage('config-servers.php', 'Options', 'Options', null, $_SESSION['module'], 'config-options.php');
+		addSubmenuPage('config-servers.php', 'Logging', 'Logging', null, $_SESSION['module'], 'config-logging.php');
+
+	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', 'manage_settings', $_SESSION['module'], 'module-settings.php');
 }
 
 

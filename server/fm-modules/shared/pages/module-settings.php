@@ -22,23 +22,17 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Settings';
+if (!currentUserCan('manage_settings', $_SESSION['module'])) unAuth();
 
-printHeader($page_name . ' &lsaquo; ' . $_SESSION['module']);
-@printMenu($page_name, $page_name_sub);
+printHeader();
+@printMenu();
 
 include_once(ABSPATH . 'fm-modules/shared/classes/class_settings.php');
 
-echo <<<HTML
-<div id="body_container">
+echo '<div id="body_container">
 <div id="response" style="display: none;"></div>
-	<h2>{$_SESSION['module']} Settings</h2>
-
-HTML;
-
-echo $fm_module_settings->printForm();
-
-echo '</div>' . "\n";
+	<h2>' . getPageTitle() . '</h2>
+	' . $fm_module_settings->printForm() . '</div>' . "\n";
 
 printFooter();
 

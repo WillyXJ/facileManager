@@ -34,7 +34,23 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
-if (is_array($_POST) && count($_POST) && $allowed_to_manage_zones) {
+if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
+	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {
+	
+	if (is_array($_POST['item_id'])) {
+		foreach ($_POST['item_id'] as $domain_id) {
+			if (!is_numeric($domain_id)) continue;
+			
+			echo $fm_dns_zones->doBulkZoneReload($domain_id);
+			echo "\n";
+		}
+	}
+	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.';
+	
+	exit;
+}
+
+if (is_array($_POST) && count($_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';

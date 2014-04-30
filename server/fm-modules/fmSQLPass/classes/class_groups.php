@@ -31,26 +31,25 @@ class fm_sqlpass_groups {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="groups">There are no server groups.</p>';
 		} else {
-			?>
-			<table class="display_results" id="table_edits" name="groups">
-				<thead>
-					<tr>
-						<th>Group Name</th>
-						<th>Associated Servers</th>
-						<th width="110" style="text-align: center;">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$num_rows = $fmdb->num_rows;
-					$results = $fmdb->last_result;
-					for ($x=0; $x<$num_rows; $x++) {
-						$this->displayRow($results[$x]);
-					}
-					?>
-				</tbody>
-			</table>
-			<?php
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'groups'
+						);
+
+			$title_array = array('Group Name', 'Associated Servers');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
+			for ($x=0; $x<$num_rows; $x++) {
+				$this->displayRow($results[$x]);
+			}
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -127,7 +126,7 @@ class fm_sqlpass_groups {
 
 
 	function displayRow($row) {
-		global $fmdb, $__FM_CONFIG, $allowed_to_manage_servers;
+		global $fmdb, $__FM_CONFIG;
 		
 		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
 		
@@ -145,7 +144,7 @@ class fm_sqlpass_groups {
 			$assoc_servers = rtrim($assoc_servers, ', ');
 		}
 		
-		if ($allowed_to_manage_servers) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->group_id . '&status=';
@@ -157,7 +156,7 @@ class fm_sqlpass_groups {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
-			$edit_status = '<td style="text-align: center;">N/A</td>';
+			$edit_status = null;
 		}
 		
 		echo <<<HTML
@@ -190,7 +189,7 @@ HTML;
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-groups">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="group_id" id="group_id" value="$group_id" />
 			<table class="form-table">

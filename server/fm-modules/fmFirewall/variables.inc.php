@@ -27,41 +27,16 @@
  *
  */
 
+if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+
 /** Module Version */
-$__FM_CONFIG['fmFirewall']['version']				= '1.0-b4';
-$__FM_CONFIG['fmFirewall']['client_version']		= '1.0-b3';
+$__FM_CONFIG['fmFirewall']['version']				= '1.0-beta5';
+$__FM_CONFIG['fmFirewall']['client_version']		= '1.0-beta5';
 $__FM_CONFIG['fmFirewall']['description']			= 'Managing software firewalls should not be difficult. Manage one or more software firewall
 														servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files
 														individually.';
 $__FM_CONFIG['fmFirewall']['prefix']				= 'fw_';
-$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.1.1';
-
-/** Dashboard Menu Options */
-$__FM_CONFIG['module']['menu']['Dashboard']['URL']			= '';
-
-/** Firewalls Menu Options */
-$__FM_CONFIG['module']['menu']['Firewalls']['URL']			= 'config-servers';
-
-/** Objects Menu Options */
-$__FM_CONFIG['module']['menu']['Objects']['URL']			= 'object-groups';
-$__FM_CONFIG['module']['menu']['Objects']['Groups']			= 'object-groups';
-$__FM_CONFIG['module']['menu']['Objects']['Hosts']			= 'objects?type=host';
-$__FM_CONFIG['module']['menu']['Objects']['Networks']		= 'objects?type=network';
-
-/** Firewalls Menu Options */
-$__FM_CONFIG['module']['menu']['Services']['URL']			= 'service-groups';
-$__FM_CONFIG['module']['menu']['Services']['Groups']		= 'service-groups';
-$__FM_CONFIG['module']['menu']['Services']['ICMP']			= 'services?type=icmp';
-$__FM_CONFIG['module']['menu']['Services']['TCP']			= 'services?type=tcp';
-$__FM_CONFIG['module']['menu']['Services']['UDP']			= 'services?type=udp';
-
-/** Time Menu Options */
-$__FM_CONFIG['module']['menu']['Time']['URL']				= 'config-time';
-
-/** Settings Menu Options */
-//$__FM_CONFIG['module']['menu']['Settings']['URL']			= 'module-settings';
-
-$__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
+$__FM_CONFIG['fmFirewall']['required_fm_version']	= '1.2-beta1';
 
 /** Images */
 $__FM_CONFIG['module']['icons']['action']['active']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
@@ -132,10 +107,5 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFire
 											'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'services'=>'service', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'time'=>'time'
 											);
 $__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
-
-/** Module Permissions */
-if (file_exists(dirname(__FILE__) . '/permissions.inc.php')) {
-	include(dirname(__FILE__) . '/permissions.inc.php');
-}
 
 ?>

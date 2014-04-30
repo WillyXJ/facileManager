@@ -22,11 +22,8 @@
  +-------------------------------------------------------------------------+
 */
 
-$page_name = 'Dashboard';
-$page_name_sub = null;
-
 printHeader();
-@printMenu($page_name, $page_name_sub);
+@printMenu();
 
 $response = isset($response) ? $response : functionalCheck();
 $line_count = substr_count($response, '<p>');
@@ -38,11 +35,7 @@ $dashboard = buildDashboard();
 
 echo '<div id="body_container">' . "\n";
 if (!empty($response)) echo '<div id="response"' . $style . '>' . $response . "</div>\n";
-echo <<<HTML
-	<h2>$page_name</h2>
-	$dashboard
-</div>
-HTML;
+echo '<h2>' . getPageTitle() . '</h2>' . $dashboard . '</div>';
 
 printFooter();
 

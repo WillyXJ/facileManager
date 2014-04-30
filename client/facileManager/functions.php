@@ -92,7 +92,7 @@ if (in_array('install', $argv)) {
 		require ($config_file);
 		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO')) {
 			$proto = (socketTest(FMHOST, 443)) ? 'https' : 'http';
-			$url = "${proto}://" . FMHOST . "admin-accounts?verify";
+			$url = "${proto}://" . FMHOST . "admin-accounts.php?verify";
 			$data['compress'] = $compress;
 			$data['AUTHKEY'] = AUTHKEY;
 			$data['SERIALNO'] = SERIALNO;
@@ -135,7 +135,7 @@ if (!socketTest($server_path['hostname'], $port, 20)) {
 
 /** Run the upgrader */
 if (in_array('upgrade', $argv)) {
-	upgradeFM($proto . '://' . FMHOST . 'admin-servers?upgrade', $data);
+	upgradeFM($proto . '://' . FMHOST . 'admin-servers.php?upgrade', $data);
 }
 
 
@@ -244,7 +244,7 @@ function installFM($proto, $compress) {
 	
 	/** Test the authentication */
 	echo fM('  --> Checking account details...');
-	$url = "${proto}://${hostname}/${path}admin-accounts?verify";
+	$url = "${proto}://${hostname}/${path}admin-accounts.php?verify";
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	echo $raw_data . "\n\n";
@@ -267,7 +267,7 @@ function installFM($proto, $compress) {
 		$serialno = trim(fgets(STDIN));
 	}
 	
-	$url = "${proto}://${hostname}/${path}admin-servers?genserial";
+	$url = "${proto}://${hostname}/${path}admin-servers.php?genserial";
 	
 	/** Process new server */
 	if (empty($serialno)) {
@@ -292,7 +292,7 @@ function installFM($proto, $compress) {
 	saveFMConfigFile($data);
 	
 	/** Complete installation */
-	$url = "${proto}://${hostname}/${path}admin-servers?install";
+	$url = "${proto}://${hostname}/${path}admin-servers.php?install";
 	$raw_data = getPostData($url, $data);
 	
 	/** Add log entry */
@@ -341,7 +341,7 @@ function upgradeFM($url, $data) {
 	
 	/** Download latest core files */
 	echo fM("Downloading ");
-	$core_file = 'facilemanager-core-latest.tar.gz';
+	$core_file = 'facilemanager-core-' . $latest_module_version . '.tar.gz';
 	downloadfMFile($core_file);
 	
 	/** Download latest module files */
@@ -1041,7 +1041,7 @@ function downloadfMFile($file, $module = false) {
 		CURLOPT_RETURNTRANSFER	=> 1,
 		CURLOPT_FOLLOWLOCATION	=> true
 	);
-	curl_setopt_array($ch, $options);
+	@curl_setopt_array($ch, $options);
 	$result = curl_exec($ch);
 	if ($result === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
 		$message = "Unable to download file.\n";

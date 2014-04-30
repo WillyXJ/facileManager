@@ -36,7 +36,7 @@ if (file_exists($module_tools_file) && $_SESSION['module'] != $fm_name) {
 	include($module_tools_file);
 }
 
-if (is_array($_POST) && count($_POST) && $allowed_to_run_tools) {
+if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
 			case 'module_install':
@@ -46,7 +46,7 @@ if (is_array($_POST) && count($_POST) && $allowed_to_run_tools) {
 				
 				echo <<<MSG
 				$response<br />
-				<a href="{$GLOBALS['RELPATH']}admin-modules" class="button" id="cancel_button">OK</a>
+				<a href="{$GLOBALS['RELPATH']}admin-modules.php" class="button" id="cancel_button">OK</a>
 MSG;
 				exit;
 				
@@ -58,7 +58,7 @@ MSG;
 				
 				echo <<<MSG
 				$response<br />
-				<a href="{$GLOBALS['RELPATH']}admin-modules" class="button" id="cancel_button">OK</a>
+				<a href="{$GLOBALS['RELPATH']}admin-modules.php" class="button" id="cancel_button">OK</a>
 MSG;
 				exit;
 				

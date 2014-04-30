@@ -26,35 +26,30 @@ class fm_module_time {
 	 * Displays the time list
 	 */
 	function rows($result) {
-		global $fmdb, $allowed_to_manage_time;
+		global $fmdb;
 		
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="time">There are no time restrictions defined.</p>';
 		} else {
-			echo '<table class="display_results" id="table_edits" name="time">' . "\n";
-			$title_array = array('Restriction Name', 'Date Range', 'Time', 'Weekdays', 'Comment');
-			echo "<thead>\n<tr>\n";
-			
-			foreach ($title_array as $title) {
-				$style = ($title == 'Comment') ? ' style="width: 30%;"' : null;
-				echo '<th' . $style . '>' . $title . '</th>' . "\n";
-			}
-			
-			if ($allowed_to_manage_time) echo '<th width="110" style="text-align: center;">Actions</th>' . "\n";
-			
-			echo <<<HTML
-					</tr>
-				</thead>
-				<tbody>
-
-HTML;
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+			
+			$table_info = array(
+							'class' => 'display_results',
+							'id' => 'table_edits',
+							'name' => 'time'
+						);
+
+			$title_array = array('Restriction Name', 'Date Range', 'Time', 'Weekdays', array('title' => 'Comment', 'style' => 'width: 30%;'));
+			if (currentUserCan('manage_time', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+
+			echo displayTableHeader($table_info, $title_array);
+			
 			for ($x=0; $x<$num_rows; $x++) {
 				$this->displayRow($results[$x]);
 			}
-			echo '</tbody>';
-			echo '</table>';
+			
+			echo "</tbody>\n</table>\n";
 		}
 	}
 
@@ -167,13 +162,13 @@ HTML;
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $allowed_to_manage_time;
+		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->time_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = null;
 		
-		if ($allowed_to_manage_time) {
+		if (currentUserCan('manage_time', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->time_id . '&status=';
 			$edit_status .= ($row->time_status == 'active') ? 'disabled' : 'active';
@@ -250,7 +245,7 @@ HTML;
 		}
 
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="config-time">
+		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="time_id" value="$time_id" />
 			<table class="form-table">
