@@ -1343,6 +1343,11 @@ REMOVE;
 	$query = "DELETE FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `module_name`='{$module}'";
 	$fmdb->query($query);
 	
+	/** Delete capability entries from fm_options */
+	$fm_user_caps = getOption('fm_user_caps');
+	unset($fm_user_caps[$module]);
+	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+	
 	/** Delete capability entries from fm_users */
 	$query = "SELECT * FROM `{$__FM_CONFIG['db']['name']}`.`fm_users`";
 	$fmdb->query($query);
