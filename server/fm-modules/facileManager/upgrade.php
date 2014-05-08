@@ -44,7 +44,7 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 32) ? fmUpgrade_120($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 33) ? fmUpgrade_1202($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -378,8 +378,8 @@ INSERT;
 }
 
 
-/** fM v1.2 **/
-function fmUpgrade_120($database) {
+/** fM v1.2-beta1 **/
+function fmUpgrade_1201($database) {
 	global $fmdb, $fm_name;
 	
 	$success = true;
@@ -488,6 +488,32 @@ function fmUpgrade_120($database) {
 		$fmdb->query("DROP TABLE `fm_perms`");
 		if (!$fmdb->result || $fmdb->sql_errors) return false;
 		
+	}
+
+	return $success;
+}
+
+
+/** fM v1.2-rc1 **/
+function fmUpgrade_1202($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 32) ? fmUpgrade_1201($database) : true;
+	
+	if ($success) {
+		/** Update user capabilities */
+		$fm_user_caps[$fm_name] = array(
+				'do_everything'		=> '<b>Super Admin</b>',
+				'manage_modules'	=> 'Module Management',
+				'manage_users'		=> 'User Management',
+				'run_tools'			=> 'Run Tools',
+				'manage_settings'	=> 'Manage Settings',
+				'view_logs'			=> 'View Logs'
+			);
+		if (!setOption('fm_user_caps', $fm_user_caps)) return false;
 	}
 
 	return $success;

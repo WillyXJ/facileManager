@@ -22,6 +22,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan('view_logs')) unAuth();
+
 printHeader();
 @printMenu();
 

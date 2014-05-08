@@ -41,10 +41,10 @@ $_fm_last_object_menu = 2;
 
 $menu[45] = array(null, null, null, null, null, 'separator');
 
-$menu[50] = array('Admin', null, null, $fm_name, 'admin-tools.php');
+$menu[50] = array('Admin', null, 'run_tools', $fm_name, 'admin-tools.php');
 	$submenu['admin-tools.php'][5] = array('Tools', 'Tools', 'run_tools', $fm_name, 'admin-tools.php');
 	$submenu['admin-tools.php'][10] = array('Users', 'Users', 'manage_users', $fm_name, 'admin-users.php');
-	$submenu['admin-tools.php'][15] = array('Logs', 'Logs', null, $fm_name, 'admin-logs.php');
+	$submenu['admin-tools.php'][15] = array('Logs', 'Logs', 'view_logs', $fm_name, 'admin-logs.php');
 
 $menu[70] = array('Settings', 'General Settings', 'manage_settings', $fm_name, 'admin-settings.php', null, null, true);
 	$submenu['admin-settings.php'][5] = array('General', 'General Settings', 'manage_settings', $fm_name, 'admin-settings.php');
