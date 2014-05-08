@@ -31,15 +31,19 @@ class fm_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
+		$bulk_actions_list = null;
 //		if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list[] = 'Upgrade';
+		}
 		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-			$bulk_actions_list = array('Upgrade', 'Build Config');
+			$bulk_actions_list[] = 'Build Config';
+		}
+		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
 								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
 								'class' => 'header-tiny'
 							);
-		} else {
-			$bulk_actions_list = null;
 		}
 		
 		if (!$result) {

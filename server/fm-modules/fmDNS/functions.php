@@ -680,13 +680,13 @@ function buildModuleMenu() {
 		addSubmenuPage('zones.php', null, 'Records', null, $_SESSION['module'], 'zone-records.php');
 		addSubmenuPage('zones.php', null, 'Record Validation', null, $_SESSION['module'], 'zone-records-validate.php');
 	
-	addObjectPage('Config', 'Name Servers', null, $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', 'Servers', 'Name Servers', null, $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
-		addSubmenuPage('config-servers.php', 'Views', 'Views', null, $_SESSION['module'], 'config-views.php');
-		addSubmenuPage('config-servers.php', 'ACLs', 'Access Control Lists', null, $_SESSION['module'], 'config-acls.php');
-		addSubmenuPage('config-servers.php', 'Keys', 'Keys', null, $_SESSION['module'], 'config-keys.php');
-		addSubmenuPage('config-servers.php', 'Options', 'Options', null, $_SESSION['module'], 'config-options.php');
-		addSubmenuPage('config-servers.php', 'Logging', 'Logging', null, $_SESSION['module'], 'config-logging.php');
+	addObjectPage('Config', 'Name Servers', array('manage_servers', 'build_server_configs'), $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Servers', 'Name Servers', array('manage_servers', 'build_server_configs'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
+		addSubmenuPage('config-servers.php', 'Views', 'Views', 'manage_servers', $_SESSION['module'], 'config-views.php');
+		addSubmenuPage('config-servers.php', 'ACLs', 'Access Control Lists', 'manage_servers', $_SESSION['module'], 'config-acls.php');
+		addSubmenuPage('config-servers.php', 'Keys', 'Keys', 'manage_servers', $_SESSION['module'], 'config-keys.php');
+		addSubmenuPage('config-servers.php', 'Options', 'Options', 'manage_servers', $_SESSION['module'], 'config-options.php');
+		addSubmenuPage('config-servers.php', 'Logging', 'Logging', 'manage_servers', $_SESSION['module'], 'config-logging.php');
 
 	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', 'manage_settings', $_SESSION['module'], 'module-settings.php');
 }

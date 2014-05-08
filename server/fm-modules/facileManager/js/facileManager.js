@@ -619,7 +619,11 @@ $(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
-						$('#manage_item_contents').html('<h2>' + $('#bulk_action').val() + ' Results</h2><textarea rows="20" cols="85">' + response + '</textarea><p><a href="" class="button">OK</a></p>');
+						if (response.indexOf("<h2>") >= 0) {
+							$('#manage_item_contents').html(response);
+						} else {
+							$('#manage_item_contents').html('<h2>' + $('#bulk_action').val() + ' Results</h2><textarea rows="20" cols="85">' + response + '</textarea><p><a href="" class="button">OK</a></p>');
+						}
 					}
 				});
 			}

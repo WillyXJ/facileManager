@@ -64,10 +64,20 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	switch($_POST['bulk_action']) {
 		/** Handle client upgrades */
 		case 'upgrade':
+			/** Check permissions */
+			if (!currentUserCan('manage_servers', $_SESSION['module'])) {
+				returnUnAuth();
+			}
+			
 			$bulk_function = 'doClientUpgrade';
 			break;
 		/** Handle client server config builds */
 		case 'build config':
+			/** Check permissions */
+			if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
+				returnUnAuth();
+			}
+			
 			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 			$bulk_function = 'doBulkServerBuild';
 			break;

@@ -30,6 +30,11 @@ class fm_shared_module_servers {
 	function doClientUpgrade($serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
+		/** Check permissions */
+		if (!currentUserCan('manage_servers', $_SESSION['module'])) {
+			return 'You do not have permission to manage servers.';
+		}
+		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
 		if (!$fmdb->num_rows) return $serial_no . ' is not a valid serial number.';
@@ -162,6 +167,11 @@ class fm_shared_module_servers {
 	 */
 	function doBulkServerBuild($server_serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_module_servers;
+		
+		/** Check permissions */
+		if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
+			return 'You do not have permission to build server configs.';
+		}
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($server_serial_no), 'server_', 'server_serial_no');

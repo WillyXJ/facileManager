@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan('manage_servers', $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_views.php');
 
 $view_option = (isset($_GET['view_option'])) ? ucfirst($_GET['view_option']) : 'Views';

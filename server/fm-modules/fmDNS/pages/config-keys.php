@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan('manage_servers', $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;

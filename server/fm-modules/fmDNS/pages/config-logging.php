@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan('manage_servers', $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_logging.php');
 
 $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'channel';

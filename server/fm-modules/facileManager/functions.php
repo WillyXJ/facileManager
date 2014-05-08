@@ -360,6 +360,7 @@ function printMenu() {
 	ksort($filtered_menu);
 	ksort($filtered_submenu);
 	
+	$i = 1;
 	foreach ($filtered_menu as $position => $main_menu_array) {
 		$sub_menu_html = '</li>';
 		$show_top_badge_count = true;
@@ -428,7 +429,9 @@ HTML;
 		
 		if (empty($slug) && !empty($class)) {
 			/** Ideally this should be the separator */
-			$main_menu_html .= '<li' . $class . '></li>' . "\n";
+			if ($i != count($filtered_menu)) {
+				$main_menu_html .= '<li' . $class . '></li>' . "\n";
+			}
 		} else {
 			/** Display the menu item if allowed */
 			if (currentUserCan($capability, $module)) {
@@ -436,6 +439,8 @@ HTML;
 				$main_menu_html .= sprintf('<li%s><a href="%s">%s</a>%s%s' . "\n", $class, $slug, $menu_title, $arrow, $sub_menu_html);
 			}
 		}
+		
+		$i++;
 	}
 	
 	echo <<<MENU
@@ -1208,7 +1213,7 @@ function setOption($option = null, $value = null, $insert_update = 'auto', $auto
 	
 	if ($auto_serialize) {
 		$value = isSerialized($value) ? sanitize($value) : serialize($value);
-	} else sanitize($value);
+	} else $value = sanitize($value);
 	$option = sanitize($option);
 	
 	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
@@ -1316,7 +1321,7 @@ function uninstallModuleSchema($database, $module) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$removes[] = <<<REMOVE
-DELETE FROM $database.`fm_options` WHERE `option_name` LIKE '{$module}_%';
+DELETE FROM $database.`fm_options` WHERE `module_name` = '$module';
 REMOVE;
 
 	foreach ($removes as $query) {
@@ -2206,7 +2211,7 @@ function currentUserCan($capability, $module = 'facileManager', $extra_perm = nu
  * @package facileManager
  *
  * @param integer $user_id User ID to check.
- * @param string $capability Capability name.
+ * @param string|array $capability Capability name.
  * @param string $module Module name to check capability for
  * @param string $extra_perm Extra capability to check
  * @return boolean
@@ -2221,6 +2226,14 @@ function userCan($user_id, $capability, $module = 'facileManager', $extra_perm =
 		
 	/** If no authentication then return full access */
 	if (!getOption('auth_method')) return true;
+	
+	/** Handle multiple capabilities */
+	if (is_array($capability)) {
+		foreach ($capability as $cap) {
+			if (userCan($user_id, $cap, $module, $extra_perm)) return true;
+		}
+		return false;
+	}
 	
 	/** Check user capability */
 	if (@array_key_exists($capability, $user_capabilities[$module])) {

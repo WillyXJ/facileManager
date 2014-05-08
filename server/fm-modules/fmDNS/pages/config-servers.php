@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
 $response = isset($response) ? $response : null;
 

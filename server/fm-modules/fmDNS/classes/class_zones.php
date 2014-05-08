@@ -442,6 +442,8 @@ class fm_dns_zones {
 	function displayRow($row, $map, $reload_allowed) {
 		global $__FM_CONFIG;
 		
+		if (!$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $row->domain_id))) return;
+		
 		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
 		$response = null;
 		
@@ -460,7 +462,6 @@ class fm_dns_zones {
 		}
 		
 		$clones = $this->cloneDomainsList($row->domain_id);
-		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $row->domain_id));
 		
 		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
 			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {

@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan('manage_servers', $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
 
 $option_type = $display_option_type = $display_option_type_sql = (isset($_GET['option_type'])) ? sanitize(ucfirst($_GET['option_type'])) : 'Global';
