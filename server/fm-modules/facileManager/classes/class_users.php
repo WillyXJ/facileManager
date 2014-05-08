@@ -39,7 +39,7 @@ class fm_users {
 							'name' => 'users'
 						);
 
-			$title_array[] = array('class' => 'header-tiny');
+			$title_array[] = array('class' => 'header-tiny header-nosort');
 			$title_array[] = array('title' => 'Login', 'rel' => 'user_login');
 			array_push($title_array, array('title' => 'Last Session Date', 'rel' => 'user_last_login'), array('title' => 'Last Session Host', 'class' => 'header-nosort'), array('title' => 'Authenticate With', 'class' => 'header-nosort'), array('title' => 'Super Admin', 'class' => 'header-nosort'));
 			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');

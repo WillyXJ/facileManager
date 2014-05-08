@@ -489,12 +489,9 @@ span.grey {
 .display_results.sortable th:not(.header-nosort):hover {
 	cursor: pointer;
 }
-.display_results.sortable th:not(.header-nosort):hover i,
-.display_results.sortable th#header-sorted i {
-	display: inline-block;
-}
 .display_results.sortable th i {
-	display: none;
+	border: 3px solid #464646;
+	display: inline-block;
 	margin-left: 3px;
 	position: relative;
 	top: 0;
