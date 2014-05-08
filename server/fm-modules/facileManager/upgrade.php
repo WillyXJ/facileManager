@@ -44,7 +44,7 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 33) ? fmUpgrade_1202($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 34) ? fmUpgrade_1202($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -504,6 +504,8 @@ function fmUpgrade_1202($database) {
 	$success = ($GLOBALS['running_db_version'] < 32) ? fmUpgrade_1201($database) : true;
 	
 	if ($success) {
+		$fm_user_caps = getOption('fm_user_caps');
+	
 		/** Update user capabilities */
 		$fm_user_caps[$fm_name] = array(
 				'do_everything'		=> '<b>Super Admin</b>',
