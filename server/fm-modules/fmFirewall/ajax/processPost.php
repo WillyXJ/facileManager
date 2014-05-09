@@ -33,7 +33,7 @@ foreach (scandir($class_dir) as $class_file) {
 }
 
 $unpriv_message = 'You do not have sufficient privileges.';
-$checks_array = array('servers' => 'manage_servers',
+$checks_array = @array('servers' => 'manage_servers',
 					'services' => 'manage_services',
 					'objects' => 'manage_objects',
 					'groups' => 'manage_' . $_POST['item_sub_type'] . 's',
