@@ -23,25 +23,17 @@
 */
 
 /* Redirect to activate modules if none are active */
-if ($_SESSION['module'] == $fm_name) {
+if ($_SESSION['module'] == $fm_name && currentUserCan('manage_modules')) {
 	header('Location: ' . $menu[getParentMenuKey('Modules')][4]);
 }
 
-printHeader();
-@printMenu();
+setUserModule($_REQUEST['module']);
 
-$response = functionalCheck();
-$line_count = substr_count($response, '<p>');
-$line_height = $line_count * 1.5 + .8;
-$margin = ($line_height - 1 < 1.5) ? 4 : $line_height + 1.5;
-$style = ($line_count > 1) ? ' style="height: ' . $line_height . 'em;"' : null;
+/* Prevent a redirect loop **/
+if ($_SESSION['module'] == $fm_name) {
+	unAuth('hide');
+}
 
-$dashboard = buildDashboard();
-
-echo '<div id="body_container">' . "\n";
-if (!empty($response)) echo '<div id="response"' . $style . '>' . $response . "</div>\n";
-echo '<h2>' . getPageTitle() . '</h2>' . $dashboard . '</div>';
-
-printFooter();
+header('Location: ' . $GLOBALS['RELPATH']);
 
 ?>

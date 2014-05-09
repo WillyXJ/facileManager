@@ -452,12 +452,7 @@ BODY;
 		/** Upgrade compatibility */
 		if (getOption('fm_db_version') < 32) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
-		$modules = @getActiveModules(true);
-		if (@in_array($user->user_default_module, $modules)) {
-			$_SESSION['module'] = $user->user_default_module;
-		} else {
-			$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
-		}
+		setUserModule($user->user_default_module);
 		setcookie('myid', session_id(), time() + 60 * 60 * 24 * 7);
 	}
 	

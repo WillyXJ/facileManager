@@ -180,18 +180,18 @@ class fm_users {
 		$sql = rtrim($sql_edit . $sql_pwd, ',');
 		
 		/** Process user permissions */
+		if (!isset($post['user_caps'])) $post['user_caps'] = array();
+		
 		if (isset($post['user_caps'][$fm_name])) {
 			if (array_key_exists('do_everything', $post['user_caps'][$fm_name])) {
 				$post['user_caps'] = array($fm_name => array('do_everything' => 1));
 			}
-		} else {
-			$post['user_caps'][$fm_name] = array();
 		}
 		if (isset($post['user_caps'])) {
 			$sql .= ",user_caps='" . serialize($post['user_caps']) . "'";
 		}
 		
-		// Update the user
+		/** Update the user */
 		$query = "UPDATE `fm_users` SET $sql WHERE `user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
@@ -377,7 +377,9 @@ FORM_ROW;
 		}
 		
 		if (in_array('user_module', $form_bits)) {
-			$user_module_options = buildSelect('user_default_module', 'user_default_module', getActiveModules(), $user_default_module);
+			$active_modules = $user_id ? getActiveModules(true) : getActiveModules();
+			$user_module_options = buildSelect('user_default_module', 'user_default_module', $active_modules, $user_default_module);
+			unset($active_modules);
 			$user_module_form = <<<FORM_ROW
 				<tr>
 					<th width="33%" scope="row">Default Module</th>

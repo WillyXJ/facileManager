@@ -2160,16 +2160,16 @@ function formatLogKeyData($strip, $key, $data) {
  * @package facileManager
  *
  * @param string $message Text to display
- * @param boolean $show_page_back_link Whether or not to show the page back link
+ * @param string $link_display Show or Hide the page back link
  * @return string
  */
-function fMDie($message = 'An unknown error occurred.', $show_page_back_link = true) {
+function fMDie($message = 'An unknown error occurred.', $link_display = 'show') {
 	global $fm_name;
 	
 	printHeader('Error', 'install', false, false);
 	
 	echo '<p>' . $message . '</p>';
-	if ($show_page_back_link) echo '<p><a href="javascript:history.back();">&larr; Back</a></p>';
+	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">&larr; Back</a></p>';
 	
 	exit;
 }
@@ -2181,10 +2181,11 @@ function fMDie($message = 'An unknown error occurred.', $show_page_back_link = t
  * @since 1.2
  * @package facileManager
  *
+ * @param string $link_display Show or Hide the page back link
  * @return string
  */
-function unAuth() {
-	fMDie('You do not have permission to view this page. Please contact your administrator for access.');
+function unAuth($link_display = 'show') {
+	fMDie('You do not have permission to view this page. Please contact your administrator for access.', $link_display);
 }
 
 
@@ -2560,6 +2561,26 @@ function checkUserPostPerms($checks_array, $action) {
 	}
 	
 	return false;
+}
+
+
+/**
+ * Checks if max_input_vars has been exceeded
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param string $user_default_module User's default module
+ */
+function setUserModule($user_default_module) {
+	global $fm_name;
+	
+	$modules = @getActiveModules(true);
+	if (@in_array($user_default_module, $modules)) {
+		$_SESSION['module'] = $user_default_module;
+	} else {
+		$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
+	}
 }
 
 
