@@ -442,7 +442,9 @@ class fm_dns_zones {
 	function displayRow($row, $map, $reload_allowed) {
 		global $__FM_CONFIG;
 		
-		if (!$zone_access_allowed = currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $row->domain_id))) return;
+		if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $row->domain_id))) return;
+		
+		$zone_access_allowed = currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $row->domain_id));
 		
 		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
 		$response = null;
@@ -662,7 +664,8 @@ HTML;
 			$clone_results = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				$return .= '<p><a href="zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_results[$i]->domain_id . '" title="Edit zone records">' . $clone_results[$i]->domain_name . '</a>';
-				if (currentUserCan('manage_zones', $_SESSION['module'])) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
+				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
+					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				$return .= "</p>\n";
 			}
 		}

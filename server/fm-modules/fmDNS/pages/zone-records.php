@@ -53,7 +53,8 @@ $zone_access_allowed = true;
 $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
 sort($supported_record_types);
 
-$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id));
+$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id, $parent_domain_id));
 		
 if (!in_array($record_type, $supported_record_types) && !in_array($record_type, $__FM_CONFIG['records']['common_types'])) $record_type = $__FM_CONFIG['records']['common_types'][0];
 $avail_types = buildRecordTypes($record_type, $domain_id, $map, $supported_record_types);
@@ -111,7 +112,6 @@ echo "	<h2>Records</h2>
 				$ip_sort = false;
 				break;
 		}
-		$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
 		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
 		$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
 		$sort_direction = null;
