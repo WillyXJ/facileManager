@@ -171,13 +171,14 @@ class fm_module_objects {
 		
 		$edit_name = $row->object_name;
 		$netmask = ($row->object_type != 'address') ? "<td>$row->object_mask</td>" : null;
+		$comments = nl2br($row->object_comment);
 		
 		echo <<<HTML
 			<tr id="$row->object_id"$disabled_class>
 				<td>$row->object_name</td>
 				<td>$row->object_address</td>
 				$netmask
-				<td>$row->object_comment</td>
+				<td>$comments</td>
 				$edit_status
 			</tr>
 

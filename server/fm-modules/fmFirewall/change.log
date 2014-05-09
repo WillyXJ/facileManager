@@ -9,6 +9,7 @@
 * Server - Uses new fM user capabilities backend.
 * Server - Uses new fM menu platform.
 * Server - Fixed button css.
+* Server - Fixed display of comments containing carriage returns.
 
 1.0-b4 (2014-03-24)
 ===================

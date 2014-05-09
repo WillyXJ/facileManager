@@ -265,6 +265,8 @@ HTML;
 		$destination_not = ($row->policy_destination_not) ? '!' : null;
 		$service_not = ($row->policy_services_not) ? '!' : null;
 
+		$comments = nl2br($row->policy_comment);
+
 		echo <<<HTML
 		<tr id="$row->policy_id"$disabled_class>
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
@@ -274,7 +276,7 @@ HTML;
 			<td>$interface</td>
 			<td>$row->policy_direction</td>
 			<td>$policy_time</td>
-			<td>$row->policy_comment</td>
+			<td>$comments</td>
 			$edit_status
 		</tr>
 

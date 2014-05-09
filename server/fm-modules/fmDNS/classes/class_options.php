@@ -192,11 +192,13 @@ class fm_module_options {
 			$edit_status = null;
 		}
 		
+		$comments = nl2br($row->cfg_comment);
+
 		echo <<<HTML
 		<tr id="$row->cfg_id"$disabled_class>
 			<td>$row->cfg_name</td>
 			<td>$row->cfg_data</td>
-			<td>$row->cfg_comment</td>
+			<td>$comments</td>
 			$edit_status
 		</tr>
 HTML;

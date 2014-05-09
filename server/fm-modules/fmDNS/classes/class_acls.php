@@ -196,11 +196,13 @@ class fm_dns_acls {
 		$edit_name = $row->acl_name;
 		$edit_addresses = ($row->acl_predefined == 'as defined:') ? nl2br(str_replace(';', "\n", $row->acl_addresses)) : $row->acl_predefined;
 		
+		$comments = nl2br($row->acl_comment);
+
 		echo <<<HTML
 		<tr id="$row->acl_id"$disabled_class>
 			<td>$edit_name</td>
 			<td>$edit_addresses</td>
-			<td>$row->acl_comment</td>
+			<td>$comments</td>
 			$edit_status
 		</tr>
 HTML;

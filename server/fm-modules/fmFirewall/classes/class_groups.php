@@ -199,12 +199,13 @@ class fm_module_groups {
 			}
 		}
 		$group_items = implode("<br />\n", $group_items);
+		$comments = nl2br($row->group_comment);
 		
 		echo <<<HTML
 			<tr id="$row->group_id"$disabled_class>
 				<td>$row->group_name</td>
 				<td>$group_items</td>
-				<td>$row->group_comment</td>
+				<td>$comments</td>
 				$edit_status
 			</tr>
 

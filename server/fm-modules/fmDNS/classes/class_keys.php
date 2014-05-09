@@ -184,13 +184,15 @@ class fm_dns_keys {
 		$edit_name = $row->key_name;
 		$key_view = ($row->key_view) ? getNameFromID($row->key_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'none';
 		
+		$comments = nl2br($row->key_comment);
+
 		echo <<<HTML
 		<tr id="$row->key_id"$disabled_class>
 			<td>$edit_name</td>
 			<td>$row->key_algorithm</td>
 			<td>$row->key_secret</td>
 			<td>$key_view</td>
-			<td>$row->key_comment</td>
+			<td>$comments</td>
 			$edit_status
 		</tr>
 HTML;

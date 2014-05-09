@@ -184,6 +184,8 @@ class fm_module_time {
 		
 		/** Format weekdays */
 		$weekdays = $this->formatDays($row->time_weekdays);
+
+		$comments = nl2br($row->time_comment);
 		
 		echo <<<HTML
 			<tr id="$row->time_id"$disabled_class>
@@ -191,7 +193,7 @@ class fm_module_time {
 				<td>$date_range</td>
 				<td>$row->time_start_time &rarr; $row->time_end_time</td>
 				<td>$weekdays</td>
-				<td>$row->time_comment</td>
+				<td>$comments</td>
 				$edit_status
 			</tr>
 

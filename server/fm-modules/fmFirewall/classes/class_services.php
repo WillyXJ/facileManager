@@ -198,8 +198,9 @@ HTML;
 
 HTML;
 		}
+		$comments = nl2br($row->service_comment);
 		echo <<<HTML
-				<td>$row->service_comment</td>
+				<td>$comments</td>
 				$edit_status
 			</tr>
 

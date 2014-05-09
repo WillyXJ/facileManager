@@ -462,11 +462,13 @@ class fm_module_logging {
 			$channels_row = '<td>' . $channels . '</td>';
 		} else $channels_row = null;
 		
+		$comments = nl2br($row->cfg_comment);
+
 		echo <<<HTML
 		<tr id="$row->cfg_id"$disabled_class>
 			<td>$edit_name</td>
 			$channels_row
-			<td>$row->cfg_comment</td>
+			<td>$comments</td>
 			$edit_status
 		</tr>
 HTML;
