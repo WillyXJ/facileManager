@@ -8,6 +8,7 @@
            without permission to manage objects.
 * Server - Uses new fM user capabilities backend.
 * Server - Uses new fM menu platform.
+* Server - Fixed button css.
 
 1.0-b4 (2014-03-24)
 ===================

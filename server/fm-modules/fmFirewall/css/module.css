@@ -20,7 +20,8 @@
 }
 
 .list-toggle input[type="button"] {
-	padding: 3px 10px;
+	padding: 3px 8px;
+	margin-bottom: 5px;
 }
 .list-toggle select {
 	width: 150px;
@@ -34,6 +35,10 @@
 .list-toggle th, .list-toggle td {
 	font-size: 11px;
 	padding: 0;
+}
+
+.list-toggle td.switch-buttons {
+	padding: 5px;
 }
 
 table.legend {

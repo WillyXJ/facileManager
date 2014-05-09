@@ -258,7 +258,7 @@ HTML;
 								</tr>
 								<tr>
 									<td>$assigned_list</td>
-									<td>
+									<td class="switch-buttons">
 										<input type="button" id="buttonLeft" value="<" /><br />
 										<input type="button" id="buttonRight" value=">" />
 									</td>
