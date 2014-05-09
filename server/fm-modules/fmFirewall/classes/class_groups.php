@@ -41,7 +41,7 @@ class fm_module_groups {
 						);
 
 			$title_array = array('Group Name', $type . 's', array('title' => 'Comment', 'style' => 'width: 40%;'));
-			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -161,7 +161,7 @@ class fm_module_groups {
 		
 		$edit_status = $group_items = null;
 		
-		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_groups';
+		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_objects';
 		
 		if (currentUserCan($permission, $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';

@@ -79,7 +79,7 @@ printHeader();
 
 $group_type = 'object';
 
-echo printPageHeader($response, null, currentUserCan('manage_services', $_SESSION['module']), $group_type);
+echo printPageHeader($response, null, currentUserCan('manage_objects', $_SESSION['module']), $group_type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='object'");
 $fm_module_groups->rows($result, $group_type);
