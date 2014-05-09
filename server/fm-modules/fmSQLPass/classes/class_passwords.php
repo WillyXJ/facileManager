@@ -96,6 +96,8 @@ HTML;
 		if (empty($user_password)) $error = 'No password is defined.'; 
 		if (empty($user_login)) $error = 'No user login is defined.'; 
 		
+		if (!currentUserCan('manage_passwords', $_SESSION['module'])) $error = 'You do not have permission to perform this task.';
+		
 		if ($error) {
 			if (!$verbose) return '<p class="error">' . $error . '</p>';
 			else return <<<HTML

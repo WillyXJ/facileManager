@@ -33,7 +33,21 @@ foreach (scandir($class_dir) as $class_file) {
 }
 
 /** Edits */
-if (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
+$checks_array = array('servers' => 'manage_servers',
+					'services' => 'manage_services',
+					'objects' => 'manage_objects',
+					'groups' => 'manage_' . $_POST['item_sub_type'] . 's',
+					'time' => 'manage_time',
+					'policies' => 'manage_policies'
+				);
+$allowed_capabilities = array_unique($checks_array);
+
+if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
+		returnUnAuth();
+		exit;
+	}
+	
 	if (array_key_exists('add_form', $_POST)) {
 		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
 		$add_new = true;
@@ -111,6 +125,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESS
 	}
 	
 	echo $edit_form;
-}
+} else returnUnAuth();
 
 ?>

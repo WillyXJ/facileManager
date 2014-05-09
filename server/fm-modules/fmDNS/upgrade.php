@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.2-beta1', '<') ? upgradefmDNS_120($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.2-rc1', '<') ? upgradefmDNS_1202($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	return true;
@@ -582,8 +582,8 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 1.2 */
-function upgradefmDNS_120($__FM_CONFIG, $running_version) {
+/** 1.2-beta1 */
+function upgradefmDNS_1201($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
@@ -697,6 +697,56 @@ TABLE;
 		}
 	}
 
+	if (!setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
+		
+	return true;
+}
+
+
+/** 1.2-rc1 */
+function upgradefmDNS_1202($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.2-beta1', '<') ? upgradefmDNS_1201($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$fm_user_caps = getOption('fm_user_caps');
+	
+	/** Update user capabilities */
+	$fm_user_caps['fmDNS'] = array(
+			'view_all'				=> 'View All',
+			'manage_servers'		=> 'Server Management',
+			'build_server_configs'	=> 'Build Server Configs',
+			'manage_zones'			=> 'Zone Management',
+			'manage_records'		=> 'Record Management',
+			'reload_zones'			=> 'Reload Zones',
+			'manage_settings'		=> 'Manage Settings'
+		);
+	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+	
+	$fmdb->get_results("SELECT * FROM `fm_users`");
+	if ($fmdb->num_rows) {
+		$count = $fmdb->num_rows;
+		$result = $fmdb->last_result;
+		for ($i=0; $i<$count; $i++) {
+			$user_caps = null;
+			/** Update user capabilities */
+			$temp_caps = null;
+			foreach ($fm_user_caps['fmDNS'] as $slug => $trash) {
+				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
+				if (@array_key_exists('fmDNS', $user_caps)) {
+					if (array_key_exists('read_only', $user_caps['fmDNS'])) {
+						$temp_caps['fmDNS']['view_all'] = 1;
+						unset($user_caps['fmDNS']['read_only']);
+					}
+				}
+			}
+			if (@array_key_exists('fmDNS', $temp_caps)) $user_caps['fmDNS'] = array_merge($temp_caps['fmDNS'], $user_caps['fmDNS']);
+			$fmdb->query("UPDATE fm_users SET user_caps = '" . serialize($user_caps) . "' WHERE user_id=" . $result[$i]->user_id);
+			if (!$fmdb->result) return false;
+		}
+	}
+	
 	if (!setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
 		
 	return true;

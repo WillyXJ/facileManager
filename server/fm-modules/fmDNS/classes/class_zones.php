@@ -442,7 +442,7 @@ class fm_dns_zones {
 	function displayRow($row, $map, $reload_allowed) {
 		global $__FM_CONFIG;
 		
-		if (!$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $row->domain_id))) return;
+		if (!$zone_access_allowed = currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $row->domain_id))) return;
 		
 		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
 		$response = null;

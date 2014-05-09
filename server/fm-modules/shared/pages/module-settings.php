@@ -22,7 +22,7 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!currentUserCan('manage_settings', $_SESSION['module'])) unAuth();
+if (!currentUserCan(array('manage_settings', 'view_all'), $_SESSION['module'])) unAuth();
 
 printHeader();
 @printMenu();

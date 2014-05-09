@@ -26,6 +26,8 @@
 if (!isset($type)) header('Location: objects-host.php');
 if (isset($_GET['type'])) header('Location: objects-' . sanitize(strtolower($_GET['type'])) . '.php');
 
+if (!currentUserCan(array('manage_objects', 'view_all'), $_SESSION['module'])) unAuth();
+
 /** Ensure we have a valid type */
 if (!in_array($type, enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'))) header('Location: ' . $GLOBALS['basename']);
 

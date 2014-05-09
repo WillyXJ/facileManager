@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan(array('manage_time', 'view_all'), $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
 $response = isset($response) ? $response : null;
 

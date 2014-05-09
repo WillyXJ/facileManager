@@ -26,6 +26,8 @@
 if (!isset($type)) header('Location: services-icmp.php');
 if (isset($_GET['type'])) header('Location: services-' . sanitize(strtolower($_GET['type'])) . '.php');
 
+if (!currentUserCan(array('manage_services', 'view_all'), $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
 $response = isset($response) ? $response : null;
 

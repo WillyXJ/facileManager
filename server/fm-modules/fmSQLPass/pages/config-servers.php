@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_servers.php');
 $response = isset($response) ? $response : null;
 

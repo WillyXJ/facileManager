@@ -23,7 +23,7 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!currentUserCan('manage_servers', $_SESSION['module'])) unAuth();
+if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
 

@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan(array('manage_passwords', 'view_all'), $_SESSION['module'])) unAuth();
+
 $response = isset($response) ? $response : null;
 
 printHeader();

@@ -186,11 +186,6 @@ class fm_users {
 			}
 		}
 		if (isset($post['user_caps'])) {
-			foreach ($post['user_caps'] as $module => $caps_array) {
-				if (array_key_exists('read_only', $caps_array)) {
-					$post['user_caps'][$module] = array('read_only' => 1);
-				}
-			}
 			$sql .= ",user_caps='" . serialize($post['user_caps']) . "'";
 		}
 		

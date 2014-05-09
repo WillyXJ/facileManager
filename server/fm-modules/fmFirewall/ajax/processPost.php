@@ -32,8 +32,23 @@ foreach (scandir($class_dir) as $class_file) {
 	include($class_dir . $class_file);
 }
 
-if (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
-	$table = 'dns_' . $_POST['item_type'];
+$unpriv_message = 'You do not have sufficient privileges.';
+$checks_array = array('servers' => 'manage_servers',
+					'services' => 'manage_services',
+					'objects' => 'manage_objects',
+					'groups' => 'manage_' . $_POST['item_sub_type'] . 's',
+					'time' => 'manage_time',
+					'policies' => 'manage_policies'
+				);
+$allowed_capabilities = array_unique($checks_array);
+
+if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
+		echo $unpriv_message;
+		exit;
+	}
+	
+	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
 
@@ -125,6 +140,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESS
 	exit;
 }
 
-echo 'You do not have sufficient privileges.';
+echo $unpriv_message;
 
 ?>

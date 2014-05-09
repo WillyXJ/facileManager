@@ -2543,4 +2543,24 @@ function checkMaxInputVars() {
 }
 
 
+/**
+ * Checks if max_input_vars has been exceeded
+ *
+ * @since 1.2
+ * @package facileManager
+ *
+ * @param array $checks_array Array of actions and capabilities
+ * @param string $action Action to check
+ *
+ * @return bool
+ */
+function checkUserPostPerms($checks_array, $action) {
+	if (array_key_exists($action, $checks_array)) {
+		return currentUserCan($checks_array[$action], $_SESSION['module']);
+	}
+	
+	return false;
+}
+
+
 ?>

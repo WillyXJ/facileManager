@@ -50,7 +50,23 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	exit;
 }
 
-if (is_array($_POST) && count($_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
+$unpriv_message = 'You do not have sufficient privileges.';
+$checks_array = array('servers' => 'manage_servers',
+					'views' => 'manage_servers',
+					'acls' => 'manage_servers',
+					'keys' => 'manage_servers',
+					'options' => 'manage_servers',
+					'logging' => 'manage_servers',
+					'domains' => 'manage_zones'
+				);
+$allowed_capabilities = array_unique($checks_array);
+
+if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
+		echo $unpriv_message;
+		exit;
+	}
+	
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
@@ -143,6 +159,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('manage_zones', $_SESSIO
 	exit;
 }
 
-echo 'You do not have sufficient privileges.';
+echo $unpriv_message;
 
 ?>

@@ -76,7 +76,22 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.ph
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
 /** Edits */
-if (is_array($_POST) && count($_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
+$checks_array = array('servers' => 'manage_servers',
+					'views' => 'manage_servers',
+					'acls' => 'manage_servers',
+					'keys' => 'manage_servers',
+					'options' => 'manage_servers',
+					'logging' => 'manage_servers',
+					'domains' => 'manage_zones'
+				);
+$allowed_capabilities = array_unique($checks_array);
+
+if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
+		returnUnAuth();
+		exit;
+	}
+	
 	if (array_key_exists('add_form', $_POST)) {
 		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
 		$add_new = true;
@@ -150,6 +165,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('manage_zones', $_SESSIO
 	}
 	
 	echo $edit_form;
-}
+} else returnUnAuth();
 
 ?>

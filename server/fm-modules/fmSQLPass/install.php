@@ -75,7 +75,7 @@ INSERT;
 	$insert = ($fm_user_caps === null) ? true : false;
 	
 	$fm_user_caps[$module] = array(
-			'read_only'				=> '<b>Read Only</b>',
+			'view_all'				=> 'View All',
 			'manage_servers'		=> 'Server Management',
 			'manage_passwords'		=> 'Password Management',
 			'manage_settings'		=> 'Manage Settings'

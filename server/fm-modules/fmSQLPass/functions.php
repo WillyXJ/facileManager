@@ -288,12 +288,12 @@ function changePostgreSQLUserPassword($server_name, $server_port, $admin_user, $
  * @subpackage fmSQLPass
  */
 function buildModuleMenu() {
-	addObjectPage('Config', 'Database Servers', 'manage_servers', $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', 'Servers', 'Database Servers', 'manage_servers', $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', 'Groups', 'Server Groups', 'manage_servers', $_SESSION['module'], 'config-groups.php');
-		addSubmenuPage('config-servers.php', 'Passwords', 'Passwords', 'manage_passwords', $_SESSION['module'], 'config-passwords.php');
+	addObjectPage('Config', 'Database Servers', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Servers', 'Database Servers', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', 'Groups', 'Server Groups', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-groups.php');
+		addSubmenuPage('config-servers.php', 'Passwords', 'Passwords', array('manage_passwords', 'view_all'), $_SESSION['module'], 'config-passwords.php');
 
-	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', 'manage_settings', $_SESSION['module'], 'module-settings.php');
+	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }
 
 

@@ -41,7 +41,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	echo $fm_sqlpass_passwords->setPassword();
 
 /** Handle everything else */
-} elseif (is_array($_POST) && count($_POST) && (currentUserCan('manage_servers', $_SESSION['module']) || $allowed_to_manage_backups)) {
+} elseif (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$table = 'sqlpass_' . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
@@ -84,5 +84,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 
 	exit;
 }
+
+echo 'You do not have sufficient privileges.';
 
 ?>

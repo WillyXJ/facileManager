@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan(array('manage_objects', 'view_all'), $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
 $response = isset($response) ? $response : null;
 
