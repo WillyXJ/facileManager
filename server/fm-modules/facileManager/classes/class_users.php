@@ -184,6 +184,8 @@ class fm_users {
 			if (array_key_exists('do_everything', $post['user_caps'][$fm_name])) {
 				$post['user_caps'] = array($fm_name => array('do_everything' => 1));
 			}
+		} else {
+			$post['user_caps'][$fm_name] = array();
 		}
 		if (isset($post['user_caps'])) {
 			$sql .= ",user_caps='" . serialize($post['user_caps']) . "'";
@@ -417,11 +419,17 @@ FORM_ROW;
 			/** Cannot edit perms of super-admin if logged in user is not a super-admin */
 			if ((userCan($user_id, 'do_everything')) && !currentUserCan('do_everything')) break;
 			
+			$user_is_super_admin = userCan($user_id, 'do_everything');
+			
 			$fm_perm_boxes = $perm_boxes = null;
 			$i = 1;
 			$fm_user_caps = getOption('fm_user_caps');
 			foreach ($fm_user_caps[$fm_name] as $key => $title) {
-				$checked = (userCan($user_id, $key)) ? 'checked' : null;
+				if ($key != 'do_everything' && $user_is_super_admin) {
+					$checked = null;
+				} else {
+					$checked = (userCan($user_id, $key)) ? 'checked' : null;
+				}
 				$fm_perm_boxes .= ' <input name="user_caps[' . $fm_name . '][' . $key . ']" id="fm_perm_' . $key . '" type="checkbox" value="1" ' . $checked . '/> <label for="fm_perm_' . $key . '">' . $title . '</label>' . "\n";
 				/** Display checkboxes three per row */
 				if ($i == 3) {
@@ -449,7 +457,7 @@ PERM;
 				$i = 1;
 				if (array_key_exists($module_name, $fm_user_caps)) {
 					foreach ($fm_user_caps[$module_name] as $key => $title) {
-						$checked = (userCan($user_id, $key, $module_name)) ? 'checked' : null;
+						$checked = (userCan($user_id, $key, $module_name) && !$user_is_super_admin) ? 'checked' : null;
 						$module_perm_boxes .= ' <input name="user_caps[' . $module_name . '][' . $key . ']" id="fm_perm_' . $module_name . '_' . $key . '" type="checkbox" value="1" ' . $checked . '/> <label for="fm_perm_' . $module_name . '_' . $key . '">' . $title . '</label>' . "\n";
 						/** Display checkboxes three per row */
 						if ($i == 3) {

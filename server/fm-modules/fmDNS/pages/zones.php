@@ -23,6 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
+if (!currentUserCan(array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'])) unAuth();
+
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 
 if (!isset($map)) header('Location: zones-forward.php');
