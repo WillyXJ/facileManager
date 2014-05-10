@@ -697,7 +697,7 @@ TABLE;
 		}
 	}
 
-	if (!setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
+	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
 		
 	return true;
 }
@@ -747,7 +747,7 @@ function upgradefmDNS_1202($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	if (!setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS')) return false;
+	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
 		
 	return true;
 }

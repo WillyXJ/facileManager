@@ -132,7 +132,7 @@ function upgradefmFirewall_01005($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	if (!setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall')) return false;
+	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
 	
 	return true;
 }
@@ -181,6 +181,8 @@ function upgradefmFirewall_01006($__FM_CONFIG, $running_version) {
 			if (!$fmdb->result) return false;
 		}
 	}
+	
+	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
 	
 	return true;
 }
