@@ -1,4 +1,4 @@
-1.0-rc1 (2014-05-??)
+1.0-rc1 (2014-05-10)
 ====================
 * Server - [feature] Added support for bulk server config builds. (Issue #71)
 * Server - Added file extensions to all redirects and links.
