@@ -43,7 +43,7 @@
 * Server - [bug] Records could not be added or imported due to high number of
            submitted variables (php max_input_vars).  Added check for usability.
            (Issue #87)
-* Server - Fixed display of comments containing carriage returns.
+* Server - [bug] Fixed display of comments containing carriage returns.
 
 1.1.3 (2014-04-15)
 ==================
