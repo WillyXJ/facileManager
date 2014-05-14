@@ -1,5 +1,5 @@
-1.0-rc1 (2014-05-10)
-====================
+1.0 (2014-05-14)
+================
 * Server - Added file extensions to all redirects and links.
 * Server - Cleaned up code.
 * Server - [security] Fixed an issue where unpriviledged users could save module
