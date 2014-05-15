@@ -33,6 +33,8 @@ function upgradefmDNSSchema($module) {
 	$success = version_compare($running_version, '1.2-rc1', '<') ? upgradefmDNS_1202($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
+	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
+		
 	return true;
 }
 

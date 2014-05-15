@@ -33,6 +33,8 @@ function upgradefmFirewallSchema($module) {
 	$success = version_compare($running_version, '1.0-rc1', '<') ? upgradefmFirewall_01006($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
+	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
+	
 	return true;
 }
 
