@@ -1,6 +1,10 @@
-1.2 (2014-05-15)
-================
-* Both   - [bug] Fixed client upgrade versioning.
+1.2.2 (2014-05-15)
+==================
+* Server - [bug] Fixed issue where zone reloads would not happen. (Issue #93)
+
+1.2.1 (2014-05-15)
+==================
+* Both   - [bug] Fixed client upgrade versioning. (Issue #93)
 
 1.2 (2014-05-14)
 ================

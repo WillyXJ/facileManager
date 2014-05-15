@@ -482,7 +482,7 @@ class fm_module_buildconf {
 							if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
 							
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/db.' . $domain_name . "$file_ext"] = $this->buildZoneFile($zone_result[$i]);
+							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . "$file_ext"] = $this->buildZoneFile($zone_result[$i]);
 						}
 					}
 					if (isset($data->files)) {
