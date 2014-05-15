@@ -1,3 +1,7 @@
+1.2 (2014-05-15)
+================
+* Both   - [bug] Fixed client upgrade versioning.
+
 1.2 (2014-05-14)
 ================
 * Server - [bug] Fixed a SQL error when enabling/disabling keys.

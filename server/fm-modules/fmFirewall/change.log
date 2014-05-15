@@ -1,3 +1,7 @@
+1.0.1 (2014-05-15)
+==================
+* Both   - [bug] Fixed client upgrade versioning.
+
 1.0 (2014-05-14)
 ================
 * Server - [feature] Added support for bulk server config builds. (Issue #71)
