@@ -133,11 +133,17 @@ class fm_dns_records {
 		
 		$record_type_sql = ($record_type != 'SOA') ? ",record_type='$record_type'" : null;
 		
+		$null_keys = array('record_key_tag');
+		
 		$sql_edit = null;
 		
 		foreach ($array as $key => $data) {
 			if ($key == 'record_skipped') continue;
-			$sql_edit .= $key . "='" . mysql_real_escape_string($data) . "',";
+			if (in_array($key, $null_keys) && empty($data)) {
+				$sql_edit .= $key . '=NULL,';
+			} else {
+				$sql_edit .= $key . "='" . mysql_real_escape_string(str_replace("\r\n", "\n", $data)) . "',";
+			}
 			if ($key != 'record_status' && !$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 		}
 		$sql_edit = rtrim($sql_edit, ',');
