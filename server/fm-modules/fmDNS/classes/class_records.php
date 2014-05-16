@@ -145,7 +145,13 @@ class fm_dns_records {
 		/** Update the record */
 		if ($skipped_record) {
 			$table .= '_skipped';
-			$query = "REPLACE INTO `$table` VALUES({$_SESSION['user']['account_id']}, $domain_id, $id, '{$array['record_status']}')";
+			$query = "SELECT * FROM `$table` WHERE account_id={$_SESSION['user']['account_id']} AND domain_id=$domain_id AND record_id=$id";
+			$result = $fmdb->query($query);
+			if ($fmdb->num_rows) {
+				$query = "UPDATE `$table` SET domain_id=$domain_id, record_id=$id, record_status='{$array['record_status']}' WHERE account_id={$_SESSION['user']['account_id']} AND domain_id=$domain_id AND record_id=$id";
+			} else {
+				$query = "INSERT INTO `$table` VALUES({$_SESSION['user']['account_id']}, $domain_id, $id, '{$array['record_status']}')";
+			}
 			$data = $array['record_status'] == 'active' ? 'no' : 'yes';
 			$log_message .= formatLogKeyData(null, 'Included', $data);
 		} else {
