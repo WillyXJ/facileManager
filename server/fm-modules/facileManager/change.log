@@ -1,3 +1,7 @@
+1.2.2 (2014-05-??)
+==================
+* Both   - [bug] Fixed client upgrade errors. (Issue #94)
+
 1.2.1 (2014-05-15)
 ==================
 * Both   - [bug] Fixed client upgrade versioning. (Issue #93)

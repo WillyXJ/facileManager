@@ -30,6 +30,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 	if (file_exists(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/variables.inc.php')) {
 		include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/variables.inc.php');
 	}
+	include(ABSPATH . 'fm-includes/version.php');
 	
 	/** Check account key */
 	include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
@@ -76,7 +77,16 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 			/** Client upgrades */
 			if (array_key_exists('upgrade', $_GET)) {
 				$current_module_version = getOption('client_version', 0, $_POST['module_name']);
-				$data = ($_POST['server_client_version'] == $current_module_version) ? "Latest version: $current_module_version\nNo upgrade available.\n" : array('latest_module_version' => $current_module_version);
+				if ($_POST['server_client_version'] == $current_module_version) {
+					$data = "Latest version: $current_module_version\nNo upgrade available.\n";
+				} elseif ($current_module_version <= '1.2.3') {
+					$data = "Latest version: $current_module_version\nThis upgrade requires a manual installation.\n";
+				} else {
+					$data = array(
+								'latest_core_version' => $fm_version,
+								'latest_module_version' => $current_module_version
+							);
+				}
 				
 				// Probably need to move/remove this
 				$fm_shared_module_servers->updateClientVersion();

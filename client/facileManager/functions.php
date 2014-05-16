@@ -341,7 +341,7 @@ function upgradeFM($url, $data) {
 	
 	/** Download latest core files */
 	echo fM("Downloading ");
-	$core_file = 'facilemanager-core-' . $latest_module_version . '.tar.gz';
+	$core_file = 'facilemanager-core-' . $latest_core_version . '.tar.gz';
 	downloadfMFile($core_file);
 	
 	/** Download latest module files */
@@ -1033,13 +1033,16 @@ function downloadfMFile($file, $module = false) {
 	$local_file = '/tmp/' . $file;
 	@unlink($local_file);
 	
+	$fh = fopen($local_file, 'a+');
 	$ch = curl_init();
 	$options = array(
 		CURLOPT_URL				=> $base_url,
-		CURLOPT_FILE			=> $local_file,
+		CURLOPT_FILE			=> $fh,
 		CURLOPT_TIMEOUT			=> 3600,
-		CURLOPT_RETURNTRANSFER	=> 1,
-		CURLOPT_FOLLOWLOCATION	=> true
+		CURLOPT_HEADER			=> false,
+		CURLOPT_FOLLOWLOCATION	=> true,
+		CURLOPT_SSL_VERIFYPEER  => false,
+		CURLOPT_RETURNTRANSFER  => true
 	);
 	@curl_setopt_array($ch, $options);
 	$result = curl_exec($ch);
@@ -1050,8 +1053,7 @@ function downloadfMFile($file, $module = false) {
 		exit(1);
 	}
 	curl_close($ch);
-	
-	file_put_contents($local_file, $result);
+	fclose($fh);
 }
 
 
