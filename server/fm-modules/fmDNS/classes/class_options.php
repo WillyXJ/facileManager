@@ -59,10 +59,9 @@ class fm_module_options {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$_POST = $post;
 		/** Validate post */
-		if (!$this->validatePost($post)) return false;
-		$post = $_POST;
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_view='{$post['cfg_view']}'");
@@ -106,10 +105,9 @@ class fm_module_options {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$_POST = $post;
 		/** Validate post */
-		if (!$this->validatePost($post)) return false;
-		$post = $_POST;
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
 		if (isset($post['cfg_id']) && !isset($post['cfg_name'])) {
 			$post['cfg_name'] = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
@@ -149,7 +147,7 @@ class fm_module_options {
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$post['cfg_data']}\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
-		return $result;
+		return true;
 	}
 	
 	
@@ -393,17 +391,17 @@ FORM;
 	}
 	
 	
-	function validatePost($_POST) {
+	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$_POST['cfg_comment'] = trim($_POST['cfg_comment']);
+		$post['cfg_comment'] = trim($post['cfg_comment']);
 		
-		if (is_array($_POST['cfg_data'])) $_POST['cfg_data'] = join(' ', $_POST['cfg_data']);
+		if (is_array($post['cfg_data'])) $post['cfg_data'] = join(' ', $post['cfg_data']);
 		
-		if (isset($_POST['cfg_name'])) {
-			$def_option = "'{$_POST['cfg_name']}'";
-		} elseif (isset($_POST['cfg_id'])) {
-			$def_option = "(SELECT cfg_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE cfg_id = {$_POST['cfg_id']})";
+		if (isset($post['cfg_name'])) {
+			$def_option = "'{$post['cfg_name']}'";
+		} elseif (isset($post['cfg_id'])) {
+			$def_option = "(SELECT cfg_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE cfg_id = {$post['cfg_id']})";
 		} else return false;
 		
 		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
@@ -418,32 +416,36 @@ FORM;
 					case 'seconds':
 					case 'minutes':
 					case 'size_in_bytes':
-						return verifyNumber($_POST['cfg_data']);
+						if (!verifyNumber($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid number.';
 						break;
 					case 'port':
-						return verifyNumber($_POST['cfg_data'], 0, 65535);
+						if (!verifyNumber($post['cfg_data'], 0, 65535)) return $post['cfg_data'] . ' is an invalid port number.';
 						break;
 					case 'quoted_string':
-						$_POST['cfg_data'] = '"' . trim($_POST['cfg_data'], '"') . '"';
+						$post['cfg_data'] = '"' . trim($post['cfg_data'], '"') . '"';
 						break;
 					case 'quoted_string | none':
-						$_POST['cfg_data'] = '"' . trim($_POST['cfg_data'], '"') . '"';
-						if ($_POST['cfg_data'] == '"none"') $_POST['cfg_data'] = 'none';
+						$post['cfg_data'] = '"' . trim($post['cfg_data'], '"') . '"';
+						if ($post['cfg_data'] == '"none"') $post['cfg_data'] = 'none';
 						break;
 					case 'address_match_element':
+						/** Need to check for valid ACLs or IP addresses */
+						
 						break;
 					case 'ipv4_address | ipv6_address':
-						return verifyIPAddress($_POST['cfg_data']);
+						if (!verifyIPAddress($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid IP address.';
 						break;
 					case 'ipv4_address | *':
 					case 'ipv6_address | *':
-						if ($_POST['cfg_data'] != '*') return verifyIPAddress($_POST['cfg_data']);
+						if ($post['cfg_data'] != '*') {
+							if (!verifyIPAddress($post['cfg_data'])) $post['cfg_data'] . ' is an invalid IP address.';
+						}
 						break;
 				}
 			}
 		}
 		
-		return true;
+		return $post;
 	}
 
 }

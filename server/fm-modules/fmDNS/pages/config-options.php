@@ -58,8 +58,9 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			if (!$fm_module_options->add($_POST)) {
-				$response = 'This option could not be added.'. "\n";
+			$result = $fm_module_options->add($_POST);
+			if ($result !== true) {
+				$response = $result;
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
@@ -77,8 +78,9 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			if (!$fm_module_options->update($_POST)) {
-				$response = 'This option could not be updated.'. "\n";
+			$result = $fm_module_options->update($_POST);
+			if ($result !== true) {
+				$response = $result;
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
