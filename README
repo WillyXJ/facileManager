@@ -66,7 +66,7 @@ Additional Steps (OS-based)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Debian-based/Ubuntu - 
-         Edit /etc/apache2/sites-available/default and change 'AllowOverride 
+         Edit /etc/apache2/sites-enabled/default and change 'AllowOverride 
          None' to 'AllowOverride All' under <directory /var/www/> and reload 
          apache.
 
