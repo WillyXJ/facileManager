@@ -1,4 +1,4 @@
-1.2.3 (2014-05-??)
+1.2.3 (2014-05-16)
 ==================
 * Server - [bug] Fixed include/exclude of records in cloned domains.
 * Server - [bug] Fixed CERT updates when key tag is blank.
