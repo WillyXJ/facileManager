@@ -3,6 +3,7 @@
 * Server - [bug] Fixed include/exclude of records in cloned domains.
 * Server - [bug] Fixed CERT updates when key tag is blank.
 * Server - [bug] Fixed fatal PHP errors found with PHP 5.5. (Issue #95)
+* Server - [feature] Added helpful note when adding servers via UI.
 
 1.2.2 (2014-05-15)
 ==================
