@@ -1,3 +1,7 @@
+1.2.4 (2014-05-??)
+==================
+* Server - Added table index to improve queries. (Issue #96)
+
 1.2.3 (2014-05-16)
 ==================
 * Server - [bug] Fixed include/exclude of records in cloned domains.
