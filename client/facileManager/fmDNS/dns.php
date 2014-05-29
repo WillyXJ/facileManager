@@ -33,7 +33,7 @@ error_reporting(0);
 $module_name = basename(dirname(__FILE__));
 
 /** Client version */
-$data['server_client_version'] = '1.2.3';
+$data['server_client_version'] = '1.2.4';
 
 $whoami = 'root';
 $url = null;
@@ -49,7 +49,7 @@ $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
 if (file_exists($fm_client_functions)) {
 	include_once($fm_client_functions);
 } else {
-	echo fM("The facileManager client scripts are not installed.\n");
+	echo "The facileManager core client scripts are required, but not found.\n";
 	exit(1);
 }
 

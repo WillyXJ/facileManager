@@ -1,6 +1,7 @@
 1.2.4 (2014-05-??)
 ==================
 * Server - Added table index to improve queries. (Issue #96)
+* Client - Fixed a dependency check. (Issue #98)
 
 1.2.3 (2014-05-16)
 ==================
