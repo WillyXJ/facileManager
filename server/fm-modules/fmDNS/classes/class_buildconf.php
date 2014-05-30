@@ -668,7 +668,7 @@ class fm_module_buildconf {
 							$file_ext = ($zone_result[0]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/db.' . $domain_name . "$file_ext"] = $this->buildZoneFile($zone_result[0]);
+							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . "$file_ext"] = $this->buildZoneFile($zone_result[0]);
 							
 							/** Track reloads */
 							$data->reload_domain_ids[] = $zone_result[0]->domain_id;
