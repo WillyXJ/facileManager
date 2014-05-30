@@ -75,7 +75,8 @@ Client Installation
 --------------------
 
 1.  Move the contents of the client directory to /usr/local/ on your client
-    servers to manage.
+    servers to manage. (Note: client files from the core (or complete) package
+    are also required.)
     `sudo mv facileManager/client/facileManager /usr/local/`
 2.  For each module you wish to use, run the following to complete the client
     installation.
