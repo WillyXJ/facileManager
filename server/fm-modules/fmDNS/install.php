@@ -127,7 +127,8 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}record
   `record_comment` varchar(200) NOT NULL,
   `record_append` enum('yes','no') NOT NULL DEFAULT 'yes',
   `record_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
-  PRIMARY KEY (`record_id`)
+  PRIMARY KEY (`record_id`),
+  KEY `domain_id` (`domain_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
 TABLE;
 
