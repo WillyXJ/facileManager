@@ -377,7 +377,7 @@ FORM;
 				if (!is_array($post_result)) {
 					/** Something went wrong */
 					if (empty($post_result)) {
-						$post_result = 'Failed: It appears ' . $server_name . ' does not have php configured properly within httpd.';
+						$post_result = 'Failed: It appears ' . $server_name . ' does not have php configured properly within httpd or httpd is not running.';
 					}
 					return $response . '<p class="error">' . $post_result . '</p>'. "\n";
 				} else {

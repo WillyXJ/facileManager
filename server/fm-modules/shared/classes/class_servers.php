@@ -75,7 +75,7 @@ class fm_shared_module_servers {
 					if (!is_array($post_result)) {
 						/** Something went wrong */
 						if (empty($post_result)) {
-							$response[] = ' --> It appears ' . $server_name . ' does not have php configured properly within httpd.';
+							$response[] = ' --> It appears ' . $server_name . ' does not have php configured properly within httpd or httpd is not running.';
 							break;
 						}
 					} else {
