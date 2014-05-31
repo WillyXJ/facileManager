@@ -169,8 +169,7 @@ HTML;
 function buildModuleHelpFile() {
 	global $menu, $__FM_CONFIG;
 	
-	$zones_url = $menu[getParentMenuKey('Zones')][4];
-	print_r($GLOBALS['submenu']);
+//	print_r($GLOBALS['submenu']);
 	
 	$body = '
 <h3>' . $_SESSION['module'] . '</h3>
