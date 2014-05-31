@@ -91,109 +91,6 @@ class fm_module_buildconf {
 			$logging = $keys = $servers = null;
 			
 
-			/** Build global configs */
-			$config .= "options {\n";
-			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=0 AND cfg_status="active"');
-			if ($fmdb->num_rows) {
-				$config_result = $fmdb->last_result;
-				$global_config_count = $fmdb->num_rows;
-				for ($i=0; $i < $global_config_count; $i++) {
-					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
-				}
-			} else $global_config = array();
-
-			/** Override with server-specific configs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
-			if ($fmdb->num_rows) {
-				$server_config_result = $fmdb->last_result;
-				$global_config_count = $fmdb->num_rows;
-				for ($j=0; $j < $global_config_count; $j++) {
-					$server_config[$server_config_result[0]->cfg_name] = array($server_config_result[0]->cfg_data, $config_result[$i]->cfg_comment);
-				}
-			} else $server_config = array();
-
-			/** Merge arrays */
-			$config_array = array_merge($global_config, $server_config);
-			
-			foreach ($config_array as $cfg_name => $cfg_data) {
-				list($cfg_info, $cfg_comment) = $cfg_data;
-				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-				$fmdb->get_results($query);
-				if (!$fmdb->num_rows) $def_multiple_values = 'no';
-				else {
-					$result = $fmdb->last_result[0];
-					$def_multiple_values = $result->def_multiple_values;
-				}
-				if ($cfg_comment) {
-					$comment = wordwrap($cfg_comment, 50, "\n");
-					$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-					unset($comment);
-				}
-				$config .= "\t" . $cfg_name . ' ';
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
-				$config .= ";\n";
-				
-				unset($cfg_info);
-				if ($cfg_comment) $config .= "\n";
-			}
-			$config .= "};\n\n";
-			
-			/** Debian-based requires named.conf.options */
-			if (isDebianSystem($server_os_distro)) {
-				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
-				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";
-				$data->files[$server_config_file] = $config;
-				$config = $zones;
-			}
-			
-
-			/** Build logging config */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in (0, ' . $server_serial_no . ')');
-			if ($fmdb->num_rows) {
-				$logging_result = $fmdb->last_result;
-				$count = $fmdb->num_rows;
-				for ($i=0; $i < $count; $i++) {
-					if ($logging_result[$i]->cfg_comment) {
-						$comment = wordwrap($logging_result[$i]->cfg_comment, 50, "\n");
-						$logging .= "\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-						unset($comment);
-					}
-					$logging .= "\t" . $logging_result[$i]->cfg_name . ' ' . $logging_result[$i]->cfg_data . " {\n";
-					
-					/** Get logging config details */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id` ASC,`cfg_name`,`cfg_data', 'cfg_', 'AND cfg_type="logging" AND cfg_parent="' . $logging_result[$i]->cfg_id . '" AND cfg_status="active"');
-					if ($fmdb->num_rows) {
-						$child_result = $fmdb->last_result;
-						$count2 = $fmdb->num_rows;
-						for ($j=0; $j < $count2; $j++) {
-							if ($logging_result[$i]->cfg_name == 'channel') {
-								$logging .= "\t\t" . $child_result[$j]->cfg_name;
-								if ($child_result[$j]->cfg_data && $child_result[$j]->cfg_data != $child_result[$j]->cfg_name) $logging .= ' ' . $child_result[$j]->cfg_data;
-								$logging .= ";\n";
-							} else {
-								$channels = null;
-								$assoc_channels = explode(';', $child_result[$j]->cfg_data);
-								foreach ($assoc_channels as $channel) {
-									if (is_numeric($channel)) {
-										$channel = getNameFromID($channel, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
-									}
-									$channels .= "\t\t$channel;\n";
-								}
-								$logging .= $channels;
-							}
-						}
-					}					
-					
-					/** Close */
-					$logging .= "\t};\n";
-				}
-			}
-			if ($logging) $logging = "logging {\n$logging};\n\n";
-			
-
 			/** Build keys config */
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view=0 AND key_status="active"');
 			if ($fmdb->num_rows) {
@@ -224,7 +121,7 @@ class fm_module_buildconf {
 				}
 			}
 			
-			$config .= $logging . $servers;
+			$config .= $servers;
 
 			if ($keys) {
 				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
@@ -283,6 +180,111 @@ class fm_module_buildconf {
 					$config .= "\t" . $acl_item . ";\n";
 					$config .= "};\n\n";
 				}
+			}
+			
+
+			/** Build logging config */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in (0, ' . $server_serial_no . ')');
+			if ($fmdb->num_rows) {
+				$logging_result = $fmdb->last_result;
+				$count = $fmdb->num_rows;
+				for ($i=0; $i < $count; $i++) {
+					if ($logging_result[$i]->cfg_comment) {
+						$comment = wordwrap($logging_result[$i]->cfg_comment, 50, "\n");
+						$logging .= "\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+						unset($comment);
+					}
+					$logging .= "\t" . $logging_result[$i]->cfg_name . ' ' . $logging_result[$i]->cfg_data . " {\n";
+					
+					/** Get logging config details */
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id` ASC,`cfg_name`,`cfg_data', 'cfg_', 'AND cfg_type="logging" AND cfg_parent="' . $logging_result[$i]->cfg_id . '" AND cfg_status="active"');
+					if ($fmdb->num_rows) {
+						$child_result = $fmdb->last_result;
+						$count2 = $fmdb->num_rows;
+						for ($j=0; $j < $count2; $j++) {
+							if ($logging_result[$i]->cfg_name == 'channel') {
+								$logging .= "\t\t" . $child_result[$j]->cfg_name;
+								if ($child_result[$j]->cfg_data && $child_result[$j]->cfg_data != $child_result[$j]->cfg_name) $logging .= ' ' . $child_result[$j]->cfg_data;
+								$logging .= ";\n";
+							} else {
+								$channels = null;
+								$assoc_channels = explode(';', $child_result[$j]->cfg_data);
+								foreach ($assoc_channels as $channel) {
+									if (is_numeric($channel)) {
+										$channel = getNameFromID($channel, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
+									}
+									$channels .= "\t\t$channel;\n";
+								}
+								$logging .= $channels;
+							}
+						}
+					}					
+					
+					/** Close */
+					$logging .= "\t};\n";
+				}
+			}
+			if ($logging) $logging = "logging {\n$logging};\n\n";
+			
+			$config .= $logging;
+
+
+			/** Build global configs */
+			$config .= "options {\n";
+			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=0 AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				$config_result = $fmdb->last_result;
+				$global_config_count = $fmdb->num_rows;
+				for ($i=0; $i < $global_config_count; $i++) {
+					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+				}
+			} else $global_config = array();
+
+			/** Override with server-specific configs */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				$server_config_result = $fmdb->last_result;
+				$global_config_count = $fmdb->num_rows;
+				for ($j=0; $j < $global_config_count; $j++) {
+					$server_config[$server_config_result[0]->cfg_name] = array($server_config_result[0]->cfg_data, $config_result[$i]->cfg_comment);
+				}
+			} else $server_config = array();
+
+			/** Merge arrays */
+			$config_array = array_merge($global_config, $server_config);
+			
+			foreach ($config_array as $cfg_name => $cfg_data) {
+				list($cfg_info, $cfg_comment) = $cfg_data;
+				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+				$fmdb->get_results($query);
+				if (!$fmdb->num_rows) $def_multiple_values = 'no';
+				else {
+					$result = $fmdb->last_result[0];
+					$def_multiple_values = $result->def_multiple_values;
+				}
+				if ($cfg_comment) {
+					$comment = wordwrap($cfg_comment, 50, "\n");
+					$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+					unset($comment);
+				}
+				$config .= "\t" . $cfg_name . ' ';
+				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
+				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+				$config .= ";\n";
+				
+				unset($cfg_info);
+				if ($cfg_comment) $config .= "\n";
+			}
+			$config .= "};\n\n";
+			
+			/** Debian-based requires named.conf.options */
+			if (isDebianSystem($server_os_distro)) {
+				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
+				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";
+				$data->files[$server_config_file] = $config;
+				$config = $zones;
 			}
 			
 
