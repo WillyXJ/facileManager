@@ -943,7 +943,7 @@ function addLogEntry($log_data) {
 	global $module_name;
 	
 	$log_file = '/var/log/fm.log';
-	$date = date('M d H:i:s');
+	$date = @date('M d H:i:s');
 	
 	$log_data = explode("\n", trim($log_data));
 	foreach ($log_data as $log_line) {
@@ -1070,7 +1070,7 @@ function downloadfMFile($file, $module = false) {
  */
 function extractFiles($files = array()) {
 	$tmp_dir = '/tmp/fM_files';
-	mkdir($tmp_dir);
+	if (!is_dir($tmp_dir)) mkdir($tmp_dir);
 	
 	foreach ($files as $filename) {
 		$path_parts = pathinfo($filename);
