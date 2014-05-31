@@ -1,3 +1,7 @@
+1.2.5 (2014-05-??)
+==================
+* Server - [feature] Client auto upgrade minimum version are now dynamic.
+
 1.2.4 (2014-05-30)
 ==================
 * Server - Added table index to improve queries. (Issue #96)
