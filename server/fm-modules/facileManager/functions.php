@@ -2485,7 +2485,7 @@ function getPageTitle() {
  * @since 1.2
  * @package facileManager
  *
- * @return integer|bool Returns the badge count or false if the menu item is not found
+ * @return integer|bool Returns the parent menu key or false if the menu item is not found
  */
 function getParentMenuKey($search_slug = null) {
 	global $menu, $submenu;
@@ -2581,6 +2581,38 @@ function setUserModule($user_default_module) {
 	} else {
 		$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
 	}
+}
+
+
+/**
+ * Returns the menu item URL
+ *
+ * @since 1.2.3
+ * @package facileManager
+ *
+ * @return integer|bool Returns the parent menu key or false if the menu item is not found
+ */
+function getMenuURL($search_slug = null) {
+	global $menu, $submenu;
+	
+	if (!$search_slug) $search_slug = $GLOBALS['basename'];
+	
+	foreach ($menu as $position => $menu_items) {
+		$parent_key = array_search($search_slug, $menu_items, true);
+		if ($parent_key !== false) {
+			return $menu[$position][4];
+		}
+	}
+	
+	foreach ($submenu as $parent_slug => $menu_items) {
+		foreach ($menu_items as $element) {
+			if (array_search($search_slug, $element, true) !== false) {
+				return $submenu[getParentMenuKey($parent_slug)][$element][4];
+			}
+		}
+	}
+	
+	return false;
 }
 
 
