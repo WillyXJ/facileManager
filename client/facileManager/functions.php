@@ -1033,11 +1033,10 @@ function downloadfMFile($file, $module = false) {
 	$local_file = '/tmp/' . $file;
 	@unlink($local_file);
 	
-	$fh = fopen($local_file, 'a+');
+	$fh = fopen($local_file, 'w+');
 	$ch = curl_init();
 	$options = array(
 		CURLOPT_URL				=> $base_url,
-		CURLOPT_FILE			=> $fh,
 		CURLOPT_TIMEOUT			=> 3600,
 		CURLOPT_HEADER			=> false,
 		CURLOPT_FOLLOWLOCATION	=> true,
@@ -1046,14 +1045,18 @@ function downloadfMFile($file, $module = false) {
 	);
 	@curl_setopt_array($ch, $options);
 	$result = curl_exec($ch);
+	@fputs($fh, $result);
+	@fclose($fh);
 	if ($result === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
 		$message = "Unable to download file.\n";
 		echo fM($message . "\n" . curl_error($ch) . "\n");
 		addLogEntry($message . "\n" . curl_error($ch));
-		exit(1);
+		
+		curl_close($ch);
+		exit($retval);
 	}
+	
 	curl_close($ch);
-	fclose($fh);
 }
 
 

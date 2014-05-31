@@ -1,6 +1,7 @@
 1.2.3 (2014-05-??)
 ==================
 * Server - [feature] Client auto upgrade minimum version are now dynamic.
+* Client - [bug] Fixed client auto upgrades. (Issue #103)
 
 1.2.2 (2014-05-16)
 ==================
