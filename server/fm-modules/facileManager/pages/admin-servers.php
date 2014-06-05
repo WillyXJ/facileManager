@@ -82,7 +82,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 				$current_module_version = getOption('client_version', 0, $_POST['module_name']);
 				if ($_POST['server_client_version'] == $current_module_version) {
 					$data = "Latest version: $current_module_version\nNo upgrade available.\n";
-				} elseif ($current_module_version < $__FM_CONFIG[$_POST['module_name']]['min_client_auto_upgrade_version']) {
+				} elseif (version_compare($_POST['server_client_version'], $__FM_CONFIG[$_POST['module_name']]['min_client_auto_upgrade_version'], '<')) {
 					$data = "Latest version: $current_module_version\nThis upgrade requires a manual installation.\n";
 				} else {
 					$data = array(
