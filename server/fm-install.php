@@ -207,7 +207,7 @@ function processSetup() {
 		exit(displaySetup('Could not connect to MySQL.<br />Please check your credentials.'));
 	} else {
 		$db_selected = @mysql_select_db($dbname, $link);
-		if (mysql_error()) {
+		if (mysql_error() && strpos(mysql_error(), 'Unknown database') === false) {
 			exit(displaySetup(mysql_error()));
 		}
 		if ($db_selected) {
