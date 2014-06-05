@@ -57,40 +57,19 @@ function checkAppVersions($single_check = true) {
 		if (!$single_check) $requirement_check .= displayProgress("PHP >= $required_php_version", true, false);
 	}
 
-	/** MySQL Extension */
-	if (!extension_loaded('mysql')) {
-		if ($single_check) {
-			bailOut(sprintf('<p style="text-align: center;">Your PHP installation appears to be missing the MySQL extension which is required by %1s.</p>', $fm_name));
+	/** PHP Extensions */
+	$required_php_extensions = array('mysql', 'mysqli', 'curl', 'posix');
+	foreach ($required_php_extensions as $extenstion) {
+		if (!extension_loaded($extenstion)) {
+			if ($single_check) {
+				bailOut(sprintf('<p style="text-align: center;">Your PHP installation appears to be missing the %1s extension which is required by %2s.</p>', $extenstion, $fm_name));
+			} else {
+				$requirement_check .= displayProgress("PHP $extenstion Extension", false, false);
+				$error = true;
+			}
 		} else {
-			$requirement_check .= displayProgress('PHP mysql Extension', false, false);
-			$error = true;
+			if (!$single_check) $requirement_check .= displayProgress("PHP $extenstion Extension", true, false);
 		}
-	} else {
-		if (!$single_check) $requirement_check .= displayProgress('PHP mysql Extension', true, false);
-	}
-	
-	/** MySQLi Extension */
-	if (!extension_loaded('mysqli')) {
-		if ($single_check) {
-			bailOut(sprintf('<p style="text-align: center;">Your PHP installation appears to be missing the MySQLi extension which is required by %1s.</p>', $fm_name));
-		} else {
-			$requirement_check .= displayProgress('PHP mysqli Extension', false, false);
-			$error = true;
-		}
-	} else {
-		if (!$single_check) $requirement_check .= displayProgress('PHP mysqli Extension', true, false);
-	}
-	
-	/** Curl extension */
-	if (!extension_loaded('curl')) {
-		if ($single_check) {
-			bailOut(sprintf('<p style="text-align: center;">Your PHP installation appears to be missing the Curl extension which is required by %1s.</p>', $fm_name));
-		} else {
-			$requirement_check .= displayProgress('PHP curl Extension', false, false);
-			$error = true;
-		}
-	} else {
-		if (!$single_check) $requirement_check .= displayProgress('PHP curl Extension', true, false);
 	}
 	
 	/** Apache mod_rewrite module */

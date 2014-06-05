@@ -100,7 +100,9 @@ $__FM_CONFIG['options']['software_update_tree']			= array('Stable', 'Release Can
 if (function_exists('ldap_connect')) array_push($__FM_CONFIG['options']['auth_method'], array('LDAP Authentication', 2));
 
 /** Webserver Runas */
-$__FM_CONFIG['webserver']['user_info'] = posix_getpwuid(posix_geteuid());
+if (function_exists('posix_getpwuid')) {
+	$__FM_CONFIG['webserver']['user_info'] = posix_getpwuid(posix_geteuid());
+}
 
 /** Array sorts */
 @sort($__FM_CONFIG['logging']['categories']);
