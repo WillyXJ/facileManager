@@ -2,6 +2,7 @@
 ================
 * Server - Changed order of named.conf sections.
 * Server - [feature] Automatically includes the hint zone. (Issue #104)
+* Server - [feature] Adds localhost zones at install time. (Issue #105)
 
 1.2.5 (2014-05-??)
 ==================
