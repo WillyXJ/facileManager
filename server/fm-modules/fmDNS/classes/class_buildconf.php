@@ -254,8 +254,14 @@ class fm_module_buildconf {
 			/** Merge arrays */
 			$config_array = array_merge($global_config, $server_config);
 			
+			$include_hint_zone = false;
+
 			foreach ($config_array as $cfg_name => $cfg_data) {
 				list($cfg_info, $cfg_comment) = $cfg_data;
+
+				/** Include hint zone (root servers) */
+				if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
+
 				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 				$fmdb->get_results($query);
 				if (!$fmdb->num_rows) $def_multiple_values = 'no';
@@ -326,6 +332,10 @@ class fm_module_buildconf {
 
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
+
+						/** Include hint zone (root servers) */
+						if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
+
 						$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 						$fmdb->get_results($query);
 						if (!$fmdb->num_rows) $def_multiple_values = 'no';
@@ -381,7 +391,7 @@ class fm_module_buildconf {
 					}
 					
 					/** Generate zone file */
-					$tmp_files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name);
+					$tmp_files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name, $include_hint_zone);
 					
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
@@ -399,7 +409,7 @@ class fm_module_buildconf {
 				}
 			} else {
 				/** Generate zones.all.conf */
-				$files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no);
+				$files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, 0, null, $include_hint_zone);
 				
 				/** Include all zones in one file */
 				if (is_array($files)) {
@@ -441,8 +451,6 @@ class fm_module_buildconf {
 	 */
 	function buildZoneConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
-		
-		$zones = null;
 		
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);
@@ -514,7 +522,7 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null) {
+	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
 		global $fmdb, $__FM_CONFIG;
 		
 		include(ABSPATH . 'fm-includes/version.php');
@@ -527,6 +535,16 @@ class fm_module_buildconf {
 		$zones = '// This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 		$server_id = getServerID($server_serial_no, $_SESSION['module']);
 		
+		/** Build hint zone (root servers) */
+		if ($include_hint_zone) {
+			$zones .= 'zone "." {' . "\n";
+			$zones .= "\ttype hint;\n";
+			$zones .= "\tfile \"$server_zones_dir/hint/named.root\";\n";
+			$zones .= "};\n";
+			
+			$files[$server_zones_dir . '/hint/named.root'] = $this->getHintZone();
+		}
+
 		/** Build zones */
 		$view_sql = "and (`domain_view`=0 or `domain_view`=$view_id or `domain_view` LIKE '$view_id;%' or `domain_view` LIKE '%;$view_id' or `domain_view` LIKE '%;$view_id;%')";
 		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id%' or `domain_name_servers` like '%;$server_id;%') $view_sql order by `domain_clone_domain_id`,`domain_name`";
@@ -1213,6 +1231,45 @@ HTML;
 		
 		return $servers;
 	}
+
+
+	/**
+	 * Gets the hint zone
+	 *
+	 * @since 1.3
+	 * @package fmDNS
+	 *
+	 * @return string
+	 */
+	function getHintZone() {
+		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
+		
+		/** Download latest copy if older than 30 days */
+		if (filemtime($local_hint_zone) < strtotime('1 month ago')) {
+			$this->getLatestRootServers();
+		}
+		
+		$hint_zone = file_get_contents($local_hint_zone);
+		
+		return $hint_zone;
+	}
+
+
+	/**
+	 * Gets the latest root servers
+	 *
+	 * @since 1.3
+	 * @package fmDNS
+	 */
+	function getLatestRootServers() {
+		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
+		
+		/** Download the latest root servers (must be writeable by web server */
+		if (is_writeable($local_hint_zone)) {
+			file_put_contents($local_hint_zone, fopen('http://www.internic.net/domain/named.root', 'r'));
+		}
+	}
+
 
 }
 
