@@ -1244,10 +1244,7 @@ HTML;
 	function getHintZone() {
 		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
 		
-		/** Download latest copy if older than 30 days */
-		if (filemtime($local_hint_zone) < strtotime('1 month ago')) {
-			$this->getLatestRootServers();
-		}
+		$this->getLatestRootServers();
 		
 		$hint_zone = file_get_contents($local_hint_zone);
 		
@@ -1262,11 +1259,27 @@ HTML;
 	 * @package fmDNS
 	 */
 	function getLatestRootServers() {
-		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
+		global $__FM_CONFIG;
 		
-		/** Download the latest root servers (must be writeable by web server */
-		if (is_writeable($local_hint_zone)) {
-			file_put_contents($local_hint_zone, fopen('http://www.internic.net/domain/named.root', 'r'));
+		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
+		$remote_hint_zone = 'http://www.internic.net/domain/named.root';
+		
+		$remote_headers = get_headers($remote_hint_zone, 1);
+		
+		if (filemtime($local_hint_zone) < strtotime($remote_headers['Last-Modified']) && !isset($GLOBALS['root_servers_updated'])) {
+			$GLOBALS['root_servers_updated'] = true;
+			
+			/** Download the latest root servers (must be writeable by web server */
+			if (is_writeable($local_hint_zone)) {
+				file_put_contents($local_hint_zone, fopen($remote_hint_zone, 'r'));
+			} else {
+				echo <<<HTML
+			<div id="named_check" class="info">
+				<p>The root servers have been recently updated, but the webserver user ({$__FM_CONFIG['webserver']['user_info']['name']}) cannot write to $local_hint_zone to update the hint zone.</p>
+				<p>A local copy will be used instead.</p>
+			</div>
+HTML;
+			}
 		}
 	}
 
