@@ -444,7 +444,7 @@ INSERT;
 	$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}domains` (`domain_name`, `domain_mapping`) VALUES 
 	('localhost', 'forward'), 
-	('0.0.127.in-addr-arpa', 'reverse');
+	('0.0.127.in-addr.arpa', 'reverse');
 INSERT;
 	$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}records` (`domain_id`, `record_name`, `record_value`, `record_ttl`, `record_type`, `record_append`) VALUES 
