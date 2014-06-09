@@ -2377,7 +2377,7 @@ function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $mo
 	}
 	
 	/** Update parent menu badge count */
-	if ($badge_count > 1) {
+	if ($badge_count) {
 		global $menu;
 		
 		$parent_menu_key = getParentMenuKey($parent_slug);
