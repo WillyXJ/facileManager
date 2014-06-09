@@ -444,14 +444,18 @@ INSERT;
 	$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}domains` (`domain_name`, `domain_mapping`) VALUES 
 	('localhost', 'forward'), 
-	('0.0.127.in-addr.arpa', 'reverse');
+	('0.0.127.in-addr.arpa', 'reverse'),
+	('0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa', 'reverse');
 INSERT;
 	$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}records` (`domain_id`, `record_name`, `record_value`, `record_ttl`, `record_type`, `record_append`) VALUES 
 	(1, '@', '127.0.0.1', '', 'A', 'yes'),
+	(1, '@', '::1', '', 'AAAA', 'yes'),
 	(1, '@', '@', '', 'NS', 'no'),
 	(2, '1', 'localhost.', '', 'PTR', 'yes'),
-	(2, '@', 'localhost.', '', 'NS', 'no');
+	(2, '@', 'localhost.', '', 'NS', 'no'),
+	(3, '1', 'localhost.', '', 'PTR', 'yes'),
+	(3, '@', 'localhost.', '', 'NS', 'no');
 INSERT;
 
 	/** Update user capabilities */
