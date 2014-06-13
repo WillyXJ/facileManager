@@ -4,6 +4,7 @@
 * Server - [feature] Automatically includes the hint zone. (Issue #104)
 * Server - [feature] Adds localhost zones at install time. (Issue #105)
 * Server - [feature] Added support for select2 jquery.
+* Server - [feature] Added support for controls. (Issue #102)
 
 1.2.5 (2014-05-??)
 ==================

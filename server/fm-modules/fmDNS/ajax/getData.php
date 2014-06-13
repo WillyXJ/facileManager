@@ -74,6 +74,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
 
 /** Edits */
 $checks_array = array('servers' => 'manage_servers',
@@ -82,6 +83,7 @@ $checks_array = array('servers' => 'manage_servers',
 					'keys' => 'manage_servers',
 					'options' => 'manage_servers',
 					'logging' => 'manage_servers',
+					'controls' => 'manage_servers',
 					'domains' => 'manage_zones'
 				);
 $allowed_capabilities = array_unique($checks_array);
@@ -113,15 +115,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'servers':
 			$post_class = $fm_module_servers;
 			break;
-		case 'views':
-			$post_class = $fm_dns_views;
-			break;
-		case 'acls':
-			$post_class = $fm_dns_acls;
-			break;
-		case 'keys':
-			$post_class = $fm_dns_keys;
-			break;
 		case 'options':
 			$post_class = $fm_module_options;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
@@ -141,6 +134,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$field = $prefix . 'id';
 			$item_type = $_POST['item_sub_type'] . ' ';
 			break;
+		default:
+			$post_class = ${"fm_dns_${_POST['item_type']}"};
 	}
 	
 	if ($add_new) {

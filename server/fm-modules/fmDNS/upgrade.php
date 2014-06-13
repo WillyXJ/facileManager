@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.2.4', '<') ? upgradefmDNS_124($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.3', '<') ? upgradefmDNS_130($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -800,6 +800,42 @@ function upgradefmDNS_124($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD INDEX (  `domain_id` ) ;";
+
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	return true;
+}
+
+
+/** 1.3 */
+function upgradefmDNS_130($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.2.4', '<') ? upgradefmDNS_124($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
+  `control_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `control_ip` varchar(15) NOT NULL DEFAULT '*',
+  `control_port` int(5) DEFAULT NULL,
+  `control_addresses` text NOT NULL,
+  `control_key` int(11) DEFAULT NULL,
+  `control_comment` text NOT NULL,
+  `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active'
+  PRIMARY KEY (`acl_id`)
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLE;
 
 	$inserts = $updates = null;
 	

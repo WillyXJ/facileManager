@@ -56,6 +56,21 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}config
 TABLE;
 
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}controls` (
+  `control_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `control_ip` varchar(15) NOT NULL DEFAULT '*',
+  `control_port` int(5) DEFAULT NULL,
+  `control_addresses` text NOT NULL,
+  `control_key` int(11) DEFAULT NULL,
+  `control_comment` text NOT NULL,
+  `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active'
+  PRIMARY KEY (`acl_id`)
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLE;
+	
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domains` (
   `domain_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
