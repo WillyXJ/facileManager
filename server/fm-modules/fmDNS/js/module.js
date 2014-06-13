@@ -182,6 +182,10 @@ function displayOptionPlaceholder(option_value) {
 		success: function(response)
 		{
 			$('.value_placeholder').html(response);
+			$("#manage #cfg_data").select2({
+				width: '100px',
+				minimumResultsForSearch: 10
+			});
 		}
 	});
 }

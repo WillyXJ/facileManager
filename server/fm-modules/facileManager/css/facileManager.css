@@ -635,11 +635,6 @@ tbody {
 	padding-top: 16px;
 }
 
-.form-table span {
-	position: relative;
-	top: 6px;
-}
-
 .form-table tr.pwdhint th, .form-table tr.pwdhint td {
 	font-size: 8pt;
 	color: #666;
@@ -656,7 +651,7 @@ tbody {
 	font-size: 12px;
 }
 
-#setting-row div {
+#setting-row > div {
 	display: inline-block;
 	vertical-align: top;
 	margin-top: 0.8em;
@@ -700,23 +695,27 @@ tbody {
 	margin-bottom: -2.2em;
 }
 
-#configtypesmenu span {
+#configtypesmenu > span {
 	padding: 2px 5px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
-#configtypesmenu span.selected, #configtypesmenu span:hover {
+#configtypesmenu > span.selected,
+#configtypesmenu > span:hover,
+#configtypesmenu > div span:hover {
 	background-color: #666;
 }
 #configtypesmenu span:hover a {
 	color: #fff;
 }
-#configtypesmenu a {
+#configtypesmenu > span > a,
+#configtypesmenu > div a {
 	color: #000;
 	text-decoration: none;
 	padding: 2px;
 }
-#configtypesmenu a:hover {
+#configtypesmenu > span > a:hover,
+#configtypesmenu > div a:hover {
 	color: #fff;
 	text-decoration: none;
 	background-color: #666;
@@ -729,6 +728,11 @@ tbody {
 
 #configtypesmenu.log_space {
 	right: 13em;
+}
+
+#configtypesmenu > form {
+	margin-top: -.4em;
+	font-size: 10pt;
 }
 
 #response {
@@ -1277,6 +1281,10 @@ pre {
 	width: auto;
 	padding-top: 5px;
 	padding-bottom: 20px;
+}
+
+.select2-drop {
+	white-space: nowrap;
 }
 
 /** Firefox hacks :( */

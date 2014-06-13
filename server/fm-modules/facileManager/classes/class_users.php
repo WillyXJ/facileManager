@@ -525,6 +525,13 @@ PERM;
 			</p>
 			</div>
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("select").select2({
+					minimumResultsForSearch: -1
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

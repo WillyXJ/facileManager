@@ -194,6 +194,8 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version' rel='stylesheet' type='text/css'>
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.css?ver=$fm_version" type="text/css" />
 		$module_css
 		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js?ver=$fm_version" type="text/javascript" charset="utf-8"></script>
 		$module_js
@@ -674,7 +676,7 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
  * @since 1.0
  * @package facileManager
  */
-function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $class = null) {
+function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = 'Select an option') {
 	$type_options = null;
 	if (is_array($options[0])) {
 		for ($i = 0; $i < count($options); $i++) {
@@ -694,8 +696,7 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 			$type_options.="<option$selected>$options[$i]</option>\n";
 		}
 	}
-	$build_select = "<select ";
-	if ($class) $build_select .= "class=\"$class\" ";
+	$build_select = "<select class=\"$classes\" data-placeholder=\"$placeholder\" ";
 	$build_select .= "size=\"$size\" name=\"{$select_name}";
 	if ($multiple) $build_select .= '[]';
 	$build_select .= "\" id=\"$select_id\"";
@@ -2023,9 +2024,9 @@ function getBadgeCounts($type) {
  */
 function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 	if (is_array($bulk_actions_list)) {
-		$bulk_actions[] = 'Bulk Actions';
+		$bulk_actions[] = null;
 		
-		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1) . 
+		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1, '', false, null, null, 'Bulk Actions') . 
 			'<input type="submit" name="bulk_apply" id="bulk_apply" value="Apply" class="button" />' . "\n";
 	}
 }

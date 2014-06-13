@@ -73,6 +73,12 @@ p.soa_import span {
 	font-size: 9pt;
 }
 
+#configtypesmenu > #recordmenu span {
+	padding: 2px 5px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+}
+
 #configtypesmenu > #recordmenu > ul > li > a:hover,
 #configtypesmenu > #recordmenu > ul > li > a > span:hover,
 #configtypesmenu > #recordmenu > ul > li:hover > a {

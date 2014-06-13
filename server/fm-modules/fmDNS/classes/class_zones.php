@@ -649,6 +649,15 @@ HTML;
 			<input type="submit" name="submit" value="$ucf_action Zone" class="button" />
 			<input type="button" value="Cancel" class="button" id="cancel_button" />
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					allowClear: true,
+					width: '100%',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 HTML;
 
 		return $return_form;

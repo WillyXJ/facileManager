@@ -622,7 +622,7 @@ FORM;
 	function buildTimezoneList($selected_zone = null) {
 		$continents = array('Africa', 'America', 'Antarctica', 'Arctic', 'Asia', 'Atlantic', 'Australia', 'Europe', 'Indian', 'Pacific');
 		
-		$structure[] = '<select size="1" name="timezone[' . $_SESSION['user']['account_id'] . ']" id="timezone">';
+		$structure[] = '<select name="timezone[' . $_SESSION['user']['account_id'] . ']" id="timezone">';
 
 		$i = 0;
 		foreach (timezone_identifiers_list() as $zone) {

@@ -256,6 +256,14 @@ HTML;
 			<input type="submit" name="submit" value="$ucaction ACL" class="button" />
 			<input type="button" value="Cancel" class="button" id="cancel_button" />
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

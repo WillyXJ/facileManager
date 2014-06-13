@@ -42,7 +42,7 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 	if (isSerialized($user_module_perms)) {
 		$user_module_perms = unserialize($user_module_perms);
 	}
-	$available_zones_perms = isset($user_module_perms[$module_name]['access_specific_zones']) ? $user_module_perms[$module_name]['access_specific_zones'] : null;
+	$available_zones_perms = isset($user_module_perms[$module_name]['access_specific_zones']) ? $user_module_perms[$module_name]['access_specific_zones'] : 0;
 	
 	/** Get available zones */
 	$available_zones[0][] = 'All Zones';

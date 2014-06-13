@@ -5,11 +5,17 @@ $(document).ready(function() {
 	
 	$(document).keyup(function(e) {
 		if (e.keyCode == KEYCODE_ESC) { $('#cancel_button').click(); } 
-	});    
-	    
+	});
 
 	$(function() {
-		$( ".datepicker" ).datepicker();
+		$(".datepicker").datepicker();
+		$("select").select2({minimumResultsForSearch: 10});
+		$("#bulk_action").select2({minimumResultsForSearch: -1, width: '120px', allowClear: true});
+		$("#server_serial_no").select2({minimumResultsForSearch: 10});
+		$("#settings select").select2({
+			width: '200px',
+			minimumResultsForSearch: 10
+		});
 	});
 	
 	$('input:text, input:password, select').first().focus();
@@ -117,7 +123,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
-				$( ".datepicker" ).datepicker();
+				$(".datepicker").datepicker();
 				$('.form-table input:text, .form-table select').first().focus();
 			}
 		});
@@ -156,7 +162,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
-				$( ".datepicker" ).datepicker();
+				$(".datepicker").datepicker();
 				$('.form-table input, .form-table select').first().focus();
 			}
 		});

@@ -569,6 +569,14 @@ FORM;
 				<input type="submit" name="submit" value="$ucaction Channel" class="button" />
 				<input type="button" value="Cancel" class="button" id="cancel_button" />
 			</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					allowClear: true,
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 		} elseif ($type == 'category') {
 			$cfg_name = buildSelect('cfg_name', 'cfg_name', $this->availableCategories($cfg_data), $cfg_data);
@@ -590,8 +598,17 @@ FORM;
 					</tr>
 				</table>
 				<input type="submit" name="submit" value="$ucaction Category" class="button" />
-				<input value="Cancel" class="button cancel" id="cancel_button" />
+				<input type="button" value="Cancel" class="button" id="cancel_button" />
 			</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					allowClear: true,
+					width: '235px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 		} else {
 			$return_form = <<<FORM
