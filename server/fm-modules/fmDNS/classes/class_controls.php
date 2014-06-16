@@ -59,10 +59,6 @@ class fm_dns_controls {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_name');
-		if ($field_length !== false && strlen($post['control_name']) > $field_length) return 'Control name is too long (maximum ' . $field_length . ' characters).';
-		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', sanitize($post['control_name']), 'control_', 'control_name');
 		if ($fmdb->num_rows) return 'This control already exists.';
@@ -107,10 +103,6 @@ class fm_dns_controls {
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_name');
-		if ($field_length !== false && strlen($post['control_name']) > $field_length) return 'Control name is too long (maximum ' . $field_length . ' characters).';
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', sanitize($post['control_name']), 'control_', 'control_name');
@@ -212,11 +204,11 @@ HTML;
 	 * Displays the form to add new control
 	 */
 	function printForm($data = '', $action = 'add') {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_dns_acls, $fm_module_servers;
 		
 		$control_id = 0;
-		$control_name = $control_addresses = $control_comment = null;
-		$control_predefined = 'as defined:';
+		$control_ip = $control_addresses = $control_comment = null;
+		$control_port = $control_keys = null;
 		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
 		
@@ -227,12 +219,14 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
-		$control_predefined = buildSelect('control_predefined', 'control_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_predefined'), $control_predefined);
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $control_addresses), ';'));
+		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableKeys(), $control_keys, 1, null, true);
 
 		/** Get field length */
 		$control_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_name');
 
+		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
 			<input type="hidden" name="action" value="$action" />
@@ -240,13 +234,23 @@ HTML;
 			<input type="hidden" name="server_serial_no" value="$server_serial_no" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="control_name">Control Name</label></th>
-					<td width="67%"><input name="control_name" id="control_name" type="text" value="$control_name" size="40" placeholder="internal" maxlength="$control_name_length" /></td>
+					<th width="33%" scope="row"><label for="control_ip">IP Address</label></th>
+					<td width="67%"><input name="control_ip" id="control_ip" type="text" value="$control_ip" size="40" placeholder="127.0.0.1" maxlength="$control_name_length" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="control_predefined">Matched Address List</label></th>
-					<td width="67%">$control_predefined
-					<textarea name="control_addresses" rows="7" cols="28" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$control_addresses</textarea></td>
+					<th width="33%" scope="row"><label for="control_port">Port</label></th>
+					<td width="67%"><input name="control_port" id="control_port" type="text" value="$control_port" size="40" placeholder="953" /></td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="control_predefined">Allowed Address List</label></th>
+					<td width="67%">
+						<input type="hidden" name="cfg_data" id="address_match_element" data-placeholder="Define allowed hosts" value="$control_addresses" /><br />
+						( address_match_element )
+					</td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="control_keys">Keys</label></th>
+					<td width="67%">$control_keys</td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="control_comment">Comment</label></th>
@@ -260,7 +264,20 @@ HTML;
 			$(document).ready(function() {
 				$("#manage select").select2({
 					width: '200px',
-					minimumResultsForSearch: 10
+					minimumResultsForSearch: 10,
+					allowClear: true
+				});
+				$("#address_match_element").select2({
+					createSearchChoice:function(term, data) { 
+						if ($(data).filter(function() { 
+							return this.text.localeCompare(term)===0; 
+						}).length===0) 
+						{return {id:term, text:term};} 
+					},
+					multiple: true,
+					width: '200px',
+					tokenSeparators: [",", " ", ";"],
+					data: $available_acls
 				});
 			});
 		</script>

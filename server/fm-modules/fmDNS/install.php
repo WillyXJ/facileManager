@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}contro
   `control_ip` varchar(15) NOT NULL DEFAULT '*',
   `control_port` int(5) DEFAULT NULL,
   `control_addresses` text NOT NULL,
-  `control_key` int(11) DEFAULT NULL,
+  `control_keys` int(11) DEFAULT NULL,
   `control_comment` text NOT NULL,
   `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active'
   PRIMARY KEY (`acl_id`)
