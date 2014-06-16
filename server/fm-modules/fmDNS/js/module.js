@@ -167,11 +167,13 @@ $(document).ready(function() {
 
 function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById('cfg_name').value;
+	var server_serial_no	= getUrlVars()['server_serial_no'];
 
 	var form_data = {
 		get_option_placeholder: true,
 		option_name: option_name,
 		option_value: option_value,
+		server_serial_no: server_serial_no,
 		is_ajax: 1
 	};
 
@@ -182,10 +184,12 @@ function displayOptionPlaceholder(option_value) {
 		success: function(response)
 		{
 			$('.value_placeholder').html(response);
-			$("#manage #cfg_data").select2({
-				width: '100px',
-				minimumResultsForSearch: 10
-			});
+			if (response.toLowerCase().indexOf("address_match_element") == -1) {
+				$("#manage #cfg_data").select2({
+					width: '100px',
+					minimumResultsForSearch: 10
+				});
+			}
 		}
 	});
 }

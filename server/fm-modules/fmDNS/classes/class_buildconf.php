@@ -59,6 +59,8 @@ class fm_module_buildconf {
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		
+		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+		
 		setTimezone();
 		
 		$files = array();
@@ -276,6 +278,7 @@ class fm_module_buildconf {
 				}
 				$config .= "\t" . $cfg_name . ' ';
 				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
+				$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_module_options->parseACL($cfg_info) : $cfg_info;
 				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
 				$config .= ";\n";
@@ -350,6 +353,7 @@ class fm_module_buildconf {
 						}
 						$config .= "\t" . $cfg_name . ' ';
 						if ($def_multiple_values == 'yes') $config .= '{ ';
+						$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_module_options->parseACL($cfg_info) : $cfg_info;
 						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 						if ($def_multiple_values == 'yes') $config .= '; }';
 						$config .= ";\n";

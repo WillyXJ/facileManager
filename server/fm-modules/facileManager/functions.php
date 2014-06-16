@@ -723,14 +723,14 @@ function trimFullStop($value){
  * @since 1.0
  * @package facileManager
  */
-function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null) {
+function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null, $status = null) {
 	global $fmdb;
 	
 	if (!$account_id) {
 		$account_id = $_SESSION['user']['account_id'];
 	}
 	
-	basicGet($table, $id, $prefix, $field, null, $account_id);
+	basicGet($table, $id, $prefix, $field, $status, $account_id);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
 		if (isset($result[0]->$data)) return $result[0]->$data;

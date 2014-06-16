@@ -27,6 +27,7 @@ if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
@@ -34,7 +35,30 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		if ($result[0]->def_dropdown == 'no') {
+		if (strpos($result[0]->def_type, 'address_match_element') !== false) {
+			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $_POST['server_serial_no']);
+
+			echo <<<HTML
+					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
+					<td width="67%"><input type="hidden" name="cfg_data" id="address_match_element" value="$cfg_data" /><br />
+					{$result[0]->def_type}</td>
+					<script>
+					$("#address_match_element").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: true,
+						width: '200px',
+						tokenSeparators: [",", " ", ";"],
+						data: $available_acls
+					});
+					</script>
+
+HTML;
+		} elseif ($result[0]->def_dropdown == 'no') {
 			echo <<<HTML
 					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
 					<td width="67%"><input name="cfg_data" id="cfg_data" type="text" value='$cfg_data' size="40" /><br />
@@ -70,7 +94,6 @@ HTML;
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');

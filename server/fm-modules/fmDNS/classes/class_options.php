@@ -95,7 +95,8 @@ class fm_module_options {
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		addLogEntry("Added option:\nName: $tmp_name\nValue: {$post['cfg_data']}\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
+		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $this->parseACL($post['cfg_data']) : $post['cfg_data'];
+		addLogEntry("Added option:\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
 		return true;
 	}
 
@@ -146,7 +147,8 @@ class fm_module_options {
 
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$post['cfg_data']}\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
+		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $this->parseACL($post['cfg_data']) : $post['cfg_data'];
+		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
 		return true;
 	}
 	
@@ -191,11 +193,12 @@ class fm_module_options {
 		}
 		
 		$comments = nl2br($row->cfg_comment);
+		$cfg_data = strpos($row->cfg_data, 'acl_') !== false ? $this->parseACL($row->cfg_data) : $row->cfg_data;
 
 		echo <<<HTML
 		<tr id="$row->cfg_id"$disabled_class>
 			<td>$row->cfg_name</td>
-			<td>$row->cfg_data</td>
+			<td>$cfg_data</td>
 			<td>$comments</td>
 			$edit_status
 		</tr>
@@ -454,6 +457,22 @@ FORM;
 		}
 		
 		return $post;
+	}
+	
+	
+	function parseACL($address_match_list) {
+		global $__FM_CONFIG;
+		
+		$acls = explode(',', $address_match_list);
+		$formatted_acls = null;
+		foreach ($acls as $address) {
+			if (strpos($address, 'acl_') === false) $formatted_acls[] = $address;
+			
+			$acl_id = str_replace('acl_', '', $address);
+			$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+		}
+		
+		return implode('; ', $formatted_acls);
 	}
 
 }

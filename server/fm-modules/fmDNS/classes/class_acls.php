@@ -268,6 +268,51 @@ FORM;
 
 		return $return_form;
 	}
+
+	/**
+	 * Gets the ACL listing
+	 */
+	function getACLList($server_serial_no = 0) {
+		global $__FM_CONFIG, $fmdb;
+		
+		$acl_list = null;
+		$serial_sql = $server_serial_no ? "AND server_serial_no IN (0,$server_serial_no)" : "AND server_serial_no=0";
+		
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql);
+		if ($fmdb->num_rows) {
+			$last_result = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$acl_list[$i]['id'] = 'acl_' . $last_result[$i]->acl_id;
+				$acl_list[$i]['text'] = $last_result[$i]->acl_name;
+			}
+		}
+		
+		return $acl_list;
+	}
+
+	/**
+	 * Builds the ACL listing JSON
+	 */
+	function buildACLJSON($saved_acls, $server_serial_no = 0) {
+		$available_acls = $this->getACLList($server_serial_no);
+		$temp_acls = null;
+		foreach ($available_acls as $temp_acl_array) {
+			$temp_acls[] = $temp_acl_array['id'];
+		}
+		$i = count($available_acls);
+		foreach (explode(',', $saved_acls) as $saved_acl) {
+			if (!$saved_acl) continue;
+			if (array_search($saved_acl, $temp_acls) === false) {
+				$available_acls[$i]['id'] = $saved_acl;
+				$available_acls[$i]['text'] = $saved_acl;
+				$i++;
+			}
+		}
+		$available_acls = json_encode($available_acls);
+		unset($temp_acl_array, $temp_acl);
+		
+		return $available_acls;
+	}
 	
 }
 

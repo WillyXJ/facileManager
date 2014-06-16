@@ -444,7 +444,12 @@ HTML;
 			<input type="button" value="Cancel" class="button" id="cancel_button" />
 		</form>
 		<script>
-			$(document).ready(function() { $("#manage select").select2({minimumResultsForSearch: 10}); });
+			$(document).ready(function() {
+				$("#manage select").select2({
+					minimumResultsForSearch: 10,
+					allowClear: true
+				});
+			});
 		</script>
 FORM;
 
