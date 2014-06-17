@@ -682,12 +682,12 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 		for ($i = 0; $i < count($options); $i++) {
 			if (is_array($option_select)) {
 				foreach ($option_select as $key) {
-					if ($key == $options[$i][1]) {
+					if (isset($key) && $key == $options[$i][1]) {
 						$selected = ' selected';
 						break;
 					} else $selected = '';
 				}
-			} else $selected = ($option_select == $options[$i][1]) ? ' selected' : '';
+			} else $selected = (isset($option_select) && $option_select == $options[$i][1]) ? ' selected' : '';
 			$type_options.="<option$selected value=\"{$options[$i][1]}\">{$options[$i][0]}</option>\n";
 		}
 	} else {
