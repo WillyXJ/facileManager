@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}contro
   `control_addresses` text NOT NULL,
   `control_keys` int(11) DEFAULT NULL,
   `control_comment` text NOT NULL,
-  `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active'
-  PRIMARY KEY (`acl_id`)
+  `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`control_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLE;
 	

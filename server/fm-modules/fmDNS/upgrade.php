@@ -832,8 +832,8 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
   `control_addresses` text NOT NULL,
   `control_keys` int(11) DEFAULT NULL,
   `control_comment` text NOT NULL,
-  `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active'
-  PRIMARY KEY (`acl_id`)
+  `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`control_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLE;
 

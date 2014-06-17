@@ -222,9 +222,6 @@ HTML;
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $control_addresses), ';'));
 		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableKeys(), $control_keys, 1, null, true);
 
-		/** Get field length */
-		$control_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_name');
-
 		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
 		
 		$return_form = <<<FORM
@@ -235,7 +232,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="control_ip">IP Address</label></th>
-					<td width="67%"><input name="control_ip" id="control_ip" type="text" value="$control_ip" size="40" placeholder="127.0.0.1" maxlength="$control_name_length" /></td>
+					<td width="67%"><input name="control_ip" id="control_ip" type="text" value="$control_ip" size="40" placeholder="127.0.0.1" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="control_port">Port</label></th>

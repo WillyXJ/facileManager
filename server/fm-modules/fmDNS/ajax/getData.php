@@ -31,12 +31,13 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
+	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
 	$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
 		if (strpos($result[0]->def_type, 'address_match_element') !== false) {
-			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $_POST['server_serial_no']);
+			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
 
 			echo <<<HTML
 					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
