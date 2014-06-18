@@ -50,7 +50,7 @@ p.soa_import span {
 	background-repeat: no-repeat;
 	background-attachment: local;
 	min-height: 59px;
-	overflow: scroll;
+	overflow: auto;
 }
 #named_check p {
 	padding-left: 5em;

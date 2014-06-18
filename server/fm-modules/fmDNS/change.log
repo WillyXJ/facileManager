@@ -1,10 +1,11 @@
 1.3 (2014-07-??)
 ================
-* Server - Changed order of named.conf sections.
+* Server - [improvement] Changed order of named.conf sections.
 * Server - [feature] Automatically includes the hint zone. (Issue #104)
 * Server - [feature] Adds localhost zones at install time. (Issue #105)
 * Server - [feature] Added support for select2 jquery.
 * Server - [feature] Added support for controls. (Issue #102)
+* Server - [improvement] Fixed scrolling of named check window.
 
 1.2.5 (2014-05-??)
 ==================
@@ -12,7 +13,7 @@
 
 1.2.4 (2014-05-30)
 ==================
-* Server - Added table index to improve queries. (Issue #96)
+* Server - [improvement] Added table index to improve queries. (Issue #96)
 * Client - [bug] Fixed a dependency check. (Issue #98)
 * Server - [bug] Fixed cron zone reloads (Issue #98)
 
