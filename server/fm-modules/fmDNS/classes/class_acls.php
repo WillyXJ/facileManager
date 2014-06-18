@@ -314,6 +314,22 @@ FORM;
 		return $available_acls;
 	}
 	
+	
+	function parseACL($address_match_list) {
+		global $__FM_CONFIG;
+		
+		$acls = explode(',', $address_match_list);
+		$formatted_acls = null;
+		foreach ($acls as $address) {
+			if (strpos($address, 'acl_') === false) $formatted_acls[] = $address;
+			
+			$acl_id = str_replace('acl_', '', $address);
+			$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+		}
+		
+		return implode('; ', $formatted_acls);
+	}
+
 }
 
 if (!isset($fm_dns_acls))

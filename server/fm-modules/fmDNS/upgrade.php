@@ -828,9 +828,9 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` int(11) NOT NULL DEFAULT '0',
   `control_ip` varchar(15) NOT NULL DEFAULT '*',
-  `control_port` int(5) DEFAULT NULL,
+  `control_port` int(5) NOT NULL DEFAULT '953',
   `control_addresses` text NOT NULL,
-  `control_keys` int(11) DEFAULT NULL,
+  `control_keys` varchar(255) DEFAULT NULL,
   `control_comment` text NOT NULL,
   `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`control_id`)

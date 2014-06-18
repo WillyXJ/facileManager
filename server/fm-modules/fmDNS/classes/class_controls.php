@@ -40,7 +40,7 @@ class fm_dns_controls {
 							'name' => 'controls'
 						);
 
-			$title_array = array('Name', 'Address List', 'Comment');
+			$title_array = array('IP Address', 'Port', 'Address List', 'Keys', 'Comment');
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -59,9 +59,9 @@ class fm_dns_controls {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', sanitize($post['control_name']), 'control_', 'control_name');
-		if ($fmdb->num_rows) return 'This control already exists.';
+		/** Validate post */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls`";
 		$sql_fields = '(';
@@ -69,17 +69,10 @@ class fm_dns_controls {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		/** Cleans up control_addresses for future parsing **/
-		$post['control_addresses'] = verifyAndCleanAddresses($post['control_addresses']);
-		if ($post['control_addresses'] === false) return 'Invalid address(es) specified.';
-		
-		$post['control_comment'] = trim($post['control_comment']);
-		
 		$exclude = array('submit', 'action', 'server_id');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if ($key == 'control_name' && empty($clean_data)) return 'No control name defined.';
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -93,8 +86,7 @@ class fm_dns_controls {
 		
 		if (!$fmdb->result) return 'Could not add the control because a database error occurred.';
 
-		$control_addresses = $post['control_predefined'] == 'as defined:' ? $post['control_addresses'] : $post['control_predefined'];
-		addLogEntry("Added control:\nName: {$post['control_name']}\nAddresses: $control_addresses\nComment: {$post['control_comment']}");
+		addLogEntry("Added control:\nIP: {$post['control_ip']}\nAddresses: $control_addresses\nComment: {$post['control_comment']}");
 		return true;
 	}
 
@@ -104,21 +96,13 @@ class fm_dns_controls {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', sanitize($post['control_name']), 'control_', 'control_name');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			if ($result[0]->control_id != $post['control_id']) return 'This control already exists.';
-		}
+		/** Validate post */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
-		if (empty($post['control_name'])) return 'No control name defined.';
 		/** Cleans up control_addresses for future parsing **/
-		$post['control_addresses'] = verifyAndCleanAddresses($post['control_addresses']);
-		if ($post['control_addresses'] === false) return 'Invalid address(es) specified.';
-		
-		if ($post['control_predefined'] != 'as defined:') $post['control_addresses'] = null;
-
-		$post['control_comment'] = trim($post['control_comment']);
+//		$post['control_addresses'] = verifyAndCleanAddresses($post['control_addresses']);
+//		if ($post['control_addresses'] === false) return 'Invalid address(es) specified.';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -133,7 +117,6 @@ class fm_dns_controls {
 		$sql = rtrim($sql_edit, ',');
 		
 		// Update the control
-		$old_name = getNameFromID($post['control_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_', 'control_id', 'control_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET $sql WHERE `control_id`={$post['control_id']}";
 		$result = $fmdb->query($query);
 		
@@ -166,7 +149,15 @@ class fm_dns_controls {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
+		
+		if (!class_exists('fm_dns_acls')) {
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		}
+		
+		if (!class_exists('fm_dns_keys')) {
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
+		}
 		
 		$disabled_class = ($row->control_status == 'disabled') ? ' class="disabled"' : null;
 		
@@ -185,15 +176,18 @@ class fm_dns_controls {
 			$edit_status = null;
 		}
 		
-		$edit_name = $row->control_name;
-		$edit_addresses = ($row->control_predefined == 'as defined:') ? nl2br(str_replace(';', "\n", $row->control_addresses)) : $row->control_predefined;
+		$control_port = !empty($row->control_port) ? $row->control_port : 953;
+		$control_addresses = strpos($row->control_addresses, 'acl_') !== false ? $fm_dns_acls->parseACL($row->control_addresses) : $row->control_addresses;
+		$control_keys = $fm_dns_keys->parseKey($row->control_keys);
 		
 		$comments = nl2br($row->control_comment);
 
 		echo <<<HTML
 		<tr id="$row->control_id"$disabled_class>
-			<td>$edit_name</td>
-			<td>$edit_addresses</td>
+			<td>$row->control_ip</td>
+			<td>$control_port</td>
+			<td>$control_addresses</td>
+			<td>$control_keys</td>
 			<td>$comments</td>
 			$edit_status
 		</tr>
@@ -220,7 +214,7 @@ HTML;
 		}
 		
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $control_addresses), ';'));
-		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableKeys(), $control_keys, 1, null, true);
+		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableKeys(), explode(';', $control_keys), 1, null, true);
 
 		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
 		
@@ -229,6 +223,7 @@ HTML;
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="control_id" value="$control_id" />
 			<input type="hidden" name="server_serial_no" value="$server_serial_no" />
+			<input type="hidden" name="control_keys" value="" />
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="control_ip">IP Address</label></th>
@@ -241,7 +236,7 @@ HTML;
 				<tr>
 					<th width="33%" scope="row"><label for="control_predefined">Allowed Address List</label></th>
 					<td width="67%">
-						<input type="hidden" name="cfg_data" id="address_match_element" data-placeholder="Define allowed hosts" value="$control_addresses" /><br />
+						<input type="hidden" name="control_addresses" id="address_match_element" data-placeholder="Define allowed hosts" value="$control_addresses" /><br />
 						( address_match_element )
 					</td>
 				</tr>
@@ -282,6 +277,32 @@ FORM;
 
 		return $return_form;
 	}
+	
+	
+	function validatePost($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (!$post['control_id']) unset($post['control_id']);
+		
+		$post['control_comment'] = trim($post['control_comment']);
+		
+		if (is_array($post['control_keys'])) $post['control_keys'] = join(',', $post['control_keys']);
+		
+		if (!empty($post['control_ip']) && $post['control_ip'] != '*') {
+			if (!verifyIPAddress($post['control_ip'])) $post['control_ip'] . ' is not a valid IP address.';
+		} else $post['control_ip'] = '*';
+		
+		if (empty($post['control_addresses'])) {
+			return "Allowed addresses not defined.";
+		}
+		
+		if (!empty($post['control_port'])) {
+			if (!verifyNumber($post['control_port'], 0, 65535)) return $post['control_port'] . ' is not a valid port number.';
+		} else $post['control_port'] = 953;
+		
+		return $post;
+	}
+	
 	
 }
 

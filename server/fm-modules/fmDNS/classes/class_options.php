@@ -173,7 +173,11 @@ class fm_module_options {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_dns_acls;
+		
+		if (!class_exists('fm_dns_acls')) {
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		}
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
 		
@@ -193,7 +197,7 @@ class fm_module_options {
 		}
 		
 		$comments = nl2br($row->cfg_comment);
-		$cfg_data = strpos($row->cfg_data, 'acl_') !== false ? $this->parseACL($row->cfg_data) : $row->cfg_data;
+		$cfg_data = strpos($row->cfg_data, 'acl_') !== false ? $fm_dns_acls->parseACL($row->cfg_data) : $row->cfg_data;
 
 		echo <<<HTML
 		<tr id="$row->cfg_id"$disabled_class>
@@ -460,21 +464,6 @@ FORM;
 	}
 	
 	
-	function parseACL($address_match_list) {
-		global $__FM_CONFIG;
-		
-		$acls = explode(',', $address_match_list);
-		$formatted_acls = null;
-		foreach ($acls as $address) {
-			if (strpos($address, 'acl_') === false) $formatted_acls[] = $address;
-			
-			$acl_id = str_replace('acl_', '', $address);
-			$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
-		}
-		
-		return implode('; ', $formatted_acls);
-	}
-
 }
 
 if (!isset($fm_module_options))

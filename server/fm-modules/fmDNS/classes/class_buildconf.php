@@ -59,7 +59,8 @@ class fm_module_buildconf {
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		
-		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 		
 		setTimezone();
 		
@@ -99,14 +100,14 @@ class fm_module_buildconf {
 				$key_result = $fmdb->last_result;
 				$key_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $key_config_count; $i++) {
-					$key_name = trimFullStop($key_result[$i]->key_name) . '.';
+					$key_name = trimFullStop($key_result[$i]->key_name);
 					$keys .= $key_name . "\n";
 					if ($key_result[$i]->key_comment) {
 						$comment = wordwrap($key_result[$i]->key_comment, 50, "\n");
 						$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
 						unset($comment);
 					}
-					$key_config .= "key $key_name {\n";
+					$key_config .= "key \"$key_name\" {\n";
 					$key_config .= "\talgorithm " . $key_result[$i]->key_algorithm . ";\n";
 					$key_config .= "\tsecret \"" . $key_result[$i]->key_secret . "\";\n";
 					$key_config .= "};\n\n";
@@ -278,7 +279,7 @@ class fm_module_buildconf {
 				}
 				$config .= "\t" . $cfg_name . ' ';
 				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-				$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_module_options->parseACL($cfg_info) : $cfg_info;
+				$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
 				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
 				$config .= ";\n";
@@ -287,6 +288,32 @@ class fm_module_buildconf {
 				if ($cfg_comment) $config .= "\n";
 			}
 			$config .= "};\n\n";
+			
+			
+			/** Build controls configs */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN (0,' . $server_serial_no . ') AND control_status="active"');
+			if ($fmdb->num_rows) {
+				$control_result = $fmdb->last_result;
+				$control_config_count = $fmdb->num_rows;
+				$control_config = "controls {\n";
+				for ($i=0; $i < $control_config_count; $i++) {
+					if ($control_result[$i]->control_comment) {
+						$comment = wordwrap($control_result[$i]->control_comment, 50, "\n");
+						$control_config .= "\t// " . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
+					$control_config .= "\tinet " . $control_result[$i]->control_ip;
+					if ($control_result[$i]->control_port != 953) $control_config .= ' port ' . $control_result[$i]->control_port;
+					if (!empty($control_result[$i]->control_addresses)) $control_config .= ' allow { ' . trim($fm_dns_acls->parseACL($control_result[$i]->control_addresses), '; ') . '; }';
+					$control_config .= (!empty($control_result[$i]->control_keys)) ? ' keys { "' . $fm_dns_keys->parseKey($control_result[$i]->control_keys) . '"; };' : ";";
+					$control_config .= "\n";
+				}
+				$control_config .= "};\n\n";
+			} else $control_config = null;
+			
+			$config .= $control_config;
+			unset($control_config);
+
 			
 			/** Debian-based requires named.conf.options */
 			if (isDebianSystem($server_os_distro)) {
@@ -353,7 +380,7 @@ class fm_module_buildconf {
 						}
 						$config .= "\t" . $cfg_name . ' ';
 						if ($def_multiple_values == 'yes') $config .= '{ ';
-						$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_module_options->parseACL($cfg_info) : $cfg_info;
+						$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
 						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 						if ($def_multiple_values == 'yes') $config .= '; }';
 						$config .= ";\n";

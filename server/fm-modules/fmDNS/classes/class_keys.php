@@ -262,6 +262,19 @@ FORM;
 		return $return_form;
 	}
 	
+	
+	function parseKey($keys) {
+		global $__FM_CONFIG;
+		
+		$formatted_keys = null;
+		foreach (explode(',', $keys) as $key_id) {
+			$formatted_keys[] = getNameFromID($key_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}keys", 'key_', 'key_id', 'key_name', null, 'active');
+		}
+		
+		return implode('"; "', $formatted_keys);
+	}
+
+
 }
 
 if (!isset($fm_dns_keys))
