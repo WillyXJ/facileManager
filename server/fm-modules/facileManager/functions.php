@@ -212,11 +212,11 @@ HTML;
  * @since 1.0
  * @package facileManager
  */
-function printFooter($text = null, $block_style = null) {
+function printFooter($classes = null, $text = null, $block_style = null) {
 	echo <<<FOOT
 	</div>
 <div class="manage_form_container" id="manage_item" $block_style></div>
-<div class="manage_form_contents" id="manage_item_contents" $block_style>
+<div class="manage_form_contents $classes" id="manage_item_contents" $block_style>
 $text
 </div>
 </body></html>

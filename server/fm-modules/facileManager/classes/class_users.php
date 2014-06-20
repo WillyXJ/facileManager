@@ -504,6 +504,11 @@ PERM;
 		
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
 		$return_form .= <<<FORM
+		<div class="popup-header">
+			<input type="button" value="X" class="close" title="Close" />
+			<h3>$ucaction User</h3>
+		</div>
+		<div class="popup-contents">
 			<div class="leftbox">
 			<form id="fm_user_profile">
 			<input type="hidden" name="action" value="$action" />
@@ -518,12 +523,13 @@ PERM;
 			$verbose_form
 			$user_perm_form
 			</table>
-			</form>
-			<p>
-				<input type="submit" id="$button_id" name="submit" value="$button_text" class="button" $button_disabled />
-				<input type="button" value="Cancel" class="button" id="cancel_button" />
-			</p>
 			</div>
+		</div>
+		<div class="popup-footer">
+			<input type="submit" id="$button_id" name="submit" value="$button_text" class="button primary" $button_disabled />
+			<input type="button" value="Cancel" class="button left" id="cancel_button" />
+		</div>
+		</form>
 		</form>
 		<script>
 			$(document).ready(function() {

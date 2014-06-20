@@ -231,7 +231,7 @@ $(document).ready(function() {
     });
 
     /* Cancel button */
-    $('#manage_item_contents').delegate('#cancel_button', 'click tap', function(e) {
+    $('#manage_item_contents').delegate('#cancel_button, .close', 'click tap', function(e) {
 		$('#manage_item').fadeOut(200);
 		$('#manage_item_contents').fadeOut(200).html();
 	});

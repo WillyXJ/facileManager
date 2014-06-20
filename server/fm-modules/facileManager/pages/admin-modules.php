@@ -142,6 +142,6 @@ echo '
 	</div>
 </div>' . "\n";
 
-printFooter($output);
+printFooter(null, $output);
 
 ?>

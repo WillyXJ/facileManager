@@ -28,7 +28,7 @@ if (!class_exists('fm_tools')) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 }
 
-$admin_tools = $output = $block_style = null;
+$admin_tools = $output = $block_style = $classes = null;
 $response = isset($response) ? $response : null;
 $tools_option = array();
 $import_output = '<p>Processing...</p>';
@@ -95,6 +95,6 @@ echo <<<HTML
 	</div>
 HTML;
 
-printFooter($output, $block_style);
+printFooter($classes, $output, $block_style);
 
 ?>
