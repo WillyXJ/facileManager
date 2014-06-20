@@ -30,33 +30,39 @@ class fm_login {
 	 * @return string
 	 */
 	function printLoginForm() {
-		printHeader('Login', 'install');
+		global $fm_name;
+		printHeader('Login', 'login');
 		
 		/** Cannot change password without mail_enable defined */
 		$mail_enable = (getOption('fm_db_version') >= 18) ? getOption('mail_enable') : false;
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : false;
 		$forgot_link = ($mail_enable && $auth_method == 1) ? '<p id="forgotton_link"><a href="?forgot_password">Forgot your password?</a></p>' : null;
+		
+		$branding_logo = $GLOBALS['RELPATH'] . '/fm-modules/' . $fm_name . '/images/fm.png';
 
 		echo <<<HTML
 		<form id="loginform" action="{$_SERVER['REQUEST_URI']}" method="post">
-		<center>
+		<div id="fm-branding">
+			<img src="$branding_logo" />
+		</div>
 		<div id="message"></div>
 		<div id="login_form">
-		<table class="form-table">
+		<table>
 			<tr>
-				<th><label for="username">Username:</label></th>
-				<td><input type="text" size="25" name="username" id="username" placeholder="username" /></td>
-			</tr>
-			<tr>
-				<th><label for="password">Password:</label></th>
 				<td>
-					<input type="password" size="25" name="password" id="password" placeholder="password" />
-					$forgot_link
+					<div class="input-wrapper">
+						<input type="text" size="25" name="username" id="username" placeholder="Username" />
+					</div>
 				</td>
+				<td>
+					<div class="input-wrapper">
+						<input type="password" size="25" name="password" id="password" placeholder="Password" />
+					</div>
+				</td>
+				<td><input name="submit" id="loginbtn" type="submit" value="Login" class="button" /></td>
 			</tr>
 		</table>
-		</center>
-		<p class="step"><input name="submit" id="loginbtn" type="submit" value="Login" class="button" /></p>
+		$forgot_link
 		</form>
 		</div>
 	
