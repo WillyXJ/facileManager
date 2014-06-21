@@ -536,7 +536,7 @@ HTML;
 	function printForm($data = '', $action = 'create', $map = 'forward') {
 		global $__FM_CONFIG;
 		
-		$ucf_action = ucfirst($action);
+		$ucaction = ucfirst($action);
 		$domain_id = $domain_view = $domain_name_servers = 0;
 		$domain_type = $domain_check_names = $domain_notify_slaves = $domain_multi_masters = $domain_clone_domain_id = null;
 		$domain_transfers_from = $domain_updates_from = $domain_master_servers = $domain_forward_servers = $domain_name = null;
@@ -578,8 +578,12 @@ HTML;
 		$domain_master_servers = str_replace('; ', "\n", rtrim($domain_master_servers, '; '));
 		$domain_forward_servers = str_replace('; ', "\n", rtrim($domain_forward_servers, '; '));
 		
+		$popup_header = buildPopup('header', $ucaction . ' Zone');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<HTML
 		<form name="manage" id="manage" method="post" action="?map=$map">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="{$action}Zone[ZoneID]" value="$domain_id" />
 			<table class="form-table zone-form">
@@ -646,8 +650,7 @@ HTML;
 					</td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucf_action Zone" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 		<script>
 			$(document).ready(function() {

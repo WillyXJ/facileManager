@@ -218,8 +218,12 @@ HTML;
 
 		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
 		
+		$popup_header = buildPopup('header', $ucaction . ' Control');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="control_id" value="$control_id" />
 			<input type="hidden" name="server_serial_no" value="$server_serial_no" />
@@ -249,8 +253,7 @@ HTML;
 					<td width="67%"><textarea id="control_comment" name="control_comment" rows="4" cols="30">$control_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Control" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 		<script>
 			$(document).ready(function() {

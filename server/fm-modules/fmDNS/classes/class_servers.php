@@ -400,9 +400,13 @@ HTML;
 		
 		$alternative_help = ($action == 'add') ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
 		
+		$popup_header = buildPopup('header', $ucaction . ' Server');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
-		$alternative_help
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
+			$alternative_help
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="server_id" value="$server_id" />
 			<table class="form-table">
@@ -440,8 +444,7 @@ HTML;
 					<td width="67%"><input name="server_zones_dir" id="server_zones_dir" type="text" value="$server_zones_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_zones_dir']}" maxlength="$server_zones_dir_length" /></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Server" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 		<script>
 			$(document).ready(function() {

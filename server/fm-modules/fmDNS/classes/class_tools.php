@@ -309,10 +309,13 @@ ROW;
 		
 		$table_header = displayTableHeader($table_info, $title_array);
 		
+		$popup_header = buildPopup('header', 'Import Verification');
+		$popup_footer = buildPopup('footer', 'Import', array('import' => 'submit', 'cancel_button' => 'cancel'));
+		
 		$body = <<<BODY
-<h2>Import Verification</h2>
-<p>Domain: $domain_name</p>
 		<form method="post" action="zone-records-write.php">
+		$popup_header
+			<p>Domain: $domain_name</p>
 			<input type="hidden" name="domain_id" value="{$_POST['domain_id']}">
 			<input type="hidden" name="map" value="$domain_map">
 			<input type="hidden" name="import_records" value="true">
@@ -323,7 +326,7 @@ ROW;
 				$rows
 				</tbody>
 			</table>
-			<br /><input id="import" type="submit" value="Import" class="button" /> <input id="cancel_button" name="cancel" type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 BODY;
 

@@ -217,8 +217,12 @@ HTML;
 		/** Get field length */
 		$view_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
 		
+		$popup_header = buildPopup('header', $ucaction . ' View');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="page" id="page" value="views" />
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="view_id" id="view_id" value="$view_id" />
@@ -233,8 +237,7 @@ HTML;
 					<td width="67%"><textarea id="view_comment" name="view_comment" rows="4" cols="30">$view_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit" value="$ucaction View" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 FORM;
 

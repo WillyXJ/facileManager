@@ -502,13 +502,12 @@ PERM;
 			}
 		} while (false);
 		
+		$popup_header = buildPopup('header', $ucaction . ' User');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
 		$return_form .= <<<FORM
-		<div class="popup-header">
-			<input type="button" value="X" class="close" title="Close" />
-			<h3>$ucaction User</h3>
-		</div>
-		<div class="popup-contents">
+		$popup_header
 			<div class="leftbox">
 			<form id="fm_user_profile">
 			<input type="hidden" name="action" value="$action" />

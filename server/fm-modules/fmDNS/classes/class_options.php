@@ -275,11 +275,15 @@ HTML;
 		
 		$cfg_data = sanitize($cfg_data);
 
+		$popup_header = buildPopup('header', $ucaction . ' Option');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<script>
 			displayOptionPlaceholder("$cfg_data");
 		</script>
 		<form name="manage" id="manage" method="post" action="$request_uri">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="cfg_id" value="$cfg_id" />
 			<input type="hidden" name="cfg_type" value="$cfg_type" />
@@ -300,8 +304,7 @@ HTML;
 					<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Option" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 		<script>
 			$(document).ready(function() {

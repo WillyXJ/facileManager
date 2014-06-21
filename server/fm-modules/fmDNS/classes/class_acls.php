@@ -233,8 +233,12 @@ HTML;
 		/** Get field length */
 		$acl_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
 
+		$popup_header = buildPopup('header', $ucaction . ' ACL');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="acl_id" value="$acl_id" />
 			<input type="hidden" name="server_serial_no" value="$server_serial_no" />
@@ -253,8 +257,7 @@ HTML;
 					<td width="67%"><textarea id="acl_comment" name="acl_comment" rows="4" cols="30">$acl_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction ACL" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 		<script>
 			$(document).ready(function() {

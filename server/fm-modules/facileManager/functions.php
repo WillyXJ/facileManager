@@ -2617,4 +2617,52 @@ function getMenuURL($search_slug = null) {
 }
 
 
+/**
+ * Returns the menu item URL
+ *
+ * @since 1.3
+ * @package facileManager
+ *
+ * @return integer|bool Returns the parent menu key or false if the menu item is not found
+ */
+function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel')) {
+	if ($section == 'header') {
+		return <<<HTML
+		<div class="popup-header">
+			<input type="button" value="X" class="close" title="Close" />
+			<h3>$text</h3>
+		</div>
+		<div class="popup-contents">
+
+HTML;
+	} elseif ($section == 'footer') {
+		$id = array_search('submit', $buttons);
+		if ($id !== false) {
+			$id = !is_numeric($id) ? ' id="' . $id . '"' : null;
+			$submit = '<input type="submit" name="submit" value="' . $text . '" class="button primary"' . $id . ' />';
+		} else $submit = null;
+		
+		$id = array_search('cancel', $buttons);
+		if ($id !== false) {
+			$text = array_search('submit', $buttons) !== false ? 'Cancel' : $text;
+			$cancel = '<input type="button" value="' . $text . '" class="button ';
+			$cancel .= count($buttons) > 1 ? 'left' : null;
+			$id = is_numeric($id) ? 'cancel_button' : $id;
+			$cancel .= '" id="' . $id . '" />';
+		} else $cancel = null;
+		
+		return <<<HTML
+		</div>
+		<div class="popup-footer">
+			$submit
+			$cancel
+		</div>
+
+HTML;
+	}
+	
+	return false;
+}
+
+
 ?>

@@ -483,6 +483,7 @@ HTML;
 		$cfg_id = 0;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
+		$uctype = ucfirst($type);
 		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
 		$cfg_data = null;
 		
@@ -493,8 +494,12 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
+		$popup_header = buildPopup('header', $ucaction . ' ' . $uctype);
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 			<form name="manage" id="manage" method="post" action="?type=$type">
+			$popup_header
 				<input type="hidden" name="action" value="$action" />
 				<input type="hidden" name="cfg_id" value="$cfg_id" />
 				<input type="hidden" name="cfg_type" value="logging" />
@@ -566,8 +571,7 @@ FORM;
 						<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
 					</tr>
 				</table>
-				<input type="submit" name="submit" value="$ucaction Channel" class="button" />
-				<input type="button" value="Cancel" class="button" id="cancel_button" />
+				$popup_footer
 			</form>
 		<script>
 			$(document).ready(function() {
@@ -597,8 +601,7 @@ FORM;
 						<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
 					</tr>
 				</table>
-				<input type="submit" name="submit" value="$ucaction Category" class="button" />
-				<input type="button" value="Cancel" class="button" id="cancel_button" />
+				$popup_footer
 			</form>
 		<script>
 			$(document).ready(function() {
@@ -611,10 +614,9 @@ FORM;
 		</script>
 FORM;
 		} else {
-			$return_form = <<<FORM
-			<p>Invalid request.</p>
-			<input type="submit" value="OK" class="button" id="cancel_button" />
-FORM;
+		$return_form = buildPopup('header', 'Error');
+		$return_form .= '<h3>Oops!</h3><p>Invalid request.</p>';
+		$return_form .= buildPopup('footer', 'OK', array('cancel'));
 		}
 
 		return $return_form;

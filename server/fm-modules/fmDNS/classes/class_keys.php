@@ -225,8 +225,12 @@ HTML;
 		$key_algorithm = buildSelect('key_algorithm', 'key_algorithm', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_algorithm'), $key_algorithm, 1);
 		$key_view = buildSelect('key_view', 'key_view', $fm_dns_zones->availableViews(), $key_view);
 		
+		$popup_header = buildPopup('header', $ucaction . ' Key');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="key_id" value="$key_id" />
 			<table class="form-table">
@@ -251,8 +255,7 @@ HTML;
 					<td width="67%"><textarea id="key_comment" name="key_comment" rows="4" cols="30">$key_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Key" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 		<script>
 			$(document).ready(function() { $("#manage select").select2({minimumResultsForSearch: 10}); });

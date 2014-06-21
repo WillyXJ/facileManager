@@ -355,27 +355,6 @@ span.menu_badge p {
 	text-align: right;
 }
 
-.button {
-	text-decoration: none;
-	font-size: 14px !important;
-	line-height: 16px;
-	padding: 6px 12px;
-	cursor: pointer;
-	border: 1px solid #bbb;
-	background-color: #f9f9f9;
-	color: #464646;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-	-moz-box-sizing: content-box;
-	-webkit-box-sizing: content-box;
-	box-sizing: content-box;
-}
-
-.button:hover {
-	color: #000;
-	border-color: #666;
-}
-
 #footer {
 	font-size: 11px;
 	position: relative;
@@ -890,6 +869,7 @@ a {
 	margin-left: -270px;
 	display: none;
 	opacity: 1.0;
+	min-width: 500px;
 	max-width: 70%;
 	max-height: 60%;
 	background-color: #ffffff;
@@ -970,7 +950,7 @@ a {
 }
 
 .popup-contents {
-	max-height: 350px;
+	max-height: 400px;
 	overflow-y: auto;
 	padding: 0 2em;
 }
@@ -993,7 +973,7 @@ a {
 	border-bottom-right-radius: 8px;
 }
 
-.popup-footer .button {
+.button {
 	display: inline-block;
 	padding: 4px 12px;
 	font-size: 12px;
@@ -1023,19 +1003,19 @@ a {
 	border-radius: 4px;
 }
 
-.popup-footer .primary {
-	background-color: #5c9732;
-	background-image: -moz-linear-gradient(top, #65a637, #4e802a);
-	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#65a637), to(#4e802a));
-	background-image: -webkit-linear-gradient(top, #65a637, #4e802a);
-	background-image: -o-linear-gradient(top, #65a637, #4e802a);
-	background-image: linear-gradient(to bottom, #65a637, #4e802a);
+.primary {
+	background-color: #496e99;
+	background-image: -moz-linear-gradient(top, #53a4e2, #496e99);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#53a4e2), to(#496e99));
+	background-image: -webkit-linear-gradient(top, #53a4e2, #496e99);
+	background-image: -o-linear-gradient(top, #53a4e2, #496e99);
+	background-image: linear-gradient(to bottom, #53a4e2, #496e99);
 	background-repeat: repeat-x;
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff65a637', endColorstr='#ff4e802a', GradientType=0);
-	background-color: #65a637;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff53a4e2', endColorstr='#ff496e99', GradientType=0);
+	background-color: #53a4e2;
 	border: 1px solid #426d24;
 	border-bottom-color: #32521b;
-	border-top-color: #4e802a;
+	border-top-color: #496e99;
 	color: #ffffff;
 	text-shadow: 0 -1px 0 rgba(51, 51, 51, 0.7);
 	-webkit-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);

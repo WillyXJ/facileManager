@@ -6,6 +6,7 @@
 * Server - [feature] Added support for select2 jquery.
 * Server - [feature] Added support for controls. (Issue #102)
 * Server - [improvement] Fixed scrolling of named check window.
+* Server - [improvement] Gave the popups a facelift.
 
 1.2.5 (2014-05-??)
 ==================

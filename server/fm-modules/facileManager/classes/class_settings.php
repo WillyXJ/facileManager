@@ -171,7 +171,7 @@ class fm_settings {
 		
 		$local_hostname = php_uname('n');
 		
-		$save_button = currentUserCan('manage_settings') ? '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button" /></p>' : null;
+		$save_button = currentUserCan('manage_settings') ? '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button primary" /></p>' : null;
 		$sshkey_button = currentUserCan('manage_settings') ? '<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="Generate" class="button" />' : null;
 		if ($sshkey_button !== null) {
 			$ssh_priv = getOption('ssh_key_priv', $_SESSION['user']['account_id']);

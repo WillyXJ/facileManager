@@ -5,6 +5,7 @@
            be created through the installer. (Issue #72)
 * Server - [bug] Fixed menu badge counts.
 * Server - [feature] Added support for select2 jquery.
+* Server - [improvement] Gave the popups a facelift.
 
 1.2.3 (2014-05-??)
 ==================
