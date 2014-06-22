@@ -82,15 +82,18 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			$bulk_function = 'doBulkServerBuild';
 			break;
 	}
+	$result = buildPopup('header', ucwords($_POST['bulk_action']) . ' Results');
+	$result .= "<pre>\n";
 	if (is_array($_POST['item_id'])) {
 		foreach ($_POST['item_id'] as $serial_no) {
 			if (!is_numeric($serial_no)) continue;
 			
-			echo $fm_shared_module_servers->$bulk_function($serial_no);
-			echo "\n";
+			$result .= $fm_shared_module_servers->$bulk_function($serial_no);
+			$result .= "\n";
 		}
 	}
-	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.';
+	$result .= "\n" . ucwords($_POST['bulk_action']) . ' is complete.</pre>';
+	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), "");
 
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {

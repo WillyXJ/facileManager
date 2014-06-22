@@ -2625,7 +2625,7 @@ function getMenuURL($search_slug = null) {
  *
  * @return integer|bool Returns the parent menu key or false if the menu item is not found
  */
-function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel')) {
+function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
 	if ($section == 'header') {
 		return <<<HTML
 		<div class="popup-header">
@@ -2645,10 +2645,14 @@ HTML;
 		$id = array_search('cancel', $buttons);
 		if ($id !== false) {
 			$text = array_search('submit', $buttons) !== false ? 'Cancel' : $text;
-			$cancel = '<input type="button" value="' . $text . '" class="button ';
-			$cancel .= count($buttons) > 1 ? 'left' : null;
 			$id = is_numeric($id) ? 'cancel_button' : $id;
-			$cancel .= '" id="' . $id . '" />';
+			if ($link !== null) {
+				$cancel = '<a href="' . $link . '" class="button" id="' . $id . '">' . $text . '</a>';
+			} else {
+				$cancel = '<input type="button" value="' . $text . '" class="button ';
+				$cancel .= count($buttons) > 1 ? 'left' : null;
+				$cancel .= '" id="' . $id . '" />';
+			}
 		} else $cancel = null;
 		
 		return <<<HTML

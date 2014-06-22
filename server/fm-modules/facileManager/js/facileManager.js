@@ -123,6 +123,9 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
+				if ($('#manage_item_contents').width() >= 700) {
+					$('#manage_item_contents').addClass('wide');
+				}
 				$(".datepicker").datepicker();
 				$('.form-table input:text, .form-table select').first().focus();
 			}
@@ -162,6 +165,9 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
+				if ($('#manage_item_contents').width() >= 700) {
+					$('#manage_item_contents').addClass('wide');
+				}
 				$(".datepicker").datepicker();
 				$('.form-table input, .form-table select').first().focus();
 			}
@@ -234,6 +240,7 @@ $(document).ready(function() {
     $('#manage_item_contents').delegate('#cancel_button, .close', 'click tap', function(e) {
 		$('#manage_item').fadeOut(200);
 		$('#manage_item_contents').fadeOut(200).html();
+		$('#manage_item_contents').removeClass('wide');
 	});
 	
 	
@@ -560,7 +567,10 @@ $(document).ready(function() {
 		
 							$('#manage_item').fadeIn(200);
 							$('#manage_item_contents').fadeIn(200);
-							$('#manage_item_contents').html('<h2>Configuration Build Results</h2>' + response + '<br /><input type="submit" value="OK" class="button" id="cancel_button" />');
+							$('#manage_item_contents').html(response);
+							if ($('#manage_item_contents').width() >= 700) {
+								$('#manage_item_contents').addClass('wide');
+							}
 							
 							$('#response').delay(300).fadeTo(200, 0.00, function() {
 								$('#response').slideUp(400);
@@ -569,7 +579,8 @@ $(document).ready(function() {
 						
 						if (response.toLowerCase().indexOf("failed") == -1 && 
 							response.toLowerCase().indexOf("one or more errors") == -1 && 
-							response.toLowerCase().indexOf("you are not authorized") == -1
+							response.toLowerCase().indexOf("you are not authorized") == -1 && 
+							response.toLowerCase().indexOf("does not have php configured") == -1
 							) {
 							$this.fadeOut(400);
 							$this.parent().parent().removeClass('build');
@@ -625,10 +636,9 @@ $(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
-						if (response.indexOf("<h2>") >= 0) {
-							$('#manage_item_contents').html(response);
-						} else {
-							$('#manage_item_contents').html('<h2>' + $('#bulk_action').val() + ' Results</h2><textarea rows="20" cols="85">' + response + '</textarea><p><a href="" class="button">OK</a></p>');
+						$('#manage_item_contents').html(response);
+						if ($('#manage_item_contents').width() >= 700) {
+							$('#manage_item_contents').addClass('wide');
 						}
 					}
 				});

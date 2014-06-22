@@ -41,39 +41,35 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 		switch($_POST['task']) {
 			case 'module_install':
 				$module_name = isset($_POST['item']) ? sanitize($_POST['item']) : null;
-				$response = '<h2>Installing Module</h2>' . "\n";
+				$response = buildPopup('header', 'Installing Module');
 				$response .= $fm_tools->installModule($module_name);
+				$response .= buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), "{$GLOBALS['RELPATH']}admin-modules.php");
 				
-				echo <<<MSG
-				$response<br />
-				<a href="{$GLOBALS['RELPATH']}admin-modules.php" class="button" id="cancel_button">OK</a>
-MSG;
+				echo $response;
 				exit;
 				
 				break;
 			case 'module_upgrade':
 				$module_name = isset($_POST['item']) ? sanitize($_POST['item']) : null;
-				$response = '<h2>Upgrading Module</h2>' . "\n";
+				$response = buildPopup('header', 'Upgrading Module');
 				$response .= $fm_tools->upgradeModule($module_name);
+				$response .= buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), "{$GLOBALS['RELPATH']}admin-modules.php");
 				
-				echo <<<MSG
-				$response<br />
-				<a href="{$GLOBALS['RELPATH']}admin-modules.php" class="button" id="cancel_button">OK</a>
-MSG;
+				echo $response;
 				exit;
 				
 				break;
 			case 'db-cleanup':
-				$response = '<h2>Database Clean Up Results</h2>' . "\n";
+				$response = buildPopup('header', 'Database Clean Up Results');
 				$response .= '<p>' . $fm_tools->cleanupDatabase() . '</p>';
 				break;
 		}
 	}
 } else {
-	echo '<h2>Error</h2>' . "\n";
+	echo buildPopup('header', 'Error');
 	echo '<p>You are not authorized to run this tool.</p>' . "\n";
 }
 
-echo $response . '<input type="submit" value="OK" class="button" id="cancel_button" />' . "\n";
+echo $response . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 
 ?>

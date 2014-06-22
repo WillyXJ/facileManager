@@ -389,7 +389,7 @@ BODY;
 			$return .=  "\n";
 
 			/** remote port tests */
-			$return .= "\tRemote Port:\t";
+			$return .= "\tRemote Port:\t\t";
 			if ($results[$x]->server_update_method != 'cron') {
 				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
 					$return .= 'success (tcp/' . $results[$x]->server_update_port . ")\n";
@@ -438,11 +438,9 @@ BODY;
 	
 	
 	function unAuth($message) {
-		return <<<HTML
-			<h2>Error</h2>
-			<p>You do not have permission to access this $message.</p>
-			<br /><input type="button" value="OK" class="button" id="cancel_button" />
-HTML;
+		$response = buildPopup('header', 'Error');
+		$response .= "<p>You do not have permission to access this $message.</p>";
+		return $response . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 	}
 	
 }

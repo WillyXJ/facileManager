@@ -62,8 +62,10 @@ if (array_key_exists('submit', $_POST)) {
 		case 'Import Records':
 			if (!empty($_FILES['import-file']['tmp_name'])) {
 				$block_style = 'style="display: block;"';
-				$classes = 'wide';
 				$output = $fm_module_tools->zoneImportWizard();
+				if (strpos($output, 'You do not have permission') === false) {
+					$classes = 'wide';
+				}
 			}
 			break;
 	}

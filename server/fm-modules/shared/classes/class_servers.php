@@ -32,7 +32,10 @@ class fm_shared_module_servers {
 		
 		/** Check permissions */
 		if (!currentUserCan('manage_servers', $_SESSION['module'])) {
-			return 'You do not have permission to manage servers.';
+			echo buildPopup('header', 'Error');
+			echo '<p>You do not have permission to manage servers.</p>';
+			echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+			exit;
 		}
 		
 		/** Check serial number */
@@ -52,7 +55,7 @@ class fm_shared_module_servers {
 			switch($server_update_method) {
 				case 'cron':
 					/* Servers updated via cron require manual upgrades */
-					$response[] = ' --> This server needs to be upgrade manually with the following command:';
+					$response[] = ' --> This server needs to be upgraded manually with the following command:';
 					$response[] = " --> sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade";
 					addLogEntry('Upgraded client scripts on ' . $server_name . '.');
 					break;
@@ -170,7 +173,10 @@ class fm_shared_module_servers {
 		
 		/** Check permissions */
 		if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
-			return 'You do not have permission to build server configs.';
+			echo buildPopup('header', 'Error');
+			echo '<p>You do not have permission to build server configs.</p>';
+			echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+			exit;
 		}
 		
 		/** Check serial number */

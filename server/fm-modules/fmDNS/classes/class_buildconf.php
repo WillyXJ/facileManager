@@ -250,7 +250,7 @@ class fm_module_buildconf {
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($j=0; $j < $global_config_count; $j++) {
-					$server_config[$server_config_result[0]->cfg_name] = array($server_config_result[0]->cfg_data, $config_result[$i]->cfg_comment);
+					$server_config[$server_config_result[0]->cfg_name] = @array($server_config_result[0]->cfg_data, $config_result[$i]->cfg_comment);
 				}
 			} else $server_config = array();
 
@@ -811,7 +811,7 @@ class fm_module_buildconf {
 	function buildRecords($domain, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_records;
 		
-		$zone_file = null;
+		$zone_file = $skipped_records = null;
 		$domain_name_trim = trimFullStop($domain->domain_name);
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		
@@ -1028,7 +1028,7 @@ class fm_module_buildconf {
 	 */
 	function mergeZoneDetails($zone, $all_zones, $count) {
 		for ($i = 0; $i < $count; $i++) {
-			if ($all_zones[$i]->domain_id == $zone->domain_clone_domain_id) {
+			if (isset($all_zones[$i]->domain_id) && $all_zones[$i]->domain_id == $zone->domain_clone_domain_id) {
 				$all_zones[$i]->parent_domain_id = $zone->domain_id;
 				$all_zones[$i]->domain_id = $zone->domain_clone_domain_id;
 				$all_zones[$i]->domain_name = $zone->domain_name;

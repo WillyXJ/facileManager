@@ -511,17 +511,18 @@ FORM;
 			$options[] = 'purge';
 		}
 		
+		$response = buildPopup('header', 'Configuration Build Results');
 		switch($server_update_method) {
 			case 'cron':
 				/* set the server_update_config flag */
 				setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
-				$response .= '<p>This server will be updated on the next cron run.</p>'. "\n";
+				$response = '<p>This server will be updated on the next cron run.</p>'. "\n";
 				break;
 			case 'http':
 			case 'https':
 				/** Test the port first */
 				if (!socketTest($server_name, $server_update_port, 10)) {
-					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
+					return '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
 				}
 				
 				/** Remote URL to use */
@@ -535,39 +536,39 @@ FORM;
 				if (!is_array($post_result)) {
 					/** Something went wrong */
 					if (empty($post_result)) {
-						$post_result = 'It appears ' . $server_name . ' does not have php configured properly within httpd or httpd is not running.';
+						return '<p class="error">It appears ' . $server_name . ' does not have php configured properly within httpd or httpd is not running.</p>';
 					}
-					return $response . '<p class="error">' . $post_result . '</p>'. "\n";
+					return '<p class="error">' . $post_result . '</p>';
 				} else {
 					if (count($post_result) > 1) {
-						$response .= '<textarea rows="4" cols="100">';
+						$response .= "<pre>\n";
 						
 						/** Loop through and format the output */
 						foreach ($post_result as $line) {
 							$response .= "[$server_name] $line\n";
 						}
 						
-						$response .= "</textarea>\n";
+						$response .= "</pre>\n";
 					} else {
-						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
+						$response = "<p>[$server_name] " . $post_result[0] . '</p>';
 					}
 				}
 				break;
 			case 'ssh':
 				/** Test the port first */
 				if (!socketTest($server_name, $server_update_port, 10)) {
-					return $response . '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
+					return '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
 				}
 				
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return $response . '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+					return '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
 				}
 				
 				$temp_ssh_key = '/tmp/fm_id_rsa';
 				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-					return $response . '<p class="error">Failed: could not load SSH key into ' . $temp_ssh_key . '.</p>'. "\n";
+					return '<p class="error">Failed: could not load SSH key into ' . $temp_ssh_key . '.</p>'. "\n";
 				}
 				
 				@chmod($temp_ssh_key, 0400);
@@ -578,21 +579,21 @@ FORM;
 				
 				if ($retval) {
 					/** Something went wrong */
-					return $response . '<p class="error">Config build failed.</p>'. "\n";
+					return '<p class="error">Config build failed.</p>'. "\n";
 				} else {
 					if (!count($post_result)) $post_result[] = 'Config build was successful.';
 					
 					if (count($post_result) > 1) {
-						$response .= '<textarea rows="4" cols="100">';
+						$response .= "<pre>\n";
 						
 						/** Loop through and format the output */
 						foreach ($post_result as $line) {
 							$response .= "[$server_name] $line\n";
 						}
 						
-						$response .= "</textarea>\n";
+						$response .= "</pre>\n";
 					} else {
-						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
+						$response = "<p>[$server_name] " . $post_result[0] . '</p>';
 					}
 				}
 				break;
@@ -606,6 +607,9 @@ FORM;
 		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		addLogEntry("Built the configuration for server '$tmp_name'.");
 
+		if (strpos($response, '<pre>') !== false) {
+			$response .= buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+		}
 		return $response;
 	}
 	

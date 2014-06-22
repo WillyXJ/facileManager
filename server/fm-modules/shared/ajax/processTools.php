@@ -32,17 +32,17 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
 			case 'connect-test':
-				$response = '<h2>Connectivity Test Results</h2>' . "\n";
-				$response .= '<textarea rows="15" cols="80">' . "\n";
+				$response = buildPopup('header', 'Connectivity Test Results');
+				$response .= '<pre>' . "\n";
 				$response .= $fm_module_tools->connectTests();
-				$response .= '</textarea>' . "\n";
+				$response .= '</pre>' . "\n";
 				break;
 		}
 	}
 	
 	$response .= "<br />\n";
 } else {
-	echo '<h2>Error</h2>' . "\n";
+	echo buildPopup('header', 'Error');
 	echo '<p>You are not authorized to run these tools.</p>' . "\n";
 }
 
