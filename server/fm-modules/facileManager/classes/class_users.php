@@ -180,7 +180,7 @@ class fm_users {
 		$sql = rtrim($sql_edit . $sql_pwd, ',');
 		
 		/** Process user permissions */
-		if (!isset($post['user_caps'])) $post['user_caps'] = array();
+		if (isset($post['process_user_caps']) && !isset($post['user_caps'])) $post['user_caps'] = array();
 		
 		if (isset($post['user_caps'][$fm_name])) {
 			if (array_key_exists('do_everything', $post['user_caps'][$fm_name])) {
@@ -445,7 +445,8 @@ FORM_ROW;
 				<tr id="userperms">
 					<th width="33%" scope="row">$fm_name</th>
 					<td width="67%">
-					$fm_perm_boxes
+						<input type="hidden" name"process_user_caps" value="1" />
+						$fm_perm_boxes
 					</td>
 				</tr>
 
