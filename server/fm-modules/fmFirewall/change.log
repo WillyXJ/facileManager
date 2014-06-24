@@ -1,4 +1,8 @@
-1.0.2 (2014-05-??)
+1.1 (2014-06-??)
+================
+* Server - [bug] Fixed some PHP errors.
+
+1.0.2 (2014-06-04)
 ==================
 * Server - [feature] Client auto upgrade minimum version are now dynamic.
 

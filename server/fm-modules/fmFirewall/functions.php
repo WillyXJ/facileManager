@@ -284,6 +284,7 @@ function getModuleBadgeCounts($type) {
 	
 	if ($type == 'servers') {
 		$badge_counts = null;
+		$server_builds = array();
 		
 		/** Servers */
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
