@@ -327,8 +327,12 @@ HTML;
 		$destination_not_check = ($policy_destination_not) ? 'checked' : null;
 		$service_not_check = ($policy_services_not) ? 'checked' : null;
 
+		$popup_header = buildPopup('header', $ucaction . ' Policy');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="?server_serial_no={$_REQUEST['server_serial_no']}">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
@@ -462,14 +466,21 @@ FORM;
 					<td width="67%"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">$policy_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit_items" value="$ucaction Rule" class="button" />
 
 FORM;
 		}
 		
 		$return_form .= <<<FORM
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

@@ -311,8 +311,12 @@ HTML;
 		$server_type = buildSelect('server_type', 'server_type', $available_server_types, $server_type, 1);
 		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 		
+		$popup_header = buildPopup('header', $ucaction . ' Firewall');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="server_id" value="$server_id" />
 			<table class="form-table">
@@ -333,9 +337,16 @@ HTML;
 					<td width="67%"><input name="server_config_file" id="server_config_file" type="text" value="$server_config_file" size="40" /></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Firewall" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

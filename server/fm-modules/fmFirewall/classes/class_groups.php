@@ -236,8 +236,12 @@ HTML;
 		$assigned_list = buildSelect(null, 'group_items_assigned', availableGroupItems($group_type, 'assigned', $group_items_assigned), null, 7, null, true);
 		$available_list = buildSelect(null, 'group_items_available', availableGroupItems($group_type, 'available', $group_items_assigned, $group_id), null, 7, null, true);
 		
+		$popup_header = buildPopup('header', $ucaction . ' Group');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="group_id" value="$group_id" />
 			<input type="hidden" name="group_type" value="$group_type" />
@@ -274,9 +278,16 @@ HTML;
 					<td width="67%"><textarea id="group_comment" name="group_comment" rows="4" cols="30">$group_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit_items" value="$ucaction Group" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

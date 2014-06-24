@@ -246,8 +246,12 @@ HTML;
 			$weekdays_form .= '/>' . $day . "</label>\n";
 		}
 
+		$popup_header = buildPopup('header', $ucaction . ' Restriction');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="time_id" value="$time_id" />
 			<table class="form-table">
@@ -280,9 +284,16 @@ HTML;
 					<td width="67%"><textarea id="time_comment" name="time_comment" rows="4" cols="30">$time_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Time" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '70px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;
