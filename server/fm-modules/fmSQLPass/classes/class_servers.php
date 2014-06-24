@@ -337,8 +337,12 @@ HTML;
 			unset($server_credentials);
 		}
 		
+		$popup_header = buildPopup('header', $ucaction . ' Server');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="server_type" id="server_type" value="$server_type" />
 			<input type="hidden" name="server_id" id="server_id" value="$server_id" />
@@ -368,9 +372,16 @@ HTML;
 					<td width="67%"><input name="server_credentials[]" id="server_cred_password" type="password" value="$server_cred_password" size="40" /></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit" value="$ucaction Server" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;
