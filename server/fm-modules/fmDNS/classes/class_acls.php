@@ -275,7 +275,7 @@ FORM;
 	/**
 	 * Gets the ACL listing
 	 */
-	function getACLList($server_serial_no = 0) {
+	function getACLList($server_serial_no = 0, $include = 'acl') {
 		global $__FM_CONFIG, $fmdb;
 		
 		$acl_list = null;
@@ -290,6 +290,14 @@ FORM;
 			}
 		}
 		
+		if ($include == 'all') {
+			foreach (array('none', 'any', 'localhost', 'localnets') as $predefined) {
+				$acl_list[$i]['id'] = $predefined;
+				$acl_list[$i]['text'] = $predefined;
+				$i++;
+			}
+		}
+		
 		return $acl_list;
 	}
 
@@ -297,7 +305,7 @@ FORM;
 	 * Builds the ACL listing JSON
 	 */
 	function buildACLJSON($saved_acls, $server_serial_no = 0) {
-		$available_acls = $this->getACLList($server_serial_no);
+		$available_acls = $this->getACLList($server_serial_no, 'all');
 		$temp_acls = null;
 		foreach ($available_acls as $temp_acl_array) {
 			$temp_acls[] = $temp_acl_array['id'];
