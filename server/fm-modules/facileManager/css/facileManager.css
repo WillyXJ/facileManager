@@ -933,7 +933,7 @@ a {
 	-webkit-border-top-right-radius: 8px;
 	-moz-border-radius-topright: 8px;
 	border-top-right-radius: 8px;
-	padding: 9px 15px;
+	padding: 4px 15px;
 }
 
 .popup-header h3 {
@@ -954,7 +954,7 @@ a {
 }
 
 .popup-contents {
-	max-height: 400px;
+	max-height: 480px;
 	overflow-y: auto;
 	padding: 0 2em;
 }
@@ -968,7 +968,7 @@ a {
 	-moz-border-radius: 0 0 6px 6px;
 	border-radius: 0 0 6px 6px;
 	border-top-color: #b7b7b7;
-	padding: 10px;
+	padding: 8px;
 	-webkit-border-bottom-left-radius: 8px;
 	-moz-border-radius-bottomleft: 8px;
 	border-bottom-left-radius: 8px;
