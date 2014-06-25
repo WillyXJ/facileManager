@@ -536,6 +536,10 @@ PERM;
 				$("select").select2({
 					minimumResultsForSearch: -1
 				});
+				$("select.wide_select").select2({
+					width: '300px',
+					minimumResultsForSearch: -1
+				});
 			});
 		</script>
 FORM;
