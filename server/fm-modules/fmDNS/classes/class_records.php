@@ -25,25 +25,32 @@ class fm_dns_records {
 	/**
 	 * Displays the record list
 	 */
-	function rows($result, $record_type, $domain_id) {
-		global $fmdb;
+	function rows($result, $record_type, $domain_id, $page) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return = null;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
+			$return = '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
 		} else {
-			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+			$start = $__FM_CONFIG['limit']['records'] * ($page - 1);
+			$end = $__FM_CONFIG['limit']['records'] * $page;
 
 			$table_info = array('class' => 'display_results sortable');
 
-			echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
+			$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
 			
-			for ($x=0; $x<$num_rows; $x++) {
-				echo $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
+			for ($x=$start; $x<$end; $x++) {
+				if (!array_key_exists($x, $results)) break;
+				
+				$return .= $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
 			}
 			
-			echo "</tbody>\n</table>\n";
+			$return .= "</tbody>\n</table>\n";
 		}
+		
+		return $return;
 	}
 
 	/**
@@ -195,13 +202,14 @@ class fm_dns_records {
 		
 		$table_info = array('class' => 'display_results');
 
-		echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');
-		echo $this->getInputForm(strtoupper($record_type), true, $domain_id);
-		?>
+		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');
+		$return .= $this->getInputForm(strtoupper($record_type), true, $domain_id);
+		$return .= <<<HTML
 			</tbody>
 		</table>
 		<p class="add_records"><a id="add_records" href="#">+ Add more records</a></p>
-		<?php
+HTML;
+		return $return;
 	}
 
 	function getHeader($type) {

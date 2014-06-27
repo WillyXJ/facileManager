@@ -1552,16 +1552,20 @@ function arrayKeysExist($keys, $array) {
  * @param integer $total_pages Total number of pages
  * @return string
  */
-function displayPagination($page, $total_pages) {
+function displayPagination($page, $total_pages, $classes = null) {
 	if ($total_pages <= 1) return;
 	
 	$search = null;
+	foreach ($GLOBALS['URI'] as $key => $val) {
+		if ($key == 'p') continue;
+		$search .= $key . '=' . $val . '&';
+	}
 	
 	$page_links = array();
 	$end_size = 1;
 	$mid_size = 2;
 	$dots = false;
-	$page_links[] = '<div id="pagination">';
+	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 
 	// Previous link
 	if ($page > 1 && $total_pages > 1) {

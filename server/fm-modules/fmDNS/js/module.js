@@ -87,6 +87,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#more_records').append(response);
+				$("select").select2({minimumResultsForSearch: 10});
 				more_clicks = more_clicks + 1;
 			}
 		});
