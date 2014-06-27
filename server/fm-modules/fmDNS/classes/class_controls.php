@@ -214,7 +214,7 @@ HTML;
 		}
 		
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $control_addresses), ';'));
-		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableKeys(), explode(';', $control_keys), 1, null, true);
+		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableKeys('nonempty'), explode(';', $control_keys), 1, null, true, null, null, 'Select one or more keys');
 
 		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
 		

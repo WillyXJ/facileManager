@@ -459,19 +459,24 @@ FORM;
 		return $return_form;
 	}
 	
-	function availableKeys() {
+	function availableKeys($default = 'blank') {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return[0][] = '';
-		$return[0][] = '';
+		$j = 0;
+		if ($default == 'blank') {
+			$return[$j][] = '';
+			$return[$j][] = '';
+			$j++;
+		}
 		
 		$query = "SELECT key_id,key_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}keys WHERE account_id='{$_SESSION['user']['account_id']}' AND key_status='active' ORDER BY key_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i+1][] = $results[$i]->key_name;
-				$return[$i+1][] = $results[$i]->key_id;
+				$return[$j][] = $results[$i]->key_name;
+				$return[$j][] = $results[$i]->key_id;
+				$j++;
 			}
 		}
 		
