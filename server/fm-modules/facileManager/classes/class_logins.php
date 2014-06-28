@@ -38,7 +38,7 @@ class fm_login {
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : false;
 		$forgot_link = ($mail_enable && $auth_method == 1) ? '<p id="forgotton_link"><a href="?forgot_password">Forgot your password?</a></p>' : null;
 		
-		$branding_logo = $GLOBALS['RELPATH'] . '/fm-modules/' . $fm_name . '/images/fm.png';
+		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
 		echo <<<HTML
 		<form id="loginform" action="{$_SERVER['REQUEST_URI']}" method="post">

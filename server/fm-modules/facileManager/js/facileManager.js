@@ -18,7 +18,7 @@ $(document).ready(function() {
 		});
 	});
 	
-	$('input:text, input:password, select').first().focus();
+//	$('input:text, input:password, select').first().focus();
 	
 	// Everything we need for scrolling up and down.
 	$(window).scroll( function(){
@@ -515,7 +515,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$("#help_topbar img.close").click(function() {
+	$("#help_topbar .close").click(function() {
 		$("#topheadpartright .help_link").click();
 	});
 	

@@ -948,9 +948,13 @@ a {
 	border: none;
 	background: none;
 	cursor: pointer;
-	margin-top: 10px;
 	font-weight: bold;
 	color: #333;
+	width: 20px;
+}
+
+.popup-header .close {
+	margin-top: 8px;
 }
 
 .popup-contents {

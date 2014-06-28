@@ -2630,10 +2630,12 @@ function getMenuURL($search_slug = null) {
  * @return integer|bool Returns the parent menu key or false if the menu item is not found
  */
 function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
+	global $__FM_CONFIG;
+	
 	if ($section == 'header') {
 		return <<<HTML
 		<div class="popup-header">
-			<input type="button" value="X" class="close" title="Close" />
+			{$__FM_CONFIG['icons']['close']}
 			<h3>$text</h3>
 		</div>
 		<div class="popup-contents">
