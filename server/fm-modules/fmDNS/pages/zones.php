@@ -139,7 +139,11 @@ if (!$reload_allowed && !$response) $response = '<p>You currently have no name s
 echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='$map' AND domain_clone_domain_id='0'");
-$fm_dns_zones->rows($result, $map, $reload_allowed);
+$total_pages = ceil($fmdb->num_rows / $__FM_CONFIG['limit']['records']);
+if ($page > $total_pages) $page = $total_pages;
+echo displayPagination($page, $total_pages, 'below');
+
+$fm_dns_zones->rows($result, $map, $reload_allowed, $page);
 
 printFooter();
 

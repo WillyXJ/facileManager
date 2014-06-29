@@ -35,15 +35,13 @@ class fm_dns_records {
 		} else {
 			$results = $fmdb->last_result;
 			$start = $__FM_CONFIG['limit']['records'] * ($page - 1);
-			$end = $__FM_CONFIG['limit']['records'] * $page;
+			$end = $__FM_CONFIG['limit']['records'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $__FM_CONFIG['limit']['records'] * $page;
 
 			$table_info = array('class' => 'display_results sortable');
 
 			$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
 			
 			for ($x=$start; $x<$end; $x++) {
-				if (!array_key_exists($x, $results)) break;
-				
 				$return .= $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
 			}
 			

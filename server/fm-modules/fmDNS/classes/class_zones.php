@@ -25,7 +25,7 @@ class fm_dns_zones {
 	/**
 	 * Displays the zone list
 	 */
-	function rows($result, $map, $reload_allowed) {
+	function rows($result, $map, $reload_allowed, $page) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$num_rows = $fmdb->num_rows;
@@ -44,6 +44,9 @@ class fm_dns_zones {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="domains">There are no zones.</p>';
 		} else {
+			$start = $__FM_CONFIG['limit']['records'] * ($page - 1);
+			$end = $__FM_CONFIG['limit']['records'] * $page > $num_rows ? $num_rows : $__FM_CONFIG['limit']['records'] * $page;
+
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
 			$table_info = array(
@@ -61,7 +64,7 @@ class fm_dns_zones {
 
 			echo displayTableHeader($table_info, $title_array, 'zones');
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			for ($x=$start; $x<$end; $x++) {
 				$this->displayRow($results[$x], $map, $reload_allowed);
 			}
 			
