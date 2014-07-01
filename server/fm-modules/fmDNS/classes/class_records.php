@@ -426,19 +426,16 @@ HTML;
 			$nochecked = ($soa_append == 'no') ? 'checked' : '';
 		} else {
 			$action = 'create';
-			$SOAID = 0;
 			$yeschecked = ($_GET['map'] == 'forward') ? 'checked' : '';
 			$nochecked = ($yeschecked) ? '' : 'checked';
 			extract($__FM_CONFIG['soa']);
 		}
 	
-		$SerialForm = "<span id=\"serial1\" onclick=\"exchange(this);\" style=\"cursor: pointer; position: relative; top: 6px;\">AutoGen</span><input maxlength=\"9\" onblur=\"exchange(this);\" name=\"{$action}[$soa_id][soa_serial_no]\" id=\"serial1b\" class=\"replace\" type=\"text\" value=\"\">";
-				
 		return <<<HTML
 	<table class="form-table">
 		<tr>
 			<th width="120">Serial Number</th>
-			<td>$SerialForm</td>
+			<td><span style="position: relative; top: 6px;">Auto Generated</span></td>
 		</tr>
 		<tr>
 			<th>Master Server</th>

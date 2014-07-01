@@ -9,6 +9,7 @@
 * Server - [bug] Fixed an issue where changing personal user profile would remove
            all user permissions.
 * Server - [improvement] Pagination is now dynamic. (Issue #85)
+* Server - [feature] Removed support for manual zone serial number entries.
 
 1.2.3 (2014-05-??)
 ==================
