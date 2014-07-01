@@ -1625,7 +1625,7 @@ function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
 	<div id="configtypesmenu" $class>
 		<form action="{$GLOBALS['basename']}" method="GET">
 		$hidden_inputs
-		$record_count
+		$record_count items per page
 		</form>
 	</div>
 HTML;

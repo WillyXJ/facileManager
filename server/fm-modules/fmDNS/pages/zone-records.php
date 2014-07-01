@@ -125,7 +125,7 @@ if ($record_type == 'SOA') {
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
 	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
-	$pagination = displayPagination($page, $total_pages, 'below');
+	$pagination = displayPagination($page, $total_pages);
 	$body .= $pagination . $form;
 
 	$body .= $fm_dns_records->rows($result, $record_type, $domain_id, $page);

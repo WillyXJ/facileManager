@@ -141,7 +141,7 @@ echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='$map' AND domain_clone_domain_id='0'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-echo displayPagination($page, $total_pages, 'below');
+echo displayPagination($page, $total_pages);
 
 $fm_dns_zones->rows($result, $map, $reload_allowed, $page);
 
