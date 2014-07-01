@@ -9,6 +9,7 @@
 * Server - [improvement] Gave the popups a facelift.
 * Server - [feature] Added pagination support. (Issue #85)
 * Server - [improvement] Fixed sort order of several pages. (Issue #117)
+* Server - [feature] Removed support for manual zone serial number entries.
 * Server - [feature] Automatically create missing reverse zone when creating PTR
            records from A records page. (Issue #115)
 
