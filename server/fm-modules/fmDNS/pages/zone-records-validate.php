@@ -71,8 +71,10 @@ echo <<<HTML
 			$html_out_create
 		</tbody>
 	</table>
-	<p><input type="submit" name="submit" value="Submit" class="button" />
-	<input type="reset" value="Back" onClick="history.go(-1)" class="button" /></p>
+	<p>
+		<input type="reset" value="Back" onClick="history.go(-1)" class="button" />
+		<input type="submit" name="submit" value="Submit" class="button primary" />
+	</p>
 </form>
 </div>
 HTML;
@@ -276,7 +278,7 @@ function buildReturnUpdate($domain_id, $record_type, $value) {
 			}
 		}
 
-		$img = ($name_error || $value_error || $priority_error || $ttl_error || $append_error) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
+		$img = (count($input_return_error)) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
 		if ($record_type != 'SOA') {
 			$value[$i]['record_name'] = (!$value[$i]['record_name'] && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
 		}
@@ -387,11 +389,14 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 						}
 					}
 					if ($key == 'PTR') {
-						$valid = checkPTRZone($data['record_value']);
-						if (!$valid) {
-							$value_error = '<font color="red"><i>Reverse zone does not exist.</i></font> ';
+						$retval = checkPTRZone($data['record_value'], $domain_id);
+						list($val, $error_msg, $class) = $retval;
+						$value_error = '<font color="' . $class . '"><i>' . $error_msg . '</i></font> ';
+						if ($val == null) {
 							$input_return_error[$i] = 1;
-						} else $val = $valid;
+						} else {
+							$val = $retval;
+						}
 					}
 				}
 
@@ -534,7 +539,7 @@ function buildReturnCreate($domain_id, $record_type, $value) {
 				$y++;
 			}
 
-			$img = ($name_error || $value_error || $number_error || $ttl_error || $append_error) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
+			$img = (count($input_return_error)) ? $__FM_CONFIG['icons']['fail'] : $__FM_CONFIG['icons']['ok'];
 			if ($record_type != 'SOA') {
 				$value[$i]['record_name'] = (empty($value[$i]['record_name']) && $record_type != 'PTR') ? '@' : $value[$i]['record_name'];
 			}
@@ -620,17 +625,58 @@ function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = f
 	}
 }
 
-function checkPTRZone($ip) {
+function checkPTRZone($ip, $domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
 	list($ip1, $ip2, $ip3, $ip4) = explode('.' , $ip);
 	$zone = "'$ip3.$ip2.$ip1.in-addr.arpa', '$ip2.$ip1.in-addr.arpa', '$ip1.in-addr.arpa'";
 	
-	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone)");
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_status!='deleted'");
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		return $result[0]->domain_id;
-	} else return false;
+		return array($result[0]->domain_id, null, null);
+	} else {
+		if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+			return autoCreatePTRZone($zone, $domain_id);
+		}
+		return array(null, 'Reverse zone does not exist.', 'red');
+	}
+}
+
+function autoCreatePTRZone($new_zones, $fwd_domain_id) {
+	global $__FM_CONFIG, $fmdb;
+	
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $fwd_domain_id, 'domain_', 'domain_id');
+	if ($fmdb->num_rows) {
+		$result = $fmdb->last_result;
+		
+		$new_zone = explode(",", $new_zones);
+		
+		$ptr_array['ZoneID'] = 0;
+		$ptr_array[0]['domain_name'] = trim($new_zone[0], "'");
+		$ptr_array[0]['domain_mapping'] = 'reverse';
+		$ptr_array[0]['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
+
+		$copy_fields = array('domain_view', 'domain_transfers_from', 'domain_updates_from',
+			'domain_master_servers', 'domain_forward_servers', 'domain_type', 
+			'domain_check_names', 'domain_notify_slaves', 'domain_multi_masters');
+		foreach ($copy_fields as $field) {
+			$ptr_array[0][$field] = $result[0]->$field;
+		}
+		$_POST['createZone'] = $ptr_array;
+		unset($ptr_array);
+		
+		global $fm_dns_zones;
+		
+		if (!class_exists('fm_dns_zones')) {
+			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+		}
+		$retval = $fm_dns_zones->add();
+		
+		return !is_int($retval) ? array(null, $retval, 'red') : array($retval, 'Auto created reverse zone.', 'green');
+	}
+	
+	return false;
 }
 
 function nameCheck($domain_id, $value) {

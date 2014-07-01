@@ -150,6 +150,11 @@ $__FM_CONFIG['fmDNS']['default']['options'] = array(
 				'description' => array('Purge Configuration Files', 'When enabled, configuration files will be deleted on the DNS
 								servers before building the server config. This can be handy if you want to remove unused files.'),
 				'default_value' => 'no',
+				'type' => 'checkbox'),
+		'auto_create_ptr_zones' => array(
+				'description' => array('Create Reverse Zones Automatically', 'While creating A records and choosing to create the associated'
+					. ' PTR record, reverse zones can be automatically created if they are missing.'),
+				'default_value' => 'no',
 				'type' => 'checkbox')
 	);
 
