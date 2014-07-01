@@ -76,18 +76,18 @@ $body .= "	<h2>Records</h2>
 	$avail_types\n";
 	
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-	$body .= '<form method="POST" action="zone-records-validate.php">
+	$form = '<form method="POST" action="zone-records-validate.php">
 <input type="hidden" name="domain_id" value="' . $domain_id . '">
 <input type="hidden" name="record_type" value="' . $record_type . '">
 <input type="hidden" name="map" value="' . $map . '">' . "\n";
-}
+} else $form = null;
 
 if ($record_type == 'SOA') {
 	$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `domain_id`='$domain_id'";
 	$fmdb->get_results($soa_query);
 	if ($fmdb->num_rows) $result = $fmdb->last_result;
 	else $result = null;
-	$fm_dns_records->buildSOA($result, $domain_id);
+	$body .= $form . $fm_dns_records->buildSOA($result, $domain_id);
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 		$body .= '
 	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
@@ -123,10 +123,10 @@ if ($record_type == 'SOA') {
 	if (in_array($record_type, array('A', 'AAAA')) && $sort_field == 'record_value') $ip_sort = true;
 
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
-	$total_pages = ceil($fmdb->num_rows / $__FM_CONFIG['limit']['records']);
+	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
 	$pagination = displayPagination($page, $total_pages, 'below');
-	$body .= $pagination;
+	$body .= $pagination . $form;
 
 	$body .= $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 

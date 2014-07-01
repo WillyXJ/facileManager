@@ -1550,6 +1550,7 @@ function arrayKeysExist($keys, $array) {
  *
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
+ * @param string classes Additional classes to apply to the div
  * @return string
  */
 function displayPagination($page, $total_pages, $classes = null) {
@@ -1567,11 +1568,12 @@ function displayPagination($page, $total_pages, $classes = null) {
 	$dots = false;
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 
-	// Previous link
+	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page - 1) . '">« Previous</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=1\">&laquo;</a>";
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page - 1) . '">&lsaquo;</a>';
 	}
-	// Page number
+	/** Page number */
 	for ($p=1; $p<=$total_pages; $p++) {
 		if ($p == $page) {
 			$page_links[] = '<span class="current">' . $p . '</span>';
@@ -1586,14 +1588,49 @@ function displayPagination($page, $total_pages, $classes = null) {
 			}
 		}
 	}
-	// Next link
+	/** Next link */
 	if ($page < $total_pages) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page + 1) . '">Next »</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page + 1) . '">&rsaquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . $total_pages . '">&raquo;</a>';
 	}
 
 	$page_links[] = '</div>';
+	$page_links[] = buildPaginationCountMenu(0, 'pagination');
 	
 	return join("\n", $page_links);
+}
+
+
+/**
+ * Builds the server listing in a dropdown menu
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
+	global $fmdb, $__FM_CONFIG;
+	
+	$record_count = buildSelect('rc', 'rc', $__FM_CONFIG['limit']['records'], $_SESSION['user']['record_count'], 1, null, false, 'this.form.submit()');
+	
+	$hidden_inputs = null;
+	foreach ($GLOBALS['URI'] as $param => $value) {
+		if ($param == 'rc') continue;
+		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
+	}
+	
+	$class = $class ? 'class="' . $class . '"' : null;
+
+	$return = <<<HTML
+	<div id="configtypesmenu" $class>
+		<form action="{$GLOBALS['basename']}" method="GET">
+		$hidden_inputs
+		$record_count
+		</form>
+	</div>
+HTML;
+
+	return $return;
 }
 
 

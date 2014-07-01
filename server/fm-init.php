@@ -175,6 +175,13 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			handleSortOrder();
 		}
 		
+		/** Handle pagination record counts */
+		if (array_key_exists('rc', $_GET)) {
+			$_SESSION['user']['record_count'] = in_array($_GET['rc'], $__FM_CONFIG['limit']['records']) ? $_GET['rc'] : $__FM_CONFIG['limit']['records'][0];
+		} else {
+			$_SESSION['user']['record_count'] = isset($_SESSION['user']['record_count']) ? $_SESSION['user']['record_count'] : $__FM_CONFIG['limit']['records'][0];
+		}
+		
 		/** Debug mode */
 		if (array_key_exists('debug', $_GET)) {
 			echo '<pre>';

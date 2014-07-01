@@ -44,8 +44,8 @@ class fm_dns_zones {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="domains">There are no zones.</p>';
 		} else {
-			$start = $__FM_CONFIG['limit']['records'] * ($page - 1);
-			$end = $__FM_CONFIG['limit']['records'] * $page > $num_rows ? $num_rows : $__FM_CONFIG['limit']['records'] * $page;
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
 
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
@@ -553,13 +553,13 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
-		// Process multiple views
+		/** Process multiple views */
 		if (strpos($domain_view, ';')) {
 			$domain_view = explode(';', rtrim($domain_view, ';'));
 			if (in_array('0', $domain_view)) $domain_view = 0;
 		}
 		
-		// Process multiple domain name servers
+		/** Process multiple domain name servers */
 		if (strpos($domain_name_servers, ';')) {
 			$domain_name_servers = explode(';', rtrim($domain_name_servers, ';'));
 			if (in_array('0', $domain_name_servers)) $domain_name_servers = 0;

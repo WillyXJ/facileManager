@@ -34,8 +34,8 @@ class fm_dns_records {
 			$return = '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
 		} else {
 			$results = $fmdb->last_result;
-			$start = $__FM_CONFIG['limit']['records'] * ($page - 1);
-			$end = $__FM_CONFIG['limit']['records'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $__FM_CONFIG['limit']['records'] * $page;
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$end = $_SESSION['user']['record_count'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $_SESSION['user']['record_count'] * $page;
 
 			$table_info = array('class' => 'display_results sortable');
 
@@ -432,9 +432,9 @@ HTML;
 			extract($__FM_CONFIG['soa']);
 		}
 	
-		$SerialForm = "<span id=\"serial1\" onclick=\"exchange(this);\" style=\"cursor: pointer;\">AutoGen</span><input maxlength=\"9\" onblur=\"exchange(this);\" name=\"{$action}[$soa_id][soa_serial_no]\" id=\"serial1b\" class=\"replace\" type=\"text\" value=\"\">";
+		$SerialForm = "<span id=\"serial1\" onclick=\"exchange(this);\" style=\"cursor: pointer; position: relative; top: 6px;\">AutoGen</span><input maxlength=\"9\" onblur=\"exchange(this);\" name=\"{$action}[$soa_id][soa_serial_no]\" id=\"serial1b\" class=\"replace\" type=\"text\" value=\"\">";
 				
-		echo <<<HTML
+		return <<<HTML
 	<table class="form-table">
 		<tr>
 			<th width="120">Serial Number</th>

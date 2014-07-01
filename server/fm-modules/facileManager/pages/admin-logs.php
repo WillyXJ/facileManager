@@ -65,7 +65,7 @@ $query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['accou
 $fmdb->query($query);
 $log_count = $fmdb->num_rows;
 
-$total_pages = ceil($log_count / $__FM_CONFIG['limit']['records']);
+$total_pages = ceil($log_count / $_SESSION['user']['record_count']);
 $pagination = displayPagination($page, $total_pages);
 
 $log_search_module = isset($log_search_module) ? $log_search_module : 'All Modules';
@@ -123,7 +123,7 @@ function displayLogData($page, $search_sql = null) {
 	$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 	$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 	
-	$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp DESC LIMIT " . (($page - 1) * $__FM_CONFIG['limit']['records']) . ", {$__FM_CONFIG['limit']['records']}";
+	$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp DESC LIMIT " . (($page - 1) * $_SESSION['user']['record_count']) . ", {$_SESSION['user']['record_count']}";
 	$fmdb->query($query);
 	$result = $fmdb->last_result;
 	$log_count = $fmdb->num_rows;

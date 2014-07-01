@@ -8,6 +8,7 @@
 * Server - [improvement] Gave the popups a facelift.
 * Server - [bug] Fixed an issue where changing personal user profile would remove
            all user permissions.
+* Server - [improvement] Pagination is now dynamic. (Issue #85)
 
 1.2.3 (2014-05-??)
 ==================

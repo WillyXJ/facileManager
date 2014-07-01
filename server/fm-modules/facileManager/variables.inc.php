@@ -85,7 +85,7 @@ $__FM_CONFIG['password_hint']['medium']		= 'You must choose a password with at l
 $__FM_CONFIG['password_hint']['strong']		= 'You must choose a password with at least eight (8) characters containing uppercase and lowercase letters, numbers, and special characters (\'&\', \'$\', \'@\', etc.).';
 
 /** Limits */
-$__FM_CONFIG['limit']['records']	= 50;
+$__FM_CONFIG['limit']['records']	= array(20, 35, 50, 75, 100, 200);
 
 /** Options */
 $__FM_CONFIG['options']['auth_method']					= array(array('None', 0), array('Builtin Authentication', 1));

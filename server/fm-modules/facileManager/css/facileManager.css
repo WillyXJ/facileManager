@@ -714,6 +714,10 @@ tbody {
 	font-size: 10pt;
 }
 
+#configtypesmenu.pagination {
+	top: 3px;
+}
+
 #response {
 	text-align: center;
 	color: #000;
