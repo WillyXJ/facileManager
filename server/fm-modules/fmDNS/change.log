@@ -8,6 +8,7 @@
 * Server - [improvement] Fixed scrolling of named check window.
 * Server - [improvement] Gave the popups a facelift.
 * Server - [feature] Added pagination support. (Issue #85)
+* Server - [improvement] Fixed sort order of several pages. (Issue #117)
 
 1.2.5 (2014-05-??)
 ==================

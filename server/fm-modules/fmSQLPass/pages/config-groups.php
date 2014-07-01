@@ -73,7 +73,7 @@ printHeader();
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_id', 'group_');
+$result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_');
 $fm_sqlpass_groups->rows($result);
 
 printFooter();

@@ -87,7 +87,7 @@ $avail_servers = buildServerSubMenu($server_serial_no);
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 echo "$avail_servers\n";
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND server_serial_no=$server_serial_no");
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name', 'view_', "AND server_serial_no=$server_serial_no");
 $fm_dns_views->rows($result);
 
 printFooter();

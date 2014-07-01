@@ -110,7 +110,7 @@ $avail_servers = buildServerSubMenu($server_serial_no, 'log_space');
 echo printPageHeader($response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 echo "$avail_types\n$avail_servers\n";
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', 'AND cfg_type="logging" AND cfg_name="' . $channel_category . '" AND server_serial_no=' . $server_serial_no);
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_data', 'cfg_', 'AND cfg_type="logging" AND cfg_name="' . $channel_category . '" AND server_serial_no=' . $server_serial_no);
 $fm_module_logging->rows($result, $channel_category);
 
 printFooter();
