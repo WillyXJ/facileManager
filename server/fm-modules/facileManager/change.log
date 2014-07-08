@@ -10,6 +10,7 @@
            all user permissions.
 * Server - [improvement] Pagination is now dynamic. (Issue #85)
 * Both   - [feature] Added OS display support for Raspberry Pi. (Issue #108)
+* Server - [improvement] Added a check for the PHP filter module. (Issue #121)
 
 1.2.3 (2014-05-??)
 ==================

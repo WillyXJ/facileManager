@@ -58,7 +58,7 @@ function checkAppVersions($single_check = true) {
 	}
 
 	/** PHP Extensions */
-	$required_php_extensions = array('mysql', 'mysqli', 'curl', 'posix');
+	$required_php_extensions = array('mysql', 'mysqli', 'curl', 'posix', 'filter');
 	foreach ($required_php_extensions as $extenstion) {
 		if (!extension_loaded($extenstion)) {
 			if ($single_check) {
