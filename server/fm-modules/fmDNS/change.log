@@ -12,6 +12,8 @@
 * Server - [feature] Removed support for manual zone serial number entries.
 * Server - [feature] Automatically create missing reverse zone when creating PTR
            records from A records page. (Issue #115)
+* Server - [improvement] Rewrote record validation and adds better support for
+           CNAME creations (Issue #111).
 
 1.2.5 (2014-05-??)
 ==================

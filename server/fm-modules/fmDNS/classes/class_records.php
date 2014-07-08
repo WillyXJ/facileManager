@@ -214,8 +214,17 @@ HTML;
 		global $zone_access_allowed;
 		
 		$show_value = true;
-		$title_array[] = array('title' => 'Record', 'rel' => 'record_name');
+		if ($type == 'SOA') {
+			$show_value = false;
+			$title_array[] = array('title' => 'Master', 'rel' => 'soa_master_server');
+			$title_array[] = array('title' => 'E-mail', 'rel' => 'soa_email_address');
+			$title_array[] = array('title' => 'Refresh', 'rel' => 'soa_refresh');
+			$title_array[] = array('title' => 'Retry', 'rel' => 'soa_retry');
+			$title_array[] = array('title' => 'Expire', 'rel' => 'soa_expire');
+			$title_array[] = array('title' => 'TTL', 'rel' => 'soa_ttl');
+		}
 		if ($type != 'SOA') {
+			$title_array[] = array('title' => 'Record', 'rel' => 'record_name');
 			$title_array[] = array('title' => 'TTL', 'rel' => 'record_ttl');
 			$title_array[] = array('title' => 'Class', 'rel' => 'record_class');
 		}
@@ -250,9 +259,11 @@ HTML;
 			$title_array[] = array('title' => 'Port', 'rel' => 'record_port');
 		}
 		
-		$title_array[] = array('title' => 'Comment', 'rel' => 'record_comment');
+		if ($type != 'SOA') {
+			$title_array[] = array('title' => 'Comment', 'rel' => 'record_comment');
+		}
 		
-		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null);
+		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null, 'rel' => 'record_append');
 		
 		if ($type != 'SOA') $title_array[] = array('title' => 'Status', 'rel' => 'record_status');
 		if (empty($_POST)) {

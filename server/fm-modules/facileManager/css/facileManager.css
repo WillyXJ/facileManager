@@ -425,6 +425,7 @@ h4 {
 span.grey {
 	color: #aaa;
 }
+
 .display_results tbody tr.attention,
 .modules .active.upgrade {
 	background-color: #f5ebeb;
@@ -1044,6 +1045,10 @@ a {
 	float: right;
 }
 
+.center {
+	text-align: center;
+}
+
 #plus {
 	padding: 0 5px;
 	position: relative;
@@ -1422,6 +1427,14 @@ pre {
 	float: right;
 	margin-bottom: -2.6em;
 	right: 22px;
+}
+
+.valid_error {
+	color: #CB3739;
+}
+
+.valid_message {
+	color: #008500;
 }
 
 /** Firefox hacks :( */
