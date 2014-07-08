@@ -130,6 +130,14 @@ strong {
 	bottom: 60%;
 }
 
+#fm-branding span {
+	color: #D0D0D0;
+	position: relative;
+	left: 10px;
+	bottom: 13px;
+	font-size: 30px;
+}
+
 #login_form {
 	position: absolute;
 	top: 40%;
@@ -146,5 +154,13 @@ strong {
 
 #message p {
 	margin: 0 0 -.5em 0;
+	text-align: center;
 }
 
+.failed {
+	color: #CB3739;
+}
+
+.success {
+	color: #D0D0D0;
+}

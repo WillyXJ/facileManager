@@ -91,7 +91,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			if (count($_POST)) {
 				$result = $fm_login->processUserPwdResetForm($_POST['user_login']);
 				if ($result === true) {
-					$message = '<p class="success">Your password reset email has been sent.</p>';
+					$message = '<p class="success">Your password reset email has been sent to the address on file.</p>';
 				} else {
 					$message = '<p class="failed">' . $result . '</p>';
 				}

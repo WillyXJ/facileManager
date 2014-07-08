@@ -43,9 +43,8 @@ class fm_login {
 		echo <<<HTML
 		<form id="loginform" action="{$_SERVER['REQUEST_URI']}" method="post">
 		<div id="fm-branding">
-			<img src="$branding_logo" />
+			<img src="$branding_logo" /><span>Login</span>
 		</div>
-		<div id="message"></div>
 		<div id="login_form">
 		<table>
 			<tr>
@@ -85,26 +84,32 @@ HTML;
 		/** Should not be here if there is no mail_enable defined or if not using builtin auth */
 		if (!getOption('mail_enable') || getOption('auth_method') != 1) header('Location: ' . $GLOBALS['RELPATH']);
 
-		printHeader('Password Reset', 'install');
+		global $fm_name;
+		printHeader('Password Reset', 'login');
+		
+		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 		
 		echo <<<HTML
-		<form id="forgotpwd" method="post" action="{$_SERVER['PHP_SELF']}?forgot_password">
-			<input type="hidden" name="reset_pwd" value="1" />
-			<center>
-			<div id="message">$message</div>
-			<p>Please enter your username and a password reset link will be emailed to the address on file:</p>
-			<table class="form-table">
-				<tr>
-					<th>Username</th>
-					<td>
-						<input type="text" size="25" name="user_login" id="user_login" value="" placeholder="username" />
-						<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
-					</td>
-				</tr>
-			</table>
-			</center>
-			<p class="step"><input id="forgotbtn" name="submit" type="submit" value="Submit" class="button" /></p>
+		<form id="loginform" action="{$_SERVER['PHP_SELF']}?forgot_password" method="post">
+		<input type="hidden" name="reset_pwd" value="1" />
+		<div id="fm-branding">
+			<img src="$branding_logo" /><span>Reset Password</span>
+		</div>
+		<div id="login_form">
+		<table>
+			<tr>
+				<td>
+					<div class="input-wrapper">
+						<input type="text" name="user_login" id="user_login" placeholder="Username" style="width: 400px;" />
+					</div>
+				</td>
+				<td><input name="submit" id="forgotbtn" type="submit" value="Submit" class="button" /></td>
+			</tr>
+		</table>
+		<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
+		<div id="message">$message</div>
 		</form>
+		</div>
 	
 HTML;
 	}
