@@ -159,6 +159,12 @@ class fm_shared_module_servers {
 				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
 			$fmdb->query($query);
 		}
+		
+		if (array_key_exists('server_os_distro', $_POST)) {
+			$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_os_distro`='" . $_POST['server_os_distro'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
+				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
+			$fmdb->query($query);
+		}
 	}
 	
 	

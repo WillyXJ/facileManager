@@ -1923,8 +1923,8 @@ function sendFileToBrowser($filename) {
 function setOSIcon($server_os) {
 	global $fm_name;
 	
-	$os_name = array('openSUSE');
-	$os_image = array('SUSE');
+	$os_name = array('openSUSE', 'Raspberry Pi');
+	$os_image = array('SUSE', 'RaspberryPi');
 	
 	$os = file_exists(ABSPATH . 'fm-modules/' . $fm_name . '/images/os/' . str_replace($os_name, $os_image, $server_os) . '.png') ? $server_os : 'unknown';
 	$os_image = '<img src="fm-modules/' . $fm_name . '/images/os/' . str_replace($os_name, $os_image, $os) . '.png" border="0" alt="' . $os . '" title="' . $os . '" width="18" />';

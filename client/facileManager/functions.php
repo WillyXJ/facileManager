@@ -625,6 +625,8 @@ function detectOSDistro() {
 			'Turbolinux' => '/etc/turbolinux-version'
 			);
 		
+		$raspberry_pi = array('Raspbian', 'Pidora');
+		
 		/** Debian-based systems */
 		if ($program = findProgram('lsb_release')) {
 			$lsb_release = shell_exec($program . ' -a 2>/dev/null | grep -i distributor');
@@ -644,6 +646,18 @@ function detectOSDistro() {
 			&& $rh_release = file_get_contents($filename)) {
 			 $rh_release = explode(' ', $rh_release);
 			 return $rh_release[0];
+		}
+		
+		/** OS-release systems */
+		if (file_exists($filename = '/etc/os-release')
+			&& $os_release = parse_ini_file($filename)) {
+			 $os_release = explode(' ', $os_release['NAME']);
+			 
+			 if (in_array(ucfirst($os_release[0]), $raspberry_pi)) {
+				 return 'Raspberry Pi';
+			 }
+			 
+			 return $os_release[0];
 		}
 		
 		/** All other systems */
