@@ -231,6 +231,8 @@ HTML;
 		if ($type == 'CERT' ) {
 			$title_array[] = array('title' => 'Type', 'rel' => 'record_cert_type');
 			$title_array[] = array('title' => 'Key Tag', 'rel' => 'record_key_tag');
+		}
+		if (in_array($type, array('CERT', 'SSHFP'))) {
 			$title_array[] = array('title' => 'Algorithm', 'rel' => 'record_algorithm');
 		}
 		if ($type == 'HINFO') {
@@ -332,6 +334,11 @@ HTML;
 				$field_values['data']['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['cert_types'], $record_cert_type);
 				$field_values['data']['Key Tag'] = '><input style="width: 45px;" type="text" name="' . $action . '[_NUM_][record_key_tag]" value="' . $record_key_tag . '" onkeydown="return validateNumber(event)" />';
 				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['cert_algorithms'], $record_algorithm);
+				$value_textarea = true;
+			}
+			
+			if ($type == 'SSHFP') {
+				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['sshfp_algorithms'], $record_algorithm);
 				$value_textarea = true;
 			}
 			

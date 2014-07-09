@@ -914,6 +914,11 @@ class fm_module_buildconf {
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . "\"" . $record_comment . "\n";
 						break;
+					case 'SSHFP':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'SSH Key Fingerprint records';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_algorithm . ' 1 ' . $record_result[$i]->record_value . $record_comment . "\n";
+						break;
 					case 'SRV':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;

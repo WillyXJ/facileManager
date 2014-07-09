@@ -591,7 +591,6 @@ function upgradefmDNS_1201($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-//	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DHCID',  'DLV',  'DNAME',  'DNSKEY', 'DS',  'HIP',  'IPSECKEY',  'KEY',  'KX',  'MX',  'NAPTR',  'NS',  'NSEC',  'NSEC3',  'NSEC3PARAM',  'PTR',  'RSIG',  'RP',  'SIG',  'SRV',  'SSHFP',  'TA',  'TKEY', 'TLSA',  'TSIG',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_class`  `record_class` ENUM(  'IN',  'CH',  'HS' ) NOT NULL DEFAULT  'IN';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD  `record_os` VARCHAR( 255 ) NULL AFTER  `record_port`,
@@ -836,6 +835,8 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
   PRIMARY KEY (`control_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLE;
+
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO', 'SSHFP' ) NOT NULL DEFAULT  'A';";
 
 	$inserts = $updates = null;
 	

@@ -93,6 +93,10 @@ $__FM_CONFIG['records']['cert_algorithms'] = array(
 											array('RSA/SHA-256', 8),
 											array('RSA/SHA-512', 10)
 											);
+$__FM_CONFIG['records']['sshfp_algorithms'] = array(
+											array('RSA', 1),
+											array('DSA', 2)
+											);
 
 $__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');
 $__FM_CONFIG['options']['avail_types'] = array('Global');
