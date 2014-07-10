@@ -585,7 +585,7 @@ HTML;
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<HTML
-		<form name="manage" id="manage" method="post" action="?map=$map">
+		<form name="manage" id="manage" method="post" action="">
 		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="{$action}Zone[ZoneID]" value="$domain_id" />
