@@ -57,6 +57,24 @@ $tools_option[] = <<<HTML
 			<br />
 HTML;
 
+$button = null;
+if (currentUserCan('run_tools') && currentUserCan('manage_servers', $_SESSION['module'])) {
+	$button = '<p class="step"><input id="dump-cache" name="submit" type="submit" value="Dump Cache" class="button" /> '
+			. '<input id="clear-cache" name="submit" type="submit" value="Clear Cache" class="button" /></p>';
+}
+
+$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $fm_dns_zones->availableDNSServers(), 0, 5, null, true, null, null, 'Select one or more servers');
+
+$tools_option[] = <<<HTML
+			<div id="admin-tools-select">
+			<h2>Cache Management</h2>
+			<p>Dump or clear server cache.</p>
+			$name_servers
+			$button
+			</div>
+			<br />
+HTML;
+
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
 		case 'Import Records':

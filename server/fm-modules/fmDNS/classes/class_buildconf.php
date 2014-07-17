@@ -53,14 +53,14 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildServerConfig($post_data) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
 		
 		/** Get datetime formatting */
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		
-		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 		
 		setTimezone();
 		
@@ -156,7 +156,7 @@ class fm_module_buildconf {
 					$acl_config_count = $fmdb->num_rows;
 					for ($j=0; $j < $acl_config_count; $j++) {
 						if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $acl_result[$i]->acl_comment);
+							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
 						} else {
 							$addresses = explode(' ', $server_acl_result[$j]->acl_addresses);
 							$server_acl_addresses = null;

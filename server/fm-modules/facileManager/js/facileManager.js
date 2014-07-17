@@ -16,6 +16,10 @@ $(document).ready(function() {
 			width: '200px',
 			minimumResultsForSearch: 10
 		});
+		$("#admin-tools-select select").select2({
+			width: '300px',
+			minimumResultsForSearch: 10
+		});
 	});
 	
 //	$('input:text, input:password, select').first().focus();
@@ -402,17 +406,14 @@ $(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $('#admin-tools').delegate('form input.button:not("#import-records, #cancel, #import, #db-backup"), #module_install, #module_upgrade',
+    $('#admin-tools').delegate('form input.button:not("#db-backup"), #module_install, #module_upgrade',
     'click tap',function(e){
         var $this 	= $(this);
         task		= $this.attr('id');
         item		= $this.attr('name');
+		var form_data = $('#admin-tools-form').serialize();
 
-		var form_data = {
-			task: task,
-			item: item,
-			is_ajax: 1
-		};
+		form_data += '&task=' + task + '&item=' + item + '&is_ajax=1';
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);

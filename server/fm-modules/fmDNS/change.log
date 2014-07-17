@@ -16,6 +16,7 @@
            CNAME creations (Issue #111).
 * Server - [feature] Added support for SSHFP RR. (Issue #84)
 * Server - [bug] Fixed an issue where zone creations would fail without an error.
+* Both   - [feature] Added support to dump and clear cache. (Issue #112)
 
 1.2.5 (2014-05-??)
 ==================

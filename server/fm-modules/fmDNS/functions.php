@@ -72,8 +72,6 @@ function buildModuleDashboard() {
 			$errors .= '<a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '"><b>' . $server_results[$i]->server_name . '</b></a> needs a new configuration built.' . "\n";
 		}
 	}
-	$server_error_display = ($server_errors) ? '<li>' . nl2br($server_errors) . '</li>' : null;
-
 	/** Zone stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
 	$domain_count = $fmdb->num_rows;

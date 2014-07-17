@@ -483,7 +483,7 @@ FORM;
 		return $return;
 	}
 
-	function buildServerConfig($serial_no) {
+	function buildServerConfig($serial_no, $action = 'buildconf', $friendly_action = 'Configuration Build') {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Check serial number */
@@ -494,34 +494,43 @@ FORM;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
 		$options[] = null;
 		
-		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
-			global $fm_module_buildconf;
-			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
-			
-			$data['SERIALNO'] = $server_serial_no;
-			$data['compress'] = 0;
-			$data['dryrun'] = true;
+		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 		
-			basicGet('fm_accounts', $_SESSION['user']['account_id'], 'account_', 'account_id');
-			$account_result = $fmdb->last_result;
-			$data['AUTHKEY'] = $account_result[0]->account_key;
-		
-			$raw_data = $fm_module_buildconf->buildServerConfig($data);
-		
-			$response = @$fm_module_buildconf->namedSyntaxChecks($raw_data);
-			if (strpos($response, 'error') !== false) return $response;
-		} else $response = null;
-		
-		if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
-			$options[] = 'purge';
+		if ($action == 'buildconf') {
+			if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
+				global $fm_module_buildconf;
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
+
+				$data['SERIALNO'] = $server_serial_no;
+				$data['compress'] = 0;
+				$data['dryrun'] = true;
+
+				basicGet('fm_accounts', $_SESSION['user']['account_id'], 'account_', 'account_id');
+				$account_result = $fmdb->last_result;
+				$data['AUTHKEY'] = $account_result[0]->account_key;
+
+				$raw_data = $fm_module_buildconf->buildServerConfig($data);
+
+				$response = @$fm_module_buildconf->namedSyntaxChecks($raw_data);
+				if (strpos($response, 'error') !== false) return $response;
+			}
+
+			if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
+				$options[] = 'purge';
+			}
+
+			$response = buildPopup('header', $friendly_action . ' Results');
 		}
 		
-		$response = buildPopup('header', 'Configuration Build Results');
 		switch($server_update_method) {
 			case 'cron':
-				/* set the server_update_config flag */
-				setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
-				$response = '<p>This server will be updated on the next cron run.</p>'. "\n";
+				if ($action == 'buildconf') {
+					/* set the server_update_config flag */
+					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
+					$response = '<p>This server will be updated on the next cron run.</p>'. "\n";
+				} else {
+					$response = '<p>This server receives updates via cron - please manage the server manually.</p>'. "\n";
+				}
 				break;
 			case 'http':
 			case 'https':
@@ -534,7 +543,7 @@ FORM;
 				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
 				
 				/** Data to post to $url */
-				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no, 'options'=>implode(' ', $options));
+				$post_data = array('action'=>$action, 'serial_no'=>$server_serial_no, 'options'=>implode(' ', $options));
 				
 				$post_result = @unserialize(getPostData($url, $post_data));
 				
@@ -568,7 +577,7 @@ FORM;
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+					return '<p class="error">Failed: SSH key is not defined.</p>'. "\n";
 				}
 				
 				$temp_ssh_key = '/tmp/fm_id_rsa';
@@ -578,44 +587,84 @@ FORM;
 				
 				@chmod($temp_ssh_key, 0400);
 				
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l fm_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php buildconf " . implode(' ', $options) . "'", $post_result, $retval);
+				/** Test SSH authentication */
+				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l fm_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/dns.php'", $post_result, $retval);
+				if ($retval) {
+					/** Something went wrong */
+					@unlink($temp_ssh_key);
+					return '<p class="error">Could not login via SSH.</p>'. "\n";
+				}
+				
+				/** Run build */
+				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l fm_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php $action " . implode(' ', $options) . "'", $post_result, $retval);
 				
 				@unlink($temp_ssh_key);
 				
 				if ($retval) {
 					/** Something went wrong */
-					return '<p class="error">Config build failed.</p>'. "\n";
-				} else {
-					if (!count($post_result)) $post_result[] = 'Config build was successful.';
-					
-					if (count($post_result) > 1) {
-						$response .= "<pre>\n";
-						
-						/** Loop through and format the output */
-						foreach ($post_result as $line) {
-							$response .= "[$server_name] $line\n";
-						}
-						
-						$response .= "</pre>\n";
-					} else {
-						$response = "<p>[$server_name] " . $post_result[0] . '</p>';
-					}
+					$post_result[] = '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
 				}
+				
+				if (!count($post_result)) $post_result[] = ucfirst($friendly_action) . ' was successful.';
+
+				if (count($post_result) > 1) {
+					$response = "<pre>\n";
+
+					/** Loop through and format the output */
+					foreach ($post_result as $line) {
+						$response .= "[$server_name] $line\n";
+					}
+
+					$response .= "</pre>\n";
+				} else {
+					$response = "<p>[$server_name] " . $post_result[0] . '</p>';
+				}
+
 				break;
 		}
 		
-		/* reset the server_build_config flag */
-		if (!strpos($response, strtolower('failed'))) {
-			setBuildUpdateConfigFlag($serial_no, 'no', 'build');
+		if ($action == 'buildconf') {
+			/* reset the server_build_config flag */
+			if (!strpos($response, strtolower('failed'))) {
+				setBuildUpdateConfigFlag($serial_no, 'no', 'build');
+			}
 		}
 
 		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-		addLogEntry("Built the configuration for server '$tmp_name'.");
+		addLogEntry(ucfirst($friendly_action) . " was performed on server '$tmp_name'.");
 
-		if (strpos($response, '<pre>') !== false) {
-			$response .= buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+		if (strpos($response, "<pre>") !== false) {
+			$response .= $popup_footer;
 		}
 		return $response;
+	}
+	
+	function manageCache($server_id, $action) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Check serial number */
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($server_id), 'server_', 'server_id');
+		if (!$fmdb->num_rows) return 'This server is not found.';
+
+		$server_details = $fmdb->last_result;
+		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+		$response[] = $server_name;
+		
+		if ($server_installed != 'yes') {
+			$response[] = ' --> Failed: Client is not installed.';
+		}
+		
+		if (count($response) == 1 && $server_status != 'active') {
+			$response[] = ' --> Failed: Server is ' . $server_status . '.';
+		}
+		
+		if (count($response) == 1) {
+			foreach (makePlainText($this->buildServerConfig($server_serial_no, $action, ucfirst(str_replace('-', ' ', $action))), true) as $line) {
+				$response[] = ' --> ' . $line;
+			}
+		}
+		
+		return implode("\n", $response);
 	}
 	
 }

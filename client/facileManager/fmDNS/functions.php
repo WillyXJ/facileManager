@@ -45,6 +45,8 @@ function printModuleHelp () {
   -b|buildconf   Build named config and zone files
   -z|zones       Build all associated zone files
   -c|cron        Run in cron mode
+     dump-cache  Dump the DNS cache
+	 clear-cache Clear the DNS cache
      id=XX       Specify the individual DomainID to build and reload
   
 HELP;
@@ -330,5 +332,40 @@ function getStartupScript() {
 	return false;
 }
 
+
+function manageCache($action, $message) {
+	addLogEntry($message);
+	if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
+		$last_line = system(findProgram('rndc') . ' ' . $action . ' 2>&1', $retval);
+		if ($last_line) addLogEntry($last_line);
+
+		if ($action == 'dumpdb -cache') {
+			/** Get dump-file location */
+			$dump_file = system('grep dump-file /etc/named.conf* | awk \'{print $NF}\'', $retval);
+			$dump_file = str_replace(array('"', ';'), '', $dump_file);
+
+			if (file_exists($dump_file)) {
+				echo file_get_contents($dump_file);
+			}
+		}
+		
+		$message = $retval ? $message . ' failed.' : $message . ' completed successfully.';
+		echo fM($message);
+		addLogEntry($message);
+	} else {
+		$error_msg = "The server is not running.\n";
+		if ($debug) echo fM($error_msg);
+		addLogEntry($error_msg);
+	}
+	if ($retval) {
+		addLogEntry($last_line);
+		$message = "There was an error " . strtolower($message) . ".  Please check the logs for details.\n";
+		if ($debug) echo fM($message);
+		addLogEntry($message);
+		exit(1);
+	}
+	
+	exit;
+}
 
 ?>

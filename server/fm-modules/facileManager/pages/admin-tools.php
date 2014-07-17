@@ -89,7 +89,7 @@ foreach ($tools_option as $tool) {
 echo <<<HTML
 >
 	<div id="admin-tools">
-		<form enctype="multipart/form-data" method="post" action="">
+		<form enctype="multipart/form-data" method="post" action="" id="admin-tools-form">
 		$admin_tools
 		</form>
 	</div>

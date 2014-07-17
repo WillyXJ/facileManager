@@ -18,7 +18,7 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes zone reloads                                                  |
+ | Processes form posts                                                    |
  | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
@@ -26,30 +26,49 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-
-if (is_array($_POST) && count($_POST)) {
-	if (isset($_POST['action']) && $_POST['action'] == 'build') {
-		if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
-			exit('<p class="error">You are not authorized to build server configs.</p>');
+if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
+	if (isset($_POST['task']) && !empty($_POST['task'])) {
+		switch($_POST['task']) {
+			case 'import-records':
+				print_r($_FILES);
+				if (!empty($_FILES['import-file']['tmp_name'])) {
+					$block_style = 'style="display: block;"';
+					$response = $fm_module_tools->zoneImportWizard();
+					if (strpos($output, 'You do not have permission') === false) {
+						$classes = 'wide';
+					}
+				}
+				break;
+			case 'dump-cache':
+			case 'clear-cache':
+				$response = buildPopup('header', 'Cache Management Results');
+				if (!currentUserCan('manage_servers')) {
+					$_POST = array();
+					break;
+				}
+				if (!empty($_POST['domain_name_servers'])) {
+					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+					
+					/** All servers */
+					if (in_array(0, $_POST['domain_name_servers'])) {
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
+						$result = $fmdb->last_result;
+						for ($i=0; $i<$fmdb->num_rows; $i++) {
+							$all_servers[] = $result[$i]->server_id;
+						}
+						$_POST['domain_name_servers'] = $all_servers;
+					}
+					
+					foreach ($_POST['domain_name_servers'] as $server_id) {
+						$response .= '<pre>' . $fm_module_servers->manageCache($server_id, $_POST['task']) . '</pre>';
+					}
+				} else {
+					$response = buildPopup('header', 'Error');
+					$response .= '<p>Please specify at least one server.</p>';
+				}
+				break;
 		}
-		$server_serial_no = getNameFromID($_POST['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
-		$response = buildPopup('header', 'Configuration Build Results');
-		$response .= $fm_module_servers->buildServerConfig($server_serial_no);
-		exit($response . buildPopup('footer', 'OK', array('cancel_button' => 'cancel')));
 	}
 }
-
-$shared_ajax_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processReload.php';
-if (file_exists($shared_ajax_file) && $_SESSION['module'] != $fm_name) {
-	include($shared_ajax_file);
-}
-
-$module_ajax_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processReload.php';
-if (file_exists($module_ajax_file) && $_SESSION['module'] != $fm_name) {
-	include($module_ajax_file);
-}
-
-echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 
 ?>
