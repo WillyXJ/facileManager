@@ -12,6 +12,7 @@
 * Both   - [feature] Added OS display support for Raspberry Pi. (Issue #108)
 * Server - [improvement] Added a check for the PHP filter module. (Issue #121)
 * Server - [improvement] Updated the login page.
+* Server - [bug] Fixed SSL mixed content. (Issue #131)
 
 1.2.3 (2014-05-??)
 ==================
