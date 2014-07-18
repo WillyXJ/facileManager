@@ -46,16 +46,6 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			}
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['id'])) {
-			$delete_status = $fm_dns_controls->delete(sanitize($_GET['id']), $server_serial_no);
-			if ($delete_status !== true) {
-				$response = $delete_status;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-			}
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$result = $fm_dns_controls->update($_POST);

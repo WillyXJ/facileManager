@@ -40,15 +40,6 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$server_delete_status = $fm_module_servers->delete(sanitize($_GET['id']));
-			if ($server_delete_status !== true) {
-				$response = $server_delete_status;
-				$action = 'add';
-			} else header('Location: ' . $GLOBALS['basename']);
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$result = $fm_module_servers->update($_POST);

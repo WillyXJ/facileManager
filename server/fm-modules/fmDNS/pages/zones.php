@@ -52,15 +52,6 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			} else header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=SOA');
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['domain_id'])) {
-			$zone_delete_status = $fm_dns_zones->delete(sanitize($_GET['domain_id']));
-			if ($zone_delete_status !== true) {
-				$response = '<p class="error">' . $zone_delete_status . '</p>'. "\n";
-				$action = 'create';
-			} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$zone_update_status = $fm_dns_zones->update();

@@ -2,6 +2,7 @@
 ================
 * Server - [improvement] Gave the popups a facelift.
 * Server - [improvement] Fixed sort order of several pages. (Issue #117)
+* Server - [improvement] Cleaned up some code.
 
 1.0 (2014-05-14)
 ================

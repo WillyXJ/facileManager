@@ -2,6 +2,7 @@
 ================
 * Server - [bug] Fixed some PHP errors.
 * Server - [improvement] Gave the popups a facelift.
+* Server - [improvement] Cleaned up some code.
 
 1.0.2 (2014-06-04)
 ==================

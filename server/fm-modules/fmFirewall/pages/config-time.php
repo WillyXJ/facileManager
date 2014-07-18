@@ -40,15 +40,6 @@ if (currentUserCan('manage_time', $_SESSION['module'])) {
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$time_delete_status = $fm_module_time->delete(sanitize($_GET['id']));
-			if ($time_delete_status !== true) {
-				$response = $time_delete_status;
-				$action = 'add';
-			} else header('Location: ' . $GLOBALS['basename']);
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$result = $fm_module_time->update($_POST);
