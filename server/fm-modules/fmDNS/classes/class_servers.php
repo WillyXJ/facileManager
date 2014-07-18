@@ -462,6 +462,8 @@ FORM;
 	function availableKeys($default = 'blank') {
 		global $fmdb, $__FM_CONFIG;
 		
+		$return = null;
+		
 		$j = 0;
 		if ($default == 'blank') {
 			$return[$j][] = '';

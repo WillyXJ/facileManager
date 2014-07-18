@@ -571,7 +571,6 @@ tbody {
 	padding: 0px 20px 0px 0;
 	border-bottom: 8px solid #fff;
 	font-size: 14px;
-	vertical-align: top
 }
 .form-table td strong {
 	font-size: 11px;
@@ -629,6 +628,15 @@ tbody {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	font-size: 12px;
+}
+
+#fm_user_profile .form-table td {
+	vertical-align: middle;
+}
+
+#fm_user_profile .form-table td #form_username {
+	position: relative;
+	top: -2px;
 }
 
 #setting-row > div {
