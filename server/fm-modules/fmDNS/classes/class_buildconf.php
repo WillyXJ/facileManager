@@ -250,7 +250,7 @@ class fm_module_buildconf {
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($j=0; $j < $global_config_count; $j++) {
-					$server_config[$server_config_result[0]->cfg_name] = @array($server_config_result[0]->cfg_data, $config_result[$i]->cfg_comment);
+					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 				}
 			} else $server_config = array();
 
