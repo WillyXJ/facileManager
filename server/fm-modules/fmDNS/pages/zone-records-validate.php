@@ -42,8 +42,9 @@ printHeader();
 $domain_info['id']   = $domain_id;
 $domain_info['name'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 $domain_info['map']  = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+$domain_info['clone_of']  = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
 
-if (isset($_POST['update'])) $_POST['update'] = buildUpdateArray($domain_info['id'], $record_type, $_POST['update']);
+if (isset($_POST['update'])) $_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update']);
 
 $table_info = array('class' => 'display_results');
 $header_array = $fm_dns_records->getHeader(strtoupper($record_type));
@@ -87,14 +88,16 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	
 	$html = null;
 	
-	$skips_allowed = $type == 'update' ? true : false;
-	
 	extract($domain_info, EXTR_PREFIX_ALL, 'domain');
+	
+	/** Skips only allowed with clone zones and imports */
+	$skips_allowed = ($type == 'update' && $domain_clone_of) ? true : false;
 	
 	foreach ($data_array as $id => $data) {
 		if (isset($data['Delete'])) {
 			$action = 'Delete';
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');
+			$value[$id] = $data;
 		} elseif (array_key_exists('record_skipped', $data) && $skips_allowed) {
 			if ($data['record_skipped'] == 'on') {
 				$action = 'Skip Import';
@@ -113,6 +116,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 				$value[$id] = $valid_data;
 			}
 		}
+		if (is_array($value[$id])) $value[$id]['action'] = $action;
 	}
 	
 	foreach ($value as $id => $array) {
@@ -122,9 +126,9 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 		} else {
 			$img = $__FM_CONFIG['icons']['ok'];
 		}
-		$html .= "<tr><td>$action</td>";
+		$html .= "<tr><td>{$array['action']}</td>";
 		foreach ($array as $key => $val) {
-			if (in_array($key, array('record_skipped', 'record_status', 'PTR'))) {
+			if (in_array($key, array('record_skipped', 'record_status', 'PTR', 'Action'))) {
 				continue;
 			}
 			
@@ -289,10 +293,16 @@ function buildInputReturn($action, $id, $key, $val) {
 }
 
 function buildUpdateArray($domain_id, $record_type, $data_array) {
+	$exclude_keys = array('record_skipped', 'record_append');
 	$sql_records = buildSQLRecords($record_type, $domain_id);
 	$raw_changes = compareValues($data_array, $sql_records);
 	if (count($raw_changes)) {
 		foreach ($raw_changes as $i => $data_array) {
+			foreach ($exclude_keys as $key) {
+				if (!array_key_exists($key, $data_array)) {
+					unset($sql_records[$i][$key]);
+				}
+			}
 			$changes[$i] = array_merge($sql_records[$i], $raw_changes[$i]);
 		}
 	} else {
