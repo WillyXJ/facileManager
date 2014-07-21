@@ -333,13 +333,13 @@ HTML;
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
-			<input type="hidden" name="policy_source_not" id="policy_source_not" value="0" />
-			<input type="hidden" name="policy_destination_not" id="policy_destination_not" value="0" />
-			<input type="hidden" name="policy_services_not" id="policy_services_not" value="0" />
+			<input type="hidden" name="policy_source_not" value="0" />
+			<input type="hidden" name="policy_destination_not" value="0" />
+			<input type="hidden" name="policy_services_not" value="0" />
 FORM;
 		if ($type == 'rules') {
 			$return_form .= <<<FORM
-			<table class="form-table">
+			<table class="form-table policy-form">
 				<tr>
 					<th width="33%" scope="row"><label for="policy_interface">Interface</label></th>
 					<td width="67%">$policy_interface</td>
@@ -351,7 +351,7 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Source</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="policy_source_not" id="policy_source_not" value="1" type="checkbox" $source_not_check /><b>not</b></label>
+						<input name="policy_source_not" id="policy_source_not" value="1" type="checkbox" $source_not_check /><label for="policy_source_not"><b>not</b></label>
 						<p class="checkbox_desc">Use this option to invert the match</p>
 						$source_items
 					</td>
@@ -359,7 +359,7 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Destination</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" $destination_not_check /><b>not</b></label>
+						<input name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" $destination_not_check /><label for="policy_destination_not"><b>not</b></label>
 						<p class="checkbox_desc">Use this option to invert the match</p>
 						$destination_items
 					</td>
@@ -367,7 +367,7 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Services</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="policy_services_not" id="policy_services_not" value="1" type="checkbox" $service_not_check /><b>not</b></label>
+						<input name="policy_services_not" id="policy_services_not" value="1" type="checkbox" $service_not_check /><label for="policy_services_not"><b>not</b></label>
 						<p class="checkbox_desc">Use this option to invert the match</p>
 						$services_items
 					</td>
@@ -393,7 +393,7 @@ FORM;
 			}
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-				$options .= '<label><input style="height: 10px;" name="policy_options[]" id="policy_options" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' />' . $opt_array['desc'] . "</label><br />\n";
+				$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']">' . $opt_array['desc'] . "</label><br />\n";
 			}
 			
 			$return_form .= <<<FORM

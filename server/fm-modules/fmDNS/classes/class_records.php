@@ -385,14 +385,14 @@ HTML;
 		
 			$field_values['data']['Comment'] = '><input maxlength="200" type="text" name="' . $action . '[_NUM_][record_comment]" value="' . $record_comment . '" />';
 			
-			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' align="center"><label><input ' . $yeschecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="yes" /> yes</label> <label><input ' . $nochecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="no" /> no</label>';
+			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' align="center"><input ' . $yeschecked . ' type="radio" id="record_append[_NUM_][0]" name="' . $action . '[_NUM_][record_append]" value="yes" /><label class="radio" for="record_append[_NUM_][0]"> yes</label> <input ' . $nochecked . ' type="radio" id="record_append[_NUM_][1]" name="' . $action . '[_NUM_][record_append]" value="no" /><label class="radio" for="record_append[_NUM_][1]"> no</label>';
 			
 			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['data']['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][PTR]" />Create PTR</label>' : null;
+				$field_values['data']['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label>' : null;
 			} else {
-				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Delete]" />Delete</label>';
+				$field_values['data']['Actions'] = ' align="center"><input type="checkbox" id="record_delete[' . $record_id . ']" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete[' . $record_id . ']">Delete</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
@@ -414,7 +414,7 @@ HTML;
 			$field_values['data']['Status'] = '>' . $record_status;
 			
 			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed && $domain_id != $parent_domain_id) {
-				$field_values['data']['Actions'] = ' align="center"><input type="hidden" name="' . $action . '[_NUM_][record_skipped]" value="off" /><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][record_skipped]" ';
+				$field_values['data']['Actions'] = ' align="center"><input type="hidden" name="' . $action . '[_NUM_][record_skipped]" value="off" /><label><input type="checkbox" name="' . $action . '[_NUM_][record_skipped]" ';
 				$field_values['data']['Actions'] .= in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id)) ? ' checked' : null;
 				$field_values['data']['Actions'] .= '/>Skip Import</label>';
 			}
@@ -453,7 +453,7 @@ HTML;
 	<table class="form-table">
 		<tr>
 			<th width="120">Serial Number</th>
-			<td><span style="position: relative; top: 6px;">Auto Generated</span></td>
+			<td><span style="position: relative; top: -2px;">Auto Generated</span></td>
 		</tr>
 		<tr>
 			<th>Master Server</th>
@@ -481,7 +481,15 @@ HTML;
 		</tr>
 		<tr>
 			<th>Append Domain</th>
-			<td><label><input type="radio" name="{$action}[$soa_id][soa_append]" value="yes" $yeschecked /> yes</label> <label><input type="radio" name="{$action}[$soa_id][soa_append]" value="no" $nochecked /> no</label></td>
+			<td><input type="radio" id="append[0]" name="{$action}[$soa_id][soa_append]" value="yes" $yeschecked /><label class="radio" for="append[0]"> yes</label> <input type="radio" id="append[1]" name="{$action}[$soa_id][soa_append]" value="no" $nochecked /><label class="radio" for="append[1]"> no</label></td>
+		</tr>
+		<tr>
+			<th>Create Template</th>
+			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" checked /><label for="soa_create_template"> yes</label></td>
+		</tr>
+		<tr id="soa_template_name">
+			<th>Template Name</th>
+			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" /></td>
 		</tr>
 	</table>
 HTML;

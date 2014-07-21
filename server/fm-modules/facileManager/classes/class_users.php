@@ -398,8 +398,8 @@ FORM_ROW;
 				<tr>
 					<th width="33%" scope="row">Options</th>
 					<td width="67%">
-						<input style="height: 10px;" name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" $force_pwd_check /><label for="user_force_pwd_change">Force Password Change at Next Login</label><br />
-						<input style="height: 10px;" name="user_template_only" id="user_template_only" value="yes" type="checkbox" $user_template_only_check /><label for="user_template_only">Template User</label>
+						<input name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" $force_pwd_check /><label for="user_force_pwd_change">Force Password Change at Next Login</label><br />
+						<input name="user_template_only" id="user_template_only" value="yes" type="checkbox" $user_template_only_check /><label for="user_template_only">Template User</label>
 					</td>
 				</tr>
 			
@@ -411,7 +411,7 @@ FORM_ROW;
 			$verbose_form = <<<FORM_ROW
 				<tr>
 					<th width="33%" scope="row">Options</th>
-					<td width="67%"><input style="height: 10px;" name="verbose" id="verbose" type="checkbox" value="1" checked /><label for="verbose">Verbose Output</label></td>
+					<td width="67%"><input name="verbose" id="verbose" type="checkbox" value="1" checked /><label for="verbose">Verbose Output</label></td>
 				</tr>
 			
 FORM_ROW;

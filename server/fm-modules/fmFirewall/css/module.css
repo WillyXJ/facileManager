@@ -65,3 +65,7 @@ p.checkbox_desc {
 	margin-top: 0;
 	margin-left: 3px;
 }
+
+.form-table.policy-form td label {
+	white-space: normal;
+}
