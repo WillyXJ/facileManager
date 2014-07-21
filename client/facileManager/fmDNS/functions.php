@@ -318,6 +318,7 @@ function getStartupScript() {
 		'Gentoo'    => '/etc/init.d/named start',
 		'Slackware' => '/etc/rc.d/rc.bind start',
 		'FreeBSD'   => '/etc/rc.d/named start',
+		'OpenBSD'   => '/etc/rc.d/named start',
 		'Apple'     => findProgram('launchctl') . ' start org.isc.named'
 		);
 	
