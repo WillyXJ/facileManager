@@ -19,6 +19,7 @@
 * Both   - [feature] Added support to dump and clear cache. (Issue #112)
 * Server - [bug] Fixed server overrides. (Issue #132)
 * Server - [improvement] Cleaned up some code.
+* Both   - [feature] Added support to define chroot directory. (Issue #92, #134)
 
 1.2.5 (2014-05-??)
 ==================

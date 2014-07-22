@@ -224,7 +224,7 @@ function buildModuleHelpFile() {
 			<p><b>Servers</b><br />
 			DNS servers can be defined at Config &rarr; <a href="' . $menu[getParentMenuKey('Servers')][4] .'">Servers</a>. In the add/edit server 
 			window, select and define the server hostname, key (if applicable), system account the daemon runs as, update method, configuration file, 
-			server root, and directory to keep the zone files in.</p>
+			server root, chroot directory (if applicable), and directory to keep the zone files in.</p>
 			<p>The server can be updated via the following methods:</p>
 			<ul>
 				<li><i>http(s) -</i> ' . $fm_name . ' will initiate a http(s) connection to the DNS server which updates the configs.</li>

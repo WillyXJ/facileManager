@@ -110,16 +110,27 @@ function buildConf($url, $data) {
 		addLogEntry($raw_data);
 		exit(1);
 	}
+	extract($raw_data, EXTR_SKIP);
+	
+	if (dirname($server_chroot_dir)) {
+		$server_root_dir = $server_chroot_dir . $server_root_dir;
+		$server_zones_dir = $server_chroot_dir . $server_zones_dir;
+		$server_config_file = $server_chroot_dir . $server_config_file;
+		foreach ($files as $filename => $contents) {
+			$new_files[$server_chroot_dir . $filename] = $contents;
+		}
+		$files = $new_files;
+		unset($new_files);
+	}
+	
 	if ($debug) {
-		foreach ($raw_data['files'] as $filename => $contents) {
+		foreach ($files as $filename => $contents) {
 			echo str_repeat('=', 50) . "\n";
 			echo $filename . ":\n";
 			echo str_repeat('=', 50) . "\n";
 			echo $contents . "\n\n";
 		}
 	}
-	
-	extract($raw_data, EXTR_SKIP);
 	
 	$runas = ($server_run_as_predefined == 'as defined:') ? $server_run_as : $server_run_as_predefined;
 	$chown_files = array($server_root_dir, $server_zones_dir);
@@ -242,17 +253,18 @@ function moduleAddServer($url, $data) {
 			}
 		}
 		$data['server_config_file'] = $named_conf;
-		$raw_root = explode('"', shell_exec('grep directory ' . $named_conf));
+		$server_root = getParameterValue('directory', $named_conf, '"');
 		
-		if (count($raw_root) <= 1) {
+		if ($server_root === false) {
 			if (file_exists($named_conf . '.options')) {
-				$raw_root = explode('"', shell_exec('grep directory ' . $named_conf . '.options'));
+				$server_root = getParameterValue('directory', $named_conf . '.options', '"');
 			}
 		}
-		$data['server_root_dir'] = @trim($raw_root[1]);
+		$data['server_root_dir'] = $server_root;
 		
 		$data['server_zones_dir'] = (dirname($named_conf) == '/etc') ? null : dirname($named_conf) . '/zones';
 	}
+	$data['server_chroot_dir'] = detectChrootDir();
 	
 	/** Add the server to the account */
 	$app = detectDaemonVersion(true);
@@ -330,6 +342,39 @@ function getStartupScript() {
 	}
 	
 	return false;
+}
+
+
+function detectChrootDir() {
+	switch (PHP_OS) {
+		case 'Linux':
+			$os = detectOSDistro();
+			if (in_array($os, array('Redhat', 'CentOS', 'ClearOS', 'Oracle'))) {
+				if ($chroot_dir = getParameterValue('^ROOTDIR', '/etc/sysconfig/named')) return $chroot_dir;
+			}
+			if (in_array($os, array('Debian', 'Ubuntu', 'Fubuntu'))) {
+				if ($flags = getParameterValue('^OPTIONS', '/etc/default/bind9')) {
+					$flags = explode(' ', $flags);
+					if (in_array('-t', $flags)) return $flags[array_search('-t', $flags) + 1];
+				}
+			}
+			break;
+		case 'OpenBSD':
+			$chroot_dir = '/var/named';
+			foreach (array('/etc/rc.conf.local', '/etc/rc.conf') as $rcfile) {
+				if ($chroot_dir = getParameterValue('^named_chroot', $rcfile)) break;
+			}
+			return $chroot_dir;
+		case 'FreeBSD':
+			if ($chroot_dir = getParameterValue('^named_chroot', '/etc/rc.conf')) return $chroot_dir;
+			
+			if ($flags = getParameterValue('^named_flags', '/etc/rc.conf')) {
+				$flags = explode(' ', $flags);
+				if (in_array('-t', $flags)) return $flags[array_search('-t', $flags) + 1];
+			}
+	}
+	
+	return null;
 }
 
 

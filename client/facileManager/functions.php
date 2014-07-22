@@ -838,12 +838,11 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 					exit(1);
 				}
 			}
-			$raw_root = explode('"', shell_exec('grep ^DocumentRoot ' . $httpdconf));
 			/** Get the docroot from STDIN if it's not found */
-			if (count($raw_root) <= 1) {
+			if (! $docroot = getParameterValue('^DocumentRoot', $httpdconf, '"')) {
 				echo fM("\nCannot find DocumentRoot in " . $web_server['file'] . ".  Please enter the full path of your default DocumentRoot (/var/www/html): ");
 				$docroot = rtrim(trim(strtolower(fgets(STDIN))), '/');
-			} else $docroot = trim($raw_root[1]);
+			}
 				
 			/** Check if the docroot exists */
 			if (!is_dir($docroot)) {
@@ -860,14 +859,10 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			
 			/** Add an entry to sudoers */
 			$sudoers = findFile('sudoers');
-			$raw_user = explode(' ', shell_exec('grep ^User ' . $httpdconf));
-			$user = trim($raw_user[1]);
+			$user = getParameterValue('^User', $httpdconf, ' ');
 			if ($user[0] == '$') {
 				$user_var = preg_replace(array('/\$/', '/{/', '/}/'), '', $user);
-				$raw_user = explode('=', shell_exec('grep ' . $user_var . ' ' . findFile('envvars')));
-				if (count($raw_user)) {
-					$user = trim($raw_user[1]);
-				}
+				$user = getParameterValue($user_var, findFile('envvars'), '=');
 			}
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
@@ -922,6 +917,7 @@ function addUser($user_info, $passwd_users) {
 	
 	switch (PHP_OS) {
 		case 'Linux':
+		case 'OpenBSD':
 			if (!in_array($user, $passwd_users)) {
 				$result = system(findProgram('useradd') . " -m -c '$username' $user", $retval);
 			}
@@ -1123,6 +1119,28 @@ function extractFiles($files = array()) {
 	if ($tmp_dir != '/') {
 		@system(findProgram('rm') . " -rf $tmp_dir");
 	}
+}
+
+
+/**
+ * Returns the value of a parameter in a file
+ *
+ * @since 1.3
+ * @package facileManager
+ *
+ * @param string $param Parameter to search for
+ * @param string $file File to search in
+ * @param string $delimiter Delimiter to use
+ * 
+ * @return string
+ */
+function getParameterValue($param, $file, $delimiter = '=') {
+	$raw_line = explode($delimiter, shell_exec('grep ' . $param . ' ' . $file));
+	if (!count($raw_line)) {
+		return false;
+	}
+	
+	return trim(str_replace(array('"', "'"), '', $raw_line[1]));
 }
 
 
