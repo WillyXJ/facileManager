@@ -689,6 +689,9 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', 'Options', 'Options', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-servers.php', 'Logging', 'Logging', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
 		addSubmenuPage('config-servers.php', 'Controls', 'Controls', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
+	
+	addObjectPage('Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'template-soa.php');
+		addSubmenuPage('template-soa.php', 'Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'template-soa.php');
 
 	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }

@@ -163,6 +163,14 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#soa_create_template").click(function() {
+		if ($(this).is(':checked')) {
+			$('#soa_template_name').show('slow');
+		} else {
+			$('#soa_template_name').slideUp();
+		}
+	});
+	
 });
 
 

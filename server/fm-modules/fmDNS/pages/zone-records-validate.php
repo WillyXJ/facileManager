@@ -36,9 +36,6 @@ if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !c
 /** Make sure we can handle all of the variables */
 checkMaxInputVars();
 
-printHeader();
-@printMenu();
-
 $domain_info['id']   = $domain_id;
 $domain_info['name'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
 $domain_info['map']  = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
@@ -54,6 +51,9 @@ $body = null;
 foreach($_POST as $name => $array) {
 	if (in_array($name, array('create', 'update'))) $body .= createOutput($domain_info, $record_type, $array, $name, $header_array);
 }
+
+printHeader();
+@printMenu();
 
 echo <<<HTML
 <div id="body_container">

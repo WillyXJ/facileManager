@@ -75,7 +75,12 @@ class fm_dns_records {
 		
 		$sql_insert = "INSERT INTO `$table`";
 		$sql_fields = '(domain_id,';
-		$sql_values = "$domain_id,";
+		if (array_key_exists('soa_template', $new_array)) {
+			$sql_values = '0,';
+			unset($new_array['soa_template']);
+		} else {
+			$sql_values = "$domain_id,";
+		}
 		if ($record_type != 'SOA' && $record_type) {
 			$sql_fields .= 'record_type,';
 			$sql_values .= "'$record_type',";
@@ -103,6 +108,7 @@ class fm_dns_records {
 		$sql_values = rtrim($sql_values, ',');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
+//		echo $query; exit;
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;

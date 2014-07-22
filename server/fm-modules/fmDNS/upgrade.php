@@ -838,6 +838,17 @@ TABLE;
 
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO', 'SSHFP' ) NOT NULL DEFAULT  'A';";
 
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa_tpl_assigned` (
+  `account_id` int(11) NOT NULL,
+  `domain_id` int(11) NOT NULL,
+  `soa_id` int(11) NOT NULL,
+  PRIMARY KEY (`soa_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+TABLE;
+
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_name` VARCHAR(255) NULL AFTER `domain_id`;";
+	
 	$inserts = $updates = null;
 	
 	/** Create table schema */
@@ -861,7 +872,27 @@ TABLE;
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
+	
+	/**
+	$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
+	$fmdb->query($query);
+	$num_rows = $fmdb->num_rows;
+	$results = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		if ($results[$x]->domain_name_servers == 0) continue;
 		
+		$name_server_ids = explode(';', $results[$x]->domain_name_servers);
+		$server_serial_nos = null;
+		foreach ($name_server_ids as $server_id) {
+			$server_serial_nos[] = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
+		}
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_name_servers='" . implode(';', $server_serial_nos) . "' "
+				. "WHERE domain_id=" . $results[$x]->domain_id;
+		$fmdb->query($query);
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+	}
+	*/
+
 	return true;
 }
 
