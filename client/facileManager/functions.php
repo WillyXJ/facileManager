@@ -922,6 +922,7 @@ function addUser($user_info, $passwd_users) {
 	
 	switch (PHP_OS) {
 		case 'Linux':
+		case 'OpenBSD':
 			if (!in_array($user, $passwd_users)) {
 				$result = system(findProgram('useradd') . " -m -c '$username' $user", $retval);
 			}

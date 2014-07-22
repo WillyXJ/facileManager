@@ -96,6 +96,10 @@ class fm_module_servers {
 		if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
 		if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
 		
+		$post['server_root_dir'] = rtrim($post['server_root_dir'], '/');
+		$post['server_chroot_dir'] = rtrim($post['server_chroot_dir'], '/');
+		$post['server_zones_dir'] = rtrim($post['server_zones_dir'], '/');
+		
 		/** Process server_run_as */
 		$server_run_as_options = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined');
 		if (!in_array($post['server_run_as_predefined'], $server_run_as_options)) {
@@ -151,7 +155,8 @@ class fm_module_servers {
 		$tmp_runas = $post['server_run_as_predefined'] ? $post['server_run_as_predefined'] : $post['server_run_as'];
 		addLogEntry("Added server:\nName: {$post['server_name']} ({$post['server_serial_no']})\nKey: {$tmp_key}\nType: {$post['server_type']}\n" .
 				"Run-as: {$tmp_runas}\nUpdate Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}\n" .
-				"Server Root: {$post['server_root_dir']}\nZone file directory: {$post['server_zones_dir']}");
+				"Server Root: {$post['server_root_dir']}\nServer Chroot: {$post['server_chroot_dir']}\n" .
+				"Zone file directory: {$post['server_zones_dir']}");
 		return true;
 	}
 
@@ -166,6 +171,10 @@ class fm_module_servers {
 		if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
 		if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
 		if (empty($post['server_update_method'])) $post['server_update_method'] = 'cron';
+		
+		$post['server_root_dir'] = rtrim($post['server_root_dir'], '/');
+		$post['server_chroot_dir'] = rtrim($post['server_chroot_dir'], '/');
+		$post['server_zones_dir'] = rtrim($post['server_zones_dir'], '/');
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
@@ -222,7 +231,8 @@ class fm_module_servers {
 		$tmp_runas = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : $post['server_run_as_predefined'];
 		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nKey: {$tmp_key}\nType: {$post['server_type']}\n" .
 					"Run-as: {$tmp_runas}\nUpdate Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}\n" .
-					"Server Root: {$post['server_root_dir']}\nZone file directory: {$post['server_zones_dir']}");
+					"Server Root: {$post['server_root_dir']}\nServer Chroot: {$post['server_chroot_dir']}\n" .
+					"Zone file directory: {$post['server_zones_dir']}");
 		return true;
 	}
 	
@@ -356,6 +366,7 @@ HTML;
 		$server_id = 0;
 		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
+		$server_chroot_dir = null;
 		$ucaction = ucfirst($action);
 		$server_installed = false;
 		
@@ -391,6 +402,7 @@ HTML;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
 		$server_config_file_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_config_file');
 		$server_root_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_root_dir');
+		$server_chroot_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_chroot_dir');
 		$server_zones_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_zones_dir');
 
 		$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
@@ -438,6 +450,10 @@ HTML;
 				<tr>
 					<th width="33%" scope="row"><label for="server_root_dir">Server Root</label></th>
 					<td width="67%"><input name="server_root_dir" id="server_root_dir" type="text" value="$server_root_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_root_dir']}" maxlength="$server_root_dir_length" /></td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row"><label for="server_chroot_dir">Server Chroot</label></th>
+					<td width="67%"><input name="server_chroot_dir" id="server_chroot_dir" type="text" value="$server_chroot_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_chroot_dir']}" maxlength="$server_chroot_dir_length" /></td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="server_zones_dir">Zone File Directory</label></th>

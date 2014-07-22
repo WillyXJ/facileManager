@@ -242,6 +242,7 @@ $(document).ready(function() {
 
     /* Cancel button */
     $('#manage_item_contents').delegate('#cancel_button, .close', 'click tap', function(e) {
+		e.preventDefault();
 		$('#manage_item').fadeOut(200);
 		$('#manage_item_contents').fadeOut(200).html();
 		$('#manage_item_contents').removeClass('wide');

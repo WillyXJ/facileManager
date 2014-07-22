@@ -172,6 +172,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
   `server_run_as_predefined` enum('named','bind','daemon','as defined:') NOT NULL DEFAULT 'named',
   `server_run_as` varchar(50) DEFAULT NULL,
   `server_root_dir` varchar(255) NOT NULL,
+  `server_chroot_dir` VARCHAR(255) NULL DEFAULT NULL,
   `server_zones_dir` varchar(255) NOT NULL,
   `server_config_file` varchar(255) NOT NULL DEFAULT '/etc/named.conf',
   `server_update_method` enum('http','https','cron','ssh') NOT NULL DEFAULT 'http',

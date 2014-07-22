@@ -110,16 +110,27 @@ function buildConf($url, $data) {
 		addLogEntry($raw_data);
 		exit(1);
 	}
+	extract($raw_data, EXTR_SKIP);
+	
+	if (dirname($server_chroot_dir)) {
+		$server_root_dir = $server_chroot_dir . $server_root_dir;
+		$server_zones_dir = $server_chroot_dir . $server_zones_dir;
+		$server_config_file = $server_chroot_dir . $server_config_file;
+		foreach ($files as $filename => $contents) {
+			$new_files[$server_chroot_dir . $filename] = $contents;
+		}
+		$files = $new_files;
+		unset($new_files);
+	}
+	
 	if ($debug) {
-		foreach ($raw_data['files'] as $filename => $contents) {
+		foreach ($files as $filename => $contents) {
 			echo str_repeat('=', 50) . "\n";
 			echo $filename . ":\n";
 			echo str_repeat('=', 50) . "\n";
 			echo $contents . "\n\n";
 		}
 	}
-	
-	extract($raw_data, EXTR_SKIP);
 	
 	$runas = ($server_run_as_predefined == 'as defined:') ? $server_run_as : $server_run_as_predefined;
 	$chown_files = array($server_root_dir, $server_zones_dir);
