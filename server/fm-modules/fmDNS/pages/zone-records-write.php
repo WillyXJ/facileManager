@@ -25,10 +25,12 @@
 
 require_once('fm-init.php');
 
+/*
 if (array_key_exists('cancel', $_POST)) {
 	header('Location: ' . $__FM_CONFIG['menu']['Admin']['Tools']);
 	exit;
 }
+*/
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 

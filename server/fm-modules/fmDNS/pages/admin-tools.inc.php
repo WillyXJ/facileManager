@@ -45,7 +45,7 @@ $tools_option[] = <<<HTML
 			<table class="form-table">
 				<tr>
 					<th>File to import:</th>
-					<td><input id="import-file" name="import-file" type="file" $disabled /></td>
+					<td><input id="import-file" name="import-file" type="file" /></td>
 				</tr>
 				<tr>
 					<th>Zone to import to:</th>
