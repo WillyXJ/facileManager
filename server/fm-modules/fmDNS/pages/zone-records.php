@@ -83,11 +83,13 @@ if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowe
 } else $form = null;
 
 if ($record_type == 'SOA') {
-	$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `domain_id`='$domain_id'";
+	$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
+		`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
+		`soa_status`='active'";
 	$fmdb->get_results($soa_query);
 	if ($fmdb->num_rows) $result = $fmdb->last_result;
 	else $result = null;
-	$body .= $form . $fm_dns_records->buildSOA($result, $domain_id);
+	$body .= $form . $fm_dns_records->buildSOA($result);
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 		$body .= '
 	<p><input type="submit" name="submit" value="Validate" class="button" /></p>

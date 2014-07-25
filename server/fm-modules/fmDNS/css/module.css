@@ -121,3 +121,9 @@ p.soa_import span {
 	font-size: 14px;
 	white-space: normal;
 }
+
+.soa-template-dropdown strong {
+	margin-right: 5px;
+	position: relative;
+	top: 2px;
+}

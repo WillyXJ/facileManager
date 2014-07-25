@@ -838,19 +838,18 @@ TABLE;
 
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO', 'SSHFP' ) NOT NULL DEFAULT  'A';";
 
-	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa_tpl_assigned` (
-  `account_id` int(11) NOT NULL,
-  `domain_id` int(11) NOT NULL,
-  `soa_id` int(11) NOT NULL,
-  PRIMARY KEY (`soa_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-TABLE;
-
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_name` VARCHAR(255) NULL AFTER `domain_id`;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_chroot_dir` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `server_root_dir`;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD  `soa_id` INT( 11 ) NOT NULL AFTER  `account_id` ,
+		ADD  `soa_serial_no` INT( 11 ) NOT NULL AFTER  `soa_id` ;";
+
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD  `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `domain_id`;";
+
+	$inserts = null;
 	
-	$inserts = $updates = null;
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_id`=s.`soa_id`;";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_serial_no`=s.`soa_serial_no`;";
+	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` DROP `domain_id`, DROP `soa_serial_no`;";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {

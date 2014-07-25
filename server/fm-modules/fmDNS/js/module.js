@@ -163,6 +163,18 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#body_container").delegate('#soa_template_chosen', 'change', function(e) {
+		if ($(this).val() == '0') {
+			$('#custom-soa-form').show('slow');
+		} else {
+			$('#custom-soa-form').slideUp();
+		}
+	});
+	
+	if ($('#soa_template_chosen').val() != 0) {
+		$('#custom-soa-form').hide();
+	}
+	
 	$("#soa_create_template").click(function() {
 		if ($(this).is(':checked')) {
 			$('#soa_template_name').show('slow');

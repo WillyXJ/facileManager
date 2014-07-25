@@ -74,16 +74,10 @@ class fm_dns_records {
 		}
 		
 		$sql_insert = "INSERT INTO `$table`";
-		$sql_fields = '(domain_id,';
-		if (array_key_exists('soa_template', $new_array)) {
-			$sql_values = '0,';
-			unset($new_array['soa_template']);
-		} else {
-			$sql_values = "$domain_id,";
-		}
+		$sql_fields = '(';
 		if ($record_type != 'SOA' && $record_type) {
-			$sql_fields .= 'record_type,';
-			$sql_values .= "'$record_type',";
+			$sql_fields .= 'domain_id,record_type,';
+			$sql_values .= "$domain_id,'$record_type',";
 		}
 		
 		$new_array['account_id'] = $_SESSION['user']['account_id'];
@@ -112,6 +106,11 @@ class fm_dns_records {
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;
+		
+		/** Update domain with SOA ID */
+		if ($record_type == 'SOA') {
+			$this->assignSOA($fmdb->insert_id, $domain_id);
+		}
 
 		/** Update the SOA serial number */
 		$soa_count = getSOACount($domain_id);
@@ -222,6 +221,7 @@ HTML;
 		$show_value = true;
 		if ($type == 'SOA') {
 			$show_value = false;
+			$title_array[] = array('title' => 'Name', 'rel' => 'soa_name');
 			$title_array[] = array('title' => 'Master', 'rel' => 'soa_master_server');
 			$title_array[] = array('title' => 'E-mail', 'rel' => 'soa_email_address');
 			$title_array[] = array('title' => 'Refresh', 'rel' => 'soa_refresh');
@@ -440,22 +440,31 @@ HTML;
 		return $form;
 	}
 	
-	function buildSOA($result, $soa_id) {
+	function buildSOA($result) {
 		global $__FM_CONFIG, $disabled;
 		
+		$soa_id = 0;
+		
 		if ($result) {
-			$action = 'update';
 			extract(get_object_vars($result[0]));
 			$yeschecked = ($soa_append == 'yes') ? 'checked' : '';
 			$nochecked = ($soa_append == 'no') ? 'checked' : '';
+			$action = $soa_template == 'yes' ? 'create' : 'update';
 		} else {
 			$action = 'create';
 			$yeschecked = ($_GET['map'] == 'forward') ? 'checked' : '';
 			$nochecked = ($yeschecked) ? '' : 'checked';
 			extract($__FM_CONFIG['soa']);
 		}
+		
+		$soa_templates = buildSelect("{$action}[soa_template_chosen]", 'soa_template_chosen', $this->availableSOATemplates(), $soa_id);
 	
 		return <<<HTML
+	<div class="soa-template-dropdown">
+		<strong>Select a Template</strong>
+		$soa_templates
+	</div>
+	<div id="custom-soa-form">
 	<table class="form-table">
 		<tr>
 			<th width="120">Serial Number</th>
@@ -498,6 +507,7 @@ HTML;
 			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" /></td>
 		</tr>
 	</table>
+	</div>
 HTML;
 	}
 	
@@ -549,6 +559,62 @@ HTML;
 		
 		return $skipped_records;
 	}
+	
+	
+	/**
+	 * Builds an array of available SOA templates
+	 *
+	 * @since 1.3
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @return array
+	 */
+	function availableSOATemplates() {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return[0][] = 'Custom';
+		$return[0][] = '0';
+		
+		$query = "SELECT soa_id,soa_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}soa WHERE account_id='{$_SESSION['user']['account_id']}' 
+			AND soa_status='active' AND soa_template='yes' ORDER BY soa_name ASC";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$return[$i+1][] = $results[$i]->soa_name;
+				$return[$i+1][] = $results[$i]->soa_id;
+			}
+		}
+		return $return;
+	}
+	
+	
+	/**
+	 * Builds an array of available SOA templates
+	 *
+	 * @since 1.3
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $soa_id SOA ID to assign
+	 * @param id $domain_id Domain ID to assign to
+	 * @return boolean
+	 */
+	function assignSOA($soa_id, $domain_id) {
+		global $__FM_CONFIG;
+		
+		$old_soa_id = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_id');
+		
+		if (basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $domain_id, 'soa_id', $soa_id, 'domain_id')) {
+			/** Delete old custom SOA */
+			if (getNameFromID($old_soa_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}soa", 'soa_', 'soa_id', 'soa_template') == 'no') {
+				updateStatus("fm_{$__FM_CONFIG['fmDNS']['prefix']}soa", $old_soa_id, 'soa_', 'deleted', 'soa_id');
+			}
+		}
+	}
+	
+	
 }
 
 if (!isset($fm_dns_records))

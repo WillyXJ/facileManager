@@ -74,6 +74,8 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domains` (
   `domain_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
+  `soa_id` int(11) NOT NULL,
+  `soa_serial_no` int(11) NOT NULL,
   `domain_name` varchar(255) NOT NULL DEFAULT '',
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
@@ -205,15 +207,6 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}soa` (
   PRIMARY KEY (`soa_id`),
   KEY `domain_id` (`domain_id`,`soa_master_server`,`soa_email_address`,`soa_refresh`,`soa_retry`,`soa_expire`,`soa_ttl`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
-TABLE;
-
-	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}soa_tpl_assigned` (
-  `account_id` int(11) NOT NULL,
-  `domain_id` int(11) NOT NULL,
-  `soa_id` int(11) NOT NULL,
-  PRIMARY KEY (`soa_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 TABLE;
 
 	$table[] = <<<TABLE

@@ -25,14 +25,12 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
+include(ABSPATH . 'fm-modules/fmDNS/classes/class_templates.php');
 
-$server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST)) ? '?server_serial_no=' . $server_serial_no : null;
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
@@ -76,8 +74,8 @@ printHeader();
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'domain_id', 'soa_', 'AND domain_id=0');
-$fm_dns_keys->rows($result);
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_name', 'soa_', "AND soa_template='yes'");
+$fm_module_templates->rows($result, 'soa');
 
 printFooter();
 
