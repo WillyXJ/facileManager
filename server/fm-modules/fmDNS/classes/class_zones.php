@@ -753,7 +753,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Check domain_id and soa */
-		$query = "select * from fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.domain_id=d.domain_id and d.domain_id=$domain_id";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.soa_id=d.soa_id and d.domain_id=$domain_id";
 		$result = $fmdb->query($query);
 		if (!$fmdb->num_rows) return false;
 
@@ -871,8 +871,8 @@ HTML;
 		
 		/** Reset the domain_reload flag */
 		if (!$failures) {
-			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='no' WHERE `domain_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND `domain_id`=$domain_id";
-			$result = $fmdb->query($query);
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			$fm_dns_records->updateSOAReload($domain_id, 'no');
 		}
 
 		addLogEntry("Reloaded zone '$domain_name'.");
@@ -913,9 +913,9 @@ HTML;
 	function updateSOASerialNo($domain_id, $soa_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$soa_serial_no = ($soa_serial_no == 99) ? 10 : $soa_serial_no + 1;
+		$soa_serial_no = ($soa_serial_no == 99) ? 0 : $soa_serial_no + 1;
 		
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` SET `soa_serial_no`=$soa_serial_no WHERE `domain_id`=$domain_id";
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=" . sprintf('%02d', $soa_serial_no) . " WHERE `domain_id`=$domain_id";
 		$result = $fmdb->query($query);
 	}
 	

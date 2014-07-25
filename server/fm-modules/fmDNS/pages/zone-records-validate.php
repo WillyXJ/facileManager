@@ -104,7 +104,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	$skips_allowed = ($type == 'update' && $domain_clone_of) ? true : false;
 	
 	foreach ($data_array as $id => $data) {
-		if ($id == 'soa_template_chosen') continue;
+		if (!is_array($data)) continue;
 		if (isset($data['Delete'])) {
 			$action = 'Delete';
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');
@@ -194,7 +194,6 @@ function validateEntry($action, $id, $data, $record_type) {
 	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append)) {
 		$data['record_append'] = 'yes';
 	}
-	
 	if (!empty($data['record_value'])) {
 		foreach ($data as $key => $val) {
 			if ($key == 'record_name' && $record_type != 'PTR') {

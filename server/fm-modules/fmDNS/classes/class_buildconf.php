@@ -774,8 +774,9 @@ class fm_module_buildconf {
 		
 		$zone_file = null;
 		
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
-			`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='{$domain->domain_id}')";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE 
+			domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.account_id='{$_SESSION['user']['account_id']}'
+			AND s.soa_id=d.soa_id AND d.domain_id={$domain->domain_id}";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$soa_result = $fmdb->last_result;

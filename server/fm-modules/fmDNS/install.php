@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `soa_id` int(11) NOT NULL,
-  `soa_serial_no` int(11) NOT NULL,
+  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL,
   `domain_name` varchar(255) NOT NULL DEFAULT '',
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
@@ -193,19 +193,17 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}soa` (
   `soa_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `domain_id` int(11) NOT NULL DEFAULT '0',
+  `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no',
   `soa_name` varchar(255) DEFAULT NULL,
   `soa_master_server` varchar(50) NOT NULL DEFAULT '',
   `soa_append` enum('yes','no') NOT NULL DEFAULT 'yes',
   `soa_email_address` varchar(50) NOT NULL DEFAULT '',
-  `soa_serial_no` tinyint(2) NOT NULL DEFAULT '10',
   `soa_refresh` varchar(50) DEFAULT '21600',
   `soa_retry` varchar(50) DEFAULT '7200',
   `soa_expire` varchar(50) DEFAULT '604800',
   `soa_ttl` varchar(50) DEFAULT '1200',
   `soa_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
-  PRIMARY KEY (`soa_id`),
-  KEY `domain_id` (`domain_id`,`soa_master_server`,`soa_email_address`,`soa_refresh`,`soa_retry`,`soa_expire`,`soa_ttl`)
+  PRIMARY KEY (`soa_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
 TABLE;
 
