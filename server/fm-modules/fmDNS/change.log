@@ -20,6 +20,7 @@
 * Server - [bug] Fixed server overrides. (Issue #132)
 * Server - [improvement] Cleaned up some code.
 * Both   - [feature] Added support to define chroot directory. (Issue #92, #134)
+* Server - [bug] Fixed the servers menu badge count. (Issue #139)
 
 1.2.5 (2014-05-??)
 ==================
