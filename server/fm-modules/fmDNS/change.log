@@ -22,6 +22,8 @@
 * Both   - [feature] Added support to define chroot directory. (Issue #92, #134)
 * Server - [feature] Added support for SOA templates. (Issue #114)
 * Server - [bug] Fixed the servers menu badge count. (Issue #139)
+* Server - [bug] Fixed an issue where zones could still be reloaded after
+           updating the zone configuration. (Issue #141)
 
 1.2.5 (2014-05-??)
 ==================

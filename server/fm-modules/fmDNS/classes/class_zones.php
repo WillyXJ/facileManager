@@ -360,7 +360,7 @@ class fm_dns_zones {
 			if ($key == 'domain_name_servers') $data = $log_message_name_servers;
 			$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 		}
-		$sql_edit = rtrim($sql_edit, ',');
+		$sql_edit .= "domain_reload='no'";
 		
 		/* Set the server_build_config flag for existing servers */
 		if (getSOACount($id) && getNSCount($id)) {
