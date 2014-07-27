@@ -92,6 +92,7 @@ class fmdb {
 				$i++;
 			}
 			$num_rows = 0;
+			unset($this->last_result);
 			while ($row = @mysql_fetch_object($this->result)) {
 				$this->last_result[$num_rows] = $row;
 				$num_rows++;
@@ -128,16 +129,17 @@ class fmdb {
 	 * Print SQL/DB error.
 	 */
 	function print_error($query = '') {
-		$this->last_error = mysql_error($this->dbh);
-		if ($query) $str = "{$this->last_error} | Query: [$query]";
+		$str = mysql_error($this->dbh) . " | Query: [$query]";
 		$str = htmlspecialchars($str, ENT_QUOTES);
 
 		// Is error output turned on or not..
 		if (getOption('show_errors')) {
 			// If there is an error then take note of it
-			print "<div id='error'>
-			<p class='wpdberror'><strong>Database error:</strong> [$str]</p>
-			</div>";
+			if ($query) {
+				$this->last_error = "<div id='error'>
+				<p class='wpdberror'><strong>Database error:</strong> [$str]</p>
+				</div>";
+			}
 		} else {
 			return false;
 		}
