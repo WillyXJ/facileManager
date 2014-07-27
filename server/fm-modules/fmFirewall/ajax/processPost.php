@@ -97,12 +97,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'delete':
 			if (isset($id)) {
-				$delete_status = $post_class->delete(sanitize($id), $server_serial_no, $type);
-				if ($delete_status !== true) {
-					exit($delete_status);
-				} else {
-					exit('Success');
-				}
+				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
 			}
 			break;
 		case 'edit':

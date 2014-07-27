@@ -608,7 +608,7 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 function updateStatus($table, $id, $prefix, $status, $field = 'id') {
 	global $fmdb;
 	
-	$query = "UPDATE `$table` SET `{$prefix}status`='" . sanitize($status) . "' WHERE `$field`=" . sanitize($id);
+	$query = "UPDATE `$table` SET `{$prefix}status`='" . sanitize($status) . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `$field`=" . sanitize($id);
 
 	return $fmdb->query($query);
 }
@@ -2632,6 +2632,7 @@ function setUserModule($user_default_module) {
  * @since 1.2.3
  * @package facileManager
  *
+ * @param string $search_slug Menu slug to query
  * @return integer|bool Returns the parent menu key or false if the menu item is not found
  */
 function getMenuURL($search_slug = null) {
@@ -2664,7 +2665,11 @@ function getMenuURL($search_slug = null) {
  * @since 1.3
  * @package facileManager
  *
- * @return integer|bool Returns the parent menu key or false if the menu item is not found
+ * @param string $section Popup section to build (header or footer)
+ * @param string $text Popup text to pass for header or buttons
+ * @param array $buttons Buttons to include
+ * @param string $link Link to provide for a button
+ * @return string Returns the popup section
  */
 function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
 	global $__FM_CONFIG;
@@ -2709,6 +2714,32 @@ HTML;
 	}
 	
 	return false;
+}
+
+
+/**
+ * Returns the menu item URL
+ *
+ * @since 1.3
+ * @package facileManager
+ *
+ * @param string $output Output to parse for AJAX call
+ * @return string Return for the AJAX call to display
+ */
+function parseAjaxOutput($output) {
+	global $fmdb;
+	
+	$message_array['content'] = $output;
+	if ($message_array['content'] !== true) {
+		if (strpos($message_array['content'], "\n") !== false || isset($fmdb->last_error)) {
+			unset($_POST);
+			include_once(ABSPATH . 'fm-modules/facileManager/ajax/formatOutput.php');
+		} else {
+			echo $message_array['content'];
+		}
+	} else {
+		echo 'Success';
+	}
 }
 
 

@@ -115,17 +115,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				if (!$post_class->add($_POST)) {
 					echo '<div class="error"><p>This ' . $table . ' could not be added.</p></div>'. "\n";
 					$form_data = $_POST;
-				} else echo 'Success';
+				} else exit('Success');
 			}
 			break;
 		case 'delete':
 			if (isset($id)) {
-				$delete_status = $post_class->delete(sanitize($id), $server_serial_no, $type);
-				if ($delete_status !== true) {
-					echo $delete_status;
-				} else {
-					echo 'Success';
-				}
+				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
 			}
 			break;
 		case 'edit':

@@ -230,7 +230,10 @@ $(document).ready(function() {
 						} else {
 							$('#manage_item').fadeIn(200);
 							$('#manage_item_contents').fadeIn(200);
-							$('#manage_item_contents').html('<h2>Delete Results</h2>' + response + '<br /><input type="submit" value="OK" class="button" id="cancel_button" />');
+							$('#manage_item_contents').html(response);
+							if ($('#manage_item_contents').width() >= 700) {
+								$('#manage_item_contents').addClass('wide');
+							}
 						}
 					}
 				}

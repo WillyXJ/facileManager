@@ -64,12 +64,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	switch ($_POST['action']) {
 		case 'delete':
 			if (isset($id)) {
-				$delete_status = $post_class->delete(sanitize($id), $type);
-				if ($delete_status !== true) {
-					echo $delete_status;
-				} else {
-					echo 'Success';
-				}
+				exit(parseAjaxOutput($post_class->delete(sanitize($id), $type)));
 			}
 			break;
 		case 'edit':
