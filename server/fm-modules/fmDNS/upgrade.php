@@ -844,7 +844,7 @@ TABLE;
 		ADD  `soa_serial_no` INT( 11 ) NOT NULL AFTER  `soa_id` ;";
 
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD  `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `domain_id`;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `soa_serial_no` `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `soa_serial_no` `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT  '0';";
 	
 	$inserts = null;
 	

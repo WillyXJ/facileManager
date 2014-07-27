@@ -141,43 +141,30 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 			$img = $__FM_CONFIG['icons']['ok'];
 		}
 		$html .= "<tr><td>{$array['action']}</td>";
-		foreach ($array as $key => $val) {
-			if (in_array($key, array('record_skipped', 'record_status', 'PTR', 'Action'))) {
+		foreach ($header_array as $head_id => $head_array) {
+			if (!is_array($head_array) || !array_key_exists('rel', $head_array)) {
 				continue;
 			}
 			
-			/** Show only the fields found in the header */
-			$found = false;
-			foreach ($header_array as $head_id => $head_array) {
-				if (is_array($head_array) && array_search($key, $head_array) !== false) {
-					$found = true;
-					break;
-				}
-			}
-			if (!$found) continue;
-			
 			$html .= '<td';
-			if (in_array($key, array('record_append', 'soa_append'))) {
+			if (in_array($head_array['rel'], array('record_append', 'soa_append'))) {
 				$html .= ' class="center"';
 			}
-			if (empty($val)) {
-				$val = "<i>empty</i>";
+			if (empty($array[$head_array['rel']])) {
+				$array[$head_array['rel']] = "<i>empty</i>";
 			}
-			$html .= '>' . $val;
-			if (($key == 'record_value' && $array['record_append'] == 'yes') ||
-					(in_array($key, array('soa_master_server', 'soa_email_address')) && $array['soa_append'] == 'yes')) {
+			$html .= '>' . $array[$head_array['rel']];
+			if (($head_array['rel'] == 'record_value' && $array['record_append'] == 'yes') ||
+					(in_array($head_array['rel'], array('soa_master_server', 'soa_email_address')) && $array['soa_append'] == 'yes')) {
 				$html .= '<span class="grey">.' . $domain_info['name'] . '</span>';
 			}
-			if (isset($input_error[$id]['errors'][$key])) {
-				$html .= ' <span class="valid_error">' . $input_error[$id]['errors'][$key] . '</span>';
+			if (isset($input_error[$id]['errors'][$head_array['rel']])) {
+				$html .= ' <span class="valid_error">' . $input_error[$id]['errors'][$head_array['rel']] . '</span>';
 			}
-			if (isset($input_error[$id]['info'][$key])) {
-				$html .= ' <span class="valid_message">' . $input_error[$id]['info'][$key] . '</span>';
+			if (isset($input_error[$id]['info'][$head_array['rel']])) {
+				$html .= ' <span class="valid_message">' . $input_error[$id]['info'][$head_array['rel']] . '</span>';
 			}
 			$html .= '</td>';
-		}
-		if ($record_type != 'SOA') {
-			$html .= '<td>' . $array['record_status'] . '</td>';
 		}
 		$html .= '<td class="center">' . $img . '</td>';
 		$html .= "</tr>\n";
@@ -219,13 +206,13 @@ function validateEntry($action, $id, $data, $record_type) {
 					}
 				}
 				if ($key == 'PTR') {
-					$retval = checkPTRZone($data['record_value'], $domain_id);
-					list($val, $error_msg, $class) = $retval;
-					$value_error = '<font color="' . $class . '"><i>' . $error_msg . '</i></font> ';
+					$retval = checkPTRZone($data['record_value'], $id);
+					list($val, $error_msg) = $retval;
 					if ($val == null) {
-						$messages['errors'][$key] = 'Invalid';
+						$messages['errors']['record_value'] = $error_msg;
 					} else {
-						$val = $retval;
+						$messages['info']['record_value'] = $error_msg;
+						continue;
 					}
 				}
 			}
@@ -442,4 +429,57 @@ function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = f
 	return false;
 }
 
+function checkPTRZone($ip, $domain_id) {
+	global $fmdb, $__FM_CONFIG;
+
+	list($ip1, $ip2, $ip3, $ip4) = explode('.' , $ip);
+	$zone = "'$ip3.$ip2.$ip1.in-addr.arpa', '$ip2.$ip1.in-addr.arpa', '$ip1.in-addr.arpa'";
+
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_status!='deleted'");
+	if ($fmdb->num_rows) {
+		$result = $fmdb->last_result;
+		return array($result[0]->domain_id, null);
+	} else {
+		if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+			return autoCreatePTRZone($zone, $domain_id);
+		}
+		return array(null, 'Reverse zone does not exist.');
+	}
+}
+
+function autoCreatePTRZone($new_zones, $fwd_domain_id) {
+	global $__FM_CONFIG, $fmdb;
+
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $fwd_domain_id, 'domain_', 'domain_id');
+	if ($fmdb->num_rows) {
+		$result = $fmdb->last_result;
+
+		$new_zone = explode(",", $new_zones);
+
+		$ptr_array['ZoneID'] = 0;
+		$ptr_array[0]['domain_name'] = trim($new_zone[0], "'");
+		$ptr_array[0]['domain_mapping'] = 'reverse';
+		$ptr_array[0]['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
+
+		$copy_fields = array('soa_id', 'domain_view', 'domain_transfers_from', 'domain_updates_from',
+			'domain_master_servers', 'domain_forward_servers', 'domain_type', 
+			'domain_check_names', 'domain_notify_slaves', 'domain_multi_masters');
+		foreach ($copy_fields as $field) {
+			$ptr_array[0][$field] = $result[0]->$field;
+		}
+		$_POST['createZone'] = $ptr_array;
+		unset($ptr_array);
+
+		global $fm_dns_zones;
+
+		if (!class_exists('fm_dns_zones')) {
+			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+		}
+		$retval = $fm_dns_zones->add();
+
+		return !is_int($retval) ? array(null, $retval) : array($retval, 'Auto created reverse zone.');
+	}
+
+	return false;
+}
 ?>

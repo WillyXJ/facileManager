@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `soa_id` int(11) NOT NULL,
-  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL,
+  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT  '0',
   `domain_name` varchar(255) NOT NULL DEFAULT '',
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
