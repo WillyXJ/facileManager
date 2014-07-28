@@ -280,6 +280,7 @@ FORM;
 		
 		$acl_list = null;
 		$serial_sql = $server_serial_no ? "AND server_serial_no IN (0,$server_serial_no)" : "AND server_serial_no=0";
+		$i = 0;
 		
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql);
 		if ($fmdb->num_rows) {
