@@ -718,6 +718,10 @@ class fm_module_buildconf {
 							$domain_name = $this->getDomainName($zone_result[0]->domain_mapping, trimFullStop($zone_result[0]->domain_name));
 							$file_ext = ($zone_result[0]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 
+							/** Are there multiple zones with the same name? */
+							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[0]->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result[0]->domain_id);
+							if ($fmdb->num_rows) $file_ext = $zone_result[0]->domain_id . ".$file_ext";
+							
 							/** Build zone file */
 							$data->files[$server_zones_dir . '/' . $zone_result[0]->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result[0]);
 							
