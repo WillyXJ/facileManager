@@ -362,7 +362,7 @@ class fm_dns_zones {
 		}
 		$sql_edit .= "domain_reload='no'";
 		
-		/* Set the server_build_config flag for existing servers */
+		/** Set the server_build_config flag for existing servers */
 		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
@@ -376,10 +376,13 @@ class fm_dns_zones {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		/* Set the server_build_config flag for new servers */
+		/** Set the server_build_config flag for new servers */
 		if (getSOACount($id) && getNSCount($id)) {
 			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
 		}
+
+		/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
+		basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $id, 'domain_id', false);
 
 		addLogEntry($log_message);
 		return true;
