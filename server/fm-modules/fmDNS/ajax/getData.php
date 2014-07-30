@@ -99,6 +99,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
 /** Edits */
 $checks_array = array('servers' => 'manage_servers',
@@ -108,7 +109,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'options' => 'manage_servers',
 					'logging' => 'manage_servers',
 					'controls' => 'manage_servers',
-					'domains' => 'manage_zones'
+					'domains' => 'manage_zones',
+					'soa' => 'manage_zones'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -157,6 +159,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$prefix = 'cfg_';
 			$field = $prefix . 'id';
 			$item_type = $_POST['item_sub_type'] . ' ';
+			break;
+		case 'soa':
+			$post_class = $fm_module_templates;
+			$prefix = 'soa_';
+			$field = $prefix . 'id';
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};

@@ -440,10 +440,12 @@ HTML;
 		return $form;
 	}
 	
-	function buildSOA($result) {
+	function buildSOA($result, $show = array('template_menu', 'create_template', 'template_name'), $force_action = 'auto') {
 		global $__FM_CONFIG, $disabled;
 		
 		$soa_id = 0;
+		$soa_name = $soa_templates = $create_template = null;
+		$map = isset($_GET['map']) ? $_GET['map'] : 'forward';
 		
 		if ($result) {
 			extract(get_object_vars($result[0]));
@@ -452,18 +454,49 @@ HTML;
 			$action = $soa_template == 'yes' ? 'create' : 'update';
 		} else {
 			$action = 'create';
-			$yeschecked = ($_GET['map'] == 'forward') ? 'checked' : '';
+			$yeschecked = ($map == 'forward') ? 'checked' : '';
 			$nochecked = ($yeschecked) ? '' : 'checked';
 			extract($__FM_CONFIG['soa']);
 		}
 		
-		$soa_templates = buildSelect("{$action}[soa_template_chosen]", 'soa_template_chosen', $this->availableSOATemplates(), $soa_id);
-	
-		return <<<HTML
+		if ($force_action != 'auto') {
+			$action = $force_action;
+		}
+		
+		if (array_search('template_menu', $show) !== false) {
+			$soa_templates = buildSelect("{$action}[soa_template_chosen]", 'soa_template_chosen', $this->availableSOATemplates(), $soa_id);
+			$soa_templates = <<<HTML
 	<div class="soa-template-dropdown">
 		<strong>Select a Template</strong>
 		$soa_templates
 	</div>
+HTML;
+		}
+	
+		if (array_search('create_template', $show) !== false) {
+			$create_template = <<<HTML
+		<tr>
+			<th>Create Template</th>
+			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" checked /><label for="soa_create_template"> yes</label></td>
+		</tr>
+HTML;
+		} else {
+			$create_template = <<<HTML
+			<input type="hidden" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" />
+HTML;
+		}
+	
+		if (array_search('template_name', $show) !== false) {
+			$template_name = <<<HTML
+		<tr id="soa_template_name">
+			<th>Template Name</th>
+			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" value="$soa_name" /></td>
+		</tr>
+HTML;
+		}
+	
+		return <<<HTML
+		$soa_templates
 	<div id="custom-soa-form">
 	<table class="form-table">
 		<tr>
@@ -498,14 +531,8 @@ HTML;
 			<th>Append Domain</th>
 			<td><input type="radio" id="append[0]" name="{$action}[$soa_id][soa_append]" value="yes" $yeschecked /><label class="radio" for="append[0]"> yes</label> <input type="radio" id="append[1]" name="{$action}[$soa_id][soa_append]" value="no" $nochecked /><label class="radio" for="append[1]"> no</label></td>
 		</tr>
-		<tr>
-			<th>Create Template</th>
-			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" checked /><label for="soa_create_template"> yes</label></td>
-		</tr>
-		<tr id="soa_template_name">
-			<th>Template Name</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" /></td>
-		</tr>
+		$create_template
+		$template_name
 	</table>
 	</div>
 HTML;

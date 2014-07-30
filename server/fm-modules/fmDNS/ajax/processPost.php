@@ -34,6 +34,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {
@@ -59,7 +60,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'options' => 'manage_servers',
 					'logging' => 'manage_servers',
 					'controls' => 'manage_servers',
-					'domains' => 'manage_zones'
+					'domains' => 'manage_zones',
+					'soa' => 'manage_zones'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -104,6 +106,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$field = $prefix . 'id';
 			if (isset($_POST['item_sub_type'])) $item_type = $_POST['item_sub_type'] . ' ';
 			$type = sanitize($_POST['log_type']);
+			break;
+		case 'soa':
+			$post_class = $fm_module_templates;
+			$prefix = 'soa_';
+			$field = $prefix . 'id';
+			$type = 'soa';
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};

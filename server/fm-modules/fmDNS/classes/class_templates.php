@@ -55,12 +55,22 @@ class fm_module_templates {
 	}
 	
 	function displayRow($row, $prefix) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fmdb;
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$show_delete = true;
+			
+			/** Cannot delete templates in use */
+			if ($prefix == 'soa') {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $row->soa_id, 'domain_', 'soa_id');
+				if ($fmdb->num_rows) {
+					$show_delete = false;
+				}
+			}
+			
+			$edit_status .= $show_delete ? '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>' : null;
 			$edit_status .= '</td>';
 		} else {
 			$edit_status = null;
@@ -91,6 +101,39 @@ HTML;
 		echo $edit_status . "</tr>\n";
 	}
 	
+	function printForm($data = '', $action = 'add') {
+		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+		
+		$force_action = $action == 'add' ? 'create' : 'update';
+		
+		$ucaction = ucfirst($action);
+		$form = '<form method="POST" action="zone-records-validate.php">
+<input type="hidden" name="domain_id" value="0" />
+<input type="hidden" name="record_type" value="SOA" />' . "\n";
+		$form .= buildPopup('header', $ucaction . ' Template');
+
+		$form .= $fm_dns_records->buildSOA($data, array('template_name'), $force_action);
+		
+		$form .= buildPopup('footer');
+		$form .= '</form>';
+		
+		echo $form;
+	}
+	
+	/**
+	 * Deletes the selected template
+	 */
+	function delete($id, $server_serial_no = 0, $prefix) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $prefix, $prefix . '_', $prefix . '_id', $prefix . '_name');
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $prefix, $id, $prefix . '_', 'deleted', $prefix . '_id') === false) {
+			return 'This template could not be deleted because a database error occurred.';
+		} else {
+			addLogEntry("Deleted $prefix template '$tmp_name'.");
+			return true;
+		}
+	}
 }
 
 if (!isset($fm_module_templates))

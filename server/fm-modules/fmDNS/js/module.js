@@ -171,8 +171,10 @@ $(document).ready(function() {
 		}
 	});
 	
-	if ($('#soa_template_chosen').val() != 0) {
-		$('#custom-soa-form').hide();
+	if ($('#soa_template_chosen').val() !== undefined) {
+		if ($('#soa_template_chosen').val() != 0) {
+			$('#custom-soa-form').hide();
+		}
 	}
 	
 	$("#soa_create_template").click(function() {

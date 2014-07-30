@@ -125,8 +125,14 @@ if (isset($create) && is_array($create)) {
 	}
 }
 
-if (isset($record_type) && !isset($import_records)) {
+if (isset($record_type) && $domain_id && !isset($import_records)) {
 	header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);
-} else header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);
+} else {
+	if ($domain_id) {
+		header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);
+	} else {
+		header('Location: ' . $menu[getParentMenuKey('SOA')][4]);
+	}
+}
 
 ?>
