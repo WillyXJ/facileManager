@@ -655,23 +655,19 @@ function basicUpdate($table, $id, $update_field, $update_value, $field = 'id') {
 function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
 	global $fmdb;
 	
-	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name';";
+	$query = "show columns from $tbl_name like '$column_name';";
 	$result = $fmdb->get_results($query);
 	
-	if (isset($fmdb->last_result)) {
-		$result = $fmdb->last_result;
-		$thisrow = $result[0];
-		$valuestring = $thisrow->Type;
-		$valuestring = str_replace(array('enum', '(', ')', "'"), '', $valuestring);
-		if (isset($head)) {
-			$valuestring = "{$head},{$valuestring}";
-		}
-		$values = explode(',', $valuestring);
-
-		return $values;
+	$result = $fmdb->last_result;
+	$thisrow = $result[0];
+	$valuestring = $thisrow->Type;
+	$valuestring = str_replace(array('enum', '(', ')', "'"), '', $valuestring);
+	if (isset($head)) {
+		$valuestring = "{$head},{$valuestring}";
 	}
+	$values = explode(',', $valuestring);
 	
-	return false;
+	return $values;
 }
 
 /**

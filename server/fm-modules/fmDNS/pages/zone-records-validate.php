@@ -477,7 +477,7 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		}
 		$retval = $fm_dns_zones->add();
 
-		return !is_int($retval) ? array(null, $retval) : array($retval, 'Auto created reverse zone.');
+		return !is_int($retval) ? array(null, $retval) : array($retval, 'Created reverse zone.');
 	}
 
 	return false;

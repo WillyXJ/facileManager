@@ -564,19 +564,17 @@ function getModuleBadgeCounts($type) {
 		
 		/** Servers */
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
-		if ($fmdb->num_rows) {
-			$server_results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$server_builds[] = $server_results[$i]->server_name;
-			}
+		$server_count = $fmdb->num_rows;
+		$server_results = $fmdb->last_result;
+		for ($i=0; $i<$server_count; $i++) {
+			$server_builds[] = $server_results[$i]->server_name;
 		}
 		if (version_compare(getOption('version', 0, $_SESSION['module']), '1.1', '>=')) {
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption('client_version', 0, $_SESSION['module']) . "'");
-			if ($fmdb->num_rows) {
-				$server_results = $fmdb->last_result;
-				for ($i=0; $i<$fmdb->num_rows; $i++) {
-					$server_builds[] = $server_results[$i]->server_name;
-				}
+			$server_count = $fmdb->num_rows;
+			$server_results = $fmdb->last_result;
+			for ($i=0; $i<$server_count; $i++) {
+				$server_builds[] = $server_results[$i]->server_name;
 			}
 		}
 		
@@ -700,8 +698,8 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', 'Logging', 'Logging', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
 		addSubmenuPage('config-servers.php', 'Controls', 'Controls', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
 	
-	addObjectPage('Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'template-soa.php');
-		addSubmenuPage('template-soa.php', 'Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'template-soa.php');
+	addObjectPage('Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
+		addSubmenuPage('templates-soa.php', 'Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
 
 	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }
