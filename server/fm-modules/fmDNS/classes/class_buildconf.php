@@ -1127,6 +1127,7 @@ class fm_module_buildconf {
 	function namedSyntaxChecks($files_array) {
 		global $__FM_CONFIG;
 		
+		if (!array_key_exists('server_serial_no', $files_array)) return;
 		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
 		
 		$die = false;

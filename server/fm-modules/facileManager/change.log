@@ -14,6 +14,7 @@
 * Server - [improvement] Updated the login page.
 * Server - [bug] Fixed SSL mixed content. (Issue #131)
 * Server - [improvement] Added a check for the PHP json module. (Issue #133)
+* Server - [feature] Supports additional configuration previews. (Issue #130)
 
 1.2.3 (2014-05-??)
 ==================
