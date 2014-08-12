@@ -42,7 +42,7 @@ class fm_module_servers {
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
 								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
-								'class' => 'header-tiny'
+								'class' => 'header-tiny header-nosort'
 							);
 		}
 		
@@ -52,18 +52,25 @@ class fm_module_servers {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'servers'
 						);
 
-			$title_array[] = array('class' => 'header-tiny');
-			$title_array = array_merge($title_array, array('Hostname', 'Serial No', 'Method', 'Key', 'Server Type', 'Run-as',
-														'Config File', 'Server Root', 'Zones Directory'
-													));
+			$title_array[] = array('class' => 'header-tiny header-nosort');
+			$title_array = array_merge($title_array, array(array('title' => 'Hostname', 'rel' => 'server_name'),
+				array('title' => 'Serial No', 'rel' => 'server_serial_no'),
+				array('title' => 'Method', 'rel' => 'server_update_method'),
+				array('title' => 'Key', 'class' => 'header-nosort'),
+				array('title' => 'Server Type', 'class' => 'header-nosort'),
+				array('title' => 'Run-as', 'rel' => 'server_run_as_predefined'),
+				array('title' => 'Config File', 'rel' => 'server_config_file'),
+				array('title' => 'Server Root', 'rel' => 'server_root_dir'),
+				array('title' => 'Zones Directory', 'rel' => 'server_zones_dir'),
+				));
 			$title_array[] = array(
 								'title' => 'Actions',
-								'class' => 'header-actions'
+								'class' => 'header-actions header-nosort'
 							);
 
 			echo displayTableHeader($table_info, $title_array);

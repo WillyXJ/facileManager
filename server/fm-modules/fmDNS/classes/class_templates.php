@@ -35,14 +35,14 @@ class fm_module_templates {
 			$results = $fmdb->last_result;
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => $prefix
 						);
 
 			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			$title_array = $fm_dns_records->getHeader(strtoupper($prefix));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			

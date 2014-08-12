@@ -35,7 +35,7 @@ class fm_dns_zones {
 			$bulk_actions_list = array('Reload');
 			$checkbox[] = array(
 								'title' => '<input type="checkbox" onClick="toggle(this, \'domain_list[]\')" />',
-								'class' => 'header-tiny'
+								'class' => 'header-tiny header-nosort'
 							);
 		} else {
 			$checkbox = $bulk_actions_list = null;
@@ -50,13 +50,16 @@ class fm_dns_zones {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'domains'
 						);
 
-			$title_array = array(array('title' => 'ID', 'class' => 'header-small'), 'Domain', 'Type', 'Clones', 'Views');
-			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(array('title' => 'ID', 'class' => 'header-small'), 
+				array('title' => 'Domain', 'rel' => 'domain_name'), 
+				array('title' => 'Type', 'rel' => 'domain_type'),
+				'Clones', 'Views');
+			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 			
 			if (is_array($checkbox)) {
 				$title_array = array_merge($checkbox, $title_array);

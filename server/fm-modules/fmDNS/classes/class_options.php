@@ -35,13 +35,15 @@ class fm_module_options {
 			$results = $fmdb->last_result;
 
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'options'
 						);
 
-			$title_array = array('Option', 'Value', 'Comment');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array[] = array('title' => 'Option', 'rel' => 'cfg_name');
+			$title_array[] = array('title' => 'Value', 'rel' => 'cfg_data');
+			$title_array[] = array('title' => 'Comment', 'class' => 'header-nosort');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			

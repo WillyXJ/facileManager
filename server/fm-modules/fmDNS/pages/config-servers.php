@@ -70,7 +70,13 @@ printHeader();
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
+$sort_direction = null;
+$sort_field = 'server_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', array($sort_field, 'server_name'), 'server_', null, null, false, $sort_direction);
 $fm_module_servers->rows($result);
 
 printFooter();

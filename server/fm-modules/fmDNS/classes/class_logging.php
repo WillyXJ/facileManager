@@ -35,15 +35,15 @@ class fm_module_logging {
 			$results = $fmdb->last_result;
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'logging'
 						);
 
-			$title_array[] = 'Name';
-			if ($channel_category == 'category') $title_array[] = 'Channels';
-			$title_array[] = 'Comment';
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array[] = array('title' => 'Name', 'rel' => 'cfg_data');
+			if ($channel_category == 'category') $title_array[] = array('title' => 'Channels', 'class' => 'header-nosort');
+			$title_array[] = array('title' => 'Comment', 'class' => 'header-nosort');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			

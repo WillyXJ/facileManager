@@ -74,7 +74,13 @@ printHeader();
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $template_type, $template_type . '_name', $template_type . '_', "AND {$template_type}_template='yes'");
+$sort_direction = null;
+$sort_field = $template_type . '_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $template_type, array($sort_field, $template_type . '_name'), $template_type . '_', "AND {$template_type}_template='yes'", null, false, $sort_direction);
 $fm_module_templates->rows($result, $template_type);
 
 printFooter();

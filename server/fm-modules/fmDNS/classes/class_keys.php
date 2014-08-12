@@ -35,13 +35,17 @@ class fm_dns_keys {
 			$results = $fmdb->last_result;
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'keys'
 						);
 
-			$title_array = array('Key', 'Algorithm', 'Secret', 'View', 'Comment');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(array('title' => 'Key', 'rel' => 'key_name'), 
+				array('title' => 'Algorithm', 'class' => 'header-nosort'), 
+				array('title' => 'Secret', 'rel' => 'key_secret'), 
+				array('title' => 'View', 'class' => 'header-nosort'), 
+				array('title' => 'Comment', 'class' => 'header-nosort'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			

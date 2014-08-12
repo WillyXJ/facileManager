@@ -27,6 +27,7 @@
 * Server - [feature] Preview of single zone files is now possible. (Issue #130)
 * Server - [improvement] Redesigned zone configuration and added support for
            configuration options at the zone level.
+* Server - [improvement] All tables are now sortable. (Issue #127)
 
 1.2.5 (2014-05-??)
 ==================

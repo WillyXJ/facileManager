@@ -656,7 +656,6 @@ $(document).ready(function() {
 	/* Sortable table headers */
     $('.sortable th:not(".header-nosort")').click(function() {
     	var sort_by_field = $(this).attr('rel');
-    	var sort_direction = $(this).parent().parent().parent().attr('id');
     	
     	if (sort_by_field) {
     		if (window.location.href.indexOf('?') != -1) {
