@@ -1942,7 +1942,7 @@ function setOSIcon($server_os) {
  * @param string $server_os Server OS to return the icon for
  * @return string
  */
-function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null) {
+function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null) {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = getPageTitle();
@@ -1954,7 +1954,8 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	
 	if ($allowed_to_add) {
 		if ($name) $name = ' name="' . $name . '"';
-		echo '<a id="plus" href="#" title="Add New"' . $name . '>' . $__FM_CONFIG['icons']['add'] . '</a>';
+		if ($rel) $rel = ' rel="' . $rel . '"';
+		echo '<a id="plus" href="#" title="Add New"' . $name . $rel . '>' . $__FM_CONFIG['icons']['add'] . '</a>';
 	}
 	
 	echo '</h2>' . "\n";

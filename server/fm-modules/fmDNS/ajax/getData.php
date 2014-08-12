@@ -125,7 +125,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {
 		$id = sanitize($_POST['item_id']);
-		$view_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
+		$item_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
+		$item_id = isset($_POST['domain_id']) ? sanitize($_POST['domain_id']) : $item_id;
 		$add_new = false;
 	} else returnError();
 	
@@ -184,7 +185,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		if ($_POST['item_type'] == 'logging') {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', $_POST['item_sub_type']);
 		} else {
-			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $view_id);
+			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $item_id);
 		}
 	}
 	

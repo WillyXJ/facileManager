@@ -278,6 +278,8 @@ FORM;
 	function getACLList($server_serial_no = 0, $include = 'acl') {
 		global $__FM_CONFIG, $fmdb;
 		
+		if ($include == 'none') return array();
+		
 		$acl_list = null;
 		$serial_sql = $server_serial_no ? "AND server_serial_no IN (0,$server_serial_no)" : "AND server_serial_no=0";
 		
@@ -304,9 +306,9 @@ FORM;
 	/**
 	 * Builds the ACL listing JSON
 	 */
-	function buildACLJSON($saved_acls, $server_serial_no = 0) {
-		$available_acls = $this->getACLList($server_serial_no, 'all');
-		$temp_acls = null;
+	function buildACLJSON($saved_acls, $server_serial_no = 0, $include = 'all') {
+		$available_acls = $this->getACLList($server_serial_no, $include);
+		$temp_acls = array();
 		foreach ($available_acls as $temp_acl_array) {
 			$temp_acls[] = $temp_acl_array['id'];
 		}
@@ -332,7 +334,10 @@ FORM;
 		$acls = explode(',', $address_match_list);
 		$formatted_acls = null;
 		foreach ($acls as $address) {
-			if (strpos($address, 'acl_') === false) $formatted_acls[] = $address;
+			if (strpos($address, 'acl_') === false) {
+				$formatted_acls[] = $address;
+				continue;
+			}
 			
 			$acl_id = str_replace('acl_', '', $address);
 			$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');

@@ -235,7 +235,7 @@ class fm_module_buildconf {
 			/** Build global configs */
 			$config .= "options {\n";
 			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=0 AND cfg_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0 AND server_serial_no=0 AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
@@ -245,7 +245,7 @@ class fm_module_buildconf {
 			} else $global_config = array();
 
 			/** Override with server-specific configs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
@@ -338,7 +338,7 @@ class fm_module_buildconf {
 					$config .= 'view "' . $view_result[$i]->view_name . "\" {\n";
 
 					/** Get cooresponding config records */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=0 AND cfg_view='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=0 AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -348,7 +348,7 @@ class fm_module_buildconf {
 					} else $view_config = array();
 
 					/** Override with server-specific configs */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=$server_serial_no AND cfg_view='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=$server_serial_no AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$server_config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -554,7 +554,7 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		include(ABSPATH . 'fm-includes/version.php');
 		
@@ -605,23 +605,27 @@ class fm_module_buildconf {
 					switch($zone_result[$i]->domain_type) {
 						case 'master':
 							$zones .= "\tfile \"$server_zones_dir/master/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $zone_result[$i]->domain_check_names ? "\tcheck-names " . $zone_result[$i]->domain_check_names . ";\n" : null;
-							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
+//							$zones .= $zone_result[$i]->domain_check_names ? "\tcheck-names " . $zone_result[$i]->domain_check_names . ";\n" : null;
+//							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
 							/** Build zone file */
 							$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 							break;
 						case 'slave':
-							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
 							$zones .= "\tfile \"$server_zones_dir/slave/db." . $domain_name . "$file_ext\";\n";
+							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
+							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
 							$zones .= $zone_result[$i]->domain_multi_masters ? "\tmulti-master " . $zone_result[$i]->domain_multi_masters . ";\n" : null;
 							break;
 						case 'stub':
-							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
 							$zones .= "\tfile \"$server_zones_dir/stub/db." . $domain_name . "$file_ext\";\n";
+							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
+							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$zones .= "\tforwarders { " . $zone_result[$i]->domain_forward_servers . "};\n";
+							$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
+							$zones .= "\tforwarders { " . trim($fm_dns_acls->parseACL($domain_forward_servers), '; ') . "; };\n";
 					}
 					$zones .= "};\n";
 	
@@ -1327,6 +1331,75 @@ HTML;
 	}
 
 
+	/**
+	 * Formats the server key statements
+	 *
+	 * @since 1.3
+	 * @package fmDNS
+	 *
+	 * @param integer $domain_id The domain_id of the zone
+	 * @param integer $server_serial_no The server serial number
+	 * @return string
+	 */
+	function getZoneOptions($domain_id, $server_serial_no) {
+		global $fmdb, $__FM_CONFIG;
+		
+		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		$config = null;
+		
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id='$domain_id' AND server_serial_no=0 AND cfg_status='active'");
+		if ($fmdb->num_rows) {
+			$config_result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_config_count; $i++) {
+				$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+			}
+		} else $global_config = array();
+
+		/** Override with server-specific configs */
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id='$domain_id' AND server_serial_no=$server_serial_no AND cfg_status='active'");
+		if ($fmdb->num_rows) {
+			$server_config_result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($j=0; $j < $global_config_count; $j++) {
+				$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
+			}
+		} else $server_config = array();
+
+		/** Merge arrays */
+		$config_array = array_merge($global_config, $server_config);
+		
+		foreach ($config_array as $cfg_name => $cfg_data) {
+			list($cfg_info, $cfg_comment) = $cfg_data;
+
+			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+			$fmdb->get_results($query);
+			if (!$fmdb->num_rows) $def_multiple_values = 'no';
+			else {
+				$result = $fmdb->last_result[0];
+				$def_multiple_values = $result->def_multiple_values;
+			}
+			if ($cfg_comment) {
+				$comment = wordwrap($cfg_comment, 50, "\n");
+				$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+				unset($comment);
+			}
+			$config .= "\t" . $cfg_name . ' ';
+			if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
+			
+			/** Parse address_match_element configs */
+			$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
+
+			$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+			if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+			$config .= ";\n";
+
+			unset($cfg_info);
+			if ($cfg_comment) $config .= "\n";
+		}
+
+		return $config;
+	}
 }
 
 if (!isset($fm_module_buildconf))

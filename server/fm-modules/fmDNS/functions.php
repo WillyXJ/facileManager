@@ -413,7 +413,7 @@ function verifyAndCleanAddresses($data, $allow_alpha = false) {
 	$data = preg_replace('/\s\s+/', ' ', $data);
 	
 	/** Check for bad chars */
-	if (preg_match("([-_\!@#\$&\*\+\=\|:,'\"%^\(\)" . $alpha . "])", $data)) return false;
+	if (preg_match("([-\!@#\$&\*\+\=\|:'\"%^\(\)" . $alpha . "])", $data)) return false;
 	
 	/** Swap delimiters for ; */
 	$data = str_replace(array("\n", ';', ' '), ';', $data);

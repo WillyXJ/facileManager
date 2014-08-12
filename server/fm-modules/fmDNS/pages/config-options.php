@@ -28,7 +28,7 @@ if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) u
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
 
 $option_type = $display_option_type = $display_option_type_sql = (isset($_GET['option_type'])) ? sanitize(ucfirst($_GET['option_type'])) : 'Global';
-$display_option_type_sql = "global' AND cfg_view='";
+$display_option_type_sql = "global";
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $response = isset($response) ? $response : null;
 
@@ -42,17 +42,35 @@ if (array_key_exists('view_id', $_GET)) {
 	$view_info = $fmdb->last_result;
 	
 	$display_option_type = $view_info[0]->view_name;
-	$display_option_type_sql .= "$view_id";
+	$display_option_type_sql .= "' AND view_id='$view_id";
+	
+	$name = 'view_id';
+	$rel = $view_id;
+/* Configure options for a zone */
+} elseif (array_key_exists('domain_id', $_GET)) {
+	$domain_id = (isset($_GET['domain_id'])) ? sanitize($_GET['domain_id']) : null;
+	if (!$domain_id) header('Location: ' . $GLOBALS['basename']);
+	
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
+	if (!$fmdb->num_rows) header('Location: zones.php');
+	$domain_info = $fmdb->last_result;
+	
+	$display_option_type = $domain_info[0]->domain_name;
+	$display_option_type_sql .= "' AND domain_id='$domain_id";
+	
+	$name = 'domain_id';
+	$rel = $domain_id;
 } else {
-	$display_option_type_sql .= "0";
-	$view_id = null;
+	$view_id = $domain_id = $name = $rel = null;
+	$display_option_type_sql .= "' AND view_id='0' AND domain_id='0";
 }
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$view_id_uri = (array_key_exists('view_id', $_GET)) ? '?view_id=' . $view_id : null;
+	$type_id_uri = (array_key_exists('view_id', $_GET)) ? '?view_id=' . $view_id : null;
+	$type_id_uri = (array_key_exists('domain_id', $_GET)) ? '?domain_id=' . $domain_id : $type_id_uri;
 	if (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) {
-		$server_serial_no_uri = ($view_id_uri) ? '&' : '?';
+		$server_serial_no_uri = ($type_id_uri) ? '&' : '?';
 		$server_serial_no_uri .= 'server_serial_no=' . $server_serial_no;
 	} else $server_serial_no_uri = null;
 	switch ($action) {
@@ -64,7 +82,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $view_id_uri . $server_serial_no_uri);
+				header('Location: ' . $GLOBALS['basename'] . $type_id_uri . $server_serial_no_uri);
 			}
 		}
 		break;
@@ -76,7 +94,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $view_id_uri . $server_serial_no_uri);
+				header('Location: ' . $GLOBALS['basename'] . $type_id_uri . $server_serial_no_uri);
 			}
 		}
 		if (isset($_GET['status'])) {
@@ -86,7 +104,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
 				addLogEntry("Set option '$tmp_name' status to " . $_GET['status'] . '.');
-				header('Location: ' . $GLOBALS['basename'] . $view_id_uri . $server_serial_no_uri);
+				header('Location: ' . $GLOBALS['basename'] . $type_id_uri . $server_serial_no_uri);
 			}
 		}
 	}
@@ -97,7 +115,7 @@ printHeader();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $view_id);
+echo printPageHeader($response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
 echo "$avail_servers\n";
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no=$server_serial_no");

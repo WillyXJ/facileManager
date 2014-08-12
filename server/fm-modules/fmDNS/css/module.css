@@ -122,6 +122,10 @@ p.soa_import span {
 	white-space: normal;
 }
 
+.form-table.zone-form input[type=text] {
+	width: 24em;
+}
+
 .soa-template-dropdown strong {
 	margin-right: 5px;
 	position: relative;

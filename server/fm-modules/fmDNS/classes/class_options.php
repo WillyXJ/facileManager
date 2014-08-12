@@ -64,7 +64,7 @@ class fm_module_options {
 		if (!is_array($post)) return $post;
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_view='{$post['cfg_view']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
 		if ($fmdb->num_rows) return false;
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
@@ -94,9 +94,12 @@ class fm_module_options {
 
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
-		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $this->parseACL($post['cfg_data']) : $post['cfg_data'];
-		addLogEntry("Added option:\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
+		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
+		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : null;
+
+		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		addLogEntry("Added option:\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
 
@@ -105,6 +108,7 @@ class fm_module_options {
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
+//		print_r($post);exit;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -115,7 +119,7 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_view='{$post['cfg_view']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->cfg_id != $post['cfg_id']) return false;
@@ -146,9 +150,12 @@ class fm_module_options {
 		if (!$fmdb->rows_affected) return true;
 
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
-		$tmp_view_name = $post['cfg_view'] ? getNameFromID($post['cfg_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $this->parseACL($post['cfg_data']) : $post['cfg_data'];
-		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: $tmp_view_name\nComment: {$post['cfg_comment']}");
+		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
+		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : null;
+
+		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
 	
@@ -173,7 +180,7 @@ class fm_module_options {
 
 
 	function displayRow($row) {
-		global $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		if (!class_exists('fm_dns_acls')) {
 			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
@@ -197,7 +204,9 @@ class fm_module_options {
 		}
 		
 		$comments = nl2br($row->cfg_comment);
-		$cfg_data = strpos($row->cfg_data, 'acl_') !== false ? $fm_dns_acls->parseACL($row->cfg_data) : $row->cfg_data;
+		
+		/** Parse address_match_element configs */
+		$cfg_data = $this->parseDefType($row->cfg_name, $row->cfg_data);
 
 		echo <<<HTML
 		<tr id="$row->cfg_id"$disabled_class>
@@ -212,7 +221,7 @@ HTML;
 	/**
 	 * Displays the form to add new option
 	 */
-	function printForm($data = '', $action = 'add', $cfg_type = 'global', $cfg_view = null) {
+	function printForm($data = '', $action = 'add', $cfg_type = 'global', $cfg_type_id = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$cfg_id = 0;
@@ -222,11 +231,16 @@ HTML;
 		
 		switch(strtolower($cfg_type)) {
 			case 'global':
+				if (isset($_POST['item_sub_type'])) {
+					$cfg_id_name = sanitize($_POST['item_sub_type']);
+				} else {
+					$cfg_id_name = isset($_POST['view_id']) ? 'view_id' : 'domain_id';
+				}
 				$data_holder = null;
 				$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
 				$server_serial_no_field = '<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />';
-				$request_uri = $cfg_view ? 'view_id=' . $cfg_view : null;
-				$request_uri .= $server_serial_no && $cfg_view ? '&' : null;
+				$request_uri = $cfg_type_id ? $cfg_id_name . '=' . $cfg_type_id : null;
+				$request_uri .= $server_serial_no && $cfg_type_id ? '&' : null;
 				$request_uri .= $server_serial_no ? 'server_serial_no=' . $server_serial_no : null;
 				$request_uri = $request_uri ? '?' . $request_uri : null;
 				$disabled = $action == 'add' ? null : 'disabled';
@@ -254,7 +268,6 @@ HTML;
 		
 		$cfg_isparent = buildSelect('cfg_isparent', 'cfg_isparent', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_isparent'), $cfg_isparent, 1);
 		$cfg_parent = buildSelect('cfg_parent', 'cfg_parent', $this->availableParents($cfg_id, $cfg_type), $cfg_parent);
-		$cfg_view = buildSelect('cfg_view', 'cfg_view', $this->availableViews(), $cfg_view);
 		$avail_options_array = $this->availableOptions($action, $server_serial_no);
 		$cfg_avail_options = buildSelect('cfg_name', 'cfg_name', $avail_options_array, $cfg_name, 1, $disabled, false, 'displayOptionPlaceholder()');
 
@@ -287,12 +300,9 @@ HTML;
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="cfg_id" value="$cfg_id" />
 			<input type="hidden" name="cfg_type" value="$cfg_type" />
+			<input type="hidden" name="$cfg_id_name" value="$cfg_type_id" />
 			$server_serial_no_field
 			<table class="form-table">
-				<tr>
-					<th width="33%" scope="row"><label for="cfg_view">View</label></th>
-					<td width="67%">$cfg_view</td>
-				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="cfg_name">Option Name</label></th>
 					<td width="67%">$cfg_avail_options</td>
@@ -366,29 +376,33 @@ FORM;
 		
 		if ($action == 'add') {
 			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) {
-				$cfg_view_sql = 'cfg_view = ' . $_POST['item_id'];
-//				$cfg_view_sql = 'cfg_view IN (0,' . $_POST['item_id'] . ')';
-//				if ($server_serial_no) $cfg_view_sql = 'cfg_view=0';
+				$cfg_id_sql = $_POST['item_sub_type'] . ' = ' . $_POST['item_id'];
 			} else {
-				$cfg_view_sql = 'cfg_view=0';
+				$cfg_id_sql = 'view_id=0 AND domain_id=0';
 			}
-/**
-			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options' AND def_option NOT IN (
-				SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='global' AND cfg_status IN (
-					'active', 'disabled'
+			
+			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
+				AND def_option NOT IN (
+					SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='global' AND cfg_status IN (
+						'active', 'disabled'
 				) AND account_id='{$_SESSION['user']['account_id']}' AND (
-					(server_serial_no=$server_serial_no AND cfg_view=0) OR (server_serial_no=0 AND $cfg_view_sql)
+					(server_serial_no=$server_serial_no AND $cfg_id_sql)
 				)
 			)";
-*/
-			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options' AND def_option NOT IN (
-				SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='global' AND cfg_status IN (
-					'active', 'disabled'
-				) AND account_id='{$_SESSION['user']['account_id']}' AND (
-					(server_serial_no=$server_serial_no AND $cfg_view_sql)
-				)
-			)";
-			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) $query .= " AND def_view_support='yes'";
+			$query .= " AND def_clause_support LIKE '%";
+			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) {
+				switch ($_POST['item_sub_type']) {
+					case 'view_id':
+						$query .= 'V';
+						break;
+					case 'domain_id':
+						$query .= 'Z';
+						break;
+				}
+			} else {
+				$query .= 'O';
+			}
+			$query .= "%'";
 		} else {
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'";
 		}
@@ -466,7 +480,29 @@ FORM;
 		return $post;
 	}
 	
-	
+
+	/**
+	 * Parses for address_match_element and formats
+	 *
+	 * @since 1.3
+	 * @package facileManager
+	 *
+	 * @param string $cfg_name Config name to query
+	 * @param string $cfg_data Data to parse/format
+	 * @return string Return formated data
+	 */
+	function parseDefType($cfg_name, $cfg_data) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		$query = "SELECT def_type FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$result = $fmdb->last_result;
+			if (isset($result[0]->def_type)) $def_type = $result[0]->def_type;
+		}
+		
+		return (strpos($cfg_data, 'acl_') !== false || strpos($def_type, 'address_match_element') !== false) ? $fm_dns_acls->parseACL($cfg_data) : $cfg_data;
+	}
 }
 
 if (!isset($fm_module_options))

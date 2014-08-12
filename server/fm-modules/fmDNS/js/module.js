@@ -185,6 +185,19 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#manage_item_contents").delegate('#domain_type', 'change', function(e) {
+		if ($(this).val() == 'forward') {
+			$('#define_forwarders').show('slow');
+			$('#define_masters').slideUp();
+		} else if ($(this).val() == 'slave' || $(this).val() == 'stub') {
+			$('#define_forwarders').slideUp();
+			$('#define_masters').show('slow');
+		} else {
+			$('#define_forwarders').slideUp();
+			$('#define_masters').slideUp();
+		}
+	});
+	
 });
 
 

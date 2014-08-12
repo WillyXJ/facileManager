@@ -103,7 +103,7 @@ $(document).ready(function() {
         var $this 		= $(this);
         item_type		= $('#table_edits').attr('name');
         item_sub_type	= $this.attr('name');
-        item_id			= $('#plus').attr('name');
+        item_id			= $this.attr('rel');
 		var server_serial_no	= getUrlVars()["server_serial_no"];
 
 		$('#manage_item').fadeIn(200);
@@ -147,6 +147,7 @@ $(document).ready(function() {
         item_sub_type	= $this.attr('name');
         var server_serial_no	= getUrlVars()["server_serial_no"];
         var view_id		= getUrlVars()["view_id"];
+        var domain_id		= getUrlVars()["domain_id"];
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
@@ -159,6 +160,7 @@ $(document).ready(function() {
 			item_sub_type: item_sub_type,
 			server_serial_no: server_serial_no,
 			view_id: view_id,
+			domain_id: domain_id,
 			is_ajax: 1
 		};
 

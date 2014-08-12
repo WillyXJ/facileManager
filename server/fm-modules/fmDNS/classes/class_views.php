@@ -142,10 +142,10 @@ class fm_dns_views {
 		}
 		
 		/** Are there any corresponding configs to delete? */
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_view=' . $id);
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND view_id=' . $id);
 		if ($fmdb->num_rows) {
 			/** Delete corresponding configs */
-			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_view') === false) {
+			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'view_id') === false) {
 				return 'The corresponding configs could not be deleted.';
 			}
 		}
