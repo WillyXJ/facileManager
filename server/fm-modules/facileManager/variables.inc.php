@@ -62,7 +62,7 @@ $__FM_CONFIG['icons']['delete']			= '<img src="fm-modules/' . $fm_name . '/image
 $__FM_CONFIG['icons']['enable']			= '<img src="fm-modules/' . $fm_name . '/images/enable24.png" border="0" alt="Enable" title="Enable" width="20" />';
 $__FM_CONFIG['icons']['disable']		= '<img src="fm-modules/' . $fm_name . '/images/disable24.png" border="0" alt="Disable" title="Disable" width="20" />';
 $__FM_CONFIG['icons']['popout']			= '<img src="fm-modules/' . $fm_name . '/images/popout24.png" border="0" alt="Popout" title="Popout" width="20" class="popout" />';
-$__FM_CONFIG['icons']['close']			= '<input type="image" src="fm-modules/' . $fm_name . '/images/error24.png" title="Close" class="close" />';
+$__FM_CONFIG['icons']['close']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" title="Close" class="close" />';
 $__FM_CONFIG['icons']['pwd_change']		= '<img src="fm-modules/' . $fm_name . '/images/profile24.png" border="0" alt="Edit Profile" title="Edit Profile" width="20" />';
 $__FM_CONFIG['icons']['pwd_reset']		= '<img src="fm-modules/' . $fm_name . '/images/password-change24.png" border="0" alt="Send Password Reset Email" title="Send Password Reset Email" height="20" />';
 $__FM_CONFIG['icons']['account']		= '<img src="fm-modules/' . $fm_name . '/images/account24.png" border="0" alt="Account Settings" title="Account Settings" width="20" />';
