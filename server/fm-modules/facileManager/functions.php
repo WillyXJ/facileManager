@@ -596,7 +596,6 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 	}
 	
 	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
-	file_put_contents('/tmp/php.log', "$disp_query\n", FILE_APPEND);
 	return $fmdb->query($disp_query);
 }
 
