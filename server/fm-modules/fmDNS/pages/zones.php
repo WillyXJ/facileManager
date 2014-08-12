@@ -49,7 +49,10 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			if (!is_numeric($insert_id)) {
 				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
 				$form_data = $_POST;
-			} else header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=SOA');
+			} else {
+				$redirect_record_type = (isset($_POST['soa_id']) && $_POST['soa_id']) ? 'NS' : 'SOA';
+				header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=' . $redirect_record_type);
+			}
 		}
 		break;
 	case 'edit':

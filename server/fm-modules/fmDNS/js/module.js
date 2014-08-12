@@ -189,12 +189,27 @@ $(document).ready(function() {
 		if ($(this).val() == 'forward') {
 			$('#define_forwarders').show('slow');
 			$('#define_masters').slideUp();
+			$('#define_soa').slideUp();
 		} else if ($(this).val() == 'slave' || $(this).val() == 'stub') {
 			$('#define_forwarders').slideUp();
 			$('#define_masters').show('slow');
+			$('#define_soa').slideUp();
+		} else if ($(this).val() == 'master') {
+			$('#define_forwarders').slideUp();
+			$('#define_masters').slideUp();
+			$('#define_soa').show('slow');
 		} else {
 			$('#define_forwarders').slideUp();
 			$('#define_masters').slideUp();
+			$('#define_soa').slideUp();
+		}
+	});
+	
+	$("#manage_item_contents").delegate('#domain_clone_domain_id', 'change', function(e) {
+		if ($(this).val() == 0) {
+			$('#define_soa').show('slow');
+		} else {
+			$('#define_soa').slideUp();
 		}
 	});
 	

@@ -154,7 +154,12 @@ class fm_dns_zones {
 					$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
 					if ($key == 'domain_view') $data = $log_message_views;
 					if ($key == 'domain_name_servers') $data = $log_message_name_servers;
-					$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+					if ($key == 'soa_id') {
+						$soa_name = $data ? getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name') : 'Custom';
+						$log_message .= formatLogKeyData('_id', $key, $soa_name);
+					} else {
+						$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+					}
 				}
 			}
 			$sql_fields .= 'account_id)';
@@ -547,6 +552,16 @@ HTML;
 			$available_acls = $fm_dns_acls->buildACLJSON($domain_master_servers, 0, 'none');
 		}
 		
+		if ($action == 'create') {
+			$soa_show = 'block';
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			$soa_templates = '<tr id="define_soa">
+					<th>SOA</th>
+					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates()) . '</td></tr>';
+		} else {
+			$soa_show = 'none';
+			$soa_templates = null;
+		}
 		$additional_config_link = ($action == 'create' || $domain_type != 'master') ? null : '<tr><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
 		
 		$popup_header = buildPopup('header', $ucaction . ' Zone');
@@ -592,6 +607,7 @@ HTML;
 					<th><label for="domain_name_servers">DNS Servers</label></th>
 					<td>$name_servers</td>
 				</tr>
+				$soa_templates
 				$additional_config_link
 			</table>
 		$popup_footer
