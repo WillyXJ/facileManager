@@ -537,7 +537,7 @@ HTML;
 		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
 
 		$views = buildSelect('domain_view', 'domain_view', $this->availableViews(), $domain_view, 4, null, true);
-		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
+		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map, 1, 'disabled');
 		$domain_types = buildSelect('domain_type', 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
 		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 5, null, true);
@@ -799,7 +799,7 @@ HTML;
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						return $response . '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+						return $response . '<p class="error">Failed: SSH key is not <a href="' . getMenuURL('Settings') . '">defined</a>.</p>'. "\n";
 					}
 					
 					$temp_ssh_key = '/tmp/fm_id_rsa';

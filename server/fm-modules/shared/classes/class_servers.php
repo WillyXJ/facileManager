@@ -103,7 +103,7 @@ class fm_shared_module_servers {
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						$response[] = ' --> Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.';
+						$response[] = ' --> Failed: SSH key is not <a href="' . getMenuURL('General') . '">defined</a>.';
 						break;
 					}
 					

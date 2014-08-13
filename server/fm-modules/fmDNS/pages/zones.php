@@ -128,7 +128,7 @@ printHeader();
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
-if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to manage one or more servers.</p>';
+if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . getMenuURL('Servers') . '">Click here</a> to manage one or more servers.</p>';
 
 echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	

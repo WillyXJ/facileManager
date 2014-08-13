@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}functi
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
   `def_multiple_values` enum('yes','no') NOT NULL DEFAULT 'no',
-  `def_clause_support` enum('yes','no') NOT NULL DEFAULT 'no',
+  `def_clause_support` varchar(10) NOT NULL DEFAULT 'O',
   `def_dropdown` enum('yes','no') NOT NULL DEFAULT 'no',
   UNIQUE KEY `def_option` (`def_option`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;

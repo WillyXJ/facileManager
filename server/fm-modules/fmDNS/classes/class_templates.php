@@ -29,7 +29,7 @@ class fm_module_templates {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="templates">There are no templates.</p>';
+			echo '<p id="table_edits" class="noresult" name="' . $prefix . '">There are no templates.</p>';
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;

@@ -33,10 +33,10 @@ function moduleFunctionalCheck() {
 	$checks = array();
 	
 	/** Count active database servers */
-//	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active database servers defined.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to define one or more to manage.</p>';
+//	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active database servers defined.  <a href="' . getMenuURL('Servers') . '">Click here</a> to define one or more to manage.</p>';
 	
 	/** Count groups */
-//	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : '<p>You currently have no database server groups defined.  <a href="' . $__FM_CONFIG['menu']['Config']['Server Groups'] . '">Click here</a> to define one or more.</p>';
+//	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : '<p>You currently have no database server groups defined.  <a href="' . getMenuURL('Server Groups'). '">Click here</a> to define one or more.</p>';
 	
 	foreach ($checks as $val) {
 		$html_checks .= $val;
@@ -99,7 +99,7 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Configure Firewalls</a>
 		<div id="fmfw_config_servers">
-			<p>Firewall servers can be managed from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> menu item. From 
+			<p>Firewall servers can be managed from the <a href="__menu{Firewalls}">Firewalls</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
 			firewalls depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
@@ -111,14 +111,14 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Firewall Policies</a>
 		<div id="fmfw_config_policies">
-			<p>Policy Rules are managed by clicking on the firewall server name from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> 
+			<p>Policy Rules are managed by clicking on the firewall server name from the <a href="__menu{Firewalls}">Firewalls</a> 
 			menu item. From there, you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete 
 			({$__FM_CONFIG['icons']['delete']}), and reorder rules (drag and drop the row). When adding or editing a rule, you can select the 
 			firewall interface the rule applies to, the direction, source, destination, services, time restriction (iptables only), action, and
 			any options you want for the rule.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete firewall policies.</i></p>
 			<p>When the rules are defined and ready for deployment to the firewall server, you can preview ({$__FM_CONFIG['icons']['preview']}) the config
-			before building ({$__FM_CONFIG['icons']['build']}) it from the <a href="{$__FM_CONFIG['module']['menu']['Firewalls']['URL']}">Firewalls</a> 
+			before building ({$__FM_CONFIG['icons']['build']}) it from the <a href="__menu{Firewalls}">Firewalls</a> 
 			menu item.</p>
 			<p><i>The 'Build Server Configs' or 'Super Admin' permission is required to build and deploy firewall policies.</i></p>
 			<br />
@@ -128,10 +128,10 @@ function buildModuleHelpFile() {
 		<a class="list_title">Objects</a>
 		<div id="fmfw_objects">
 			<p>Much like an appliance firewall, objects need to be defined before they can be used in policies. All objects 
-			(<a href="{$__FM_CONFIG['module']['menu']['Objects']['Hosts']}">Hosts</a> and <a href="{$__FM_CONFIG['module']['menu']['Objects']['Networks']}">Networks</a>)
-			are managed from the <a href="{$__FM_CONFIG['module']['menu']['Objects']['URL']}">Objects</a> menu item. Give the object a name and
+			(<a href="__menu{Hosts}">Hosts</a> and <a href="__menu{Networks}">Networks</a>)
+			are managed from the <a href="__menu{Objects}">Objects</a> menu item. Give the object a name and
 			specify the host or network address.</p>
-			<p><a href="{$__FM_CONFIG['module']['menu']['Objects']['URL']}">Object Groups</a> allow you to group object types together for easy policy 
+			<p><a href="__menu{Objects}">Object Groups</a> allow you to group object types together for easy policy 
 			creation. For example, you might want all of your web servers to be grouped together for a web server policy rule.</a>
 			<p><i>The 'Object Management' or 'Super Admin' permission is required to add, edit, and delete services and service groups.</i></p>
 			<br />
@@ -141,11 +141,11 @@ function buildModuleHelpFile() {
 		<a class="list_title">Services</a>
 		<div id="fmfw_services">
 			<p>Much like an appliance firewall, services need to be defined before they can be used in policies. All services 
-			(<a href="{$__FM_CONFIG['module']['menu']['Services']['ICMP']}">ICMP</a>, <a href="{$__FM_CONFIG['module']['menu']['Services']['TCP']}">TCP</a>,
-			<a href="{$__FM_CONFIG['module']['menu']['Services']['UDP']}">UDP</a>) are managed from the 
-			<a href="{$__FM_CONFIG['module']['menu']['Services']['URL']}">Services</a> menu item. Give the service a name, specify the ports (or 
+			(<a href="__menu{ICMP}">ICMP</a>, <a href="__menu{TCP}">TCP</a>,
+			<a href="__menu{UDP}">UDP</a>) are managed from the 
+			<a href="__menu{Services}">Services</a> menu item. Give the service a name, specify the ports (or 
 			types/codes for ICMP) and any TCP flags.</p>
-			<p><a href="{$__FM_CONFIG['module']['menu']['Services']['URL']}">Service Groups</a> allow you to group services together for easy policy 
+			<p><a href="__menu{Services}">Service Groups</a> allow you to group services together for easy policy 
 			creation. For example, you might want http and https to be grouped together for a web server.</a>
 			<p><i>The 'Service Management' or 'Super Admin' permission is required to add, edit, and delete services and service groups.</i></p>
 			<br />
@@ -154,7 +154,7 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Time Restrictions</a>
 		<div id="fmfw_time">
-			<p>Time restrictions can be defined from the <a href="{$__FM_CONFIG['module']['menu']['Time']['URL']}">Time</a> menu item. From there you can 
+			<p>Time restrictions can be defined from the <a href="__menu{Time}">Time</a> menu item. From there you can 
 			specify the start date and time, end date and time, and the weekdays of the restriction. Only iptables firewall type supports the use of time
 			restrictions in its policies.</p>
 			<p><i>The 'Time Management' or 'Super Admin' permission is required to add, edit, and delete time restrictions.</i></p>

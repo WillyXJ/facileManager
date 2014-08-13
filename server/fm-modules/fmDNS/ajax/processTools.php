@@ -53,11 +53,19 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 					/** All servers */
 					if (in_array(0, $_POST['domain_name_servers'])) {
 						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
-						$result = $fmdb->last_result;
-						for ($i=0; $i<$fmdb->num_rows; $i++) {
-							$all_servers[] = $result[$i]->server_id;
+						if ($fmdb->num_rows) {
+							$result = $fmdb->last_result;
+							for ($i=0; $i<$fmdb->num_rows; $i++) {
+								$all_servers[] = $result[$i]->server_id;
+							}
+							$_POST['domain_name_servers'] = $all_servers;
+						} else {
+							global $menu;
+							
+							$response = buildPopup('header', 'Error');
+							$response .= '<p>You currently have no active name servers defined.  <a href="' . $menu[getParentMenuKey('Servers')][4] . '">Click here</a> to define one or more to manage.</p>';
+							break;
 						}
-						$_POST['domain_name_servers'] = $all_servers;
 					}
 					
 					foreach ($_POST['domain_name_servers'] as $server_id) {

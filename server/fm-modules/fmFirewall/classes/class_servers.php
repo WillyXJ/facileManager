@@ -415,7 +415,7 @@ FORM;
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return $response . '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+					return $response . '<p class="error">Failed: SSH key is not <a href="' . getMenuURL('General') . '">defined</a>.</p>'. "\n";
 				}
 				
 				$temp_ssh_key = '/tmp/fm_id_rsa';

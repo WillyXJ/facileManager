@@ -518,7 +518,7 @@ $(document).ready(function() {
 	
 	$("#help_topbar img.popout").click(function() {
 		$("#topheadpartright .help_link").click();
-		window.open('help','1356124444538','width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0');
+		window.open('help.php','1356124444538','width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0');
 		return false;
 	});
 	

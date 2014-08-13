@@ -41,10 +41,10 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 
 			echo <<<HTML
 					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
-					<td width="67%"><input type="hidden" name="cfg_data" id="address_match_element" value="$cfg_data" /><br />
+					<td width="67%"><input type="hidden" name="cfg_data" class="address_match_element" value="$cfg_data" /><br />
 					{$result[0]->def_type}</td>
 					<script>
-					$("#address_match_element").select2({
+					$(".address_match_element").select2({
 						createSearchChoice:function(term, data) { 
 							if ($(data).filter(function() { 
 								return this.text.localeCompare(term)===0; 
@@ -112,9 +112,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'soa' => 'manage_zones'
 				);
-$allowed_capabilities = array_unique($checks_array);
 
-if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
 	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
 		returnUnAuth();
 		exit;

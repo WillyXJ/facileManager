@@ -41,17 +41,6 @@ $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'
 
 if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
-/** Styled break in menu listing */
-$__FM_CONFIG['menu']['Break'][]				= null;
-
-/** Admin Menu Options */
-$__FM_CONFIG['menu']['Admin']['URL']		= 'admin-tools.php';
-$__FM_CONFIG['menu']['Admin']['Tools']		= 'admin-tools.php';
-$__FM_CONFIG['menu']['Admin']['Users']		= 'admin-users.php';
-$__FM_CONFIG['menu']['Admin']['Logs']		= 'admin-logs.php';
-$__FM_CONFIG['menu']['Settings']['URL']		= 'admin-settings.php';
-$__FM_CONFIG['menu']['Modules']['URL']		= 'admin-modules.php';
-
 /** Images */
 $__FM_CONFIG['icons']['fail']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Failed" title="Failed" />';
 $__FM_CONFIG['icons']['caution']		= '<img src="fm-modules/' . $fm_name . '/images/orangequestion.jpg" border="0" alt="Caution" title="Caution" width="20" />';

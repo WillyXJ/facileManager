@@ -992,33 +992,33 @@ function buildHelpFile() {
 			<p>Modules are what gives $fm_name purpose. They can be installed, activated, upgraded, deactivated, and uninstalled.</p>
 			
 			<p><b>Install</b><br />
-			Just extract the module into the 'fm-modules' directory on the server host (if not already present), go to Admin &rarr; 
-			<a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, and then click the 'Install' button next to the module 
+			Just extract the module into the 'fm-modules' directory on the server host (if not already present), go to 
+			<a href="__menu{Modules}">Modules</a>, and then click the 'Install' button next to the module 
 			you wish to install.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Activate</b><br />
 			In order for the module to be usable, it needs to be active in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Activate' link next 
+			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Activate' link next 
 			to the module you wish to activate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Upgrade</b><br />
 			Anytime module files are individually updated in the 'fm-modules' directory on the server host apart from updating $fm_name 
 			as a whole, they will need to be upgraded to ensure full compatibility and functionality.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Upgrade' button next 
+			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Upgrade' button next 
 			to the module you wish to upgrade. This will upgrade the database with any required changed.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Deactivate</b><br />
 			If you no longer want a module to be usable, it can be deactived in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Deactivate' link next 
+			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Deactivate' link next 
 			to the module you wish to deactivate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Uninstall</b><br />
 			If you no longer want a module to be installed, it can be uninstalled via the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, ensure the module is already 
+			<p>Go to <a href="__menu{Modules}">Modules</a>, ensure the module is already 
 			deactivated, and then click the 'Uninstall' button next to the module you wish to remove. This will remove all associated 
 			entries and tables from the database.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
@@ -1030,7 +1030,7 @@ function buildHelpFile() {
 			<p>$fm_name incorporates the use of multiple user accounts with granular permissions. This way you can limit access to your 
 			environment.</p>
 			
-			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Users']}">Users</a>.</p>
+			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="__menu{Users}">Users</a>.</p>
 			
 			<p>For non-LDAP users, there are some options you can select:</p>
 			<ul>
@@ -1051,9 +1051,9 @@ function buildHelpFile() {
 				<li><b>User Management</b><br />
 				This permission allows the user to add, modify, and delete user accounts.</li>
 				<li><b>Run Tools</b><br />
-				This permission grants the user access to run the various tools in Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Tools']}">Tools</a>.</li>
+				This permission grants the user access to run the various tools in Admin &rarr; <a href="__menu{Tools}">Tools</a>.</li>
 				<li><b>Manage Settings</b><br />
-				This permission grants the user access to change system settings at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Settings']}">Settings</a>.</li>
+				This permission grants the user access to change system settings at Settings &rarr; <a href="__menu{Settings}">General</a>.</li>
 			</ul>
 			<p><i>The 'User Management' or 'Super Admin' permission is required for these actions.</i></p>
 		</div>
@@ -1061,7 +1061,7 @@ function buildHelpFile() {
 	<li>
 		<a class="list_title">Manage Settings</a>
 		<div>
-			<p>There are several settings available to set at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Settings']}">Settings</a>.</p>
+			<p>There are several settings available to set at Settings &rarr; <a href="__menu{Settings}">General</a>.</p>
 			<p><i>The 'Manage Settings' or 'Super Admin' permission is required to change settings.</i></p>
 			<p><b>Authentication</b><br />
 			There are three types of authentication supported by $fm_name:</p>
@@ -1069,7 +1069,7 @@ function buildHelpFile() {
 				<li><b>None</b><br />
 				Every user will be automatically logged in as the default super-admin account that was created during the installation process.</li>
 				<li><b>Built-in Authentication</b><br />
-				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Users']}">Users</a>.</li>
+				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users}">Users</a>.</li>
 				<li><b>LDAP Authentication</b><br />
 				Users are authenticated against a defined LDAP server. Upon success, users are created in the $fm_name database using the selected 
 				template account for granular permissions within the environment. These users cannot be disabled nor can their passwords be changed 
@@ -1099,7 +1099,7 @@ function buildHelpFile() {
 		<a class="list_title">Review Logs</a>
 		<div>
 			<p>Every action performed within the $fm_name UI will be logged for auditing purposes.</p>
-			<p>You can view and search the logs at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Logs']}">Logs</a></p>
+			<p>You can view and search the logs at Admin &rarr; <a href="__menu{Logs}">Logs</a></p>
 		</div>
 	</li>
 </ul>
@@ -1119,7 +1119,7 @@ HTML;
 		}
 	}
 
-	return $body . '<br />';
+	return parseMenuLinks($body) . '<br />';
 }
 
 
@@ -2649,9 +2649,9 @@ function getMenuURL($search_slug = null) {
 	}
 	
 	foreach ($submenu as $parent_slug => $menu_items) {
-		foreach ($menu_items as $element) {
+		foreach ($menu_items as $submenu_id => $element) {
 			if (array_search($search_slug, $element, true) !== false) {
-				return $submenu[getParentMenuKey($parent_slug)][$element][4];
+				return $submenu[$parent_slug][$submenu_id][4];
 			}
 		}
 	}
@@ -2661,7 +2661,7 @@ function getMenuURL($search_slug = null) {
 
 
 /**
- * Returns the menu item URL
+ * Builds the popup window
  *
  * @since 1.3
  * @package facileManager
@@ -2719,7 +2719,7 @@ HTML;
 
 
 /**
- * Returns the menu item URL
+ * Parses the output for AJAX calls
  *
  * @since 1.3
  * @package facileManager
@@ -2744,4 +2744,17 @@ function parseAjaxOutput($output) {
 }
 
 
+/**
+ * Parses the output for AJAX calls
+ *
+ * @since 1.3
+ * @package facileManager
+ *
+ * @param string $html HTML to set menu links in
+ * @return string Parsed output
+ */
+function parseMenuLinks($html) {
+	$string = preg_replace("/__menu{(.+?)}/esim", "getMenuURL('\\1')", $html);
+	return $string;
+}
 ?>

@@ -32,13 +32,13 @@ function moduleFunctionalCheck() {
 	$html_checks = null;
 	
 	/** Count active name servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active name servers defined.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to define one or more to manage.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active name servers defined.  <a href="' . getMenuURL('Servers') . '">Click here</a> to define one or more to manage.</p>';
 	
 	/** Count global options */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : '<p>You currently have no global options defined for named.conf.  <a href="' . $__FM_CONFIG['menu']['Config']['Options'] . '">Click here</a> to define one or more.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : '<p>You currently have no global options defined for named.conf.  <a href="' . getMenuURL('Options') . '">Click here</a> to define one or more.</p>';
 	
 	/** Count zones */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : '<p>You currently have no zones defined.  <a href="' . $__FM_CONFIG['menu']['Zones']['URL'] . '">Click here</a> to define one or more.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : '<p>You currently have no zones defined.  <a href="' . getMenuURL('Zones') . '">Click here</a> to define one or more.</p>';
 	
 	foreach ($checks as $val) {
 		$html_checks .= $val;
@@ -67,9 +67,9 @@ function buildModuleDashboard() {
 		if ($server_results[$i]->server_installed != 'yes') {
 			$errors .= '<b>' . $server_results[$i]->server_name . '</b> client is not installed.' . "\n";
 		} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-			$errors .= '<a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '"><b>' . $server_results[$i]->server_name . '</b></a> client needs to be upgraded.' . "\n";
+			$errors .= '<a href="' . getMenuURL('Servers') . '"><b>' . $server_results[$i]->server_name . '</b></a> client needs to be upgraded.' . "\n";
 		} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
-			$errors .= '<a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '"><b>' . $server_results[$i]->server_name . '</b></a> needs a new configuration built.' . "\n";
+			$errors .= '<a href="' . getMenuURL('Servers') . '"><b>' . $server_results[$i]->server_name . '</b></a> needs a new configuration built.' . "\n";
 		}
 	}
 	/** Zone stats */
@@ -88,7 +88,7 @@ function buildModuleDashboard() {
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=NS';
 			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have any NS records defined.' . "\n";
 		} elseif ($domain_results[$i]->domain_reload != 'no') {
-			$errors .= '<a href="' . $__FM_CONFIG['menu']['Zones'][ucfirst($domain_results[$i]->domain_mapping)] . '"><b>' . $domain_results[$i]->domain_name . '</b></a> needs to be reloaded.' . "\n";
+			$errors .= '<a href="' . getMenuURL(ucfirst($domain_results[$i]->domain_mapping)) . '"><b>' . $domain_results[$i]->domain_name . '</b></a> needs to be reloaded.' . "\n";
 		}
 	}
 	if ($errors) {
@@ -167,22 +167,20 @@ HTML;
 function buildModuleHelpFile() {
 	global $menu, $__FM_CONFIG;
 	
-//	print_r($GLOBALS['submenu']);
-	
-	$body = '
-<h3>' . $_SESSION['module'] . '</h3>
+	$body = <<<HTML
+<h3>{$_SESSION['module']}</h3>
 <ul>
 	<li>
 		<a class="list_title">Configure Zones</a>
 		<div>
-			<p>Zones (aka domains) can be managed from the <a href="' . $menu[getParentMenuKey('Zones')][4] . '">Zones</a> menu item. From 
-			there you can add (' . $__FM_CONFIG['icons']['add'] . '), edit (' . $__FM_CONFIG['icons']['edit'] . '), delete (' . 
-			$__FM_CONFIG['icons']['delete'] . '), and reload (' . $__FM_CONFIG['icons']['reload'] . ') zones depending on your user permissions.</p>
+			<p>Zones (aka domains) can be managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
+			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete 
+			({$__FM_CONFIG['icons']['delete']}), and reload ({$__FM_CONFIG['icons']['reload']}) zones depending on your user permissions.</p>
 			<p>You can define a zone as a clone of another previously defined master zone.  The cloned zone will contain all of the same records
-			present in the parent zone.  This is useful if you have multiple zones with identical records as you won\'t have to repeat the record
+			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
 			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
-			<p><i>The \'Zone Management\' or \'Super Admin\' permission is required to add, edit, and delete zones.</i></p>
-			<p><i>The \'Reload Zone\' or \'Super Admin\' permission is required for reloading zones.</i></p>
+			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones.</i></p>
+			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa).</p>
 			<p>Zones that are missing SOA and NS records will be highlighted with a red background and will not be built or reloaded until the 
 			records exists.</p>
@@ -192,24 +190,28 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Manage Zone Records</a>
 		<div>
-			<p>Records are managed from the <a href="' . $menu[getParentMenuKey('Zones')][4] . '">Zones</a> menu item. From 
+			<p>Records are managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
 			there you can select the zone you want manage records for.  Select from the upper-right the type of record(s) you want to 
 			manage and then you can add, modify, and delete records depending on your user permissions.</p>
 			<p>You can add IPv4 A type and IPv6 AAAA type records under the same page. Select A or AAAA from the upper-right and add your 
-			IPv4 and IPv6 records and ' . $_SESSION['module'] . ' will auto-detect their type.</p>
+			IPv4 and IPv6 records and {$_SESSION['module']} will auto-detect their type.</p>
 			<p>When adding certain records (such as CNAME, MX, SRV, SOA, NS, etc.), you have the option append the domain to the record. This 
-			means ' . $_SESSION['module'] . ' will automatically add the domain to the record so you don\'t have to give the fully qualified domain name 
+			means {$_SESSION['module']} will automatically add the domain to the record so you don't have to give the fully qualified domain name 
 			in the record value.</p>
-			<p><i>The \'Record Management\' or \'Super Admin\' permission is required to add, edit, and delete records.</i></p>
+			<p><i>The 'Record Management' or 'Super Admin' permission is required to add, edit, and delete records.</i></p>
 			<p>When adding or updating a SOA record for a zone, the domain can be appended to the Master Server and Email Address if selected. This
-			means you could simply enter \'ns1\' and \'username\' for the Master Server and Email Address respectively. If you prefer to enter the entire
-			entry, make sure you append a period (.) at the end of each and select \'no\' for Append Domain.</p>
+			means you could simply enter 'ns1' and 'username' for the Master Server and Email Address respectively. If you prefer to enter the entire
+			entry, make sure you select 'no' for Append Domain.</p>
+			<p>SOA records can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
+			management. You can create a SOA template when managing zone records or you can completely manage them from 
+			<a href="__menu{SOA}">Templates</a>. SOA templates can only be deleted when there are no zones associated with them.</p>
+			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete SOA templates.</i></p>
 			<p>Adding A and AAAA records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
 			exist in order for PTR records to automatically be created.</p>
 			<p>When viewing the records of a cloned zone, the parent records will not be editable, but you can choose to skip them or add new records
 			that impacts the cloned zone only.</p>
 			<p>You can also import BIND-compatible zone files instead of adding records individually. Go to Admin &rarr; 
-			<a href="' . $menu[getParentMenuKey('Tools')][4] . '">Tools</a> and use the Import Zone Files utility. After selecting the file and zone 
+			<a href="__menu{Tools}">Tools</a> and use the Import Zone Files utility. After selecting the file and zone 
 			to import to, you have one final chance to review what gets imported before the records are actually imported.</p>
 			<br />
 		</div>
@@ -218,76 +220,81 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Servers</a>
 		<div>
 			<p>All aspects of server configuration takes place in the Config menu 
-			item. From there you can add (' . $__FM_CONFIG['icons']['add'] . '), edit (' . $__FM_CONFIG['icons']['edit'] . '), delete (' .
-			$__FM_CONFIG['icons']['delete'] . ') servers and options depending on your user permissions.</p>
+			item. From there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), 
+			delete ({$__FM_CONFIG['icons']['delete']}) servers and options depending on your user permissions.</p>
 			
 			<p><b>Servers</b><br />
-			DNS servers can be defined at Config &rarr; <a href="' . $menu[getParentMenuKey('Servers')][4] .'">Servers</a>. In the add/edit server 
+			DNS servers can be defined at Config &rarr; <a href="__menu{Servers}">Servers</a>. In the add/edit server 
 			window, select and define the server hostname, key (if applicable), system account the daemon runs as, update method, configuration file, 
 			server root, chroot directory (if applicable), and directory to keep the zone files in.</p>
 			<p>The server can be updated via the following methods:</p>
 			<ul>
-				<li><i>http(s) -</i> ' . $fm_name . ' will initiate a http(s) connection to the DNS server which updates the configs.</li>
+				<li><i>http(s) -</i> $fm_name will initiate a http(s) connection to the DNS server which updates the configs.</li>
 				<li><i>cron -</i> The DNS servers will initiate a http connection to $fm_name to update the configs.</li>
-				<li><i>ssh -</i> ' . $fm_name . ' will SSH to the DNS server which updates the configs.</li>
+				<li><i>ssh -</i> $fm_name will SSH to the DNS server which updates the configs.</li>
 			</ul>
 			<p>In order for the server to be enabled, the client app needs to be installed on the DNS server.</p>
-			<p><i>The \'Server Management\' or \'Super Admin\' permission is required to add, edit, and delete servers.</i></p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
 			<p>Once a server is added or modified, the configuration files for the server will need to be built before zone reloads will be available. 
-			Before building the configuration (' . $__FM_CONFIG['icons']['build'] . ') you can preview (' . $__FM_CONFIG['icons']['preview'] . ') the configs to 
+			Before building the configuration ({$__FM_CONFIG['icons']['build']}) you can preview ({$__FM_CONFIG['icons']['preview']}) the configs to 
 			ensure they are how you desire them. Both the preview and the build will check the configuration files with named-checkconf and named-checkzone
-			if enabled in the <a href="' . $menu[getParentMenuKey($_SESSION['module'] . ' Settings')][4] . '">Settings</a>.</p>
-			<p><i>The \'Build Server Configs\' or \'Super Admin\' permission is required to build the DNS server configurations.</i></p>
+			if enabled in the <a href="__menu{{$_SESSION['module']} Settings}">Settings</a>.</p>
+			<p><i>The 'Build Server Configs' or 'Super Admin' permission is required to build the DNS server configurations.</i></p>
 			<br />
 			
 			<p><b>Views</b><br />
-			If you want to use views, they need to be defined at Config &rarr; <a href="' . getMenuURL('Views') . '">Views</a>. View names 
+			If you want to use views, they need to be defined at Config &rarr; <a href="__menu{Views}">Views</a>. View names 
 			can be defined globally for all DNS servers or on a per-server basis. This is controlled by the servers drop-down menu in the upper right.</p>
 			<p>Once you define a view, you can select it in the list to manage the options for that view - either globally or server-based. See the section 
-			on \'Options\' for further details.</p>
-			<p><i>The \'Server Management\' or \'Super Admin\' permission is required to manage views.</i></p>
+			on 'Options' for further details.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage views.</i></p>
 			<br />
 			
 			<p><b>ACLs</b><br />
-			Access Control Lists are defined at Config &rarr; <a href="' . $menu[getParentMenuKey('ACLs')][4] . '">ACLs</a> and can be defined globally 
+			Access Control Lists are defined at Config &rarr; <a href="__menu{ACLs}">ACLs</a> and can be defined globally 
 			for all DNS servers or on a per-server basis. This is controlled by the servers drop-down menu in the upper right.</p>
 			<p>When defining an ACL, specify the name and the address list. You can use the pre-defined addresses or specify your own delimited by a space,
 			semi-colon, or newline.</p>
-			<p><i>The \'Server Management\' or \'Super Admin\' permission is required to manage ACLs.</i></p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage ACLs.</i></p>
 			<br />
 			
 			<p><b>Keys</b><br />
-			Currently, ' . $_SESSION['module'] . ' does not generate server keys (TSIG), but once you create them on your server, you can define them in the UI 
-			at Config &rarr; <a href="' . $menu[getParentMenuKey('Keys')][4] . '">Keys</a>.</p>
-			<p><i>The \'Server Management\' or \'Super Admin\' permission is required to manage keys.</i></p>
+			Currently, {$_SESSION['module']} does not generate server keys (TSIG), but once you create them on your server, you can define them in the UI 
+			at Config &rarr; <a href="__menu{Keys}">Keys</a>.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			
 			<p><b>Options</b><br />
 			Options can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. Currently, the options 
-			configuration is rudimentary and can be defined at Config &rarr; <a href="' . $menu[getParentMenuKey('Options')][4] . '">Options</a>.</p>
+			configuration is rudimentary and can be defined at Config &rarr; <a href="__menu{Options}">Options</a>.</p>
 			<p>Server-level options always supercede global options (including global view options).</p>
-			<p><i>The \'Server Management\' or \'Super Admin\' permission is required to manage server options.</i></p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server options.</i></p>
 			<br />
 			
 			<p><b>Logging</b><br />
 			Logging channels and categories can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. 
-			To manage the logging configuration, go to Config &rarr; <a href="' . $menu[getParentMenuKey('Logging')][4] . '">Logging</a>.</p>
+			To manage the logging configuration, go to Config &rarr; <a href="__menu{Logging}">Logging</a>.</p>
 			<p>Server-level channels and categories always supercede global ones.</p>
-			<p><i>The \'Server Management\' or \'Super Admin\' permission is required to manage server logging.</i></p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server logging.</i></p>
+			<br />
+			
+			<p><b>Controls</b><br />
+			Controls can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. 
+			To manage the controls configuration, go to Config &rarr; <a href="__menu{Controls}">Controls</a>.</p>
+			<p>Server-level controls always supercede global ones.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server controls.</i></p>
 			<br />
 		</div>
 	</li>
 	<li>
 		<a class="list_title">Module Settings</a>
 		<div>
-			<p>Settings for ' . $_SESSION['module'] . ' can be updated from the <a href="' . 
-			$menu[getParentMenuKey($_SESSION['module'] . ' Settings')][4] . '">Settings</a> menu item.</p>
+			<p>Settings for {$_SESSION['module']} can be updated from the <a href="__menu{$_SESSION['module']} Settings}">Settings</a> menu item.</p>
 			<br />
 		</div>
 	</li>
 	
-';
-	
+HTML;
 	return $body;
 }
 
@@ -371,7 +378,7 @@ function reloadZone($domain_id) {
 function getSOACount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
-	if (version_compare(getOption('version', 0, 'fmDNS'), '1.3', '<')) {
+	if (version_compare(getOption('version', 0, 'fmDNS'), '1.3-beta1', '<')) {
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE (`domain_id`='$domain_id' OR
 			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 				`domain_id`='$domain_id')
