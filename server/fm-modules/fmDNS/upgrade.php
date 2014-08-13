@@ -856,7 +856,7 @@ TABLE;
 	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` DROP `domain_id`, DROP `soa_serial_no`;";
 	
 	$inserts[] = <<<INSERT
-INSERT IGNORE INTO  `fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
 `def_option` ,
 `def_type` ,
