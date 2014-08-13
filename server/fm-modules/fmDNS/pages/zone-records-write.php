@@ -113,7 +113,7 @@ if (isset($create) && is_array($create)) {
 	}
 	
 	if (isset($import_records)) {
-		$domain_name = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		$domain_name = displayFriendlyDomainName(getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		addLogEntry("Imported $record_count records from '$import_file' into $domain_name.");
 	}
 }

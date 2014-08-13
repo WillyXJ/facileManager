@@ -55,7 +55,7 @@ if (array_key_exists('view_id', $_GET)) {
 	if (!$fmdb->num_rows) header('Location: zones.php');
 	$domain_info = $fmdb->last_result;
 	
-	$display_option_type = $domain_info[0]->domain_name;
+	$display_option_type = displayFriendlyDomainName($domain_info[0]->domain_name);
 	$display_option_type_sql .= "' AND domain_id='$domain_id";
 	
 	$name = 'domain_id';

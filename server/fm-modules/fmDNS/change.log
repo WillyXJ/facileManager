@@ -28,6 +28,7 @@
 * Server - [improvement] Redesigned zone configuration and added support for
            configuration options at the zone level.
 * Server - [improvement] All tables are now sortable. (Issue #127)
+* Server - [feature] Added IDN display support. (Issue #124)
 
 1.2.5 (2014-06-04)
 ==================

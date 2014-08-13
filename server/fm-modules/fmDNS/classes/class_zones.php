@@ -103,7 +103,7 @@ class fm_dns_zones {
 				if ($field == 'domain_clone_domain_id') {
 					$sql_values .= sanitize($post['domain_clone_domain_id']) . ',';
 				} elseif ($field == 'domain_name') {
-					$log_message .= 'Name: ' . sanitize($post['domain_name']) . "\n";
+					$log_message .= 'Name: ' . displayFriendlyDomainName(sanitize($post['domain_name'])) . "\n";
 					$log_message .= "Clone of: $value\n";
 					$sql_values .= "'" . sanitize($post['domain_name']) . "',";
 				} elseif ($field == 'domain_reload') {
@@ -219,7 +219,7 @@ class fm_dns_zones {
 		
 		$sql_edit = $domain_name_servers = $domain_view = null;
 		
-		$old_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		$old_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$log_message = "Updated a zone ($old_name) with the following details:\n";
 
 		/** If changing zone to clone or different domain_type, are there any existing associated records? */
@@ -393,7 +393,7 @@ class fm_dns_zones {
 			}
 			
 			/** Delete zone */
-			$tmp_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+			$tmp_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_id') === false) {
 				return 'This zone could not be deleted because a database error occurred.';
 			}
@@ -466,7 +466,8 @@ FORM;
 			$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="delete" href="#">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 		}
-		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">{$row->domain_name}</a>" : $row->domain_name;
+		$domain_name = displayFriendlyDomainName($row->domain_name);
+		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">$domain_name</a>" : $domain_name;
 		if ($row->domain_view) {
 			// Process multiple views
 			if (strpos($row->domain_view, ';')) {
@@ -520,6 +521,8 @@ HTML;
 		} elseif (@is_object($data[0])) {
 			extract(get_object_vars($data[0]));
 		}
+		
+		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
 		
 		/** Process multiple views */
 		if (strpos($domain_view, ';')) {
@@ -847,7 +850,7 @@ HTML;
 			$fm_dns_records->updateSOAReload($domain_id, 'no');
 		}
 
-		addLogEntry("Reloaded zone '$domain_name'.");
+		addLogEntry("Reloaded zone '" . displayFriendlyDomainName($domain_name) . "'.");
 		return $response;
 	}
 
@@ -1039,7 +1042,7 @@ HTML;
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
 		
-		$response[] = $domain_name;
+		$response[] = displayFriendlyDomainName($domain_name);
 		
 		/** Ensure domain is reloadable */
 		if ($domain_reload != 'yes') {
@@ -1082,7 +1085,11 @@ HTML;
 		$post['domain_name'] = rtrim(strtolower($post['domain_name']), '.');
 		
 		/** Perform domain name validation */
-		if ($post['domain_mapping'] == 'reverse') $post['domain_name'] = $this->fixDomainTypos($post['domain_name']);
+		if ($post['domain_mapping'] == 'reverse') {
+			$post['domain_name'] = $this->fixDomainTypos($post['domain_name']);
+		} else {
+			$post['domain_name'] = function_exists('idn_to_ascii') ? idn_to_ascii($post['domain_name']) : $post['domain_name'];
+		}
 		if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return 'Invalid zone name.';
 		
 		/** Ensure domain_view is set */

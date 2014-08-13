@@ -81,14 +81,14 @@ function buildModuleDashboard() {
 			$domain_results[$i]->domain_type == 'master') {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=SOA';
-			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have a SOA defined.' . "\n";
+			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> does not have a SOA defined.' . "\n";
 		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 			$domain_results[$i]->domain_type == 'master') {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=NS';
-			$errors .= '">' . $domain_results[$i]->domain_name . '</a> does not have any NS records defined.' . "\n";
+			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> does not have any NS records defined.' . "\n";
 		} elseif ($domain_results[$i]->domain_reload != 'no') {
-			$errors .= '<a href="' . getMenuURL(ucfirst($domain_results[$i]->domain_mapping)) . '"><b>' . $domain_results[$i]->domain_name . '</b></a> needs to be reloaded.' . "\n";
+			$errors .= '<a href="' . getMenuURL(ucfirst($domain_results[$i]->domain_mapping)) . '"><b>' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</b></a> needs to be reloaded.' . "\n";
 		}
 	}
 	if ($errors) {
@@ -136,7 +136,7 @@ function buildModuleToolbar() {
 	global $__FM_CONFIG, $fmdb;
 	
 	if (isset($_REQUEST['domain_id'])) {
-		$domain = getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		$domain = displayFriendlyDomainName(getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$domain_menu = <<<HTML
 		<div id="topheadpart">
 			<span class="single_line">Domain:&nbsp;&nbsp; $domain</span>
@@ -145,6 +145,7 @@ HTML;
 		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
 			extract(get_object_vars($fmdb->last_result[0]));
+			$domain_name = displayFriendlyDomainName($domain_name);
 			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
 			$domain_menu .= <<<HTML
 		<div id="topheadpart">
@@ -712,4 +713,20 @@ function buildModuleMenu() {
 }
 
 
+/**
+ * Gets the name servers hosting a zone
+ *
+ * @since 1.3
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param id $domain_name Domain name to convert to utf8
+ * @return string
+ */
+function displayFriendlyDomainName($domain_name) {
+	$new_domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
+	if ($new_domain_name != $domain_name) $new_domain_name = $domain_name . ' (' . $new_domain_name . ')';
+	
+	return $new_domain_name;
+}
 ?>
