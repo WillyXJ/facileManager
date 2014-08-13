@@ -1,5 +1,5 @@
-1.1 (2014-06-??)
-================
+1.1-beta1 (2014-06-??)
+======================
 * Server - [bug] Fixed some PHP errors.
 * Server - [improvement] Gave the popups a facelift.
 * Server - [improvement] Cleaned up some code.

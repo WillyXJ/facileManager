@@ -1,5 +1,5 @@
-1.3 (2014-06-??)
-================
+1.3-beta1 (2014-06-??)
+======================
 * Server - Added dependency check for posix php module.
 * Server - [bug] Fixed install wizard for database checks as databases could not
            be created through the installer. (Issue #72)
@@ -16,7 +16,7 @@
 * Server - [improvement] Added a check for the PHP json module. (Issue #133)
 * Server - [feature] Supports additional configuration previews. (Issue #130)
 
-1.2.3 (2014-05-??)
+1.2.3 (2014-06-04)
 ==================
 * Server - [feature] Client auto upgrade minimum version are now dynamic.
 * Client - [bug] Fixed client auto upgrades. (Issue #103)
