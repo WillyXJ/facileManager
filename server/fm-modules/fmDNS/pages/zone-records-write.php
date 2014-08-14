@@ -46,6 +46,9 @@ if (isset($update) && is_array($update)) {
 		elseif ($record_type == 'AAAA' && !strrpos($data['record_value'], ':')) $record_type = 'A';
 
 		$fm_dns_records->update($domain_id, $id, $record_type, $data);
+		
+		/** Are we auto-creating a PTR record? */
+		autoCreatePTR($domain_id, $record_type, $data);
 	}
 }
 
@@ -74,40 +77,8 @@ if (isset($create) && is_array($create)) {
 			$fm_dns_records->add($domain_id, $record_type, $data);
 			
 			/** Are we auto-creating a PTR record? */
-			if ($record_type == 'A' && isset($data['PTR']) && currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $data['PTR']))) {
-				$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
-				if ($data['record_name'][0] == '@') {
-					$data['record_name'] = null;
-					$domain = substr($domain, 1);
-				}
-				
-				/** Get reverse zone */
-				if (!strrpos($data['record_value'], ':')) {
-					$rev_domain = trimFullStop(getNameFromID($data['PTR'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-					$domain_pieces = array_reverse(explode('.', $rev_domain));
-					$domain_parts = count($domain_pieces);
-					
-					$subnet_ips = null;
-					for ($i=2; $i<$domain_parts; $i++) {
-						$subnet_ips .= $domain_pieces[$i] . '.';
-					}
-					$record_octets = array_reverse(explode('.', str_replace($subnet_ips, '', $data['record_value'])));
-					$temp_record_value = null;
-					for ($j=0; $j<count($record_octets); $j++) {
-						$temp_record_value .= $record_octets[$j] . '.';
-					}
-					$data['record_value'] = rtrim($temp_record_value, '.');
-				} else break;
-								
-				$array = array(
-						'record_name' => $data['record_value'],
-						'record_value' => $data['record_name'] . $domain,
-						'record_comment' => $data['record_comment'],
-						'record_status' => $data['record_status'],
-						);
-						
-				$fm_dns_records->add($data['PTR'], 'PTR', $array);
-			}
+			autoCreatePTR($domain_id, $record_type, $data);
+			
 			$record_count++;
 		}
 	}
@@ -128,4 +99,47 @@ if (isset($record_type) && $domain_id && !isset($import_records)) {
 	}
 }
 
+
+function autoCreatePTR($domain_id, $record_type, $data) {
+	if ($record_type == 'A' && isset($data['PTR']) && currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $data['PTR']))) {
+		global $__FM_CONFIG;
+
+		$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
+		if ($data['record_name'][0] == '@') {
+			$data['record_name'] = null;
+			$domain = substr($domain, 1);
+		}
+
+		/** Get reverse zone */
+		if (!strrpos($data['record_value'], ':')) {
+			$rev_domain = trimFullStop(getNameFromID($data['PTR'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+			$domain_pieces = array_reverse(explode('.', $rev_domain));
+			$domain_parts = count($domain_pieces);
+
+			$subnet_ips = null;
+			for ($i=2; $i<$domain_parts; $i++) {
+				$subnet_ips .= $domain_pieces[$i] . '.';
+			}
+			$record_octets = array_reverse(explode('.', str_replace($subnet_ips, '', $data['record_value'])));
+			$temp_record_value = null;
+			for ($j=0; $j<count($record_octets); $j++) {
+				$temp_record_value .= $record_octets[$j] . '.';
+			}
+			$data['record_value'] = rtrim($temp_record_value, '.');
+		} else {
+			/** IPv6 not yet supported */
+			break;
+		}
+
+		$array = array(
+				'record_name' => $data['record_value'],
+				'record_value' => $data['record_name'] . $domain,
+				'record_comment' => $data['record_comment'],
+				'record_status' => $data['record_status'],
+				);
+
+		global $fm_dns_records;
+		$fm_dns_records->add($data['PTR'], 'PTR', $array);
+	}
+}
 ?>

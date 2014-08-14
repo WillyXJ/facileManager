@@ -208,7 +208,9 @@ function buildModuleHelpFile() {
 			<a href="__menu{SOA}">Templates</a>. SOA templates can only be deleted when there are no zones associated with them.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete SOA templates.</i></p>
 			<p>Adding A and AAAA records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
-			exist in order for PTR records to automatically be created.</p>
+			exist in order for PTR records to automatically be created. You can enable the automatic reverse zone creation in the 
+			<a href="__menu{{$_SESSION['module']} Settings}">Settings</a>. In this case, the reverse zone will inherit the same SOA as the 
+			forward zone.</p>
 			<p>When viewing the records of a cloned zone, the parent records will not be editable, but you can choose to skip them or add new records
 			that impacts the cloned zone only.</p>
 			<p>You can also import BIND-compatible zone files instead of adding records individually. Go to Admin &rarr; 
@@ -290,7 +292,7 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Module Settings</a>
 		<div>
-			<p>Settings for {$_SESSION['module']} can be updated from the <a href="__menu{$_SESSION['module']} Settings}">Settings</a> menu item.</p>
+			<p>Settings for {$_SESSION['module']} can be updated from the <a href="__menu{{$_SESSION['module']} Settings}">Settings</a> menu item.</p>
 			<br />
 		</div>
 	</li>

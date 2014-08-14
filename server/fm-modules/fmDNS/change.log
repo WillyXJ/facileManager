@@ -29,6 +29,8 @@
            configuration options at the zone level.
 * Server - [improvement] All tables are now sortable. (Issue #127)
 * Server - [feature] Added IDN display support. (Issue #124)
+* Server - [feature] Added support to automatically create PTR records for
+           existing A records. (Issue #129)
 
 1.2.5 (2014-06-04)
 ==================

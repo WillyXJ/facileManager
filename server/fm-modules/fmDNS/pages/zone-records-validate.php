@@ -44,7 +44,7 @@ $domain_info['clone_of'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS
 if (isset($_POST['update'])) {
 	if ($_POST['update']['soa_template_chosen']) {
 		global $fm_dns_records;
-		// Save the soa_template_chosen in domains table and end
+		/** Save the soa_template_chosen in domains table and end */
 		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 		$fm_dns_records->assignSOA($_POST['update']['soa_template_chosen'], $domain_id);
 		header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $domain_id . '&record_type=SOA');
@@ -206,7 +206,8 @@ function validateEntry($action, $id, $data, $record_type) {
 					}
 				}
 				if ($key == 'PTR') {
-					$retval = checkPTRZone($data['record_value'], $id);
+					global $domain_id;
+					$retval = checkPTRZone($data['record_value'], $domain_id);
 					list($val, $error_msg) = $retval;
 					if ($val == null) {
 						$messages['errors']['record_value'] = $error_msg;
@@ -475,6 +476,6 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		return !is_int($retval) ? array(null, $retval) : array($retval, 'Created reverse zone.');
 	}
 
-	return false;
+	return array(null, 'Forward domain not found.');
 }
 ?>

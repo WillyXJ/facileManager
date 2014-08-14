@@ -396,9 +396,10 @@ HTML;
 			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['data']['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label>' : null;
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label>' : null;
 			} else {
-				$field_values['data']['Actions'] = ' align="center"><input type="checkbox" id="record_delete[' . $record_id . ']" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete[' . $record_id . ']">Delete</label>';
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label><br />' : ' align="center">';
+				$field_values['data']['Actions'] .= '<input type="checkbox" id="record_delete[' . $record_id . ']" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete[' . $record_id . ']">Delete</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
