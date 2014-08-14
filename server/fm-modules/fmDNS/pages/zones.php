@@ -45,7 +45,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 	switch ($action) {
 	case 'create':
 		if (!empty($_POST)) {
-			$insert_id = $fm_dns_zones->add();
+			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
 				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
 				$form_data = $_POST;

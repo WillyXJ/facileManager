@@ -385,7 +385,7 @@ function getSOACount($domain_id) {
 				`domain_id`='$domain_id')
 		) AND `soa_status`!='deleted'";
 	} else {
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `soa_id`= (SELECT `soa_id` FROM 
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `soa_id`= (SELECT DISTINCT(`soa_id`) FROM 
 			`fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `soa_id`!=0 AND (`domain_id`='$domain_id' OR
 				`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 					`domain_id`='$domain_id')

@@ -78,11 +78,11 @@ class fm_dns_zones {
 	/**
 	 * Adds the new zone
 	 */
-	function add() {
+	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Validate post */
-		$post = $this->validatePost($_POST);
+		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
@@ -1085,6 +1085,10 @@ HTML;
 		$post['domain_name'] = rtrim(strtolower($post['domain_name']), '.');
 		
 		/** Perform domain name validation */
+		if (!isset($post['domain_mapping'])) {
+			global $map;
+			$post['domain_mapping'] = $map;
+		}
 		if ($post['domain_mapping'] == 'reverse') {
 			$post['domain_name'] = $this->fixDomainTypos($post['domain_name']);
 		} else {

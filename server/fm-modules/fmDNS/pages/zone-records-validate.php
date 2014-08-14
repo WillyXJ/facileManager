@@ -212,7 +212,6 @@ function validateEntry($action, $id, $data, $record_type) {
 						$messages['errors']['record_value'] = $error_msg;
 					} else {
 						$messages['info']['record_value'] = $error_msg;
-						continue;
 					}
 				}
 			}
@@ -456,26 +455,22 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 
 		$new_zone = explode(",", $new_zones);
 
-		$ptr_array['ZoneID'] = 0;
-		$ptr_array[0]['domain_name'] = trim($new_zone[0], "'");
-		$ptr_array[0]['domain_mapping'] = 'reverse';
-		$ptr_array[0]['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
+		$ptr_array['domain_id'] = 0;
+		$ptr_array['domain_name'] = trim($new_zone[0], "'");
+		$ptr_array['domain_mapping'] = 'reverse';
+		$ptr_array['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
 
-		$copy_fields = array('soa_id', 'domain_view', 'domain_transfers_from', 'domain_updates_from',
-			'domain_master_servers', 'domain_forward_servers', 'domain_type', 
-			'domain_check_names', 'domain_notify_slaves', 'domain_multi_masters');
+		$copy_fields = array('soa_id', 'domain_view', 'domain_type');
 		foreach ($copy_fields as $field) {
-			$ptr_array[0][$field] = $result[0]->$field;
+			$ptr_array[$field] = $result[0]->$field;
 		}
-		$_POST['createZone'] = $ptr_array;
-		unset($ptr_array);
 
 		global $fm_dns_zones;
 
 		if (!class_exists('fm_dns_zones')) {
 			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 		}
-		$retval = $fm_dns_zones->add();
+		$retval = $fm_dns_zones->add($ptr_array);
 
 		return !is_int($retval) ? array(null, $retval) : array($retval, 'Created reverse zone.');
 	}
