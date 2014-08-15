@@ -31,6 +31,7 @@
 * Server - [feature] Added IDN display support. (Issue #124)
 * Server - [feature] Added support to automatically create PTR records for
            existing A records. (Issue #129)
+* Server - [bug] Fixed zone name validation to support the underscore (Issue #143)
 
 1.2.5 (2014-06-04)
 ==================
