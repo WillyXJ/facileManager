@@ -401,7 +401,8 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 	
 	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
 		return true;
-	} elseif (preg_match('/^[a-z0-9_\-.]+$/i', $record_name) == true) {
+	} elseif (preg_match('/^[a-z0-9_\-.]+$/i', $record_name) == true
+			&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $record_name) == true) {
 		return true;
 	} elseif ($record_name == '@') {
 		return true;
