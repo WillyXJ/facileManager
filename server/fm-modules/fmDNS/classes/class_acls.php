@@ -251,7 +251,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="acl_predefined">Matched Address List</label></th>
-					<td width="67%">$acl_predefined
+					<td width="67%">$acl_predefined<br />
 					<textarea name="acl_addresses" rows="7" cols="28" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$acl_addresses</textarea></td>
 				</tr>
 				<tr>

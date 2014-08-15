@@ -55,10 +55,10 @@ class fm_dns_zones {
 							'name' => 'domains'
 						);
 
-			$title_array = array(array('title' => 'ID', 'class' => 'header-small'), 
+			$title_array = array(array('title' => 'ID', 'class' => 'header-small header-nosort'), 
 				array('title' => 'Domain', 'rel' => 'domain_name'), 
 				array('title' => 'Type', 'rel' => 'domain_type'),
-				'Clones', 'Views');
+				'Clones', array('title' => 'Views', 'class' => 'header-nosort'));
 			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 			
 			if (is_array($checkbox)) {
