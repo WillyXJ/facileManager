@@ -22,7 +22,7 @@ $(document).ready(function() {
 		});
 	});
 	
-//	$('input:text, input:password, select').first().focus();
+	$('input:text, input:password, select').first().focus();
 	
 	// Everything we need for scrolling up and down.
 	$(window).scroll( function(){
