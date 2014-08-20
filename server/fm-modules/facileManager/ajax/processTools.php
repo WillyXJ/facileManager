@@ -43,6 +43,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$module_name = isset($_POST['item']) ? sanitize($_POST['item']) : null;
 				$response = buildPopup('header', 'Installing Module');
 				$response .= $fm_tools->installModule($module_name);
+				if ($fmdb->last_error) $response .= $fmdb->last_error;
 				$response .= buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), "{$GLOBALS['RELPATH']}admin-modules.php");
 				
 				echo $response;
@@ -53,6 +54,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$module_name = isset($_POST['item']) ? sanitize($_POST['item']) : null;
 				$response = buildPopup('header', 'Upgrading Module');
 				$response .= $fm_tools->upgradeModule($module_name);
+				if ($fmdb->last_error) $response .= $fmdb->last_error;
 				$response .= buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), "{$GLOBALS['RELPATH']}admin-modules.php");
 				
 				echo $response;

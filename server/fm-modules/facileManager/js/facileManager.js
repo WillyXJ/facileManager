@@ -251,6 +251,10 @@ $(document).ready(function() {
 		$('#manage_item').fadeOut(200);
 		$('#manage_item_contents').fadeOut(200).html();
 		$('#manage_item_contents').removeClass('wide');
+		var link = $(this).attr('href');
+		if (link) {
+			window.location = link;
+		}
 	});
 	
 	

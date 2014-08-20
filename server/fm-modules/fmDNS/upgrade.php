@@ -840,11 +840,10 @@ TABLE;
 
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_name` VARCHAR(255) NULL AFTER `domain_id`;";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_chroot_dir` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `server_root_dir`;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD  `soa_id` INT( 11 ) NOT NULL AFTER  `account_id` ,
-		ADD  `soa_serial_no` INT( 11 ) NOT NULL AFTER  `soa_id` ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD  `soa_id` INT( 11 ) NOT NULL DEFAULT '0' AFTER  `account_id` ,
+		ADD  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT '0' AFTER  `soa_id` ;";
 
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD  `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `domain_id`;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `soa_serial_no` `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT  '0';";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `cfg_view` `view_id` INT(11) NOT NULL DEFAULT '0';";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `domain_id` INT(11) NOT NULL DEFAULT '0' AFTER `view_id`;";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD INDEX(`domain_id`);";
@@ -1062,16 +1061,16 @@ INSERT;
 			if ($results[$x]->$old_key) {
 				$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` 
 					(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']},
-					{$results[$x]->domain_id}, $new_key, {$results[$x]->$old_key});";
+					{$results[$x]->domain_id}, '$new_key', '{$results[$x]->$old_key}');";
 				$fmdb->query($query);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
 		}
 	}
 	
-	$query = "ALTER TALBE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` DROP ";
+	$query = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
 	foreach ($translate_array as $old_key => $new_key) {
-		$query .= "$old_key,";
+		$query .= " DROP `$old_key`,";
 	}
 	$query = rtrim($query, ',') . ';';
 	$fmdb->query($query);
