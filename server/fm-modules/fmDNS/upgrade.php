@@ -1076,6 +1076,24 @@ INSERT;
 	$fmdb->query($query);
 	if (!$fmdb->result || $fmdb->sql_errors) return false;
 	
+	/** Update manually entered ACLs with acl_ids */
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE cfg_type='global'";
+	$fmdb->query($query);
+	$num_rows = $fmdb->num_rows;
+	$results = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		$cfg_data_array = explode(';', $results[$x]->cfg_data);
+		$new_cfg_data = null;
+		foreach ($cfg_data_array as $acl_name) {
+			$acl_id = getNameFromID(trim($acl_name), "fm_{$__FM_CONFIG['fmDNS']['prefix']}acls", 'acl_', 'acl_name', 'acl_id');
+			$new_cfg_data .= $acl_id ? "acl_{$acl_id}," : $acl_name . ',';
+		}
+		$new_cfg_data = rtrim($new_cfg_data, ',');
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data='$new_cfg_data' WHERE cfg_id=" . $results[$x]->cfg_id;
+		$fmdb->query($query);
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+	}
+	
 	/**
 	$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
 	$fmdb->query($query);

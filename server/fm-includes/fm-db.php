@@ -92,7 +92,7 @@ class fmdb {
 				$i++;
 			}
 			$num_rows = 0;
-			unset($this->last_result);
+//			unset($this->last_result);
 			while ($row = @mysql_fetch_object($this->result)) {
 				$this->last_result[$num_rows] = $row;
 				$num_rows++;
