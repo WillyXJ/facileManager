@@ -1,4 +1,4 @@
-1.3-beta1 (2014-07-??)
+1.3-beta1 (2014-08-20)
 ======================
 * Server - [improvement] Changed order of named.conf sections.
 * Server - [feature] Automatically includes the hint zone. (Issue #104)
