@@ -275,15 +275,12 @@ HTML;
 			/** Automatically skip duplicates */
 			$checked = $this->checkDuplicates($array, $_POST['domain_id']);
 			
-			$class = buildSelect('create[' . $count . '][record_class]', 'class' . $count . 'b', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $array['record_class'], 1, null, false, 'exchange(this);');
-			$type = buildSelect('create[' . $count . '][record_type]', 'type' . $count . 'b', $available_record_types, $array['record_type'], 1, null, false, 'exchange(this);');
-
 			$rows .= <<<ROW
 					<tr class="import_swap">
 						<td><span id="name{$count}" onclick="exchange(this);">{$array['record_name']}</span><input onblur="exchange(this);" type="text" id="name{$count}b" name="create[$count][record_name]" value="{$array['record_name']}" /></td>
 						<td><span id="ttl{$count}" onclick="exchange(this);">{$array['record_ttl']}</span><input onblur="exchange(this);" type="number" id="ttl{$count}b" name="create[$count][record_ttl]" value="{$array['record_ttl']}" /></td>
-						<td><span id="class{$count}" onclick="exchange(this);">{$array['record_class']}</span>$class</td>
-						<td><span id="type{$count}" onclick="exchange(this);">{$array['record_type']}</span>$type</td>
+						<td><input type="hidden" name="create[$count][record_class]" value="{$array['record_class']}" />{$array['record_class']}</td>
+						<td><input type="hidden" name="create[$count][record_type]" value="{$array['record_type']}" />{$array['record_type']}</td>
 						<td><span id="priority{$count}" onclick="exchange(this);">{$array['record_priority']}</span><input onblur="exchange(this);" type="number" id="priority{$count}b" name="create[$count][record_priority]" value="{$array['record_priority']}" /></td>
 						<td><span id="value{$count}" onclick="exchange(this);">{$array['record_value']}</span><input onblur="exchange(this);" type="text" id="value{$count}b" name="create[$count][record_value]" value="{$array['record_value']}" /></td>
 						<td><span id="weight{$count}" onclick="exchange(this);">{$array['record_weight']}</span><input onblur="exchange(this);" type="number" id="weight{$count}b" name="create[$count][record_weight]" value="{$array['record_weight']}" /></td>
@@ -326,6 +323,7 @@ ROW;
 				$rows
 				</tbody>
 			</table>
+			<br />
 		$popup_footer
 		</form>
 BODY;
@@ -383,19 +381,19 @@ BODY;
 			$return .= 'Running tests for ' . $results[$x]->server_name . "\n";
 			
 			/** ping tests */
-			$return .= "\tPing:\t\t\t";
+			$return .= "\t" . str_pad('Ping:', 15);
 			if (pingTest($results[$x]->server_name)) $return .=  'success';
 			else $return .=  'failed';
 			$return .=  "\n";
 
 			/** remote port tests */
-			$return .= "\tRemote Port:\t\t";
+			$return .= "\t" . str_pad('Remote Port:', 15);
 			if ($results[$x]->server_update_method != 'cron') {
 				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
 					$return .= 'success (tcp/' . $results[$x]->server_update_port . ")\n";
 					
 					if ($results[$x]->server_update_method == 'ssh') {
-						$return .= "\tSSH Login:\t";
+						$return .= "\t" . str_pad('SSH Login:', 15);
 						if (!$ssh_key) {
 							$return .= 'no SSH key defined';
 						} elseif ($ssh_key_loaded === false) {
@@ -410,7 +408,7 @@ BODY;
 						}
 					} else {
 						/** php tests */
-						$return .= "\thttp page:\t\t";
+						$return .= "\t" . str_pad('http page:', 15);
 						$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
 									$_SESSION['module'] . '/reload.php', null);
 						if ($php_result == 'Incorrect parameters defined.') $return .= 'success';
@@ -422,7 +420,7 @@ BODY;
 			$return .=  "\n";
 			
 			/** dns tests */
-			$return .= "\tDNS:\t\t\t";
+			$return .= "\t" . str_pad('DNS:', 15);
 			$port = 53;
 			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  'success (tcp/' . $port . ')';
 			else $return .=  'failed (tcp/' . $port . ')';

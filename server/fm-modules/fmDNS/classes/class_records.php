@@ -102,7 +102,6 @@ class fm_dns_records {
 		$sql_values = rtrim($sql_values, ',');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-//		echo $query; exit;
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;
