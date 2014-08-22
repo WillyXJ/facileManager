@@ -46,7 +46,7 @@ function printModuleHelp () {
   -z|zones       Build all associated zone files
   -c|cron        Run in cron mode
      dump-cache  Dump the DNS cache
-	 clear-cache Clear the DNS cache
+     clear-cache Clear the DNS cache
      id=XX       Specify the individual DomainID to build and reload
   
 HELP;

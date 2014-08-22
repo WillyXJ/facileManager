@@ -371,7 +371,7 @@ VALUES
 ('options', 'check-integrity', '( yes | no )', 'no', 'OVZ', 'yes'),
 ('options', 'check-mx', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
 ('options', 'check-mx-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
-('options', 'check-names', '( master | slave | response ) ( warn | fail | ignore )', 'no', 'OVZ', 'yes'),
+('options', 'check-names', '( warn | fail | ignore )', 'no', 'Z', 'yes'),
 ('options', 'check-sibling', '( yes | no )', 'no', 'OVZ', 'yes'),
 ('options', 'check-srv-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
 ('options', 'check-wildcard', '( yes | no )', 'no', 'OVZ', 'yes'),

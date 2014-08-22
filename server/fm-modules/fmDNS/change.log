@@ -4,6 +4,7 @@
 * Server - [bug] Allow IPv6 addresses in ACLs. (Issue #146)
 * Server - [bug] Fixed config options inputs and error messages.
 * Server - [bug] Fixed zone imports.
+* Server - [bug] Fixed check-names zone syntax.
 
 1.3-beta1 (2014-08-20)
 ======================

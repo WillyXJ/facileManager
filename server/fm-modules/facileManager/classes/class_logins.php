@@ -415,7 +415,7 @@ HTML;
 <p>You (or somebody else) has requested a link to reset your $fm_name password.</p>
 <p>If you don't want to reset your password, then you can ignore this message.</p>
 <p>To reset your password, click the following link:<br />
-<<a href="{$GLOBALS['FM_URL']}password_reset?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset?key=$uniq_hash&login={$user_info['user_login']}</a>></p>
+<<a href="{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}</a>></p>
 </div>
 </div>
 <p style="font-size: 10px; color: #888; text-align: center;">$fm_name | $from_address</p>
@@ -432,7 +432,7 @@ If you don't want to reset your password, then you can ignore this message.
 
 To reset your password, click the following link:
 
-{$GLOBALS['FM_URL']}password_reset?key=$uniq_hash&login={$user_info['user_login']}
+{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}
 BODY;
 		}
 		
