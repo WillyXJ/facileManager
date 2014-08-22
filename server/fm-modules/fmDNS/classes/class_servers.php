@@ -517,7 +517,7 @@ FORM;
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
-		$options[] = null;
+		$options[] = $response = null;
 		
 		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 		
@@ -543,8 +543,6 @@ FORM;
 			if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
 				$options[] = 'purge';
 			}
-
-			$response = buildPopup('header', $friendly_action . ' Results');
 		}
 		
 		switch($server_update_method) {
@@ -619,6 +617,7 @@ FORM;
 					@unlink($temp_ssh_key);
 					return '<p class="error">Could not login via SSH.</p>'. "\n";
 				}
+				unset($post_result);
 				
 				/** Run build */
 				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l fm_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php $action " . implode(' ', $options) . "'", $post_result, $retval);
@@ -659,7 +658,7 @@ FORM;
 		addLogEntry(ucfirst($friendly_action) . " was performed on server '$tmp_name'.");
 
 		if (strpos($response, "<pre>") !== false) {
-			$response .= $popup_footer;
+			$response = buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
 		}
 		return $response;
 	}

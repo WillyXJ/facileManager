@@ -93,7 +93,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		}
 	}
 	$result .= "\n" . ucwords($_POST['bulk_action']) . ' is complete.</pre>';
-	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), "");
+	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL('Servers'));
 
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
