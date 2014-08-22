@@ -34,9 +34,7 @@ if (is_array($_POST) && count($_POST)) {
 			exit('<p class="error">You are not authorized to build server configs.</p>');
 		}
 		$server_serial_no = getNameFromID($_POST['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
-		$response = buildPopup('header', 'Configuration Build Results');
-		$response .= $fm_module_servers->buildServerConfig($server_serial_no);
-		exit($response . buildPopup('footer', 'OK', array('cancel_button' => 'cancel')));
+		exit($fm_module_servers->buildServerConfig($server_serial_no));
 	}
 }
 

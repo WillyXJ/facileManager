@@ -1342,10 +1342,12 @@ HTML;
 	 * @return string
 	 */
 	function getZoneOptions($domain_id, $server_serial_no) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
 		$config = null;
+		
+		$server_root_dir = getNameFromID($server_serial_no, "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
 		
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id='$domain_id' AND server_serial_no=0 AND cfg_status='active'");
 		if ($fmdb->num_rows) {
