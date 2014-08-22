@@ -1151,7 +1151,7 @@ HTML;
 		/** Cleans up acl_addresses for future parsing **/
 		$clean_fields = array('forwarders', 'masters');
 		foreach ($clean_fields as $val) {
-			$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], true);
+			$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
 			if ($post['domain_required_servers'][$val] === false) return 'Invalid address(es) specified';
 		}
 

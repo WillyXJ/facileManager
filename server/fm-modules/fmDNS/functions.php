@@ -416,30 +416,45 @@ function getNSCount($domain_id) {
  * @package facileManager
  * @subpackage fmDNS
  */
-function verifyAndCleanAddresses($data, $allow_alpha = false) {
-	$alpha = (!$allow_alpha) ? 'a-z' : null;
-	
+function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 	/** Remove extra spaces */
 	$data = preg_replace('/\s\s+/', ' ', $data);
 	
-	/** Check for bad chars */
-	if (preg_match("([-\!@#\$&\*\+\=\|:'\"%^\(\)" . $alpha . "])", $data)) return false;
-	
 	/** Swap delimiters for ; */
-	$data = str_replace(array("\n", ';', ' '), ';', $data);
-	$data = str_replace(';;', ';', $data);
-	$data = rtrim($data, ';');
-	if (!empty($data)) $data .= ';';
-	$data = str_replace(';', '; ', $data);
+	$data = str_replace(array("\n", ';', ' ', ','), ',', $data);
+	$data = str_replace(',,', ',', $data);
+	$data = rtrim($data, ',');
+	if (!empty($data)) $data .= ',';
 	
-	/** Tried to do some IP validation, but it won't work.
-	 *  People can enter 10. which is valid for named.
-	$addresses = explode(';', $data);
+	$addresses = explode(',', $data);
 	foreach ($addresses as $ip_address) {
-		echo $ip_address . '<br />';
-		if (ip2long($ip_address) === false || ip2long($ip_address) ==  -1) return false;
+		$ip_address = rtrim(trim($ip_address), '.');
+		if (!strlen($ip_address)) continue;
+//		if ($allow_acl && preg_match("/^acl_(\d).*/", $ip_address)) continue;
+		
+		/** Handle negated addresses */
+		if (strpos($ip_address, '!') == 0) {
+			$ip_address = substr($ip_address, 1);
+		}
+		
+		/** IPv4 checks */
+		if (strpos($ip_address, ':') === false) {
+			if (strpos($ip_address, '/') !== false && $subnets_allowed == 'subnets-allowed') {
+				$cidr_array = explode('/', $ip_address);
+				list($ip_address, $cidr) = $cidr_array;
+				/** Valid CIDR? */
+				if (!verifyNumber($cidr, 0, 32)) return false;
+			}
+			/** Create full IP */
+			$ip_octets = explode('.', $ip_address);
+			if (count($ip_octets) < 4) {
+				$ip_octets = array_merge($ip_octets, array_fill(count($ip_octets), 4 - count($ip_octets), 0));
+			}
+			$ip_address = implode('.', $ip_octets);
+		}
+		
+		if (verifyIPAddress($ip_address) === false) return false;
 	}
-	*/
 	
 	return $data;
 }

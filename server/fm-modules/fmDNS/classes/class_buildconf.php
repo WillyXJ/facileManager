@@ -140,10 +140,10 @@ class fm_module_buildconf {
 					if ($acl_result[$i]->acl_predefined != 'as defined:') {
 						$global_acl_array[$acl_result[$i]->acl_name] = array($acl_result[$i]->acl_predefined, $acl_result[$i]->acl_comment);
 					} else {
-						$addresses = explode(' ', $acl_result[$i]->acl_addresses);
+						$addresses = explode(',', $acl_result[$i]->acl_addresses);
 						$global_acl_array[$acl_result[$i]->acl_name] = null;
 						foreach($addresses as $address) {
-							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . "\n";
+							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
 						}
 						$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
 					}
@@ -158,10 +158,10 @@ class fm_module_buildconf {
 						if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
 							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
 						} else {
-							$addresses = explode(' ', $server_acl_result[$j]->acl_addresses);
+							$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
 							$server_acl_addresses = null;
 							foreach($addresses as $address) {
-								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . "\n";
+								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
 							}
 							$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 						}
@@ -604,19 +604,13 @@ class fm_module_buildconf {
 					
 					switch($zone_result[$i]->domain_type) {
 						case 'master':
-							$zones .= "\tfile \"$server_zones_dir/master/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
-//							$zones .= $zone_result[$i]->domain_check_names ? "\tcheck-names " . $zone_result[$i]->domain_check_names . ";\n" : null;
-//							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
-							/** Build zone file */
-							$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
-							break;
 						case 'slave':
-							$zones .= "\tfile \"$server_zones_dir/slave/db." . $domain_name . "$file_ext\";\n";
-							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
-							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
-							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
-							$zones .= $zone_result[$i]->domain_multi_masters ? "\tmulti-master " . $zone_result[$i]->domain_multi_masters . ";\n" : null;
+							$zones .= "\tfile \"$server_zones_dir/{$zone_result[$i]->domain_type}/db." . $domain_name_file . "$file_ext\";\n";
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
+							/** Build zone file */
+							if ($zone_result[$i]->domain_type == 'master') {
+								$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
+							}
 							break;
 						case 'stub':
 							$zones .= "\tfile \"$server_zones_dir/stub/db." . $domain_name . "$file_ext\";\n";
@@ -1373,6 +1367,8 @@ HTML;
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			list($cfg_info, $cfg_comment) = $cfg_data;
+			
+			$cfg_info = str_replace(',', '; ', $cfg_info);
 
 			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 			$fmdb->get_results($query);

@@ -196,7 +196,7 @@ class fm_dns_acls {
 		}
 		
 		$edit_name = $row->acl_name;
-		$edit_addresses = ($row->acl_predefined == 'as defined:') ? nl2br(str_replace(';', "\n", $row->acl_addresses)) : $row->acl_predefined;
+		$edit_addresses = ($row->acl_predefined == 'as defined:') ? nl2br(str_replace(',', "\n", $row->acl_addresses)) : $row->acl_predefined;
 		
 		$comments = nl2br($row->acl_comment);
 
@@ -230,7 +230,7 @@ HTML;
 		}
 		
 		$acl_predefined = buildSelect('acl_predefined', 'acl_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_predefined'), $acl_predefined);
-		$acl_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $acl_addresses), ';'));
+		$acl_addresses = str_replace(',', "\n", rtrim(str_replace(' ', '', $acl_addresses), ';'));
 
 		/** Get field length */
 		$acl_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
