@@ -935,8 +935,8 @@ VALUES
 ('options', 'journal', '( quoted_string )', 'no', 'Z', 'no'),
 ('options', 'key-directory', '( quoted_string )', 'no', 'OVZ', 'no'),
 ('options', 'lame-ttl', '( seconds )', 'no', 'OV', 'no'),
-('options', 'listen-on', '[ port ( ip_port | * ) ] { ( address_match_element ) }', 'yes', 'OR', 'no'),
-('options', 'listen-on-v6', '[ port ( ip_port | * ) ] { ( address_match_element ) }', 'yes', 'O', 'no'),
+('options', 'listen-on', '[ port ( ip_port | * ) ] { ( ipv4_address ) }', 'yes', 'OR', 'no'),
+('options', 'listen-on-v6', '[ port ( ip_port | * ) ] { ( ipv6_address ) }', 'yes', 'O', 'no'),
 ('options', 'managed-keys-directory', '( quoted_string )', 'no', 'O', 'no'),
 ('options', 'masterfile-format', '( text | raw )', 'no', 'OVZ', 'yes'),
 ('options', 'masters', '( { ipv4_address | ipv6_address } )', 'yes', 'OVZ', 'no'),
@@ -1126,6 +1126,8 @@ function upgradefmDNS_1302($__FM_CONFIG, $running_version) {
 	
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ';', ',') WHERE instr(acl_addresses, ';') > 0;";
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ' ', '') WHERE instr(acl_addresses, ' ') > 0;";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv4_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on';";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv6_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on-v6';";
 
 	if (count($updates) && $updates[0]) {
 		foreach ($updates as $schema) {

@@ -67,7 +67,7 @@ class fm_module_options {
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
-		if ($fmdb->num_rows) return false;
+		if ($fmdb->num_rows) return 'This record already exists.';
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
@@ -80,8 +80,8 @@ class fm_module_options {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'cfg_comment') return false;
-				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return false;
+				if (!strlen($clean_data) && $key != 'cfg_comment') return 'Empty values are not allowed.';
+				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return $clean_data . ' is not an acceptable option name.';
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
 			}
@@ -92,7 +92,7 @@ class fm_module_options {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return false;
+		if (!$fmdb->result) return 'A database error occurred. ' . $fmdb->last_error;
 
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
@@ -226,7 +226,7 @@ HTML;
 	function printForm($data = '', $action = 'add', $cfg_type = 'global', $cfg_type_id = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$cfg_id = 0;
+		$cfg_id = $cfg_type_id = 0;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
 		$server_serial_no_field = $cfg_isparent = $cfg_parent = $cfg_data = null;
