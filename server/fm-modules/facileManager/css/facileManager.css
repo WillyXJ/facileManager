@@ -984,6 +984,7 @@ a {
 	max-height: 480px;
 	overflow-y: auto;
 	padding: 0 2em;
+	background: #ffffff;
 }
 
 .popup-footer {
