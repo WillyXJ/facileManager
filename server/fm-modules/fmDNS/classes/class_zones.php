@@ -1055,7 +1055,8 @@ HTML;
 		}
 		
 		/** Ensure user is allowed to reload zone */
-		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id));
+		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id)) & 
+				currentUserCan('reload_zones');
 		
 		if (count($response) == 1 && !$zone_access_allowed) {
 			$response[] = ' --> Failed: You do not have permission to reload this zone.';
