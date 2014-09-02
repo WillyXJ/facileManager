@@ -847,6 +847,7 @@ class fm_module_buildconf {
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
 			$record_result = $fmdb->last_result;
+			$separator = '   ';
 			
 			/** Add full zone clone dname record */
 			if (isset($domain->parent_domain_id) && $full_zone_clone == true) {
@@ -872,78 +873,78 @@ class fm_module_buildconf {
 					case 'A':
 					case 'AAAA':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Host addresses';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'CERT':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.7.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Certificates';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'CNAME':
 					case 'DNAME':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Aliases';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'DHCID':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DHCP ID records';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+//						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DLV':
 					case 'DS':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DNSSEC Lookaside Validation';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+//						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DNSKEY':
 					case 'KEY':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Key records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'HINFO':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Hardware information records';
 						$hardware = (strpos($record_result[$i]->record_value, ' ') === false) ? $record_result[$i]->record_value : '"' . $record_result[$i]->record_value . '"';
 						$os = (strpos($record_result[$i]->record_os, ' ') === false) ? $record_result[$i]->record_os : '"' . $record_result[$i]->record_os . '"';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $hardware . ' ' . $os . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $hardware . ' ' . $os . $record_comment . "\n";
 						break;
 					case 'KX':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Key Exchange records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'MX':
 						$record_array[2 . $record_result[$i]->record_type]['Description'] = 'Mail Exchange records';
-						$record_array[2 . $record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[2 . $record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'TXT':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . "\"" . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . "\"" . $record_comment . "\n";
 						break;
 					case 'SSHFP':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'SSH Key Fingerprint records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_algorithm . ' 1 ' . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_algorithm . ' 1 ' . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'SRV':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_weight . "\t" . $record_result[$i]->record_port . "\t" . $record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_weight . $separator . $record_result[$i]->record_port . $separator . $record_value . $record_comment . "\n";
 						break;
 					case 'PTR':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Addresses point to hosts';
 						$record_name = ($record_result[$i]->record_append == 'yes' && $domain->domain_mapping == 'reverse') ? $record_result[$i]->record_name . '.' . $domain_name : $record_result[$i]->record_name;
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'RP':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Responsible Persons';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
 						$record_text = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_text . '.' . $domain_name_trim . '.' : $record_result[$i]->record_text;
 						if (!strlen($record_result[$i]->record_text)) $record_text = '.';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . "\t" . $record_text . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_value . $separator . $record_text . $record_comment . "\n";
 						break;
 					case 'NS':
 						$record_array[1 . $record_result[$i]->record_type]['Description'] = 'Name servers';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
-						$record_array[1 . $record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . $record_comment . "\n";
+						$record_array[1 . $record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_value . $record_comment . "\n";
 						break;
 				}
 			}
