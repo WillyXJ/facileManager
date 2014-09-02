@@ -537,7 +537,7 @@ FORM;
 				$raw_data = $fm_module_buildconf->buildServerConfig($data);
 
 				$response = @$fm_module_buildconf->namedSyntaxChecks($raw_data);
-				if (strpos($response, 'error') !== false) return $response;
+				if (strpos($response, 'error') !== false) return buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
 			}
 
 			if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
