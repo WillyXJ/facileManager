@@ -27,6 +27,7 @@ $(document).ready(function() {
 				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
 					$this.fadeOut(400);
 					$this.parent().parent().removeClass('build');
+					$this.parent().parent().find('input:checkbox:first').remove();
 				}
 			}
 		});
