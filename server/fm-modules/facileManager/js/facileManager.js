@@ -5,11 +5,21 @@ $(document).ready(function() {
 	
 	$(document).keyup(function(e) {
 		if (e.keyCode == KEYCODE_ESC) { $('#cancel_button').click(); } 
-	});    
-	    
+	});
 
 	$(function() {
-		$( ".datepicker" ).datepicker();
+		$(".datepicker").datepicker();
+		$("select").select2({minimumResultsForSearch: 10});
+		$("#bulk_action").select2({minimumResultsForSearch: -1, width: '120px', allowClear: true});
+		$("#server_serial_no").select2({minimumResultsForSearch: 10});
+		$("#settings select").select2({
+			width: '200px',
+			minimumResultsForSearch: 10
+		});
+		$("#admin-tools-select select").select2({
+			width: '300px',
+			minimumResultsForSearch: 10
+		});
 	});
 	
 	$('input:text, input:password, select').first().focus();
@@ -93,7 +103,7 @@ $(document).ready(function() {
         var $this 		= $(this);
         item_type		= $('#table_edits').attr('name');
         item_sub_type	= $this.attr('name');
-        item_id			= $('#plus').attr('name');
+        item_id			= $this.attr('rel');
 		var server_serial_no	= getUrlVars()["server_serial_no"];
 
 		$('#manage_item').fadeIn(200);
@@ -117,7 +127,10 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
-				$( ".datepicker" ).datepicker();
+				if ($('#manage_item_contents').width() >= 700) {
+					$('#manage_item_contents').addClass('wide');
+				}
+				$(".datepicker").datepicker();
 				$('.form-table input:text, .form-table select').first().focus();
 			}
 		});
@@ -134,6 +147,7 @@ $(document).ready(function() {
         item_sub_type	= $this.attr('name');
         var server_serial_no	= getUrlVars()["server_serial_no"];
         var view_id		= getUrlVars()["view_id"];
+        var domain_id		= getUrlVars()["domain_id"];
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
@@ -146,6 +160,7 @@ $(document).ready(function() {
 			item_sub_type: item_sub_type,
 			server_serial_no: server_serial_no,
 			view_id: view_id,
+			domain_id: domain_id,
 			is_ajax: 1
 		};
 
@@ -156,7 +171,10 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#manage_item_contents').html(response);
-				$( ".datepicker" ).datepicker();
+				if ($('#manage_item_contents').width() >= 700) {
+					$('#manage_item_contents').addClass('wide');
+				}
+				$(".datepicker").datepicker();
 				$('.form-table input, .form-table select').first().focus();
 			}
 		});
@@ -214,7 +232,10 @@ $(document).ready(function() {
 						} else {
 							$('#manage_item').fadeIn(200);
 							$('#manage_item_contents').fadeIn(200);
-							$('#manage_item_contents').html('<h2>Delete Results</h2>' + response + '<br /><input type="submit" value="OK" class="button" id="cancel_button" />');
+							$('#manage_item_contents').html(response);
+							if ($('#manage_item_contents').width() >= 700) {
+								$('#manage_item_contents').addClass('wide');
+							}
 						}
 					}
 				}
@@ -225,9 +246,15 @@ $(document).ready(function() {
     });
 
     /* Cancel button */
-    $('#manage_item_contents').delegate('#cancel_button', 'click tap', function(e) {
+    $('#manage_item_contents').delegate('#cancel_button, .close', 'click tap', function(e) {
+		e.preventDefault();
 		$('#manage_item').fadeOut(200);
 		$('#manage_item_contents').fadeOut(200).html();
+		$('#manage_item_contents').removeClass('wide');
+		var link = $(this).attr('href');
+		if (link) {
+			window.location = link;
+		}
 	});
 	
 	
@@ -389,17 +416,14 @@ $(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $('#admin-tools').delegate('form input.button:not("#import-records, #cancel, #import, #db-backup"), #module_install, #module_upgrade',
+    $('#admin-tools').delegate('form input.button:not("#import-records, #import, #db-backup"), #module_install, #module_upgrade',
     'click tap',function(e){
         var $this 	= $(this);
         task		= $this.attr('id');
         item		= $this.attr('name');
+		var form_data = $('#admin-tools-form').serialize();
 
-		var form_data = {
-			task: task,
-			item: item,
-			is_ajax: 1
-		};
+		form_data += '&task=' + task + '&item=' + item + '&is_ajax=1';
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
@@ -498,11 +522,11 @@ $(document).ready(function() {
 	
 	$("#help_topbar img.popout").click(function() {
 		$("#topheadpartright .help_link").click();
-		window.open('help','1356124444538','width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0');
+		window.open('help.php','1356124444538','width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0');
 		return false;
 	});
 	
-	$("#help_topbar img.close").click(function() {
+	$("#help_topbar .close").click(function() {
 		$("#topheadpartright .help_link").click();
 	});
 	
@@ -554,7 +578,10 @@ $(document).ready(function() {
 		
 							$('#manage_item').fadeIn(200);
 							$('#manage_item_contents').fadeIn(200);
-							$('#manage_item_contents').html('<h2>Configuration Build Results</h2>' + response + '<br /><input type="submit" value="OK" class="button" id="cancel_button" />');
+							$('#manage_item_contents').html(response);
+							if ($('#manage_item_contents').width() >= 700) {
+								$('#manage_item_contents').addClass('wide');
+							}
 							
 							$('#response').delay(300).fadeTo(200, 0.00, function() {
 								$('#response').slideUp(400);
@@ -563,7 +590,8 @@ $(document).ready(function() {
 						
 						if (response.toLowerCase().indexOf("failed") == -1 && 
 							response.toLowerCase().indexOf("one or more errors") == -1 && 
-							response.toLowerCase().indexOf("you are not authorized") == -1
+							response.toLowerCase().indexOf("you are not authorized") == -1 && 
+							response.toLowerCase().indexOf("does not have php configured") == -1
 							) {
 							$this.fadeOut(400);
 							$this.parent().parent().removeClass('build');
@@ -619,10 +647,9 @@ $(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
-						if (response.indexOf("<h2>") >= 0) {
-							$('#manage_item_contents').html(response);
-						} else {
-							$('#manage_item_contents').html('<h2>' + $('#bulk_action').val() + ' Results</h2><textarea rows="20" cols="85">' + response + '</textarea><p><a href="" class="button">OK</a></p>');
+						$('#manage_item_contents').html(response);
+						if ($('#manage_item_contents').width() >= 700) {
+							$('#manage_item_contents').addClass('wide');
 						}
 					}
 				});
@@ -633,7 +660,6 @@ $(document).ready(function() {
 	/* Sortable table headers */
     $('.sortable th:not(".header-nosort")').click(function() {
     	var sort_by_field = $(this).attr('rel');
-    	var sort_direction = $(this).parent().parent().parent().attr('id');
     	
     	if (sort_by_field) {
     		if (window.location.href.indexOf('?') != -1) {

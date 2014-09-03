@@ -45,20 +45,14 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 	switch ($action) {
 	case 'create':
 		if (!empty($_POST)) {
-			$insert_id = $fm_dns_zones->add();
+			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
 				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
 				$form_data = $_POST;
-			} else header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=SOA');
-		}
-		break;
-	case 'delete':
-		if (isset($_GET['domain_id'])) {
-			$zone_delete_status = $fm_dns_zones->delete(sanitize($_GET['domain_id']));
-			if ($zone_delete_status !== true) {
-				$response = '<p class="error">' . $zone_delete_status . '</p>'. "\n";
-				$action = 'create';
-			} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
+			} else {
+				$redirect_record_type = (isset($_POST['soa_id']) && $_POST['soa_id']) ? 'NS' : 'SOA';
+				header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=' . $redirect_record_type);
+			}
 		}
 		break;
 	case 'edit':
@@ -134,12 +128,22 @@ printHeader();
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
-if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to manage one or more servers.</p>';
+if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . getMenuURL('Servers') . '">Click here</a> to manage one or more servers.</p>';
 
 echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='$map' AND domain_clone_domain_id='0'");
-$fm_dns_zones->rows($result, $map, $reload_allowed);
+$sort_direction = null;
+$sort_field = 'domain_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_mapping='$map' AND domain_clone_domain_id='0'", null, false, $sort_direction);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+echo displayPagination($page, $total_pages);
+
+$fm_dns_zones->rows($result, $map, $reload_allowed, $page);
 
 printFooter();
 

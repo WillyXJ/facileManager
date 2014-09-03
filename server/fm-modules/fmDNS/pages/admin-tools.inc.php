@@ -45,7 +45,7 @@ $tools_option[] = <<<HTML
 			<table class="form-table">
 				<tr>
 					<th>File to import:</th>
-					<td><input id="import-file" name="import-file" type="file" $disabled /></td>
+					<td><input id="import-file" name="import-file" type="file" /></td>
 				</tr>
 				<tr>
 					<th>Zone to import to:</th>
@@ -57,12 +57,33 @@ $tools_option[] = <<<HTML
 			<br />
 HTML;
 
+$button = null;
+if (currentUserCan('run_tools') && currentUserCan('manage_servers', $_SESSION['module'])) {
+	$button = '<p class="step"><input id="dump-cache" name="submit" type="submit" value="Dump Cache" class="button" /> '
+			. '<input id="clear-cache" name="submit" type="submit" value="Clear Cache" class="button" /></p>';
+}
+
+$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $fm_dns_zones->availableDNSServers(), 0, 5, null, true, null, null, 'Select one or more servers');
+
+$tools_option[] = <<<HTML
+			<div id="admin-tools-select">
+			<h2>Cache Management</h2>
+			<p>Dump or clear server cache.</p>
+			$name_servers
+			$button
+			</div>
+			<br />
+HTML;
+
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
 		case 'Import Records':
 			if (!empty($_FILES['import-file']['tmp_name'])) {
 				$block_style = 'style="display: block;"';
 				$output = $fm_module_tools->zoneImportWizard();
+				if (strpos($output, 'You do not have permission') === false) {
+					$classes = 'wide';
+				}
 			}
 			break;
 	}

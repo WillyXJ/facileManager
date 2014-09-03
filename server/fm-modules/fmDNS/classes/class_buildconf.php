@@ -53,11 +53,14 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildServerConfig($post_data) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
 		
 		/** Get datetime formatting */
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
+		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 		
 		setTimezone();
 		
@@ -91,62 +94,95 @@ class fm_module_buildconf {
 			$logging = $keys = $servers = null;
 			
 
-			/** Build global configs */
-			$config .= "options {\n";
-			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=0 AND cfg_status="active"');
+			/** Build keys config */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view=0 AND key_status="active"');
 			if ($fmdb->num_rows) {
-				$config_result = $fmdb->last_result;
-				$global_config_count = $fmdb->num_rows;
-				for ($i=0; $i < $global_config_count; $i++) {
-					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+				$key_result = $fmdb->last_result;
+				$key_config_count = $fmdb->num_rows;
+				for ($i=0; $i < $key_config_count; $i++) {
+					$key_name = trimFullStop($key_result[$i]->key_name);
+					$keys .= $key_name . "\n";
+					if ($key_result[$i]->key_comment) {
+						$comment = wordwrap($key_result[$i]->key_comment, 50, "\n");
+						$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
+					$key_config .= "key \"$key_name\" {\n";
+					$key_config .= "\talgorithm " . $key_result[$i]->key_algorithm . ";\n";
+					$key_config .= "\tsecret \"" . $key_result[$i]->key_secret . "\";\n";
+					$key_config .= "};\n\n";
+					
+					/** Get associated servers */
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_', 'AND server_serial_no!=' . $server_serial_no . ' AND server_key=' . $key_result[$i]->key_id . ' AND server_status="active"');
+					if ($fmdb->num_rows) {
+						$server_result = $fmdb->last_result;
+						$server_count = $fmdb->num_rows;
+						for ($j=0; $j < $server_count; $j++) {
+							$servers .= $this->formatServerKeys($server_result[$j]->server_name, $key_name);
+						}
+					}
 				}
-			} else $global_config = array();
-
-			/** Override with server-specific configs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_view=0 AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
-			if ($fmdb->num_rows) {
-				$server_config_result = $fmdb->last_result;
-				$global_config_count = $fmdb->num_rows;
-				for ($j=0; $j < $global_config_count; $j++) {
-					$server_config[$server_config_result[0]->cfg_name] = array($server_config_result[0]->cfg_data, $config_result[$i]->cfg_comment);
-				}
-			} else $server_config = array();
-
-			/** Merge arrays */
-			$config_array = array_merge($global_config, $server_config);
-			
-			foreach ($config_array as $cfg_name => $cfg_data) {
-				list($cfg_info, $cfg_comment) = $cfg_data;
-				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-				$fmdb->get_results($query);
-				if (!$fmdb->num_rows) $def_multiple_values = 'no';
-				else {
-					$result = $fmdb->last_result[0];
-					$def_multiple_values = $result->def_multiple_values;
-				}
-				if ($cfg_comment) {
-					$comment = wordwrap($cfg_comment, 50, "\n");
-					$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-					unset($comment);
-				}
-				$config .= "\t" . $cfg_name . ' ';
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
-				$config .= ";\n";
-				
-				unset($cfg_info);
-				if ($cfg_comment) $config .= "\n";
 			}
-			$config .= "};\n\n";
 			
-			/** Debian-based requires named.conf.options */
-			if (isDebianSystem($server_os_distro)) {
-				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
-				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";
-				$data->files[$server_config_file] = $config;
-				$config = $zones;
+			$config .= $servers;
+
+			if ($keys) {
+				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
+			
+				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
+			}
+			
+			/** Build ACLs */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no=0');
+			if ($fmdb->num_rows) {
+				$acl_result = $fmdb->last_result;
+				for ($i=0; $i < $fmdb->num_rows; $i++) {
+					if ($acl_result[$i]->acl_predefined != 'as defined:') {
+						$global_acl_array[$acl_result[$i]->acl_name] = array($acl_result[$i]->acl_predefined, $acl_result[$i]->acl_comment);
+					} else {
+						$addresses = explode(',', $acl_result[$i]->acl_addresses);
+						$global_acl_array[$acl_result[$i]->acl_name] = null;
+						foreach($addresses as $address) {
+							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
+						}
+						$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
+					}
+				}
+
+				/** Override with server-specific ACLs */
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no=' . $server_serial_no);
+				if ($fmdb->num_rows) {
+					$server_acl_result = $fmdb->last_result;
+					$acl_config_count = $fmdb->num_rows;
+					for ($j=0; $j < $acl_config_count; $j++) {
+						if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
+							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
+						} else {
+							$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
+							$server_acl_addresses = null;
+							foreach($addresses as $address) {
+								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+							}
+							$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+						}
+					}
+				} else $server_acl_array = array();
+
+				/** Merge arrays */
+				$acl_array = array_merge($global_acl_array, $server_acl_array);
+
+				/** Format ACL config */
+				foreach ($acl_array as $acl_name => $acl_data) {
+					list($acl_item, $acl_comment) = $acl_data;
+					if ($acl_comment) {
+						$comment = wordwrap($acl_comment, 50, "\n");
+						$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
+					$config .= 'acl "' . $acl_name . "\" {\n";
+					$config .= "\t" . $acl_item . ";\n";
+					$config .= "};\n\n";
+				}
 			}
 			
 
@@ -193,96 +229,98 @@ class fm_module_buildconf {
 			}
 			if ($logging) $logging = "logging {\n$logging};\n\n";
 			
+			$config .= $logging;
 
-			/** Build keys config */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view=0 AND key_status="active"');
+
+			/** Build global configs */
+			$config .= "options {\n";
+			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0 AND server_serial_no=0 AND cfg_status="active"');
 			if ($fmdb->num_rows) {
-				$key_result = $fmdb->last_result;
-				$key_config_count = $fmdb->num_rows;
-				for ($i=0; $i < $key_config_count; $i++) {
-					$key_name = trimFullStop($key_result[$i]->key_name) . '.';
-					$keys .= $key_name . "\n";
-					if ($key_result[$i]->key_comment) {
-						$comment = wordwrap($key_result[$i]->key_comment, 50, "\n");
-						$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+				$config_result = $fmdb->last_result;
+				$global_config_count = $fmdb->num_rows;
+				for ($i=0; $i < $global_config_count; $i++) {
+					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+				}
+			} else $global_config = array();
+
+			/** Override with server-specific configs */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				$server_config_result = $fmdb->last_result;
+				$global_config_count = $fmdb->num_rows;
+				for ($j=0; $j < $global_config_count; $j++) {
+					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
+				}
+			} else $server_config = array();
+
+			/** Merge arrays */
+			$config_array = array_merge($global_config, $server_config);
+			
+			$include_hint_zone = false;
+
+			foreach ($config_array as $cfg_name => $cfg_data) {
+				list($cfg_info, $cfg_comment) = $cfg_data;
+
+				/** Include hint zone (root servers) */
+				if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
+
+				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+				$fmdb->get_results($query);
+				if (!$fmdb->num_rows) $def_multiple_values = 'no';
+				else {
+					$result = $fmdb->last_result[0];
+					$def_multiple_values = $result->def_multiple_values;
+				}
+				if ($cfg_comment) {
+					$comment = wordwrap($cfg_comment, 50, "\n");
+					$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+					unset($comment);
+				}
+				$config .= "\t" . $cfg_name . ' ';
+				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
+				$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
+				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+				$config .= ";\n";
+				
+				unset($cfg_info);
+				if ($cfg_comment) $config .= "\n";
+			}
+			$config .= "};\n\n";
+			
+			
+			/** Build controls configs */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN (0,' . $server_serial_no . ') AND control_status="active"');
+			if ($fmdb->num_rows) {
+				$control_result = $fmdb->last_result;
+				$control_config_count = $fmdb->num_rows;
+				$control_config = "controls {\n";
+				for ($i=0; $i < $control_config_count; $i++) {
+					if ($control_result[$i]->control_comment) {
+						$comment = wordwrap($control_result[$i]->control_comment, 50, "\n");
+						$control_config .= "\t// " . str_replace("\n", "\n// ", $comment) . "\n";
 						unset($comment);
 					}
-					$key_config .= "key $key_name {\n";
-					$key_config .= "\talgorithm " . $key_result[$i]->key_algorithm . ";\n";
-					$key_config .= "\tsecret \"" . $key_result[$i]->key_secret . "\";\n";
-					$key_config .= "};\n\n";
-					
-					/** Get associated servers */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_id', 'server_', 'AND server_serial_no!=' . $server_serial_no . ' AND server_key=' . $key_result[$i]->key_id . ' AND server_status="active"');
-					if ($fmdb->num_rows) {
-						$server_result = $fmdb->last_result;
-						$server_count = $fmdb->num_rows;
-						for ($j=0; $j < $server_count; $j++) {
-							$servers .= $this->formatServerKeys($server_result[$j]->server_name, $key_name);
-						}
-					}
+					$control_config .= "\tinet " . $control_result[$i]->control_ip;
+					if ($control_result[$i]->control_port != 953) $control_config .= ' port ' . $control_result[$i]->control_port;
+					if (!empty($control_result[$i]->control_addresses)) $control_config .= ' allow { ' . trim($fm_dns_acls->parseACL($control_result[$i]->control_addresses), '; ') . '; }';
+					$control_config .= (!empty($control_result[$i]->control_keys)) ? ' keys { "' . $fm_dns_keys->parseKey($control_result[$i]->control_keys) . '"; };' : ";";
+					$control_config .= "\n";
 				}
-			}
+				$control_config .= "};\n\n";
+			} else $control_config = null;
 			
-			$config .= $logging . $servers;
+			$config .= $control_config;
+			unset($control_config);
 
-			if ($keys) {
-				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
 			
-				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
-			}
-			
-			/** Build ACLs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no=0');
-			if ($fmdb->num_rows) {
-				$acl_result = $fmdb->last_result;
-				for ($i=0; $i < $fmdb->num_rows; $i++) {
-					if ($acl_result[$i]->acl_predefined != 'as defined:') {
-						$global_acl_array[$acl_result[$i]->acl_name] = array($acl_result[$i]->acl_predefined, $acl_result[$i]->acl_comment);
-					} else {
-						$addresses = explode(' ', $acl_result[$i]->acl_addresses);
-						$global_acl_array[$acl_result[$i]->acl_name] = null;
-						foreach($addresses as $address) {
-							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . "\n";
-						}
-						$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
-					}
-				}
-
-				/** Override with server-specific ACLs */
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no=' . $server_serial_no);
-				if ($fmdb->num_rows) {
-					$server_acl_result = $fmdb->last_result;
-					$acl_config_count = $fmdb->num_rows;
-					for ($j=0; $j < $acl_config_count; $j++) {
-						if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $acl_result[$i]->acl_comment);
-						} else {
-							$addresses = explode(' ', $server_acl_result[$j]->acl_addresses);
-							$server_acl_addresses = null;
-							foreach($addresses as $address) {
-								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . "\n";
-							}
-							$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
-						}
-					}
-				} else $server_acl_array = array();
-
-				/** Merge arrays */
-				$acl_array = array_merge($global_acl_array, $server_acl_array);
-
-				/** Format ACL config */
-				foreach ($acl_array as $acl_name => $acl_data) {
-					list($acl_item, $acl_comment) = $acl_data;
-					if ($acl_comment) {
-						$comment = wordwrap($acl_comment, 50, "\n");
-						$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
-						unset($comment);
-					}
-					$config .= 'acl "' . $acl_name . "\" {\n";
-					$config .= "\t" . $acl_item . ";\n";
-					$config .= "};\n\n";
-				}
+			/** Debian-based requires named.conf.options */
+			if (isDebianSystem($server_os_distro)) {
+				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
+				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";
+				$data->files[$server_config_file] = $config;
+				$config = $zones;
 			}
 			
 
@@ -300,7 +338,7 @@ class fm_module_buildconf {
 					$config .= 'view "' . $view_result[$i]->view_name . "\" {\n";
 
 					/** Get cooresponding config records */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=0 AND cfg_view='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=0 AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -310,7 +348,7 @@ class fm_module_buildconf {
 					} else $view_config = array();
 
 					/** Override with server-specific configs */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=$server_serial_no AND cfg_view='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no=$server_serial_no AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$server_config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -324,6 +362,10 @@ class fm_module_buildconf {
 
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
+
+						/** Include hint zone (root servers) */
+						if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
+
 						$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 						$fmdb->get_results($query);
 						if (!$fmdb->num_rows) $def_multiple_values = 'no';
@@ -338,6 +380,7 @@ class fm_module_buildconf {
 						}
 						$config .= "\t" . $cfg_name . ' ';
 						if ($def_multiple_values == 'yes') $config .= '{ ';
+						$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
 						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 						if ($def_multiple_values == 'yes') $config .= '; }';
 						$config .= ";\n";
@@ -379,7 +422,7 @@ class fm_module_buildconf {
 					}
 					
 					/** Generate zone file */
-					$tmp_files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name);
+					$tmp_files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name, $include_hint_zone);
 					
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
@@ -397,7 +440,7 @@ class fm_module_buildconf {
 				}
 			} else {
 				/** Generate zones.all.conf */
-				$files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no);
+				$files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, 0, null, $include_hint_zone);
 				
 				/** Include all zones in one file */
 				if (is_array($files)) {
@@ -439,8 +482,6 @@ class fm_module_buildconf {
 	 */
 	function buildZoneConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
-		
-		$zones = null;
 		
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);
@@ -512,8 +553,8 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null) {
-		global $fmdb, $__FM_CONFIG;
+	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		include(ABSPATH . 'fm-includes/version.php');
 		
@@ -525,6 +566,16 @@ class fm_module_buildconf {
 		$zones = '// This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 		$server_id = getServerID($server_serial_no, $_SESSION['module']);
 		
+		/** Build hint zone (root servers) */
+		if ($include_hint_zone) {
+			$zones .= 'zone "." {' . "\n";
+			$zones .= "\ttype hint;\n";
+			$zones .= "\tfile \"$server_zones_dir/hint/named.root\";\n";
+			$zones .= "};\n";
+			
+			$files[$server_zones_dir . '/hint/named.root'] = $this->getHintZone();
+		}
+
 		/** Build zones */
 		$view_sql = "and (`domain_view`=0 or `domain_view`=$view_id or `domain_view` LIKE '$view_id;%' or `domain_view` LIKE '%;$view_id' or `domain_view` LIKE '%;$view_id;%')";
 		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id%' or `domain_name_servers` like '%;$server_id;%') $view_sql order by `domain_clone_domain_id`,`domain_name`";
@@ -553,24 +604,22 @@ class fm_module_buildconf {
 					
 					switch($zone_result[$i]->domain_type) {
 						case 'master':
-							$zones .= "\tfile \"$server_zones_dir/master/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $zone_result[$i]->domain_check_names ? "\tcheck-names " . $zone_result[$i]->domain_check_names . ";\n" : null;
-							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
-							/** Build zone file */
-							$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
-							break;
 						case 'slave':
-							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
-							$zones .= "\tfile \"$server_zones_dir/slave/db." . $domain_name . "$file_ext\";\n";
-							$zones .= $zone_result[$i]->domain_notify_slaves ? "\tnotify " . $zone_result[$i]->domain_notify_slaves . ";\n" : null;
-							$zones .= $zone_result[$i]->domain_multi_masters ? "\tmulti-master " . $zone_result[$i]->domain_multi_masters . ";\n" : null;
+							$zones .= "\tfile \"$server_zones_dir/{$zone_result[$i]->domain_type}/db." . $domain_name_file . "$file_ext\";\n";
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
+							/** Build zone file */
+							if ($zone_result[$i]->domain_type == 'master') {
+								$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
+							}
 							break;
 						case 'stub':
-							$zones .= "\tmasters { " . $zone_result[$i]->domain_master_servers . "};\n";
 							$zones .= "\tfile \"$server_zones_dir/stub/db." . $domain_name . "$file_ext\";\n";
+							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
+							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$zones .= "\tforwarders { " . $zone_result[$i]->domain_forward_servers . "};\n";
+							$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
+							$zones .= "\tforwarders { " . trim($fm_dns_acls->parseACL($domain_forward_servers), '; ') . "; };\n";
 					}
 					$zones .= "};\n";
 	
@@ -667,6 +716,10 @@ class fm_module_buildconf {
 							$domain_name = $this->getDomainName($zone_result[0]->domain_mapping, trimFullStop($zone_result[0]->domain_name));
 							$file_ext = ($zone_result[0]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 
+							/** Are there multiple zones with the same name? */
+							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[0]->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result[0]->domain_id);
+							if ($fmdb->num_rows) $file_ext = $zone_result[0]->domain_id . ".$file_ext";
+							
 							/** Build zone file */
 							$data->files[$server_zones_dir . '/' . $zone_result[0]->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result[0]);
 							
@@ -723,7 +776,9 @@ class fm_module_buildconf {
 		
 		$zone_file = null;
 		
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND `domain_id`='" . $domain->domain_id . "'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE 
+			domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.account_id='{$_SESSION['user']['account_id']}'
+			AND s.soa_id=d.soa_id AND d.domain_id={$domain->domain_id}";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$soa_result = $fmdb->last_result;
@@ -760,7 +815,7 @@ class fm_module_buildconf {
 	function buildRecords($domain, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_records;
 		
-		$zone_file = null;
+		$zone_file = $skipped_records = null;
 		$domain_name_trim = trimFullStop($domain->domain_name);
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		
@@ -792,6 +847,7 @@ class fm_module_buildconf {
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
 			$record_result = $fmdb->last_result;
+			$separator = '   ';
 			
 			/** Add full zone clone dname record */
 			if (isset($domain->parent_domain_id) && $full_zone_clone == true) {
@@ -817,73 +873,78 @@ class fm_module_buildconf {
 					case 'A':
 					case 'AAAA':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Host addresses';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'CERT':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.7.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Certificates';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'CNAME':
 					case 'DNAME':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Aliases';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'DHCID':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DHCP ID records';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+//						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DLV':
 					case 'DS':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DNSSEC Lookaside Validation';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+//						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DNSKEY':
 					case 'KEY':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Key records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'HINFO':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Hardware information records';
 						$hardware = (strpos($record_result[$i]->record_value, ' ') === false) ? $record_result[$i]->record_value : '"' . $record_result[$i]->record_value . '"';
 						$os = (strpos($record_result[$i]->record_os, ' ') === false) ? $record_result[$i]->record_os : '"' . $record_result[$i]->record_os . '"';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $hardware . ' ' . $os . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $hardware . ' ' . $os . $record_comment . "\n";
 						break;
 					case 'KX':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Key Exchange records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'MX':
 						$record_array[2 . $record_result[$i]->record_type]['Description'] = 'Mail Exchange records';
-						$record_array[2 . $record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[2 . $record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'TXT':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . "\"" . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . "\"" . $record_comment . "\n";
+						break;
+					case 'SSHFP':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'SSH Key Fingerprint records';
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_algorithm . ' 1 ' . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'SRV':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_priority . "\t" . $record_result[$i]->record_weight . "\t" . $record_result[$i]->record_port . "\t" . $record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_weight . $separator . $record_result[$i]->record_port . $separator . $record_value . $record_comment . "\n";
 						break;
 					case 'PTR':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Addresses point to hosts';
 						$record_name = ($record_result[$i]->record_append == 'yes' && $domain->domain_mapping == 'reverse') ? $record_result[$i]->record_name . '.' . $domain_name : $record_result[$i]->record_name;
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'RP':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Responsible Persons';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
 						$record_text = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_text . '.' . $domain_name_trim . '.' : $record_result[$i]->record_text;
 						if (!strlen($record_result[$i]->record_text)) $record_text = '.';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . "\t" . $record_text . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_value . $separator . $record_text . $record_comment . "\n";
 						break;
 					case 'NS':
 						$record_array[1 . $record_result[$i]->record_type]['Description'] = 'Name servers';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
-						$record_array[1 . $record_result[$i]->record_type]['Data'][] = $record_name . "\t" . $record_result[$i]->record_ttl . "\t" . $record_result[$i]->record_class . "\t" . $record_result[$i]->record_type . "\t" . $record_value . $record_comment . "\n";
+						$record_array[1 . $record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_value . $record_comment . "\n";
 						break;
 				}
 			}
@@ -977,7 +1038,7 @@ class fm_module_buildconf {
 	 */
 	function mergeZoneDetails($zone, $all_zones, $count) {
 		for ($i = 0; $i < $count; $i++) {
-			if ($all_zones[$i]->domain_id == $zone->domain_clone_domain_id) {
+			if (isset($all_zones[$i]->domain_id) && $all_zones[$i]->domain_id == $zone->domain_clone_domain_id) {
 				$all_zones[$i]->parent_domain_id = $zone->domain_id;
 				$all_zones[$i]->domain_id = $zone->domain_clone_domain_id;
 				$all_zones[$i]->domain_name = $zone->domain_name;
@@ -1065,6 +1126,7 @@ class fm_module_buildconf {
 	function namedSyntaxChecks($files_array) {
 		global $__FM_CONFIG;
 		
+		if (!array_key_exists('server_serial_no', $files_array)) return;
 		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
 		
 		$die = false;
@@ -1212,6 +1274,131 @@ HTML;
 		return $servers;
 	}
 
+
+	/**
+	 * Gets the hint zone
+	 *
+	 * @since 1.3
+	 * @package fmDNS
+	 *
+	 * @return string
+	 */
+	function getHintZone() {
+		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
+		
+		$this->getLatestRootServers();
+		
+		$hint_zone = file_get_contents($local_hint_zone);
+		
+		return $hint_zone;
+	}
+
+
+	/**
+	 * Gets the latest root servers
+	 *
+	 * @since 1.3
+	 * @package fmDNS
+	 */
+	function getLatestRootServers() {
+		global $__FM_CONFIG;
+		
+		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
+		$remote_hint_zone = 'http://www.internic.net/domain/named.root';
+		
+		$remote_headers = get_headers($remote_hint_zone, 1);
+		
+		if (filemtime($local_hint_zone) < strtotime($remote_headers['Last-Modified']) && !isset($GLOBALS['root_servers_updated'])) {
+			$GLOBALS['root_servers_updated'] = true;
+			
+			/** Download the latest root servers (must be writeable by web server */
+			if (is_writeable($local_hint_zone)) {
+				file_put_contents($local_hint_zone, fopen($remote_hint_zone, 'r'));
+			} else {
+				echo <<<HTML
+			<div id="named_check" class="info">
+				<p>The root servers have been recently updated, but the webserver user ({$__FM_CONFIG['webserver']['user_info']['name']}) cannot write to $local_hint_zone to update the hint zone.</p>
+				<p>A local copy will be used instead.</p>
+			</div>
+HTML;
+			}
+		}
+	}
+
+
+	/**
+	 * Formats the server key statements
+	 *
+	 * @since 1.3
+	 * @package fmDNS
+	 *
+	 * @param integer $domain_id The domain_id of the zone
+	 * @param integer $server_serial_no The server serial number
+	 * @return string
+	 */
+	function getZoneOptions($domain_id, $server_serial_no) {
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
+		
+		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		$config = null;
+		
+		$server_root_dir = getNameFromID($server_serial_no, "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
+		
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id='$domain_id' AND server_serial_no=0 AND cfg_status='active'");
+		if ($fmdb->num_rows) {
+			$config_result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_config_count; $i++) {
+				$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+			}
+		} else $global_config = array();
+
+		/** Override with server-specific configs */
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id='$domain_id' AND server_serial_no=$server_serial_no AND cfg_status='active'");
+		if ($fmdb->num_rows) {
+			$server_config_result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($j=0; $j < $global_config_count; $j++) {
+				$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
+			}
+		} else $server_config = array();
+
+		/** Merge arrays */
+		$config_array = array_merge($global_config, $server_config);
+		
+		foreach ($config_array as $cfg_name => $cfg_data) {
+			list($cfg_info, $cfg_comment) = $cfg_data;
+			
+			$cfg_info = str_replace(',', '; ', $cfg_info);
+
+			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+			$fmdb->get_results($query);
+			if (!$fmdb->num_rows) $def_multiple_values = 'no';
+			else {
+				$result = $fmdb->last_result[0];
+				$def_multiple_values = $result->def_multiple_values;
+			}
+			if ($cfg_comment) {
+				$comment = wordwrap($cfg_comment, 50, "\n");
+				$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
+				unset($comment);
+			}
+			$config .= "\t" . $cfg_name . ' ';
+			if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
+			
+			/** Parse address_match_element configs */
+			$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
+
+			$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+			if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+			$config .= ";\n";
+
+			unset($cfg_info);
+			if ($cfg_comment) $config .= "\n";
+		}
+
+		return $config;
+	}
 }
 
 if (!isset($fm_module_buildconf))

@@ -25,25 +25,30 @@ class fm_dns_records {
 	/**
 	 * Displays the record list
 	 */
-	function rows($result, $record_type, $domain_id) {
-		global $fmdb;
+	function rows($result, $record_type, $domain_id, $page) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return = null;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
+			$return = '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
 		} else {
-			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$end = $_SESSION['user']['record_count'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $_SESSION['user']['record_count'] * $page;
 
 			$table_info = array('class' => 'display_results sortable');
 
-			echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
+			$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
 			
-			for ($x=0; $x<$num_rows; $x++) {
-				echo $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
+			for ($x=$start; $x<$end; $x++) {
+				$return .= $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
 			}
 			
-			echo "</tbody>\n</table>\n";
+			$return .= "</tbody>\n</table>\n";
 		}
+		
+		return $return;
 	}
 
 	/**
@@ -52,7 +57,7 @@ class fm_dns_records {
 	function add($domain_id, $record_type, $new_array) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$domain_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		$domain_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$log_message = "Added a record with the following details:\nDomain: $domain_name\nType: $record_type\n";
 
 		$table = ($record_type == 'SOA') ? 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa' : 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records';
@@ -69,11 +74,10 @@ class fm_dns_records {
 		}
 		
 		$sql_insert = "INSERT INTO `$table`";
-		$sql_fields = '(domain_id,';
-		$sql_values = "$domain_id,";
+		$sql_fields = '(';
 		if ($record_type != 'SOA' && $record_type) {
-			$sql_fields .= 'record_type,';
-			$sql_values .= "'$record_type',";
+			$sql_fields .= 'domain_id,record_type,';
+			$sql_values .= "$domain_id,'$record_type',";
 		}
 		
 		$new_array['account_id'] = $_SESSION['user']['account_id'];
@@ -101,6 +105,11 @@ class fm_dns_records {
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;
+		
+		/** Update domain with SOA ID */
+		if ($record_type == 'SOA') {
+			$this->assignSOA($fmdb->insert_id, $domain_id);
+		}
 
 		/** Update the SOA serial number */
 		$soa_count = getSOACount($domain_id);
@@ -124,7 +133,7 @@ class fm_dns_records {
 	function update($domain_id, $id, $record_type, $array, $skipped_record = false) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$domain_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		$domain_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$record_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_name');
 		$log_message = "Updated a record ($record_name) with the following details:\nDomain: $domain_name\nType: $record_type\n";
 
@@ -195,27 +204,40 @@ class fm_dns_records {
 		
 		$table_info = array('class' => 'display_results');
 
-		echo displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');
-		echo $this->getInputForm(strtoupper($record_type), true, $domain_id);
-		?>
+		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');
+		$return .= $this->getInputForm(strtoupper($record_type), true, $domain_id);
+		$return .= <<<HTML
 			</tbody>
 		</table>
 		<p class="add_records"><a id="add_records" href="#">+ Add more records</a></p>
-		<?php
+HTML;
+		return $return;
 	}
 
 	function getHeader($type) {
 		global $zone_access_allowed;
 		
 		$show_value = true;
-		$title_array[] = array('title' => 'Record', 'rel' => 'record_name');
+		if ($type == 'SOA') {
+			$show_value = false;
+			$title_array[] = array('title' => 'Name', 'rel' => 'soa_name');
+			$title_array[] = array('title' => 'Master', 'rel' => 'soa_master_server');
+			$title_array[] = array('title' => 'E-mail', 'rel' => 'soa_email_address');
+			$title_array[] = array('title' => 'Refresh', 'rel' => 'soa_refresh');
+			$title_array[] = array('title' => 'Retry', 'rel' => 'soa_retry');
+			$title_array[] = array('title' => 'Expire', 'rel' => 'soa_expire');
+			$title_array[] = array('title' => 'TTL', 'rel' => 'soa_ttl');
+		}
 		if ($type != 'SOA') {
+			$title_array[] = array('title' => 'Record', 'rel' => 'record_name');
 			$title_array[] = array('title' => 'TTL', 'rel' => 'record_ttl');
 			$title_array[] = array('title' => 'Class', 'rel' => 'record_class');
 		}
 		if ($type == 'CERT' ) {
 			$title_array[] = array('title' => 'Type', 'rel' => 'record_cert_type');
 			$title_array[] = array('title' => 'Key Tag', 'rel' => 'record_key_tag');
+		}
+		if (in_array($type, array('CERT', 'SSHFP'))) {
 			$title_array[] = array('title' => 'Algorithm', 'rel' => 'record_algorithm');
 		}
 		if ($type == 'HINFO') {
@@ -244,9 +266,11 @@ class fm_dns_records {
 			$title_array[] = array('title' => 'Port', 'rel' => 'record_port');
 		}
 		
-		$title_array[] = array('title' => 'Comment', 'rel' => 'record_comment');
+		if ($type != 'SOA') {
+			$title_array[] = array('title' => 'Comment', 'rel' => 'record_comment');
+		}
 		
-		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null);
+		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null, 'rel' => 'record_append');
 		
 		if ($type != 'SOA') $title_array[] = array('title' => 'Status', 'rel' => 'record_status');
 		if (empty($_POST)) {
@@ -318,6 +342,11 @@ class fm_dns_records {
 				$value_textarea = true;
 			}
 			
+			if ($type == 'SSHFP') {
+				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['sshfp_algorithms'], $record_algorithm);
+				$value_textarea = true;
+			}
+			
 			if ($type == 'HINFO') {
 				$field_values['data']['Hardware'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
 				$field_values['data']['OS'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_os]" value="' . $record_os . '" />';
@@ -361,14 +390,15 @@ class fm_dns_records {
 		
 			$field_values['data']['Comment'] = '><input maxlength="200" type="text" name="' . $action . '[_NUM_][record_comment]" value="' . $record_comment . '" />';
 			
-			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' align="center"><label><input ' . $yeschecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="yes" /> yes</label> <label><input ' . $nochecked . ' type="radio" name="' . $action . '[_NUM_][record_append]" value="no" /> no</label>';
+			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' align="center"><input ' . $yeschecked . ' type="radio" id="record_append[_NUM_][0]" name="' . $action . '[_NUM_][record_append]" value="yes" /><label class="radio" for="record_append[_NUM_][0]"> yes</label> <input ' . $nochecked . ' type="radio" id="record_append[_NUM_][1]" name="' . $action . '[_NUM_][record_append]" value="no" /><label class="radio" for="record_append[_NUM_][1]"> no</label>';
 			
 			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['data']['Actions'] = in_array($type, array('A', 'AAAA')) ? ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][PTR]" />Create PTR</label>' : null;
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label>' : null;
 			} else {
-				$field_values['data']['Actions'] = ' align="center"><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][Delete]" />Delete</label>';
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label><br />' : ' align="center">';
+				$field_values['data']['Actions'] .= '<input type="checkbox" id="record_delete[' . $record_id . ']" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete[' . $record_id . ']">Delete</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
@@ -390,7 +420,7 @@ class fm_dns_records {
 			$field_values['data']['Status'] = '>' . $record_status;
 			
 			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed && $domain_id != $parent_domain_id) {
-				$field_values['data']['Actions'] = ' align="center"><input type="hidden" name="' . $action . '[_NUM_][record_skipped]" value="off" /><label><input style="height: 10px;" type="checkbox" name="' . $action . '[_NUM_][record_skipped]" ';
+				$field_values['data']['Actions'] = ' align="center"><input type="hidden" name="' . $action . '[_NUM_][record_skipped]" value="off" /><label><input type="checkbox" name="' . $action . '[_NUM_][record_skipped]" ';
 				$field_values['data']['Actions'] .= in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id)) ? ' checked' : null;
 				$field_values['data']['Actions'] .= '/>Skip Import</label>';
 			}
@@ -410,29 +440,68 @@ class fm_dns_records {
 		return $form;
 	}
 	
-	function buildSOA($result, $soa_id) {
+	function buildSOA($result, $show = array('template_menu', 'create_template', 'template_name'), $force_action = 'auto') {
 		global $__FM_CONFIG, $disabled;
 		
+		$soa_id = 0;
+		$soa_name = $soa_templates = $create_template = null;
+		$map = isset($_GET['map']) ? $_GET['map'] : 'forward';
+		
 		if ($result) {
-			$action = 'update';
 			extract(get_object_vars($result[0]));
 			$yeschecked = ($soa_append == 'yes') ? 'checked' : '';
 			$nochecked = ($soa_append == 'no') ? 'checked' : '';
+			$action = $soa_template == 'yes' ? 'create' : 'update';
 		} else {
 			$action = 'create';
-			$SOAID = 0;
-			$yeschecked = ($_GET['map'] == 'forward') ? 'checked' : '';
+			$yeschecked = ($map == 'forward') ? 'checked' : '';
 			$nochecked = ($yeschecked) ? '' : 'checked';
 			extract($__FM_CONFIG['soa']);
 		}
+		
+		if ($force_action != 'auto') {
+			$action = $force_action;
+		}
+		
+		if (array_search('template_menu', $show) !== false) {
+			$soa_templates = buildSelect("{$action}[soa_template_chosen]", 'soa_template_chosen', $this->availableSOATemplates(), $soa_id);
+			$soa_templates = <<<HTML
+	<div class="soa-template-dropdown">
+		<strong>Select a Template</strong>
+		$soa_templates
+	</div>
+HTML;
+		}
 	
-		$SerialForm = "<span id=\"serial1\" onclick=\"exchange(this);\" style=\"cursor: pointer;\">AutoGen</span><input maxlength=\"9\" onblur=\"exchange(this);\" name=\"{$action}[$soa_id][soa_serial_no]\" id=\"serial1b\" class=\"replace\" type=\"text\" value=\"\">";
-				
-		echo <<<HTML
+		if (array_search('create_template', $show) !== false) {
+			$create_template = <<<HTML
+		<tr>
+			<th>Create Template</th>
+			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" checked /><label for="soa_create_template"> yes</label></td>
+		</tr>
+HTML;
+		} else {
+			$create_template = <<<HTML
+			<input type="hidden" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" />
+HTML;
+		}
+	
+		if (array_search('template_name', $show) !== false) {
+			$template_name = <<<HTML
+		<tr id="soa_template_name">
+			<th>Template Name</th>
+			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" value="$soa_name" /></td>
+		</tr>
+HTML;
+		}
+	
+		return <<<HTML
+		$soa_templates
+	<div id="custom-soa-form">
 	<table class="form-table">
 		<tr>
 			<th width="120">Serial Number</th>
-			<td>$SerialForm</td>
+			<td><span style="position: relative; top: -2px;">Auto Generated</span></td>
 		</tr>
 		<tr>
 			<th>Master Server</th>
@@ -460,9 +529,12 @@ class fm_dns_records {
 		</tr>
 		<tr>
 			<th>Append Domain</th>
-			<td><label><input type="radio" name="{$action}[$soa_id][soa_append]" value="yes" $yeschecked /> yes</label> <label><input type="radio" name="{$action}[$soa_id][soa_append]" value="no" $nochecked /> no</label></td>
+			<td><input type="radio" id="append[0]" name="{$action}[$soa_id][soa_append]" value="yes" $yeschecked /><label class="radio" for="append[0]"> yes</label> <input type="radio" id="append[1]" name="{$action}[$soa_id][soa_append]" value="no" $nochecked /><label class="radio" for="append[1]"> no</label></td>
 		</tr>
+		$create_template
+		$template_name
 	</table>
+	</div>
 HTML;
 	}
 	
@@ -471,7 +543,7 @@ HTML;
 		global $fmdb, $fm_dns_zones, $__FM_CONFIG;
 		
 		/** Check domain_id and soa */
-		$query = "select * from fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.domain_id=d.domain_id and d.domain_id=$domain_id";
+		$query = "select * from fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.soa_id=d.soa_id and d.domain_id=$domain_id";
 		$result = $fmdb->query($query);
 		if (!$fmdb->num_rows) return false;
 
@@ -514,6 +586,62 @@ HTML;
 		
 		return $skipped_records;
 	}
+	
+	
+	/**
+	 * Builds an array of available SOA templates
+	 *
+	 * @since 1.3
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @return array
+	 */
+	function availableSOATemplates() {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return[0][] = 'Custom';
+		$return[0][] = '0';
+		
+		$query = "SELECT soa_id,soa_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}soa WHERE account_id='{$_SESSION['user']['account_id']}' 
+			AND soa_status='active' AND soa_template='yes' ORDER BY soa_name ASC";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$return[$i+1][] = $results[$i]->soa_name;
+				$return[$i+1][] = $results[$i]->soa_id;
+			}
+		}
+		return $return;
+	}
+	
+	
+	/**
+	 * Builds an array of available SOA templates
+	 *
+	 * @since 1.3
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $soa_id SOA ID to assign
+	 * @param id $domain_id Domain ID to assign to
+	 * @return boolean
+	 */
+	function assignSOA($soa_id, $domain_id) {
+		global $__FM_CONFIG;
+		
+		$old_soa_id = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_id');
+		
+		if (basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $domain_id, 'soa_id', $soa_id, 'domain_id')) {
+			/** Delete old custom SOA */
+			if (getNameFromID($old_soa_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}soa", 'soa_', 'soa_id', 'soa_template') == 'no') {
+				updateStatus("fm_{$__FM_CONFIG['fmDNS']['prefix']}soa", $old_soa_id, 'soa_', 'deleted', 'soa_id');
+			}
+		}
+	}
+	
+	
 }
 
 if (!isset($fm_dns_records))

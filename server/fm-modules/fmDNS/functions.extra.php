@@ -42,7 +42,7 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 	if (isSerialized($user_module_perms)) {
 		$user_module_perms = unserialize($user_module_perms);
 	}
-	$available_zones_perms = isset($user_module_perms[$module_name]['access_specific_zones']) ? $user_module_perms[$module_name]['access_specific_zones'] : null;
+	$available_zones_perms = isset($user_module_perms[$module_name]['access_specific_zones']) ? $user_module_perms[$module_name]['access_specific_zones'] : 0;
 	
 	/** Get available zones */
 	$available_zones[0][] = 'All Zones';
@@ -52,11 +52,11 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$available_zones[$i+1][] = $results[$i]->domain_name;
+			$available_zones[$i+1][] = displayFriendlyDomainName($results[$i]->domain_name);
 			$available_zones[$i+1][] = $results[$i]->domain_id;
 		}
 	}
-	$zones_list = buildSelect("user_caps[$module_name][access_specific_zones]", 1, $available_zones, $available_zones_perms, 5, null, true);
+	$zones_list = buildSelect("user_caps[$module_name][access_specific_zones]", 1, $available_zones, $available_zones_perms, 5, null, true, null, 'wide_select', 'Select one or more zones');
 	
 	return <<<HTML
 							<tr>

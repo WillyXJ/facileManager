@@ -191,9 +191,11 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-		<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version' rel='stylesheet' type='text/css'>
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version" rel="stylesheet" type="text/css">
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.css?ver=$fm_version" type="text/css" />
 		$module_css
 		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js?ver=$fm_version" type="text/javascript" charset="utf-8"></script>
 		$module_js
@@ -210,11 +212,11 @@ HTML;
  * @since 1.0
  * @package facileManager
  */
-function printFooter($text = null, $block_style = null) {
+function printFooter($classes = null, $text = null, $block_style = null) {
 	echo <<<FOOT
 	</div>
 <div class="manage_form_container" id="manage_item" $block_style></div>
-<div class="manage_form_contents" id="manage_item_contents" $block_style>
+<div class="manage_form_contents $classes" id="manage_item_contents" $block_style>
 $text
 </div>
 </body></html>
@@ -581,7 +583,7 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 	if (is_array($id)) {
 		$primary_field = sanitize($id[0]);
 		$secondary_fields = implode(',', $id);
-		$secondary_fields = $direction . ' ' . sanitize(substr($secondary_fields, strlen($primary_field)));
+		$secondary_fields = ' ' . $direction . sanitize(substr($secondary_fields, strlen($primary_field)));
 	} else {
 		$primary_field = sanitize($id);
 		$secondary_fields = null;
@@ -606,7 +608,7 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 function updateStatus($table, $id, $prefix, $status, $field = 'id') {
 	global $fmdb;
 	
-	$query = "UPDATE `$table` SET `{$prefix}status`='" . sanitize($status) . "' WHERE `$field`=" . sanitize($id);
+	$query = "UPDATE `$table` SET `{$prefix}status`='" . sanitize($status) . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `$field`=" . sanitize($id);
 
 	return $fmdb->query($query);
 }
@@ -674,18 +676,18 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
  * @since 1.0
  * @package facileManager
  */
-function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $class = null) {
+function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = 'Select an option') {
 	$type_options = null;
 	if (is_array($options[0])) {
 		for ($i = 0; $i < count($options); $i++) {
 			if (is_array($option_select)) {
 				foreach ($option_select as $key) {
-					if ($key == $options[$i][1]) {
+					if (isset($key) && $key == $options[$i][1]) {
 						$selected = ' selected';
 						break;
 					} else $selected = '';
 				}
-			} else $selected = ($option_select == $options[$i][1]) ? ' selected' : '';
+			} else $selected = (isset($option_select) && $option_select == $options[$i][1]) ? ' selected' : '';
 			$type_options.="<option$selected value=\"{$options[$i][1]}\">{$options[$i][0]}</option>\n";
 		}
 	} else {
@@ -694,8 +696,7 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 			$type_options.="<option$selected>$options[$i]</option>\n";
 		}
 	}
-	$build_select = "<select ";
-	if ($class) $build_select .= "class=\"$class\" ";
+	$build_select = "<select class=\"$classes\" data-placeholder=\"$placeholder\" ";
 	$build_select .= "size=\"$size\" name=\"{$select_name}";
 	if ($multiple) $build_select .= '[]';
 	$build_select .= "\" id=\"$select_id\"";
@@ -722,14 +723,14 @@ function trimFullStop($value){
  * @since 1.0
  * @package facileManager
  */
-function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null) {
+function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null, $status = null) {
 	global $fmdb;
 	
 	if (!$account_id) {
 		$account_id = $_SESSION['user']['account_id'];
 	}
 	
-	basicGet($table, $id, $prefix, $field, null, $account_id);
+	basicGet($table, $id, $prefix, $field, $status, $account_id);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
 		if (isset($result[0]->$data)) return $result[0]->$data;
@@ -991,33 +992,33 @@ function buildHelpFile() {
 			<p>Modules are what gives $fm_name purpose. They can be installed, activated, upgraded, deactivated, and uninstalled.</p>
 			
 			<p><b>Install</b><br />
-			Just extract the module into the 'fm-modules' directory on the server host (if not already present), go to Admin &rarr; 
-			<a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, and then click the 'Install' button next to the module 
+			Just extract the module into the 'fm-modules' directory on the server host (if not already present), go to 
+			<a href="__menu{Modules}">Modules</a>, and then click the 'Install' button next to the module 
 			you wish to install.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Activate</b><br />
 			In order for the module to be usable, it needs to be active in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Activate' link next 
+			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Activate' link next 
 			to the module you wish to activate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Upgrade</b><br />
 			Anytime module files are individually updated in the 'fm-modules' directory on the server host apart from updating $fm_name 
 			as a whole, they will need to be upgraded to ensure full compatibility and functionality.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Upgrade' button next 
+			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Upgrade' button next 
 			to the module you wish to upgrade. This will upgrade the database with any required changed.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Deactivate</b><br />
 			If you no longer want a module to be usable, it can be deactived in the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a> and click the 'Deactivate' link next 
+			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Deactivate' link next 
 			to the module you wish to deactivate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
 			<br />
 			<p><b>Uninstall</b><br />
 			If you no longer want a module to be installed, it can be uninstalled via the UI.</p>
-			<p>Go to Admin &rarr; <a href="{$__FM_CONFIG['menu']['Modules']['URL']}">Modules</a>, ensure the module is already 
+			<p>Go to <a href="__menu{Modules}">Modules</a>, ensure the module is already 
 			deactivated, and then click the 'Uninstall' button next to the module you wish to remove. This will remove all associated 
 			entries and tables from the database.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
@@ -1029,7 +1030,7 @@ function buildHelpFile() {
 			<p>$fm_name incorporates the use of multiple user accounts with granular permissions. This way you can limit access to your 
 			environment.</p>
 			
-			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Users']}">Users</a>.</p>
+			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="__menu{Users}">Users</a>.</p>
 			
 			<p>For non-LDAP users, there are some options you can select:</p>
 			<ul>
@@ -1050,9 +1051,9 @@ function buildHelpFile() {
 				<li><b>User Management</b><br />
 				This permission allows the user to add, modify, and delete user accounts.</li>
 				<li><b>Run Tools</b><br />
-				This permission grants the user access to run the various tools in Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Tools']}">Tools</a>.</li>
+				This permission grants the user access to run the various tools in Admin &rarr; <a href="__menu{Tools}">Tools</a>.</li>
 				<li><b>Manage Settings</b><br />
-				This permission grants the user access to change system settings at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Settings']}">Settings</a>.</li>
+				This permission grants the user access to change system settings at Settings &rarr; <a href="__menu{Settings}">General</a>.</li>
 			</ul>
 			<p><i>The 'User Management' or 'Super Admin' permission is required for these actions.</i></p>
 		</div>
@@ -1060,7 +1061,7 @@ function buildHelpFile() {
 	<li>
 		<a class="list_title">Manage Settings</a>
 		<div>
-			<p>There are several settings available to set at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Settings']}">Settings</a>.</p>
+			<p>There are several settings available to set at Settings &rarr; <a href="__menu{Settings}">General</a>.</p>
 			<p><i>The 'Manage Settings' or 'Super Admin' permission is required to change settings.</i></p>
 			<p><b>Authentication</b><br />
 			There are three types of authentication supported by $fm_name:</p>
@@ -1068,7 +1069,7 @@ function buildHelpFile() {
 				<li><b>None</b><br />
 				Every user will be automatically logged in as the default super-admin account that was created during the installation process.</li>
 				<li><b>Built-in Authentication</b><br />
-				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Users']}">Users</a>.</li>
+				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users}">Users</a>.</li>
 				<li><b>LDAP Authentication</b><br />
 				Users are authenticated against a defined LDAP server. Upon success, users are created in the $fm_name database using the selected 
 				template account for granular permissions within the environment. These users cannot be disabled nor can their passwords be changed 
@@ -1098,7 +1099,7 @@ function buildHelpFile() {
 		<a class="list_title">Review Logs</a>
 		<div>
 			<p>Every action performed within the $fm_name UI will be logged for auditing purposes.</p>
-			<p>You can view and search the logs at Admin &rarr; <a href="{$__FM_CONFIG['menu']['Admin']['Logs']}">Logs</a></p>
+			<p>You can view and search the logs at Admin &rarr; <a href="__menu{Logs}">Logs</a></p>
 		</div>
 	</li>
 </ul>
@@ -1118,7 +1119,7 @@ HTML;
 		}
 	}
 
-	return $body . '<br />';
+	return parseMenuLinks($body) . '<br />';
 }
 
 
@@ -1549,24 +1550,30 @@ function arrayKeysExist($keys, $array) {
  *
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
+ * @param string classes Additional classes to apply to the div
  * @return string
  */
-function displayPagination($page, $total_pages) {
+function displayPagination($page, $total_pages, $classes = null) {
 	if ($total_pages <= 1) return;
 	
 	$search = null;
+	foreach ($GLOBALS['URI'] as $key => $val) {
+		if ($key == 'p') continue;
+		$search .= $key . '=' . $val . '&';
+	}
 	
 	$page_links = array();
 	$end_size = 1;
 	$mid_size = 2;
 	$dots = false;
-	$page_links[] = '<div id="pagination">';
+	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 
-	// Previous link
+	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page - 1) . '">« Previous</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=1\">&laquo;</a>";
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page - 1) . '">&lsaquo;</a>';
 	}
-	// Page number
+	/** Page number */
 	for ($p=1; $p<=$total_pages; $p++) {
 		if ($p == $page) {
 			$page_links[] = '<span class="current">' . $p . '</span>';
@@ -1581,14 +1588,49 @@ function displayPagination($page, $total_pages) {
 			}
 		}
 	}
-	// Next link
+	/** Next link */
 	if ($page < $total_pages) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page + 1) . '">Next »</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page + 1) . '">&rsaquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . $total_pages . '">&raquo;</a>';
 	}
 
 	$page_links[] = '</div>';
+	$page_links[] = buildPaginationCountMenu(0, 'pagination');
 	
 	return join("\n", $page_links);
+}
+
+
+/**
+ * Builds the server listing in a dropdown menu
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ */
+function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
+	global $fmdb, $__FM_CONFIG;
+	
+	$record_count = buildSelect('rc', 'rc', $__FM_CONFIG['limit']['records'], $_SESSION['user']['record_count'], 1, null, false, 'this.form.submit()');
+	
+	$hidden_inputs = null;
+	foreach ($GLOBALS['URI'] as $param => $value) {
+		if ($param == 'rc') continue;
+		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
+	}
+	
+	$class = $class ? 'class="' . $class . '"' : null;
+
+	$return = <<<HTML
+	<div id="configtypesmenu" $class>
+		<form action="{$GLOBALS['basename']}" method="GET">
+		$hidden_inputs
+		$record_count items per page
+		</form>
+	</div>
+HTML;
+
+	return $return;
 }
 
 
@@ -1881,8 +1923,8 @@ function sendFileToBrowser($filename) {
 function setOSIcon($server_os) {
 	global $fm_name;
 	
-	$os_name = array('openSUSE');
-	$os_image = array('SUSE');
+	$os_name = array('openSUSE', 'Raspberry Pi');
+	$os_image = array('SUSE', 'RaspberryPi');
 	
 	$os = file_exists(ABSPATH . 'fm-modules/' . $fm_name . '/images/os/' . str_replace($os_name, $os_image, $server_os) . '.png') ? $server_os : 'unknown';
 	$os_image = '<img src="fm-modules/' . $fm_name . '/images/os/' . str_replace($os_name, $os_image, $os) . '.png" border="0" alt="' . $os . '" title="' . $os . '" width="18" />';
@@ -1900,7 +1942,7 @@ function setOSIcon($server_os) {
  * @param string $server_os Server OS to return the icon for
  * @return string
  */
-function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null) {
+function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null) {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = getPageTitle();
@@ -1912,7 +1954,8 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	
 	if ($allowed_to_add) {
 		if ($name) $name = ' name="' . $name . '"';
-		echo '<a id="plus" href="#" title="Add New"' . $name . '>' . $__FM_CONFIG['icons']['add'] . '</a>';
+		if ($rel) $rel = ' rel="' . $rel . '"';
+		echo '<a id="plus" href="#" title="Add New"' . $name . $rel . '>' . $__FM_CONFIG['icons']['add'] . '</a>';
 	}
 	
 	echo '</h2>' . "\n";
@@ -2023,9 +2066,9 @@ function getBadgeCounts($type) {
  */
 function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 	if (is_array($bulk_actions_list)) {
-		$bulk_actions[] = 'Bulk Actions';
+		$bulk_actions[] = null;
 		
-		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1) . 
+		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1, '', false, null, null, 'Bulk Actions') . 
 			'<input type="submit" name="bulk_apply" id="bulk_apply" value="Apply" class="button" />' . "\n";
 	}
 }
@@ -2377,7 +2420,7 @@ function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $mo
 	}
 	
 	/** Update parent menu badge count */
-	if ($badge_count > 1) {
+	if ($badge_count) {
 		global $menu;
 		
 		$parent_menu_key = getParentMenuKey($parent_slug);
@@ -2485,7 +2528,7 @@ function getPageTitle() {
  * @since 1.2
  * @package facileManager
  *
- * @return integer|bool Returns the badge count or false if the menu item is not found
+ * @return integer|bool Returns the parent menu key or false if the menu item is not found
  */
 function getParentMenuKey($search_slug = null) {
 	global $menu, $submenu;
@@ -2584,4 +2627,134 @@ function setUserModule($user_default_module) {
 }
 
 
+/**
+ * Returns the menu item URL
+ *
+ * @since 1.2.3
+ * @package facileManager
+ *
+ * @param string $search_slug Menu slug to query
+ * @return integer|bool Returns the parent menu key or false if the menu item is not found
+ */
+function getMenuURL($search_slug = null) {
+	global $menu, $submenu;
+	
+	if (!$search_slug) $search_slug = $GLOBALS['basename'];
+	
+	foreach ($menu as $position => $menu_items) {
+		$parent_key = array_search($search_slug, $menu_items, true);
+		if ($parent_key !== false) {
+			return $menu[$position][4];
+		}
+	}
+	
+	foreach ($submenu as $parent_slug => $menu_items) {
+		foreach ($menu_items as $submenu_id => $element) {
+			if (array_search($search_slug, $element, true) !== false) {
+				return $submenu[$parent_slug][$submenu_id][4];
+			}
+		}
+	}
+	
+	return false;
+}
+
+
+/**
+ * Builds the popup window
+ *
+ * @since 1.3
+ * @package facileManager
+ *
+ * @param string $section Popup section to build (header or footer)
+ * @param string $text Popup text to pass for header or buttons
+ * @param array $buttons Buttons to include
+ * @param string $link Link to provide for a button
+ * @return string Returns the popup section
+ */
+function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
+	global $__FM_CONFIG;
+	
+	if ($section == 'header') {
+		return <<<HTML
+		<div class="popup-header">
+			{$__FM_CONFIG['icons']['close']}
+			<h3>$text</h3>
+		</div>
+		<div class="popup-contents">
+
+HTML;
+	} elseif ($section == 'footer') {
+		$id = array_search('submit', $buttons);
+		if ($id !== false) {
+			$id = !is_numeric($id) ? ' id="' . $id . '"' : null;
+			$submit = '<input type="submit" name="submit" value="' . $text . '" class="button primary"' . $id . ' />';
+		} else $submit = null;
+		
+		$id = array_search('cancel', $buttons);
+		if ($id !== false) {
+			$text = array_search('submit', $buttons) !== false ? 'Cancel' : $text;
+			$id = is_numeric($id) ? 'cancel_button' : $id;
+			if ($link !== null) {
+				$cancel = '<a href="' . $link . '" class="button" id="' . $id . '">' . $text . '</a>';
+			} else {
+				$cancel = '<input type="button" value="' . $text . '" class="button ';
+				$cancel .= count($buttons) > 1 ? 'left' : null;
+				$cancel .= '" id="' . $id . '" />';
+			}
+		} else $cancel = null;
+		
+		return <<<HTML
+		</div>
+		<div class="popup-footer">
+			$submit
+			$cancel
+		</div>
+
+HTML;
+	}
+	
+	return false;
+}
+
+
+/**
+ * Parses the output for AJAX calls
+ *
+ * @since 1.3
+ * @package facileManager
+ *
+ * @param string $output Output to parse for AJAX call
+ * @return string Return for the AJAX call to display
+ */
+function parseAjaxOutput($output) {
+	global $fmdb;
+	
+	$message_array['content'] = $output;
+	if ($message_array['content'] !== true) {
+		if (strpos($message_array['content'], "\n") !== false || isset($fmdb->last_error)) {
+			unset($_POST);
+			include_once(ABSPATH . 'fm-modules/facileManager/ajax/formatOutput.php');
+		} else {
+			echo $message_array['content'];
+		}
+	} else {
+		echo 'Success';
+	}
+}
+
+
+/**
+ * Parses the output for AJAX calls
+ *
+ * @since 1.3
+ * @package facileManager
+ *
+ * @param string $html HTML to set menu links in
+ * @return string Parsed output
+ */
+function parseMenuLinks($html) {
+	$string = preg_replace("/__menu{(.+?)}/esim", "getMenuURL('\\1')", $html);
+	return $string;
+}
 ?>

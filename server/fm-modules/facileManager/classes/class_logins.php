@@ -30,33 +30,38 @@ class fm_login {
 	 * @return string
 	 */
 	function printLoginForm() {
-		printHeader('Login', 'install');
+		global $fm_name;
+		printHeader('Login', 'login');
 		
 		/** Cannot change password without mail_enable defined */
 		$mail_enable = (getOption('fm_db_version') >= 18) ? getOption('mail_enable') : false;
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : false;
 		$forgot_link = ($mail_enable && $auth_method == 1) ? '<p id="forgotton_link"><a href="?forgot_password">Forgot your password?</a></p>' : null;
+		
+		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
 		echo <<<HTML
 		<form id="loginform" action="{$_SERVER['REQUEST_URI']}" method="post">
-		<center>
-		<div id="message"></div>
+		<div id="fm-branding">
+			<img src="$branding_logo" /><span>Login</span>
+		</div>
 		<div id="login_form">
-		<table class="form-table">
+		<table>
 			<tr>
-				<th><label for="username">Username:</label></th>
-				<td><input type="text" size="25" name="username" id="username" placeholder="username" /></td>
-			</tr>
-			<tr>
-				<th><label for="password">Password:</label></th>
 				<td>
-					<input type="password" size="25" name="password" id="password" placeholder="password" />
-					$forgot_link
+					<div class="input-wrapper">
+						<input type="text" size="25" name="username" id="username" placeholder="Username" />
+					</div>
 				</td>
+				<td>
+					<div class="input-wrapper">
+						<input type="password" size="25" name="password" id="password" placeholder="Password" />
+					</div>
+				</td>
+				<td><input name="submit" id="loginbtn" type="submit" value="Login" class="button" /></td>
 			</tr>
 		</table>
-		</center>
-		<p class="step"><input name="submit" id="loginbtn" type="submit" value="Login" class="button" /></p>
+		$forgot_link
 		</form>
 		</div>
 	
@@ -79,26 +84,32 @@ HTML;
 		/** Should not be here if there is no mail_enable defined or if not using builtin auth */
 		if (!getOption('mail_enable') || getOption('auth_method') != 1) header('Location: ' . $GLOBALS['RELPATH']);
 
-		printHeader('Password Reset', 'install');
+		global $fm_name;
+		printHeader('Password Reset', 'login');
+		
+		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 		
 		echo <<<HTML
-		<form id="forgotpwd" method="post" action="{$_SERVER['PHP_SELF']}?forgot_password">
-			<input type="hidden" name="reset_pwd" value="1" />
-			<center>
-			<div id="message">$message</div>
-			<p>Please enter your username and a password reset link will be emailed to the address on file:</p>
-			<table class="form-table">
-				<tr>
-					<th>Username</th>
-					<td>
-						<input type="text" size="25" name="user_login" id="user_login" value="" placeholder="username" />
-						<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
-					</td>
-				</tr>
-			</table>
-			</center>
-			<p class="step"><input id="forgotbtn" name="submit" type="submit" value="Submit" class="button" /></p>
+		<form id="loginform" action="{$_SERVER['PHP_SELF']}?forgot_password" method="post">
+		<input type="hidden" name="reset_pwd" value="1" />
+		<div id="fm-branding">
+			<img src="$branding_logo" /><span>Reset Password</span>
+		</div>
+		<div id="login_form">
+		<table>
+			<tr>
+				<td>
+					<div class="input-wrapper">
+						<input type="text" name="user_login" id="user_login" placeholder="Username" style="width: 400px;" />
+					</div>
+				</td>
+				<td><input name="submit" id="forgotbtn" type="submit" value="Submit" class="button" /></td>
+			</tr>
+		</table>
+		<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
+		<div id="message">$message</div>
 		</form>
+		</div>
 	
 HTML;
 	}
@@ -404,7 +415,7 @@ HTML;
 <p>You (or somebody else) has requested a link to reset your $fm_name password.</p>
 <p>If you don't want to reset your password, then you can ignore this message.</p>
 <p>To reset your password, click the following link:<br />
-<<a href="{$GLOBALS['FM_URL']}password_reset?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset?key=$uniq_hash&login={$user_info['user_login']}</a>></p>
+<<a href="{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}</a>></p>
 </div>
 </div>
 <p style="font-size: 10px; color: #888; text-align: center;">$fm_name | $from_address</p>
@@ -421,7 +432,7 @@ If you don't want to reset your password, then you can ignore this message.
 
 To reset your password, click the following link:
 
-{$GLOBALS['FM_URL']}password_reset?key=$uniq_hash&login={$user_info['user_login']}
+{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}
 BODY;
 		}
 		

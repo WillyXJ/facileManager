@@ -35,13 +35,15 @@ class fm_dns_acls {
 			$results = $fmdb->last_result;
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'acls'
 						);
 
-			$title_array = array('Name', 'Address List', 'Comment');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(array('title' => 'Name', 'rel' => 'acl_name'), 
+				array('title' => 'Address List', 'rel' => 'acl_addresses'), 
+				array('title' => 'Comment', 'class' => 'header-nosort'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -194,7 +196,7 @@ class fm_dns_acls {
 		}
 		
 		$edit_name = $row->acl_name;
-		$edit_addresses = ($row->acl_predefined == 'as defined:') ? nl2br(str_replace(';', "\n", $row->acl_addresses)) : $row->acl_predefined;
+		$edit_addresses = ($row->acl_predefined == 'as defined:') ? nl2br(str_replace(',', "\n", $row->acl_addresses)) : $row->acl_predefined;
 		
 		$comments = nl2br($row->acl_comment);
 
@@ -228,13 +230,17 @@ HTML;
 		}
 		
 		$acl_predefined = buildSelect('acl_predefined', 'acl_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_predefined'), $acl_predefined);
-		$acl_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $acl_addresses), ';'));
+		$acl_addresses = str_replace(',', "\n", rtrim(str_replace(' ', '', $acl_addresses), ';'));
 
 		/** Get field length */
 		$acl_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
 
+		$popup_header = buildPopup('header', $ucaction . ' ACL');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="acl_id" value="$acl_id" />
 			<input type="hidden" name="server_serial_no" value="$server_serial_no" />
@@ -245,7 +251,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33%" scope="row"><label for="acl_predefined">Matched Address List</label></th>
-					<td width="67%">$acl_predefined
+					<td width="67%">$acl_predefined<br />
 					<textarea name="acl_addresses" rows="7" cols="28" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$acl_addresses</textarea></td>
 				</tr>
 				<tr>
@@ -253,14 +259,96 @@ HTML;
 					<td width="67%"><textarea id="acl_comment" name="acl_comment" rows="4" cols="30">$acl_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction ACL" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;
 	}
+
+	/**
+	 * Gets the ACL listing
+	 */
+	function getACLList($server_serial_no = 0, $include = 'acl') {
+		global $__FM_CONFIG, $fmdb;
+		
+		if ($include == 'none') return array();
+		
+		$acl_list = null;
+		$i = 0;
+		$serial_sql = $server_serial_no ? "AND server_serial_no IN (0,$server_serial_no)" : "AND server_serial_no=0";
+		
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_status='active'");
+		if ($fmdb->num_rows) {
+			$last_result = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$acl_list[$i]['id'] = 'acl_' . $last_result[$i]->acl_id;
+				$acl_list[$i]['text'] = $last_result[$i]->acl_name;
+			}
+		}
+		
+		if ($include == 'all') {
+			foreach (array('none', 'any', 'localhost', 'localnets') as $predefined) {
+				$acl_list[$i]['id'] = $predefined;
+				$acl_list[$i]['text'] = $predefined;
+				$i++;
+			}
+		}
+		
+		return $acl_list;
+	}
+
+	/**
+	 * Builds the ACL listing JSON
+	 */
+	function buildACLJSON($saved_acls, $server_serial_no = 0, $include = 'all') {
+		$available_acls = $this->getACLList($server_serial_no, $include);
+		$temp_acls = array();
+		foreach ($available_acls as $temp_acl_array) {
+			$temp_acls[] = $temp_acl_array['id'];
+		}
+		$i = count($available_acls);
+		foreach (explode(',', $saved_acls) as $saved_acl) {
+			if (!$saved_acl) continue;
+			if (array_search($saved_acl, $temp_acls) === false) {
+				$available_acls[$i]['id'] = $saved_acl;
+				$available_acls[$i]['text'] = $saved_acl;
+				$i++;
+			}
+		}
+		$available_acls = json_encode($available_acls);
+		unset($temp_acl_array, $temp_acl);
+		
+		return $available_acls;
+	}
 	
+	
+	function parseACL($address_match_list) {
+		global $__FM_CONFIG;
+		
+		$acls = explode(',', $address_match_list);
+		$formatted_acls = null;
+		foreach ($acls as $address) {
+			if (strpos($address, 'acl_') === false) {
+				$formatted_acls[] = $address;
+				continue;
+			}
+			
+			$acl_id = str_replace('acl_', '', $address);
+			$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+		}
+		
+		return implode('; ', $formatted_acls);
+	}
+
 }
 
 if (!isset($fm_dns_acls))

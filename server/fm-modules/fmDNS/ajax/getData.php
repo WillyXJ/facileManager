@@ -27,14 +27,39 @@ if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
+	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
 	$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		if ($result[0]->def_dropdown == 'no') {
+		if (strpos($result[0]->def_type, 'address_match_element') !== false) {
+			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
+
+			echo <<<HTML
+					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
+					<td width="67%"><input type="hidden" name="cfg_data" class="address_match_element" value="$cfg_data" /><br />
+					{$result[0]->def_type}</td>
+					<script>
+					$(".address_match_element").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: true,
+						width: '200px',
+						tokenSeparators: [",", " ", ";"],
+						data: $available_acls
+					});
+					</script>
+
+HTML;
+		} elseif ($result[0]->def_dropdown == 'no') {
 			echo <<<HTML
 					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
 					<td width="67%"><input name="cfg_data" id="cfg_data" type="text" value='$cfg_data' size="40" /><br />
@@ -70,10 +95,11 @@ HTML;
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
 /** Edits */
 $checks_array = array('servers' => 'manage_servers',
@@ -82,11 +108,12 @@ $checks_array = array('servers' => 'manage_servers',
 					'keys' => 'manage_servers',
 					'options' => 'manage_servers',
 					'logging' => 'manage_servers',
-					'domains' => 'manage_zones'
+					'controls' => 'manage_servers',
+					'domains' => 'manage_zones',
+					'soa' => 'manage_zones'
 				);
-$allowed_capabilities = array_unique($checks_array);
 
-if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
 	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
 		returnUnAuth();
 		exit;
@@ -97,7 +124,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {
 		$id = sanitize($_POST['item_id']);
-		$view_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
+		$item_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
+		$item_id = isset($_POST['domain_id']) ? sanitize($_POST['domain_id']) : $item_id;
 		$add_new = false;
 	} else returnError();
 	
@@ -112,15 +140,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
-			break;
-		case 'views':
-			$post_class = $fm_dns_views;
-			break;
-		case 'acls':
-			$post_class = $fm_dns_acls;
-			break;
-		case 'keys':
-			$post_class = $fm_dns_keys;
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
@@ -141,26 +160,31 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$field = $prefix . 'id';
 			$item_type = $_POST['item_sub_type'] . ' ';
 			break;
+		case 'soa':
+			$post_class = $fm_module_templates;
+			$prefix = 'soa_';
+			$field = $prefix . 'id';
+			break;
+		default:
+			$post_class = ${"fm_dns_${_POST['item_type']}"};
 	}
 	
 	if ($add_new) {
-		$edit_form = '<h2>Add ' . substr(ucfirst($item_type), 0, -1) . '</h2>' . "\n";
 		if ($_POST['item_type'] == 'logging') {
-			$edit_form .= $post_class->printForm(null, $action, $_POST['item_sub_type']);
+			$edit_form = $post_class->printForm(null, $action, $_POST['item_sub_type']);
 		} else {
-			$edit_form .= $post_class->printForm(null, $action, $type_map, $id);
+			$edit_form = $post_class->printForm(null, $action, $type_map, $id);
 		}
 	} else {
-		$edit_form = '<h2>Edit ' . substr(ucfirst($item_type), 0, -1) . '</h2>' . "\n";
 		basicGet('fm_' . $table, $id, $prefix, $field);
 		$results = $fmdb->last_result;
 		if (!$fmdb->num_rows) returnError();
 		
 		$edit_form_data[] = $results[0];
 		if ($_POST['item_type'] == 'logging') {
-			$edit_form .= $post_class->printForm($edit_form_data, 'edit', $_POST['item_sub_type']);
+			$edit_form = $post_class->printForm($edit_form_data, 'edit', $_POST['item_sub_type']);
 		} else {
-			$edit_form .= $post_class->printForm($edit_form_data, 'edit', $type_map, $view_id);
+			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $item_id);
 		}
 	}
 	

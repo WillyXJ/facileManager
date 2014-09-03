@@ -48,7 +48,7 @@ class fm_module_tools {
 			$return .= 'Running tests for ' . $results[$x]->server_name . "\n";
 			
 			/** ping tests */
-			$return .= "\tPing:\t\t\t";
+			$return .= "\tPing:\t\t";
 			if (pingTest($results[$x]->server_name)) $return .=  'success';
 			else $return .=  'failed';
 			$return .=  "\n";

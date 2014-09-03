@@ -106,7 +106,7 @@ class fm_module_settings {
 	function printForm() {
 		global $fmdb, $__FM_CONFIG;
 		
-		$save_button = currentUserCan('manage_settings', $_SESSION['module']) ? '<input type="submit" name="save" id="save_module_settings" value="Save" class="button" />' : null;
+		$save_button = currentUserCan('manage_settings', $_SESSION['module']) ? '<input type="submit" name="save" id="save_module_settings" value="Save" class="button primary" />' : null;
 		
 		$query = "SELECT * FROM fm_options WHERE account_id={$_SESSION['user']['account_id']} AND module_name='{$_SESSION['module']}'";
 		$fmdb->get_results($query);

@@ -35,13 +35,13 @@ class fm_dns_views {
 			$results = $fmdb->last_result;
 
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'views'
 						);
 
-			$title_array = array('View Name', 'Comment');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(array('title' => 'View Name', 'rel' => 'view_name'), array('title' => 'Comment', 'class' => 'header-nosort'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -142,10 +142,10 @@ class fm_dns_views {
 		}
 		
 		/** Are there any corresponding configs to delete? */
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_view=' . $id);
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND view_id=' . $id);
 		if ($fmdb->num_rows) {
 			/** Delete corresponding configs */
-			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_view') === false) {
+			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'view_id') === false) {
 				return 'The corresponding configs could not be deleted.';
 			}
 		}
@@ -217,8 +217,12 @@ HTML;
 		/** Get field length */
 		$view_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
 		
+		$popup_header = buildPopup('header', $ucaction . ' View');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="page" id="page" value="views" />
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="view_id" id="view_id" value="$view_id" />
@@ -233,8 +237,7 @@ HTML;
 					<td width="67%"><textarea id="view_comment" name="view_comment" rows="4" cols="30">$view_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit" value="$ucaction View" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 FORM;
 

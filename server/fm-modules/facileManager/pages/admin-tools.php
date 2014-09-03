@@ -28,7 +28,7 @@ if (!class_exists('fm_tools')) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 }
 
-$admin_tools = $output = $block_style = null;
+$admin_tools = $output = $block_style = $classes = null;
 $response = isset($response) ? $response : null;
 $tools_option = array();
 $import_output = '<p>Processing...</p>';
@@ -89,12 +89,12 @@ foreach ($tools_option as $tool) {
 echo <<<HTML
 >
 	<div id="admin-tools">
-		<form enctype="multipart/form-data" method="post" action="">
+		<form enctype="multipart/form-data" method="post" action="" id="admin-tools-form">
 		$admin_tools
 		</form>
 	</div>
 HTML;
 
-printFooter($output, $block_style);
+printFooter($classes, $output, $block_style);
 
 ?>

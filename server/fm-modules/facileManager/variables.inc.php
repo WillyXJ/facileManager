@@ -41,17 +41,6 @@ $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'
 
 if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
-/** Styled break in menu listing */
-$__FM_CONFIG['menu']['Break'][]				= null;
-
-/** Admin Menu Options */
-$__FM_CONFIG['menu']['Admin']['URL']		= 'admin-tools.php';
-$__FM_CONFIG['menu']['Admin']['Tools']		= 'admin-tools.php';
-$__FM_CONFIG['menu']['Admin']['Users']		= 'admin-users.php';
-$__FM_CONFIG['menu']['Admin']['Logs']		= 'admin-logs.php';
-$__FM_CONFIG['menu']['Settings']['URL']		= 'admin-settings.php';
-$__FM_CONFIG['menu']['Modules']['URL']		= 'admin-modules.php';
-
 /** Images */
 $__FM_CONFIG['icons']['fail']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Failed" title="Failed" />';
 $__FM_CONFIG['icons']['caution']		= '<img src="fm-modules/' . $fm_name . '/images/orangequestion.jpg" border="0" alt="Caution" title="Caution" width="20" />';
@@ -62,7 +51,7 @@ $__FM_CONFIG['icons']['delete']			= '<img src="fm-modules/' . $fm_name . '/image
 $__FM_CONFIG['icons']['enable']			= '<img src="fm-modules/' . $fm_name . '/images/enable24.png" border="0" alt="Enable" title="Enable" width="20" />';
 $__FM_CONFIG['icons']['disable']		= '<img src="fm-modules/' . $fm_name . '/images/disable24.png" border="0" alt="Disable" title="Disable" width="20" />';
 $__FM_CONFIG['icons']['popout']			= '<img src="fm-modules/' . $fm_name . '/images/popout24.png" border="0" alt="Popout" title="Popout" width="20" class="popout" />';
-$__FM_CONFIG['icons']['close']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Close" title="Close" width="20" class="close" />';
+$__FM_CONFIG['icons']['close']			= '<img src="fm-modules/' . $fm_name . '/images/error24.png" title="Close" class="close" />';
 $__FM_CONFIG['icons']['pwd_change']		= '<img src="fm-modules/' . $fm_name . '/images/profile24.png" border="0" alt="Edit Profile" title="Edit Profile" width="20" />';
 $__FM_CONFIG['icons']['pwd_reset']		= '<img src="fm-modules/' . $fm_name . '/images/password-change24.png" border="0" alt="Send Password Reset Email" title="Send Password Reset Email" height="20" />';
 $__FM_CONFIG['icons']['account']		= '<img src="fm-modules/' . $fm_name . '/images/account24.png" border="0" alt="Account Settings" title="Account Settings" width="20" />';
@@ -85,7 +74,7 @@ $__FM_CONFIG['password_hint']['medium']		= 'You must choose a password with at l
 $__FM_CONFIG['password_hint']['strong']		= 'You must choose a password with at least eight (8) characters containing uppercase and lowercase letters, numbers, and special characters (\'&\', \'$\', \'@\', etc.).';
 
 /** Limits */
-$__FM_CONFIG['limit']['records']	= 50;
+$__FM_CONFIG['limit']['records']	= array(20, 35, 50, 75, 100, 200);
 
 /** Options */
 $__FM_CONFIG['options']['auth_method']					= array(array('None', 0), array('Builtin Authentication', 1));

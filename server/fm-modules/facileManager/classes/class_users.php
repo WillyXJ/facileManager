@@ -180,7 +180,7 @@ class fm_users {
 		$sql = rtrim($sql_edit . $sql_pwd, ',');
 		
 		/** Process user permissions */
-		if (!isset($post['user_caps'])) $post['user_caps'] = array();
+		if (isset($post['process_user_caps']) && !isset($post['user_caps'])) $post['user_caps'] = array();
 		
 		if (isset($post['user_caps'][$fm_name])) {
 			if (array_key_exists('do_everything', $post['user_caps'][$fm_name])) {
@@ -398,8 +398,8 @@ FORM_ROW;
 				<tr>
 					<th width="33%" scope="row">Options</th>
 					<td width="67%">
-						<input style="height: 10px;" name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" $force_pwd_check /><label for="user_force_pwd_change">Force Password Change at Next Login</label><br />
-						<input style="height: 10px;" name="user_template_only" id="user_template_only" value="yes" type="checkbox" $user_template_only_check /><label for="user_template_only">Template User</label>
+						<input name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" $force_pwd_check /><label for="user_force_pwd_change">Force Password Change at Next Login</label><br />
+						<input name="user_template_only" id="user_template_only" value="yes" type="checkbox" $user_template_only_check /><label for="user_template_only">Template User</label>
 					</td>
 				</tr>
 			
@@ -411,7 +411,7 @@ FORM_ROW;
 			$verbose_form = <<<FORM_ROW
 				<tr>
 					<th width="33%" scope="row">Options</th>
-					<td width="67%"><input style="height: 10px;" name="verbose" id="verbose" type="checkbox" value="1" checked /><label for="verbose">Verbose Output</label></td>
+					<td width="67%"><input name="verbose" id="verbose" type="checkbox" value="1" checked /><label for="verbose">Verbose Output</label></td>
 				</tr>
 			
 FORM_ROW;
@@ -445,7 +445,8 @@ FORM_ROW;
 				<tr id="userperms">
 					<th width="33%" scope="row">$fm_name</th>
 					<td width="67%">
-					$fm_perm_boxes
+						<input type="hidden" name"process_user_caps" value="1" />
+						$fm_perm_boxes
 					</td>
 				</tr>
 
@@ -502,8 +503,12 @@ PERM;
 			}
 		} while (false);
 		
+		$popup_header = buildPopup('header', $ucaction . ' User');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
 		$return_form .= <<<FORM
+		$popup_header
 			<div class="leftbox">
 			<form id="fm_user_profile">
 			<input type="hidden" name="action" value="$action" />
@@ -518,13 +523,25 @@ PERM;
 			$verbose_form
 			$user_perm_form
 			</table>
-			</form>
-			<p>
-				<input type="submit" id="$button_id" name="submit" value="$button_text" class="button" $button_disabled />
-				<input type="button" value="Cancel" class="button" id="cancel_button" />
-			</p>
 			</div>
+		</div>
+		<div class="popup-footer">
+			<input type="submit" id="$button_id" name="submit" value="$button_text" class="button primary" $button_disabled />
+			<input type="button" value="Cancel" class="button left" id="cancel_button" />
+		</div>
 		</form>
+		</form>
+		<script>
+			$(document).ready(function() {
+				$("select").select2({
+					minimumResultsForSearch: -1
+				});
+				$("select.wide_select").select2({
+					width: '300px',
+					minimumResultsForSearch: -1
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

@@ -35,13 +35,17 @@ class fm_dns_keys {
 			$results = $fmdb->last_result;
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'keys'
 						);
 
-			$title_array = array('Key', 'Algorithm', 'Secret', 'View', 'Comment');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(array('title' => 'Key', 'rel' => 'key_name'), 
+				array('title' => 'Algorithm', 'class' => 'header-nosort'), 
+				array('title' => 'Secret', 'rel' => 'key_secret'), 
+				array('title' => 'View', 'class' => 'header-nosort'), 
+				array('title' => 'Comment', 'class' => 'header-nosort'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -225,8 +229,12 @@ HTML;
 		$key_algorithm = buildSelect('key_algorithm', 'key_algorithm', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_algorithm'), $key_algorithm, 1);
 		$key_view = buildSelect('key_view', 'key_view', $fm_dns_zones->availableViews(), $key_view);
 		
+		$popup_header = buildPopup('header', $ucaction . ' Key');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="key_id" value="$key_id" />
 			<table class="form-table">
@@ -251,14 +259,29 @@ HTML;
 					<td width="67%"><textarea id="key_comment" name="key_comment" rows="4" cols="30">$key_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Key" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() { $("#manage select").select2({minimumResultsForSearch: 10}); });
+		</script>
 FORM;
 
 		return $return_form;
 	}
 	
+	
+	function parseKey($keys) {
+		global $__FM_CONFIG;
+		
+		$formatted_keys = null;
+		foreach (explode(',', $keys) as $key_id) {
+			$formatted_keys[] = getNameFromID($key_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}keys", 'key_', 'key_id', 'key_name', null, 'active');
+		}
+		
+		return implode('"; "', $formatted_keys);
+	}
+
+
 }
 
 if (!isset($fm_dns_keys))

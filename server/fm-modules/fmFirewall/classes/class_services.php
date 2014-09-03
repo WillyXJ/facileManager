@@ -258,8 +258,12 @@ HTML;
 			$tcp_flags_settings_form .= "/></td>\n";
 		}
 		
+		$popup_header = buildPopup('header', $ucaction . ' Service');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="?type=$type">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="service_id" value="$service_id" />
 			<table class="form-table">
@@ -309,9 +313,16 @@ HTML;
 					<td width="67%"><textarea id="service_comment" name="service_comment" rows="4" cols="30">$service_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Service" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

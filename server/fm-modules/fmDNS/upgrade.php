@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.2.4', '<') ? upgradefmDNS_124($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.3-beta2', '<') ? upgradefmDNS_1302($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -591,7 +591,6 @@ function upgradefmDNS_1201($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-//	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DHCID',  'DLV',  'DNAME',  'DNSKEY', 'DS',  'HIP',  'IPSECKEY',  'KEY',  'KX',  'MX',  'NAPTR',  'NS',  'NSEC',  'NSEC3',  'NSEC3PARAM',  'PTR',  'RSIG',  'RP',  'SIG',  'SRV',  'SSHFP',  'TA',  'TKEY', 'TLSA',  'TSIG',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_class`  `record_class` ENUM(  'IN',  'CH',  'HS' ) NOT NULL DEFAULT  'IN';";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD  `record_os` VARCHAR( 255 ) NULL AFTER  `record_port`,
@@ -811,6 +810,227 @@ function upgradefmDNS_124($__FM_CONFIG, $running_version) {
 		}
 	}
 
+	return true;
+}
+
+
+/** 1.3-beta1 */
+function upgradefmDNS_1301($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.2.4', '<') ? upgradefmDNS_124($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
+  `control_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `control_ip` varchar(15) NOT NULL DEFAULT '*',
+  `control_port` int(5) NOT NULL DEFAULT '953',
+  `control_addresses` text NOT NULL,
+  `control_keys` varchar(255) DEFAULT NULL,
+  `control_comment` text NOT NULL,
+  `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`control_id`)
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLE;
+
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO', 'SSHFP' ) NOT NULL DEFAULT  'A';";
+
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_name` VARCHAR(255) NULL AFTER `domain_id`;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_chroot_dir` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `server_root_dir`;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD  `soa_id` INT( 11 ) NOT NULL DEFAULT '0' AFTER  `account_id` ,
+		ADD  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT '0' AFTER  `soa_id` ;";
+
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD  `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `domain_id`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `cfg_view` `view_id` INT(11) NOT NULL DEFAULT '0';";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `domain_id` INT(11) NOT NULL DEFAULT '0' AFTER `view_id`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD INDEX(`domain_id`);";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_view_support` `def_clause_support` VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'O';";
+	$table[] = "TRUNCATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`;";
+	
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_id`=s.`soa_id`;";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_serial_no`=s.`soa_serial_no`;";
+	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` DROP `domain_id`, DROP `soa_serial_no`;";
+	
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`
+)
+VALUES 
+('key', 'algorithm', 'string', 'no', 'K', 'no'),
+('key', 'secret', 'quoted_string', 'no', 'K', 'no'),
+('options', 'acache-cleaning-interval', '( minutes )', 'no', 'OV', 'no'),
+('options', 'acache-enable', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'additional-from-auth', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'additional-from-cache', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'allow-notify', '( address_match_element )', 'yes', 'OVZ', 'no'),
+('options', 'allow-query', '( address_match_element )', 'yes', 'OVZ', 'no'),
+('options', 'allow-query-cache', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'allow-query-cache-on', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'allow-query-on', '( address_match_element )', 'yes', 'OVZ', 'no'),
+('options', 'allow-recursion', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'allow-recursion-on', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'allow-transfer', '( address_match_element )', 'yes', 'OVZ', 'no'),
+('options', 'allow-update', '( address_match_element )', 'yes', 'OVZ', 'no'),
+('options', 'allow-update-forwarding', '( address_match_element )', 'yes', 'OVZ', 'no'),
+('options', 'also-notify', '( ipv4_address | ipv6_address ) [ port ( ip_port | * ) ]', 'yes', 'OVZ', 'no'),
+('options', 'alt-transfer-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
+('options', 'alt-transfer-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
+('options', 'attach-cache', '( quoted_string )', 'no', 'OV', 'no'),
+('options', 'auth-nxdomain', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'auto-dnssec', '( allow | maintain | create | off )', 'no', 'OVZ', 'yes'),
+('options', 'avoid-v4-udp-ports', '( ip_port )', 'yes', 'O', 'no'), 
+('options', 'avoid-v6-udp-ports', '( ip_port )', 'yes', 'O', 'no'),
+('options', 'bindkeys-file', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'blackhole', '( address_match_element )', 'yes', 'O', 'no'),
+('options', 'bogus', '( yes | no )', 'no', 'S', 'yes'),
+('options', 'check-dup-records', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
+('options', 'check-integrity', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'check-mx', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
+('options', 'check-mx-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
+('options', 'check-names', '( master | slave | response ) ( warn | fail | ignore )', 'no', 'OVZ', 'yes'),
+('options', 'check-sibling', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'check-srv-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
+('options', 'check-wildcard', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'cleaning-interval', '( minutes )', 'no', 'OV', 'no'),
+('options', 'clients-per-query', '( integer )', 'no', 'OV', 'no'),
+('options', 'coresize', '( size_in_bytes )', 'no', 'O', 'no'),
+('options', 'database', '( quoted_string )', 'no', 'Z', 'no'),
+('options', 'datasize', '( size_in_bytes )', 'no', 'O', 'no'),
+('options', 'delegation-only', '( yes | no )', 'no', 'Z', 'yes'),
+('options', 'deny-answer-address', '( address_match_element ) [ except-from { ( address_match_element ) } ]', 'yes', 'OV', 'no'),
+('options', 'deny-answer-aliases', '( quoted_string ) [ except-from { ( address_match_element ) } ]', 'yes', 'OV', 'no'),
+('options', 'dialup', '( yes | no | notify | refresh | passive | notify-passive )', 'no', 'OVZ', 'yes'),
+('options', 'disable-algorithms', '( string )', 'yes', 'OV', 'no'),
+('options', 'disable-empty-zone', '( quoted_string )', 'no', 'OV', 'no'),
+('options', 'dnssec-accept-expired', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'dnssec-dnskey-kskonly', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'dnssec-enable', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'dnssec-lookaside', 'domain trust-anchor domain', 'no', 'OV', 'no'),
+('options', 'dnssec-must-be-secure', 'domain ( yes | no )', 'no', 'OV', 'no'),
+('options', 'dnssec-secure-to-insecure', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'dnssec-validation', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'dual-stack-servers', '( quoted_string )', 'yes', 'OV', 'no'),
+('options', 'dump-file', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'edns', '( yes | no )', 'no', 'S', 'yes'),
+('options', 'edns-udp-size', '( size_in_bytes )', 'no', 'OSV', 'no'),
+('options', 'empty-contact', '( string )', 'no', 'OV', 'no'),
+('options', 'empty-server', '( string )', 'no', 'OV', 'no'),
+('options', 'empty-zones-enable', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'files', '( integer )', 'no', 'O', 'no'),
+('options', 'flush-zones-on-shutdown', '( yes | no )', 'no', 'O', 'yes'),
+('options', 'forward', '( first | only )', 'no', 'OVZ', 'yes'),
+('options', 'forwarders', '[ port ( ip_port | * ) ] { ( ipv4_address | ipv6_address ) } [ port ( ip_port | * ) ]', 'yes', 'OVZ', 'no'),
+('options', 'heartbeat-interval', '( minutes )', 'no', 'O', 'no'),
+('options', 'hostname', '( quoted_string | none )', 'no', 'O', 'no'),
+('options', 'interface-interval', '( minutes )', 'no', 'O', 'no'),
+('options', 'ixfr-from-differences', '( yes | no )', 'no', 'Z', 'yes'),
+('options', 'journal', '( quoted_string )', 'no', 'Z', 'no'),
+('options', 'key-directory', '( quoted_string )', 'no', 'OVZ', 'no'),
+('options', 'lame-ttl', '( seconds )', 'no', 'OV', 'no'),
+('options', 'listen-on', '[ port ( ip_port | * ) ] { ( ipv4_address ) }', 'yes', 'OR', 'no'),
+('options', 'listen-on-v6', '[ port ( ip_port | * ) ] { ( ipv6_address ) }', 'yes', 'O', 'no'),
+('options', 'managed-keys-directory', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'masterfile-format', '( text | raw )', 'no', 'OVZ', 'yes'),
+('options', 'masters', '( { ipv4_address | ipv6_address } )', 'yes', 'OVZ', 'no'),
+('options', 'match-clients', '( address_match_element )', 'yes', 'V', 'no'),
+('options', 'match-destinations', '( address_match_element )', 'yes', 'V', 'no'),
+('options', 'match-mapped-addresses', '( yes | no )', 'no', 'O', 'yes'),
+('options', 'match-recursive-only', '( yes | no )', 'no', 'V', 'yes'),
+('options', 'max-acache-size', '( size_in_bytes )', 'no', 'OV', 'no'),
+('options', 'max-cache-size', '( size_in_bytes )', 'no', 'OV', 'no'),
+('options', 'max-cache-ttl', '( seconds )', 'no', 'OV', 'no'),
+('options', 'max-clients-per-query', '( integer )', 'no', 'OV', 'no'),
+('options', 'max-journal-size', '( size_in_bytes )', 'no', 'OVZ', 'no'),
+('options', 'max-ncache-ttl', '( seconds )', 'no', 'OV', 'no'),
+('options', 'max-refresh-time', '( seconds )', 'no', 'OVZ', 'no'),
+('options', 'max-retry-time', '( seconds )', 'no', 'OVZ', 'no'),
+('options', 'max-transfer-idle-in', '( minutes )', 'no', 'OVZ', 'no'),
+('options', 'max-transfer-idle-out', '( minutes )', 'no', 'OVZ', 'no'),
+('options', 'max-transfer-time-in', '( minutes )', 'no', 'OVZ', 'no'),
+('options', 'max-transfer-time-out', '( minutes )', 'no', 'OVZ', 'no'),
+('options', 'max-udp-size', '( size_in_bytes )', 'no', 'OSV', 'no'),
+('options', 'memstatistics', '( yes | no )', 'no', 'O', 'yes'),
+('options', 'memstatistics-file', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'min-refresh-time', '( seconds )', 'no', 'OVZ', 'no'),
+('options', 'min-retry-time', '( seconds )', 'no', 'OVZ', 'no'),
+('options', 'minimal-responses', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'multi-master', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'ndots', '( integer )', 'no', 'R', 'no'),
+('options', 'notify', '( yes | no | explicit )', 'no', 'OVZ', 'yes'),
+('options', 'notify-delay', '( seconds )', 'no', 'OVZ', 'no'),
+('options', 'notify-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
+('options', 'notify-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
+('options', 'notify-to-soa', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'pid-file', '( quoted_string | none )', 'no', 'O', 'no'),
+('options', 'port', '( ip_port )', 'no', 'O', 'no'),
+('options', 'preferred-glue', '( A | AAAA )', 'no', 'OV', 'yes'),
+('options', 'provide-ixfr', '( yes | no )', 'no', 'S', 'yes'),
+('options', 'query-source', 'address ( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
+('options', 'query-source-v6', 'address ( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
+('options', 'querylog', '( yes | no )', 'no', 'O', 'yes'),
+('options', 'random-device', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'recursing-file', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'recursion', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'recursive-clients', '( integer )', 'no', 'O', 'no'),
+('options', 'request-ixfr', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'request-nsid', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'reserved-sockets', '( integer )', 'no', 'O', 'no'),
+('options', 'search', '( quoted_string )', 'yes', 'R', 'no'),
+('options', 'secroots-file', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'serial-query-rate', '( integer )', 'no', 'O', 'no'),
+('options', 'server-id', '( quoted_string | none | hostname )', 'no', 'O', 'no'),
+('options', 'session-keyfile', '( quoted_string | none )', 'no', 'O', 'no'),
+('options', 'session-keyname', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'session-keyalg', '( string )', 'no', 'O', 'no'),
+('options', 'sig-signing-nodes', '( integer )', 'no', 'OVZ', 'no'),
+('options', 'sig-signing-signatures', '( integer )', 'no', 'OVZ', 'no'),
+('options', 'sig-signing-type', '( integer )', 'no', 'OVZ', 'no'),
+('options', 'sig-validity-interval', '( days )', 'no', 'OVZ', 'no'),
+('options', 'sortlist', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'stacksize', '( size_in_bytes )', 'no', 'O', 'no'),
+('options', 'statistics-file', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'tcp-clients', '( integer )', 'no', 'O', 'no'),
+('options', 'tcp-listen-queue', '( integer )', 'no', 'O', 'no'),
+('options', 'tkey-dhkey', '( quoted_string integer )', 'no', 'O', 'no'),
+('options', 'tkey-domain', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'tkey-gssapi-credential', '( quoted_string )', 'no', 'O', 'no'),
+('options', 'transfer-format', '( many-answers | one-answer )', 'no', 'OSVZ', 'yes'),
+('options', 'transfer-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
+('options', 'transfer-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
+('options', 'transfers', '( integer )', 'no', 'S', 'no'),
+('options', 'transfers-in', '( integer )', 'no', 'O', 'no'),
+('options', 'transfers-out', '( integer )', 'no', 'O', 'no'),
+('options', 'transfers-per-ns', '( integer )', 'no', 'O', 'no'),
+('options', 'try-tcp-refresh', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'update-check-ksk', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'update-policy', '( local | { update-policy-rule } )', 'no', 'Z', 'no'),
+('options', 'use-alt-transfer-source', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'use-v4-udp-ports', '( range ip_port ip_port )', 'no', 'O', 'no'),
+('options', 'use-v6-udp-ports', '( range ip_port ip_port )', 'no', 'O', 'no'),
+('options', 'view', '( quoted_string )', 'no', 'R', 'no'),
+('options', 'version', '( quoted_string | none )', 'no', 'O', 'no'),
+('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'yes')
+;
+INSERT;
+
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
 			$fmdb->query($schema);
@@ -824,9 +1044,99 @@ function upgradefmDNS_124($__FM_CONFIG, $running_version) {
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
+	
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
+	$fmdb->query($query);
+	$num_rows = $fmdb->num_rows;
+	$results = $fmdb->last_result;
+	$translate_array = array('domain_check_names' => 'check-names',
+								'domain_notify_slaves' => 'notify',
+								'domain_multi_masters' => 'multi-master',
+								'domain_transfers_from' => 'transfers-from',
+								'domain_updates_from' => 'updates-from',
+								'domain_master_servers' => 'masters',
+								'domain_forward_servers' => 'forwarders');
+	for ($x=0; $x<$num_rows; $x++) {
+		foreach ($translate_array as $old_key => $new_key) {
+			if ($results[$x]->$old_key) {
+				$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` 
+					(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']},
+					{$results[$x]->domain_id}, '$new_key', '{$results[$x]->$old_key}');";
+				$fmdb->query($query);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+	
+	$query = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
+	foreach ($translate_array as $old_key => $new_key) {
+		$query .= " DROP `$old_key`,";
+	}
+	$query = rtrim($query, ',') . ';';
+	$fmdb->query($query);
+	if (!$fmdb->result || $fmdb->sql_errors) return false;
+	
+	/** Update manually entered ACLs with acl_ids */
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE cfg_type='global'";
+	$fmdb->query($query);
+	$num_rows = $fmdb->num_rows;
+	$results = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		$cfg_data_array = explode(';', $results[$x]->cfg_data);
+		$new_cfg_data = null;
+		foreach ($cfg_data_array as $acl_name) {
+			$acl_id = getNameFromID(trim($acl_name), "fm_{$__FM_CONFIG['fmDNS']['prefix']}acls", 'acl_', 'acl_name', 'acl_id');
+			$new_cfg_data .= $acl_id ? "acl_{$acl_id}," : $acl_name . ',';
+		}
+		$new_cfg_data = rtrim($new_cfg_data, ',');
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data='$new_cfg_data' WHERE cfg_id=" . $results[$x]->cfg_id;
+		$fmdb->query($query);
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+	}
+	
+	/**
+	$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
+	$fmdb->query($query);
+	$num_rows = $fmdb->num_rows;
+	$results = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		if ($results[$x]->domain_name_servers == 0) continue;
 		
+		$name_server_ids = explode(';', $results[$x]->domain_name_servers);
+		$server_serial_nos = null;
+		foreach ($name_server_ids as $server_id) {
+			$server_serial_nos[] = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
+		}
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_name_servers='" . implode(';', $server_serial_nos) . "' "
+				. "WHERE domain_id=" . $results[$x]->domain_id;
+		$fmdb->query($query);
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+	}
+	*/
+
 	return true;
 }
 
+/** 1.3-beta2 */
+function upgradefmDNS_1302($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.3-beta1', '<') ? upgradefmDNS_1301($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ';', ',') WHERE instr(acl_addresses, ';') > 0;";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ' ', '') WHERE instr(acl_addresses, ' ') > 0;";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv4_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on';";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv6_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on-v6';";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( warn | fail | ignore )', `def_clause_support` = 'Z' WHERE `fm_dns_functions`.`def_option` = 'check-names';";
 
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	return true;
+}
 ?>

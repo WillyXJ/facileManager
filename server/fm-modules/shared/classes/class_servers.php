@@ -32,7 +32,10 @@ class fm_shared_module_servers {
 		
 		/** Check permissions */
 		if (!currentUserCan('manage_servers', $_SESSION['module'])) {
-			return 'You do not have permission to manage servers.';
+			echo buildPopup('header', 'Error');
+			echo '<p>You do not have permission to manage servers.</p>';
+			echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+			exit;
 		}
 		
 		/** Check serial number */
@@ -52,7 +55,7 @@ class fm_shared_module_servers {
 			switch($server_update_method) {
 				case 'cron':
 					/* Servers updated via cron require manual upgrades */
-					$response[] = ' --> This server needs to be upgrade manually with the following command:';
+					$response[] = ' --> This server needs to be upgraded manually with the following command:';
 					$response[] = " --> sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade";
 					addLogEntry('Upgraded client scripts on ' . $server_name . '.');
 					break;
@@ -100,7 +103,7 @@ class fm_shared_module_servers {
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						$response[] = ' --> Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.';
+						$response[] = ' --> Failed: SSH key is not <a href="' . getMenuURL('General') . '">defined</a>.';
 						break;
 					}
 					
@@ -156,6 +159,12 @@ class fm_shared_module_servers {
 				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
 			$fmdb->query($query);
 		}
+		
+		if (array_key_exists('server_os_distro', $_POST)) {
+			$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_os_distro`='" . $_POST['server_os_distro'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
+				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
+			$fmdb->query($query);
+		}
 	}
 	
 	
@@ -170,7 +179,10 @@ class fm_shared_module_servers {
 		
 		/** Check permissions */
 		if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
-			return 'You do not have permission to build server configs.';
+			echo buildPopup('header', 'Error');
+			echo '<p>You do not have permission to build server configs.</p>';
+			echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+			exit;
 		}
 		
 		/** Check serial number */

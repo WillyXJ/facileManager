@@ -40,15 +40,6 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$server_delete_status = $fm_module_servers->delete(sanitize($_GET['id']));
-			if ($server_delete_status !== true) {
-				$response = $server_delete_status;
-				$action = 'add';
-			} else header('Location: ' . $GLOBALS['basename']);
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$result = $fm_module_servers->update($_POST);
@@ -79,7 +70,13 @@ printHeader();
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
+$sort_direction = null;
+$sort_field = 'server_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', array($sort_field, 'server_name'), 'server_', null, null, false, $sort_direction);
 $fm_module_servers->rows($result);
 
 printFooter();

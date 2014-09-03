@@ -211,8 +211,12 @@ HTML;
 		$object_mask_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_mask');
 		$object_type = buildSelect('object_type', 'object_type', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'), $type, 1);
 		
+		$popup_header = buildPopup('header', $ucaction . ' Object');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="?type=$type">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="object_id" value="$object_id" />
 			<table class="form-table">
@@ -239,9 +243,16 @@ HTML;
 					<td width="67%"><textarea id="object_comment" name="object_comment" rows="4" cols="30">$object_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Object" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;

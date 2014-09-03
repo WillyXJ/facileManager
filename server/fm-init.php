@@ -91,7 +91,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			if (count($_POST)) {
 				$result = $fm_login->processUserPwdResetForm($_POST['user_login']);
 				if ($result === true) {
-					$message = '<p class="success">Your password reset email has been sent.</p>';
+					$message = '<p class="success">Your password reset email has been sent to the address on file.</p>';
 				} else {
 					$message = '<p class="failed">' . $result . '</p>';
 				}
@@ -173,6 +173,13 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		/** Handle sort orders */
 		if (array_key_exists('sort_by', $_GET)) {
 			handleSortOrder();
+		}
+		
+		/** Handle pagination record counts */
+		if (array_key_exists('rc', $_GET)) {
+			$_SESSION['user']['record_count'] = in_array($_GET['rc'], $__FM_CONFIG['limit']['records']) ? $_GET['rc'] : $__FM_CONFIG['limit']['records'][0];
+		} else {
+			$_SESSION['user']['record_count'] = isset($_SESSION['user']['record_count']) ? $_SESSION['user']['record_count'] : $__FM_CONFIG['limit']['records'][0];
 		}
 		
 		/** Debug mode */

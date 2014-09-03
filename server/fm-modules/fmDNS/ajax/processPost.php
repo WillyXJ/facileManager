@@ -33,10 +33,15 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {
 	
+	$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
+
+	echo buildPopup('header', 'Reload Results') . '<pre>';
 	if (is_array($_POST['item_id'])) {
 		foreach ($_POST['item_id'] as $domain_id) {
 			if (!is_numeric($domain_id)) continue;
@@ -45,7 +50,7 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 			echo "\n";
 		}
 	}
-	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.';
+	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.</pre>' . $popup_footer;
 	
 	exit;
 }
@@ -57,7 +62,9 @@ $checks_array = array('servers' => 'manage_servers',
 					'keys' => 'manage_servers',
 					'options' => 'manage_servers',
 					'logging' => 'manage_servers',
-					'domains' => 'manage_zones'
+					'controls' => 'manage_servers',
+					'domains' => 'manage_zones',
+					'soa' => 'manage_zones'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -82,15 +89,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'servers':
 			$post_class = $fm_module_servers;
 			break;
-		case 'views':
-			$post_class = $fm_dns_views;
-			break;
-		case 'acls':
-			$post_class = $fm_dns_acls;
-			break;
-		case 'keys':
-			$post_class = $fm_dns_keys;
-			break;
 		case 'options':
 			$post_class = $fm_module_options;
 			$table = 'config';
@@ -112,6 +110,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			if (isset($_POST['item_sub_type'])) $item_type = $_POST['item_sub_type'] . ' ';
 			$type = sanitize($_POST['log_type']);
 			break;
+		case 'soa':
+			$post_class = $fm_module_templates;
+			$prefix = 'soa_';
+			$field = $prefix . 'id';
+			$type = 'soa';
+			break;
+		default:
+			$post_class = ${"fm_dns_${_POST['item_type']}"};
 	}
 
 	switch ($_POST['action']) {
@@ -120,17 +126,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				if (!$post_class->add($_POST)) {
 					echo '<div class="error"><p>This ' . $table . ' could not be added.</p></div>'. "\n";
 					$form_data = $_POST;
-				} else echo 'Success';
+				} else exit('Success');
 			}
 			break;
 		case 'delete':
 			if (isset($id)) {
-				$delete_status = $post_class->delete(sanitize($id), $server_serial_no, $type);
-				if ($delete_status !== true) {
-					echo $delete_status;
-				} else {
-					echo 'Success';
-				}
+				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
 			}
 			break;
 		case 'edit':

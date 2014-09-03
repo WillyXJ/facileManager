@@ -40,15 +40,6 @@ if (currentUserCan('manage_objects', $_SESSION['module'])) {
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$group_delete_status = $fm_module_groups->delete(sanitize($_GET['id']));
-			if ($group_delete_status !== true) {
-				$response = $group_delete_status;
-				$action = 'add';
-			} else header('Location: ' . $GLOBALS['basename']);
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$result = $fm_module_groups->update($_POST);

@@ -33,7 +33,7 @@ error_reporting(0);
 $module_name = basename(dirname(__FILE__));
 
 /** Client version */
-$data['server_client_version'] = '1.2.5';
+$data['server_client_version'] = '1.3-beta2';
 
 $whoami = 'root';
 $url = null;
@@ -43,6 +43,8 @@ $dryrun = (in_array('-n', $argv) || in_array('dryrun', $argv)) ? true : false;
 $buildconf = (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : false;
 $zones = (in_array('-z', $argv) || in_array('zones', $argv)) ? true : false;
 $cron = (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
+$dump_cache = in_array('dump-cache', $argv) ? true : false;
+$clear_cache = in_array('clear-cache', $argv) ? true : false;
 
 /** Include shared client functions */
 $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
@@ -82,6 +84,16 @@ if ($buildconf) {
 /** Build the zone files */
 if ($zones) {
 	$data['action'] = 'zones';
+}
+
+/** Dump the cache */
+if ($dump_cache) {
+	manageCache('dumpdb -cache', 'Dumping cache');
+}
+
+/** Clear the cache */
+if ($clear_cache) {
+	manageCache('flush', 'Clearing cache');
 }
 
 /** Set variables to pass */

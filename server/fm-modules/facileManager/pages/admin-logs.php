@@ -65,7 +65,7 @@ $query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['accou
 $fmdb->query($query);
 $log_count = $fmdb->num_rows;
 
-$total_pages = ceil($log_count / $__FM_CONFIG['limit']['records']);
+$total_pages = ceil($log_count / $_SESSION['user']['record_count']);
 $pagination = displayPagination($page, $total_pages);
 
 $log_search_module = isset($log_search_module) ? $log_search_module : 'All Modules';
@@ -80,29 +80,21 @@ $header = displayTableHeader($table_info, $title_array);
 
 echo printPageHeader($response);
 echo <<<HTML
-$pagination
 		<form class="search-form" id="date-range" action="" method="post">
 		<table class="log_search_form" align="center">
 			<tbody>
 				<tr>
-					<th>Module</th>
-					<th>User</th>
-					<th>Date Begin</th>
-					<th>Date End</th>
-					<th>Search Text</th>
-					<th></th>
-				</tr>
-				<tr>
 					<td>$module_list</td>
 					<td>$user_list</td>
-					<td><input name="log_search_date_b" value="$log_search_date_b" type="date" class="datepicker" /></td>
-					<td><input name="log_search_date_e" value="$log_search_date_e" type="date" class="datepicker" /></td>
-					<td><input type="text" name="log_search_query" value="$log_search_query" /></td>
-					<td><input value="Search" type="submit" /></td>
+					<td><input name="log_search_date_b" value="$log_search_date_b" type="text" class="datepicker" placeholder="Date Begin" /></td>
+					<td><input name="log_search_date_e" value="$log_search_date_e" type="text" class="datepicker" placeholder="Date End" /></td>
+					<td><input type="text" name="log_search_query" value="$log_search_query" placeholder="Search Text" /></td>
+					<td><input value="Search" type="submit" class="button" /></td>
 				</tr>
 			</tbody>
 		</table>
 		</form>
+$pagination
 		$header
 
 HTML;
@@ -123,7 +115,7 @@ function displayLogData($page, $search_sql = null) {
 	$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 	$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 	
-	$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp DESC LIMIT " . (($page - 1) * $__FM_CONFIG['limit']['records']) . ", {$__FM_CONFIG['limit']['records']}";
+	$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp DESC LIMIT " . (($page - 1) * $_SESSION['user']['record_count']) . ", {$_SESSION['user']['record_count']}";
 	$fmdb->query($query);
 	$result = $fmdb->last_result;
 	$log_count = $fmdb->num_rows;

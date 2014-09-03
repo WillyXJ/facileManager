@@ -237,7 +237,7 @@ class fm_module_servers {
 		}
 		$edit_name = currentUserCan(array('manage_policies', 'view_all'), $_SESSION['module']) ? '<a href="config-policy.php?server_serial_no=' . $row->server_serial_no . '">' . $row->server_name . '</a>' : $row->server_name;
 		
-		if (isset($row->server_client_version) && $row->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
+		if (isset($row->server_client_version) && version_compare($row->server_client_version, getOption('client_version', 0, $_SESSION['module']), '<')) {
 			$edit_actions = 'Client Upgrade Available<br />';
 			$class = 'attention';
 		}
@@ -311,8 +311,12 @@ HTML;
 		$server_type = buildSelect('server_type', 'server_type', $available_server_types, $server_type, 1);
 		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 		
+		$popup_header = buildPopup('header', $ucaction . ' Firewall');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="server_id" value="$server_id" />
 			<table class="form-table">
@@ -333,9 +337,16 @@ HTML;
 					<td width="67%"><input name="server_config_file" id="server_config_file" type="text" value="$server_config_file" size="40" /></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" value="$ucaction Firewall" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;
@@ -404,7 +415,7 @@ FORM;
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return $response . '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+					return $response . '<p class="error">Failed: SSH key is not <a href="' . getMenuURL('General') . '">defined</a>.</p>'. "\n";
 				}
 				
 				$temp_ssh_key = '/tmp/fm_id_rsa';

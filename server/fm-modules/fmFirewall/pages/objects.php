@@ -46,15 +46,6 @@ if (currentUserCan('manage_objects', $_SESSION['module'])) {
 			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['object_type']);
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$object_delete_status = $fm_module_objects->delete(sanitize($_GET['id']));
-			if ($object_delete_status !== true) {
-				$response = $object_delete_status;
-				$action = 'add';
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['object_type']);
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$result = $fm_module_objects->update($_POST);

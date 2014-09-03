@@ -25,7 +25,7 @@ class fm_dns_zones {
 	/**
 	 * Displays the zone list
 	 */
-	function rows($result, $map, $reload_allowed) {
+	function rows($result, $map, $reload_allowed, $page) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$num_rows = $fmdb->num_rows;
@@ -35,7 +35,7 @@ class fm_dns_zones {
 			$bulk_actions_list = array('Reload');
 			$checkbox[] = array(
 								'title' => '<input type="checkbox" onClick="toggle(this, \'domain_list[]\')" />',
-								'class' => 'header-tiny'
+								'class' => 'header-tiny header-nosort'
 							);
 		} else {
 			$checkbox = $bulk_actions_list = null;
@@ -44,16 +44,22 @@ class fm_dns_zones {
 		if (!$result) {
 			echo '<p id="table_edits" class="noresult" name="domains">There are no zones.</p>';
 		} else {
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
+
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
 			$table_info = array(
-							'class' => 'display_results',
+							'class' => 'display_results sortable',
 							'id' => 'table_edits',
 							'name' => 'domains'
 						);
 
-			$title_array = array(array('title' => 'ID', 'class' => 'header-small'), 'Domain', 'Type', 'Clones', 'Views');
-			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(array('title' => 'ID', 'class' => 'header-small header-nosort'), 
+				array('title' => 'Domain', 'rel' => 'domain_name'), 
+				array('title' => 'Type', 'rel' => 'domain_type'),
+				'Clones', array('title' => 'Views', 'class' => 'header-nosort'));
+			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 			
 			if (is_array($checkbox)) {
 				$title_array = array_merge($checkbox, $title_array);
@@ -61,7 +67,7 @@ class fm_dns_zones {
 
 			echo displayTableHeader($table_info, $title_array, 'zones');
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			for ($x=$start; $x<$end; $x++) {
 				$this->displayRow($results[$x], $map, $reload_allowed);
 			}
 			
@@ -72,74 +78,22 @@ class fm_dns_zones {
 	/**
 	 * Adds the new zone
 	 */
-	function add() {
+	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$id = $_POST['createZone']['ZoneID'];
+		/** Validate post */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
+		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
 		$sql_fields = '(';
 		$sql_values = $domain_name_servers = $domain_views = null;
 		
 		$log_message = "Added a zone with the following details:\n";
 
-		/** Empty domain names are not allowed */
-		if (empty($_POST['createZone'][$id]['domain_name'])) return 'No zone name defined.';
-		
-		$_POST['createZone'][$id]['domain_name'] = rtrim(strtolower($_POST['createZone'][$id]['domain_name']), '.');
-		
-		/** Perform domain name validation */
-		if ($_POST['createZone'][$id]['domain_mapping'] == 'reverse') $_POST['createZone'][$id]['domain_name'] = $this->fixDomainTypos($_POST['createZone'][$id]['domain_name']);
-		if (!$this->validateDomainName($_POST['createZone'][$id]['domain_name'], $_POST['createZone'][$id]['domain_mapping'])) return 'Invalid zone name.';
-		
-		/** Ensure domain_view is set */
-		if (!array_key_exists('domain_view', $_POST['createZone'][$id])) $_POST['createZone'][$id]['domain_view'] = 0;
-
-		/** Reverse zones should have form of x.x.x.in-addr.arpa */
-		if ($_POST['createZone'][$id]['domain_mapping'] == 'reverse') {
-			$_POST['createZone'][$id]['domain_name'] = $this->setReverseZoneName($_POST['createZone'][$id]['domain_name']);
-		}
-		
-		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_SESSION['user']['account_id'], 'view_', 'account_id');
-		if (!$fmdb->num_rows) { /** No views defined - all zones must be unique */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($_POST['createZone'][$id]['domain_name']), 'domain_', 'domain_name');
-			if ($fmdb->num_rows) return 'Zone already exists.';
-		} else { /** All zones must be unique per view */
-			$defined_views = $fmdb->last_result;
-			
-			/** Format domain_view */
-			if (!$_POST['createZone'][$id]['domain_view'] || in_array(0, $_POST['createZone'][$id]['domain_view'])) {
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($_POST['createZone'][$id]['domain_name']), 'domain_', 'domain_name');
-				if ($fmdb->num_rows) return 'Zone already exists for all views.';
-			}
-			if (is_array($_POST['createZone'][$id]['domain_view'])) {
-				$domain_view = null;
-				foreach ($_POST['createZone'][$id]['domain_view'] as $val) {
-					if ($val == 0 || $val == '') {
-						$domain_view = 0;
-						break;
-					}
-					$domain_view .= $val . ';';
-					basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($_POST['createZone'][$id]['domain_name']), 'domain_', 'domain_name', "AND (domain_view='$val' OR domain_view=0 OR domain_view LIKE '$val;%' OR domain_view LIKE '%;$val;%' OR domain_view LIKE '%;$val')");
-					if ($fmdb->num_rows) {
-						$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-						return "Zone already exists for the '$view_name' view.";
-					}
-				}
-				$_POST['createZone'][$id]['domain_view'] = rtrim($domain_view, ';');
-			}
-		}
-		
-		/** Format domain_clone_domain_id */
-		if (!$_POST['createZone'][$id]['domain_clone_domain_id']) $_POST['createZone'][$id]['domain_clone_domain_id'] = 0;
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
-		if ($field_length !== false && strlen($_POST['createZone'][$id]['domain_name']) > $field_length) return 'Zone name is too long (maximum ' . $field_length . ' characters).';
-		
 		/** Get clone parent values */
-		if ($_POST['createZone'][$id]['domain_clone_domain_id']) {
-			$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE domain_id={$_POST['createZone'][$id]['domain_clone_domain_id']}";
+		if ($post['domain_clone_domain_id']) {
+			$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE domain_id={$post['domain_clone_domain_id']}";
 			$fmdb->query($query);
 			if (!$fmdb->num_rows) return 'Cannot find cloned zone.';
 			
@@ -147,11 +101,11 @@ class fm_dns_zones {
 			foreach ($parent_domain[0] as $field => $value) {
 				if ($field == 'domain_id') continue;
 				if ($field == 'domain_clone_domain_id') {
-					$sql_values .= sanitize($_POST['createZone'][$id]['domain_clone_domain_id']) . ',';
+					$sql_values .= sanitize($post['domain_clone_domain_id']) . ',';
 				} elseif ($field == 'domain_name') {
-					$log_message .= 'Name: ' . sanitize($_POST['createZone'][$id]['domain_name']) . "\n";
+					$log_message .= 'Name: ' . displayFriendlyDomainName(sanitize($post['domain_name'])) . "\n";
 					$log_message .= "Clone of: $value\n";
-					$sql_values .= "'" . sanitize($_POST['createZone'][$id]['domain_name']) . "',";
+					$sql_values .= "'" . sanitize($post['domain_name']) . "',";
 				} elseif ($field == 'domain_reload') {
 					$sql_values .= "'no',";
 				} else {
@@ -164,24 +118,11 @@ class fm_dns_zones {
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
 		} else {
-			/** Cleans up acl_addresses for future parsing **/
-			$clean_fields = array('domain_transfers_from', 'domain_updates_from', 'domain_master_servers', 'domain_forward_servers');
-			foreach ($clean_fields as $val) {
-				$_POST['createZone'][$id][$val] = verifyAndCleanAddresses($_POST['createZone'][$id][$val], true);
-				if ($_POST['createZone'][$id][$val] === false) return 'Invalid address(es) specified';
-			}
-			
-			/** Forward zones require forward servers */
-			if ($_POST['createZone'][$id]['domain_type'] == 'forward' && empty($_POST['createZone'][$id]['domain_forward_servers'])) return 'No forward servers defined.';
-			
-			/** Slave zones require master servers */
-			if (in_array($_POST['createZone'][$id]['domain_type'], array('slave', 'stub')) && empty($_POST['createZone'][$id]['domain_master_servers'])) return 'No master servers defined.';
-			
 			/** Format domain_view */
 			$log_message_views = null;
-			if (is_array($_POST['createZone'][$id]['domain_view'])) {
+			if (is_array($post['domain_view'])) {
 				$domain_view = null;
-				foreach ($_POST['createZone'][$id]['domain_view'] as $val) {
+				foreach ($post['domain_view'] as $val) {
 					if ($val == 0 || $val == '') {
 						$domain_view = 0;
 						break;
@@ -190,13 +131,13 @@ class fm_dns_zones {
 					$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 					$log_message_views .= $val ? "$view_name; " : null;
 				}
-				$_POST['createZone'][$id]['domain_view'] = rtrim($domain_view, ';');
+				$post['domain_view'] = rtrim($domain_view, ';');
 			}
-			if (!$_POST['createZone'][$id]['domain_view']) $_POST['createZone'][$id]['domain_view'] = 0;
+			if (!$post['domain_view']) $post['domain_view'] = 0;
 			
 			/** Format domain_name_servers */
 			$log_message_name_servers = null;
-			foreach ($_POST['createZone'][$id]['domain_name_servers'] as $val) {
+			foreach ($post['domain_name_servers'] as $val) {
 				if ($val == 0) {
 					$domain_name_servers = 0;
 					break;
@@ -205,15 +146,24 @@ class fm_dns_zones {
 				$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 				$log_message_name_servers .= $val ? "$server_name; " : null;
 			}
-			$_POST['createZone'][$id]['domain_name_servers'] = rtrim($domain_name_servers, ';');
-			if (!$_POST['createZone'][$id]['domain_name_servers']) $_POST['createZone'][$id]['domain_name_servers'] = 0;
+			$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
+			if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
 			
-			foreach ($_POST['createZone'][$id] as $key => $data) {
-				$sql_fields .= $key . ',';
-				$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
-				if ($key == 'domain_view') $data = $log_message_views;
-				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
-				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers');
+		
+			foreach ($post as $key => $data) {
+				if (!in_array($key, $exclude)) {
+					$sql_fields .= $key . ',';
+					$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
+					if ($key == 'domain_view') $data = $log_message_views;
+					if ($key == 'domain_name_servers') $data = $log_message_name_servers;
+					if ($key == 'soa_id') {
+						$soa_name = $data ? getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name') : 'Custom';
+						$log_message .= formatLogKeyData('_id', $key, $soa_name);
+					} else {
+						$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+					}
+				}
 			}
 			$sql_fields .= 'account_id)';
 			$sql_values .= "'{$_SESSION['user']['account_id']}'";
@@ -222,16 +172,31 @@ class fm_dns_zones {
 			$result = $fmdb->query($query);
 		}
 		
-		if (!$fmdb->result) return 'Could not add zone because a database error occurred.';
+		if ($fmdb->sql_errors) return 'Could not add zone because a database error occurred.';
 
 		$insert_id = $fmdb->insert_id;
+		
+		/** Add mandatory config options */
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` 
+			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
+		$required_servers = sanitize($post['domain_required_servers']);
+		if ($post['domain_type'] == 'forward') {
+			$query .= "'forwarders', '" . $required_servers . "')";
+			$result = $fmdb->query($query);
+			$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
+		} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
+			$query .= "'masters', '" . $required_servers . "')";
+			$result = $fmdb->query($query);
+			$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
+		}
+		if ($fmdb->sql_errors) return 'Could not add zone because a database error occurred.';
 		
 		addLogEntry($log_message);
 		
 		/* Set the server_build_config flag for servers */
-		if ($_POST['createZone'][$id]['domain_clone_domain_id']) {
-			if (getSOACount($_POST['createZone'][$id]['domain_clone_domain_id']) && getNSCount($_POST['createZone'][$id]['domain_clone_domain_id'])) {
-				setBuildUpdateConfigFlag(getZoneServers($_POST['createZone'][$id]['domain_clone_domain_id']), 'yes', 'build');
+		if ($post['domain_clone_domain_id']) {
+			if (getSOACount($post['domain_clone_domain_id']) && getNSCount($post['domain_clone_domain_id'])) {
+				setBuildUpdateConfigFlag(getZoneServers($post['domain_clone_domain_id']), 'yes', 'build');
 			}
 		}
 		return $insert_id;
@@ -243,89 +208,30 @@ class fm_dns_zones {
 	function update() {
 		global $fmdb, $__FM_CONFIG;
 		
-		$id = $_POST['editZone']['ZoneID'];
+		$domain_id = sanitize($_POST['domain_id']);
+		
+		/** Validate post */
+		$_POST['domain_mapping'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+		$_POST['domain_type'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+		
+		$post = $this->validatePost($_POST);
+		if (!is_array($post)) return $post;
+		
 		$sql_edit = $domain_name_servers = $domain_view = null;
 		
-		$old_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		$old_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$log_message = "Updated a zone ($old_name) with the following details:\n";
 
-		/** Empty domain names are not allowed */
-		if (empty($_POST['editZone'][$id]['domain_name'])) return 'No zone name defined.';
-		
-		/** Perform domain name validation */
-		if ($_POST['editZone'][$id]['domain_mapping'] == 'reverse') $_POST['editZone'][$id]['domain_name'] = $this->fixDomainTypos($_POST['editZone'][$id]['domain_name']);
-		if (!$this->validateDomainName($_POST['editZone'][$id]['domain_name'], $_POST['editZone'][$id]['domain_mapping'])) return 'Invalid zone name.';
-		
-		/** Reverse zones should have form of x.x.x.in-addr.arpa */
-		if ($_POST['editZone'][$id]['domain_mapping'] == 'reverse') {
-			$_POST['editZone'][$id]['domain_name'] = $this->setReverseZoneName($_POST['editZone'][$id]['domain_name']);
-		}
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
-		if ($field_length !== false && strlen($_POST['editZone'][$id]['domain_name']) > $field_length) return 'Zone name is too long (maximum' . $field_length . ' characters).';
-		
-		/** Ensure domain_view is set */
-		if (!array_key_exists('domain_view', $_POST['editZone'][$id])) $_POST['editZone'][$id]['domain_view'] = 0;
-
-		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_SESSION['user']['account_id'], 'view_', 'account_id');
-		if (!$fmdb->num_rows) { /** No views defined - all zones must be unique */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($_POST['editZone'][$id]['domain_name']), 'domain_', 'domain_name');
-			if ($fmdb->num_rows) return 'Zone already exists.';
-		} else { /** All zones must be unique per view */
-			$defined_views = $fmdb->last_result;
-			
-			/** Format domain_view */
-			if (!array_key_exists('domain_view', $_POST['editZone'][$id])) $_POST['editZone'][$id]['domain_view'] = 0;
-			if (!$_POST['editZone'][$id]['domain_view'] || in_array(0, $_POST['editZone'][$id]['domain_view'])) {
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($_POST['editZone'][$id]['domain_name']), 'domain_', 'domain_name', 'AND domain_id!=' . $id);
-				if ($fmdb->num_rows) return 'Zone already exists for all views.';
-			}
-			if (is_array($_POST['editZone'][$id]['domain_view'])) {
-				$domain_view = null;
-				foreach ($_POST['editZone'][$id]['domain_view'] as $val) {
-					if ($val == 0 || $val == '') {
-						$domain_view = 0;
-						break;
-					}
-					$domain_view .= $val . ';';
-					basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($_POST['editZone'][$id]['domain_name']), 'domain_', 'domain_name', "AND (domain_view='$val' OR domain_view=0 OR domain_view LIKE '$val;%' OR domain_view LIKE '%;$val;%' OR domain_view LIKE '%;$val') AND domain_id!=$id");
-					if ($fmdb->num_rows) {
-						$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-						return "Zone already exists for the '$view_name' view.";
-					}
-				}
-				$_POST['editZone'][$id]['domain_view'] = rtrim($domain_view, ';');
-			}
-		}
-		
 		/** If changing zone to clone or different domain_type, are there any existing associated records? */
-		if ($_POST['editZone'][$id]['domain_clone_domain_id'] || $_POST['editZone'][$id]['domain_type'] != 'master') {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $id, 'record_', 'domain_id');
+		if ($post['domain_clone_domain_id'] || $post['domain_type'] != 'master') {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) return 'There are associated records with this zone.';
 		}
 		
-		/** Forward zones require forward servers */
-		if ($_POST['editZone'][$id]['domain_type'] == 'forward' && empty($_POST['editZone'][$id]['domain_forward_servers'])) return 'No forward servers defined.';
-		
-		/** Slave zones require master servers */
-		if ($_POST['editZone'][$id]['domain_type'] == 'slave' && empty($_POST['editZone'][$id]['domain_master_servers'])) return 'No master servers defined.';
-		
-		/** Cleans up acl_addresses for future parsing **/
-		$clean_fields = array('domain_transfers_from', 'domain_updates_from', 'domain_master_servers', 'domain_forward_servers');
-		foreach ($clean_fields as $val) {
-			$_POST['editZone'][$id][$val] = verifyAndCleanAddresses($_POST['editZone'][$id][$val], true);
-			if ($_POST['editZone'][$id][$val] === false) return 'Invalid address(es) specified.';
-		}
-		
-		/** Format domain_clone_domain_id */
-		if (!$_POST['editZone'][$id]['domain_clone_domain_id']) $_POST['editZone'][$id]['domain_clone_domain_id'] = 0;
-		
 		/** Format domain_view */
 		$log_message_views = null;
-		if (is_array($_POST['editZone'][$id]['domain_view'])) {
-			foreach ($_POST['editZone'][$id]['domain_view'] as $val) {
+		if (is_array($post['domain_view'])) {
+			foreach ($post['domain_view'] as $val) {
 				if ($val == 0) {
 					$domain_view = 0;
 					break;
@@ -334,12 +240,12 @@ class fm_dns_zones {
 				$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 				$log_message_views .= $val ? "$view_name; " : null;
 			}
-			$_POST['editZone'][$id]['domain_view'] = rtrim($domain_view, ';');
+			$post['domain_view'] = rtrim($domain_view, ';');
 		}
 		
 		/** Format domain_name_servers */
 		$log_message_name_servers = null;
-		foreach ($_POST['editZone'][$id]['domain_name_servers'] as $val) {
+		foreach ($post['domain_name_servers'] as $val) {
 			if ($val == 0) {
 				$domain_name_servers = 0;
 				break;
@@ -348,35 +254,67 @@ class fm_dns_zones {
 			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			$log_message_name_servers .= $val ? "$server_name; " : null;
 		}
-		$_POST['editZone'][$id]['domain_name_servers'] = rtrim($domain_name_servers, ';');
-		if (!$_POST['editZone'][$id]['domain_name_servers']) $_POST['editZone'][$id]['domain_name_servers'] = 0;
+		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
+		if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
 		
-		foreach ($_POST['editZone'][$id] as $key => $data) {
-			$sql_edit .= strlen(sanitize($data)) ? $key . "='" . mysql_real_escape_string($data) . "'," : $key . '=NULL,';
-			if ($key == 'domain_view') $data = $log_message_views;
-			if ($key == 'domain_name_servers') $data = $log_message_name_servers;
-			$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+		$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers');
+
+		foreach ($post as $key => $data) {
+			if (!in_array($key, $exclude)) {
+				$sql_edit .= strlen(sanitize($data)) ? $key . "='" . mysql_real_escape_string($data) . "'," : $key . '=NULL,';
+				if ($key == 'domain_view') $data = $log_message_views;
+				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
+				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+			}
 		}
-		$sql_edit = rtrim($sql_edit, ',');
+		$sql_edit .= "domain_reload='no'";
 		
-		/* Set the server_build_config flag for existing servers */
-		if (getSOACount($id) && getNSCount($id)) {
-			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
+		/** Set the server_build_config flag for existing servers */
+		if (getSOACount($domain_id) && getNSCount($domain_id)) {
+			setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
 		}
 
 		/** Update the zone */
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $sql_edit WHERE `domain_id`='$id' AND `account_id`='{$_SESSION['user']['account_id']}'";
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $sql_edit WHERE `domain_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the zone because a database error occurred.';
+		if ($fmdb->sql_errors) return 'Could not update the zone because a database error occurred.';
+		
+		$rows_affected = $fmdb->rows_affected;
 
-		/** Return if there are no changes */
-		if (!$fmdb->rows_affected) return true;
-
-		/* Set the server_build_config flag for new servers */
-		if (getSOACount($id) && getNSCount($id)) {
-			setBuildUpdateConfigFlag(getZoneServers($id), 'yes', 'build');
+		/** Add mandatory config options */
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` 
+			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $domain_id, ";
+		$required_servers = sanitize($post['domain_required_servers']);
+		if ($post['domain_type'] == 'forward') {
+			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")) {
+				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forwarders'"), 'cfg_data', $required_servers, 'cfg_id');
+			} else {
+				$query .= "'forwarders', '" . $required_servers . "')";
+				$result = $fmdb->query($query);
+			}
+			$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
+		} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
+			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")) {
+				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='masters'"), 'cfg_data', $required_servers, 'cfg_id');
+			} else {
+				$query .= "'masters', '" . $required_servers . "')";
+				$result = $fmdb->query($query);
+			}
+			$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
 		}
+		if ($fmdb->sql_errors) return 'Could not update zone because a database error occurred.' . $fmdb->last_error;
+		
+		/** Return if there are no changes */
+		if ($rows_affected + $fmdb->rows_affected = 0) return true;
+
+		/** Set the server_build_config flag for new servers */
+		if (getSOACount($domain_id) && getNSCount($domain_id)) {
+			setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
+		}
+
+		/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
+		basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $domain_id, 'domain_id', false);
 
 		addLogEntry($log_message);
 		return true;
@@ -392,19 +330,35 @@ class fm_dns_zones {
 		/** Does the domain_id exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id', 'active');
 		if ($fmdb->num_rows) {
+			$domain_result = $fmdb->last_result[0];
+			unset($fmdb->num_rows);
+			
+			/** Delete all associated configs */
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $domain_id, 'cfg_', 'domain_id');
+			if ($fmdb->num_rows) {
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $domain_id, 'cfg_', 'deleted', 'domain_id') === false) {
+					return 'The associated configs for this zone could not be deleted because a database error occurred.';
+				}
+				unset($fmdb->num_rows);
+			}
+			
 			/** Delete all associated records */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) {
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
 					return 'The associated records for this zone could not be deleted because a database error occurred.';
 				}
+				unset($fmdb->num_rows);
 			}
 			
 			/** Delete all associated SOA */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_id, 'soa_', 'domain_id');
-			if ($fmdb->num_rows) {
-				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_id, 'soa_', 'deleted', 'domain_id') === false) {
-					return 'The SOA for this zone could not be deleted because a database error occurred.';
+			if ($domain_result->soa_id) {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_result->soa_id, 'soa_', 'soa_id', "AND soa_template='no'");
+				if ($fmdb->num_rows) {
+					if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_result->soa_id, 'soa_', 'deleted', 'soa_id') === false) {
+						return 'The SOA for this zone could not be deleted because a database error occurred.';
+					}
+					unset($fmdb->num_rows);
 				}
 			}
 			
@@ -419,13 +373,27 @@ class fm_dns_zones {
 			/** Delete cloned zones */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
 			if ($fmdb->num_rows) {
+				unset($fmdb->num_rows);
+				/** Delete cloned zone records first */
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', "AND domain_clone_domain_id=$domain_id");
+				if ($fmdb->num_rows) {
+					$clone_domain_result = $fmdb->last_result;
+					$clone_domain_num_rows = $fmdb->num_rows;
+					for ($i=0; $i<$clone_domain_num_rows; $i++) {
+						if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
+							return 'The associated records for the cloned zones could not be deleted because a database error occurred.';
+						}
+					}
+					unset($fmdb->num_rows);
+				}
+				
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_clone_domain_id') === false) {
 					return 'The associated clones for this zone could not be deleted because a database error occurred.';
 				}
 			}
 			
 			/** Delete zone */
-			$tmp_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+			$tmp_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_id') === false) {
 				return 'This zone could not be deleted because a database error occurred.';
 			}
@@ -491,11 +459,15 @@ FORM;
 		else {
 			$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
 		}
+		if ($soa_count && $ns_count && $row->domain_type == 'master') {
+			$edit_status = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $row->domain_id . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
+		}
 		if (currentUserCan('manage_zones', $_SESSION['module']) && $zone_access_allowed) {
-			$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="delete" href="#">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 		}
-		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">{$row->domain_name}</a>" : $row->domain_name;
+		$domain_name = displayFriendlyDomainName($row->domain_name);
+		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">$domain_name</a>" : $domain_name;
 		if ($row->domain_view) {
 			// Process multiple views
 			if (strpos($row->domain_view, ';')) {
@@ -534,12 +506,12 @@ HTML;
 	 * Displays the form to add new zone
 	 */
 	function printForm($data = '', $action = 'create', $map = 'forward') {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_dns_acls;
 		
-		$ucf_action = ucfirst($action);
+		$ucaction = ucfirst($action);
 		$domain_id = $domain_view = $domain_name_servers = 0;
-		$domain_type = $domain_check_names = $domain_notify_slaves = $domain_multi_masters = $domain_clone_domain_id = null;
-		$domain_transfers_from = $domain_updates_from = $domain_master_servers = $domain_forward_servers = $domain_name = null;
+		$domain_type = $domain_clone_domain_id = $domain_name = null;
+		$disabled = $action == 'create' ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST)) {
@@ -550,13 +522,15 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
-		// Process multiple views
+		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
+		
+		/** Process multiple views */
 		if (strpos($domain_view, ';')) {
 			$domain_view = explode(';', rtrim($domain_view, ';'));
 			if (in_array('0', $domain_view)) $domain_view = 0;
 		}
 		
-		// Process multiple domain name servers
+		/** Process multiple domain name servers */
 		if (strpos($domain_name_servers, ';')) {
 			$domain_name_servers = explode(';', rtrim($domain_name_servers, ';'));
 			if (in_array('0', $domain_name_servers)) $domain_name_servers = 0;
@@ -565,90 +539,106 @@ HTML;
 		/** Get field length */
 		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
 
-		$views = buildSelect("{$action}Zone[$domain_id][domain_view]", 'domain_view', $this->availableViews(), $domain_view, 4, null, true);
-		$zone_maps = buildSelect("{$action}Zone[$domain_id][domain_mapping]", 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map);
-		$domain_types = buildSelect("{$action}Zone[$domain_id][domain_type]", 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type);
-		$check_names = buildSelect("{$action}Zone[$domain_id][domain_check_names]", 'domain_check_names', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_check_names',''), $domain_check_names);
-		$notify_slaves = buildSelect("{$action}Zone[$domain_id][domain_notify_slaves]", 'domain_notify_slaves', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_notify_slaves',''), $domain_notify_slaves);
-		$multi_masters = buildSelect("{$action}Zone[$domain_id][domain_multi_masters]", 'domain_multi_masters', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','multi_masters',''), $domain_multi_masters);
-		$clone = buildSelect("{$action}Zone[$domain_id][domain_clone_domain_id]", 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1);
-		$name_servers = buildSelect("{$action}Zone[$domain_id][domain_name_servers]", 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 5, null, true);
-		$domain_transfers_from = str_replace('; ', "\n", rtrim($domain_transfers_from, '; '));
-		$domain_updates_from = str_replace('; ', "\n", rtrim($domain_updates_from, '; '));
-		$domain_master_servers = str_replace('; ', "\n", rtrim($domain_master_servers, '; '));
-		$domain_forward_servers = str_replace('; ', "\n", rtrim($domain_forward_servers, '; '));
+		$views = buildSelect('domain_view', 'domain_view', $this->availableViews(), $domain_view, 4, null, true);
+		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map, 1, 'disabled');
+		$domain_types = buildSelect('domain_type', 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type, 1, $disabled);
+		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
+		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 5, null, true);
+
+		$forwarders_show = $masters_show = 'none';
+		$domain_forward_servers = $domain_master_servers = null;
+		$available_acls = json_encode(array());
+		if ($domain_type == 'forward') {
+			$forwarders_show = 'block';
+			$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
+			$available_acls = $fm_dns_acls->buildACLJSON($domain_forward_servers, 0, 'none');
+		} elseif (in_array($domain_type, array('slave', 'stub'))) {
+			$masters_show = 'block';
+			$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
+			$available_acls = $fm_dns_acls->buildACLJSON($domain_master_servers, 0, 'none');
+		}
+		
+		if ($action == 'create') {
+			$soa_show = 'block';
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			$soa_templates = '<tr id="define_soa">
+					<th>SOA</th>
+					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates()) . '</td></tr>';
+		} else {
+			$soa_show = 'none';
+			$soa_templates = null;
+		}
+		$additional_config_link = ($action == 'create' || $domain_type != 'master') ? null : '<tr><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
+		
+		$popup_header = buildPopup('header', $ucaction . ' Zone');
+		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<HTML
-		<form name="manage" id="manage" method="post" action="?map=$map">
+		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="{$action}Zone[ZoneID]" value="$domain_id" />
+			<input type="hidden" name="domain_id" value="$domain_id" />
 			<table class="form-table zone-form">
 				<tr>
+					<th><label for="domain_name">Domain Name</label></th>
+					<td><input type="text" id="domain_name" name="domain_name" size="40" value="$domain_name" maxlength="$domain_name_length" /></td>
+				</tr>
+				<tr>
+					<th><label for="domain_view">Views</label></th>
+					<td>$views</td>
+				</tr>
+				<tr>
+					<th><label for="domain_mapping">Zone Map</label></th>
+					<td>$zone_maps</td>
+				</tr>
+				<tr>
+					<th><label for="domain_type">Zone Type</label></th>
 					<td>
-						<table class="form-table">
-							<tr>
-								<th><label for="domain_name">Domain Name</label></th>
-								<td><input type="text" id="domain_name" name="{$action}Zone[$domain_id][domain_name]" size="40" value="$domain_name" maxlength="$domain_name_length" /></td>
-							</tr>
-							<tr>
-								<th><label for="domain_view">Views</label></th>
-								<td>$views</td>
-							</tr>
-							<tr>
-								<th><label for="domain_mapping">Zone Type</label></th>
-								<td>$zone_maps</td>
-							</tr>
-							<tr>
-								<th><label for="domain_type">Domain Type</label></th>
-								<td>$domain_types</td>
-							</tr>
-							<tr>
-								<th><label for="domain_clone_domain_id">Clone Of (optional)</label></th>
-								<td>$clone</td>
-							</tr>
-							<tr>
-								<th><label for="domain_check_names">Check Names (optional)</label></th>
-								<td>$check_names</td>
-							</tr>
-							<tr>
-								<th><label for="domain_notify_slaves">Notify Slaves (optional)</label></th>
-								<td>$notify_slaves</td>
-							</tr>
-							<tr>
-								<th><label for="domain_multi_masters">Multiple Masters (optional)</label></th>
-								<td>$multi_masters</td>
-							</tr>
-						</table>
-					</td>
-					<td>
-						<table class="form-table">
-							<tr>
-								<th><label for="domain_transfers_from">Transfers From (optional)</label></th>
-								<td><textarea id="domain_transfers_from" name="{$action}Zone[$domain_id][domain_transfers_from]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_transfers_from</textarea></td>
-							</tr>
-							<tr>
-								<th><label for="domain_updates_from">Updates From (optional)</label></th>
-								<td><textarea id="domain_updates_from" name="{$action}Zone[$domain_id][domain_updates_from]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_updates_from</textarea></td>
-							</tr>
-							<tr>
-								<th><label for="domain_master_servers">Master Servers (optional)</label></th>
-								<td><textarea id="domain_master_servers" name="{$action}Zone[$domain_id][domain_master_servers]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_master_servers</textarea></td>
-							</tr>
-							<tr>
-								<th><label for="domain_forward_servers">Forward Servers (optional)</label></th>
-								<td><textarea id="domain_forward_servers" name="{$action}Zone[$domain_id][domain_forward_servers]" rows="4" cols="30" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$domain_forward_servers</textarea></td>
-							</tr>
-							<tr>
-								<th><label for="domain_name_servers">DNS Servers</label></th>
-								<td>$name_servers</td>
-							</tr>
-						</table>
+						$domain_types
+						<div id="define_forwarders" style="display: $forwarders_show">
+							<input type="hidden" name="domain_required_servers[forwarders]" id="domain_required_servers" class="address_match_element" data-placeholder="Define forwarders" value="$domain_forward_servers" /><br />
+							( address_match_element )
+						</div>
+						<div id="define_masters" style="display: $masters_show">
+							<input type="hidden" name="domain_required_servers[masters]" id="domain_required_servers" class="address_match_element" data-placeholder="Define masters" value="$domain_master_servers" /><br />
+							( address_match_element )
+						</div>
 					</td>
 				</tr>
+				<tr>
+					<th><label for="domain_clone_domain_id">Clone Of (optional)</label></th>
+					<td>$clone</td>
+				</tr>
+				<tr>
+					<th><label for="domain_name_servers">DNS Servers</label></th>
+					<td>$name_servers</td>
+				</tr>
+				$soa_templates
+				$additional_config_link
 			</table>
-			<input type="submit" name="submit" value="$ucf_action Zone" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '100%',
+					minimumResultsForSearch: 10,
+					allowClear: true
+				});
+				$(".address_match_element").select2({
+					createSearchChoice:function(term, data) { 
+						if ($(data).filter(function() { 
+							return this.text.localeCompare(term)===0; 
+						}).length===0) 
+						{return {id:term, text:term};} 
+					},
+					multiple: true,
+					width: '300px',
+					tokenSeparators: [",", " ", ";"],
+					data: $available_acls
+				});
+			});
+		</script>
 HTML;
 
 		return $return_form;
@@ -738,7 +728,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Check domain_id and soa */
-		$query = "select * from fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.domain_id=d.domain_id and d.domain_id=$domain_id";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.soa_id=d.soa_id and d.domain_id=$domain_id";
 		$result = $fmdb->query($query);
 		if (!$fmdb->num_rows) return false;
 
@@ -812,7 +802,7 @@ HTML;
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						return $response . '<p class="error">Failed: SSH key is not <a href="' . $__FM_CONFIG['menu']['Admin']['Settings'] . '">defined</a>.</p>'. "\n";
+						return $response . '<p class="error">Failed: SSH key is not <a href="' . getMenuURL('Settings') . '">defined</a>.</p>'. "\n";
 					}
 					
 					$temp_ssh_key = '/tmp/fm_id_rsa';
@@ -856,11 +846,11 @@ HTML;
 		
 		/** Reset the domain_reload flag */
 		if (!$failures) {
-			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='no' WHERE `domain_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND `domain_id`=$domain_id";
-			$result = $fmdb->query($query);
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			$fm_dns_records->updateSOAReload($domain_id, 'no');
 		}
 
-		addLogEntry("Reloaded zone '$domain_name'.");
+		addLogEntry("Reloaded zone '" . displayFriendlyDomainName($domain_name) . "'.");
 		return $response;
 	}
 
@@ -898,9 +888,9 @@ HTML;
 	function updateSOASerialNo($domain_id, $soa_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$soa_serial_no = ($soa_serial_no == 99) ? 10 : $soa_serial_no + 1;
+		$soa_serial_no = ($soa_serial_no == 99) ? 0 : $soa_serial_no + 1;
 		
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` SET `soa_serial_no`=$soa_serial_no WHERE `domain_id`=$domain_id";
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=" . sprintf('%02d', $soa_serial_no) . " WHERE `domain_id`=$domain_id";
 		$result = $fmdb->query($query);
 	}
 	
@@ -994,7 +984,7 @@ HTML;
 			}
 		} else {
 			/** Forward zones should only contain letters, numbers, periods, and hyphens */
-			return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $domain_name) // valid chars check
+			return (preg_match("/^(_*[a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $domain_name) // valid chars check
 					&& preg_match("/^.{1,253}$/", $domain_name) // overall length check
 					&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)   ); // length of each label
 		}
@@ -1052,7 +1042,7 @@ HTML;
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
 		
-		$response[] = $domain_name;
+		$response[] = displayFriendlyDomainName($domain_name);
 		
 		/** Ensure domain is reloadable */
 		if ($domain_reload != 'yes') {
@@ -1065,7 +1055,8 @@ HTML;
 		}
 		
 		/** Ensure user is allowed to reload zone */
-		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id));
+		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id)) & 
+				currentUserCan('reload_zones');
 		
 		if (count($response) == 1 && !$zone_access_allowed) {
 			$response[] = ' --> Failed: You do not have permission to reload this zone.';
@@ -1081,6 +1072,103 @@ HTML;
 		$response[] = "\n";
 		
 		return implode("\n", $response);
+	}
+
+
+	function validatePost($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (!$post['domain_id']) unset($post['domain_id']);
+		
+		/** Empty domain names are not allowed */
+		if (empty($post['domain_name'])) return 'No zone name defined.';
+		
+		$post['domain_name'] = rtrim(strtolower($post['domain_name']), '.');
+		
+		/** Perform domain name validation */
+		if (!isset($post['domain_mapping'])) {
+			global $map;
+			$post['domain_mapping'] = $map;
+		}
+		if ($post['domain_mapping'] == 'reverse') {
+			$post['domain_name'] = $this->fixDomainTypos($post['domain_name']);
+		} else {
+			$post['domain_name'] = function_exists('idn_to_ascii') ? idn_to_ascii($post['domain_name']) : $post['domain_name'];
+		}
+		if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return 'Invalid zone name.';
+		
+		/** Ensure domain_view is set */
+		if (!array_key_exists('domain_view', $post)) $post['domain_view'] = 0;
+
+		/** Reverse zones should have form of x.x.x.in-addr.arpa */
+		if ($post['domain_mapping'] == 'reverse') {
+			$post['domain_name'] = $this->setReverseZoneName($post['domain_name']);
+		}
+		
+		/** Does the record already exist for this account? */
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_SESSION['user']['account_id'], 'view_', 'account_id');
+		if (!$fmdb->num_rows) { /** No views defined - all zones must be unique */
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name');
+			if ($fmdb->num_rows) return 'Zone already exists.';
+		} else { /** All zones must be unique per view */
+			$defined_views = $fmdb->last_result;
+			
+			/** Format domain_view */
+			$domain_id_sql = (isset($post['domain_id'])) ? 'AND domain_id!=' . sanitize($post['domain_id']) : null;
+			if (!$post['domain_view'] || in_array(0, $post['domain_view'])) {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
+				if ($fmdb->num_rows) return 'Zone already exists for all views.';
+			}
+			if (is_array($post['domain_view'])) {
+				$domain_view = null;
+				foreach ($post['domain_view'] as $val) {
+					if ($val == 0 || $val == '') {
+						$domain_view = 0;
+						break;
+					}
+					$domain_view .= $val . ';';
+					basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', "AND (domain_view='$val' OR domain_view=0 OR domain_view LIKE '$val;%' OR domain_view LIKE '%;$val;%' OR domain_view LIKE '%;$val') $domain_id_sql");
+					if ($fmdb->num_rows) {
+						$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
+						return "Zone already exists for the '$view_name' view.";
+					}
+				}
+				$post['domain_view'] = rtrim($domain_view, ';');
+			}
+		}
+		
+		/** Format domain_clone_domain_id */
+		if (!$post['domain_clone_domain_id']) $post['domain_clone_domain_id'] = 0;
+		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
+		if ($field_length !== false && strlen($post['domain_name']) > $field_length) return 'Zone name is too long (maximum ' . $field_length . ' characters).';
+		
+		/** No need to process more if zone is cloned */
+		if ($post['domain_clone_domain_id']) {
+			return $post;
+		}
+		
+		/** Cleans up acl_addresses for future parsing **/
+		$clean_fields = array('forwarders', 'masters');
+		foreach ($clean_fields as $val) {
+			$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
+			if ($post['domain_required_servers'][$val] === false) return 'Invalid address(es) specified';
+		}
+
+		/** Forward zones require forward servers */
+		if ($post['domain_type'] == 'forward') {
+			if (empty($post['domain_required_servers']['forwarders'])) return 'No forward servers defined.';
+			$post['domain_required_servers'] = $post['domain_required_servers']['forwarders'];
+		}
+
+		/** Slave and stub zones require master servers */
+		if (in_array($post['domain_type'], array('slave', 'stub'))) {
+			if (empty($post['domain_required_servers']['masters'])) return 'No master servers defined.';
+			$post['domain_required_servers'] = $post['domain_required_servers']['masters'];
+		}
+
+		return $post;
 	}
 
 }

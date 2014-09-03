@@ -27,6 +27,7 @@ $(document).ready(function() {
 				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
 					$this.fadeOut(400);
 					$this.parent().parent().removeClass('build');
+					$this.parent().parent().find('input:checkbox:first').remove();
 				}
 			}
 		});
@@ -87,6 +88,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$('#more_records').append(response);
+				$("select").select2({minimumResultsForSearch: 10});
 				more_clicks = more_clicks + 1;
 			}
 		});
@@ -162,16 +164,68 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#body_container").delegate('#soa_template_chosen', 'change', function(e) {
+		if ($(this).val() == '0') {
+			$('#custom-soa-form').show('slow');
+		} else {
+			$('#custom-soa-form').slideUp();
+		}
+	});
+	
+	if ($('#soa_template_chosen').val() !== undefined) {
+		if ($('#soa_template_chosen').val() != 0) {
+			$('#custom-soa-form').hide();
+		}
+	}
+	
+	$("#soa_create_template").click(function() {
+		if ($(this).is(':checked')) {
+			$('#soa_template_name').show('slow');
+		} else {
+			$('#soa_template_name').slideUp();
+		}
+	});
+	
+	$("#manage_item_contents").delegate('#domain_type', 'change', function(e) {
+		if ($(this).val() == 'forward') {
+			$('#define_forwarders').show('slow');
+			$('#define_masters').slideUp();
+			$('#define_soa').slideUp();
+		} else if ($(this).val() == 'slave' || $(this).val() == 'stub') {
+			$('#define_forwarders').slideUp();
+			$('#define_masters').show('slow');
+			$('#define_soa').slideUp();
+		} else if ($(this).val() == 'master') {
+			$('#define_forwarders').slideUp();
+			$('#define_masters').slideUp();
+			$('#define_soa').show('slow');
+		} else {
+			$('#define_forwarders').slideUp();
+			$('#define_masters').slideUp();
+			$('#define_soa').slideUp();
+		}
+	});
+	
+	$("#manage_item_contents").delegate('#domain_clone_domain_id', 'change', function(e) {
+		if ($(this).val() == 0) {
+			$('#define_soa').show('slow');
+		} else {
+			$('#define_soa').slideUp();
+		}
+	});
+	
 });
 
 
 function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById('cfg_name').value;
+	var server_serial_no	= getUrlVars()['server_serial_no'];
 
 	var form_data = {
 		get_option_placeholder: true,
 		option_name: option_name,
 		option_value: option_value,
+		server_serial_no: server_serial_no,
 		is_ajax: 1
 	};
 
@@ -182,6 +236,12 @@ function displayOptionPlaceholder(option_value) {
 		success: function(response)
 		{
 			$('.value_placeholder').html(response);
+			if (response.toLowerCase().indexOf("address_match_element") == -1) {
+				$("#manage #cfg_data").select2({
+					width: '100px',
+					minimumResultsForSearch: 10
+				});
+			}
 		}
 	});
 }

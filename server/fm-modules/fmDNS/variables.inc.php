@@ -31,37 +31,15 @@ if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
-		'version'							=> '1.2.5',
-		'client_version'					=> '1.2.5',
+		'version'							=> '1.3-beta2',
+		'client_version'					=> '1.3-beta2',
 		'description'						=> 'Easily manage one or more ISC BIND servers through a web interface.  No more editing configuration
 												and zone files manually.',
 		'prefix'							=> 'dns_',
 		'required_dns_version'				=> '9.3',
-		'required_fm_version'				=> '1.2.3',
+		'required_fm_version'				=> '1.3-beta2',
 		'min_client_auto_upgrade_version'	=> '1.2.5'
 	);
-
-/** Dashboard Menu Options */
-$__FM_CONFIG['module']['menu']['Dashboard']['URL']	= '';
-
-/** Zones Menu Options */
-$__FM_CONFIG['module']['menu']['Zones']['URL']		= 'zones.php';
-$__FM_CONFIG['module']['menu']['Zones']['Forward']	= 'zones.php';
-$__FM_CONFIG['module']['menu']['Zones']['Reverse']	= 'zones.php?map=reverse';
-
-/** Config Menu Options */
-$__FM_CONFIG['module']['menu']['Config']['URL']		= 'config-servers.php';
-$__FM_CONFIG['module']['menu']['Config']['Servers']	= 'config-servers.php';
-$__FM_CONFIG['module']['menu']['Config']['Views']	= 'config-views.php';
-$__FM_CONFIG['module']['menu']['Config']['ACLs']	= 'config-acls.php';
-$__FM_CONFIG['module']['menu']['Config']['Keys']	= 'config-keys.php';
-$__FM_CONFIG['module']['menu']['Config']['Options']	= 'config-options.php';
-$__FM_CONFIG['module']['menu']['Config']['Logging']	= 'config-logging.php';
-
-$__FM_CONFIG['menu'] = array_merge($__FM_CONFIG['module']['menu'], $__FM_CONFIG['menu']);
-
-/** Settings Menu Options */
-$__FM_CONFIG['menu']['Settings']['fmDNS']	= 'module-settings.php';
 
 /** Images */
 $__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';
@@ -93,6 +71,10 @@ $__FM_CONFIG['records']['cert_algorithms'] = array(
 											array('RSA/SHA-256', 8),
 											array('RSA/SHA-512', 10)
 											);
+$__FM_CONFIG['records']['sshfp_algorithms'] = array(
+											array('RSA', 1),
+											array('DSA', 2)
+											);
 
 $__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');
 $__FM_CONFIG['options']['avail_types'] = array('Global');
@@ -108,6 +90,7 @@ $__FM_CONFIG['soa']['soa_expire']			= '1w';
 
 /** Name Server Default Values */
 $__FM_CONFIG['ns']['named_root_dir']		= '/var/named';
+$__FM_CONFIG['ns']['named_chroot_dir']		= '/var/named/chroot';
 $__FM_CONFIG['ns']['named_zones_dir']		= '/etc/named/zones';
 $__FM_CONFIG['ns']['named_config_file']		= '/etc/named.conf';
 
@@ -149,6 +132,11 @@ $__FM_CONFIG['fmDNS']['default']['options'] = array(
 		'purge_config_files' => array(
 				'description' => array('Purge Configuration Files', 'When enabled, configuration files will be deleted on the DNS
 								servers before building the server config. This can be handy if you want to remove unused files.'),
+				'default_value' => 'no',
+				'type' => 'checkbox'),
+		'auto_create_ptr_zones' => array(
+				'description' => array('Create Reverse Zones Automatically', 'While creating A records and choosing to create the associated'
+					. ' PTR record, reverse zones can be automatically created if they are missing.'),
 				'default_value' => 'no',
 				'type' => 'checkbox')
 	);

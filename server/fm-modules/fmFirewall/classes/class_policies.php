@@ -312,36 +312,34 @@ HTML;
 		$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
 
 		$source_items_assigned = getGroupItems($policy_source);
-		$source_assigned_list = buildSelect(null, 'source_items_assigned', availableGroupItems('object', 'assigned', $source_items_assigned), null, 7, null, true);
-		$source_available_list = buildSelect(null, 'source_items_available', availableGroupItems('object', 'available', $source_items_assigned), null, 7, null, true);
+		$source_items = buildSelect('source_items', 'source_items', availableGroupItems('object', 'available'), $source_items_assigned, 1, null, true, null, null, 'Select one or more objects');
 		
 		$destination_items_assigned = getGroupItems($policy_destination);
-		$destination_assigned_list = buildSelect(null, 'destination_items_assigned', availableGroupItems('object', 'assigned', $destination_items_assigned), null, 7, null, true);
-		$destination_available_list = buildSelect(null, 'destination_items_available', availableGroupItems('object', 'available', $destination_items_assigned), null, 7, null, true);
+		$destination_items = buildSelect('destination_items', 'destination_items', availableGroupItems('object', 'available'), $destination_items_assigned, 1, null, true, null, null, 'Select one or more objects');
 		
 		$services_items_assigned = getGroupItems($policy_services);
-		$services_assigned_list = buildSelect(null, 'services_items_assigned', availableGroupItems('service', 'assigned', $services_items_assigned), null, 7, null, true);
-		$services_available_list = buildSelect(null, 'services_items_available', availableGroupItems('service', 'available', $services_items_assigned), null, 7, null, true);
+		$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, 'Select one or more services');
 		
 		$source_not_check = ($policy_source_not) ? 'checked' : null;
 		$destination_not_check = ($policy_destination_not) ? 'checked' : null;
 		$service_not_check = ($policy_services_not) ? 'checked' : null;
 
+		$popup_header = buildPopup('header', $ucaction . ' Policy');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="?server_serial_no={$_REQUEST['server_serial_no']}">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
-			<input type="hidden" name="policy_source_not" id="policy_source_not" value="0" />
-			<input type="hidden" name="source_items" id="source_items" value="$source_items" />
-			<input type="hidden" name="policy_destination_not" id="policy_destination_not" value="0" />
-			<input type="hidden" name="destination_items" id="destination_items" value="$destination_items" />
-			<input type="hidden" name="policy_services_not" id="policy_services_not" value="0" />
-			<input type="hidden" name="services_items" id="services_items" value="$services_items" />
+			<input type="hidden" name="policy_source_not" value="0" />
+			<input type="hidden" name="policy_destination_not" value="0" />
+			<input type="hidden" name="policy_services_not" value="0" />
 FORM;
 		if ($type == 'rules') {
 			$return_form .= <<<FORM
-			<table class="form-table">
+			<table class="form-table policy-form">
 				<tr>
 					<th width="33%" scope="row"><label for="policy_interface">Interface</label></th>
 					<td width="67%">$policy_interface</td>
@@ -353,73 +351,25 @@ FORM;
 				<tr>
 					<th width="33%" scope="row">Source</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="policy_source_not" id="policy_source_not" value="1" type="checkbox" $source_not_check /><b>not</b></label>
+						<input name="policy_source_not" id="policy_source_not" value="1" type="checkbox" $source_not_check /><label for="policy_source_not"><b>not</b></label>
 						<p class="checkbox_desc">Use this option to invert the match</p>
-						<table class="form-table list-toggle">
-							<tbody>
-								<tr>
-									<th>Assigned</th>
-									<th style="width: 50px;"></th>
-									<th>Available</th>
-								</tr>
-								<tr>
-									<td>$source_assigned_list</td>
-									<td>
-										<input type="button" id="buttonLeft" class="source" value="<" /><br />
-										<input type="button" id="buttonRight" class="source" value=">" />
-									</td>
-									<td>$source_available_list</td>
-								</tr>
-							</tbody>
-						</table>
+						$source_items
 					</td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row">Destination</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" $destination_not_check /><b>not</b></label>
+						<input name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" $destination_not_check /><label for="policy_destination_not"><b>not</b></label>
 						<p class="checkbox_desc">Use this option to invert the match</p>
-						<table class="form-table list-toggle">
-							<tbody>
-								<tr>
-									<th>Assigned</th>
-									<th style="width: 50px;"></th>
-									<th>Available</th>
-								</tr>
-								<tr>
-									<td>$destination_assigned_list</td>
-									<td>
-										<input type="button" id="buttonLeft" class="destination" value="<" /><br />
-										<input type="button" id="buttonRight" class="destination" value=">" />
-									</td>
-									<td>$destination_available_list</td>
-								</tr>
-							</tbody>
-						</table>
+						$destination_items
 					</td>
 				</tr>
 				<tr>
 					<th width="33%" scope="row">Services</th>
 					<td width="67%">
-						<label><input style="height: 10px;" name="policy_services_not" id="policy_services_not" value="1" type="checkbox" $service_not_check /><b>not</b></label>
+						<input name="policy_services_not" id="policy_services_not" value="1" type="checkbox" $service_not_check /><label for="policy_services_not"><b>not</b></label>
 						<p class="checkbox_desc">Use this option to invert the match</p>
-						<table class="form-table list-toggle">
-							<tbody>
-								<tr>
-									<th>Assigned</th>
-									<th style="width: 50px;"></th>
-									<th>Available</th>
-								</tr>
-								<tr>
-									<td>$services_assigned_list</td>
-									<td>
-										<input type="button" id="buttonLeft" class="services" value="<" /><br />
-										<input type="button" id="buttonRight" class="services" value=">" />
-									</td>
-									<td>$services_available_list</td>
-								</tr>
-							</tbody>
-						</table>
+						$services_items
 					</td>
 				</tr>
 
@@ -443,7 +393,7 @@ FORM;
 			}
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-				$options .= '<label><input style="height: 10px;" name="policy_options[]" id="policy_options" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' />' . $opt_array['desc'] . "</label><br />\n";
+				$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']">' . $opt_array['desc'] . "</label><br />\n";
 			}
 			
 			$return_form .= <<<FORM
@@ -462,14 +412,21 @@ FORM;
 					<td width="67%"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">$policy_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit_items" value="$ucaction Rule" class="button" />
 
 FORM;
 		}
 		
 		$return_form .= <<<FORM
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;
@@ -489,9 +446,9 @@ FORM;
 		} else $post['policy_options'] = 0;
 		
 		$post['server_serial_no'] = isset($post['server_serial_no']) ? $post['server_serial_no'] : $_REQUEST['server_serial_no'];
-		$post['policy_source'] = $post['source_items'];
-		$post['policy_destination'] = $post['destination_items'];
-		$post['policy_services'] = $post['services_items'];
+		$post['policy_source'] = implode(';', $post['source_items']);
+		$post['policy_destination'] = implode(';', $post['destination_items']);
+		$post['policy_services'] = implode(';', $post['services_items']);
 		unset($post['source_items']);
 		unset($post['destination_items']);
 		unset($post['services_items']);

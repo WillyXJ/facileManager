@@ -33,10 +33,10 @@ function moduleFunctionalCheck() {
 	$checks = array();
 	
 	/** Count active database servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active database servers defined.  <a href="' . $__FM_CONFIG['menu']['Config']['Servers'] . '">Click here</a> to define one or more to manage.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active database servers defined.  <a href="' . getMenuURL('Servers') . '">Click here</a> to define one or more to manage.</p>';
 	
 	/** Count groups */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : '<p>You currently have no database server groups defined.  <a href="' . $__FM_CONFIG['menu']['Config']['Server Groups'] . '">Click here</a> to define one or more.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : '<p>You currently have no database server groups defined.  <a href="' . getMenuURL('Server Groups') . '">Click here</a> to define one or more.</p>';
 	
 	foreach ($checks as $val) {
 		$html_checks .= $val;
@@ -96,7 +96,7 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Configure Servers</a>
 		<div>
-			<p>Database servers can be managed from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['URL']}">Servers</a> menu item. From 
+			<p>Database servers can be managed from the Config &rarr; <a href="__menu{Servers}">Servers</a> menu item. From 
 			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
 			servers depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
@@ -112,7 +112,7 @@ function buildModuleHelpFile() {
 			<p>Server groups are used so you can change the user passwords on a subset of servers rather than all (or selecting individual servers on
 			each run). An example would be to create a group for each data center hosting your servers so you can change the password for all database
 			servers within that data center.</p>
-			<p>Database server groups can be managed from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['Server Groups']}">Server Groups</a> 
+			<p>Database server groups can be managed from the Config &rarr; <a href="__menu{Server Groups}">Server Groups</a> 
 			menu item. From there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), and delete 
 			({$__FM_CONFIG['icons']['delete']}) servers depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete server groups.</i></p>
@@ -122,7 +122,7 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Set Passwords</a>
 		<div>
-			<p>Database user passwords can be updated from the Config &rarr; <a href="{$__FM_CONFIG['module']['menu']['Config']['Passwords']}">Passwords</a> 
+			<p>Database user passwords can be updated from the Config &rarr; <a href="__menu{Passwords}">Passwords</a> 
 			menu item. From there you can select the server groups, enter the username to change the password for, and enter the new password.</p>
 			<p><i>The 'Password Management' or 'Super Admin' permission is required to update database user passwords.</i></p>
 			<p>You can enter the username as "<code>username</code>" which will change the password for all users matching that string. If you want to 
@@ -134,7 +134,7 @@ function buildModuleHelpFile() {
 	<li>
 		<a class="list_title">Module Settings</a>
 		<div>
-			<p>Settings for {$_SESSION['module']} can be updated from the <a href="{$__FM_CONFIG['module']['menu']['Settings']['URL']}">Settings</a> 
+			<p>Settings for {$_SESSION['module']} can be updated from the <a href="__menu{{$_SESSION['module']} Settings}">Settings</a> 
 			menu item.</p>
 			<br />
 		</div>

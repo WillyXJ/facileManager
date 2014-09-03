@@ -188,8 +188,12 @@ HTML;
 		/** Check name field length */
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
 
+		$popup_header = buildPopup('header', $ucaction . ' Group');
+		$popup_footer = buildPopup('footer');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" id="action" value="$action" />
 			<input type="hidden" name="group_id" id="group_id" value="$group_id" />
 			<table class="form-table">
@@ -198,8 +202,7 @@ HTML;
 					<td width="67%"><input name="group_name" id="group_name" type="text" value="$group_name" size="40" placeholder="internal" maxlength="$group_name_length" /></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit" value="$ucaction Group" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
 FORM;
 

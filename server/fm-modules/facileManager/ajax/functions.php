@@ -31,9 +31,9 @@
 function returnError($window = true) {
 	$msg = 'There was a problem with your request.'; 
 	if ($window) {
-		echo '<h2>Error</h2>' . "\n";
-		echo '<p>' . $msg . "</p>\n";
-		echo '<br /><input type="button" value="OK" class="button" id="cancel_button" />' . "\n";
+		echo buildPopup('header', 'Error');
+		echo "<p>$msg</p>\n";
+		echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 	} else {
 		echo '<p class="error">' . $msg . "</p>\n";
 	}
@@ -50,9 +50,9 @@ function returnError($window = true) {
 function returnUnAuth($window = true) {
 	$msg = 'You do not have permission to make these changes.';
 	if ($window) {
-		echo '<h2>Error</h2>' . "\n";
-		echo '<p>' . $msg . "</p>\n";
-		echo '<br /><input type="button" value="OK" class="button" id="cancel_button" />' . "\n";
+		echo buildPopup('header', 'Error');
+		echo "<p>$msg</p>\n";
+		echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 	} else {
 		echo '<p class="error">' . $msg . "</p>\n";
 	}

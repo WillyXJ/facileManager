@@ -35,8 +35,8 @@ if (isset($_GET['record_type'])) {
 	$record_type = $default_record_type;
 }
 
-$domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
-if (!isValidDomain($domain_id)) header('Location: ' . $__FM_CONFIG['menu']['Zones']['URL']);
+$domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . getMenuURL('Zones'));
+if (!isValidDomain($domain_id)) header('Location: ' . getMenuURL('Zones'));
 
 /** Does the user have access? */
 if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();
@@ -70,75 +70,82 @@ if (!getSOACount($domain_id)) {
 	$response = '** The SOA record still needs to be created for this zone **';
 }
 
-echo '<div id="body_container">' . "\n";
-if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
-echo "	<h2>Records</h2>
+$body = '<div id="body_container">' . "\n";
+if (!empty($response)) $body .= '<div id="response"><p>' . $response . '</p></div>';
+$body .= "	<h2>Records</h2>
 	$avail_types\n";
 	
+if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+	$form = '<form method="POST" action="zone-records-validate.php">
+<input type="hidden" name="domain_id" value="' . $domain_id . '">
+<input type="hidden" name="record_type" value="' . $record_type . '">
+<input type="hidden" name="map" value="' . $map . '">' . "\n";
+} else $form = null;
+
+if ($record_type == 'SOA') {
+	$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
+		`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
+		`soa_status`='active'";
+	$fmdb->get_results($soa_query);
+	if ($fmdb->num_rows) $result = $fmdb->last_result;
+	else $result = null;
+	$body .= $form . $fm_dns_records->buildSOA($result);
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		echo '<form method="POST" action="zone-records-validate.php">
-	<input type="hidden" name="domain_id" value="' . $domain_id . '">
-	<input type="hidden" name="record_type" value="' . $record_type . '">
-	<input type="hidden" name="map" value="' . $map . '">' . "\n";
+		$body .= '
+	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
+</form>' . "\n";
+	}
+} else {
+	switch ($record_type) {
+		case 'NS':
+			$sort_field = 'record_value';
+			$ip_sort = false;
+			break;
+		case 'PTR':
+			$sort_field = 'record_name';
+			$ip_sort = true;
+			break;
+		case 'MX':
+			$sort_field = 'record_priority';
+			$ip_sort = true;
+			break;
+		default:
+			$sort_field = 'record_name';
+			$ip_sort = false;
+			break;
+	}
+	$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+	$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
+	$sort_direction = null;
+
+	if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+		extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 	}
 
-	if ($record_type == 'SOA') {
-		$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `domain_id`='$domain_id'";
-		$fmdb->get_results($soa_query);
-		if ($fmdb->num_rows) $result = $fmdb->last_result;
-		else $result = null;
-		$fm_dns_records->buildSOA($result, $domain_id);
-		if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-			echo '
-		<p><input type="submit" name="submit" value="Validate" class="button" /></p>
-	</form>' . "\n";
-		}
-	} else {
-		switch ($record_type) {
-			case 'NS':
-				$sort_field = 'record_value';
-				$ip_sort = false;
-				break;
-			case 'PTR':
-				$sort_field = 'record_name';
-				$ip_sort = true;
-				break;
-			case 'MX':
-				$sort_field = 'record_priority';
-				$ip_sort = true;
-				break;
-			default:
-				$sort_field = 'record_name';
-				$ip_sort = false;
-				break;
-		}
-		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
-		$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
-		$sort_direction = null;
-		
-		if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
-			extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
-		}
-		
-		if (in_array($record_type, array('A', 'AAAA')) && $sort_field == 'record_value') $ip_sort = true;
-		
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
-		$fm_dns_records->rows($result, $record_type, $domain_id);
-		
-		if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-			echo '
-		<br /><br />
-		<a name="#manage"></a>
-		<h2>Add Record</h2>' . "\n";
-		
-			$fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id);
-			echo '
-		<p><input type="submit" name="submit" value="Validate" class="button" /></p>
-	</form>' . "\n";
-		}
-	}
+	if (in_array($record_type, array('A', 'AAAA')) && $sort_field == 'record_value') $ip_sort = true;
 
-echo '</div>' . "\n";
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
+	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+	if ($page > $total_pages) $page = $total_pages;
+	$pagination = displayPagination($page, $total_pages);
+	$body .= $pagination . $form;
+
+	$body .= $fm_dns_records->rows($result, $record_type, $domain_id, $page);
+
+	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+		$body .= '
+	<br /><br />
+	<a name="#manage"></a>
+	<h2>Add Record</h2>' . "\n";
+
+		$body .= $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id);
+		$body .= '
+	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
+</form>' . "\n";
+	}
+}
+
+echo $body . '</div>' . "\n";
 
 printFooter();
 

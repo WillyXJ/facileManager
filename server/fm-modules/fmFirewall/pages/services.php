@@ -43,15 +43,6 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
 		}
 		break;
-	case 'delete':
-		if (isset($_GET['id']) && !empty($_GET['id'])) {
-			$service_delete_status = $fm_module_services->delete(sanitize($_GET['id']));
-			if ($service_delete_status !== true) {
-				$response = $service_delete_status;
-				$action = 'add';
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
 			$result = $fm_module_services->update($_POST);

@@ -233,15 +233,17 @@ HTML;
 		$group_items_assigned = getGroupItems($group_items);
 
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name');
-		$assigned_list = buildSelect(null, 'group_items_assigned', availableGroupItems($group_type, 'assigned', $group_items_assigned), null, 7, null, true);
-		$available_list = buildSelect(null, 'group_items_available', availableGroupItems($group_type, 'available', $group_items_assigned, $group_id), null, 7, null, true);
+		$group_items = buildSelect('group_items', 'group_items', availableGroupItems($group_type, 'available'), $group_items_assigned, 1, null, true, null, null, 'Select one or more ' . $group_type . 's');
+		
+		$popup_header = buildPopup('header', $ucaction . ' Group');
+		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
+		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="group_id" value="$group_id" />
 			<input type="hidden" name="group_type" value="$group_type" />
-			<input type="hidden" name="group_items" id="group_items" value="$group_items" />
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="group_name">Group Name</label></th>
@@ -250,23 +252,7 @@ HTML;
 				<tr>
 					<th width="33%" scope="row"><label for="group_items">$uc_group_type</label></th>
 					<td width="67%">
-						<table class="form-table list-toggle">
-							<tbody>
-								<tr>
-									<th>Assigned</th>
-									<th style="width: 50px;"></th>
-									<th>Available</th>
-								</tr>
-								<tr>
-									<td>$assigned_list</td>
-									<td class="switch-buttons">
-										<input type="button" id="buttonLeft" value="<" /><br />
-										<input type="button" id="buttonRight" value=">" />
-									</td>
-									<td>$available_list</td>
-								</tr>
-							</tbody>
-						</table>
+						$group_items
 					</td>
 				</tr>
 				<tr>
@@ -274,9 +260,16 @@ HTML;
 					<td width="67%"><textarea id="group_comment" name="group_comment" rows="4" cols="30">$group_comment</textarea></td>
 				</tr>
 			</table>
-			<input type="submit" name="submit" id="submit_items" value="$ucaction Group" class="button" />
-			<input type="button" value="Cancel" class="button" id="cancel_button" />
+		$popup_footer
 		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: '200px',
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>
 FORM;
 
 		return $return_form;
@@ -297,7 +290,7 @@ FORM;
 		if ($fmdb->num_rows) return 'This group name already exists.';
 		
 		/** Process assigned items */
-		$post['group_items'] = trim($post['group_items'], ';');
+		$post['group_items'] = implode(';', $post['group_items']);
 		if (empty($post['group_items'])) return 'You must assign at least one ' . $post['group_type'] . '.';
 		
 		return $post;
