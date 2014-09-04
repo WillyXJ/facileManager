@@ -58,6 +58,7 @@ class fm_dns_zones {
 			$title_array = array(array('title' => 'ID', 'class' => 'header-small header-nosort'), 
 				array('title' => 'Domain', 'rel' => 'domain_name'), 
 				array('title' => 'Type', 'rel' => 'domain_type'),
+				array('title' => 'Records', 'class' => 'header-small  header-nosort'),
 				'Clones', array('title' => 'Views', 'class' => 'header-nosort'));
 			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 			
@@ -408,7 +409,7 @@ class fm_dns_zones {
 	
 	
 	function displayRow($row, $map, $reload_allowed) {
-		global $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG;
 		
 		if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $row->domain_id))) return;
 		
@@ -485,12 +486,21 @@ FORM;
 
 		if ($class) $class = 'class="' . $class . '"';
 		
+		$record_count = null;
+		if ($row->domain_type == 'master') {
+			$query = "SELECT COUNT(*) record_count FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE account_id={$_SESSION['user']['account_id']} AND domain_id={$row->domain_id} AND record_status!='deleted'";
+			$fmdb->query($query);
+			$result = $fmdb->last_result;
+			$record_count = $result[0]->record_count;
+		}
+		
 		echo <<<HTML
 		<tr title="$response" id="$row->domain_id" $class>
 			$checkbox
 			<td>$row->domain_id</td>
 			<td>$edit_name</td>
 			<td>$row->domain_type</td>
+			<td align="center">$record_count</td>
 			<td id="clones">$clones</td>
 			<td>$domain_view</td>
 			<td id="edit_delete_img">
