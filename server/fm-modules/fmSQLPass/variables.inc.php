@@ -36,7 +36,7 @@ $__FM_CONFIG['fmSQLPass'] = array(
 									Password complexity requirements are enforced to ensure secure passwords. Currently supported
 									database servers include MySQL.',
 		'prefix'				=> 'sqlpass_',
-		'required_fm_version'	=> '1.3-beta1'
+		'required_fm_version'	=> '1.3-rc1'
 	);
 
 /** Default values */

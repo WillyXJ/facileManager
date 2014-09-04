@@ -37,7 +37,7 @@ $__FM_CONFIG['fmFirewall'] = array(
 												servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files
 												individually.',
 		'prefix'							=> 'fw_',
-		'required_fm_version'				=> '1.3-beta1',
+		'required_fm_version'				=> '1.3-rc1',
 		'min_client_auto_upgrade_version'	=> '1.0.2'
 	);
 
