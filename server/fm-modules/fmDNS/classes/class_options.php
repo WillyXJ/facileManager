@@ -226,7 +226,8 @@ HTML;
 	function printForm($data = '', $action = 'add', $cfg_type = 'global', $cfg_type_id = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$cfg_id = $cfg_type_id = 0;
+		$cfg_id = 0;
+		if (!$cfg_type_id) $cfg_type_id = 0;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
 		$server_serial_no_field = $cfg_isparent = $cfg_parent = $cfg_data = null;
