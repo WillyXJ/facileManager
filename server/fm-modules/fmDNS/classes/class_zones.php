@@ -58,8 +58,8 @@ class fm_dns_zones {
 			$title_array = array(array('title' => 'ID', 'class' => 'header-small header-nosort'), 
 				array('title' => 'Domain', 'rel' => 'domain_name'), 
 				array('title' => 'Type', 'rel' => 'domain_type'),
-				array('title' => 'Records', 'class' => 'header-small  header-nosort'),
-				'Clones', array('title' => 'Views', 'class' => 'header-nosort'));
+				'Clones', array('title' => 'Views', 'class' => 'header-nosort'),
+				array('title' => 'Records', 'class' => 'header-small  header-nosort'));
 			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 			
 			if (is_array($checkbox)) {
@@ -500,9 +500,9 @@ FORM;
 			<td>$row->domain_id</td>
 			<td>$edit_name</td>
 			<td>$row->domain_type</td>
-			<td align="center">$record_count</td>
 			<td id="clones">$clones</td>
 			<td>$domain_view</td>
+			<td align="center">$record_count</td>
 			<td id="edit_delete_img">
 				$reload_zone
 				$edit_status
