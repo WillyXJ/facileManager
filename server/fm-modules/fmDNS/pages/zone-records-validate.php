@@ -182,6 +182,7 @@ function validateEntry($action, $id, $data, $record_type) {
 		$data['record_append'] = 'yes';
 	}
 	if (!empty($data['record_value'])) {
+		$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);
 		foreach ($data as $key => $val) {
 			if ($key == 'record_name' && $record_type != 'PTR') {
 				if (!$val) {
