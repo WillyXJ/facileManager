@@ -380,7 +380,7 @@ class fm_module_buildconf {
 						}
 						$config .= "\t" . $cfg_name . ' ';
 						if ($def_multiple_values == 'yes') $config .= '{ ';
-						$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
+						$cfg_info = $fm_dns_acls->parseACL($cfg_info);
 						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 						if ($def_multiple_values == 'yes') $config .= '; }';
 						$config .= ";\n";
