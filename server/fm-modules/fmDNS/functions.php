@@ -423,8 +423,8 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 	/** Swap delimiters for ; */
 	$data = str_replace(array("\n", ';', ' ', ','), ',', $data);
 	$data = str_replace(',,', ',', $data);
-	$data = rtrim($data, ',');
-	if (!empty($data)) $data .= ',';
+	$data = trim($data, ',');
+//	if (!empty($data)) $data .= ',';
 	
 	$addresses = explode(',', $data);
 	foreach ($addresses as $ip_address) {
@@ -433,7 +433,7 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 //		if ($allow_acl && preg_match("/^acl_(\d).*/", $ip_address)) continue;
 		
 		/** Handle negated addresses */
-		if (strpos($ip_address, '!') == 0) {
+		if (strpos($ip_address, '!') === 0) {
 			$ip_address = substr($ip_address, 1);
 		}
 		
@@ -443,7 +443,7 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 				$cidr_array = explode('/', $ip_address);
 				list($ip_address, $cidr) = $cidr_array;
 				/** Valid CIDR? */
-				if (!verifyNumber($cidr, 0, 32)) return false;
+				if (!verifyNumber($cidr, 0, 32)) return "$ip_address/$cidr is not valid.";
 			}
 			/** Create full IP */
 			$ip_octets = explode('.', $ip_address);
@@ -453,7 +453,7 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 			$ip_address = implode('.', $ip_octets);
 		}
 		
-		if (verifyIPAddress($ip_address) === false) return false;
+		if (verifyIPAddress($ip_address) === false) return "$ip_address is not valid.";
 	}
 	
 	return $data;

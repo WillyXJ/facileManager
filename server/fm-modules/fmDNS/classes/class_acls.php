@@ -77,7 +77,7 @@ class fm_dns_acls {
 		
 		/** Cleans up acl_addresses for future parsing **/
 		$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
-		if ($post['acl_addresses'] === false) return 'Invalid address(es) specified.';
+		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
 		
 		$post['acl_comment'] = trim($post['acl_comment']);
 		
@@ -124,7 +124,7 @@ class fm_dns_acls {
 		if (empty($post['acl_name'])) return 'No ACL name defined.';
 		/** Cleans up acl_addresses for future parsing **/
 		$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
-		if ($post['acl_addresses'] === false) return 'Invalid address(es) specified.';
+		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
 		
 		if ($post['acl_predefined'] != 'as defined:') $post['acl_addresses'] = null;
 
