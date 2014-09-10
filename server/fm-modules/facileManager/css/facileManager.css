@@ -1297,6 +1297,10 @@ span.not_installed {
 	padding: 5px;
 }
 
+#pagination_container {
+	margin-bottom: 2.5em;
+}
+
 #pagination {
 	float: right;
 	font-size: 11px;

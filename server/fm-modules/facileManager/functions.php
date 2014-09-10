@@ -1566,6 +1566,7 @@ function displayPagination($page, $total_pages, $classes = null) {
 	$end_size = 1;
 	$mid_size = 2;
 	$dots = false;
+	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 
 	/** Previous link */
@@ -1596,6 +1597,7 @@ function displayPagination($page, $total_pages, $classes = null) {
 
 	$page_links[] = '</div>';
 	$page_links[] = buildPaginationCountMenu(0, 'pagination');
+	$page_links[] = '</div>';
 	
 	return join("\n", $page_links);
 }
