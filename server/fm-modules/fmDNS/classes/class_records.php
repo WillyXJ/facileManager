@@ -153,7 +153,7 @@ class fm_dns_records {
 			} else {
 				$sql_edit .= $key . "='" . mysql_real_escape_string(str_replace("\r\n", "\n", $data)) . "',";
 			}
-			if ($key != 'record_status' && !$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
+			if (!$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		
