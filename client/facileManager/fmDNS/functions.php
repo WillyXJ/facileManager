@@ -157,11 +157,13 @@ function buildConf($url, $data) {
 		foreach (scandir($server_zones_dir) as $item) {
 			if (in_array($item, array('.', '..'))) continue;
 			$full_path_file = $server_zones_dir . DIRECTORY_SEPARATOR . $item;
-			$message = "Deleting $full_path_file.\n";
-			if ($debug) echo fM($message);
-			if 	(!$data['dryrun']) {
-				addLogEntry($message);
-				unlink($full_path_file);
+			if (is_file($full_path_file)) {
+				$message = "Deleting $full_path_file.\n";
+				if ($debug) echo fM($message);
+				if (!$data['dryrun']) {
+					addLogEntry($message);
+					unlink($full_path_file);
+				}
 			}
 		}
 	}

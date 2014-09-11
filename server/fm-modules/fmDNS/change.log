@@ -1,3 +1,7 @@
+1.3-?? (2014-??)
+====================
+* Client - [bug] Fixed PHP error when attempting to purge files.
+
 1.3-rc1 (2014-09-04)
 ====================
 * Server - [improvement] Formatted zone file record output better.
