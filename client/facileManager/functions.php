@@ -323,7 +323,7 @@ function upgradeFM($url, $data) {
 	global $argv, $module_name, $proto;
 	
 	addLogEntry('Performing client upgrade');
-	$message = 'Currently installed version: ' . $data['server_client_version'] . "\n";
+	$message = 'Installed version: ' . $data['server_client_version'] . "\n";
 	echo fM($message);
 	addLogEntry($message);
 	
