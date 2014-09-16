@@ -570,7 +570,8 @@ HTML;
 		
 		if ($action == 'create') {
 			$soa_show = 'block';
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			global $fm_dns_records;
+			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			$soa_templates = '<tr id="define_soa">
 					<th>SOA</th>
 					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates()) . '</td></tr>';
@@ -856,7 +857,8 @@ HTML;
 		
 		/** Reset the domain_reload flag */
 		if (!$failures) {
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			global $fm_dns_records;
+			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			$fm_dns_records->updateSOAReload($domain_id, 'no');
 		}
 

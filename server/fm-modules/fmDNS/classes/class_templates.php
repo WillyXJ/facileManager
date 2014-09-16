@@ -40,7 +40,8 @@ class fm_module_templates {
 							'name' => $prefix
 						);
 
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			global $fm_dns_records;
+			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			$title_array = $fm_dns_records->getHeader(strtoupper($prefix));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
@@ -102,7 +103,8 @@ HTML;
 	}
 	
 	function printForm($data = '', $action = 'add') {
-		include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+		global $fm_dns_records;
+		if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 		
 		$force_action = $action == 'add' ? 'create' : 'update';
 		

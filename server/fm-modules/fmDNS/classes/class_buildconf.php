@@ -813,7 +813,7 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildRecords($domain, $server_serial_no) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_records;
+		global $fmdb, $__FM_CONFIG;
 		
 		$zone_file = $skipped_records = null;
 		$domain_name_trim = trimFullStop($domain->domain_name);
@@ -830,7 +830,8 @@ class fm_module_buildconf {
 			}
 			
 			/** Are there any skipped records? */
-			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			global $fm_dns_records;
+			if (!class_exists('fm_dns_records')) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			if ($skipped_records = $fm_dns_records->getSkippedRecordIDs($domain->parent_domain_id)) $full_zone_clone = false;
 		}
 		
