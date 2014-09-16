@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.3-beta2', '<') ? upgradefmDNS_1302($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.3', '<') ? upgradefmDNS_130($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1139,4 +1139,29 @@ function upgradefmDNS_1302($__FM_CONFIG, $running_version) {
 	
 	return true;
 }
+
+/** 1.3 */
+function upgradefmDNS_130($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.3-beta2', '<') ? upgradefmDNS_1302($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP PRIMARY KEY;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD `skip_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD INDEX(`record_id`);";
+
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	return true;
+}
+
 ?>
