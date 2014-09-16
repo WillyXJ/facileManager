@@ -498,14 +498,13 @@ class fm_module_buildconf {
 				/** Build all zone files */
 				$data->files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no);
 			} else {
+				/** Build zone files for $domain_id */
+				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
 				if ($SERIALNO != -1) {
 					$server_id = getServerID($server_serial_no, $_SESSION['module']);
-					/** Build zone files for $domain_id */
-					$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_id`=" . sanitize($domain_id) . " or `domain_clone_domain_id`=" . sanitize($domain_id) . ") and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id;%') order by `domain_name`";
-				} else {
-					/** Build zone files for $domain_id */
-					$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_id`=" . sanitize($domain_id) . " or `domain_clone_domain_id`=" . sanitize($domain_id) . ") order by `domain_name`";
+					$query .= " AND (`domain_name_servers`=0 OR `domain_name_servers`='$server_id' OR `domain_name_servers` LIKE '$server_id;%' OR `domain_name_servers` LIKE '%;$server_id;%')";
 				}
+				$query .= " ORDER BY `domain_clone_domain_id`,`domain_name`";
 				$result = $fmdb->query($query);
 				if ($fmdb->num_rows) {
 					$count = $fmdb->num_rows;
