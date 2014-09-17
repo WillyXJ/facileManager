@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}record
   `account_id` int(11) NOT NULL,
   `domain_id` int(11) NOT NULL,
   `record_id` int(11) NOT NULL,
-  `record_status` enum('active','deleted') NOT NULL DEFAULT 'active'
+  `record_status` enum('active','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`skip_id`),
   KEY `record_id` (`record_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
