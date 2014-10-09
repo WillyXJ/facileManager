@@ -11,7 +11,8 @@ tr.import_swap select {
 	display: none;
 }
 
-#server_update_port_style {
+#server_update_port_style,
+#soa_template_name {
 	display: none;
 }
 

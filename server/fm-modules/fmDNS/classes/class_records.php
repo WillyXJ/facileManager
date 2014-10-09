@@ -477,7 +477,7 @@ HTML;
 			$create_template = <<<HTML
 		<tr>
 			<th>Create Template</th>
-			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" checked /><label for="soa_create_template"> yes</label></td>
+			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" /><label for="soa_create_template"> yes</label></td>
 		</tr>
 HTML;
 		} else {
