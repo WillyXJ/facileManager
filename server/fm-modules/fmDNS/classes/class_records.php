@@ -154,6 +154,10 @@ class fm_dns_records {
 				$sql_edit .= $key . "='" . mysql_real_escape_string(str_replace("\r\n", "\n", $data)) . "',";
 			}
 			if (!$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
+			if ($key == 'soa_default' && $data == 'yes') {
+				$query = "UPDATE `$table` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
+				$result = $fmdb->query($query);
+			}
 		}
 		$sql_edit = rtrim($sql_edit, ',');
 		
@@ -474,6 +478,7 @@ HTML;
 		}
 	
 		if (array_search('create_template', $show) !== false) {
+			$template_name_show_hide = 'none';
 			$create_template = <<<HTML
 		<tr>
 			<th>Create Template</th>
@@ -481,16 +486,20 @@ HTML;
 		</tr>
 HTML;
 		} else {
+			$template_name_show_hide = 'table-row';
 			$create_template = <<<HTML
 			<input type="hidden" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" />
+			<input type="hidden" name="{$action}[$soa_id][soa_default]" value="no" />
 HTML;
 		}
 	
 		if (array_search('template_name', $show) !== false) {
+			$soa_default_checked = $soa_id == $this->getDefaultSOA() ? 'checked' : null;
 			$template_name = <<<HTML
-		<tr id="soa_template_name">
+		<tr id="soa_template_name" style="display: $template_name_show_hide">
 			<th>Template Name</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" value="$soa_name" /></td>
+			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" value="$soa_name" /><br />
+			<input type="checkbox" id="soa_default" name="{$action}[$soa_id][soa_default]" value="yes" $soa_default_checked /><label for="soa_default"> Make Default Template</label></td>
 		</tr>
 HTML;
 		}
@@ -618,7 +627,7 @@ HTML;
 	
 	
 	/**
-	 * Builds an array of available SOA templates
+	 * Assigns SOA to domain_id
 	 *
 	 * @since 1.3
 	 * @package facileManager
@@ -639,6 +648,29 @@ HTML;
 				updateStatus("fm_{$__FM_CONFIG['fmDNS']['prefix']}soa", $old_soa_id, 'soa_', 'deleted', 'soa_id');
 			}
 		}
+	}
+	
+	
+	/**
+	 * Returns the default SOA ID
+	 *
+	 * @since 1.3.1
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @return integer
+	 */
+	function getDefaultSOA() {
+		global $fmdb, $__FM_CONFIG;
+		
+		$query = "SELECT soa_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}soa WHERE account_id='{$_SESSION['user']['account_id']}' 
+			AND soa_status='active' AND soa_default='yes' LIMIT 1";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$results = $fmdb->last_result;
+			return $results[0]->soa_id;
+		}
+		return false;
 	}
 	
 	

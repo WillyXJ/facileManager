@@ -574,7 +574,7 @@ HTML;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			$soa_templates = '<tr id="define_soa">
 					<th>SOA</th>
-					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates()) . '</td></tr>';
+					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates(), $fm_dns_records->getDefaultSOA()) . '</td></tr>';
 		} else {
 			$soa_show = 'none';
 			$soa_templates = null;

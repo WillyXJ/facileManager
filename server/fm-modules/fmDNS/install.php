@@ -191,6 +191,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}soa` (
   `soa_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no',
+  `soa_default` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no',
   `soa_name` varchar(255) DEFAULT NULL,
   `soa_master_server` varchar(50) NOT NULL DEFAULT '',
   `soa_append` enum('yes','no') NOT NULL DEFAULT 'yes',

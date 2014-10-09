@@ -1164,4 +1164,26 @@ function upgradefmDNS_130($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 1.3.1 */
+function upgradefmDNS_131($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.3', '<') ? upgradefmDNS_130($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_default` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `soa_template`;";
+
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	return true;
+}
+
 ?>

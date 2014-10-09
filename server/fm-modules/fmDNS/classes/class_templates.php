@@ -42,7 +42,7 @@ class fm_module_templates {
 
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
-			$title_array = $fm_dns_records->getHeader(strtoupper($prefix));
+			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($prefix)));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -79,17 +79,20 @@ class fm_module_templates {
 		
 		$field_name = $prefix . '_name';
 		$edit_name = $row->$field_name;
+		$field_name = $prefix . '_default';
+		$star = $row->$field_name == 'yes' ? str_replace('Super Admin', 'Default Template', $__FM_CONFIG['icons']['star']) : null;
 		
 		$field_id = $prefix . '_id';
 		echo <<<HTML
 		<tr id="{$row->$field_id}">
+			<td>$star</td>
 			<td>$edit_name</td>
 HTML;
 		if ($prefix == 'soa') {
 			$row = get_object_vars($row);
 			
 			foreach ($row as $key => $val) {
-				if (in_array($key, array('soa_id', 'account_id', 'soa_template', 'soa_name', 'soa_append', 'soa_status'))) continue;
+				if (in_array($key, array('soa_id', 'account_id', 'soa_template', 'soa_default', 'soa_name', 'soa_append', 'soa_status'))) continue;
 				
 				echo '<td>' . $val;
 				if (in_array($key, array('soa_master_server', 'soa_email_address')) && $row['soa_append'] == 'yes') {
