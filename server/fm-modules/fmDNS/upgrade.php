@@ -1172,6 +1172,7 @@ function upgradefmDNS_131($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_default` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `soa_template`;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE  `key_algorithm`  `key_algorithm` ENUM(  'hmac-md5',  'hmac-sha1',  'hmac-sha224',  'hmac-sha256', 'hmac-sha384',  'hmac-sha512' ) NOT NULL DEFAULT  'hmac-md5';";
 
 	$inserts = $updates = null;
 	

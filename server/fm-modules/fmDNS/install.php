@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}keys` 
   `key_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `key_name` varchar(255) NOT NULL,
-  `key_algorithm` enum('hmac-md5') NOT NULL DEFAULT 'hmac-md5',
+  `key_algorithm` enum('hmac-md5',  'hmac-sha1',  'hmac-sha224',  'hmac-sha256', 'hmac-sha384',  'hmac-sha512') NOT NULL DEFAULT 'hmac-md5',
   `key_secret` varchar(255) NOT NULL,
   `key_view` int(11) NOT NULL DEFAULT '0',
   `key_comment` text,
