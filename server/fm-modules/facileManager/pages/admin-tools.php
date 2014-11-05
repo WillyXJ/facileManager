@@ -31,7 +31,7 @@ if (!class_exists('fm_tools')) {
 $admin_tools = $output = $block_style = $classes = null;
 $response = isset($response) ? $response : null;
 $tools_option = array();
-$import_output = '<p>Processing...</p>';
+$import_output = '<p>Processing... <i class="fa fa-spinner fa-spin"></i></p>';
 
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {

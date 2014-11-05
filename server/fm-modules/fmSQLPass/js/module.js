@@ -2,7 +2,7 @@ $(document).ready(function() {
 	
 	$('#set_sql_password').click(function() {
 		if ($('#verbose').is(":checked") == false) {
-			$('#response').html('<p>Processing...please wait.</p>');
+			$('#response').html('<p>Processing...please wait. <i class="fa fa-spinner fa-spin"></i></p>');
 			$('#response')
 				.css('opacity', 0)
 				.slideDown(400, function() {
@@ -14,7 +14,7 @@ $(document).ready(function() {
 		} else {
 			$('#manage_item').fadeIn(200);
 			$('#manage_item_contents').fadeIn(200);
-			$('#manage_item_contents').html('<h2>Password Change Results</h2><p>Processing...please wait.</p>');
+			$('#manage_item_contents').html('<h2>Password Change Results</h2><p>Processing...please wait. <i class="fa fa-spinner fa-spin"></i></p>');
 		}
 		
 		$.ajax({

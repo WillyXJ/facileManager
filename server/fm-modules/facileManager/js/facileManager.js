@@ -69,7 +69,7 @@ $(document).ready(function() {
 	
 	$("#forgotbtn").click(function() {
 	
-		$("#message").html('<p class="success">Processing...please wait.</p>');
+		$("#message").html('<p class="success">Processing...please wait. <i class="fa fa-spinner fa-spin"></i></p>');
 		
 		var action = $("#forgotpwd").attr('action');
 		var form_data = {
@@ -92,7 +92,7 @@ $(document).ready(function() {
 	});
 	
 	$('a.click_once').one('click', function() {
-		$(this).html('Processing...');
+		$(this).html('Processing... <i class="fa fa-spinner fa-spin"></i>');
 		$(this).click(function() {
 			return false;
 		});
@@ -427,7 +427,7 @@ $(document).ready(function() {
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
-		$('#manage_item_contents').html('<p>Processing...</p>');
+		$('#manage_item_contents').html('<p>Processing... <i class="fa fa-spinner fa-spin"></i></p>');
 		
 		$.ajax({
 			type: 'POST',
@@ -542,7 +542,7 @@ $(document).ready(function() {
 	        var $this 	= $(this);
 	        server_id	= $this.parent().parent().attr('id');
 	
-			$('#response').html('<p>Processing Config Build...</p>');
+			$('#response').html('<p>Processing Config Build... <i class="fa fa-spinner fa-spin"></i></p>');
 			$('#response')
 				.css('opacity', 0)
 				.slideDown(400, function() {
@@ -631,7 +631,7 @@ $(document).ready(function() {
 			if (confirm('Are you sure you want to ' + $('#bulk_action').val().toLowerCase() + ' these selected ' + item_type + '?')) {
 				$('#manage_item').fadeIn(200);
 				$('#manage_item_contents').fadeIn(200);
-				$('#manage_item_contents').html('<p>Processing Bulk Action...</p>');
+				$('#manage_item_contents').html('<p>Processing Bulk Action... <i class="fa fa-spinner fa-spin"></i></p>');
 		
 				var form_data = {
 					item_id: serverIDs,
@@ -784,4 +784,9 @@ function toggle(source, element_id) {
 	checkboxes = document.getElementsByName(element_id);
 	for(var i in checkboxes)
 		checkboxes[i].checked = source.checked;
+}
+
+function onPage(name) {
+	var path = window.location.pathname;
+	return name == path.substring(path.lastIndexOf('/') + 1);
 }

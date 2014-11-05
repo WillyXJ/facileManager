@@ -2,6 +2,11 @@ $(document).ready(function() {
 	
 	more_clicks = 0;
 	
+	/* Add body class */
+	if (onPage('zone-records.php')) {
+		$('body').addClass('fm-noscroll');
+	}
+	
 	/* Zone reload button */
     $('#zones').delegate('form', 'click tap', function(e) {
         var $this 	= $(this);
@@ -9,7 +14,7 @@ $(document).ready(function() {
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
-		$('#manage_item_contents').html('<p>Processing Reload...</p>');
+		$('#manage_item_contents').html('<p>Processing Reload... <i class="fa fa-spinner fa-spin"></i></p>');
 		
 		var form_data = {
 			domain_id: domain_id,
@@ -42,7 +47,7 @@ $(document).ready(function() {
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
-		$('#manage_item_contents').html('<p>Processing Reload...</p>');
+		$('#manage_item_contents').html('<p>Processing Reload... <i class="fa fa-spinner fa-spin"></i></p>');
 		
 		var form_data = {
 			domain_id: domain_id,

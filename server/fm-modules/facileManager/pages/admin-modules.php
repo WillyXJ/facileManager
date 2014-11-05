@@ -27,7 +27,7 @@ if (!currentUserCan('manage_modules')) unAuth();
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 
 $output = $avail_modules = $response = null;
-$import_output = '<p>Processing...</p>';
+$import_output = '<p>Processing... <i class="fa fa-spinner fa-spin"></i></p>';
 
 if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
 	if (currentUserCan('manage_modules')) {
