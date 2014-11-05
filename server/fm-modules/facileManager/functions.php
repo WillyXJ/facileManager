@@ -297,7 +297,7 @@ HTML;
 			
 			/** Include module toolbar items */
 			if (function_exists('buildModuleToolbar')) {
-				$module_toolbar = @buildModuleToolbar();
+				list($module_toolbar_left, $module_toolbar_right) = @buildModuleToolbar();
 			}
 		} else {
 			$module_menu = null;
@@ -314,12 +314,13 @@ HTML;
 			v$fm_version
 		</div>
 $account_menu
-$module_toolbar
+$module_toolbar_left
 $user_account_menu
 		<div id="topheadpartright">
 			<a class="single_line help_link" href="#">Help</a>
 		</div>
 $module_menu
+$module_toolbar_right
 	</div>
 	<div id="help">
 		<div id="help_topbar">

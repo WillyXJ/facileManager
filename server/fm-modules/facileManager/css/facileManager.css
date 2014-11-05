@@ -404,6 +404,12 @@ h4 {
 	margin-top: 1.5em;
 }
 
+.fm-noscroll {
+	height: 100%;
+	overflow: hidden;
+	margin-bottom: -5em;
+}
+
 .display_results {
 	width: 100%;
 	font-size: 12px;

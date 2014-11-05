@@ -71,7 +71,7 @@ if (!getSOACount($domain_id)) {
 	$response = '** The SOA record still needs to be created for this zone **';
 }
 
-$body = '<div id="body_container">' . "\n";
+$body = '<div id="body_container" class="fm-noscroll">' . "\n";
 if (!empty($response)) $body .= '<div id="response"><p>' . $response . '</p></div>';
 $body .= "	<h2>Records</h2>
 	$avail_types\n";
@@ -129,12 +129,15 @@ if ($record_type == 'SOA') {
 	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
 	$pagination = displayPagination($page, $total_pages);
-	$body .= $pagination . $form;
+	$body .= $pagination . '<div class="overflow-container">' . $form;
+	
+	$body .= '<div class="existing-container">';
 
 	$body .= $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 		$body .= '
+	</div><div class="new-container">
 	<br /><br />
 	<a name="#manage"></a>
 	<h2>Add Record</h2>' . "\n";
@@ -142,7 +145,7 @@ if ($record_type == 'SOA') {
 		$body .= $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id);
 		$body .= '
 	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
-</form>' . "\n";
+</form></div>' . "\n";
 	}
 }
 

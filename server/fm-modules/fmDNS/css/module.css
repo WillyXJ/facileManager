@@ -132,3 +132,22 @@ p.soa_import span {
 	position: relative;
 	top: 2px;
 }
+
+.overflow-container {
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
+.existing-container {
+	position: fixed;
+	overflow: auto;
+	bottom: 27em;
+	top: 9em;
+	right: 2em;
+	left: 14em;
+}
+.new-container {
+	position: absolute;
+	width: 100%;
+	bottom: 10em;
+}
