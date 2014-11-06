@@ -235,7 +235,7 @@ function validateEntry($action, $id, $data, $record_type) {
 			if ((in_array($record_type, array('CNAME', 'DNAME', 'MX', 'NS', 'SRV'))) || 
 					$record_type == 'PTR' && $key == 'record_value') {
 				if ($key == 'record_value') {
-					$val = $data['record_append'] == 'yes' ? trim($val, '.') : trim($val, '.') . '.';
+					$val = $data['record_append'] == 'yes' || $val == '@' ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
 					if (!verifyCNAME($data['record_append'], $val)) {
 						$messages['errors'][$key] = 'Invalid value';
@@ -423,9 +423,10 @@ function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = f
 				if (preg_match('/\d{1,3}\.\d{1,3}\-\d{1,3}/', $record)) return true;
 			}
 		} else {
-			if ($record == '@') return true;
 			return substr($record, -1, 1) == '.';
 		}
+		return true;
+	} else if ($record == '@') {
 		return true;
 	}
 	return false;
