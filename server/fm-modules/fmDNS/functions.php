@@ -155,7 +155,22 @@ HTML;
 		}
 	} else $domain_menu = null;
 	
-	return $domain_menu;
+	$notifications = <<<HTML
+		<div id="topheadpartright" style="padding: 0;">
+			<div id="cssmenu">
+			<ul>
+				<li class="has-sub"><a href="#"><span><i class="fa fa-refresh fa-lg"></i></span></a>
+					<ul class="sub-left">
+						<li class="text-only"><span>Plaintext</span></li>
+						<li class="last"><a href="{$GLOBALS['RELPATH']}"><span>Link</span></a></li>
+					</ul>
+				</li>
+			</ul>
+			</div>
+		</div>
+HTML;
+	
+	return array($domain_menu, $notifications);
 }
 
 /**

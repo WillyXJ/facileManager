@@ -138,7 +138,6 @@ if ($record_type == 'SOA') {
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 		$body .= '
 	</div><div class="new-container">
-	<br /><br />
 	<a name="#manage"></a>
 	<h2>Add Record</h2>' . "\n";
 
