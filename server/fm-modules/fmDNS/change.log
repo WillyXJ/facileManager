@@ -1,6 +1,6 @@
 1.3.2 (2014-11-05)
 ==================
-* Server - [bug] Fixed issue where a CNAME with @ value could not be created.
+* Server - [bug] Fixed CNAME with @ value could not be created. (Issue #161)
 
 1.3.1 (2014-10-13)
 ==================
