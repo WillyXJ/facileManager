@@ -167,7 +167,8 @@ class fm_tools {
 		$raw_table_list = $fmdb->last_result;
 		foreach ($raw_table_list as $table_object) {
 			$table_array = get_object_vars($table_object);
-			$table = $table_array['Tables_in_' . strtolower($__FM_CONFIG['db']['name'])];
+			$array_keys = array_keys($table_array);
+			$table = $table_array[$array_keys[0]];
 			if (array_key_exists($table, $__FM_CONFIG['clean']['prefixes'])) {
 				$query = 'DELETE FROM ' . $table  . ' WHERE ' . $__FM_CONFIG['clean']['prefixes'][$table] . '_status = "deleted"';
 				$fmdb->query($query);
