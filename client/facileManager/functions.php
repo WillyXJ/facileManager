@@ -1137,7 +1137,7 @@ function extractFiles($files = array()) {
 function getParameterValue($param, $file, $delimiter = '=') {
 	$raw_line = shell_exec('grep ' . $param . ' ' . $file);
 	if (!$raw_line) {
-		return FALSE;
+		return false;
 	}
 	
 	$raw_line = explode($delimiter, $raw_line);
