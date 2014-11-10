@@ -1,3 +1,13 @@
+1.3.3 (2014-11-??)
+==================
+* Server - [bug] Fixed zones display when limiting user access. (Issue #162)
+* Server - [bug] Fixed zone menu badge counts to accurately reflect numbers when
+           limiting user access.
+
+1.3.2 (2014-11-05)
+==================
+* Server - [bug] Fixed CNAME with @ value could not be created. (Issue #161)
+
 1.3.1 (2014-10-13)
 ==================
 * Server - [improvement] No longer default to creating a SOA template. (Issue #155)
