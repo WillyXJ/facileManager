@@ -1135,7 +1135,12 @@ function extractFiles($files = array()) {
  * @return string
  */
 function getParameterValue($param, $file, $delimiter = '=') {
-	$raw_line = explode($delimiter, shell_exec('grep ' . $param . ' ' . $file));
+	$raw_line = shell_exec('grep ' . $param . ' ' . $file);
+	if (!$raw_line) {
+		return FALSE;
+	}
+	
+	$raw_line = explode($delimiter, $raw_line);
 	if (!count($raw_line)) {
 		return false;
 	}
