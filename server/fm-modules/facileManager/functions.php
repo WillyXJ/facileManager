@@ -812,20 +812,13 @@ function pingTest($server) {
  * @package facileManager
  */
 function findProgram($program) {
-	$path = array('/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin');
-
-	if (function_exists('is_executable')) {
-		while ($this_path = current($path)) {
-			if (is_executable("$this_path/$program")) {
-				return "$this_path/$program";
-			}
-			next($path);
-		}
+	if (in_array(PHP_OS, array('FreeBSD','Darwin', 'Linux'))) {
+		$cmd = sprintf("PATH=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" which %s",
+			$program);
+		return trim(exec($cmd));
 	} else {
 		return strpos($program, '.exe');
 	}
-
-	return;
 }
 
 
