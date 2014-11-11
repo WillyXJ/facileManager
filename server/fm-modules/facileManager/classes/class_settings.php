@@ -124,12 +124,12 @@ class fm_settings {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Create the ssh key pair */
-		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f /tmp/fm_id_rsa -N ''", $exec_array, $retval);
-		$array['ssh_key_priv'] = @file_get_contents('/tmp/fm_id_rsa');
-		$array['ssh_key_pub'] = @file_get_contents('/tmp/fm_id_rsa.pub');
+		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f " . sys_get_temp_dir() . "/fm_id_rsa -N ''", $exec_array, $retval);
+		$array['ssh_key_priv'] = @file_get_contents(sys_get_temp_dir() . '/fm_id_rsa');
+		$array['ssh_key_pub'] = @file_get_contents(sys_get_temp_dir() . '/fm_id_rsa.pub');
 		
-		@unlink('/tmp/fm_id_rsa');
-		@unlink('/tmp/fm_id_rsa.pub');
+		@unlink(sys_get_temp_dir() . '/fm_id_rsa');
+		@unlink(sys_get_temp_dir() . '/fm_id_rsa.pub');
 		
 		if ($retval) {
 			return 'SSH key generation failed.';

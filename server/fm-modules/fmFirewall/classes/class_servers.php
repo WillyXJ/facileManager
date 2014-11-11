@@ -418,7 +418,7 @@ FORM;
 					return $response . '<p class="error">Failed: SSH key is not <a href="' . getMenuURL('General') . '">defined</a>.</p>'. "\n";
 				}
 				
-				$temp_ssh_key = '/tmp/fm_id_rsa';
+				$temp_ssh_key = sys_get_temp_dir() . '/fm_id_rsa';
 				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
 					return $response . '<p class="error">Failed: could not load SSH key into ' . $temp_ssh_key . '.</p>'. "\n";
 				}
