@@ -1455,12 +1455,15 @@ function generateSerialNo($module = null) {
 			$serialno = rand(100000000, 999999999);
 			
 			/** Ensure the serial number does not exist in any of the server tables */
-			$all_tables = $fmdb->get_results("SELECT table_name FROM information_schema.tables t WHERE t.table_schema = '{$__FM_CONFIG['db']['name']}' AND t.table_name LIKE 'fm_%_servers'");
+			// $all_tables = $fmdb->get_results("SELECT table_name FROM information_schema.tables t WHERE t.table_schema = '{$__FM_CONFIG['db']['name']}' AND t.table_name LIKE 'fm_%_servers'");
+			$all_tables = $fmdb->get_results("SHOW FULL TABLES FROM `{$__FM_CONFIG['db']['name']}` WHERE `Tables_in_{$__FM_CONFIG['db']['name']}` LIKE 'fm_%_servers'");
 			$table_count = $fmdb->num_rows;
 			$result = $fmdb->last_result;
 			$taken = true;
 			for ($i=0; $i<$table_count; $i++) {
-				basicGet($result[$i]->table_name, $serialno, 'server_', 'server_serial_no', null, 1);
+				// basicGet($result[$i]->table_name, $serialno, 'server_', 'server_serial_no', null, 1);
+				$field = "Tables_in_{$__FM_CONFIG['db']['name']}";
+				basicGet($result[$i]->{$field}, $serialno, 'server_', 'server_serial_no', null, 1);
 				if (!$fmdb->num_rows) $taken = false;
 			}
 			if (!$taken) return $serialno;
