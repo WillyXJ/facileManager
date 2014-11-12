@@ -108,6 +108,7 @@ class fm_shared_module_servers {
 					}
 					
 					$temp_ssh_key = sys_get_temp_dir() . '/fm_id_rsa';
+					if (file_exists($temp_ssh_key)) unlink($temp_ssh_key);
 					if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
 						$response[] = ' --> Failed: could not load SSH key into ' . $temp_ssh_key . '.';
 						break;
