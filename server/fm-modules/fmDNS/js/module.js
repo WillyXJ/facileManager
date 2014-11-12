@@ -104,7 +104,7 @@ $(document).ready(function() {
 	/* Zone clone deletes */
     $('#table_edits').delegate('img.clone_remove', 'click tap', function(e) {
         var $this 		= $(this);
-        var $clone		= $this.parent();
+        var $clone		= $this.parent().attr('class');
         item_type		= $('#table_edits').attr('name');
         item_id			= $this.attr('id');
 
@@ -123,9 +123,9 @@ $(document).ready(function() {
 				success: function(response)
 				{
 					if (response == 'Success') {
-						$clone.css({"background-color":"#D98085"});
-						$clone.fadeOut("slow", function() {
-							$clone.remove();
+						$('.'+$clone).css({"background-color":"#D98085"});
+						$('.'+$clone).fadeOut("slow", function() {
+							$('.'+$clone).remove();
 						});
 					} else {
 						$('#response').html('<p class="error">'+response+'</p>');

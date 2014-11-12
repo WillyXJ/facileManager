@@ -58,7 +58,7 @@ class fm_dns_zones {
 			$title_array = array(array('title' => 'ID', 'class' => 'header-small header-nosort'), 
 				array('title' => 'Domain', 'rel' => 'domain_name'), 
 				array('title' => 'Type', 'rel' => 'domain_type'),
-				'Clones', array('title' => 'Views', 'class' => 'header-nosort'),
+				array('title' => 'Views', 'class' => 'header-nosort'),
 				array('title' => 'Records', 'class' => 'header-small  header-nosort'));
 			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 			
@@ -92,6 +92,25 @@ class fm_dns_zones {
 		
 		$log_message = "Added a zone with the following details:\n";
 
+		/** Format domain_view */
+		$log_message_views = null;
+		$domain_view_array = explode(';', $post['domain_view']);
+		if (is_array($domain_view_array)) {
+			$domain_view = null;
+			foreach ($domain_view_array as $val) {
+				if ($val == 0 || $val == '') {
+					$domain_view = 0;
+					break;
+				}
+				$domain_view .= $val . ';';
+				$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
+				$log_message_views .= $val ? "$view_name; " : null;
+			}
+			$post['domain_view'] = rtrim($domain_view, ';');
+			$log_message_views = rtrim(trim($log_message_views), ';');
+		}
+		if (!$post['domain_view']) $post['domain_view'] = 0;
+
 		/** Get clone parent values */
 		if ($post['domain_clone_domain_id']) {
 			$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE domain_id={$post['domain_clone_domain_id']}";
@@ -107,6 +126,9 @@ class fm_dns_zones {
 					$log_message .= 'Name: ' . displayFriendlyDomainName(sanitize($post['domain_name'])) . "\n";
 					$log_message .= "Clone of: $value\n";
 					$sql_values .= "'" . sanitize($post['domain_name']) . "',";
+				} elseif ($field == 'domain_view') {
+					$log_message .= "Views: $log_message_views\n";
+					$sql_values .= "'" . sanitize($post['domain_view']) . "',";
 				} elseif ($field == 'domain_reload') {
 					$sql_values .= "'no',";
 				} else {
@@ -119,23 +141,6 @@ class fm_dns_zones {
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
 		} else {
-			/** Format domain_view */
-			$log_message_views = null;
-			if (is_array($post['domain_view'])) {
-				$domain_view = null;
-				foreach ($post['domain_view'] as $val) {
-					if ($val == 0 || $val == '') {
-						$domain_view = 0;
-						break;
-					}
-					$domain_view .= $val . ';';
-					$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-					$log_message_views .= $val ? "$view_name; " : null;
-				}
-				$post['domain_view'] = rtrim($domain_view, ';');
-			}
-			if (!$post['domain_view']) $post['domain_view'] = 0;
-			
 			/** Format domain_name_servers */
 			$log_message_name_servers = null;
 			foreach ($post['domain_name_servers'] as $val) {
@@ -415,7 +420,7 @@ class fm_dns_zones {
 		
 		$zone_access_allowed = currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $row->domain_id));
 		
-		$class = ($row->domain_status == 'disabled') ? 'disabled' : null;
+		if ($row->domain_status == 'disabled') $classes[] = 'disabled';
 		$response = null;
 		
 		$checkbox = (currentUserCan('reload_zones', $_SESSION['module'])) ? '<td></td>' : null;
@@ -425,14 +430,28 @@ class fm_dns_zones {
 		$reload_allowed = reloadAllowed($row->domain_id);
 		if (!$soa_count && $row->domain_type == 'master') {
 			$response = 'The SOA record still needs to be created for this zone';
-			$class = 'attention';
+			$classes[] = 'attention';
 		}
 		if (!$ns_count && $row->domain_type == 'master' && !$response) {
 			$response = 'One more more NS records still needs to be created for this zone';
-			$class = 'attention';
+			$classes[] = 'attention';
 		}
 		
 		$clones = $this->cloneDomainsList($row->domain_id);
+		$clone_names = $clone_types = $clone_views = $clone_counts = null;
+		foreach ($clones as $clone_id => $clone_array) {
+			$clone_names .= '<p class="clone' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="Edit zone records">' . $clone_array['clone_name'] . 
+					'</a>' . $clone_array['clone_delete'] . "</p>\n";
+			$clone_types .= '<p class="clone' . $clone_id . '">clone</p>' . "\n";
+			$clone_views .= '<p class="clone' . $clone_id . '">' . $this->viewID2Name($clone_array['clone_views']) . "</p>\n";
+			$clone_counts_array = explode('|', $clone_array['clone_count']);
+			$clone_counts .= '<p class="clone' . $clone_id . '" title="Differences from parent zone">';
+			if ($clone_counts_array[0]) $clone_counts .= '<span class="record-additions">' . $clone_counts_array[0] . '</span>&nbsp;';
+			if ($clone_counts_array[1]) $clone_counts .= '&nbsp;<span class="record-subtractions">' . $clone_counts_array[1] . '</span> ';
+			if (!array_sum($clone_counts_array)) $clone_counts .= '-';
+			$clone_counts .= "</p>\n";
+		}
+		if ($clone_names) $classes[] = 'clones';
 		
 		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
 			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {
@@ -442,7 +461,7 @@ class fm_dns_zones {
 				$reload_zone = 'Reload Available<br />';
 			}
 		} else $reload_zone = null;
-		if ($reload_zone) $class = 'build';
+		if ($reload_zone) $classes[] = 'build';
 		
 /*
 		$edit_status = <<<FORM
@@ -469,40 +488,28 @@ FORM;
 		}
 		$domain_name = displayFriendlyDomainName($row->domain_name);
 		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">$domain_name</a>" : $domain_name;
-		if ($row->domain_view) {
-			// Process multiple views
-			if (strpos($row->domain_view, ';')) {
-				$domain_views = explode(';', rtrim($row->domain_view, ';'));
-				if (in_array('0', $domain_views)) $domain_view = 'All Views';
-				else {
-					$domain_view = null;
-					foreach ($domain_views as $view_id) {
-						$domain_view .= getNameFromID($view_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ', ';
-					}
-					$domain_view = rtrim($domain_view, ', ');
-				}
-			} else $domain_view = getNameFromID($row->domain_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-		} else $domain_view = 'All Views';
+		$domain_view = $this->viewID2Name($row->domain_view);
 
-		if ($class) $class = 'class="' . $class . '"';
+		$class = 'class="' . implode(' ', $classes) . '"';
 		
 		$record_count = null;
 		if ($row->domain_type == 'master') {
 			$query = "SELECT COUNT(*) record_count FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE account_id={$_SESSION['user']['account_id']} AND domain_id={$row->domain_id} AND record_status!='deleted'";
 			$fmdb->query($query);
-			$result = $fmdb->last_result;
-			$record_count = $result[0]->record_count;
+			$record_count = $fmdb->last_result[0]->record_count;
 		}
 		
 		echo <<<HTML
 		<tr title="$response" id="$row->domain_id" $class>
 			$checkbox
 			<td>$row->domain_id</td>
-			<td>$edit_name</td>
-			<td>$row->domain_type</td>
-			<td id="clones">$clones</td>
-			<td>$domain_view</td>
-			<td align="center">$record_count</td>
+			<td><b>$edit_name</b>$clone_names</td>
+			<td>$row->domain_type
+				$clone_types</td>
+			<td>$domain_view
+				$clone_views</td>
+			<td align="center">$record_count
+				$clone_counts</td>
 			<td id="edit_delete_img">
 				$reload_zone
 				$edit_status
@@ -664,10 +671,27 @@ HTML;
 			$count = $fmdb->num_rows;
 			$clone_results = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
-				$return .= '<p><a href="zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_results[$i]->domain_id . '" title="Edit zone records">' . $clone_results[$i]->domain_name . '</a>';
+				$clone_id = $clone_results[$i]->domain_id;
+				$return[$clone_id]['clone_name'] = $clone_results[$i]->domain_name;
+				$return[$clone_id]['clone_link'] = 'zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_id;
+				
+				/** Delete permitted? */
 				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
-					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) $return .= ' ' . str_replace('__ID__', $clone_results[$i]->domain_id, $__FM_CONFIG['module']['icons']['sub_delete']);
-				$return .= "</p>\n";
+					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) {
+					$return[$clone_id]['clone_delete'] = ' ' . str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
+				} else {
+					$return[$clone_id]['clone_delete'] = null;
+				}
+				
+				/** Clone record counts */
+				$query = "SELECT COUNT(*) record_count FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE account_id={$_SESSION['user']['account_id']} AND domain_id={$clone_id} AND record_status!='deleted'";
+				$fmdb->query($query);
+				$return[$clone_id]['clone_count'] = $fmdb->last_result[0]->record_count;
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $clone_id, 'record_', 'domain_id');
+				$return[$clone_id]['clone_count'] .= '|' . $fmdb->num_rows;
+				
+				/** Clone views */
+				$return[$clone_id]['clone_views'] = $clone_results[$i]->domain_view;
 			}
 		}
 		return $return;
@@ -1181,6 +1205,38 @@ HTML;
 		}
 
 		return $post;
+	}
+	
+	/**
+	 * Converts view IDs to their respective names
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $view_ids View IDs to convert to names
+	 * @return string
+	 */
+	function viewID2Name ($view_ids) {
+		global $__FM_CONFIG;
+		
+		if ($view_ids) {
+			// Process multiple views
+			if (strpos($view_ids, ';')) {
+				$domain_views = explode(';', rtrim($view_ids, ';'));
+				if (in_array('0', $domain_views)) $domain_view = 'All Views';
+				elseif (in_array('-1', $domain_views)) $domain_view = 'Inherited';
+				else {
+					$domain_view = null;
+					foreach ($domain_views as $view_id) {
+						$domain_view .= getNameFromID($view_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ', ';
+					}
+					$domain_view = rtrim($domain_view, ', ');
+				}
+			} else $domain_view = getNameFromID($view_ids, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
+		} else $domain_view = 'All Views';
+		
+		return $domain_view;
 	}
 
 }

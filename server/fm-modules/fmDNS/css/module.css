@@ -20,8 +20,24 @@ tr.import_swap select {
 	white-space: nowrap;
 }
 
-#clones p {
-	margin: 0;
+.clones td p {
+	margin: 0 0 0 .5em;
+}
+
+.clones p span.record-additions {
+	color: green;
+	font-size: 8pt;
+}
+.clones p span.record-additions:before {
+	content: '+';
+}
+
+.clones p span.record-subtractions {
+	color: red;
+	font-size: 8pt;
+}
+.clones p span.record-subtractions:before {
+	content: '-';
 }
 
 img.clone_remove {

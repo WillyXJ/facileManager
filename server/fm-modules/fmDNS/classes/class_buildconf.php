@@ -598,8 +598,13 @@ class fm_module_buildconf {
 					$file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 					
 					/** Are there multiple zones with the same name? */
-					basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result[$i]->domain_id);
-					if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
+					if ($zone_result[$i]->parent_domain_id) {
+						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->parent_domain_id);
+						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$file_ext";
+					} else {
+						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->domain_id);
+						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
+					}
 					
 					switch($zone_result[$i]->domain_type) {
 						case 'master':
@@ -608,7 +613,7 @@ class fm_module_buildconf {
 							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
 							/** Build zone file */
 							if ($zone_result[$i]->domain_type == 'master') {
-								$files[$server_zones_dir . '/master/db.' . $domain_name_file . "$file_ext"] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
+								$files[$server_zones_dir . '/master/db.' . $domain_name_file . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 							}
 							break;
 						case 'stub':
@@ -1037,15 +1042,18 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function mergeZoneDetails($zone, $all_zones, $count) {
-		for ($i = 0; $i < $count; $i++) {
-			if (isset($all_zones[$i]->domain_id) && $all_zones[$i]->domain_id == $zone->domain_clone_domain_id) {
-				$all_zones[$i]->parent_domain_id = $zone->domain_id;
-				$all_zones[$i]->domain_id = $zone->domain_clone_domain_id;
-				$all_zones[$i]->domain_name = $zone->domain_name;
-				$all_zones[$i]->domain_name_file = $zone->domain_name;
-				
-				return $all_zones[$i];
-			}
+		global $fmdb, $__FM_CONFIG;
+		
+		basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $zone->domain_clone_domain_id, 'domain_', 'domain_id');
+		if ($fmdb->num_rows) {
+			$parent_zone = $fmdb->last_result[0];
+			$parent_zone->parent_domain_id = $zone->domain_id;
+			$parent_zone->domain_id = $zone->domain_clone_domain_id;
+			$parent_zone->domain_name = $zone->domain_name;
+			$parent_zone->domain_name_file = $zone->domain_name;
+			$parent_zone->domain_view = $zone->domain_view;
+
+			return $parent_zone;
 		}
 		
 		return false;
