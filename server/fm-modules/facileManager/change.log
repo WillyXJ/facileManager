@@ -1,7 +1,8 @@
-1.3.1 (2014-11-??)
+1.3.1 (2014-11-10)
 ==================
 * Client - [bug] Fixed issue where config file parameters are not found and an
            empty value is returned. (Issue #163)
+* Server - [bug] Fixed database cleanup routine.
 
 1.3 (2014-09-17)
 ================
