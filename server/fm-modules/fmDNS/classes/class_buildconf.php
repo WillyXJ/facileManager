@@ -576,7 +576,7 @@ class fm_module_buildconf {
 		}
 
 		/** Build zones */
-		$view_sql = "and (`domain_view`=0 or `domain_view`=$view_id or `domain_view` LIKE '$view_id;%' or `domain_view` LIKE '%;$view_id' or `domain_view` LIKE '%;$view_id;%')";
+		$view_sql = "and (`domain_view`<=0 or `domain_view`=$view_id or `domain_view` LIKE '$view_id;%' or `domain_view` LIKE '%;$view_id' or `domain_view` LIKE '%;$view_id;%')";
 		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id%' or `domain_name_servers` like '%;$server_id;%') $view_sql order by `domain_clone_domain_id`,`domain_name`";
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
@@ -584,7 +584,7 @@ class fm_module_buildconf {
 			$zone_result = $fmdb->last_result;
 			for ($i=0; $i < $count; $i++) {
 				/** Is this a clone id? */
-				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], $zone_result, $count);
+				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], $view_id);
 				if ($zone_result[$i] == false) continue;
 				
 				/** Valid SOA and NS records must exist */
@@ -1041,7 +1041,7 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function mergeZoneDetails($zone, $all_zones, $count) {
+	function mergeZoneDetails($zone, $view_id) {
 		global $fmdb, $__FM_CONFIG;
 		
 		basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $zone->domain_clone_domain_id, 'domain_', 'domain_id');
@@ -1051,7 +1051,10 @@ class fm_module_buildconf {
 			$parent_zone->domain_id = $zone->domain_clone_domain_id;
 			$parent_zone->domain_name = $zone->domain_name;
 			$parent_zone->domain_name_file = $zone->domain_name;
-			$parent_zone->domain_view = $zone->domain_view;
+			
+			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
+			
+			if (!in_array($view_id, explode(';', $parent_zone->domain_view))) return false;
 
 			return $parent_zone;
 		}

@@ -1133,8 +1133,13 @@ HTML;
 		}
 		if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return 'Invalid zone name.';
 		
+		/** Format domain_clone_domain_id */
+		if (!$post['domain_clone_domain_id']) $post['domain_clone_domain_id'] = 0;
+		
 		/** Ensure domain_view is set */
-		if (!array_key_exists('domain_view', $post)) $post['domain_view'] = 0;
+		if (!array_key_exists('domain_view', $post)) {
+			$post['domain_view'] = ($post['domain_clone_domain_id']) ? -1 : 0;
+		}
 
 		/** Reverse zones should have form of x.x.x.in-addr.arpa */
 		if ($post['domain_mapping'] == 'reverse') {
@@ -1172,9 +1177,6 @@ HTML;
 				$post['domain_view'] = rtrim($domain_view, ';');
 			}
 		}
-		
-		/** Format domain_clone_domain_id */
-		if (!$post['domain_clone_domain_id']) $post['domain_clone_domain_id'] = 0;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
@@ -1221,11 +1223,11 @@ HTML;
 		global $__FM_CONFIG;
 		
 		if ($view_ids) {
-			// Process multiple views
+			if ($view_ids == -1) return '<i>Inherited</i>';
+			/** Process multiple views */
 			if (strpos($view_ids, ';')) {
 				$domain_views = explode(';', rtrim($view_ids, ';'));
 				if (in_array('0', $domain_views)) $domain_view = 'All Views';
-				elseif (in_array('-1', $domain_views)) $domain_view = 'Inherited';
 				else {
 					$domain_view = null;
 					foreach ($domain_views as $view_id) {
