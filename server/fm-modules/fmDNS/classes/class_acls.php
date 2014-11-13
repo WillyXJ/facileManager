@@ -301,6 +301,14 @@ FORM;
 				$acl_list[$i]['text'] = $predefined;
 				$i++;
 			}
+			/** Keys */
+			$view_id = (isset($_POST['view_id']) && is_numeric(sanitize($_POST['view_id']))) ? sanitize($_POST['view_id']) : 0;
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view=' . $view_id . ' AND key_status="active"');
+			for ($j=0; $j<$fmdb->num_rows; $j++) {
+				$acl_list[$i]['id'] = 'key_' . $fmdb->last_result[$j]->key_id;
+				$acl_list[$i]['text'] = 'key "' . $fmdb->last_result[$j]->key_name . '"';
+				$i++;
+			}
 		}
 		
 		return $acl_list;
@@ -332,18 +340,25 @@ FORM;
 	
 	
 	function parseACL($address_match_list) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_dns_keys;
 		
 		$acls = explode(',', $address_match_list);
 		$formatted_acls = null;
 		foreach ($acls as $address) {
-			if (strpos($address, 'acl_') === false) {
+			if (strpos($address, 'acl_') === false && strpos($address, 'key_') === false) {
 				$formatted_acls[] = $address;
 				continue;
 			}
 			
-			$acl_id = str_replace('acl_', '', $address);
-			$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+			if (strpos($address, 'key_') !== false) {
+				if (!class_exists('fm_dns_keys')) {
+					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+				}
+				$formatted_acls[] = 'key "' . $fm_dns_keys->parseKey($address, '') . '"';
+			} else {
+				$acl_id = str_replace('acl_', '', $address);
+				$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+			}
 		}
 		
 		return implode('; ', $formatted_acls);

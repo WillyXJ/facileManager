@@ -225,12 +225,14 @@ $(document).ready(function() {
 function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById('cfg_name').value;
 	var server_serial_no	= getUrlVars()['server_serial_no'];
+	var view_id = getUrlVars()['view_id'];
 
 	var form_data = {
 		get_option_placeholder: true,
 		option_name: option_name,
 		option_value: option_value,
 		server_serial_no: server_serial_no,
+		view_id: view_id,
 		is_ajax: 1
 	};
 

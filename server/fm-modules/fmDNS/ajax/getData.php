@@ -28,6 +28,7 @@ require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
@@ -95,7 +96,6 @@ HTML;
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');

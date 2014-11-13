@@ -186,7 +186,7 @@ class fm_dns_keys {
 		}
 		
 		$edit_name = $row->key_name;
-		$key_view = ($row->key_view) ? getNameFromID($row->key_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'none';
+		$key_view = ($row->key_view) ? getNameFromID($row->key_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		
 		$comments = nl2br($row->key_comment);
 
@@ -270,15 +270,16 @@ FORM;
 	}
 	
 	
-	function parseKey($keys) {
+	function parseKey($keys, $glue = '"; "') {
 		global $__FM_CONFIG;
 		
 		$formatted_keys = null;
 		foreach (explode(',', $keys) as $key_id) {
+			$key_id = str_replace('key_', '', $key_id);
 			$formatted_keys[] = getNameFromID($key_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}keys", 'key_', 'key_id', 'key_name', null, 'active');
 		}
 		
-		return implode('"; "', $formatted_keys);
+		return implode($glue, $formatted_keys);
 	}
 
 
