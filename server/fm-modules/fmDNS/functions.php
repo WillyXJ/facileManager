@@ -752,4 +752,25 @@ function displayFriendlyDomainName($domain_name) {
 	
 	return $new_domain_name;
 }
+
+
+/**
+ * Gets the parent domain_id of the clone
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param id $domain_id Domain ID to check
+ * @return integer
+ */
+function getParentDomainID($domain_id) {
+	global $__FM_CONFIG;
+	
+	$parent_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+	
+	return ($parent_id) ? $parent_id : $domain_id;
+}
+
+
 ?>

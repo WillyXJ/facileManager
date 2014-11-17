@@ -112,6 +112,7 @@ class fm_dns_records {
 		}
 
 		/** Update the SOA serial number */
+		$domain_id = getParentDomainID($domain_id);
 		$soa_count = getSOACount($domain_id);
 		$ns_count = getNSCount($domain_id);
 		if (reloadAllowed($domain_id) && $soa_count && $ns_count) {
@@ -184,6 +185,7 @@ class fm_dns_records {
 		if (!$fmdb->rows_affected) return true;
 
 		/** Update the SOA serial number */
+		$domain_id = getParentDomainID($domain_id);
 		if (reloadAllowed($domain_id) && getSOACount($domain_id) && getNSCount($domain_id)) {
 			$this->updateSOAReload($domain_id);
 		}
