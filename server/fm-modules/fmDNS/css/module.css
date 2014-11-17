@@ -155,12 +155,11 @@ p.soa_import span {
 	width: 100%;
 }
 .existing-container {
-	position: fixed;
+	position: absolute;
 	overflow: auto;
-	bottom: 27em;
-	top: 9em;
-	right: 2em;
-	left: 14em;
+	bottom: 34em;
+	top: 0;
+	width: 100%;
 }
 .new-container {
 	position: absolute;
