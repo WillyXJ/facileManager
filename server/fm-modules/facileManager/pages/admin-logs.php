@@ -66,6 +66,7 @@ $fmdb->query($query);
 $log_count = $fmdb->num_rows;
 
 $total_pages = ceil($log_count / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
 $pagination = displayPagination($page, $total_pages);
 
 $log_search_module = isset($log_search_module) ? $log_search_module : 'All Modules';

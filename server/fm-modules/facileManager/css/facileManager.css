@@ -603,7 +603,8 @@ tbody {
 .form-table input:not([type="image"]),
 .display_results input:not([type="image"]),
 .display_results textarea,
-#bulk_action {
+#bulk_action,
+#pagination input {
 	line-height: 20px;
 	font-size: 12px;
 	padding: 2px;
@@ -1343,6 +1344,12 @@ span.not_installed {
 	box-shadow: inset 0px 0px 8px rgba(0,0,0, .5), 0px 1px 0px rgba(255,255,255, .8);
 	color: #f0f0f0;
 	text-shadow: 0px 0px 3px rgba(0,0,0, .5);
+}
+#pagination input {
+	width: 20px;
+	padding: 0px;
+	text-align: center;
+	font-size: 10px;
 }
 
 .highlighted {

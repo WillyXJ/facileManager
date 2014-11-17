@@ -189,7 +189,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			echo '</pre>';
 		}
 		
-		$page = isset($_GET['p']) ? intval($_GET['p']) : 1;
+		$page = isset($_GET['p']) && intval($_GET['p']) > 0 ? intval($_GET['p']) : 1;
 		
 		/** Build the user menu */
 		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');

@@ -731,6 +731,22 @@ $(document).ready(function() {
     		window.location = window.location.href + append_mark + 'sort_by=' + sort_by_field;
     	}
     });
+	
+	/* Pagination search */
+	$('#pagination_search input').keypress(function (e) {
+		if (e.which == 13) {
+			var newValue = $(this).val();
+			var queryParameters = {}, queryString = location.search.substring(1),
+				re = /([^&=]+)=([^&]*)/g, m;
+			while (m = re.exec(queryString)) {
+				queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+			}
+			queryParameters['p'] = newValue;
+
+			location.search = $.param(queryParameters);
+			return false;
+		}
+	});
     
 });
 

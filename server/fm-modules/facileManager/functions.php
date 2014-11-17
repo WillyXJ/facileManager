@@ -1573,39 +1573,34 @@ function displayPagination($page, $total_pages, $classes = null) {
 		$search .= $key . '=' . $val . '&';
 	}
 	
+	if ($page < 1) {
+		$page = 1;
+	}
+	if ($page > $total_pages) {
+		$page = $total_pages;
+	}
+	
 	$page_links = array();
-	$end_size = 1;
-	$mid_size = 2;
-	$dots = false;
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
+	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $search . '">';
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
 		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=1\">&laquo;</a>";
 		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page - 1) . '">&lsaquo;</a>';
 	}
+	
 	/** Page number */
-	for ($p=1; $p<=$total_pages; $p++) {
-		if ($p == $page) {
-			$page_links[] = '<span class="current">' . $p . '</span>';
-			$dots = true;
-		} else {
-			if ($p <= $end_size || ($page && $p >= $page - $mid_size && $p <= $page + $mid_size) || $p > $total_pages - $end_size) {
-				$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . $p . '">' . $p . '</a>';
-				$dots = true;
-			} elseif ($dots) {
-				$page_links[] = '<span class="text">...</span>';
-				$dots = false;
-			}
-		}
-	}
+	$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . $total_pages;
+	
 	/** Next link */
 	if ($page < $total_pages) {
 		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page + 1) . '">&rsaquo;</a>';
 		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . $total_pages . '">&raquo;</a>';
 	}
 
+	$page_links[] = '</form>';
 	$page_links[] = '</div>';
 	$page_links[] = buildPaginationCountMenu(0, 'pagination');
 	$page_links[] = '</div>';
