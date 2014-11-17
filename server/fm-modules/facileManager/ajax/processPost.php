@@ -95,6 +95,33 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	$result .= "\n" . ucwords($_POST['bulk_action']) . ' is complete.</pre>';
 	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL('Servers'));
 
+/** Handle mass rebuild */
+} elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
+	/** Check permissions */
+	if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
+		returnUnAuth();
+	}
+	$result = buildPopup('header', 'Updates Results');
+	$result .= "<pre>\n";
+	
+	/** Server config builds */
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND server_status="active" AND server_installed="yes"');
+	$server_count = $fmdb->num_rows;
+	$server_results = $fmdb->last_result;
+	for ($i=0; $i<$server_count; $i++) {
+		if (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
+			$result .= $fm_shared_module_servers->doClientUpgrade($server_results[$i]->server_serial_no);
+			$result .= "\n";
+		} elseif ($server_results[$i]->server_build_config != 'no') {
+			$result .= $fm_shared_module_servers->doBulkServerBuild($server_results[$i]->server_serial_no);
+			$result .= "\n";
+		}
+	}
+	
+	$result .= "\nAll updates have been processed.</pre>\n";
+	unset($_SESSION['display-rebuild-all']);
+	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
 	if (!currentUserCan('manage_users')) returnUnAuth();

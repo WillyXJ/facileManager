@@ -306,7 +306,13 @@ HTML;
 		}
 	
 		$help_file = buildHelpFile();
-		
+	
+		$process_all = <<<HTML
+		<div id="topheadpartright" style="display: none;">
+			<a class="single_line process_all_updates" href="#" title="Process All Available Updates"><i class="fa fa-refresh fa-lg"></i></a>
+		</div>
+HTML;
+	
 		$return = <<<HTML
 	<div id="tophead">
 		<div id="topheadpart">
@@ -322,6 +328,7 @@ $user_account_menu
 		</div>
 $module_menu
 $module_toolbar_right
+$process_all
 	</div>
 	<div id="help">
 		<div id="help_topbar">
@@ -369,14 +376,14 @@ function printMenu() {
 		$sub_menu_html = '</li>';
 		$show_top_badge_count = true;
 		
-		list($menu_title, $page_title, $capability, $module, $slug, $class, $badge_count) = $main_menu_array;
-		if (!is_array($class)) {
-			$class = !empty($class) ? array_fill(0, 1, $class) : array();
+		list($menu_title, $page_title, $capability, $module, $slug, $classes, $badge_count) = $main_menu_array;
+		if (!is_array($classes)) {
+			$classes = !empty($classes) ? array_fill(0, 1, $classes) : array();
 		}
 		
 		/** Check if menu item is current page */
 		if ($slug == findTopLevelMenuSlug($filtered_submenu)) {
-			array_push($class, 'current', 'arrow');
+			array_push($classes, 'current', 'arrow');
 			
 			if (array_key_exists($slug, $filtered_submenu)) {
 				$show_top_badge_count = false;
@@ -406,8 +413,8 @@ HTML;
 		}
 		
 		/** Build submenus */
-		if (!count($class) && count($filtered_submenu[$slug]) > 1) {
-			array_push($class, 'has-sub');
+		if (!count($classes) && count($filtered_submenu[$slug]) > 1) {
+			array_push($classes, 'has-sub');
 			foreach ($filtered_submenu[$slug] as $submenu_array) {
 				if (!empty($submenu_array[0])) {
 					if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
@@ -425,10 +432,10 @@ HTML;
 HTML;
 		}
 		
-		$arrow = (in_array('arrow', $class)) ? '<u></u>' : null;
+		$arrow = (in_array('arrow', $classes)) ? '<u></u>' : null;
 		
 		/** Join all of the classes */
-		if (count($class)) $class = ' class="' . implode(' ', $class) . '"';
+		if (count($classes)) $class = ' class="' . implode(' ', $classes) . '"';
 		else $class = null;
 		
 		if (empty($slug) && !empty($class)) {
@@ -571,7 +578,7 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
  * @since 1.0
  * @package facileManager
  */
-function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = null, $ip_sort = false, $direction = 'ASC') {
+function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = null, $ip_sort = false, $direction = 'ASC', $count_only = false) {
 	global $fmdb;
 	
 	switch($sql) {
@@ -597,7 +604,9 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 		$sort = "ORDER BY `$primary_field`" . $secondary_fields;
 	}
 	
-	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
+	$disp_query = 'SELECT ';
+	$disp_query .= $count_only ? 'COUNT(*) count' : '*';
+	$disp_query .= " FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
 	return $fmdb->query($disp_query);
 }
 
@@ -2761,4 +2770,29 @@ function parseMenuLinks($html) {
 	$string = preg_replace("/__menu{(.+?)}/esim", "getMenuURL('\\1')", $html);
 	return $string;
 }
+
+
+/**
+ * Gets the count for servers requiring a config build
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @return integer Record count
+ */
+function countServerBuilds() {
+	global $fmdb, $__FM_CONFIG;
+	
+	if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND server_build_config!="no" AND server_status="active" AND server_installed="yes"', null, false, null, true);
+		if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
+	}
+			
+//	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_reload!="no"', null, false, null, true);
+//	if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
+
+	return 0;
+}
+
+
 ?>

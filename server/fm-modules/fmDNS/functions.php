@@ -155,22 +155,7 @@ HTML;
 		}
 	} else $domain_menu = null;
 	
-	$notifications = <<<HTML
-		<div id="topheadpartright" style="padding: 0;">
-			<div id="cssmenu">
-			<ul>
-				<li class="has-sub"><a href="#"><span><i class="fa fa-refresh fa-lg"></i></span></a>
-					<ul class="sub-left">
-						<li class="text-only"><span>Plaintext</span></li>
-						<li class="last"><a href="{$GLOBALS['RELPATH']}"><span>Link</span></a></li>
-					</ul>
-				</li>
-			</ul>
-			</div>
-		</div>
-HTML;
-	
-	return array($domain_menu, $notifications);
+	return array($domain_menu, null);
 }
 
 /**
@@ -579,6 +564,7 @@ function reloadAllowed($domain_id = null) {
 function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
 	
+	$badge_counts = null;
 	if ($type == 'zones') {
 		$badge_counts = array('forward' => 0, 'reverse' => 0);
 		
@@ -604,8 +590,7 @@ function getModuleBadgeCounts($type) {
 			}
 		}
 		unset($domain_results, $domain_count);
-	} elseif ($type == 'servers') {
-		$badge_counts = null;
+	} elseif ($type == 'servers' && currentUserCan('manage_servers', $_SESSION['module'])) {
 		$server_builds = array();
 		
 		/** Servers */

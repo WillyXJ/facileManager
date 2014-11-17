@@ -94,6 +94,13 @@ HTML;
 	exit;
 }
 
+if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
+	if (countServerBuilds()) {
+		echo 'show';
+	}
+	exit;
+}
+
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');

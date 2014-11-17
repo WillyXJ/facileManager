@@ -203,6 +203,9 @@ class fm_shared_module_servers {
 		}
 		
 		if (count($response) == 1) {
+			if (!class_exists('fm_module_servers')) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+			}
 			foreach (makePlainText($fm_module_servers->buildServerConfig($server_serial_no), true) as $line) {
 				$response[] = ' --> ' . $line;
 			}

@@ -1464,6 +1464,10 @@ pre {
 	color: #008500;
 }
 
+#bulk_apply {
+	margin-left: 3px;
+}
+
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
 }

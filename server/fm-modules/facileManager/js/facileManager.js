@@ -22,6 +22,32 @@ $(document).ready(function() {
 		});
 	});
 	
+	$(function displayHideProcessAll() {
+		if ($('#tophead').is(':visible')) {
+			var form_data = {
+				action: 'display-process-all'
+			};
+
+			$.ajax({
+				type: 'GET',
+				url: 'fm-modules/facileManager/ajax/getData.php',
+				timeout: 2000,
+				data: form_data,
+				success: function(response) {
+					if (response == 'show') {
+						$('.process_all_updates').parent().fadeIn(400);
+					} else {
+						$('.process_all_updates').parent().fadeOut(400);
+					}
+					window.setTimeout(displayHideProcessAll, 45000);
+				},
+				error: function (XMLHttpRequest, textStatus, errorThrown) {
+					window.setTimeout(displayHideProcessAll, 60000);
+				}
+			});
+		}
+	});
+	
 	$('input:text, input:password, select').first().focus();
 	
 	// Everything we need for scrolling up and down.
@@ -654,6 +680,41 @@ $(document).ready(function() {
 					}
 				});
 			}
+		}
+	});
+
+	/* Mass rebuild from top menu */
+	$('.process_all_updates').click(function(event) {
+		if (confirm('Are you sure you want to process all updates?')) {
+	        var $this 	= $(this);
+			$('#manage_item').fadeIn(200);
+			$('#manage_item_contents').fadeIn(200);
+			$('#manage_item_contents').html('<p>Processing Updates... <i class="fa fa-spinner fa-spin"></i></p>');
+
+			var form_data = {
+				action: 'process-all-updates',
+				is_ajax: 1
+			};
+
+			$.ajax({
+				type: 'POST',
+				url: 'fm-modules/facileManager/ajax/processPost.php',
+				data: form_data,
+				success: function(response)
+				{
+					$('#manage_item_contents').html(response);
+					if ($('#manage_item_contents').width() >= 700) {
+						$('#manage_item_contents').addClass('wide');
+					}
+					if (response.toLowerCase().indexOf("failed") == -1 && 
+						response.toLowerCase().indexOf("one or more errors") == -1 && 
+						response.toLowerCase().indexOf("you are not authorized") == -1 && 
+						response.toLowerCase().indexOf("does not have php configured") == -1
+						) {
+						$this.parent().fadeOut(400);
+					}
+				}
+			});
 		}
 	});
 

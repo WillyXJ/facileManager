@@ -1223,7 +1223,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		if ($view_ids) {
-			if ($view_ids == -1) return '<i>Inherited</i>';
+			if ($view_ids == -1) return '<i>inherited</i>';
 			/** Process multiple views */
 			if (strpos($view_ids, ';')) {
 				$domain_views = explode(';', rtrim($view_ids, ';'));
