@@ -564,6 +564,7 @@ function reloadAllowed($domain_id = null) {
 function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
 	
+	$badge_counts = null;
 	if ($type == 'zones') {
 		$badge_counts = array('forward' => 0, 'reverse' => 0);
 		
@@ -589,8 +590,7 @@ function getModuleBadgeCounts($type) {
 			}
 		}
 		unset($domain_results, $domain_count);
-	} elseif ($type == 'servers') {
-		$badge_counts = null;
+	} elseif ($type == 'servers' && currentUserCan('manage_servers', $_SESSION['module'])) {
 		$server_builds = array();
 		
 		/** Servers */
