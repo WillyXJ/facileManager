@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed server menu badge counts to accurately reflect numbers when
            limiting user access.
+* Server - [improvement] Updated view display for keys config.
 
 1.3.3 (2014-11-10)
 ==================
