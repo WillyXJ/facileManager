@@ -1350,6 +1350,11 @@ span.not_installed {
 	padding: 0px;
 	text-align: center;
 	font-size: 10px;
+	margin-left: 5px;
+}
+#pagination span {
+	font-style: italic;
+	color: #bbb;
 }
 
 .highlighted {

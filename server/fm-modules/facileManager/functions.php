@@ -1565,6 +1565,8 @@ function arrayKeysExist($keys, $array) {
  * @return string
  */
 function displayPagination($page, $total_pages, $classes = null) {
+	global $fmdb;
+	
 	if ($total_pages <= 1) return;
 	
 	$search = null;
@@ -1584,6 +1586,7 @@ function displayPagination($page, $total_pages, $classes = null) {
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $search . '">';
+	$page_links[] = '<span>' . $fmdb->num_rows . ' items</span>';
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
