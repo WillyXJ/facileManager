@@ -310,6 +310,7 @@ HTML;
 		$process_all = <<<HTML
 		<div id="topheadpartright" style="display: none;">
 			<a class="single_line process_all_updates" href="#" title="Process All Available Updates"><i class="fa fa-refresh fa-lg"></i></a>
+			<span class="update_count"></span>
 		</div>
 HTML;
 	
@@ -2786,9 +2787,6 @@ function countServerBuilds() {
 		if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
 	}
 			
-//	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_reload!="no"', null, false, null, true);
-//	if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
-
 	return 0;
 }
 

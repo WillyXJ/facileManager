@@ -49,13 +49,12 @@ printHeader();
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
-$zone_access_allowed = true;
 $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
 sort($supported_record_types);
 $supported_record_types[] = 'SOA';
 
 $parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
-$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id, $parent_domain_id));
+$zone_access_allowed = zoneAccessIsAllowed(array($domain_id, $parent_domain_id));
 		
 if (!in_array($record_type, $supported_record_types)) $record_type = $default_record_type;
 $avail_types = buildRecordTypes($record_type, array($domain_id, $parent_domain_id), $map, $supported_record_types);

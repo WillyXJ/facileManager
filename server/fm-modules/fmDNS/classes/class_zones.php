@@ -418,7 +418,7 @@ class fm_dns_zones {
 		
 		if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $row->domain_id))) return;
 		
-		$zone_access_allowed = currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $row->domain_id));
+		$zone_access_allowed = zoneAccessIsAllowed(array($row->domain_id));
 		
 		if ($row->domain_status == 'disabled') $classes[] = 'disabled';
 		$response = null;
@@ -1091,8 +1091,7 @@ HTML;
 		}
 		
 		/** Ensure user is allowed to reload zone */
-		$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id)) & 
-				currentUserCan('reload_zones');
+		$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload');
 		
 		if (count($response) == 1 && !$zone_access_allowed) {
 			$response[] = ' --> Failed: You do not have permission to reload this zone.';

@@ -34,10 +34,11 @@ $(document).ready(function() {
 				timeout: 2000,
 				data: form_data,
 				success: function(response) {
-					if (response == 'show') {
-						$('.process_all_updates').parent().fadeIn(400);
-					} else {
+					if (response == 0) {
 						$('.process_all_updates').parent().fadeOut(400);
+					} else {
+						$('#topheadpartright span.update_count').html(response);
+						$('.process_all_updates').parent().fadeIn(400);
 					}
 					window.setTimeout(displayHideProcessAll, 45000);
 				},

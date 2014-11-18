@@ -29,7 +29,7 @@ class fm_module_tools {
 		global $__FM_CONFIG, $fm_name;
 		
 		if (!currentUserCan('manage_records', $_SESSION['module'])) return $this->unAuth('zone');
-		if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $_POST['domain_id']))) return $this->unAuth('zone');
+		if (!zoneAccessIsAllowed(array($_POST['domain_id']))) return $this->unAuth('zone');
 		
 		$raw_contents = file_get_contents($_FILES['import-file']['tmp_name']);
 		/** Strip commented lines */

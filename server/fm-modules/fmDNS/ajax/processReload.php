@@ -26,7 +26,13 @@
 if (is_array($_POST) && count($_POST)) {
 	include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 	
-	if (isset($_POST['domain_id']) && currentUserCan('reload_zones', $_SESSION['module'])) {
+	/** Clean variable */
+	$domain_id = intval($_POST['domain_id']);
+	
+	/** Ensure user is allowed to reload zone */
+	$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload');
+
+	if ($domain_id && $zone_access_allowed) {
 		echo buildPopup('header', 'Zone Reload Results');
 		
 		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {

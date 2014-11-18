@@ -755,7 +755,7 @@ function displayFriendlyDomainName($domain_name) {
 
 
 /**
- * Gets the parent domain_id of the clone
+ * Gets the count for domains requiring a reload
  *
  * @since 2.0
  * @package facileManager
@@ -770,6 +770,60 @@ function getParentDomainID($domain_id) {
 	$parent_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
 	
 	return ($parent_id) ? $parent_id : $domain_id;
+}
+
+
+/**
+ * Gets the count for zones requiring a reload
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $return_what What to return (count|ids)
+ * @return integer|array
+ */
+function getZoneReloads($return_what) {
+	global $fmdb, $__FM_CONFIG;
+	
+	$zone_count = 0;
+	$zone_ids = array();
+	
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_reload!="no"');
+	if ($fmdb->num_rows) {
+		$num_rows = $fmdb->num_rows;
+		$domain_list = $fmdb->last_result;
+		for ($i=0; $i<$num_rows; $i++) {
+			$zone_access_allowed = zoneAccessIsAllowed(array($domain_list[$i]->domain_id, $domain_list[$i]->domain_clone_domain_id));
+			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {
+				$zone_count++;
+				$zone_ids[] = $domain_list[$i]->domain_clone_domain_id ? $domain_list[$i]->domain_clone_domain_id : $domain_list[$i]->domain_id;
+			}
+		}
+	}
+	
+	return $return_what == 'count' ? $zone_count : $zone_ids;
+}
+
+
+/**
+ * Returns if access to a zone is allowed
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $domain_ids Domain IDs to check
+ * @param string $included_action Included action to check against
+ * @return boolean
+ */
+function zoneAccessIsAllowed($domain_ids, $included_action = null) {
+	if ($included_action == 'reload') {
+		return currentUserCan('access_specific_zones', $_SESSION['module'], array_merge(array(0), $domain_ids)) & 
+			currentUserCan('reload_zones', $_SESSION['module']);
+	} else {
+		return currentUserCan('access_specific_zones', $_SESSION['module'], array_merge(array(0), $domain_ids));
+	}
 }
 
 

@@ -95,9 +95,10 @@ HTML;
 }
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
-	if (countServerBuilds()) {
-		echo 'show';
-	}
+	$update_count = countServerBuilds();
+	$update_count += getZoneReloads('count');
+	
+	echo $update_count;
 	exit;
 }
 

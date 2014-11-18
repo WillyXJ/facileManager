@@ -30,7 +30,7 @@ extract($_POST);
 
 /** Should the user be here? */
 if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
-if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
+if (!zoneAccessIsAllowed(array($domain_id))) unAuth();
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 
 /** Make sure we can handle all of the variables */

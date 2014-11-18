@@ -1,3 +1,8 @@
+???
+==================
+* Server - [feature] Added ability to update all servers with a single click on
+           the top menu bar. (Issue #116)
+
 1.0.3 (2014-08-20)
 ==================
 * Server - [bug] Fixed some PHP errors.

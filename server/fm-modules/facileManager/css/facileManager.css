@@ -80,6 +80,12 @@ input[type="checkbox"] {
 	padding: 0 2em;
 	max-height: 25px;
 }
+#topheadpartright span.update_count {
+	font-size: 8px;
+	position: relative;
+	top: -5px;
+	color: #fff;
+}
 
 .single_line {
 	line-height: 18pt;

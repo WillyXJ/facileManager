@@ -42,17 +42,15 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
 
 	echo buildPopup('header', 'Reload Results') . '<pre>';
-	if (is_array($_POST['item_id'])) {
-		foreach ($_POST['item_id'] as $domain_id) {
-			if (!is_numeric($domain_id)) continue;
-			
-			echo $fm_dns_zones->doBulkZoneReload($domain_id);
-			echo "\n";
-		}
-	}
+	echo processBulkDomainIDs($_POST['item_id']);
 	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.</pre>' . $popup_footer;
 	
 	exit;
+
+	/** Handle mass updates */
+} elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
+	$result .= processBulkDomainIDs(getZoneReloads('ids'));
+	return;
 }
 
 $unpriv_message = 'You do not have sufficient privileges.';
@@ -161,5 +159,30 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 }
 
 echo $unpriv_message;
+
+/**
+ * Processes the array of domain ids for reload
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $domain_id_array Array of domain_ids to process
+ * @return string
+ */
+function processBulkDomainIDs($domain_id_array) {
+	global $fm_dns_zones;
+
+	$return = null;
+	if (is_array($domain_id_array)) {
+		foreach ($domain_id_array as $domain_id) {
+			if (!is_numeric($domain_id)) continue;
+			
+			$return .= $fm_dns_zones->doBulkZoneReload($domain_id) . "\n";
+		}
+	}
+	
+	return $return;
+}
 
 ?>
