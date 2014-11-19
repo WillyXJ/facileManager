@@ -48,10 +48,6 @@ if (array_key_exists('submit', $_POST)) {
 printHeader();
 @printMenu();
 
-if (!empty($response)) echo '<div id="response">' . $response . '</div>';
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
-
 $backup_button = findProgram('mysqldump') ? '<p class="step"><input id="db-backup" name="submit" type="submit" value="Backup Database" class="button" /></p>' : '<p>The required mysqldump utility is not found on ' . php_uname('n') . '.</p>';
 
 $tools_option[] = <<<HTML
@@ -86,8 +82,11 @@ foreach ($tools_option as $tool) {
 	$admin_tools .= $tool;
 }
 
+echo '<div id="body_container">' . "\n";
+if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
+else echo '<div id="response" style="display: none;"></div>' . "\n";
+
 echo <<<HTML
->
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="" id="admin-tools-form">
 		$admin_tools
