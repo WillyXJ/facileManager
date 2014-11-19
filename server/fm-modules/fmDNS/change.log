@@ -6,6 +6,8 @@
 * Server - [feature] Added ability to reload all zones with a single click on the
            top menu bar. (Issue #116)
 * Server - [feature] New zones can now be created with the zone import wizard.
+* Server - [improvement] Zone imports now check for duplicate records with parent
+           zone when importing to a cloned zone.
 
 1.3.3 (2014-11-10)
 ==================

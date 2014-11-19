@@ -338,7 +338,13 @@ BODY;
 	function checkDuplicates($array, $domain_id) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE record_status!='deleted' AND domain_id='$domain_id' AND ";
+		$parent_id = getParentDomainID($domain_id);
+		if ($parent_id == $domain_id) {
+			$domain_id_sql = "='$domain_id'";
+		} else {
+			$domain_id_sql = "IN ($domain_id, $parent_id)";
+		}
+		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE record_status!='deleted' AND domain_id $domain_id_sql AND ";
 		
 		foreach ($array as $key => $data) {
 			if ($key == 'record_comment' && $data == 'none') {
