@@ -26,15 +26,15 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {

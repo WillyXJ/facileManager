@@ -95,7 +95,7 @@ HTML;
 }
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
-	$update_count = countServerBuilds();
+	$update_count = countServerUpdates();
 	$update_count += getZoneReloads('count');
 	
 	echo $update_count;

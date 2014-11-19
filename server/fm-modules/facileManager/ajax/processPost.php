@@ -110,6 +110,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				$result .= $fm_shared_module_servers->doClientUpgrade($server_results[$i]->server_serial_no);
 				$result .= "\n";
 			} elseif ($server_results[$i]->server_build_config != 'no') {
+				if (!isset($fm_module_servers)) {
+					include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+				}
 				$result .= $fm_shared_module_servers->doBulkServerBuild($server_results[$i]->server_serial_no);
 				$result .= "\n";
 			}

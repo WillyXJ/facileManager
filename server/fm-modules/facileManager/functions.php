@@ -2779,11 +2779,11 @@ function parseMenuLinks($html) {
  *
  * @return integer Record count
  */
-function countServerBuilds() {
+function countServerUpdates() {
 	global $fmdb, $__FM_CONFIG;
 	
 	if (currentUserCan('manage_servers', $_SESSION['module'])) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND server_build_config!="no" AND server_status="active" AND server_installed="yes"', null, false, null, true);
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND (server_build_config!="no" OR server_client_version!="' . getOption('client_version', 0, $_SESSION['module']) . '") AND server_status="active" AND server_installed="yes"', null, false, null, true);
 		if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
 	}
 			
