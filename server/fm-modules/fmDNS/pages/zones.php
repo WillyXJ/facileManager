@@ -34,13 +34,6 @@ $map = (isset($_POST['createZone'][0]['domain_mapping'])) ? sanitize(strtolower(
 $response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_zones', $_SESSION['module'])) {
-	if (isset($_POST['action']) && $_POST['action'] == 'reload') {
-		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
-//			$response = $fm_dns_zones->buildZoneConfig($_POST['domain_id']);
-		} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
-		unset($_POST);
-	}
-	
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'create';
 	switch ($action) {
 	case 'create':

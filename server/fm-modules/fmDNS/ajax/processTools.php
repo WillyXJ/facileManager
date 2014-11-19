@@ -31,7 +31,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 		switch($_POST['task']) {
 			case 'import-records':
 				$response = buildPopup('header', 'Zone Import Wizard');
-				print_r($_FILES);
 				if (!empty($_FILES['import-file']['tmp_name'])) {
 					$block_style = 'style="display: block;"';
 					$response = $fm_module_tools->zoneImportWizard();

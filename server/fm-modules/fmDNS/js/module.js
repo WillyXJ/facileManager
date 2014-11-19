@@ -219,6 +219,26 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#manage_item_contents").delegate('#domain_mapping', 'change', function(e) {
+		var form_data = {
+			get_available_clones: true,
+			map: $(this).val(),
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: 'POST',
+			url: 'fm-modules/fmDNS/ajax/getData.php',
+			data: form_data,
+			success: function(response)
+			{
+				$('#domain_clone_domain_id').html(response);
+			}
+		});
+		
+		return false;
+	});
+	
 });
 
 

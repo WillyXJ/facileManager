@@ -92,6 +92,10 @@ HTML;
 		}
 	}
 	exit;
+} elseif (is_array($_POST) && array_key_exists('get_available_clones', $_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
+	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+	echo buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $fm_dns_zones->availableCloneDomains($_POST['map'], 0), 0);
+	exit;
 }
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {

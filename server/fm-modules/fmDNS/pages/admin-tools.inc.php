@@ -28,6 +28,28 @@ if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
 	include($module_tools_file);
 }
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+
+/** Process ad-hoc zone creations and record imports */
+if (array_key_exists('submit', $_POST)) {
+	switch($_POST['submit']) {
+		case 'Import Records':
+			if (!empty($_FILES['import-file']['tmp_name'])) {
+				$block_style = 'style="display: block;"';
+				$output = $fm_module_tools->zoneImportWizard();
+				if (strpos($output, 'You do not have permission') === false) {
+					$classes = 'wide';
+				}
+			}
+			break;
+		case 'Save':
+			$insert_id = $fm_dns_zones->add($_POST);
+			if (!is_numeric($insert_id)) {
+				$response = $insert_id;
+			}
+			break;
+	}
+}
+
 $available_zones = $fm_dns_zones->availableZones(true, 'master', true);
 $button = null;
 if ($available_zones) {
@@ -50,7 +72,8 @@ $tools_option[] = <<<HTML
 				<tr>
 					<th>Zone to import to:</th>
 					<td>
-						$zone_options
+						$zone_options<br />
+						<p id="table_edits" name="domains"><a id="plus" href="#" title="Add New" name="forward">+ Add New Zone</a></p>
 					</td>
 			</table>
 			$button
@@ -74,19 +97,5 @@ $tools_option[] = <<<HTML
 			</div>
 			<br />
 HTML;
-
-if (array_key_exists('submit', $_POST)) {
-	switch($_POST['submit']) {
-		case 'Import Records':
-			if (!empty($_FILES['import-file']['tmp_name'])) {
-				$block_style = 'style="display: block;"';
-				$output = $fm_module_tools->zoneImportWizard();
-				if (strpos($output, 'You do not have permission') === false) {
-					$classes = 'wide';
-				}
-			}
-			break;
-	}
-}
 
 ?>
