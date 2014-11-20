@@ -66,6 +66,7 @@ class fm_module_buildconf {
 		
 		$files = array();
 		$server_serial_no = sanitize($post_data['SERIALNO']);
+		$message = null;
 		extract($post_data);
 
 		$GLOBALS['built_domain_ids'] = null;
@@ -422,7 +423,8 @@ class fm_module_buildconf {
 					}
 					
 					/** Generate zone file */
-					$tmp_files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name, $include_hint_zone);
+					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name, $include_hint_zone);
+					if ($error) $message = $error;
 					
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
@@ -440,7 +442,7 @@ class fm_module_buildconf {
 				}
 			} else {
 				/** Generate zones.all.conf */
-				$files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, 0, null, $include_hint_zone);
+				list($files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, 0, null, $include_hint_zone);
 				
 				/** Include all zones in one file */
 				if (is_array($files)) {
@@ -465,7 +467,7 @@ class fm_module_buildconf {
 				$data->built_domain_ids = array_unique($GLOBALS['built_domain_ids']);
 			}
 			
-			return get_object_vars($data);
+			return array(get_object_vars($data), $message);
 		}
 		
 		/** Bad DNS server */
@@ -496,7 +498,7 @@ class fm_module_buildconf {
 			
 			if (!$domain_id) {
 				/** Build all zone files */
-				$data->files = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no);
+				list($data->files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no);
 			} else {
 				/** Build zone files for $domain_id */
 				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
@@ -555,6 +557,8 @@ class fm_module_buildconf {
 	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
+		$error = null;
+		
 		include(ABSPATH . 'fm-includes/version.php');
 		
 		/** Get datetime formatting */
@@ -572,7 +576,7 @@ class fm_module_buildconf {
 			$zones .= "\tfile \"$server_zones_dir/hint/named.root\";\n";
 			$zones .= "};\n";
 			
-			$files[$server_zones_dir . '/hint/named.root'] = $this->getHintZone();
+			list($files[$server_zones_dir . '/hint/named.root'], $error) = $this->getHintZone();
 		}
 
 		/** Build zones */
@@ -638,7 +642,7 @@ class fm_module_buildconf {
 				$files[$server_zones_dir . '/zones.conf.all'] = $zones;
 			}
 		}
-		return $files;
+		return array($files, $error);
 	}
 	
 	
@@ -735,7 +739,7 @@ class fm_module_buildconf {
 				if (is_array($data->files)) return get_object_vars($data);
 			} else {
 				/** process server config build */
-				$config = $this->buildServerConfig($post_data);
+				list($config, $message) = $this->buildServerConfig($post_data);
 				$config['server_build_all'] = true;
 				$config['purge_config_files'] = $data->purge_config_files;
 				
@@ -1297,11 +1301,11 @@ HTML;
 	function getHintZone() {
 		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
 		
-		$this->getLatestRootServers();
+		$error = $this->getLatestRootServers();
 		
 		$hint_zone = file_get_contents($local_hint_zone);
 		
-		return $hint_zone;
+		return array($hint_zone, $error);
 	}
 
 
@@ -1322,11 +1326,11 @@ HTML;
 		if (filemtime($local_hint_zone) < strtotime($remote_headers['Last-Modified']) && !isset($GLOBALS['root_servers_updated'])) {
 			$GLOBALS['root_servers_updated'] = true;
 			
-			/** Download the latest root servers (must be writeable by web server */
+			/** Download the latest root servers (must be writeable by web server) */
 			if (is_writeable($local_hint_zone)) {
 				file_put_contents($local_hint_zone, fopen($remote_hint_zone, 'r'));
 			} else {
-				echo <<<HTML
+				return <<<HTML
 			<div id="named_check" class="info">
 				<p>The root servers have been recently updated, but the webserver user ({$__FM_CONFIG['webserver']['user_info']['name']}) cannot write to $local_hint_zone to update the hint zone.</p>
 				<p>A local copy will be used instead.</p>
@@ -1334,6 +1338,8 @@ HTML;
 HTML;
 			}
 		}
+		
+		return null;
 	}
 
 

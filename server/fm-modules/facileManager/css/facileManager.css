@@ -999,6 +999,10 @@ a {
 	background: #ffffff;
 }
 
+.popup-contents p.complete {
+	padding: 0 10px;
+}
+
 .popup-footer {
 	margin-bottom: 0;
 	text-align: right;

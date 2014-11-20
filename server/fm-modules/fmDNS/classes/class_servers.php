@@ -534,9 +534,9 @@ FORM;
 				$account_result = $fmdb->last_result;
 				$data['AUTHKEY'] = $account_result[0]->account_key;
 
-				$raw_data = $fm_module_buildconf->buildServerConfig($data);
+				list($raw_data, $response) = $fm_module_buildconf->buildServerConfig($data);
 
-				$response = @$fm_module_buildconf->namedSyntaxChecks($raw_data);
+				$response .= @$fm_module_buildconf->namedSyntaxChecks($raw_data);
 				if (strpos($response, 'error') !== false) return buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
 			}
 
@@ -626,7 +626,7 @@ FORM;
 				
 				if ($retval) {
 					/** Something went wrong */
-					$post_result[] = '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
+					return '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
 				}
 				
 				if (!count($post_result)) $post_result[] = ucfirst($friendly_action) . ' was successful.';
@@ -657,7 +657,7 @@ FORM;
 		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		addLogEntry(ucfirst($friendly_action) . " was performed on server '$tmp_name'.");
 
-		if (strpos($response, "<pre>") !== false) {
+		if (strpos($response, '<pre>') !== false) {
 			$response = buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
 		}
 		return $response;

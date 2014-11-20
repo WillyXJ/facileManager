@@ -35,7 +35,7 @@ if (!$fm_login->isLoggedIn()) {
 	exit('<pre>Invalid account.</pre>');
 }
 
-$preview = $check_status = null;
+$preview = $check_status = $message = null;
 
 if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_serial_no'])) {
 	extract($_GET);
@@ -54,7 +54,7 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	
 	$function = 'build' . ucfirst($config) . 'Config';
 
-	$raw_data = $fm_module_buildconf->$function($data);
+	list($raw_data, $message) = $fm_module_buildconf->$function($data);
 
 	if (!is_array($raw_data)) {
 		$preview = unserialize($raw_data);
@@ -66,7 +66,7 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 }
 
 printHeader('Server Config Preview', 'facileManager', false, false);
-echo $check_status . "<pre>\n" . str_replace('<', '&lt;', $preview) . "\n</pre>\n";
+echo $message . $check_status . "<pre>\n" . str_replace('<', '&lt;', $preview) . "\n</pre>\n";
 printFooter();
 
 ?>

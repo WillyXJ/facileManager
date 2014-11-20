@@ -82,8 +82,8 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			$bulk_function = 'doBulkServerBuild';
 			break;
 	}
-	$result = buildPopup('header', ucwords($_POST['bulk_action']) . ' Results');
-	$result .= "<pre>\n";
+	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results');
+	$result = "<pre>\n";
 	if (is_array($_POST['item_id'])) {
 		foreach ($_POST['item_id'] as $serial_no) {
 			if (!is_numeric($serial_no)) continue;
@@ -92,13 +92,13 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			$result .= "\n";
 		}
 	}
-	$result .= "\n" . ucwords($_POST['bulk_action']) . ' is complete.</pre>';
+	$result .= "</pre>\n<p class=\"complete\">" . ucwords($_POST['bulk_action']) . ' is complete.</p>';
 	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL('Servers'));
 
 /** Handle mass updates */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
-	$result = buildPopup('header', 'Updates Results');
-	$result .= "<pre>\n";
+	echo buildPopup('header', 'Updates Results');
+	$result = "<pre>\n";
 	
 	/** Server config builds */
 	if (currentUserCan('build_server_configs', $_SESSION['module'])) {
@@ -125,7 +125,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		include($include_file);
 	}
 	
-	$result .= "\nAll updates have been processed.</pre>\n";
+	$result .= "</pre>\n<p class=\"complete\">All updates have been processed.</p>\n";
 	unset($_SESSION['display-rebuild-all']);
 	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 
