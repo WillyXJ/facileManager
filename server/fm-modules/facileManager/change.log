@@ -1,5 +1,5 @@
-2.0 (2014-??-??)
-================
+2.0-alpha1 (2014-11-20)
+=======================
 * Server - [improvement] Updated pagination handling.
 * Server - [feature] Added ability to update all servers with a single click on
            the top menu bar. (Issue #116)
