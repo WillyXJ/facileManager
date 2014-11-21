@@ -111,6 +111,20 @@ class fm_dns_zones {
 		}
 		if (!$post['domain_view']) $post['domain_view'] = 0;
 
+		/** Format domain_name_servers */
+		$log_message_name_servers = null;
+		foreach ($post['domain_name_servers'] as $val) {
+			if ($val == 0) {
+				$domain_name_servers = 0;
+				break;
+			}
+			$domain_name_servers .= $val . ';';
+			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$log_message_name_servers .= $val ? "$server_name; " : null;
+		}
+		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
+		if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
+
 		/** Get clone parent values */
 		if ($post['domain_clone_domain_id']) {
 			$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE domain_id={$post['domain_clone_domain_id']}";
@@ -129,6 +143,9 @@ class fm_dns_zones {
 				} elseif ($field == 'domain_view') {
 					$log_message .= "Views: $log_message_views\n";
 					$sql_values .= "'" . sanitize($post['domain_view']) . "',";
+				} elseif ($field == 'domain_name_servers' && sanitize($post['domain_name_servers'])) {
+					$log_message .= "Servers: $log_message_name_servers\n";
+					$sql_values .= "'" . sanitize($post['domain_name_servers']) . "',";
 				} elseif ($field == 'domain_reload') {
 					$sql_values .= "'no',";
 				} else {
@@ -141,20 +158,6 @@ class fm_dns_zones {
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
 		} else {
-			/** Format domain_name_servers */
-			$log_message_name_servers = null;
-			foreach ($post['domain_name_servers'] as $val) {
-				if ($val == 0) {
-					$domain_name_servers = 0;
-					break;
-				}
-				$domain_name_servers .= $val . ';';
-				$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-				$log_message_name_servers .= $val ? "$server_name; " : null;
-			}
-			$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
-			if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
-			
 			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers');
 		
 			foreach ($post as $key => $data) {
@@ -1157,7 +1160,12 @@ HTML;
 			$domain_id_sql = (isset($post['domain_id'])) ? 'AND domain_id!=' . sanitize($post['domain_id']) : null;
 			if (!$post['domain_view'] || in_array(0, $post['domain_view'])) {
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
-				if ($fmdb->num_rows) return 'Zone already exists for all views.';
+				if ($fmdb->num_rows) {
+					/** Zone exists for views, but what about on the same server? */
+					if (!$post['domain_name_servers'] || in_array(0, $post['domain_name_servers'])) {
+						return 'Zone already exists for all views.';
+					}
+				}
 			}
 			if (is_array($post['domain_view'])) {
 				$domain_view = null;

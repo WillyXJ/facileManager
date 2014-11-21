@@ -581,7 +581,7 @@ class fm_module_buildconf {
 
 		/** Build zones */
 		$view_sql = "and (`domain_view`<=0 or `domain_view`=$view_id or `domain_view` LIKE '$view_id;%' or `domain_view` LIKE '%;$view_id' or `domain_view` LIKE '%;$view_id;%')";
-		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id%' or `domain_name_servers` like '%;$server_id;%') $view_sql order by `domain_clone_domain_id`,`domain_name`";
+		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id;%' or `domain_name_servers` like '%;$server_id') $view_sql order by `domain_clone_domain_id`,`domain_name`";
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
@@ -1058,7 +1058,7 @@ class fm_module_buildconf {
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
 			
-			if (!in_array($view_id, explode(';', $parent_zone->domain_view))) return false;
+//			if (!in_array($view_id, explode(';', $parent_zone->domain_view))) return false;
 
 			return $parent_zone;
 		}
