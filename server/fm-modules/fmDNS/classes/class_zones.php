@@ -163,6 +163,7 @@ class fm_dns_zones {
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
 					$sql_fields .= $key . ',';
+					if (is_array($data)) $data = implode(';', $data);
 					$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
 					if ($key == 'domain_view') $data = $log_message_views;
 					if ($key == 'domain_name_servers') $data = $log_message_name_servers;
