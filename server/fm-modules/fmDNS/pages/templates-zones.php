@@ -18,12 +18,12 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes SOA templates management page                                 |
+ | Processes zone templates management page                                |
  | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
-$template_type = 'soa';
+$template_type = 'zones';
 
 include(dirname(__FILE__) . '/templates.php');
 

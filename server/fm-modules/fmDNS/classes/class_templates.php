@@ -58,7 +58,7 @@ class fm_module_templates {
 	function displayRow($row, $prefix) {
 		global $__FM_CONFIG, $fmdb;
 		
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$show_delete = true;
