@@ -34,7 +34,7 @@ $(document).ready(function() {
 				timeout: 2000,
 				data: form_data,
 				success: function(response) {
-					if (response == 0) {
+					if (response == 0 || ! $.isNumeric(response)) {
 						$('.process_all_updates').parent().fadeOut(400);
 					} else {
 						$('#topheadpartright span.update_count').html(response);
