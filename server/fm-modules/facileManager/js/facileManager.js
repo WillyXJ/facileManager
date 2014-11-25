@@ -20,6 +20,9 @@ $(document).ready(function() {
 			width: '300px',
 			minimumResultsForSearch: 10
 		});
+		$(function() {
+			$( "#manage_item_contents" ).draggable();
+		});
 	});
 	
 	$(function displayHideProcessAll() {
