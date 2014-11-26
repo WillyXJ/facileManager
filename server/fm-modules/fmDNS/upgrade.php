@@ -1187,4 +1187,26 @@ function upgradefmDNS_131($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 2.0-alpha1 */
+function upgradefmDNS_2001($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.3.1', '<') ? upgradefmDNS_131($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_template` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `account_id`, ADD `domain_default` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_template`;";
+
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	return true;
+}
+
 ?>

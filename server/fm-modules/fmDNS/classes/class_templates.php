@@ -23,13 +23,13 @@
 class fm_module_templates {
 	
 	/**
-	 * Displays the key list
+	 * Displays the template list
 	 */
-	function rows($result, $prefix) {
+	function rows($result, $template_type) {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="' . $prefix . '">There are no templates.</p>';
+			echo '<p id="table_edits" class="noresult" name="' . $template_type . '">There are no templates.</p>';
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -37,18 +37,18 @@ class fm_module_templates {
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
-							'name' => $prefix
+							'name' => $template_type
 						);
 
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
-			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($prefix)));
+			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($template_type)));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
 			for ($x=0; $x<$num_rows; $x++) {
-				$this->displayRow($results[$x], $prefix);
+				$this->displayRow($results[$x], $template_type);
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -56,7 +56,7 @@ class fm_module_templates {
 	}
 	
 	function displayRow($row, $prefix) {
-		global $__FM_CONFIG, $fmdb;
+		global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 		
 		if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
@@ -88,18 +88,41 @@ class fm_module_templates {
 			<td>$star</td>
 			<td>$edit_name</td>
 HTML;
+		$row = get_object_vars($row);
+		
+		$excluded_fields = array($prefix . '_id', 'account_id', $prefix . '_template', $prefix . '_default',
+				$prefix . '_name', $prefix . '_status');
+		
 		if ($prefix == 'soa') {
-			$row = get_object_vars($row);
-			
-			foreach ($row as $key => $val) {
-				if (in_array($key, array('soa_id', 'account_id', 'soa_template', 'soa_default', 'soa_name', 'soa_append', 'soa_status'))) continue;
-				
-				echo '<td>' . $val;
+			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));
+		}
+		if ($prefix == 'domain') {
+			$excluded_fields = array_merge($excluded_fields, array('soa_serial_no', 'soa_id', $prefix . '_mapping', $prefix . '_clone_domain_id', $prefix . '_reload'));
+		}
+
+		foreach ($row as $key => $val) {
+			if (in_array($key, $excluded_fields)) continue;
+
+			if ($prefix == 'domain') {
+				/** Friendly servers and view names */
+				if (in_array($key, array($prefix . '_view', $prefix . '_name_servers'))) {
+					if (!isset($fm_dns_zones)) {
+						include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+					}
+					if ($key == $prefix . '_view') {
+						$val = $fm_dns_zones->IDs2Name($val, 'view');
+					} elseif ($key == $prefix . '_name_servers') {
+						$val = $fm_dns_zones->IDs2Name($val, 'server');
+					}
+				}
+			}
+			echo '<td>' . $val;
+			if ($prefix == 'soa') {
 				if (in_array($key, array('soa_master_server', 'soa_email_address')) && $row['soa_append'] == 'yes') {
 					echo '<span class="grey">.mydomain.tld</span>';
 				}
-				echo '</td>';
 			}
+			echo '</td>';
 		}
 		
 		echo $edit_status . "</tr>\n";

@@ -447,7 +447,7 @@ class fm_dns_zones {
 			$clone_names .= '<p class="clone' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="Edit zone records">' . $clone_array['clone_name'] . 
 					'</a>' . $clone_array['clone_delete'] . "</p>\n";
 			$clone_types .= '<p class="clone' . $clone_id . '">clone</p>' . "\n";
-			$clone_views .= '<p class="clone' . $clone_id . '">' . $this->viewID2Name($clone_array['clone_views']) . "</p>\n";
+			$clone_views .= '<p class="clone' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 			$clone_counts_array = explode('|', $clone_array['clone_count']);
 			$clone_counts .= '<p class="clone' . $clone_id . '" title="Differences from parent zone">';
 			if ($clone_counts_array[0]) $clone_counts .= '<span class="record-additions">' . $clone_counts_array[0] . '</span>&nbsp;';
@@ -492,7 +492,7 @@ FORM;
 		}
 		$domain_name = displayFriendlyDomainName($row->domain_name);
 		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"Edit zone records\">$domain_name</a>" : $domain_name;
-		$domain_view = $this->viewID2Name($row->domain_view);
+		$domain_view = $this->IDs2Name($row->domain_view, 'view');
 
 		$class = 'class="' . implode(' ', $classes) . '"';
 		
@@ -1224,31 +1224,32 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $view_ids View IDs to convert to names
+	 * @param id $ids IDs to convert to names
+	 * @param id $type ID type to process
 	 * @return string
 	 */
-	function viewID2Name ($view_ids) {
+	function IDs2Name ($ids, $type) {
 		global $__FM_CONFIG;
 		
-		if ($view_ids) {
-			if ($view_ids == -1) return '<i>inherited</i>';
-			/** Process multiple views */
-			if (strpos($view_ids, ';')) {
-				$domain_views = explode(';', rtrim($view_ids, ';'));
-				if (in_array('0', $domain_views)) $domain_view = 'All Views';
+		if ($ids) {
+			if ($ids == -1) return '<i>inherited</i>';
+			/** Process multiple IDs */
+			if (strpos($ids, ';')) {
+				$ids_array = explode(';', rtrim($ids, ';'));
+				if (in_array('0', $ids_array)) $name = 'All ' . ucfirst($type) . 's';
 				else {
-					$domain_view = null;
-					foreach ($domain_views as $view_id) {
-						$domain_view .= getNameFromID($view_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ', ';
+					$name = null;
+					foreach ($ids_array as $view_id) {
+						$name .= getNameFromID($view_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $type . 's', $type . '_', $type . '_id', $type . '_name') . ', ';
 					}
-					$domain_view = rtrim($domain_view, ', ');
+					$name = rtrim($name, ', ');
 				}
-			} else $domain_view = getNameFromID($view_ids, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-		} else $domain_view = 'All Views';
+			} else $name = getNameFromID($ids, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $type . 's', $type . '_', $type . '_id', $type . '_name');
+		} else $name = 'All ' . ucfirst($type) . 's';
 		
-		return $domain_view;
+		return $name;
 	}
-
+	
 }
 
 if (!isset($fm_dns_zones))

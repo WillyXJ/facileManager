@@ -23,7 +23,8 @@
  +-------------------------------------------------------------------------+
 */
 
-$template_type = 'zones';
+$template_type = 'domain';
+$table = 'domains';
 
 include(dirname(__FILE__) . '/templates.php');
 
