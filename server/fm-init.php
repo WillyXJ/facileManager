@@ -41,7 +41,8 @@ if (!defined('AJAX')) {
 }
 
 $_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
-$path_parts = pathinfo($_SERVER['REQUEST_URI']);
+$path_parts = parse_url($_SERVER['REQUEST_URI']);
+$path_parts = array_merge($path_parts, pathinfo($path_parts['path']));
 
 if (file_exists(ABSPATH . 'config.inc.php')) {
 	

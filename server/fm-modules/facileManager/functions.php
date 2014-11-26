@@ -1562,18 +1562,19 @@ function arrayKeysExist($keys, $array) {
  *
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
- * @param string classes Additional classes to apply to the div
+ * @param string $classes Additional classes to apply to the div
+ * @param string $enable_options Additional options to enable in the div
  * @return string
  */
-function displayPagination($page, $total_pages, $classes = null) {
+function displayPagination($page, $total_pages, $classes = null, $enable_options = null) {
 	global $fmdb;
 	
-	if ($total_pages <= 1) return;
+	if ($total_pages <= 1 && $enable_options != 'search-form') return;
 	
-	$search = null;
+	$page_params = null;
 	foreach ($GLOBALS['URI'] as $key => $val) {
 		if ($key == 'p') continue;
-		$search .= $key . '=' . $val . '&';
+		$page_params .= $key . '=' . $val . '&';
 	}
 	
 	if ($page < 1) {
@@ -1585,14 +1586,18 @@ function displayPagination($page, $total_pages, $classes = null) {
 	
 	$page_links = array();
 	$page_links[] = '<div id="pagination_container">';
+	$page_links[] = '<div>';
+	$page_links[] = buildPaginationCountMenu(0, 'pagination');
+	if ($enable_options == 'search-form') $page_links[] = displayRecordSearchForm($page_params);
+
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
-	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $search . '">';
+	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
 	$page_links[] = '<span>' . $fmdb->num_rows . ' items</span>';
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=1\">&laquo;</a>";
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page - 1) . '">&lsaquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=1\">&laquo;</a>";
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page - 1) . '">&lsaquo;</a>';
 	}
 	
 	/** Page number */
@@ -1600,13 +1605,13 @@ function displayPagination($page, $total_pages, $classes = null) {
 	
 	/** Next link */
 	if ($page < $total_pages) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page + 1) . '">&rsaquo;</a>';
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . $total_pages . '">&raquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page + 1) . '">&rsaquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . $total_pages . '">&raquo;</a>';
 	}
 
 	$page_links[] = '</form>';
 	$page_links[] = '</div>';
-	$page_links[] = buildPaginationCountMenu(0, 'pagination');
+	$page_links[] = '</div>';
 	$page_links[] = '</div>';
 	
 	return join("\n", $page_links);
@@ -2788,6 +2793,46 @@ function countServerUpdates() {
 	}
 			
 	return 0;
+}
+
+
+/**
+ * Builds and displays the search form
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $page_params Current page parameters in URI
+ * @return string Search form
+ */
+function displayRecordSearchForm($page_params = null) {
+	if (isset($_GET['q'])) {
+		$placeholder = 'Searched for ' . sanitize($_GET['q']);
+		$search_remove = '<div class="search_remove">
+			<i class="fa fa-remove fa-2x"></i>
+		</div>';
+	} else {
+		$placeholder = 'Search by keyword';
+		$search_remove = null;
+	}
+	
+	$form = <<<HTML
+	<div id="record_search_form_container">
+		<div>
+			<div class="search_icon">
+				<i class="fa fa-search fa-2x"></i>
+			</div>
+			<div id="record_search_form">
+				<form id="record_search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
+					<input type="text" placeholder="$placeholder" />
+				</form>
+			</div>
+			$search_remove
+		</div>
+	</div>
+HTML;
+	
+	return $form;
 }
 
 

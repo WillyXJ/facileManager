@@ -610,7 +610,8 @@ tbody {
 .display_results input:not([type="image"]),
 .display_results textarea,
 #bulk_action,
-#pagination input {
+#pagination input,
+#record_search_form_container {
 	line-height: 20px;
 	font-size: 12px;
 	padding: 2px;
@@ -1317,8 +1318,26 @@ span.not_installed {
 	padding: 5px;
 }
 
-#pagination_container {
-	margin-bottom: 2.5em;
+#pagination_container,
+#record_search_form_container {
+	display: table;
+	width: 100%;
+	white-space: nowrap;
+	margin-bottom: -2px;
+}
+#pagination_container > div,
+#record_search_form_container > div {
+	display: table-row;
+}
+#pagination_container > div > div,
+#record_search_form_container > div > div {
+	display: table-cell;
+}
+#pagination_container > div > div:first-child {
+	padding-right: 2em;
+}
+#pagination_container > div > div:last-child {
+	padding-left: 2em;
 }
 
 #pagination {
@@ -1369,6 +1388,49 @@ span.not_installed {
 #pagination span {
 	font-style: italic;
 	color: #bbb;
+}
+
+#pagination > form {
+	margin-top: 3px;
+}
+
+#record_search_form_container {
+	width: 100%;
+	padding: 0 5px;
+	position: relative;
+	top: -2px;
+}
+
+#record_search_form_container > div {
+	float: left;
+}
+
+#record_search_form_container .search_icon,
+#record_search_form_container .search_remove {
+	color: #f0f0f0;
+}
+
+#record_search_form {
+	width: 100%;
+	position: relative;
+	top: -4px;
+}
+
+#record_search_form > form {
+	margin-bottom: -1em;
+	padding-left: .5em;
+	margin-top: -11px;
+}
+
+#record_search_form input[type=text] {
+	width: 100%;
+	border: none;
+	line-height: 20px;
+}
+
+#record_search_form_container .search_remove {
+	padding-left: .5em;
+	cursor: pointer;
 }
 
 .highlighted {

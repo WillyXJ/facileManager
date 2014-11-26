@@ -751,7 +751,37 @@ $(document).ready(function() {
 			return false;
 		}
 	});
-    
+	
+	/* Search input box */
+	$('#record_search input').keypress(function (e) {
+		if (e.which == 13) {
+			var newValue = $(this).val();
+			var queryParameters = {}, queryString = location.search.substring(1),
+				re = /([^&=]+)=([^&]*)/g, m;
+			while (m = re.exec(queryString)) {
+				if (m[1] == 'p') continue;
+				queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+			}
+			queryParameters['q'] = encodeURIComponent(newValue);
+
+			location.search = $.param(queryParameters);
+			return false;
+		}
+	});
+
+	/* Search input box cancel */
+    $('.search_remove').click(function() {
+		var queryParameters = {}, queryString = location.search.substring(1),
+			re = /([^&=]+)=([^&]*)/g, m;
+		while (m = re.exec(queryString)) {
+			if (m[1] == 'p' || m[1] == 'q') continue;
+			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+		}
+
+		location.search = $.param(queryParameters);
+		return false;
+	});
+
 });
 
 function del(msg){

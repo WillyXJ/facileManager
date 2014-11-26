@@ -49,6 +49,17 @@ printHeader();
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
+$search_query = null;
+if (isset($_GET['q'])) {
+	$search_query = ' AND (';
+	$search_text = sanitize($_GET['q']);
+	$fields = array('name', 'value', 'ttl', 'class', 'text', 'comment');
+	foreach ($fields as $field) {
+		$search_query .= "record_$field LIKE '%$search_text%' OR ";
+	}
+	$search_query = rtrim($search_query, ' OR ') . ')';
+}
+
 $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
 sort($supported_record_types);
 $supported_record_types[] = 'SOA';
@@ -57,7 +68,7 @@ $parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['pre
 $zone_access_allowed = zoneAccessIsAllowed(array($domain_id, $parent_domain_id));
 		
 if (!in_array($record_type, $supported_record_types)) $record_type = $default_record_type;
-$avail_types = buildRecordTypes($record_type, array($domain_id, $parent_domain_id), $map, $supported_record_types);
+$avail_types = buildRecordTypes($record_type, array($domain_id, $parent_domain_id), $map, $supported_record_types, $search_query);
 
 $response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
@@ -123,11 +134,13 @@ if ($record_type == 'SOA') {
 	}
 
 	if (in_array($record_type, array('A', 'AAAA')) && $sort_field == 'record_value') $ip_sort = true;
+	
+	if (isset($search_query)) $record_sql .= $search_query;
 
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
 	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
-	$pagination = displayPagination($page, $total_pages);
+	$pagination = displayPagination($page, $total_pages, null, 'search-form');
 	$body .= $pagination . '<div class="overflow-container">' . $form;
 	
 	$body .= '<div class="existing-container">';
@@ -152,15 +165,17 @@ echo $body . '</div>' . "\n";
 printFooter();
 
 
-function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'forward', $supported_record_types) {
+function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'forward', $supported_record_types, $search_query = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$menu_selects = $menu_sub_selects = null;
 	
+	$q = isset($_GET['q']) ? '&q=' . sanitize($_GET['q']) : null;
+	
 	if (isset($record_type) && $all_domain_ids != null) {
 		list($domain_id, $parent_domain_id) = $all_domain_ids;
 		$query = "SELECT DISTINCT `record_type` FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE `record_status`!='deleted' AND
-			`account_id`={$_SESSION['user']['account_id']} AND `domain_id` IN (" . implode(',', $all_domain_ids) . ")";
+			`account_id`={$_SESSION['user']['account_id']} AND `domain_id` IN (" . implode(',', $all_domain_ids) . ") $search_query";
 		$fmdb->get_results($query);
 		$used_record_types = array();
 		if ($fmdb->num_rows) {
@@ -179,7 +194,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $type == 'SOA') continue;
 
 			$select = ($record_type == $type) ? ' class="selected"' : '';
-			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
+			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\">$type</a></span>\n";
 		}
 		
 		/** More record types menu */
@@ -189,7 +204,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 					if ($record_type == $type) {
 						$menu_selects .= "<span class=\"selected\"><a class=\"selected\" href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
 					} else {
-						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\"><span>$type</span></a></li>\n";
+						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type{$type}{$q}\"><span>$type</span></a></li>\n";
 					}
 				}
 			}
