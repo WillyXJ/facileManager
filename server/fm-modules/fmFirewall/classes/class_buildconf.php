@@ -103,10 +103,7 @@ class fm_module_buildconf {
 				$data->files = array_merge($data->files, $files);
 			}
 			
-//			print_r($data);
-//			exit;
-			
-			return get_object_vars($data);
+			return array(get_object_vars($data), null);
 		}
 		
 		/** Bad server */
@@ -152,7 +149,7 @@ class fm_module_buildconf {
 			
 			/** process server config build */
 			$config = $this->buildServerConfig($post_data);
-			return $config;
+			return array($config, null);
 			
 		}
 		
