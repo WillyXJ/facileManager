@@ -39,7 +39,7 @@ class fm_module_policies {
 							'id' => 'table_edits',
 							'name' => 'policies'
 						);
-			if (currentUserCan('manage_servers', $_SESSION['module']) && $fmdb->num_rows > 1) $table_info['class'] .= ' grab';
+			if (currentUserCan('manage_servers', $_SESSION['module']) && $num_rows > 1) $table_info['class'] .= ' grab';
 
 			$title_array = array(array('class' => 'header-tiny'), 'Source', 'Destination', 'Service', 'Interface',
 									'Direction', 'Time', array('title' => 'Comment', 'style' => 'width: 20%;'));
