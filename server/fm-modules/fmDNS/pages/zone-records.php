@@ -204,7 +204,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 					if ($record_type == $type) {
 						$menu_selects .= "<span class=\"selected\"><a class=\"selected\" href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
 					} else {
-						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type{$type}{$q}\"><span>$type</span></a></li>\n";
+						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\"><span>$type</span></a></li>\n";
 					}
 				}
 			}
