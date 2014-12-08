@@ -531,7 +531,7 @@ class fm_module_buildconf {
 						/** set the server_update_config flag */
 						if (!$dryrun) setBuildUpdateConfigFlag($server_serial_no, 'yes', 'update');
 						
-						return get_object_vars($data);
+						return array(get_object_vars($data), null);
 					}
 				}
 				
