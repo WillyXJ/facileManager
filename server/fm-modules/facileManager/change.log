@@ -1,6 +1,7 @@
 2.0-alpha2 (201?-??-??)
 =======================
-* Client - [improvement] Added support for sudoers.d directory.
+* Client - [improvement] Added support for sudoers includedir parameter and no
+           longer disables requiretty and env_reset globally.
 
 2.0-alpha1 (2014-11-20)
 =======================

@@ -786,7 +786,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			
 			/** Add an entry to sudoers */
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
-			addSudoersConfig($module_name, $sudoers_line);
+			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'ssh';
 			
@@ -840,7 +840,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
-			addSudoersConfig($module_name, $sudoers_line);
+			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'http';
 
@@ -1098,43 +1098,42 @@ function getParameterValue($param, $file, $delimiter = '=') {
 
 
 /**
- * Returns the value of a parameter in a file
+ * Added sudoers entries
  *
  * @since 2.0
  * @package facileManager
  *
  * @param string $module_name Module to add line for
  * @param string $sudoers_line Sudo lines
- * 
- * @return boolean
+ * @param string $user User with permissions
  */
-function addSudoersConfig($module_name, $sudoers_line) {
-	$sudoers = (is_dir('/etc/sudoers.d')) ? '/etc/sudoers.d/99_' . $module_name : findFile('sudoers');
+function addSudoersConfig($module_name, $sudoers_line, $user) {
+	$sudoers_file = findFile('sudoers');
+	$sudoers_options[] = "Defaults:$user  !requiretty";
+	$sudoers_options[] = "Defaults:$user  !env_reset";
+	$sudoers_line = implode("\n", $sudoers_options) . "\n" . $sudoers_line;
+	unset($sudoers_options);
 
-	if (!$sudoers) {
+	if (!$sudoers_file) {
 		echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
 		echo fM("\n      $sudoers_line\n");
 
 		echo fM("\nInstallation aborted.\n");
 		exit(1);
 	} else {
-		$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
-		if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
+		$includedir = getParameterValue('includedir', $sudoers_file, ' ');
+		if ($includedir) {
+			if (is_dir($includedir)) {
+				$sudoers_file = $includedir . '/99_' . $module_name;
+			}
+		}
+		$cmd = "echo '$sudoers_line' >> $sudoers_file 2>/dev/null";
+		if (strpos(file_get_contents($sudoers_file), $sudoers_line) === false) {
 			$sudoers_update = system($cmd, $retval);
 
 			if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
 			else echo fM("  --> The sudoers entry has been added.\n");
 		} else echo fM("  --> The sudoers entry already exists...skipping\n");
-
-		/** Check for bad settings and disable */
-		$bad_settings = array('requiretty', 'env_reset');
-		foreach ($bad_settings as $setting) {
-			$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
-			if ($found_bad != 0) {
-				echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
-				shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
-			}
-		}
 	}
 }
 
