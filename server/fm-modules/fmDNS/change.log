@@ -4,6 +4,7 @@
 * Server - [bug] Fixed record type menu links (introduced in 2.0-alpha1)
 * Server - [improvement] Added graphical representation to skipped records in
            the cloned zone view.
+* Server - [improvement] Can now edit cloned zone details.
 
 2.0-alpha1 (2014-11-20)
 =======================

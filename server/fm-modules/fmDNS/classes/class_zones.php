@@ -445,7 +445,7 @@ class fm_dns_zones {
 		$clone_names = $clone_types = $clone_views = $clone_counts = null;
 		foreach ($clones as $clone_id => $clone_array) {
 			$clone_names .= '<p class="clone' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="Edit zone records">' . $clone_array['clone_name'] . 
-					'</a>' . $clone_array['clone_delete'] . "</p>\n";
+					'</a>' . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
 			$clone_types .= '<p class="clone' . $clone_id . '">clone</p>' . "\n";
 			$clone_views .= '<p class="clone' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 			$clone_counts_array = explode('|', $clone_array['clone_count']);
@@ -682,9 +682,10 @@ HTML;
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
 					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) {
+					$return[$clone_id]['clone_edit'] = '<a class="clone_edit" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 					$return[$clone_id]['clone_delete'] = ' ' . str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				} else {
-					$return[$clone_id]['clone_delete'] = null;
+					$return[$clone_id]['clone_delete'] = $return[$clone_id]['clone_edit'] = null;
 				}
 				
 				/** Clone record counts */

@@ -148,6 +148,43 @@ $(document).ready(function() {
 		return false;
     });
 
+	/* Zone clone edits */
+    $('#table_edits').delegate('a.clone_edit', 'click tap', function(e) {
+        var $this 		= $(this);
+        item_id			= $this.attr('id');
+        item_type		= $('#table_edits').attr('name');
+        item_sub_type	= $this.attr('name');
+
+		$('#manage_item').fadeIn(200);
+		$('#manage_item_contents').fadeIn(200);
+		$('#response').fadeOut();
+		$('#body_container').removeClass("response");
+		
+		var form_data = {
+			item_id: item_id,
+			item_type: item_type,
+			item_sub_type: item_sub_type,
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: 'POST',
+			url: 'fm-modules/facileManager/ajax/getData.php',
+			data: form_data,
+			success: function(response)
+			{
+				$('#manage_item_contents').html(response);
+				if ($('#manage_item_contents').width() >= 700) {
+					$('#manage_item_contents').addClass('wide');
+				}
+				$(".datepicker").datepicker();
+				$('.form-table input, .form-table select').first().focus();
+			}
+		});
+		
+		return false;
+    });
+
 	$("#manage_item_contents").delegate('#server_update_method', 'change', function(e) {
 		if ($(this).val() == 'cron') {
 			$('#server_update_port_option').slideUp();
