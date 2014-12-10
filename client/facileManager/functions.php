@@ -785,34 +785,8 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			}
 			
 			/** Add an entry to sudoers */
-			$sudoers = findFile('sudoers');
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
-			
-			if (!$sudoers) {
-				echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
-				echo fM("\n      $sudoers_line\n");
-				
-				echo fM("\nInstallation aborted.\n");
-				exit(1);
-			} else {
-				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
-				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
-					$sudoers_update = system($cmd, $retval);
-				
-					if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
-					else echo fM("  --> The sudoers entry has been added.\n");
-				} else echo fM("  --> The sudoers entry already exists...skipping\n");
-				
-				/** Check for bad settings and disable */
-				$bad_settings = array('requiretty', 'env_reset');
-				foreach ($bad_settings as $setting) {
-					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
-					if ($found_bad != 0) {
-						echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
-						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
-					}
-				}
-			}
+			addSudoersConfig($module_name, $sudoers_line);
 
 			return 'ssh';
 			
@@ -858,41 +832,15 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			} else echo fM("      --> $link_name already exists...skipping\n");
 			
 			/** Add an entry to sudoers */
-			$sudoers = findFile('sudoers');
 			$user = getParameterValue('^User', $httpdconf, ' ');
 			if ($user[0] == '$') {
 				$user_var = preg_replace(array('/\$/', '/{/', '/}/'), '', $user);
 				$user = getParameterValue($user_var, findFile('envvars'), '=');
 			}
+			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
-			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
-			
-			if (!$sudoers) {
-				echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
-				echo fM("\n      $sudoers_line\n");
-				
-				echo fM("\nInstallation aborted.\n");
-				exit(1);
-			} else {
-				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
-				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
-					$sudoers_update = system($cmd, $retval);
-				
-					if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
-					else echo fM("  --> The sudoers entry has been added.\n");
-				} else echo fM("  --> The sudoers entry already exists...skipping\n");
-				
-				/** Check for bad settings and disable */
-				$bad_settings = array('requiretty', 'env_reset');
-				foreach ($bad_settings as $setting) {
-					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
-					if ($found_bad != 0) {
-						echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
-						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
-					}
-				}
-			}
+			addSudoersConfig($module_name, $sudoers_line);
 
 			return 'http';
 
@@ -1146,6 +1094,48 @@ function getParameterValue($param, $file, $delimiter = '=') {
 	}
 	
 	return trim(str_replace(array('"', "'"), '', $raw_line[1]));
+}
+
+
+/**
+ * Returns the value of a parameter in a file
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $module_name Module to add line for
+ * @param string $sudoers_line Sudo lines
+ * 
+ * @return boolean
+ */
+function addSudoersConfig($module_name, $sudoers_line) {
+	$sudoers = (is_dir('/etc/sudoers.d')) ? '/etc/sudoers.d/99_' . $module_name : findFile('sudoers');
+
+	if (!$sudoers) {
+		echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
+		echo fM("\n      $sudoers_line\n");
+
+		echo fM("\nInstallation aborted.\n");
+		exit(1);
+	} else {
+		$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
+		if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
+			$sudoers_update = system($cmd, $retval);
+
+			if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
+			else echo fM("  --> The sudoers entry has been added.\n");
+		} else echo fM("  --> The sudoers entry already exists...skipping\n");
+
+		/** Check for bad settings and disable */
+		$bad_settings = array('requiretty', 'env_reset');
+		foreach ($bad_settings as $setting) {
+			$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
+			if ($found_bad != 0) {
+				echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
+				shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
+			}
+		}
+	}
 }
 
 
