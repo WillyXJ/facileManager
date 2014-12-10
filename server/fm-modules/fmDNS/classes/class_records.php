@@ -434,7 +434,12 @@ HTML;
 			
 			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed && $domain_id != $parent_domain_id) {
 				$field_values['data']['Actions'] = ' align="center"><input type="hidden" name="' . $action . '[_NUM_][record_skipped]" value="off" /><label><input type="checkbox" name="' . $action . '[_NUM_][record_skipped]" ';
-				$field_values['data']['Actions'] .= in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id)) ? ' checked' : null;
+				if (in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id))) {
+					$field_values['data']['Actions'] .= ' checked';
+					$field_values['class'] = 'disabled';
+				} else {
+					$field_values['data']['Actions'] .= null;
+				}
 				$field_values['data']['Actions'] .= '/>Skip Import</label>';
 			}
 		}
