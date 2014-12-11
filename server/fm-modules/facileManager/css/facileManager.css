@@ -746,7 +746,7 @@ tbody {
 }
 
 #configtypesmenu.pagination {
-	top: 3px;
+	top: 5px;
 	float: left;
 }
 
@@ -1396,13 +1396,15 @@ span.not_installed {
 
 #record_search_form_container {
 	width: 100%;
-	padding: 0 5px;
+	padding-left: 5px;
+	padding-right: 5px;
 	position: relative;
 	top: -2px;
 }
 
 #record_search_form_container > div {
 	float: left;
+	width: 100%;
 }
 
 #record_search_form_container .search_icon,
@@ -1420,6 +1422,7 @@ span.not_installed {
 	margin-bottom: -1em;
 	padding-left: .5em;
 	margin-top: -11px;
+	position: relative;
 }
 
 #record_search_form input[type=text] {
@@ -1558,5 +1561,11 @@ pre {
 
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
+	#configtypesmenu.pagination {
+		top: -1.7em;
+	}
+	#record_search_form > form {
+		top: -3px;
+	}
 }
 
