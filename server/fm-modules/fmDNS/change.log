@@ -5,6 +5,8 @@
 * Server - [improvement] Added graphical representation to skipped records in
            the cloned zone view.
 * Server - [improvement] Can now edit cloned zone details.
+* Server - [improvement] Skipped records are no longer displayed to read-only
+           accounts.
 
 2.0-alpha1 (2014-11-20)
 =======================

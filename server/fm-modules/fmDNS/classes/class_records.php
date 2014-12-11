@@ -441,6 +441,10 @@ HTML;
 					$field_values['data']['Actions'] .= null;
 				}
 				$field_values['data']['Actions'] .= '/>Skip Import</label>';
+			} elseif (!currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed && $domain_id != $parent_domain_id) {
+				if (in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id))) {
+					return null;
+				}
 			}
 		}
 		
