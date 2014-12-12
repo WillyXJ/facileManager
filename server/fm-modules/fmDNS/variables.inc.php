@@ -76,7 +76,7 @@ $__FM_CONFIG['records']['sshfp_algorithms'] = array(
 											);
 
 $__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');
-$__FM_CONFIG['options']['avail_types'] = array('Global');
+$__FM_CONFIG['options']['avail_types'] = array('global' => 'Global', 'ratelimit' => 'Rate Limits');
 $__FM_CONFIG['logging']['avail_types'] = array('channel' => 'channels', 'category' => 'categories');
 
 /** SOA Default Values */

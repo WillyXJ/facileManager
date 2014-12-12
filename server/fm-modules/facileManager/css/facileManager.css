@@ -698,11 +698,13 @@ tbody {
 }
 
 #configtypesmenu {
-	float: right;
+//	float: right;
 	position: relative;
-	top: -2.2em;
 	font-size: 14px;
-	margin-bottom: -2.2em;
+//	margin-bottom: -2.2em;
+}
+#configtypesmenu:last-child {
+	top: 3px;
 }
 
 #configtypesmenu > span {
@@ -746,8 +748,12 @@ tbody {
 }
 
 #configtypesmenu.pagination {
-	top: 5px;
+	top: -1px;
 	float: left;
+}
+
+#configtypesmenu.submenus {
+	top: -7px;
 }
 
 #response {
@@ -1324,6 +1330,7 @@ span.not_installed {
 	width: 100%;
 	white-space: nowrap;
 	margin-bottom: -2px;
+	position: relative;
 }
 #pagination_container > div,
 #record_search_form_container > div {
@@ -1338,6 +1345,19 @@ span.not_installed {
 }
 #pagination_container > div > div:last-child {
 	padding-left: 2em;
+}
+
+#pagination_container.submenus {
+	top: -2.5em;
+	position: relative;
+	margin-bottom: -2.2em;
+}
+#pagination_container div.stretch {
+	width: 100%;
+}
+
+#pagination_container #configtypesmenu.nopadding {
+	padding: 0;
 }
 
 #pagination {
@@ -1561,8 +1581,8 @@ pre {
 
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
-	#configtypesmenu.pagination {
-		top: -1.7em;
+	#pagination_container {
+		top: -3px;
 	}
 	#record_search_form > form {
 		top: -3px;

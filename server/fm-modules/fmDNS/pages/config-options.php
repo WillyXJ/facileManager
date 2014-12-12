@@ -113,6 +113,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
+$avail_types = buildSubMenu($type, $server_serial_no_uri);
 $avail_servers = buildServerSubMenu($server_serial_no);
 
 $sort_direction = null;
@@ -122,13 +123,35 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 }
 
 echo printPageHeader($response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
-echo "$avail_servers\n";
+echo <<<HTML
+<div id="pagination_container" class="submenus">
+	<div>
+	<div class="stretch"></div>
+	$avail_servers
+	$avail_types
+	</div>
+</div>
+
+HTML;
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array($sort_field, 'cfg_name'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no=$server_serial_no", null, false, $sort_direction);
 $fm_module_options->rows($result);
 
 printFooter();
 
+
+function buildSubMenu($option_type = 'global', $server_serial_no_uri = null) {
+	global $__FM_CONFIG;
+	
+	$menu_selects = null;
+	
+	foreach ($__FM_CONFIG['options']['avail_types'] as $general => $type) {
+		$select = ($option_type == $general) ? ' class="selected"' : '';
+		$menu_selects .= "<span$select><a$select href=\"config-logging?type=$general$server_serial_no_uri\">" . ucfirst($type) . "</a></span>\n";
+	}
+	
+	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+}
 
 
 ?>
