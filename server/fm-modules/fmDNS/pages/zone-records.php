@@ -219,7 +219,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 			$menu_selects = <<<MENU
 			$menu_selects
 			</div>
-			<div id="configtypesmenu" class="nopadding">
+			<div id="configtypesmenu" class="nopadding dropdown">
 				<div id="recordmenu">
 				<ul>
 					<li class="has-sub"><a href="#"><span>...</span></a>

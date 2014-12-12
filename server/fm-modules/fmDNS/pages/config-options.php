@@ -127,8 +127,8 @@ echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
 	<div class="stretch"></div>
-	$avail_servers
 	$avail_types
+	$avail_servers
 	</div>
 </div>
 
