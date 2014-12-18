@@ -87,9 +87,10 @@ function checkAppVersions($single_check = true) {
 	}
 	
 	/** .htaccess file */
-	if (!file_exists(ABSPATH . '.htaccess')) {
-		if (is_writeable(ABSPATH)) {
-			file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_rewrite.c>
+	if (!defined('FM_NO_HTACCESS')) {
+		if (!file_exists(ABSPATH . '.htaccess')) {
+			if (is_writeable(ABSPATH)) {
+				file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_rewrite.c>
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -98,9 +99,9 @@ RewriteRule . index.php [L]
 </IfModule>
 
 ');
-		} else {
-			if ($single_check) {
-				bailOut(sprintf('<p style="text-align: center;">I cannot create the missing %1s.htaccess which is required by %2s so please create it with the following contents:</p>', ABSPATH, $fm_name) . 
+			} else {
+				if ($single_check) {
+					bailOut(sprintf('<p style="text-align: center;">I cannot create the missing %1s.htaccess which is required by %2s so please create it with the following contents:</p>', ABSPATH, $fm_name) . 
 				'<textarea rows="8">&lt;IfModule mod_rewrite.c&gt;
 RewriteEngine On
 
@@ -109,13 +110,14 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . index.php [L]
 &lt;/IfModule&gt;
 </textarea>');
-			} else {
-				$requirement_check .= displayProgress('.htaccess File Present', false, false);
-				$error = true;
+				} else {
+					$requirement_check .= displayProgress('.htaccess File Present', false, false);
+					$error = true;
+				}
 			}
+		} else {
+			if (!$single_check) $requirement_check .= displayProgress('.htaccess File Present', true, false);
 		}
-	} else {
-		if (!$single_check) $requirement_check .= displayProgress('.htaccess File Present', true, false);
 	}
 	
 	/** Test rewrites */

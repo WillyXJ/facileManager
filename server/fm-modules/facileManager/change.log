@@ -5,6 +5,8 @@
 * Server - [bug] Fixed Firefox css issues (introduced in 2.0-alpha1).
 * Server - [improvement] Skips apache rewrite module check for CGI/FCGI
            implementations (Issue #91).
+* Server - [feature] FM_NO_HTACCESS is now a supported defined constant to
+           remove .htaccess requirement (Issue #73).
 
 2.0-alpha1 (2014-11-20)
 =======================
