@@ -1087,6 +1087,8 @@ function buildHelpFile() {
 				template account for granular permissions within the environment. These users cannot be disabled nor can their passwords be changed 
 				within $fm_name. The PHP LDAP extensions have to be installed before this option is available.</li>
 			</ul>
+			<p><i>You can reset the authentication method by setting the following in config.inc.php:</i></p>
+			<p><i>define('FM_NO_AUTH', true);</i></p>
 			<p><b>SSL</b><br />
 			You can choose to have $fm_name enforce the use of SSL when a user tries to access the web app.</p>
 			<p><b>Mailing</b><br />
