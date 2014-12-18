@@ -73,15 +73,17 @@ function checkAppVersions($single_check = true) {
 	}
 	
 	/** Apache mod_rewrite module */
-	if (!in_array('mod_rewrite', apache_get_modules())) {
-		if ($single_check) {
-			bailOut(sprintf('<p style="text-align: center;">Your Apache installation appears to be missing the mod_rewrite module which is required by %1s.</p>', $fm_name));
+	if (function_exists('apache_get_modules')) {
+		if (!in_array('mod_rewrite', apache_get_modules())) {
+			if ($single_check) {
+				bailOut(sprintf('<p style="text-align: center;">Your Apache installation appears to be missing the mod_rewrite module which is required by %1s.</p>', $fm_name));
+			} else {
+				$requirement_check .= displayProgress('Apache mod_rewrite Loaded', false, false);
+				$error = true;
+			}
 		} else {
-			$requirement_check .= displayProgress('Apache mod_rewrite Loaded', false, false);
-			$error = true;
+			if (!$single_check) $requirement_check .= displayProgress('Apache mod_rewrite Loaded', true, false);
 		}
-	} else {
-		if (!$single_check) $requirement_check .= displayProgress('Apache mod_rewrite Loaded', true, false);
 	}
 	
 	/** .htaccess file */

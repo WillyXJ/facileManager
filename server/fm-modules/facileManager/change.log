@@ -3,6 +3,8 @@
 * Client - [improvement] Added support for sudoers includedir parameter and no
            longer disables requiretty and env_reset globally.
 * Server - [bug] Fixed Firefox css issues (introduced in 2.0-alpha1).
+* Server - [improvement] Skips apache rewrite module check for CGI/FCGI
+           implementations (Issue #91).
 
 2.0-alpha1 (2014-11-20)
 =======================
