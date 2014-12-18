@@ -333,7 +333,7 @@ FORM;
 			}
 		}
 		$available_acls = json_encode($available_acls);
-		unset($temp_acl_array, $temp_acl);
+		unset($temp_acl_array, $temp_acls);
 		
 		return $available_acls;
 	}
@@ -345,19 +345,19 @@ FORM;
 		$acls = explode(',', $address_match_list);
 		$formatted_acls = null;
 		foreach ($acls as $address) {
-			if (strpos($address, 'acl_') === false && strpos($address, 'key_') === false) {
-				$formatted_acls[] = $address;
-				continue;
-			}
-			
 			if (strpos($address, 'key_') !== false) {
 				if (!class_exists('fm_dns_keys')) {
 					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 				}
 				$formatted_acls[] = 'key "' . $fm_dns_keys->parseKey($address, '') . '"';
-			} else {
+			} elseif (strpos($address, 'acl_') !== false) {
 				$acl_id = str_replace('acl_', '', $address);
 				$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+			} elseif (strpos($address, 'domain_') !== false) {
+				$domain_id = str_replace('domain_', '', $address);
+				$formatted_acls[] = getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active');
+			} else {
+				$formatted_acls[] = $address;
 			}
 		}
 		

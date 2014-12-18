@@ -950,7 +950,15 @@ HTML;
 		}
 		
 		$include_clones_sql = $include_clones ? null : "AND domain_clone_domain_id=0";
-		$zone_type_sql = $zone_type ? "AND domain_type='$zone_type'" : null;
+		if ($zone_type) {
+			if (is_array($zone_type)) {
+				$zone_type_sql = "AND domain_type IN ('" . implode("','", $zone_type) . "')";
+			} else {
+				$zone_type_sql = "AND domain_type='$zone_type'";
+			}
+		} else {
+			$zone_type_sql = null;
+		}
 		
 		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_clones_sql $zone_type_sql $restricted_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
@@ -1249,6 +1257,31 @@ HTML;
 		} else $name = 'All ' . ucfirst($type) . 's';
 		
 		return $name;
+	}
+	
+	/**
+	 * Builds the zone listing JSON
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $ids IDs to convert to names
+	 * @return json array
+	 */
+	function buildZoneJSON($saved_zones) {
+		$temp_zones = $this->availableZones(true, array('master', 'slave', 'forward'));
+		$available_zones = array(array('id' => 0, 'text' => 'All Zones'));
+		$i = 1;
+		foreach ($temp_zones as $temp_zone_array) {
+			$available_zones[$i]['id'] = $temp_zone_array[1];
+			$available_zones[$i]['text'] = $temp_zone_array[0];
+			$i++;
+		}
+		$available_zones = json_encode($available_zones);
+		unset($temp_zone_array, $temp_zones);
+		
+		return $available_zones;
 	}
 	
 }

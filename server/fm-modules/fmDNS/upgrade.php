@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module) {
 	$running_version = getOption('version', 0, $module);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.3.1', '<') ? upgradefmDNS_131($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.0-alpha2', '<') ? upgradefmDNS_2002($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1201,6 +1201,67 @@ function upgradefmDNS_2001($__FM_CONFIG, $running_version) {
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	return true;
+}
+
+/** 2.0-alpha1 */
+function upgradefmDNS_2002($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '2.0-alpha1', '<') ? upgradefmDNS_2001($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_option_type` ENUM('global','ratelimit') NOT NULL DEFAULT 'global' AFTER `def_function`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_max_parameters` INT(3) NOT NULL DEFAULT '1' ;";
+	
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`,
+`def_max_parameters`
+)
+VALUES 
+('options', 'ratelimit', 'responses-per-second', '( [size integer] [ratio fixedpoint] integer )', 'no', 'OV', 'no', '5'),
+('options', 'ratelimit', 'referrals-per-second', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'nodata-per-second', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'nxdomains-per-second', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'errors-per-second', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'all-per-second', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'window', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'log-only', '( yes | no )', 'no', 'OV', 'yes', '1'),
+('options', 'ratelimit', 'qps-scale', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'ipv4-prefix-length', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'ipv6-prefix-length', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'slip', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'exempt-clients', '( address_match_element )', 'yes', 'OV', 'no', '1'),
+('options', 'ratelimit', 'max-table-size', '( integer )', 'no', 'OV', 'no', '1'),
+('options', 'ratelimit', 'min-table-size', '( integer )', 'no', 'OV', 'no', '1')
+;
+INSERT;
+
+	$updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
 			$fmdb->query($schema);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}

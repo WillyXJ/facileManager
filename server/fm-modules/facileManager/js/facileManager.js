@@ -134,12 +134,17 @@ $(document).ready(function() {
         item_type		= $('#table_edits').attr('name');
         item_sub_type	= $this.attr('name');
         item_id			= $this.attr('rel');
-		var server_serial_no	= getUrlVars()["server_serial_no"];
+		var server_serial_no	= getUrlVars()['server_serial_no'];
+		var queryParameters = {}, queryString = location.search.substring(1),
+			re = /([^&=]+)=([^&]*)/g, m;
+		while (m = re.exec(queryString)) {
+			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+		}
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
 		$('#response').fadeOut();
-		$this.parent().parent().removeClass("response");
+		$this.parent().parent().removeClass('response');
 		
 		var form_data = {
 			add_form: true,
@@ -147,6 +152,7 @@ $(document).ready(function() {
 			item_sub_type: item_sub_type,
 			item_id: item_id,
 			server_serial_no: server_serial_no,
+			request_uri: queryParameters,
 			is_ajax: 1
 		};
 
@@ -160,7 +166,7 @@ $(document).ready(function() {
 				if ($('#manage_item_contents').width() >= 700) {
 					$('#manage_item_contents').addClass('wide');
 				}
-				$(".datepicker").datepicker();
+				$('.datepicker').datepicker();
 				$('.form-table input:text, .form-table select').first().focus();
 			}
 		});
@@ -175,14 +181,19 @@ $(document).ready(function() {
         item_id			= $row_id.attr('id');
         item_type		= $('#table_edits').attr('name');
         item_sub_type	= $this.attr('name');
-        var server_serial_no	= getUrlVars()["server_serial_no"];
-        var view_id		= getUrlVars()["view_id"];
-        var domain_id		= getUrlVars()["domain_id"];
+        var server_serial_no	= getUrlVars()['server_serial_no'];
+        var view_id		= getUrlVars()['view_id'];
+        var domain_id		= getUrlVars()['domain_id'];
+		var queryParameters = {}, queryString = location.search.substring(1),
+			re = /([^&=]+)=([^&]*)/g, m;
+		while (m = re.exec(queryString)) {
+			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+		}
 
 		$('#manage_item').fadeIn(200);
 		$('#manage_item_contents').fadeIn(200);
 		$('#response').fadeOut();
-		$row_id.parent().parent().parent().removeClass("response");
+		$row_id.parent().parent().parent().removeClass('response');
 		
 		var form_data = {
 			item_id: item_id,
@@ -191,6 +202,7 @@ $(document).ready(function() {
 			server_serial_no: server_serial_no,
 			view_id: view_id,
 			domain_id: domain_id,
+			request_uri: queryParameters,
 			is_ajax: 1
 		};
 
@@ -204,7 +216,7 @@ $(document).ready(function() {
 				if ($('#manage_item_contents').width() >= 700) {
 					$('#manage_item_contents').addClass('wide');
 				}
-				$(".datepicker").datepicker();
+				$('.datepicker').datepicker();
 				$('.form-table input, .form-table select').first().focus();
 			}
 		});

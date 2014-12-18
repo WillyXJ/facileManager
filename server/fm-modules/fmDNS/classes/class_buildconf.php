@@ -232,7 +232,7 @@ class fm_module_buildconf {
 			
 			$config .= $logging;
 
-
+			
 			/** Build global configs */
 			$config .= "options {\n";
 			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
@@ -288,6 +288,9 @@ class fm_module_buildconf {
 				unset($cfg_info);
 				if ($cfg_comment) $config .= "\n";
 			}
+			/** Build rate limits */
+			$config .= $this->getRateLimits(0, $server_serial_no);
+			
 			$config .= "};\n\n";
 			
 			
@@ -389,6 +392,9 @@ class fm_module_buildconf {
 						if ($cfg_comment) $config .= "\n";
 						unset($cfg_info);
 					}
+
+					/** Build rate limits */
+					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
 
 					/** Get cooresponding keys */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', "AND key_status='active' AND key_view='" . $view_result[$i]->view_id . "'");
@@ -1416,6 +1422,102 @@ HTML;
 
 		return $config;
 	}
+	
+	/**
+	 * Formats the server key statements
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @return string
+	 */
+	function getRateLimits($view_id, $server_serial_no) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		$ratelimits = $ratelimits_domains = null;
+		
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			$rate_result = $fmdb->last_result;
+			$global_rate_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_rate_count; $i++) {
+				if ($rate_result[$i]->domain_id) {
+					$rate_config_array['domain'][displayFriendlyDomainName(getNameFromID($rate_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'))][$rate_result[$i]->cfg_name] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
+				} else {
+					$rate_config_array[$rate_result[$i]->cfg_name] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
+				}
+			}
+		}
+		
+		
+		/** Check if rrl is supported by server_version */
+		if (count($rate_config_array)) {
+			list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
+			if (version_compare($server_version, '9.9.4', '<')) {
+				return "\t//\n\t// BIND 9.9.4 or greater is required for Response Rate Limiting.\n\t//\n\n";
+			}
+		}
+		
+		foreach ($rate_config_array as $cfg_name => $cfg_data) {
+			if ($cfg_name != 'domain') {
+				list($cfg_info, $cfg_comment) = $cfg_data;
+				$ratelimits .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment);
+			} else {
+				var_dump($cfg_info);
+				foreach ($cfg_data as $domain_name => $domain_cfg_data) {
+					$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
+					foreach ($domain_cfg_data as $domain_cfg_name => $domain_cfg_data2) {
+						list($cfg_param, $cfg_comment) = $domain_cfg_data2;
+						$ratelimits_domains .= $this->formatConfigOption ($domain_cfg_name, $cfg_param, $cfg_comment);
+					}
+				}
+			}
+		}
+		return ($ratelimits || $ratelimits_domains) ? "\trate-limit {\n{$ratelimits}{$ratelimits_domains}\t};\n\n" : null;
+	}
+	
+	/**
+	 * Formats the server key statements
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @return string
+	 */
+	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		$config = null;
+		
+		$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+		$fmdb->get_results($query);
+		if (!$fmdb->num_rows) $def_multiple_values = 'no';
+		else {
+			$result = $fmdb->last_result[0];
+			$def_multiple_values = $result->def_multiple_values;
+		}
+		if ($cfg_comment) {
+			$comment = wordwrap($cfg_comment, 50, "\n");
+			$config .= "\n\t\t// " . str_replace("\n", "\n\t\t// ", $comment) . "\n";
+			unset($comment);
+		}
+		$config .= "\t\t" . $cfg_name . ' ';
+		if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
+		$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
+		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+		$config .= ";\n";
+
+		unset($cfg_info);
+		if ($cfg_comment) $config .= "\n";
+		
+		return $config;
+	}
+	
 }
 
 if (!isset($fm_module_buildconf))

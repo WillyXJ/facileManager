@@ -614,9 +614,9 @@ FORM;
 		</script>
 FORM;
 		} else {
-		$return_form = buildPopup('header', 'Error');
-		$return_form .= '<h3>Oops!</h3><p>Invalid request.</p>';
-		$return_form .= buildPopup('footer', 'OK', array('cancel'));
+			$return_form = buildPopup('header', 'Error');
+			$return_form .= '<h3>Oops!</h3><p>Invalid request.</p>';
+			$return_form .= buildPopup('footer', 'OK', array('cancel'));
 		}
 
 		return $return_form;

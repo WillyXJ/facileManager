@@ -40,6 +40,9 @@ class fm_module_options {
 							'name' => 'options'
 						);
 
+			if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
+				$title_array[] = array('title' => 'Zone', 'rel' => 'domain_id');
+			}
 			$title_array[] = array('title' => 'Option', 'rel' => 'cfg_name');
 			$title_array[] = array('title' => 'Value', 'rel' => 'cfg_data');
 			$title_array[] = array('title' => 'Comment', 'class' => 'header-nosort');
@@ -66,7 +69,7 @@ class fm_module_options {
 		if (!is_array($post)) return $post;
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}'");
 		if ($fmdb->num_rows) return 'This record already exists.';
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
@@ -209,9 +212,17 @@ class fm_module_options {
 		
 		/** Parse address_match_element configs */
 		$cfg_data = $this->parseDefType($row->cfg_name, $row->cfg_data);
+		
+		$zone_row = null;
+		if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
+			$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : '<b>All Zones</b>';
+			$zone_row = '<td>' . $domain_name . '</td>';
+			unset($domain_name);
+		}
 
 		echo <<<HTML
 		<tr id="$row->cfg_id"$disabled_class>
+			$zone_row
 			<td>$row->cfg_name</td>
 			<td>$cfg_data</td>
 			<td>$comments</td>
@@ -224,9 +235,9 @@ HTML;
 	 * Displays the form to add new option
 	 */
 	function printForm($data = '', $action = 'add', $cfg_type = 'global', $cfg_type_id = null) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
 		
-		$cfg_id = 0;
+		$cfg_id = $domain_id = 0;
 		if (!$cfg_type_id) $cfg_type_id = 0;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
@@ -234,18 +245,23 @@ HTML;
 		
 		switch(strtolower($cfg_type)) {
 			case 'global':
+			case 'ratelimit':
 				if (isset($_POST['item_sub_type'])) {
 					$cfg_id_name = sanitize($_POST['item_sub_type']);
 				} else {
 					$cfg_id_name = isset($_POST['view_id']) ? 'view_id' : 'domain_id';
 				}
 				$data_holder = null;
-				$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
+				$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 				$server_serial_no_field = '<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />';
-				$request_uri = $cfg_type_id ? $cfg_id_name . '=' . $cfg_type_id : null;
-				$request_uri .= $server_serial_no && $cfg_type_id ? '&' : null;
-				$request_uri .= $server_serial_no ? 'server_serial_no=' . $server_serial_no : null;
-				$request_uri = $request_uri ? '?' . $request_uri : null;
+				$request_uri = 'config-options.php';
+				if (isset($_REQUEST['request_uri'])) {
+					$request_uri .= '?';
+					foreach ($_REQUEST['request_uri'] as $key => $val) {
+						$request_uri .= $key . '=' . sanitize($val) . '&';
+					}
+					$request_uri = rtrim($request_uri, '&');
+				}
 				$disabled = $action == 'add' ? null : 'disabled';
 				break;
 			case 'logging':
@@ -271,10 +287,10 @@ HTML;
 		
 		$cfg_isparent = buildSelect('cfg_isparent', 'cfg_isparent', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_isparent'), $cfg_isparent, 1);
 		$cfg_parent = buildSelect('cfg_parent', 'cfg_parent', $this->availableParents($cfg_id, $cfg_type), $cfg_parent);
-		$avail_options_array = $this->availableOptions($action, $server_serial_no);
+		$avail_options_array = $this->availableOptions($action, $server_serial_no, $cfg_type);
 		$cfg_avail_options = buildSelect('cfg_name', 'cfg_name', $avail_options_array, $cfg_name, 1, $disabled, false, 'displayOptionPlaceholder()');
 
-		$query = "SELECT def_type FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options' AND 
+		$query = "SELECT def_type FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='$cfg_type' AND 
 				def_option=";
 		if ($action != 'add') {
 			$query .= "'$cfg_name'";
@@ -291,8 +307,60 @@ HTML;
 		
 		$cfg_data = sanitize($cfg_data);
 
-		$popup_header = buildPopup('header', $ucaction . ' Option');
+		$popup_header = buildPopup('header', $ucaction . ' ' . $__FM_CONFIG['options']['avail_types'][$cfg_type] . ' Option');
 		$popup_footer = buildPopup('footer');
+		
+		$addl_options = null;
+		if ($cfg_type == 'ratelimit') {
+			$available_zones = $fm_dns_zones->buildZoneJSON($cfg_data);
+
+			$addl_options = <<<HTML
+				<tr>
+					<th width="33%" scope="row"><label for="cfg_name">Domain</label></th>
+					<td width="67%"><input type="hidden" name="domain_id" class="domain_name" value="$domain_id" /><br />
+					<script>
+					$(".domain_name").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: false,
+						width: '200px',
+						tokenSeparators: [",", " ", ";"],
+						data: $available_zones
+					});
+					$(".domain_name").change(function(){
+						var \$swap = $(this).parent().parent().next().find('td');
+						var form_data = {
+							server_serial_no: getUrlVars()['server_serial_no'],
+							cfg_type: getUrlVars()['option_type'],
+							cfg_name: $(this).parent().parent().next().find('td').find('select').val(),
+							get_available_options: true,
+							item_sub_type: 'domain_id',
+							item_id: $(this).val(),
+							is_ajax: 1
+						};
+
+						$.ajax({
+							type: 'POST',
+							url: 'fm-modules/fmDNS/ajax/getData.php',
+							data: form_data,
+							success: function(response) {
+								\$swap.html(response);
+								
+								$("#manage select").select2({
+									width: '200px',
+									minimumResultsForSearch: 10
+								});
+							}
+						});
+					});
+					</script>
+				</tr>
+HTML;
+		}
 		
 		$return_form = <<<FORM
 		<script>
@@ -306,6 +374,7 @@ HTML;
 			<input type="hidden" name="$cfg_id_name" value="$cfg_type_id" />
 			$server_serial_no_field
 			<table class="form-table">
+				$addl_options
 				<tr>
 					<th width="33%" scope="row"><label for="cfg_name">Option Name</label></th>
 					<td width="67%">$cfg_avail_options</td>
@@ -374,26 +443,28 @@ FORM;
 	}
 
 
-	function availableOptions($action, $server_serial_no) {
+	function availableOptions($action, $server_serial_no, $option_type = 'global') {
 		global $fmdb, $__FM_CONFIG;
 		
 		if ($action == 'add') {
 			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) {
-				$cfg_id_sql = $_POST['item_sub_type'] . ' = ' . $_POST['item_id'];
+				$cfg_id_sql = sanitize($_POST['item_sub_type']) . ' = ' . sanitize($_POST['item_id']);
 			} else {
 				$cfg_id_sql = 'view_id=0 AND domain_id=0';
 			}
 			
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
+				AND def_option_type='$option_type'
 				AND def_option NOT IN (
-					SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='global' AND cfg_status IN (
+					SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='$option_type' AND cfg_status IN (
 						'active', 'disabled'
 				) AND account_id='{$_SESSION['user']['account_id']}' AND (
 					(server_serial_no=$server_serial_no AND $cfg_id_sql)
 				)
 			)";
 			$query .= " AND def_clause_support LIKE '%";
-			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) {
+			if (isset($_POST['cfg_type']) && $_POST['cfg_type'] == 'global' &&
+					isset($_POST['item_id']) && $_POST['item_id'] != 0) {
 				switch ($_POST['item_sub_type']) {
 					case 'view_id':
 						$query .= 'V';
@@ -415,14 +486,14 @@ FORM;
 		$def_result = $fmdb->last_result;
 		$def_result_count = $fmdb->num_rows;
 		
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
+		if ($def_result_count) {
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i] = $results[$i]->def_option;
+				$return[$i] = $def_result[$i]->def_option;
 			}
+			return $return;
 		}
 		
-		return $return;
+		return;
 	}
 	
 	
@@ -438,6 +509,9 @@ FORM;
 		} elseif (isset($post['cfg_id'])) {
 			$def_option = "(SELECT cfg_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE cfg_id = {$post['cfg_id']})";
 		} else return false;
+		
+		if (!isset($post['view_id'])) $post['view_id'] = 0;
+		if (!isset($post['domain_id'])) $post['domain_id'] = 0;
 		
 		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
 		$fmdb->get_results($query);
@@ -504,7 +578,9 @@ FORM;
 			if (isset($result[0]->def_type)) $def_type = $result[0]->def_type;
 		} else $def_type = null;
 		
-		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || strpos($def_type, 'address_match_element') !== false) ? $fm_dns_acls->parseACL($cfg_data) : $cfg_data;
+		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \
+			strpos($cfg_data, 'domain_') !== false || strpos($def_type, 'address_match_element') !== false || \
+			strpos($def_type, 'domain_name') !== false) ? $fm_dns_acls->parseACL($cfg_data) : $cfg_data;
 	}
 }
 

@@ -124,7 +124,7 @@ function buildSubMenu($option_type = 'channel', $server_serial_no_uri = null) {
 	
 	foreach ($__FM_CONFIG['logging']['avail_types'] as $general => $type) {
 		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"config-logging?type=$general$server_serial_no_uri\">" . ucfirst($type) . "</a></span>\n";
+		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$server_serial_no_uri\">" . ucfirst($type) . "</a></span>\n";
 	}
 	
 	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
