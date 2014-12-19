@@ -57,7 +57,7 @@ switch ($step) {
 	case 0:
 	case 1:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
-			printHeader('Installation', 'install');
+			printHeader(_('Installation'), 'install');
 			displaySetup();
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=3');
@@ -65,7 +65,7 @@ switch ($step) {
 		break;
 	case 2:
 		if (!$_POST || !array($_POST)) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
-		printHeader('Installation', 'install');
+		printHeader(_('Installation'), 'install');
 		processSetup();
 		break;
 	case 3:
@@ -76,26 +76,17 @@ switch ($step) {
 		$link = @mysql_connect($__FM_CONFIG['db']['host'], $__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass']);
 		
 		if (version_compare(mysql_get_server_info(), $required_mysql_version, '<')) {
-			bailOut(sprintf('<p style="text-align: center;">Your MySQL server (%1$s) is running MySQL version %2$s but %3$s %4$s requires at least %5$s.</p>', $__FM_CONFIG['db']['host'], mysql_get_server_info(), $fm_name, $fm_version, $required_mysql_version));
+			bailOut(sprintf('<p style="text-align: center;">' . _('Your MySQL server (%1$s) is running MySQL version %2$s but %3$s %4$s requires at least %5$s.') . '</p>', $__FM_CONFIG['db']['host'], mysql_get_server_info(), $fm_name, $fm_version, $required_mysql_version));
 			break;
 		}
 		
-		printHeader('Installation', 'install');
+		printHeader(_('Installation'), 'install');
 
 		/** Check if already installed */
 		$query = "SELECT option_id FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `option_name`='fm_db_version'";
 		$result = @mysql_query($query, $link);
 		
-//		if ($result && @mysql_num_rows($result)) {
-//			/** Check if the default admin account exists */
-//			if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
-//				header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4');
-//			} else {
-//				header('Location: ' . $GLOBALS['RELPATH']);
-//			}
-//		} else {
-			fmInstall($link, $__FM_CONFIG['db']['name']);
-//		}
+		fmInstall($link, $__FM_CONFIG['db']['name']);
 		break;
 	case 4:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
@@ -105,7 +96,7 @@ switch ($step) {
 		
 		/** Make sure the super-admin account doesn't already exist */
 		if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
-			printHeader('Installation', 'install');
+			printHeader(_('Installation'), 'install');
 			displayAccountSetup();
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH']);
@@ -127,16 +118,12 @@ switch ($step) {
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=6');
 		break;
 	case 6:
-		printHeader('Installation', 'install');
+		printHeader(_('Installation'), 'install');
 		include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 		
-		echo <<<HTML
-	<center>
-	<p>Installation is complete!  Click 'Next' to login and start using $fm_name.</p>
-	<p class="step"><a href="{$GLOBALS['RELPATH']}" class="button">Next</a></p>
-	</center>
-
-HTML;
+		echo '<center><p>';
+		printf(_("Installation is complete! Click 'Next' to login and start using %s."), $fm_name);
+		printf('</p><p class="step"><a href="%s" class="button">%s</a></p></center>', $GLOBALS['RELPATH'], _('Next'));
 		break;
 }
 
@@ -154,7 +141,7 @@ function displaySetup($error = null) {
 	global $fm_name;
 	
 	if ($error) {
-		$error = "<strong>ERROR: $error</strong>\n";
+		$error = sprintf('<strong>' . _('ERROR: %s') . "</strong>\n", $error);
 	}
 	
 	$dbhost = (isset($_POST['dbhost'])) ? $_POST['dbhost'] : 'localhost';
@@ -162,34 +149,32 @@ function displaySetup($error = null) {
 	$dbuser = (isset($_POST['dbuser'])) ? $_POST['dbuser'] : null;
 	$dbpass = (isset($_POST['dbpass'])) ? $_POST['dbpass'] : null;
 	
-	echo <<<HTML
+	printf('
 <form method="post" action="?step=2">
 	<center>
-	$error
-	<p>Before we can install the backend database, I need your database credentials. (I will also use them to generate the <code>config.inc.php</code> file.)</p>
+	%1$s
+	<p>' . _('Before we can install the backend database, I need your database credentials. (I will also use them to generate the <code>config.inc.php</code> file.)') . '</p>
 	<table class="form-table">
 		<tr>
-			<th><label for="dbhost">Database Host:</label></th>
-			<td><input type="text" size="25" name="dbhost" id="dbhost" value="$dbhost" placeholder="localhost" /></td>
+			<th><label for="dbhost">' . _('Database Host') . '</label></th>
+			<td><input type="text" size="25" name="dbhost" id="dbhost" value="%2$s" placeholder="localhost" /></td>
 		</tr>
 		<tr>
-			<th><label for="dbname">Database Name:</label></th>
-			<td><input type="text" size="25" name="dbname" id="dbname" value="$dbname" placeholder="$dbname" /></td>
+			<th><label for="dbname">' . _('Database Name') . '</label></th>
+			<td><input type="text" size="25" name="dbname" id="dbname" value="%3$s" placeholder="%3$s" /></td>
 		</tr>
 		<tr>
-			<th><label for="dbuser">Username:</label></th>
-			<td><input type="text" size="25" name="dbuser" id="dbuser" value="$dbuser" placeholder="username" /></td>
+			<th><label for="dbuser">' . _('Username') . '</label></th>
+			<td><input type="text" size="25" name="dbuser" id="dbuser" value="%4$s" placeholder="' . _('username') . '" /></td>
 		</tr>
 		<tr>
-			<th><label for="dbpass">Password:</label></th>
-			<td><input type="password" size="25" name="dbpass" id="dbpass" value="$dbpass" placeholder="password" /></td>
+			<th><label for="dbpass">' . _('Password') . '</label></th>
+			<td><input type="password" size="25" name="dbpass" id="dbpass" value="%5$s" placeholder="' . _('password') . '" /></td>
 		</tr>
 	</table>
 	</center>
-	<p class="step"><input name="submit" type="submit" value="Submit" class="button" /></p>
-</form>
-
-HTML;
+	<p class="step"><input name="submit" type="submit" value="' . _('Submit') . '" class="button" /></p>
+</form>', $error, $dbhost, $dbname, $dbuser, $dbpass);
 }
 
 /**
@@ -204,7 +189,7 @@ function processSetup() {
 	
 	$link = @mysql_connect($dbhost, $dbuser, $dbpass);
 	if (!$link) {
-		exit(displaySetup('Could not connect to MySQL.<br />Please check your credentials.'));
+		exit(displaySetup(_('Could not connect to MySQL.<br />Please check your credentials.')));
 	} else {
 		$db_selected = @mysql_select_db($dbname, $link);
 		if (mysql_error() && strpos(mysql_error(), 'Unknown database') === false) {
@@ -214,7 +199,7 @@ function processSetup() {
 			$tables = @mysql_query(sanitize('SHOW TABLES FROM ' . $dbname . ';'), $link);
 			@mysql_close($link);
 			if (@mysql_num_rows($tables)) {
-				exit(displaySetup('Database already exists and contains one or more tables.<br />Please choose a different name.'));
+				exit(displaySetup(_('Database already exists and contains one or more tables.<br />Please choose a different name.')));
 			}
 		}
 	}
@@ -234,46 +219,44 @@ function displayAccountSetup($error = null) {
 	global $__FM_CONFIG;
 
 	if ($error) {
-		$error = "<strong>ERROR: $error</strong>\n";
+		$error = sprintf('<strong>' . _('ERROR: %s') . "</strong>\n", $error);
 	}
 	
 	$strength = $GLOBALS['PWD_STRENGTH'];
-	echo <<<HTML
+	printf('
 <form method="post" action="?step=5">
 	<center>
-	$error
-	<p>Ok, now create your super-admin account:</p>
+	%1$s
+	<p>' . _('Ok, now create your super-admin account') . '</p>
 	<table class="form-table">
 		<tr>
-			<th><label for="user_login">Username:</label></th>
-			<td><input type="text" size="25" name="user_login" id="user_login" placeholder="username" onkeyup="javascript:checkPasswd('user_password', 'createaccount', '$strength');" /></td>
+			<th><label for="user_login">' . _('Username') . '</label></th>
+			<td><input type="text" size="25" name="user_login" id="user_login" placeholder="username" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%2$s\');" /></td>
 		</tr>
 		<tr>
-			<th><label for="user_email">Email:</label></th>
-			<td><input type="email" size="25" name="user_email" id="user_email" placeholder="email address" onkeyup="javascript:checkPasswd('user_password', 'createaccount', '$strength');" /></td>
+			<th><label for="user_email">' . _('Email') . '</label></th>
+			<td><input type="email" size="25" name="user_email" id="user_email" placeholder="email address" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%2$s\');" /></td>
 		</tr>
 		<tr>
-			<th><label for="user_password">Password:</label></th>
-			<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd('user_password', 'createaccount', '$strength');" /></td>
+			<th><label for="user_password">' . _('Password') . '</label></th>
+			<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%2$s\');" /></td>
 		</tr>
 		<tr>
-			<th><label for="cpassword">Confirm Password:</label></th>
-			<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd('cpassword', 'createaccount', '$strength');" /></td>
+			<th><label for="cpassword">' . _('Confirm Password') . '</label></th>
+			<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd(\'cpassword\', \'createaccount\', \'%2$s\');" /></td>
 		</tr>
 		<tr>
-			<th>Password Validity</th>
-			<td><div id="passwd_check">No Password</div></td>
+			<th>' . _('Password Validity') . '</th>
+			<td><div id="passwd_check">' . _('No Password') . '</div></td>
 		</tr>
 		<tr class="pwdhint">
-			<th width="33%" scope="row">Hint</th>
-			<td width="67%">{$__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]}</td>
+			<th width="33%" scope="row">' . _('Hint') . '</th>
+			<td width="67%">%3$s</td>
 		</tr>
 	</table>
 	</center>
-	<p class="step"><input id="createaccount" name="submit" type="submit" value="Submit" class="button" disabled /></p>
-</form>
-
-HTML;
+	<p class="step"><input id="createaccount" name="submit" type="submit" value="' . _('Submit') . '" class="button" disabled /></p>
+</form>', $error, $strength, $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]);
 }
 
 /**
@@ -298,7 +281,7 @@ function processAccountSetup($link, $database) {
 	$query = "INSERT INTO $database.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
 	$result = mysql_query($query, $link) or die(mysql_error());
 	
-	addLogEntry("Installer created user '$user'", $fm_name, $link);
+	addLogEntry(sprintf(_("Installer created user '%s'"), $user), $fm_name, $link);
 }
 
 /**
@@ -312,11 +295,7 @@ function checkAccountCreation($link, $database) {
 	$query = "SELECT user_id FROM $database.fm_users WHERE user_id='1'";
 	$result = mysql_query($query, $link);
 	
-	if ($result && mysql_num_rows($result)) {
-		return true;
-	} else {
-		return false;
-	}
+	return ($result && mysql_num_rows($result)) ? true : false;
 }
 
 ?>

@@ -31,7 +31,7 @@ require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 /** Enforce authentication */
 if (!$fm_login->isLoggedIn()) {
 	echo '<script>close();</script>';
-	echo '<pre>You must be logged in to view these files.</pre>';
+	printf('<pre></pre>', _('You must be logged in to view these files.'));
 	exit;
 }
 

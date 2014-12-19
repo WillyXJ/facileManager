@@ -31,7 +31,7 @@ class fm_tools {
 		global $__FM_CONFIG;
 		
 		if (!$module_name) {
-			return '<p>No module was selected to be installed.</p>';
+			return sprintf('<p>%s</p>', _('No module was selected to be installed.'));
 		}
 		
 		$install_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'install.php';
@@ -47,13 +47,13 @@ class fm_tools {
 			}
 			if (strpos($output, 'Success') === false) {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
-				return '<p>' . $module_name . ' installation failed!</p>' . $error;
+				return sprintf('<p>' . _('%s installation failed!') . '</p>%s', $module_name, $error);
 			}
 			
-			addLogEntry("$module_name {$__FM_CONFIG[$module_name]['version']} was born.", $module_name);
-		} else return '<p>No installation file found for ' . $module_name . '.</p>';
+			addLogEntry(sprintf(_('%s %s was born.'), $module_name, $__FM_CONFIG[$module_name]['version']), $module_name);
+		} else return sprintf('<p>' . _('No installation file found for %s.') . '</p>', $module_name);
 		
-		return '<p>' . $module_name . ' was installed successfully!</p>';
+		return sprintf('<p>' . _('%s was installed successfully!') . '</p>', $module_name);
 	}
 	
 	/**
@@ -66,7 +66,7 @@ class fm_tools {
 		global $fmdb;
 		
 		if (!$module_name) {
-			return '<p>No module was selected to be upgraded.</p>';
+			return sprintf('<p>%s</p>', _('No module was selected to be upgraded.'));
 		}
 		
 		$upgrade_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'upgrade.php';
@@ -82,20 +82,20 @@ class fm_tools {
 			}
 			if ($output !== true) {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
-				return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
+				return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
 			} else {
 				setOption('version', $__FM_CONFIG[$module_name]['version'], 'auto', false, 0, $module_name);
 				if ($fmdb->last_error) {
 					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
-					return '<p>' . $module_name . ' upgrade failed!</p>' . $error;
+					return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
 				}
 				setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update', true, 0, $module_name);
 			}
 
-			addLogEntry("$module_name was upgraded to {$__FM_CONFIG[$module_name]['version']}.", $module_name);
+			addLogEntry(sprintf(_('%s was upgraded to %s.'), $module_name, $__FM_CONFIG[$module_name]['version']), $module_name);
 		}
 		
-		return '<p>' . $module_name . ' was upgraded successfully! Make sure you upgrade your clients with the updated client files (if applicable).</p>';
+		return sprintf('<p>' . _('%s was upgraded successfully! Make sure you upgrade your clients with the updated client files (if applicable).') . '</p>', $module_name);
 	}
 	
 	/**
@@ -182,8 +182,8 @@ class fm_tools {
 		$fmdb->query($query);
 		$record_count += $fmdb->rows_affected;
 		
-		addLogEntry('Cleaned up the database.', $fm_name);
-		return 'Total number of records purged from the database: <b>' . $record_count . '</b>';
+		addLogEntry(_('Cleaned up the database.'), $fm_name);
+		return sprintf(_('Total number of records purged from the database: <b>%d</b>'), $record_count);
 	}
 
 	/**
@@ -195,7 +195,7 @@ class fm_tools {
 	function backupDatabase() {
 		global $__FM_CONFIG, $fm_name;
 		
-		if (!currentUserCan('run_tools')) return '<p class="error">You are not authorized to run these tools.</p>';
+		if (!currentUserCan('run_tools')) return sprintf('<p class="error">%s</p>', _('You are not authorized to run these tools.'));
 		
 		/** Temporary fix for MySQL 5.6 warnings */
 		$exclude_warnings = array('Warning: Using a password on the command line interface can be insecure.' . "\n");
@@ -205,7 +205,7 @@ class fm_tools {
 		$error_log = str_replace('.sql', '.err', $sql_file);
 		
 		$mysqldump = findProgram('mysqldump');
-		if (!$mysqldump) return '<p class="error">mysqldump is not found on ' . php_uname('n') . '.</p>';
+		if (!$mysqldump) return sprintf('<p class="error">' . _('mysqldump is not found on %s.') . '</p>', php_uname('n'));
 		
 		$command_string = "$mysqldump --opt -Q -h {$__FM_CONFIG['db']['host']} -u {$__FM_CONFIG['db']['user']} -p{$__FM_CONFIG['db']['pass']} {$__FM_CONFIG['db']['name']} > /tmp/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
 		@system($command_string, $retval);
@@ -221,7 +221,7 @@ class fm_tools {
 		@unlink($error_log);
 		@unlink($sql_file);
 		
-		addLogEntry('Backed up the database.', $fm_name);
+		addLogEntry(_('Backed up the database.'), $fm_name);
 
 		sendFileToBrowser($sql_file . '.gz');
 	}

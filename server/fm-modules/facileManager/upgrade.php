@@ -51,7 +51,7 @@ function fmUpgrade($database) {
 		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update');
 	}
 	
-	displayProgress('Upgrading Schema', $success);
+	displayProgress(_('Upgrading Schema'), $success);
 
 	echo "</table>\n</center>\n";
 	
@@ -547,7 +547,7 @@ function upgradeConfig($field, $value, $logit = true) {
 		include(ABSPATH . 'fm-includes/version.php');
 		include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 		
-		addLogEntry("$fm_name was upgraded to $fm_version.", $fm_name);
+		addLogEntry(sprintf(_('%s was upgraded to %s.'), $fm_name, $fm_version), $fm_name);
 	}
 	
 	return true;
@@ -566,20 +566,16 @@ function displaySetupMessage($message = 1, $url = null) {
 	
 	switch ($message) {
 		case 1:
-			echo <<<HTML
+			sprintf('
 	<center>
-	<p>Database upgrade for $fm_name is complete!  Click 'Next' to start using $fm_name.</p>
-	<p class="step"><a href="$url" class="button">Next</a></p>
-	</center>
-
-HTML;
+	<p>' . _('Database upgrade for %1$s is complete! Click \'Next\' to start using %1$s.') . '</p>
+	<p class="step"><a href="%2$s" class="button">' . _('Next') . '</a></p>
+	</center>', $fm_name, $url);
 			break;
 		case 2:
-			echo <<<HTML
-	<p style="text-align: center;">Database upgrade failed.  Please try again.</p>
-	<p class="step"><a href="?step=2" class="button">Try Again</a></p>
-
-HTML;
+			echo '
+	<p style="text-align: center;">' . _('Database upgrade failed. Please try again.') . '</p>
+	<p class="step"><a href="?step=2" class="button">' . _('Try Again') . '</a></p>';
 			break;
 	}
 }

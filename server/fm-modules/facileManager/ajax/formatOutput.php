@@ -34,7 +34,7 @@ if (isset($_POST)) {
 extract($message_array);
 
 if (!isset($title) || empty($title)) {
-	$title = 'Error';
+	$title = _('Error');
 }
 
 echo buildPopup('header', $title);
@@ -44,6 +44,6 @@ if (strpos($content, '<p') === false) {
 if (isset($fmdb->last_error)) {
 	$content .= $fmdb->last_error;
 }
-echo $content . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+echo $content . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 
 ?>

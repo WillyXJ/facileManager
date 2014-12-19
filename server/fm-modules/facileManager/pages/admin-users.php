@@ -56,12 +56,12 @@ case 'edit':
 		if ($user_info) {
 			if ($user_info['user_template_only'] == 'no') {
 				if (updateStatus('fm_users', $_GET['id'], 'user_', $_GET['status'], 'user_id')) {
-					addLogEntry("Set user '" . $user_info['user_login'] . "' status to " . $_GET['status'] . '.', $fm_name);
+					addLogEntry(sprintf(_("Set user '%s' status to %s."), $user_info['user_login'], $_GET['status']), $fm_name);
 					header('Location: ' . $GLOBALS['basename']);
 				}
 			}
 		}
-		$response = 'This user could not be set to '. $_GET['status'] .'.'. "\n";
+		$response = sprintf(_('This user could not be set to %s.') . "\n", $_GET['status']);
 	}
 }
 

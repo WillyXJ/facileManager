@@ -122,12 +122,7 @@ function displayLogData($page, $search_sql = null) {
 	$log_count = $fmdb->num_rows;
 	
 	if (!$log_count) {
-		echo <<<ROW
-				<tr>
-					<td colspan="4"><p class="no_results">There are no log results.</p></td>
-				</tr>
-
-ROW;
+		printf('<tr><td colspan="4"><p class="no_results">%s</p></td></tr>', _('There are no log results.'));
 	}
 
 	for ($i=0; $i<$log_count; $i++) {
@@ -151,7 +146,7 @@ ROW;
 function buildModuleList() {
 	global $fmdb;
 	
-	$array[0] = array_fill(0, 2, 'All Modules');
+	$array[0] = array_fill(0, 2, _('All Modules'));
 	
 	$query = "SELECT DISTINCT log_module FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']})";
 	$fmdb->get_results($query);
@@ -168,7 +163,7 @@ function buildModuleList() {
 function buildUserList() {
 	global $fmdb;
 	
-	$array[0] = array('All Users', 0);
+	$array[0] = array(_('All Users'), 0);
 	
 	$query = "SELECT user_id,user_login FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} ORDER BY user_login";
 	$fmdb->get_results($query);

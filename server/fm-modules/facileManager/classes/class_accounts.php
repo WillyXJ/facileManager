@@ -30,7 +30,7 @@ class fm_accounts {
 	function verify($data) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (!isset($data['AUTHKEY'])) return "Account is not found.\n";
+		if (!isset($data['AUTHKEY'])) return _('Account is not found.') . "\n";
 		extract($data);
 		
 		include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
@@ -42,10 +42,10 @@ class fm_accounts {
 		/** Check serial number */
 		if (isset($data['SERIALNO'])) {
 			basicGet('fm_' . $__FM_CONFIG[$module_name]['prefix'] . 'servers', sanitize($SERIALNO), 'server_', 'server_serial_no', "AND server_installed='yes'", getAccountID($AUTHKEY));
-			if (!$fmdb->num_rows) return "Server is not found.\n";
+			if (!$fmdb->num_rows) return _('Server is not found.') . "\n";
 		}
 		
-		return 'Success';
+		return _('Success');
 	}
 	
 	/**
@@ -57,15 +57,15 @@ class fm_accounts {
 	function verifyAccount($AUTHKEY) {
 		global $fmdb;
 		
-		if (!isset($AUTHKEY)) return "Account is not found.\n";
+		if (!isset($AUTHKEY)) return _('Account is not found.') . "\n";
 
 		$query = "select * from fm_accounts where account_key='" . sanitize($AUTHKEY) . "'";
 		$result = $fmdb->get_results($query);
-		if (!$fmdb->num_rows) return "Account is not found.\n";
+		if (!$fmdb->num_rows) return _('Account is not found.') . "\n";
 		
 		$acct_results = $fmdb->last_result;
 		/** Ensure account is active */
-		if ($acct_results[0]->account_status != 'active') return 'Account is ' . $acct_results[0]->account_status . ".\n";
+		if ($acct_results[0]->account_status != 'active') return printf(_('Account is %s.') . "\n", $acct_results[0]->account_status);
 		
 		$_SESSION['user']['account_id'] = $acct_results[0]->account_id;
 		

@@ -55,6 +55,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 	}
 	
+	/** Load language */
+	include_once(ABSPATH . 'fm-includes/i18n.php');
+
 	$GLOBALS['URI'] = convertURIToArray();
 
 	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
@@ -88,13 +91,13 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		/** Process password resets */
 		if (!$fm_login->isLoggedIn() && array_key_exists('forgot_password', $_GET)) {
-			$message = array_key_exists('keyInvalid', $_GET) ? '<p class="failed">That key is invalid.</p>' : null;
+			$message = array_key_exists('keyInvalid', $_GET) ? sprintf('<p class="failed">%s</p>', _('That key is invalid.')) : null;
 			if (count($_POST)) {
 				$result = $fm_login->processUserPwdResetForm($_POST['user_login']);
 				if ($result === true) {
-					$message = '<p class="success">Your password reset email has been sent to the address on file.</p>';
+					$message = sprintf('<p class="success">%s</p>', _('Your password reset email has been sent to the address on file.'));
 				} else {
-					$message = '<p class="failed">' . $result . '</p>';
+					$message = sprintf('<p class="failed">%s</p>', $result);
 				}
 				
 				if ($_POST['is_ajax']) {
@@ -165,7 +168,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 					if (currentUserCan('do_everything') || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
 						header('Location: ' . $GLOBALS['RELPATH'] . 'fm-upgrade.php');
 					} else {
-						$response = '<p class="error">** The database for ' . $fm_name . ' still needs to be upgraded.  Please contact a super-admin. **</p>';
+						$response = sprintf('<p class="error">** ' . _('The database for %1s still needs to be upgraded. Please contact a super-admin.') . ' **</p>', $fm_name);
 					}
 				}
 			}
@@ -222,10 +225,6 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 } else {
 
 	/** A config file doesn't exist */
-
-	require_once(ABSPATH . 'fm-includes/init.php');
-	require_once(ABSPATH . 'fm-includes/version.php');
-	
 	header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 
 }

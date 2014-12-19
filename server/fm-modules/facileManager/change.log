@@ -8,6 +8,7 @@
 * Server - [feature] FM_NO_HTACCESS is now a supported defined constant to
            remove .htaccess requirement (Issue #73).
 * Server - [improvement] Updated help file.
+* Server - [feature] Added i18n support (Issue #106).
 
 2.0-alpha1 (2014-11-20)
 =======================

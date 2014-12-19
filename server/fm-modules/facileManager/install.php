@@ -40,31 +40,26 @@ function createConfig() {
 	
 	if (!file_exists($temp_file) || !file_get_contents($temp_file)) {
 		if (@file_put_contents($temp_file, '') === false) {
-			echo <<<CFG
-	<p>I cannot create <code>$temp_file</code> so please manually create it with the following contents:</p>
-	<textarea rows="20">$temp_config</textarea>
-	<p>Once done, click "Install."</p>
-	<p class="step"><a href="?step=3" class="button click_once">Install</a></p>
-
-CFG;
+			printf('
+	<p>' . _('I cannot create %s so please manually create it with the following contents:') . '</p>
+	<textarea rows="20">%s</textarea>
+	<p>' . _('Once done, click "Install."') . '</p>
+	<p class="step"><a href="?step=3" class="button click_once">' . _('Install') . '</a></p>', "<code>$temp_file</code>", $temp_config);
 		} else {
 			echo '<form method="post" action="?step=3"><center><table class="form-table">' . "\n";
 			
 			$retval = @file_put_contents($temp_file, $temp_config) ? true : false;
-			displayProgress('Creating Configuration File', $retval);
+			displayProgress(_('Creating Configuration File'), $retval);
 			
 			echo "</table>\n</center>\n";
 			
 			if ($retval) {
-				echo <<<HTML
-			<p style="text-align: center;">Config file has been created!  Now let's create the database schema.</p>
-			<p class="step"><a href="?step=3" class="button click_once">Continue</a></p>
-HTML;
+				echo '<p style="text-align: center;">' .
+					_("Config file has been created! Now let's create the database schema.") .
+					'</p><p class="step"><a href="?step=3" class="button click_once">' . _('Continue') . '</a></p>';
 			} else {
-				echo <<<HTML
-			<p style="text-align: center;">Config file creation failed.  Please try again.</p>
-			<p class="step"><a href="?step=2" class="button click_once">Try Again</a></p>
-HTML;
+				echo '<p style="text-align: center;">' . _('Config file creation failed. Please try again.') .
+					'</p><p class="step"><a href="?step=2" class="button click_once">' . _('Try Again') . '</a></p>';
 			}
 			
 			echo "</form>\n";
@@ -124,15 +119,11 @@ function fmInstall($link, $database) {
 	echo "</table>\n</center>\n";
 
 	if ($retval) {
-		echo <<<HTML
-	<p style="text-align: center;">Database setup is complete!  Now let's create your administrative account.</p>
-	<p class="step"><a href="?step=4" class="button">Continue</a></p>
-HTML;
+		echo '<p style="text-align: center;">' . _("Database setup is complete! Now let's create your administrative account.") .
+			'</p><p class="step"><a href="?step=4" class="button">' . _('Continue') . '</a></p>';
 	} else {
-		echo <<<HTML
-	<p style="text-align: center;">Database setup failed.  Please try again.</p>
-	<p class="step"><a href="?step=3" class="button click_once">Try Again</a></p>
-HTML;
+		echo '<p style="text-align: center;">' . _("Database setup failed. Please try again.") .
+			'</p><p class="step"><a href="?step=3" class="button click_once">' . _('Try Again') . '</a></p>';
 	}
 	
 	echo "</form>\n";
@@ -146,21 +137,18 @@ function installDatabase($link, $database) {
 	if (!$db_selected) {
 		$query = sanitize("CREATE DATABASE IF NOT EXISTS $database DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
 		$result = mysql_query($query, $link);
-		$output = displayProgress('Creating Database', $result);
+		$output = displayProgress(_('Creating Database'), $result);
 	} else {
-		$output = 'Success';
+		$output = _('Success');
 	}
 	
-	if ($output == 'Success') $output = installSchema($link, $database);
-	if ($output == 'Success') {
+	if ($output == _('Success')) $output = installSchema($link, $database);
+	if ($output == _('Success')) {
 		$modules = getAvailableModules();
 		if (count($modules)) {
-			echo <<<MSG
-			<tr>
-				<td colspan="2" id="install_module_list"><p><b>The following modules were installed as well:</b><br />(They can always be uninstalled later.)</p></td>
-			</tr>
-
-MSG;
+			echo '<tr>
+				<td colspan="2" id="install_module_list"><p><b>' . _('The following modules were installed as well:</b><br />(They can always be uninstalled later.)') . '</p></td>
+			</tr>';
 
 			foreach ($modules as $module_name) {
 				if (file_exists(dirname(__FILE__) . '/../' . $module_name . '/install.php')) {
@@ -170,21 +158,15 @@ MSG;
 					if (function_exists($function)) {
 						$output = $function($link, $database, $module_name);
 					}
-					if ($output == 'Success') {
-						addLogEntry("$module_name $fm_version was born.", $module_name, $link);
+					if ($output == _('Success')) {
+						addLogEntry(sprintf(_('%s %s was born.'), $module_name, $fm_version), $module_name, $link);
 					}
-					
-//					echo displayProgress($module_name, $output);
 				}
 			}
 		}
 	}
 	
-	if ($output == 'Success') {
-		return true;
-	} else {
-		return false;
-	}
+	return ($output == _('Success')) ? true : false;
 }
 
 
@@ -376,7 +358,7 @@ INSERT;
 		$result = @mysql_query($schema, $link);
 		if (mysql_error()) {
 			echo mysql_error();
-			return displayProgress('Creating ' . $fm_name . ' Schema', $result);
+			return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result);
 		}
 	}
 
@@ -388,14 +370,14 @@ INSERT;
 			$result = @mysql_query($query, $link);
 			if (mysql_error()) {
 				echo mysql_error();
-				return displayProgress('Creating ' . $fm_name . ' Schema', $result);
+				return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result);
 			}
 		}
 	}
 	
-	addLogEntry("$fm_name $fm_version was born.", $fm_name, $link);
+	addLogEntry(sprintf(_('%s %s was born.'), $fm_name, $fm_version), $fm_name, $link);
 
-	return displayProgress('Creating ' . $fm_name . ' Schema', $result);
+	return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result);
 }
 
 

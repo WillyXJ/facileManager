@@ -31,12 +31,17 @@ class fm_login {
 	 */
 	function printLoginForm() {
 		global $fm_name;
-		printHeader('Login', 'login');
+		
+		$translate_login    = _('Login');
+		$translate_username = _('Username');
+		$translate_password = _('Password');
+		
+		printHeader($translate_login, 'login');
 		
 		/** Cannot change password without mail_enable defined */
 		$mail_enable = (getOption('fm_db_version') >= 18) ? getOption('mail_enable') : false;
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : false;
-		$forgot_link = ($mail_enable && $auth_method == 1) ? '<p id="forgotton_link"><a href="?forgot_password">Forgot your password?</a></p>' : null;
+		$forgot_link = ($mail_enable && $auth_method == 1) ? sprintf('<p id="forgotton_link"><a href="?forgot_password">%s</a></p>', _('Forgot your password?')) : null;
 		
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
@@ -50,15 +55,15 @@ class fm_login {
 			<tr>
 				<td>
 					<div class="input-wrapper">
-						<input type="text" size="25" name="username" id="username" placeholder="Username" />
+						<input type="text" size="25" name="username" id="username" placeholder="$translate_username" />
 					</div>
 				</td>
 				<td>
 					<div class="input-wrapper">
-						<input type="password" size="25" name="password" id="password" placeholder="Password" />
+						<input type="password" size="25" name="password" id="password" placeholder="$translate_password" />
 					</div>
 				</td>
-				<td><input name="submit" id="loginbtn" type="submit" value="Login" class="button" /></td>
+				<td><input name="submit" id="loginbtn" type="submit" value="$translate_login" class="button" /></td>
 			</tr>
 		</table>
 		$forgot_link
@@ -85,28 +90,32 @@ HTML;
 		if (!getOption('mail_enable') || getOption('auth_method') != 1) header('Location: ' . $GLOBALS['RELPATH']);
 
 		global $fm_name;
-		printHeader('Password Reset', 'login');
+		printHeader(_('Password Reset'), 'login');
 		
+		$translate_reset    = _('Reset Password');
+		$translate_username = _('Username');
+		$translate_loginfm  = _('&larr; Login form');
+
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 		
 		echo <<<HTML
 		<form id="loginform" action="{$_SERVER['PHP_SELF']}?forgot_password" method="post">
 		<input type="hidden" name="reset_pwd" value="1" />
 		<div id="fm-branding">
-			<img src="$branding_logo" /><span>Reset Password</span>
+			<img src="$branding_logo" /><span>$translate_reset</span>
 		</div>
 		<div id="login_form">
 		<table>
 			<tr>
 				<td>
 					<div class="input-wrapper">
-						<input type="text" name="user_login" id="user_login" placeholder="Username" style="width: 400px;" />
+						<input type="text" name="user_login" id="user_login" placeholder="$translate_username" style="width: 400px;" />
 					</div>
 				</td>
 				<td><input name="submit" id="forgotbtn" type="submit" value="Submit" class="button" /></td>
 			</tr>
 		</table>
-		<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
+		<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">$translate_loginfm</a></p>
 		<div id="message">$message</div>
 		</form>
 		</div>
@@ -213,7 +222,6 @@ HTML;
 				if (strtotime("-1 hour") > $_SESSION['user']['last_login']) {
 					$_SESSION['user']['last_login'] = strtotime("-15 minutes");
 					$_SESSION['user']['ipaddr'] = isset($_SERVER['REMOTE_HOST']) ? $_SERVER['REMOTE_HOST'] : $_SERVER['REMOTE_ADDR'];
-//					$this->updateSessionDB($_SESSION['user']);
 				}
 				
 				/** Should the user be logged in? */
@@ -322,7 +330,6 @@ HTML;
 			@session_start();
 			$this->updateSessionDB($_SESSION['user']['name']);
 			@session_unset($_SESSION['user']);
-//			session_destroy();
 			setcookie('myid', '');
 		}
 	}
@@ -341,11 +348,11 @@ HTML;
 		global $fm_name;
 		
 		$user_info = getUserInfo($fm_login);
-		if (isEmailAddressValid($user_info['user_email']) === false) return 'There is no valid e-mail address associated with this user.';
+		if (isEmailAddressValid($user_info['user_email']) === false) return _('There is no valid e-mail address associated with this user.');
 		
 		$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
 		if (!file_exists($phpmailer_file)) {
-			return 'Unable to send email - PHPMailer class is missing.';
+			return _('Unable to send email - PHPMailer class is missing.');
 		} else {
 			require $phpmailer_file;
 		}
@@ -365,7 +372,7 @@ HTML;
 		$mail->From = getOption('mail_from');
 		$mail->AddAddress($user_info['user_email']);
 		
-		$mail->Subject = $fm_name . ' Password Reset';
+		$mail->Subject = sprintf(_('%s Password Reset'), $fm_name);
 		$mail->Body = $this->buildPwdResetEmail($user_info, $uniq_hash, true, $mail->Subject, $mail->From);
 		$mail->AltBody = $this->buildPwdResetEmail($user_info, $uniq_hash, false);
 		$mail->IsHTML(true);
@@ -373,7 +380,7 @@ HTML;
 		$mail->IsSMTP();
 		
 		if(!$mail->Send()) {
-			return 'Mailer Error: ' . $mail->ErrorInfo;
+			return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
 		}
 		
 		return true;

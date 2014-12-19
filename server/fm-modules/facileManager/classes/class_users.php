@@ -31,7 +31,7 @@ class fm_users {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="users">There are no users.</p>';
+			printf('<p id="table_edits" class="noresult" name="users">%s</p>', _('There are no users.'));
 		} else {
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -40,9 +40,13 @@ class fm_users {
 						);
 
 			$title_array[] = array('class' => 'header-tiny header-nosort');
-			$title_array[] = array('title' => 'Login', 'rel' => 'user_login');
-			array_push($title_array, array('title' => 'Last Session Date', 'rel' => 'user_last_login'), array('title' => 'Last Session Host', 'class' => 'header-nosort'), array('title' => 'Authenticate With', 'class' => 'header-nosort'), array('title' => 'Super Admin', 'class' => 'header-nosort'));
-			$title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
+			$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
+			array_push($title_array,
+					array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
+					array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
+					array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
+					array('title' => _('Super Admin'), 'class' => 'header-nosort'));
+			$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -82,14 +86,14 @@ class fm_users {
 			$user_auth_type = 1;
 		}
 
-		if (empty($user_login)) return 'No username defined.';
-		if (empty($user_password) && $user_template_only == 'no') return 'No password defined.';
-		if ($user_password != $cpassword && $user_template_only == 'no') return 'Passwords do not match.';
-		if (empty($user_email) && $user_template_only == 'no') return 'No e-mail address defined.';
+		if (empty($user_login)) return _('No username defined.');
+		if (empty($user_password) && $user_template_only == 'no') return _('No password defined.');
+		if ($user_password != $cpassword && $user_template_only == 'no') return _('Passwords do not match.');
+		if (empty($user_email) && $user_template_only == 'no') return _('No e-mail address defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_users', 'user_login');
-		if ($field_length !== false && strlen($user_login) > $field_length) return 'Username is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($user_login) > $field_length) return sprintf(_('Username is too long (maximum %d characters).'), $field_length);
 		
 		/** Force password change? */
 		$user_force_pwd_change = (isset($user_force_pwd_change) && $user_force_pwd_change == 'yes') ? 'yes' : 'no';
@@ -97,7 +101,7 @@ class fm_users {
 		/** Does the record already exist for this account? */
 		$query = "SELECT * FROM `fm_users` WHERE `user_status`!='deleted' AND `user_login`='$user_login'";
 		$fmdb->get_results($query);
-		if ($fmdb->num_rows) return 'This user already exists.';
+		if ($fmdb->num_rows) return _('This user already exists.');
 		
 		/** Process user permissions */
 		if (isset($user_caps[$fm_name])) {
@@ -117,12 +121,12 @@ class fm_users {
 				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the user to the database.';
+		if (!$result) return _('Could not add the user to the database.');
 
 		/** Process forced password change */
 		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login);
 		
-		addLogEntry("Added user '$user_login'.");
+		addLogEntry(sprintf(_("Added user '%s'."), $user_login));
 		return true;
 	}
 
@@ -150,22 +154,22 @@ class fm_users {
 			$post['user_id'] = $_SESSION['user']['id'];
 			$post['user_login'] = $_SESSION['user']['name'];
 		}
-		if (empty($post['user_login'])) return 'No username defined.';
+		if (empty($post['user_login'])) return _('No username defined.');
 		if (!empty($post['user_password'])) {
-			if (empty($post['cpassword']) || $post['user_password'] != $post['cpassword']) return 'Passwords do not match.';
+			if (empty($post['cpassword']) || $post['user_password'] != $post['cpassword']) return _('Passwords do not match.');
 			$post['user_password'] = sanitize($post['user_password'], false);
 			$sql_pwd = "`user_password`=password('" . $post['user_password'] . "'),";
 		} else $sql_pwd = null;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_users', 'user_login');
-		if ($field_length !== false && strlen($post['user_login']) > $field_length) return 'Username is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['user_login']) > $field_length) sprintf(_('Username is too long (maximum %d characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_users', sanitize($post['user_login']), 'user_', 'user_login');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
-			if ($result[0]->user_id != $post['user_id']) return 'This user already exists.';
+			if ($result[0]->user_id != $post['user_id']) return _('This user already exists.');
 		}
 		
 		$sql_edit = null;
@@ -195,12 +199,12 @@ class fm_users {
 		$query = "UPDATE `fm_users` SET $sql WHERE `user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->last_result) return 'Could not update the user in the database.';
+		if (!$fmdb->last_result) return _('Could not update the user in the database.');
 		
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($post['user_login']);
 		
-		addLogEntry("Updated user '{$post['user_login']}'.");
+		addLogEntry(sprintf(_("Updated user '%s'."), $post['user_login']));
 		
 		return true;
 	}
@@ -218,14 +222,14 @@ class fm_users {
 		/** Ensure user is not current LDAP template user */
 		if (getOption('auth_method') == 2) {
 			$template_user_id = getOption('ldap_user_template');
-			if ($id == $template_user_id) return 'This user is the LDAP user template and cannot be deleted at this time.';
+			if ($id == $template_user_id) return _('This user is the LDAP user template and cannot be deleted at this time.');
 		}
 		
 		$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
 		if (!updateStatus('fm_users', $id, 'user_', 'deleted', 'user_id')) {
-			return 'This user could not be deleted.'. "\n";
+			return _('This user could not be deleted.'). "\n";
 		} else {
-			addLogEntry("Deleted user '$tmp_name'.", $fm_name);
+			addLogEntry(sprintf(_("Deleted user '%s'."), $tmp_name), $fm_name);
 			return true;
 		}
 	}
@@ -256,7 +260,7 @@ class fm_users {
 						$edit_status .= '<a class="reset_password" id="' . $row->user_login . '" href="#">' . $__FM_CONFIG['icons']['pwd_reset'] . '</a>';
 					}
 				} else {
-					$edit_status .= '<center>Enabled</center>';
+					$edit_status .= sprintf('<center>%s</center>', _('Enabled'));
 				}
 			}
 			if ($row->user_id != 1) {
@@ -270,10 +274,10 @@ class fm_users {
 		$star = (userCan($row->user_id, 'do_everything')) ? $__FM_CONFIG['icons']['star'] : null;
 		$template_user = ($row->user_template_only == 'yes') ? $__FM_CONFIG['icons']['template_user'] : null;
 		
-		$last_login = ($row->user_last_login == 0) ? 'Never' : date("F d, Y \a\\t H:i T", $row->user_last_login);
+		$last_login = ($row->user_last_login == 0) ? _('Never') : date("F d, Y \a\\t H:i T", $row->user_last_login);
 		if ($row->user_ipaddr) {
 			$user_ipaddr = (verifyIPAddress($row->user_ipaddr) !== false) ? @gethostbyaddr($row->user_ipaddr) : $row->user_ipaddr;
-		} else $user_ipaddr = 'None';
+		} else $user_ipaddr = _('None');
 		$super_admin_status = (userCan($row->user_id, 'do_everything')) ? 'yes' : 'no';
 		
 		if ($row->user_auth_type == 2) {
@@ -281,7 +285,7 @@ class fm_users {
 		} elseif ($row->user_auth_type == 1) {
 			$user_auth_type = $fm_name;
 		} else {
-			$user_auth_type = 'None';
+			$user_auth_type = _('None');
 		}
 		
 		echo <<<HTML
@@ -312,9 +316,9 @@ HTML;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
-		$user_email = $user_module_form = $user_default_module = null;
-		$hidden = $user_form = $user_perm_form = $email_form = $user_options_form = $verbose_form = null;
-		$user_force_pwd_change = $password_form = $user_template_only = null;
+		$user_email = $user_default_module = null;
+		$hidden = $user_perm_form = $return_form_rows = null;
+		$user_force_pwd_change = $user_template_only = null;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -323,6 +327,9 @@ HTML;
 			extract(get_object_vars($data[0]));
 			$user_password = null;
 		}
+		$popup_header = buildPopup('header', $ucaction . ' User');
+		$popup_footer = buildPopup('footer');
+		
 		if (in_array('user_login', $form_bits)) {
 			/** Get field length */
 			$field_length = getColumnLength('fm_users', 'user_login');
@@ -330,91 +337,71 @@ HTML;
 			$username_form = $action == 'add' ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" />' : '<span id="form_username">' . $user_login . '</span>';
 			$hidden = '<input type="hidden" name="user_id" value="' . $user_id . '" />';
 			$hidden .= $action != 'add' ? '<input type="hidden" name="user_login" value="' . $user_login . '" />' : null;
-			$user_form = <<<FORM_ROW
-				<tr>
-					<th width="33%" scope="row"><label for="user_login">User Login</label></th>
-					<td width="67%">$username_form</td>
-				</tr>
-
-FORM_ROW;
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row"><label for="user_login">' . _('User Login') . '</label></th>
+					<td width="67%">' . $username_form . '</td>
+				</tr>';
 		}
 		if (in_array('user_email', $form_bits)) {
 			/** Get field length */
 			$field_length = getColumnLength('fm_users', 'user_login');
 			
-			$email_form = <<<FORM_ROW
-				<tr>
-					<th width="33%" scope="row"><label for="user_email">User Email</label></th>
-					<td width="67%"><input name="user_email" id="user_email" type="email" value="$user_email" size="32" maxlength="$field_length" $disabled /></td>
-				</tr>
-				
-FORM_ROW;
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row"><label for="user_email">' . _('User Email') . '</label></th>
+					<td width="67%"><input name="user_email" id="user_email" type="email" value="' . $user_email . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' /></td>
+				</tr>';
 		}
 
 		if (in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) {
 			if ($action == 'add') $button_disabled = 'disabled';
 			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
-			$password_form = <<<FORM_ROW
-				<tr>
-					<th width="33%" scope="row"><label for="user_password">User Password</label></th>
-					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd('user_password', '$button_id', '$strength');" /></td>
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row"><label for="user_password">' . _('User Password') . '</label></th>
+					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'user_password\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="cpassword">Confirm Password</label></th>
-					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd('cpassword', '$button_id', '$strength');" /></td>
+					<th width="33%" scope="row"><label for="cpassword">' . _('Confirm Password') . '</label></th>
+					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'cpassword\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row">Password Validity</th>
-					<td width="67%"><div id="passwd_check">No Password</div></td>
+					<th width="33%" scope="row">' . _('Password Validity') . '</th>
+					<td width="67%"><div id="passwd_check">' . _('No Password') . '</div></td>
 				</tr>
 				<tr class="pwdhint">
-					<th width="33%" scope="row">Hint</th>
-					<td width="67%">{$__FM_CONFIG['password_hint'][$strength]}</td>
-				</tr>
-			
-FORM_ROW;
+					<th width="33%" scope="row">' . _('Hint') . '</th>
+					<td width="67%">' . $__FM_CONFIG['password_hint'][$strength] . '</td>
+				</tr>';
 		}
 		
 		if (in_array('user_module', $form_bits)) {
 			$active_modules = $user_id ? getActiveModules(true) : getActiveModules();
 			$user_module_options = buildSelect('user_default_module', 'user_default_module', $active_modules, $user_default_module);
 			unset($active_modules);
-			$user_module_form = <<<FORM_ROW
-				<tr>
-					<th width="33%" scope="row">Default Module</th>
-					<td width="67%">
-					$user_module_options
-					</td>
-				</tr>
-
-FORM_ROW;
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row">' . _('Default Module') . '</th>
+					<td width="67%">' . $user_module_options . '</td>
+				</tr>';
 		}
 		
 		if (in_array('user_options', $form_bits)) {
 			$force_pwd_check = ($user_force_pwd_change == 'yes') ? 'checked disabled' : null;
 			$user_template_only_check = ($user_template_only == 'yes') ? 'checked' : null;
-			$user_options_form = <<<FORM_ROW
-				<tr>
-					<th width="33%" scope="row">Options</th>
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row">' . _('Options') . '</th>
 					<td width="67%">
-						<input name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" $force_pwd_check /><label for="user_force_pwd_change">Force Password Change at Next Login</label><br />
-						<input name="user_template_only" id="user_template_only" value="yes" type="checkbox" $user_template_only_check /><label for="user_template_only">Template User</label>
+						<input name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" ' . $force_pwd_check . '/><label for="user_force_pwd_change">' . _('Force Password Change at Next Login') . '</label><br />
+						<input name="user_template_only" id="user_template_only" value="yes" type="checkbox" ' . $user_template_only_check . '/><label for="user_template_only">' . _('Template User') . '</label>
 					</td>
-				</tr>
-			
-FORM_ROW;
+				</tr>';
 		}
 		
 		if (in_array('verbose', $form_bits)) {
 			$hidden .= '<input type="hidden" name="verbose" value="0" />' . "\n";
-			$verbose_form = <<<FORM_ROW
-				<tr>
-					<th width="33%" scope="row">Options</th>
-					<td width="67%"><input name="verbose" id="verbose" type="checkbox" value="1" checked /><label for="verbose">Verbose Output</label></td>
-				</tr>
-			
-FORM_ROW;
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row">' . _('Options') . '</th>
+					<td width="67%"><input name="verbose" id="verbose" type="checkbox" value="1" checked /><label for="verbose">' . _('Verbose Output') . '</label></td>
+				</tr>';
 		}
 		
 		do if (in_array('user_perms', $form_bits)) {
@@ -495,39 +482,23 @@ PERM;
 			}
 			
 			if (!empty($perm_boxes)) {
-				$user_perm_form = <<<PERM
-					<tr><td colspan="2"><br /><br /><i>User Permissions</i></td></tr>
-			$perm_boxes
-
-PERM;
+				$user_perm_form = sprintf('<tr><td colspan="2"><br /><br /><i>%s</i></td></tr>', _('User Permissions')) . $perm_boxes;
 			}
 		} while (false);
 		
-		$popup_header = buildPopup('header', $ucaction . ' User');
-		$popup_footer = buildPopup('footer');
-		
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
-		$return_form .= <<<FORM
-		$popup_header
-			<div class="leftbox">
+		$return_form .= $popup_header . '<div class="leftbox">
 			<form id="fm_user_profile">
-			<input type="hidden" name="action" value="$action" />
-			$hidden
+			<input type="hidden" name="action" value="' . $action . '" />' . $hidden . '
 			<table class="form-table" width="495px">
-				<tr><td colspan="2"><i>User Details</i></td></tr>
-			$user_form
-			$email_form
-			$password_form
-			$user_module_form
-			$user_options_form
-			$verbose_form
-			$user_perm_form
-			</table>
+				<tr><td colspan="2"><i>' . _('User Details') . '</i></td></tr>' . $return_form_rows . $user_perm_form;
+		
+		$return_form .= '</table>
 			</div>
 		</div>
 		<div class="popup-footer">
-			<input type="submit" id="$button_id" name="submit" value="$button_text" class="button primary" $button_disabled />
-			<input type="button" value="Cancel" class="button left" id="cancel_button" />
+			<input type="submit" id="' . $button_id . '" name="submit" value="' . $button_text . '" class="button primary" ' . $button_disabled . '/>
+			<input type="button" value="' . _('Cancel') . '" class="button left" id="cancel_button" />
 		</div>
 		</form>
 		</form>
@@ -537,12 +508,11 @@ PERM;
 					minimumResultsForSearch: -1
 				});
 				$("select.wide_select").select2({
-					width: '300px',
+					width: "300px",
 					minimumResultsForSearch: -1
 				});
 			});
-		</script>
-FORM;
+		</script>';
 
 		return $return_form;
 	}

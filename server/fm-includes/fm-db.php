@@ -38,18 +38,18 @@ class fmdb {
 		global $__FM_CONFIG;
 		$this->dbh = @mysql_connect($dbhost, $dbuser, $dbpassword);
 		if (!$this->dbh) {
-			bailOut('<center>The connection to the database has failed.  Please check the configuration.</center><p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">Try Again</a></p>');
+			bailOut('<center>' . _('The connection to the database has failed. Please check the configuration.') . '</center><p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">' . _('Try Again') . '</a></p>');
 		}
 
 		$this->select($dbname);
 		if (!@mysql_query("SELECT * FROM `fm_options`", $this->dbh)) {
-			bailOut('<center>The database is installed; however, the associated application tables are missing.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">Start Setup</a></p>');
+			bailOut('<center>' . _('The database is installed; however, the associated application tables are missing. Click \'Start Setup\' to start the installation process.') . '<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
 		}
 		
 		/** Check if there is an admin account */
 		$this->query("SELECT * FROM `fm_users` WHERE `user_id`=1");
 		if (!$this->num_rows) {
-			bailOut('<center>The database is installed; however, an administrative account was not created.  Click \'Continue Setup\' to continue the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">Continue Setup</a></p>');
+			bailOut('<center>' . _('The database is installed; however, an administrative account was not created. Click \'Continue Setup\' to continue the installation process.') . '<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">' . _('Continue Setup') . '</a></p>');
 		}
 	}
 
@@ -60,7 +60,7 @@ class fmdb {
 	function select($db) {
 		global $__FM_CONFIG;
 		if (!@mysql_select_db($db, $this->dbh)) {
-			bailOut('<center>The database is not installed.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">Start Setup</a></p>');
+			bailOut('<center>' . _('The database is not installed.  Click \'Start Setup\' to start the installation process.') . '<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
 		}
 	}
 	
@@ -92,7 +92,6 @@ class fmdb {
 				$i++;
 			}
 			$num_rows = 0;
-//			unset($this->last_result);
 			while ($row = @mysql_fetch_object($this->result)) {
 				$this->last_result[$num_rows] = $row;
 				$num_rows++;
@@ -129,7 +128,7 @@ class fmdb {
 	 * Print SQL/DB error.
 	 */
 	function print_error($query = '') {
-		$str = mysql_error($this->dbh) . " | Query: [$query]";
+		$str = mysql_error($this->dbh) . ' | ' . _('Query') . ": [$query]";
 		$str = htmlspecialchars($str, ENT_QUOTES);
 
 		// Is error output turned on or not..
@@ -137,7 +136,7 @@ class fmdb {
 			// If there is an error then take note of it
 			if ($query) {
 				$this->last_error = "<div id='error'>
-				<p class='wpdberror'><strong>Database error:</strong> [$str]</p>
+				<p class='wpdberror'><strong>" . _('Database error') . ":</strong> [$str]</p>
 				</div>";
 			}
 		} else {
