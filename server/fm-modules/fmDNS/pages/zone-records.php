@@ -75,16 +75,15 @@ if (reloadZone($domain_id)) {
 	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
 }
 if (!getNSCount($domain_id)) {
-	$response = '** One more more NS records still needs to be created for this zone **';
+	$response = sprintf('** %s **', _('One more more NS records still needs to be created for this zone'));
 }
 if (!getSOACount($domain_id)) {
-	$response = '** The SOA record still needs to be created for this zone **';
+	$response = sprintf('** %s **', _('The SOA record still needs to be created for this zone'));
 }
 
 $body = '<div id="body_container" class="fm-noscroll">' . "\n";
 if (!empty($response)) $body .= '<div id="response"><p>' . $response . '</p></div>';
-$body .= "	<h2>Records</h2>
-	$avail_types\n";
+$body .= sprintf("<h2>%s</h2>%s\n", _('Records'), $avail_types);
 	
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php">
@@ -102,9 +101,7 @@ if ($record_type == 'SOA') {
 	else $result = null;
 	$body .= $form . $fm_dns_records->buildSOA($result);
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		$body .= '
-	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
-</form>' . "\n";
+		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", _('Validate'));
 	}
 } else {
 	switch ($record_type) {
@@ -148,15 +145,11 @@ if ($record_type == 'SOA') {
 	$body .= $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		$body .= '
-	</div><div class="new-container">
+		$body .= sprintf('</div><div class="new-container">
 	<a name="#manage"></a>
-	<h2>Add Record</h2>' . "\n";
-
-		$body .= $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id);
-		$body .= '
-	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
-</form></div>' . "\n";
+	<h2>%s</h2>
+	<p><input type="submit" name="submit" value="%s" class="button" /></p>
+</form></div>' . "\n", _('Add Record'), $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id), _('Validate'));
 	}
 }
 

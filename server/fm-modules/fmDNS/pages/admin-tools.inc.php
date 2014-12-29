@@ -34,7 +34,7 @@ $selected_zone = 0;
 /** Process ad-hoc zone creations and record imports */
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
-		case 'Import Records':
+		case _('Import Records'):
 			if (!empty($_FILES['import-file']['tmp_name'])) {
 				$block_style = 'style="display: block;"';
 				$output = $fm_module_tools->zoneImportWizard();
@@ -43,7 +43,7 @@ if (array_key_exists('submit', $_POST)) {
 				}
 			}
 			break;
-		case 'Save':
+		case _('Save'):
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
 				$response = $insert_id;
@@ -59,47 +59,44 @@ $button = null;
 if ($available_zones) {
 	$zone_options = buildSelect('domain_id', 1, $available_zones, $selected_zone);
 	if (currentUserCan('run_tools') && currentUserCan('manage_records', $_SESSION['module'])) {
-		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="Import Records" class="button" /></p>';
+		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="' . _('Import Records') . '" class="button" /></p>';
 	}
 } else {
-	$zone_options = 'You need to define one or more zones first.';
+	$zone_options = _('You need to define one or more zones first.');
 }
 
-$tools_option[] = <<<HTML
-			<h2>Import Zone Files</h2>
-			<p>Import records from BIND-compatible zone files.</p>
+$tools_option[] = sprintf('<h2>%s</h2>
+			<p>%s</p>
 			<table class="form-table">
 				<tr>
-					<th>File to import:</th>
+					<th>%s:</th>
 					<td><input id="import-file" name="import-file" type="file" /></td>
 				</tr>
 				<tr>
-					<th>Zone to import to:</th>
+					<th>%s:</th>
 					<td>
-						$zone_options<br />
-						<p id="table_edits" name="domains"><a id="plus" href="#" title="Add New" name="forward">+ Add New Zone</a></p>
+						%s<br />
+						<p id="table_edits" name="domains"><a id="plus" href="#" title="%s" name="forward">+ %s</a></p>
 					</td>
 			</table>
-			$button
-			<br />
-HTML;
+			%s
+			<br />', _('Import Zone Files'), _('Import records from BIND-compatible zone files.'),
+				_('File to import'), _('Zone to import to'), $zone_options, _('Add New'), _('Add New Zone'), $button);
 
 $button = null;
 if (currentUserCan('run_tools') && currentUserCan('manage_servers', $_SESSION['module'])) {
-	$button = '<p class="step"><input id="dump-cache" name="submit" type="submit" value="Dump Cache" class="button" /> '
-			. '<input id="clear-cache" name="submit" type="submit" value="Clear Cache" class="button" /></p>';
+	$button = sprintf('<p class="step"><input id="dump-cache" name="submit" type="submit" value="%s" class="button" /> '
+			. '<input id="clear-cache" name="submit" type="submit" value="%s" class="button" /></p>', _('Dump Cache'), _('Clear Cache'));
 }
 
 $name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $fm_dns_zones->availableDNSServers(), 0, 5, null, true, null, null, 'Select one or more servers');
 
-$tools_option[] = <<<HTML
-			<div id="admin-tools-select">
-			<h2>Cache Management</h2>
-			<p>Dump or clear server cache.</p>
-			$name_servers
-			$button
+$tools_option[] = sprintf('<div id="admin-tools-select">
+			<h2>%s</h2>
+			<p>%s</p>
+			%s
+			%s
 			</div>
-			<br />
-HTML;
+			<br />', _('Cache Management'), _('Dump or clear server cache.'), $name_servers, $button);
 
 ?>

@@ -50,14 +50,14 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $_GET['id'], 'server_', $_GET['status'], 'server_id')) {
-				$response = 'This server could not be ' . $_GET['status'] . '.';
+				$response = sprintf(_('This server could not be set to %s.') . "\n", $_GET['status']);
 			} else {
 				/* set the server_build_config flag */
 				$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_build_config`='yes' WHERE `server_id`=" . sanitize($_GET['id']);
 				$result = $fmdb->query($query);
 				
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-				addLogEntry("Set server '$tmp_name' status to " . $_GET['status'] . '.');
+				addLogEntry(sprintf(_('Set server (%s) status to %s.'), $tmp_name, $_GET['status']));
 				header('Location: ' . $GLOBALS['basename']);
 			}
 		}

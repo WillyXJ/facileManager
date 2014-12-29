@@ -99,11 +99,11 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $_GET['id'], 'cfg_', $_GET['status'], 'cfg_id')) {
-				$response = 'This item could not be ' . $_GET['status'] . '.';
+				$response = sprintf(_('This item could not be set to %s.') . "\n", $_GET['status']);
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
-				addLogEntry("Set option '$tmp_name' status to " . $_GET['status'] . '.');
+				addLogEntry(sprintf(_('Set option (%s) status to %s.'), $tmp_name, $_GET['status']));
 				header('Location: ' . $GLOBALS['basename'] . $type_id_uri . $server_serial_no_uri);
 			}
 		}

@@ -29,7 +29,7 @@ class fm_dns_controls {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="controls">There are no controls.</p>';
+			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', _('There are no controls.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_dns_controls {
 							'name' => 'controls'
 						);
 
-			$title_array = array('IP Address', 'Port', 'Address List', 'Keys', 'Comment');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(_('IP Address'), _('Port'), _('Address List'), _('Keys'), _('Comment'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -84,9 +84,9 @@ class fm_dns_controls {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the control because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the control because a database error occurred.');
 
-		addLogEntry("Added control:\nIP: {$post['control_ip']}\nAddresses: $control_addresses\nComment: {$post['control_comment']}");
+		addLogEntry(_('Added control') . ":\n" . _('IP') . ": {$post['control_ip']}\n" . _('Addresses') . ": $control_addresses\n" . _('Comment') . ": {$post['control_comment']}");
 		return true;
 	}
 
@@ -120,13 +120,13 @@ class fm_dns_controls {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET $sql WHERE `control_id`={$post['control_id']}";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the control because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the control because a database error occurred.');
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
 		$control_addresses = $post['control_predefined'] == 'as defined:' ? $post['control_addresses'] : $post['control_predefined'];
-		addLogEntry("Updated control '$old_name' to the following:\nName: {$post['control_name']}\nAddresses: $control_addresses\nComment: {$post['control_comment']}");
+		addLogEntry(sprintf(_("Updated control '%s' to the following:"), $old_name) . "\n" . _('Name') . ": {$post['control_name']}\n" . _('Addresses') . ": $control_addresses\n" . _('Comment') . ": {$post['control_comment']}");
 		return true;
 	}
 	
@@ -139,10 +139,10 @@ class fm_dns_controls {
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_', 'control_id', 'control_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', $id, 'control_', 'deleted', 'control_id') === false) {
-			return 'This control could not be deleted because a database error occurred.';
+			return _('This control could not be deleted because a database error occurred.');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry("Deleted control '$tmp_name'.");
+			addLogEntry(sprintf(_("Control '%s' was deleted."), $tmp_name));
 			return true;
 		}
 	}
@@ -292,15 +292,15 @@ FORM;
 		if (is_array($post['control_keys'])) $post['control_keys'] = join(',', $post['control_keys']);
 		
 		if (!empty($post['control_ip']) && $post['control_ip'] != '*') {
-			if (!verifyIPAddress($post['control_ip'])) $post['control_ip'] . ' is not a valid IP address.';
+			if (!verifyIPAddress($post['control_ip'])) sprintf(_('%s is not a valid IP address.'), $post['control_ip']);
 		} else $post['control_ip'] = '*';
 		
 		if (empty($post['control_addresses'])) {
-			return "Allowed addresses not defined.";
+			return _('Allowed addresses not defined.');
 		}
 		
 		if (!empty($post['control_port'])) {
-			if (!verifyNumber($post['control_port'], 0, 65535)) return $post['control_port'] . ' is not a valid port number.';
+			if (!verifyNumber($post['control_port'], 0, 65535)) return sprintf(_('%d is not a valid port number.'), $post['control_port']);
 		} else $post['control_port'] = 953;
 		
 		return $post;

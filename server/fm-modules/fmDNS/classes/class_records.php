@@ -31,7 +31,7 @@ class fm_dns_records {
 		$return = null;
 		
 		if (!$result) {
-			$return = '<p id="table_edits" class="noresult">There are no ' . $record_type . ' records.</p>';
+			$return = sprintf('<p id="table_edits" class="noresult">%s</p>', sprintf(_('There are no %s records.', $record_type)));
 		} else {
 			$results = $fmdb->last_result;
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
@@ -212,11 +212,10 @@ class fm_dns_records {
 
 		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');
 		$return .= $this->getInputForm(strtoupper($record_type), true, $domain_id);
-		$return .= <<<HTML
-			</tbody>
+		$return .= sprintf('</tbody>
 		</table>
-		<p class="add_records"><a id="add_records" href="#">+ Add more records</a></p>
-HTML;
+		<p class="add_records"><a id="add_records" href="#">+ %s</a></p>', _('Add more records'));
+		
 		return $return;
 	}
 
@@ -226,71 +225,71 @@ HTML;
 		$show_value = true;
 		if ($type == 'SOA') {
 			$show_value = false;
-			$title_array[] = array('title' => 'Name', 'rel' => 'soa_name');
-			$title_array[] = array('title' => 'Master', 'rel' => 'soa_master_server');
-			$title_array[] = array('title' => 'E-mail', 'rel' => 'soa_email_address');
-			$title_array[] = array('title' => 'Refresh', 'rel' => 'soa_refresh');
-			$title_array[] = array('title' => 'Retry', 'rel' => 'soa_retry');
-			$title_array[] = array('title' => 'Expire', 'rel' => 'soa_expire');
-			$title_array[] = array('title' => 'TTL', 'rel' => 'soa_ttl');
+			$title_array[] = array('title' => _('Name'), 'rel' => 'soa_name');
+			$title_array[] = array('title' => _('Master'), 'rel' => 'soa_master_server');
+			$title_array[] = array('title' => _('E-mail'), 'rel' => 'soa_email_address');
+			$title_array[] = array('title' => _('Refresh'), 'rel' => 'soa_refresh');
+			$title_array[] = array('title' => _('Retry'), 'rel' => 'soa_retry');
+			$title_array[] = array('title' => _('Expire'), 'rel' => 'soa_expire');
+			$title_array[] = array('title' => _('TTL'), 'rel' => 'soa_ttl');
 		}
 		if ($type == 'DOMAIN') {
 			$show_value = false;
-			$title_array[] = array('title' => 'Name', 'rel' => $type . '_name');
-			$title_array[] = array('title' => 'Name Servers', 'rel' => $type . '_name_servers');
-			$title_array[] = array('title' => 'Views', 'rel' => $type . '_views');
-			$title_array[] = array('title' => 'Type', 'rel' => $type . '_type');
+			$title_array[] = array('title' => _('Name'), 'rel' => $type . '_name');
+			$title_array[] = array('title' => _('Name Servers'), 'rel' => $type . '_name_servers');
+			$title_array[] = array('title' => _('Views'), 'rel' => $type . '_views');
+			$title_array[] = array('title' => _('Type'), 'rel' => $type . '_type');
 		}
 		if (!in_array($type, array('SOA', 'DOMAIN'))) {
-			$title_array[] = array('title' => 'Record', 'rel' => 'record_name');
-			$title_array[] = array('title' => 'TTL', 'rel' => 'record_ttl');
-			$title_array[] = array('title' => 'Class', 'rel' => 'record_class');
+			$title_array[] = array('title' => _('Record'), 'rel' => 'record_name');
+			$title_array[] = array('title' => _('TTL'), 'rel' => 'record_ttl');
+			$title_array[] = array('title' => _('Class'), 'rel' => 'record_class');
 		}
 		if ($type == 'CERT' ) {
-			$title_array[] = array('title' => 'Type', 'rel' => 'record_cert_type');
-			$title_array[] = array('title' => 'Key Tag', 'rel' => 'record_key_tag');
+			$title_array[] = array('title' => _('Type'), 'rel' => 'record_cert_type');
+			$title_array[] = array('title' => _('Key Tag'), 'rel' => 'record_key_tag');
 		}
 		if (in_array($type, array('CERT', 'SSHFP'))) {
-			$title_array[] = array('title' => 'Algorithm', 'rel' => 'record_algorithm');
+			$title_array[] = array('title' => _('Algorithm'), 'rel' => 'record_algorithm');
 		}
 		if ($type == 'HINFO') {
-			$title_array[] = array('title' => 'Hardware', 'rel' => 'record_value');
-			$title_array[] = array('title' => 'OS', 'rel' => 'record_os');
+			$title_array[] = array('title' => _('Hardware'), 'rel' => 'record_value');
+			$title_array[] = array('title' => _('OS'), 'rel' => 'record_os');
 			$show_value = false;
 		}
 		if (in_array($type, array('DNSKEY', 'KEY'))) {
-			$title_array[] = array('title' => 'Flags', 'rel' => 'record_flags');
-			$title_array[] = array('title' => 'Algorithm', 'rel' => 'record_algorithm');
+			$title_array[] = array('title' => _('Flags'), 'rel' => 'record_flags');
+			$title_array[] = array('title' => _('Algorithm'), 'rel' => 'record_algorithm');
 		}
 		
-		if ($show_value) $title_array[] = array('title' => 'Value', 'rel' => 'record_value');
+		if ($show_value) $title_array[] = array('title' => _('Value'), 'rel' => 'record_value');
 				
 		if ($type == 'RP' ) {
-			$title_array[] = array('title' => 'Text', 'rel' => 'record_text');
+			$title_array[] = array('title' => _('Text'), 'rel' => 'record_text');
 		}
 		
 		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
 		$priority = array('MX', 'SRV', 'KX');
 		
-		if (in_array($type, $priority)) $title_array[] = array('title' => 'Priority', 'rel' => 'record_priority');
+		if (in_array($type, $priority)) $title_array[] = array('title' => _('Priority'), 'rel' => 'record_priority');
 		
 		if ($type == 'SRV') {
-			$title_array[] = array('title' => 'Weight', 'rel' => 'record_weight');
-			$title_array[] = array('title' => 'Port', 'rel' => 'record_port');
+			$title_array[] = array('title' => _('Weight'), 'rel' => 'record_weight');
+			$title_array[] = array('title' => _('Port'), 'rel' => 'record_port');
 		}
 		
 		if (!in_array($type, array('SOA', 'DOMAIN'))) {
-			$title_array[] = array('title' => 'Comment', 'rel' => 'record_comment');
+			$title_array[] = array('title' => _('Comment'), 'rel' => 'record_comment');
 		}
 		
-		if (in_array($type, $append)) $title_array[] = array('title' => 'Append Domain', 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null, 'rel' => 'record_append');
+		if (in_array($type, $append)) $title_array[] = array('title' => _('Append Domain'), 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null, 'rel' => 'record_append');
 		
-		if (!in_array($type, array('SOA', 'DOMAIN'))) $title_array[] = array('title' => 'Status', 'rel' => 'record_status');
+		if (!in_array($type, array('SOA', 'DOMAIN'))) $title_array[] = array('title' => _('Status'), 'rel' => 'record_status');
 		if (empty($_POST)) {
-			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
+			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 		} else {
-			$title_array[] = array('title' => 'Valid', 'style' => 'text-align: center;');
-			array_unshift($title_array, 'Action');
+			$title_array[] = array('title' => _('Valid'), 'style' => 'text-align: center;');
+			array_unshift($title_array, _('Action'));
 		}
 		
 		return $title_array;
@@ -316,9 +315,9 @@ HTML;
 		$yeschecked = (isset($record_append) && $record_append == 'yes') ? 'checked' : '';
 		$nochecked = (isset($record_append) && $record_append == 'no') ? 'checked' : '';
 		
-		$statusopt[0][] = 'Active';
+		$statusopt[0][] = _('Active');
 		$statusopt[0][] = 'active';
-		$statusopt[1][] = 'Disabled';
+		$statusopt[1][] = _('Disabled');
 		$statusopt[1][] = 'disabled';
 		$status = BuildSelect($action . '[_NUM_][record_status]', '_NUM_', $statusopt, $record_status);
 		$field_values['class'] = $record_status;
@@ -403,15 +402,15 @@ HTML;
 		
 			$field_values['data']['Comment'] = '><input maxlength="200" type="text" name="' . $action . '[_NUM_][record_comment]" value="' . $record_comment . '" />';
 			
-			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' align="center"><input ' . $yeschecked . ' type="radio" id="record_append[_NUM_][0]" name="' . $action . '[_NUM_][record_append]" value="yes" /><label class="radio" for="record_append[_NUM_][0]"> yes</label> <input ' . $nochecked . ' type="radio" id="record_append[_NUM_][1]" name="' . $action . '[_NUM_][record_append]" value="no" /><label class="radio" for="record_append[_NUM_][1]"> no</label>';
+			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' align="center"><input ' . $yeschecked . ' type="radio" id="record_append[_NUM_][0]" name="' . $action . '[_NUM_][record_append]" value="yes" /><label class="radio" for="record_append[_NUM_][0]"> ' . _('yes') . '</label> <input ' . $nochecked . ' type="radio" id="record_append[_NUM_][1]" name="' . $action . '[_NUM_][record_append]" value="no" /><label class="radio" for="record_append[_NUM_][1]"> ' . _('no') . '</label>';
 			
 			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label>' : null;
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">' . _('Create PTR') . '</label>' : null;
 			} else {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">Create PTR</label><br />' : ' align="center">';
-				$field_values['data']['Actions'] .= '<input type="checkbox" id="record_delete[' . $record_id . ']" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete[' . $record_id . ']">Delete</label>';
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">' . _('Create PTR') . '</label><br />' : ' align="center">';
+				$field_values['data']['Actions'] .= '<input type="checkbox" id="record_delete[' . $record_id . ']" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete[' . $record_id . ']">' . _('Delete') . '</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
@@ -440,7 +439,7 @@ HTML;
 				} else {
 					$field_values['data']['Actions'] .= null;
 				}
-				$field_values['data']['Actions'] .= '/>Skip Import</label>';
+				$field_values['data']['Actions'] .= '/>' . _('Skip Import') . '</label>';
 			} elseif (!currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed && $domain_id != $parent_domain_id) {
 				if (in_array($record_id, $this->getSkippedRecordIDs($parent_domain_id))) {
 					return null;
@@ -487,22 +486,18 @@ HTML;
 		
 		if (array_search('template_menu', $show) !== false) {
 			$soa_templates = buildSelect("{$action}[soa_template_chosen]", 'soa_template_chosen', $this->availableSOATemplates(), $soa_id);
-			$soa_templates = <<<HTML
-	<div class="soa-template-dropdown">
-		<strong>Select a Template</strong>
-		$soa_templates
-	</div>
-HTML;
+			$soa_templates = sprintf('<div class="soa-template-dropdown">
+		<strong>%s</strong>
+		%s
+	</div>', _('Select a Template'), $soa_templates);
 		}
 	
 		if (array_search('create_template', $show) !== false) {
 			$template_name_show_hide = 'none';
-			$create_template = <<<HTML
-		<tr>
-			<th>Create Template</th>
-			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" /><label for="soa_create_template"> yes</label></td>
-		</tr>
-HTML;
+			$create_template = sprintf('<tr>
+			<th>%s</th>
+			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" /><label for="soa_create_template"> %s</label></td>
+		</tr>', _('Create Template'), _('yes'));
 		} else {
 			$template_name_show_hide = 'table-row';
 			$create_template = <<<HTML
@@ -513,13 +508,11 @@ HTML;
 	
 		if (array_search('template_name', $show) !== false) {
 			$soa_default_checked = $soa_id == $this->getDefaultSOA() ? 'checked' : null;
-			$template_name = <<<HTML
-		<tr id="soa_template_name" style="display: $template_name_show_hide">
-			<th>Template Name</th>
+			$template_name = sprintf('<tr id="soa_template_name" style="display: $template_name_show_hide">
+			<th>%s</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" value="$soa_name" /><br />
-			<input type="checkbox" id="soa_default" name="{$action}[$soa_id][soa_default]" value="yes" $soa_default_checked /><label for="soa_default"> Make Default Template</label></td>
-		</tr>
-HTML;
+			<input type="checkbox" id="soa_default" name="{$action}[$soa_id][soa_default]" value="yes" $soa_default_checked /><label for="soa_default"> %s</label></td>
+		</tr>', _('Template Name'), _('Make Default Template'));
 		}
 	
 		return <<<HTML
@@ -627,7 +620,7 @@ HTML;
 	function availableSOATemplates() {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return[0][] = 'Custom';
+		$return[0][] = _('Custom');
 		$return[0][] = '0';
 		
 		$query = "SELECT soa_id,soa_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}soa WHERE account_id='{$_SESSION['user']['account_id']}' 

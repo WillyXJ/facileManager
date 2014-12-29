@@ -40,10 +40,9 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 		if (strpos($result[0]->def_type, 'address_match_element') !== false) {
 			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
 
-			echo <<<HTML
-					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
-					<td width="67%"><input type="hidden" name="cfg_data" class="address_match_element" value="$cfg_data" /><br />
-					{$result[0]->def_type}</td>
+			printf('<th width="33%" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67%"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
+					%s</td>
 					<script>
 					$(".address_match_element").select2({
 						createSearchChoice:function(term, data) { 
@@ -53,20 +52,15 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 							{return {id:term, text:term};} 
 						},
 						multiple: true,
-						width: '200px',
+						width: "200px,"
 						tokenSeparators: [",", " ", ";"],
-						data: $available_acls
+						data: %s
 					});
-					</script>
-
-HTML;
+					</script>', _('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif ($result[0]->def_dropdown == 'no') {
-			echo <<<HTML
-					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
-					<td width="67%"><input name="cfg_data" id="cfg_data" type="text" value='$cfg_data' size="40" /><br />
-					{$result[0]->def_type}</td>
-
-HTML;
+			printf('<th width="33%" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67%"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
+					%s</td>', _('Option Value'), $cfg_data, $result[0]->def_type);
 		} else {
 			/** Build array of possible values */
 			$raw_def_type_array = explode(')', str_replace('(', '', $result[0]->def_type));
@@ -84,11 +78,8 @@ HTML;
 				}
 				$i++;
 			}
-			echo <<<HTML
-					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
-					<td width="67%">$dropdown</td>
-
-HTML;
+			printf('<th width="33%" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67%">%s</td>', _('Option Value'), $dropdown);
 		}
 	}
 	exit;

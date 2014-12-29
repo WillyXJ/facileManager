@@ -29,7 +29,7 @@ class fm_module_options {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="options">There are no options.</p>';
+			printf('<p id="table_edits" class="noresult" name="options">%s</p>', _('There are no options.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,10 +40,10 @@ class fm_module_options {
 							'name' => 'options'
 						);
 
-			$title_array[] = array('title' => 'Option', 'rel' => 'cfg_name');
-			$title_array[] = array('title' => 'Value', 'rel' => 'cfg_data');
-			$title_array[] = array('title' => 'Comment', 'class' => 'header-nosort');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
+			$title_array[] = array('title' => _('Option'), 'rel' => 'cfg_name');
+			$title_array[] = array('title' => _('Value'), 'rel' => 'cfg_data');
+			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -67,7 +67,7 @@ class fm_module_options {
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
-		if ($fmdb->num_rows) return 'This record already exists.';
+		if ($fmdb->num_rows) return _('This record already exists.');
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
@@ -80,8 +80,8 @@ class fm_module_options {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'cfg_comment') return 'Empty values are not allowed.';
-				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return $clean_data . ' is not an acceptable option name.';
+				if (!strlen($clean_data) && $key != 'cfg_comment') return _('Empty values are not allowed.');
+				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return sprintf(_('%s is not an acceptable option name.'), $clean_data);
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
 			}
@@ -92,7 +92,7 @@ class fm_module_options {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'A database error occurred. ' . $fmdb->last_error;
+		if (!$fmdb->result) return _('A database error occurred.') . ' ' . $fmdb->last_error;
 
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
@@ -172,10 +172,10 @@ class fm_module_options {
 		$tmp_server_name = $server_serial_no ? getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
-			return 'This option could not be deleted.'. "\n";
+			return _('This option could not be deleted.') . "\n";
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry("Deleted option '$tmp_name' for $tmp_server_name.");
+			addLogEntry(sprintf(_("Option '%s' for %s was deleted."), $tmp_name, $tmp_server_name));
 			return true;
 		}
 	}

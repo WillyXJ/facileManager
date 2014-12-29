@@ -39,7 +39,7 @@ include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_tem
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {
 	
-	$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
+	$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
 
 	echo buildPopup('header', 'Reload Results') . '<pre>';
 	echo processBulkDomainIDs($_POST['item_id']);
@@ -53,7 +53,7 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	return;
 }
 
-$unpriv_message = 'You do not have sufficient privileges.';
+$unpriv_message = _('You do not have sufficient privileges.');
 $checks_array = array('servers' => 'manage_servers',
 					'views' => 'manage_servers',
 					'acls' => 'manage_servers',

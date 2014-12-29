@@ -85,7 +85,7 @@ if (isset($create) && is_array($create)) {
 	
 	if (isset($import_records)) {
 		$domain_name = displayFriendlyDomainName(getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-		addLogEntry("Imported $record_count records from '$import_file' into $domain_name.");
+		addLogEntry(sprintf(ngettext('Imported %d records from \'%1$s\' into %2$s.'), $record_count, $import_file, $domain_name));
 	}
 }
 

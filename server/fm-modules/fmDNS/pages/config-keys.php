@@ -59,11 +59,11 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $_GET['id'], 'key_', $_GET['status'], 'key_id')) {
-				$response = 'This item could not be '. $_GET['status'] . '.';
+				$response = sprintf(_('This item could not be set to %s.') . "\n", $_GET['status']);
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
-				addLogEntry("Set key '$tmp_name' status to " . $_GET['status'] . '.');
+				addLogEntry(sprintf(_('Set key (%s) status to %s.'), $tmp_name, $_GET['status']));
 				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
 			}
 		}

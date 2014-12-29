@@ -27,7 +27,7 @@ if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) u
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_views.php');
 
-$view_option = (isset($_GET['view_option'])) ? ucfirst($_GET['view_option']) : 'Views';
+$view_option = (isset($_GET['view_option'])) ? ucfirst($_GET['view_option']) : _('Views');
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $response = isset($response) ? $response : null;
 
@@ -60,11 +60,11 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_GET['id'], 'view_', $_GET['status'], 'view_id')) {
-				$response = 'This item could not be '. $_GET['status'] . '.';
+				$response = sprintf(_('This item could not be set to %s.') . "\n", $_GET['status']);
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-				addLogEntry("Set view '$tmp_name' status to " . $_GET['status'] . '.');
+				addLogEntry(sprintf(_('Set view (%s) status to %s.'), $tmp_name, $_GET['status']));
 				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
 			}
 		}
