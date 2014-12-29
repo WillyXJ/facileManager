@@ -8,6 +8,8 @@
 * Server - [feature] FM_NO_HTACCESS is now a supported defined constant to
            remove .htaccess requirement (Issue #73).
 * Server - [improvement] Updated help file.
+* Server - [bug] Installer now checks to ensure the database and records already
+           exist before running (Issue #166).
 
 2.0-alpha1 (2014-11-20)
 =======================

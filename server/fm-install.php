@@ -86,16 +86,16 @@ switch ($step) {
 		$query = "SELECT option_id FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `option_name`='fm_db_version'";
 		$result = @mysql_query($query, $link);
 		
-//		if ($result && @mysql_num_rows($result)) {
-//			/** Check if the default admin account exists */
-//			if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
-//				header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4');
-//			} else {
-//				header('Location: ' . $GLOBALS['RELPATH']);
-//			}
-//		} else {
+		if ($result && @mysql_num_rows($result)) {
+			/** Check if the default admin account exists */
+			if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
+				header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4');
+			} else {
+				header('Location: ' . $GLOBALS['RELPATH']);
+			}
+		} else {
 			fmInstall($link, $__FM_CONFIG['db']['name']);
-//		}
+		}
 		break;
 	case 4:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
