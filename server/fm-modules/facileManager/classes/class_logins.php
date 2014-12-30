@@ -32,11 +32,7 @@ class fm_login {
 	function printLoginForm() {
 		global $fm_name;
 		
-		$translate_login    = _('Login');
-		$translate_username = _('Username');
-		$translate_password = _('Password');
-		
-		printHeader($translate_login, 'login');
+		printHeader(_('Login'), 'login');
 		
 		/** Cannot change password without mail_enable defined */
 		$mail_enable = (getOption('fm_db_version') >= 18) ? getOption('mail_enable') : false;
@@ -45,32 +41,29 @@ class fm_login {
 		
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
-		echo <<<HTML
-		<form id="loginform" action="{$_SERVER['REQUEST_URI']}" method="post">
+		printf('<form id="loginform" action="%1$s" method="post">
 		<div id="fm-branding">
-			<img src="$branding_logo" /><span>Login</span>
+			<img src="%2$s" /><span>%3$s</span>
 		</div>
 		<div id="login_form">
 		<table>
 			<tr>
 				<td>
 					<div class="input-wrapper">
-						<input type="text" size="25" name="username" id="username" placeholder="$translate_username" />
+						<input type="text" size="25" name="username" id="username" placeholder="%4$s" />
 					</div>
 				</td>
 				<td>
 					<div class="input-wrapper">
-						<input type="password" size="25" name="password" id="password" placeholder="$translate_password" />
+						<input type="password" size="25" name="password" id="password" placeholder="%5$s" />
 					</div>
 				</td>
-				<td><input name="submit" id="loginbtn" type="submit" value="$translate_login" class="button" /></td>
+				<td><input name="submit" id="loginbtn" type="submit" value="%3$s" class="button" /></td>
 			</tr>
 		</table>
-		$forgot_link
+		%6$s
 		</form>
-		</div>
-	
-HTML;
+		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'), _('Password'), $forgot_link);
 		
 		exit(printFooter());
 	}
@@ -92,35 +85,29 @@ HTML;
 		global $fm_name;
 		printHeader(_('Password Reset'), 'login');
 		
-		$translate_reset    = _('Reset Password');
-		$translate_username = _('Username');
-		$translate_loginfm  = _('&larr; Login form');
-
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 		
-		echo <<<HTML
-		<form id="loginform" action="{$_SERVER['PHP_SELF']}?forgot_password" method="post">
+		printf('<form id="loginform" action="%s?forgot_password" method="post">
 		<input type="hidden" name="reset_pwd" value="1" />
 		<div id="fm-branding">
-			<img src="$branding_logo" /><span>$translate_reset</span>
+			<img src="%s" /><span>%s</span>
 		</div>
 		<div id="login_form">
 		<table>
 			<tr>
 				<td>
 					<div class="input-wrapper">
-						<input type="text" name="user_login" id="user_login" placeholder="$translate_username" style="width: 400px;" />
+						<input type="text" name="user_login" id="user_login" placeholder="%s" style="width: 400px;" />
 					</div>
 				</td>
-				<td><input name="submit" id="forgotbtn" type="submit" value="Submit" class="button" /></td>
+				<td><input name="submit" id="forgotbtn" type="submit" value="%s" class="button" /></td>
 			</tr>
 		</table>
-		<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">$translate_loginfm</a></p>
-		<div id="message">$message</div>
+		<p id="forgotton_link"><a href="%s">&larr; %s</a></p>
+		<div id="message">%s</div>
 		</form>
-		</div>
-	
-HTML;
+		</div>', $_SERVER['PHP_SELF'], $branding_logo, _('Reset Password'), _('Username'),
+				_('Submit'), $GLOBALS['RELPATH'], _('Login form'), $message);
 	}
 	
 		
@@ -430,17 +417,16 @@ HTML;
 </html>
 BODY;
 		} else {
-			$body = <<<BODY
-Hi {$user_info['user_login']},
+			$body = sprintf('Hi %s,
 
-You (or somebody else) has requested a link to reset your $fm_name password.
+You (or somebody else) has requested a link to reset your %s password.
 
-If you don't want to reset your password, then you can ignore this message.
+If you don\'t want to reset your password, then you can ignore this message.
 
 To reset your password, click the following link:
 
-{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}
-BODY;
+%s',
+	$user_info['user_login'], $fm_name, "{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}");
 		}
 		
 		return $body;

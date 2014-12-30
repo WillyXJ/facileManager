@@ -93,7 +93,7 @@ class fm_module_servers {
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($post['server_name']) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(ngettext('Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name');
@@ -185,7 +185,7 @@ class fm_module_servers {
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($post['server_name']) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(ngettext('Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name', "AND server_id!='{$post['server_id']}'");
@@ -290,7 +290,7 @@ class fm_module_servers {
 			/** Delete server */
 			$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_id, 'server_', 'deleted', 'server_id')) {
-				addLogEntry(sprintf(_("Server '%s' (%s). was deleted"), $tmp_name, $server_serial_no));
+				addLogEntry(sprintf(_("Server '%s' (%s) was deleted"), $tmp_name, $server_serial_no));
 				return true;
 			}
 		}
@@ -600,7 +600,7 @@ FORM;
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return sprintf('<p class="error">%s</p>'. "\n", _('Failed: SSH key is not defined.'));
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL('General')));
 				}
 				
 				$temp_ssh_key = '/tmp/fm_id_rsa';
