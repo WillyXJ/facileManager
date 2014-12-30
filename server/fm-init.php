@@ -50,7 +50,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	require_once(ABSPATH . 'config.inc.php');
 	if (!function_exists('functionalCheck') && is_array($__FM_CONFIG['db'])) {
 		require_once(ABSPATH . 'fm-modules/facileManager/functions.php');
-	} elseif (!function_exists('functionalCheck') && !is_array($__FM_CONFIG['db'])) {
+	} elseif (!function_exists('functionalCheck') || !is_array($__FM_CONFIG['db'])) {
 		/** A config file is empty */
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 	}

@@ -56,7 +56,8 @@ $step = isset($_GET['step']) ? $_GET['step'] : 0;
 switch ($step) {
 	case 0:
 	case 1:
-		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
+		if ((!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) || 
+				(@include(ABSPATH . 'config.inc.php') && !@is_array($__FM_CONFIG['db']))) {
 			printHeader(_('Installation'), 'install');
 			displaySetup();
 		} else {
@@ -83,10 +84,23 @@ switch ($step) {
 		printHeader(_('Installation'), 'install');
 
 		/** Check if already installed */
-		$query = "SELECT option_id FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `option_name`='fm_db_version'";
-		$result = @mysql_query($query, $link);
+		if (isset($__FM_CONFIG['db']['name'])) {
+			$query = "SELECT option_id FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `option_name`='fm_db_version'";
+			$result = @mysql_query($query, $link);
+		} else {
+			header('Location: ' . $GLOBALS['RELPATH']);
+		}
 		
-		fmInstall($link, $__FM_CONFIG['db']['name']);
+		if ($result && @mysql_num_rows($result)) {
+			/** Check if the default admin account exists */
+			if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
+				header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4');
+			} else {
+				header('Location: ' . $GLOBALS['RELPATH']);
+			}
+		} else {
+			fmInstall($link, $__FM_CONFIG['db']['name']);
+		}
 		break;
 	case 4:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
@@ -145,7 +159,7 @@ function displaySetup($error = null) {
 	}
 	
 	$dbhost = (isset($_POST['dbhost'])) ? $_POST['dbhost'] : 'localhost';
-	$dbname = (isset($_POST['dbname'])) ? $_POST['dbname'] : strtolower($fm_name);
+	$dbname = (isset($_POST['dbname'])) ? $_POST['dbname'] : $fm_name;
 	$dbuser = (isset($_POST['dbuser'])) ? $_POST['dbuser'] : null;
 	$dbpass = (isset($_POST['dbpass'])) ? $_POST['dbpass'] : null;
 	
@@ -153,7 +167,7 @@ function displaySetup($error = null) {
 <form method="post" action="?step=2">
 	<center>
 	%1$s
-	<p>' . _('Before we can install the backend database, I need your database credentials. (I will also use them to generate the <code>config.inc.php</code> file.)') . '</p>
+	<p>' . _('Before we can install the backend database, your database credentials are needed. (They will also be used to generate the <code>config.inc.php</code> file.)') . '</p>
 	<table class="form-table">
 		<tr>
 			<th><label for="dbhost">' . _('Database Host') . '</label></th>
@@ -222,7 +236,6 @@ function displayAccountSetup($error = null) {
 		$error = sprintf('<strong>' . _('ERROR: %s') . "</strong>\n", $error);
 	}
 	
-	$strength = $GLOBALS['PWD_STRENGTH'];
 	printf('
 <form method="post" action="?step=5">
 	<center>
@@ -250,13 +263,13 @@ function displayAccountSetup($error = null) {
 			<td><div id="passwd_check">' . _('No Password') . '</div></td>
 		</tr>
 		<tr class="pwdhint">
-			<th width="33%" scope="row">' . _('Hint') . '</th>
-			<td width="67%">%3$s</td>
+			<th width="33&#37;" scope="row">' . _('Hint') . '</th>
+			<td width="67&#37;">%3$s</td>
 		</tr>
 	</table>
 	</center>
 	<p class="step"><input id="createaccount" name="submit" type="submit" value="' . _('Submit') . '" class="button" disabled /></p>
-</form>', $error, $strength, $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]);
+</form>', $error, $GLOBALS['PWD_STRENGTH'], $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]);
 }
 
 /**
