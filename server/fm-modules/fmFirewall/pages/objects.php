@@ -56,14 +56,14 @@ if (currentUserCan('manage_objects', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $_GET['id'], 'object_', $_GET['status'], 'object_id')) {
-				$response = 'This object could not be ' . $_GET['status'] . '.';
+				$response = sprintf(_('This object could not be set to %s.') . "\n", $_GET['status']);
 			} else {
 				/* set the object_build_config flag */
 				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}objects` SET `object_build_config`='yes' WHERE `object_id`=" . sanitize($_GET['id']);
 				$result = $fmdb->query($query);
 				
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
-				addLogEntry("Set object '$tmp_name' status to " . $_GET['status'] . '.');
+				addLogEntry(sprintf(_('Set object (%s) status to %s.'), $tmp_name, $_GET['status']));
 				header('Location: ' . $GLOBALS['basename']);
 			}
 		}

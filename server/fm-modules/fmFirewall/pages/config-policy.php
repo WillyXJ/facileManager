@@ -60,12 +60,12 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $_GET['id'], 'policy_', $_GET['status'], 'policy_id')) {
-				$response = 'This policy could not be ' . $_GET['status'] . '.';
+				$response = sprintf(_('This policy could not be set to %s.') . "\n", $_GET['status']);
 			} else {
 				/* Set the server_build_config flag */
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				
-				addLogEntry("Set firewall policy status to " . $_GET['status'] . ' for ' . getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . '.');
+				addLogEntry(sprintf(_('Set firewall policy status to %s for %s.'), $_GET['status'], getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name')));
 				header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
 			}
 		}

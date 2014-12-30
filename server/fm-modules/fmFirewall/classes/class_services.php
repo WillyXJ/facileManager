@@ -29,7 +29,7 @@ class fm_module_services {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="services">There are no ' . strtoupper($type) . ' services defined.</p>';
+			printf('<p id="table_edits" class="noresult" name="services">%s</p>', sprintf(_('There are no %s services defined.'), strtoupper($type)));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_module_services {
 							'name' => 'services'
 						);
 
-			$title_array = ($type == 'icmp') ? array('Service Name', 'ICMP Type', 'ICMP Code', 'Comment') : array('Service Name', 'Source Ports', 'Dest Ports', 'Flags', 'Comment');
-			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = ($type == 'icmp') ? array(_('Service Name'), _('ICMP Type'), _('ICMP Code'), _('Comment')) : array(_('Service Name'), _('Source Ports'), _('Dest Ports'), _('Flags'), _('Comment'));
+			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -73,7 +73,7 @@ class fm_module_services {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'service_name') && empty($clean_data)) return 'No service name defined.';
+			if (($key == 'service_name') && empty($clean_data)) return _('No service name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -85,7 +85,7 @@ class fm_module_services {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the service because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the service because a database error occurred.');
 
 		addLogEntry("Added service:\nName: {$post['service_name']}\nType: {$post['service_type']}\n" .
 				"Update Method: {$post['service_update_method']}\nConfig File: {$post['service_config_file']}");
@@ -118,7 +118,7 @@ class fm_module_services {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}services` SET $sql WHERE `service_id`={$post['service_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the service because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the service because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -140,7 +140,7 @@ class fm_module_services {
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $service_id, 'service_', 'service_id');
 		if ($fmdb->num_rows) {
 			/** Is the service_id present in a policy? */
-			if (isItemInPolicy($service_id, 'service')) return 'This service could not be deleted because it is associated with one or more policies.';
+			if (isItemInPolicy($service_id, 'service')) return _('This service could not be deleted because it is associated with one or more policies.');
 			
 			/** Delete service */
 			$tmp_name = getNameFromID($service_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
@@ -150,7 +150,7 @@ class fm_module_services {
 			}
 		}
 		
-		return 'This service could not be deleted.';
+		return _('This service could not be deleted.');
 	}
 
 
@@ -332,20 +332,20 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['service_name'])) return 'No service name defined.';
+		if (empty($post['service_name'])) return _('No service name defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name');
-		if ($field_length !== false && strlen($post['service_name']) > $field_length) return 'Service name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['service_name']) > $field_length) return sprintf(ngettext('Service name is too long (maximum %d character).', 'Service name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $post['service_name'], 'service_', 'service_name', "AND service_type='{$post['service_type']}' AND service_id!={$post['service_id']}");
-		if ($fmdb->num_rows) return 'This service name already exists.';
+		if ($fmdb->num_rows) return _('This service name already exists.');
 		
 		/** Set ports */
 		if ($post['service_type'] != 'icmp') {
 			foreach ($post['port_src'] as $port) {
-				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return 'Source ports must be a valid ' . strtoupper($post['service_type']) . ' port range.';
+				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return sprintf(_('Source ports must be a valid %s port range.'), strtoupper($post['service_type']));
 				if (empty($port) || $port == 0) {
 					$post['port_src'] = array('', '');
 					break;
@@ -356,7 +356,7 @@ FORM;
 			if ($post['service_src_ports'] == ':') $post['service_src_ports'] = null;
 			
 			foreach ($post['port_dest'] as $port) {
-				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return 'Destination ports must be a valid ' . strtoupper($post['service_type']) . ' port range.';
+				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return sprintf(_('Destination ports must be a valid %s port range.'), strtoupper($post['service_type']));
 				if (empty($port) || $port == 0) {
 					$post['port_dest'] = array('', '');
 					break;
@@ -369,10 +369,10 @@ FORM;
 			unset($post['service_icmp_code']);
 			unset($post['service_icmp_type']);
 		} else {
-			if (!empty($post['service_icmp_type']) && !verifyNumber($post['service_icmp_type'], -1, 40, false)) return 'ICMP type is invalid.';
+			if (!empty($post['service_icmp_type']) && !verifyNumber($post['service_icmp_type'], -1, 40, false)) return _('ICMP type is invalid.');
 			if (empty($post['service_icmp_type'])) $post['service_icmp_type'] = 0;
 			
-			if (!empty($post['service_icmp_code']) && !verifyNumber($post['service_icmp_code'], -1, 15, false)) return 'ICMP code is invalid.';
+			if (!empty($post['service_icmp_code']) && !verifyNumber($post['service_icmp_code'], -1, 15, false)) return _('ICMP code is invalid.');
 			if (empty($post['service_icmp_code'])) $post['service_icmp_code'] = 0;
 		}
 		

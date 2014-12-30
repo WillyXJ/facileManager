@@ -55,7 +55,7 @@ function moduleFunctionalCheck() {
 function buildModuleDashboard() {
 	global $fmdb, $__FM_CONFIG;
 	
-	return '<p>' . $_SESSION['module'] . ' has no dashboard content yet.</p>';
+	return sprintf('<p>%s has no dashboard content yet.</p>', $_SESSION['module']);
 
 }
 
@@ -72,14 +72,12 @@ function buildModuleToolbar() {
 	
 	if (isset($_GET['server_serial_no'])) {
 		$server_name = getNameFromID($_GET['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-		$domain_menu = <<<HTML
-		<div id="topheadpart">
-			<span class="single_line">Firewall:&nbsp;&nbsp; $server_name</span>
-		</div>
-HTML;
+		$domain_menu = sprintf('<div id="topheadpart">
+			<span class="single_line">%s:&nbsp;&nbsp; %s</span>
+		</div>', _('Firewall'), $server_name);
 	} else $domain_menu = null;
 	
-	return $domain_menu;
+	return array($domain_menu, null);
 }
 
 
@@ -320,21 +318,21 @@ function getModuleBadgeCounts($type) {
  * @subpackage fmFirewall
  */
 function buildModuleMenu() {
-	addObjectPage('Firewalls', 'Firewall Servers', array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true);
-		addSubmenuPage('config-servers.php', null, 'Firewall Policy', null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
+	addObjectPage(_('Firewalls'), _('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true);
+		addSubmenuPage('config-servers.php', null, _('Firewall Policy'), null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
 
-	addObjectPage('Objects', 'Object Groups', array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', 'Groups', 'Object Groups', array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', 'Hosts', 'Host Objects', array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-host.php');
-		addSubmenuPage('object-groups.php', 'Networks', 'Network Objects', array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-network.php');
+	addObjectPage(_('Objects'), _('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', _('Groups'), _('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', _('Hosts'), _('Host Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-host.php');
+		addSubmenuPage('object-groups.php', _('Networks'), _('Network Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-network.php');
 
-	addObjectPage('Services', 'Service Groups', array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
-		addSubmenuPage('service-groups.php', 'Groups', 'Service Groups', array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
-		addSubmenuPage('service-groups.php', 'ICMP', 'ICMP Services', array('manage_services', 'view_all'), $_SESSION['module'], 'services-icmp.php');
-		addSubmenuPage('service-groups.php', 'TCP', 'TCP Services', array('manage_services', 'view_all'), $_SESSION['module'], 'services-tcp.php');
-		addSubmenuPage('service-groups.php', 'UDP', 'UDP Services', array('manage_services', 'view_all'), $_SESSION['module'], 'services-udp.php');
+	addObjectPage(_('Services'), _('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', _('Groups'), _('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', _('ICMP'), _('ICMP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-icmp.php');
+		addSubmenuPage('service-groups.php', _('TCP'), _('TCP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-tcp.php');
+		addSubmenuPage('service-groups.php', _('UDP'), _('UDP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-udp.php');
 
-	addObjectPage('Time', 'Time Restrictions', array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
+	addObjectPage(_('Time'), _('Time Restrictions'), array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
 }
 
 
