@@ -94,13 +94,17 @@ TABLE;
 
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+  `def_id` int(11) NOT NULL AUTO_INCREMENT,
   `def_function` enum('options','logging','key','view') NOT NULL,
+  `def_option_type` enum('global','ratelimit') NOT NULL DEFAULT 'global',
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
   `def_multiple_values` enum('yes','no') NOT NULL DEFAULT 'no',
   `def_clause_support` varchar(10) NOT NULL DEFAULT 'O',
   `def_dropdown` enum('yes','no') NOT NULL DEFAULT 'no',
-  UNIQUE KEY `def_option` (`def_option`)
+  `def_max_parameters` int(3) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`def_id`),
+  KEY `def_option` (`def_option`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 TABLE;
 
@@ -500,10 +504,40 @@ VALUES
 ('options', 'version', '( quoted_string | none )', 'no', 'O', 'no'),
 ('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'yes'),
 ('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'yes')
+('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'yes'),
+('options', 'ratelimit', 'referrals-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'nodata-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'nxdomains-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'errors-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'all-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'window', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'log-only', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'ratelimit', 'qps-scale', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'ipv4-prefix-length', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'ipv6-prefix-length', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'slip', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'exempt-clients', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'ratelimit', 'max-table-size', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'min-table-size', '( integer )', 'no', 'OV', 'no')
 ;
 INSERT;
 	
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`,
+`def_max_parameters`
+)
+VALUES 
+('options', 'ratelimit', 'responses-per-second', '( [size integer] [ratio fixedpoint] integer )', 'no', 'OV', 'no', '5'),
+;
+INSERT;
+
 	
 	/** fm_options inserts */
 	$inserts[] = <<<INSERT

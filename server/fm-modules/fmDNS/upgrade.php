@@ -1209,7 +1209,7 @@ function upgradefmDNS_2001($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 2.0-alpha1 */
+/** 2.0-alpha2 */
 function upgradefmDNS_2002($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
