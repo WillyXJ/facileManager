@@ -1444,9 +1444,9 @@ HTML;
 			$global_rate_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_rate_count; $i++) {
 				if ($rate_result[$i]->domain_id) {
-					$rate_config_array['domain'][displayFriendlyDomainName(getNameFromID($rate_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'))][$rate_result[$i]->cfg_name] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
+					$rate_config_array['domain'][displayFriendlyDomainName(getNameFromID($rate_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'))][$rate_result[$i]->cfg_name][] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
 				} else {
-					$rate_config_array[$rate_result[$i]->cfg_name] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
+					$rate_config_array[$rate_result[$i]->cfg_name][] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
 				}
 			}
 		}
@@ -1458,9 +1458,9 @@ HTML;
 			$global_config_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_config_count; $i++) {
 				if ($server_config_result[$i]->domain_id) {
-					$server_config['domain'][displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'))][$server_config_result[$i]->cfg_name] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
+					$server_config['domain'][displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'))][$server_config_result[$i]->cfg_name][] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
 				} else {
-					$server_config[$server_config_result[$i]->cfg_name] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
+					$server_config[$server_config_result[$i]->cfg_name][] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
 				}
 			}
 		} else $server_config = array();
@@ -1477,16 +1477,18 @@ HTML;
 			}
 		}
 		
-		foreach ($rate_config_array as $cfg_name => $cfg_data) {
-			if ($cfg_name != 'domain') {
-				list($cfg_info, $cfg_comment) = $cfg_data;
-				$ratelimits .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment);
-			} else {
-				foreach ($cfg_data as $domain_name => $domain_cfg_data) {
-					$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
-					foreach ($domain_cfg_data as $domain_cfg_name => $domain_cfg_data2) {
-						list($cfg_param, $cfg_comment) = $domain_cfg_data2;
-						$ratelimits_domains .= $this->formatConfigOption ($domain_cfg_name, $cfg_param, $cfg_comment);
+		foreach ($rate_config_array as $cfg_name => $value_array) {
+			foreach ($value_array as $domain_name => $cfg_data) {
+				if ($cfg_name != 'domain') {
+					list($cfg_info, $cfg_comment) = $cfg_data;
+					$ratelimits .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment);
+				} else {
+					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
+						$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
+						foreach ($domain_cfg_data as $domain_cfg_data2) {
+							list($cfg_param, $cfg_comment) = $domain_cfg_data2;
+							$ratelimits_domains .= $this->formatConfigOption ($domain_cfg_name, $cfg_param, $cfg_comment);
+						}
 					}
 				}
 			}
