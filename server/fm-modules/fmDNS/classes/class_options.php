@@ -70,7 +70,14 @@ class fm_module_options {
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}'");
-		if ($fmdb->num_rows) return 'This record already exists.';
+		if ($fmdb->num_rows) {
+			$num_same_config = $fmdb->num_rows;
+			$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
+			$fmdb->get_results($query);
+			if ($num_same_config >= $fmdb->last_result[0]->def_max_parameters) {
+				return 'This record already exists.';
+			}
+		}
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
@@ -113,7 +120,6 @@ class fm_module_options {
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
-//		print_r($post);exit;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -124,10 +130,18 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_id!={$post['cfg_id']} AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
-			if ($result[0]->cfg_id != $post['cfg_id']) return false;
+			if ($result[0]->cfg_id != $post['cfg_id']) {
+				$num_same_config = $fmdb->num_rows;
+				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
+				$fmdb->get_results($query);
+				if ($num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
+					var_dump($num_same_config);exit;
+					return 'This record already exists.';
+				}
+			}
 		}
 		
 		$exclude = array('submit', 'action', 'cfg_id');
@@ -149,7 +163,7 @@ class fm_module_options {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return false;
+		if (!$fmdb->result) return 'A database error occurred. ' . $fmdb->last_error;
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -215,7 +229,7 @@ class fm_module_options {
 		
 		$zone_row = null;
 		if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
-			$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : '<b>All Zones</b>';
+			$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : '<span>All Zones</span>';
 			$zone_row = '<td>' . $domain_name . '</td>';
 			unset($domain_name);
 		}
@@ -340,6 +354,7 @@ HTML;
 							get_available_options: true,
 							item_sub_type: 'domain_id',
 							item_id: $(this).val(),
+							view_id: getUrlVars()['view_id'],
 							is_ajax: 1
 						};
 
@@ -446,22 +461,40 @@ FORM;
 	function availableOptions($action, $server_serial_no, $option_type = 'global') {
 		global $fmdb, $__FM_CONFIG;
 		
+		$temp_array = null;
+		
 		if ($action == 'add') {
-			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) {
-				$cfg_id_sql = sanitize($_POST['item_sub_type']) . ' = ' . sanitize($_POST['item_id']);
+			if (isset($_POST['view_id'])) {
+				$cfg_id_sql[] = 'view_id = ' . sanitize($_POST['view_id']);
+			}
+			if (isset($_POST['item_id'])) {
+				if ($_POST['item_sub_type'] != 'domain_id') {
+					$cfg_id_sql[] = 'domain_id=0';
+				}
+				$cfg_id_sql[] = sanitize($_POST['item_sub_type']) . ' = ' . sanitize($_POST['item_id']);
+			}
+			if (isset($cfg_id_sql)) {
+				$cfg_id_sql = implode(' AND ', $cfg_id_sql);
 			} else {
 				$cfg_id_sql = 'view_id=0 AND domain_id=0';
 			}
 			
-			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
-				AND def_option_type='$option_type'
-				AND def_option NOT IN (
-					SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='$option_type' AND cfg_status IN (
+			$query = "SELECT cfg_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE cfg_type='$option_type' AND cfg_status IN (
 						'active', 'disabled'
-				) AND account_id='{$_SESSION['user']['account_id']}' AND (
-					(server_serial_no=$server_serial_no AND $cfg_id_sql)
-				)
-			)";
+					) AND account_id='{$_SESSION['user']['account_id']}' AND (
+						(server_serial_no=$server_serial_no AND $cfg_id_sql)
+					)";
+			$fmdb->get_results($query);
+//			echo $query;
+//			echo '<pre>';print_r($_POST);echo '</pre>';
+			$def_result = $fmdb->last_result;
+			$def_result_count = $fmdb->num_rows;
+			for ($i=0; $i<$def_result_count; $i++) {
+				$temp_array[$i] = $def_result[$i]->cfg_name;
+			}
+			
+			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
+				AND def_option_type='$option_type'";
 			$query .= " AND def_clause_support LIKE '%";
 			if (isset($_POST['cfg_type']) && $_POST['cfg_type'] == 'global' &&
 					isset($_POST['item_id']) && $_POST['item_id'] != 0) {
@@ -478,17 +511,24 @@ FORM;
 			}
 			$query .= "%'";
 		} else {
-			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'";
+			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
+				AND def_option_type='$option_type'";
 		}
 		$query .= " ORDER BY def_option ASC";
 		
 		$fmdb->get_results($query);
-		$def_result = $fmdb->last_result;
-		$def_result_count = $fmdb->num_rows;
+		$def_avail_result = $fmdb->last_result;
+		$def_avail_result_count = $fmdb->num_rows;
 		
-		if ($def_result_count) {
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i] = $def_result[$i]->def_option;
+		if ($def_avail_result_count) {
+			$j=0;
+			for ($i=0; $i<$def_avail_result_count; $i++) {
+				$array_count_values = @array_count_values($temp_array);
+				if ((is_array($temp_array) && array_search($def_avail_result[$i]->def_option, $temp_array) === false) ||
+						!isset($temp_array) || $array_count_values[$def_avail_result[$i]->def_option] < $def_avail_result[$i]->def_max_parameters) {
+					$return[$j] = $def_avail_result[$i]->def_option;
+					$j++;
+				}
 			}
 			return $return;
 		}

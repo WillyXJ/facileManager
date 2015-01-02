@@ -1438,7 +1438,7 @@ HTML;
 		
 		$ratelimits = $ratelimits_domains = null;
 		
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND cfg_status="active"');
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND server_serial_no=0 AND cfg_status="active"');
 		if ($fmdb->num_rows) {
 			$rate_result = $fmdb->last_result;
 			$global_rate_count = $fmdb->num_rows;
@@ -1450,6 +1450,23 @@ HTML;
 				}
 			}
 		}
+		
+		/** Override with server-specific configs */
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			$server_config_result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_config_count; $i++) {
+				if ($server_config_result[$i]->domain_id) {
+					$server_config['domain'][displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'))][$server_config_result[$i]->cfg_name] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
+				} else {
+					$server_config[$server_config_result[$i]->cfg_name] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
+				}
+			}
+		} else $server_config = array();
+
+		/** Merge arrays */
+		$rate_config_array = array_merge($rate_config_array, $server_config);
 		
 		
 		/** Check if rrl is supported by server_version */
@@ -1465,7 +1482,6 @@ HTML;
 				list($cfg_info, $cfg_comment) = $cfg_data;
 				$ratelimits .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment);
 			} else {
-				var_dump($cfg_info);
 				foreach ($cfg_data as $domain_name => $domain_cfg_data) {
 					$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
 					foreach ($domain_cfg_data as $domain_cfg_name => $domain_cfg_data2) {
