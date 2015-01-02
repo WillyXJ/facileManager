@@ -83,8 +83,16 @@ if (!getSOACount($domain_id)) {
 
 $body = '<div id="body_container" class="fm-noscroll">' . "\n";
 if (!empty($response)) $body .= '<div id="response"><p>' . $response . '</p></div>';
-$body .= "	<h2>Records</h2>
-	$avail_types\n";
+$body .= <<<HTML
+	<h2>Records</h2>
+	<div id="pagination_container" class="submenus">
+	<div>
+	<div class="stretch"></div>
+	$avail_types
+	</div>
+</div>
+
+HTML;
 	
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php">
@@ -209,22 +217,24 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 				}
 			}
 			$menu_selects = <<<MENU
-			<div id="recordmenu">
-			<ul>
-				<li class="has-sub"><a href="#"><span>...</span></a>
-					<ul>
-					$menu_sub_selects
-					</ul>
-				</li>
-			</ul>
-			</div>
 			$menu_selects
+			</div>
+			<div id="configtypesmenu" class="nopadding dropdown">
+				<div id="recordmenu">
+				<ul>
+					<li class="has-sub"><a href="#"><span>...</span></a>
+						<ul>
+						$menu_sub_selects
+						</ul>
+					</li>
+				</ul>
+				</div>
 
 MENU;
 		}
 	}
 	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+	return '<div id="configtypesmenu" class="submenus">' . $menu_selects . '</div>';
 }
 
 function isValidDomain($domain_id) {

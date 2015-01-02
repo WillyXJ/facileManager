@@ -81,8 +81,18 @@ $avail_types = buildSubMenu($type, $server_serial_no);
 $response = $form_data = $action = null;
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']), $type);
-//echo "$avail_types\n";
-	
+/*
+echo <<<HTML
+<div id="pagination_container" class="submenus">
+	<div>
+	<div class="stretch"></div>
+	$avail_types
+	</div>
+</div>
+
+HTML;
+*/
+
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_type='$type'");
 $fm_module_policies->rows($result, $type);
 

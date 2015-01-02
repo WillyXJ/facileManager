@@ -91,10 +91,19 @@ printHeader();
 @printMenu();
 
 $avail_types = buildSubMenu($type, $server_serial_no_uri);
-$avail_servers = buildServerSubMenu($server_serial_no, 'log_space');
+$avail_servers = buildServerSubMenu($server_serial_no);
 
 echo printPageHeader($response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
-echo "$avail_types\n$avail_servers\n";
+echo <<<HTML
+<div id="pagination_container" class="submenus">
+	<div>
+	<div class="stretch"></div>
+	$avail_types
+	$avail_servers
+	</div>
+</div>
+
+HTML;
 	
 $sort_direction = null;
 $sort_field = 'cfg_data';
@@ -115,7 +124,7 @@ function buildSubMenu($option_type = 'channel', $server_serial_no_uri = null) {
 	
 	foreach ($__FM_CONFIG['logging']['avail_types'] as $general => $type) {
 		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"config-logging?type=$general$server_serial_no_uri\">" . ucfirst($type) . "</a></span>\n";
+		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$server_serial_no_uri\">" . ucfirst($type) . "</a></span>\n";
 	}
 	
 	return '<div id="configtypesmenu">' . $menu_selects . '</div>';

@@ -77,7 +77,15 @@ printHeader();
 $avail_servers = buildServerSubMenu($server_serial_no);
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
-echo "$avail_servers\n";
+echo <<<HTML
+<div id="pagination_container" class="submenus">
+	<div>
+	<div class="stretch"></div>
+	$avail_servers
+	</div>
+</div>
+
+HTML;
 	
 $sort_direction = null;
 $sort_field = 'view_name';

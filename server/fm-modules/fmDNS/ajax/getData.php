@@ -96,6 +96,12 @@ HTML;
 	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 	echo buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $fm_dns_zones->availableCloneDomains($_POST['map'], 0), 0);
 	exit;
+} elseif (is_array($_POST) && array_key_exists('get_available_options', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
+	$cfg_type = isset($_POST['cfg_type']) ? sanitize($_POST['cfg_type']) : 'global';
+	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
+	$avail_options_array = $fm_module_options->availableOptions('add', $server_serial_no, $cfg_type);
+	echo buildSelect('cfg_name', 'cfg_name', $avail_options_array, sanitize($_POST['cfg_name']), 1, null, false, 'displayOptionPlaceholder()');
+	exit;
 }
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
@@ -158,7 +164,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			$field = $prefix . 'id';
-			$type_map = 'global';
+			$type_map = @isset($_POST['request_uri']['option_type']) ? sanitize($_POST['request_uri']['option_type']) : 'global';
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
