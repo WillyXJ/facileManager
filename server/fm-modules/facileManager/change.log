@@ -12,6 +12,7 @@
            exist before running (Issue #166).
 * Server - [improvement] Remove the Admin->Users menu item when authentication
            is not used.
+* Server - [improvement] Fixed PHP session errors when no authentication is used.
 
 2.0-alpha1 (2014-11-20)
 =======================
