@@ -175,7 +175,7 @@ HTML;
 		if (getOption('fm_db_version') >= 18) {
 			if (!getOption('auth_method')) {
 				if (!isset($_COOKIE['myid'])) {
-					session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+					session_set_cookie_params(strtotime('+1 week'));
 					@session_start();
 	
 					$_SESSION['user']['logged_in'] = true;
@@ -187,12 +187,14 @@ HTML;
 						$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
 					}
 	
-					setcookie('myid', session_id(), time() + 60 * 60 * 24 * 7);
+					setcookie('myid', session_id(), strtotime('+1 week'));
 				}
 				
-				session_set_cookie_params(time() + 60 * 60 * 24 * 7);
-				@session_id($_COOKIE['myid']);
-				@session_start();
+				session_set_cookie_params(strtotime('+1 week'));
+				if (!empty($_COOKIE['myid'])) {
+					@session_id($_COOKIE['myid']);
+					@session_start();
+				}
 	
 				return true;
 			}
@@ -203,7 +205,7 @@ HTML;
 			$myid = $_COOKIE['myid'];
 				
 			/** Init the session. */
-			session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+			session_set_cookie_params(strtotime('+1 week'));
 			session_id($myid);
 			@session_start();
 				
@@ -317,7 +319,7 @@ HTML;
 			$myid = $_COOKIE['myid'];
 			
 			// Init the session.
-			session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+			session_set_cookie_params(strtotime('+1 week'));
 			session_id($myid);
 			@session_start();
 			$this->updateSessionDB($_SESSION['user']['name']);
@@ -451,7 +453,7 @@ BODY;
 	function setSession($user) {
 		global $fm_name;
 		
-		session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+		session_set_cookie_params(strtotime('+1 week'));
 		@session_start();
 		$_SESSION['user']['logged_in'] = true;
 		$_SESSION['user']['id'] = $user->user_id;
@@ -464,7 +466,7 @@ BODY;
 		if (getOption('fm_db_version') < 32) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
 		setUserModule($user->user_default_module);
-		setcookie('myid', session_id(), time() + 60 * 60 * 24 * 7);
+		setcookie('myid', session_id(), strtotime('+1 week'));
 	}
 	
 	

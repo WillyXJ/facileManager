@@ -8,6 +8,7 @@
 * Server - [improvement] Skipped records are no longer displayed to read-only
            accounts.
 * Server - [feature] Added support for resource rate limiting (Issue #118).
+* Server - [improvement] Fixed PHP session errors when no authentication is used.
 
 2.0-alpha1 (2014-11-20)
 =======================
