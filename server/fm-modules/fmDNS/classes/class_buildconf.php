@@ -1497,7 +1497,7 @@ HTML;
 	}
 	
 	/**
-	 * Formats the server key statements
+	 * Formats the config option statements
 	 *
 	 * @since 2.0
 	 * @package fmDNS
@@ -1526,7 +1526,7 @@ HTML;
 		$config .= "\t\t" . $cfg_name . ' ';
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
 		$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
-		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+		$config .= trim(rtrim(trim($cfg_info), ';'));
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
 		$config .= ";\n";
 
