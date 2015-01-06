@@ -25,7 +25,7 @@ class fm_module_servers {
 	/**
 	 * Displays the server list
 	 */
-	function rows($result) {
+	function rows($result, $type) {
 		global $fmdb;
 		
 		$num_rows = $fmdb->num_rows;
@@ -41,13 +41,13 @@ class fm_module_servers {
 		}
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
-								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
+								'title' => '<input type="checkbox" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
 		}
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="servers">There are no servers.</p>';
+			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', sprintf('There are no %s.', $type));
 		} else {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
@@ -57,17 +57,24 @@ class fm_module_servers {
 							'name' => 'servers'
 						);
 
-			$title_array[] = array('class' => 'header-tiny header-nosort');
-			$title_array = array_merge($title_array, array(array('title' => 'Hostname', 'rel' => 'server_name'),
-				array('title' => 'Serial No', 'rel' => 'server_serial_no'),
-				array('title' => 'Method', 'rel' => 'server_update_method'),
-				array('title' => 'Key', 'class' => 'header-nosort'),
-				array('title' => 'Server Type', 'class' => 'header-nosort'),
-				array('title' => 'Run-as', 'rel' => 'server_run_as_predefined'),
-				array('title' => 'Config File', 'rel' => 'server_config_file'),
-				array('title' => 'Server Root', 'rel' => 'server_root_dir'),
-				array('title' => 'Zones Directory', 'rel' => 'server_zones_dir'),
-				));
+			if ($type == 'servers') {
+				$title_array[] = array('class' => 'header-tiny header-nosort');
+				$title_array = array_merge($title_array, array(array('title' => 'Hostname', 'rel' => 'server_name'),
+					array('title' => 'Serial No', 'rel' => 'server_serial_no'),
+					array('title' => 'Method', 'rel' => 'server_update_method'),
+					array('title' => 'Key', 'class' => 'header-nosort'),
+					array('title' => 'Server Type', 'class' => 'header-nosort'),
+					array('title' => 'Run-as', 'rel' => 'server_run_as_predefined'),
+					array('title' => 'Config File', 'rel' => 'server_config_file'),
+					array('title' => 'Server Root', 'rel' => 'server_root_dir'),
+					array('title' => 'Zones Directory', 'rel' => 'server_zones_dir'),
+					));
+			} elseif ($type == 'groups') {
+				$title_array = array_merge($title_array, array(array('title' => _('Group Name'), 'rel' => 'group_name'),
+					array('title' => 'Master Servers', 'class' => 'header-nosort'),
+					array('title' => 'Slave Servers', 'class' => 'header-nosort'),
+					));
+			}
 			$title_array[] = array(
 								'title' => 'Actions',
 								'class' => 'header-actions header-nosort'
@@ -76,7 +83,7 @@ class fm_module_servers {
 			echo displayTableHeader($table_info, $title_array);
 			
 			for ($x=0; $x<$num_rows; $x++) {
-				$this->displayRow($results[$x]);
+				$this->displayRow($results[$x], $type);
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -86,7 +93,7 @@ class fm_module_servers {
 	/**
 	 * Adds the new server
 	 */
-	function add($post) {
+	function addServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (empty($post['server_name'])) return 'No server name defined.';
@@ -140,7 +147,7 @@ class fm_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
@@ -164,6 +171,83 @@ class fm_module_servers {
 				"Run-as: {$tmp_runas}\nUpdate Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}\n" .
 				"Server Root: {$post['server_root_dir']}\nServer Chroot: {$post['server_chroot_dir']}\n" .
 				"Zone file directory: {$post['server_zones_dir']}");
+		return true;
+	}
+
+	/**
+	 * Adds the new server group
+	 */
+	function addGroup($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (empty($post['group_name'])) return _('No group name defined.');
+		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'groups', 'group_name');
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(ngettext('Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', 1), $field_length);
+		
+		/** Does the record already exist for this account? */
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $post['group_name'], 'group_', 'group_name');
+		if ($fmdb->num_rows) return _('This group name already exists.');
+		
+		/** Process group masters */
+		$log_message_master_servers = null;
+		foreach ($post['group_masters'] as $val) {
+			if ($val == 0) {
+				$group_masters = 0;
+				break;
+			}
+			$group_masters .= $val . ';';
+			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$log_message_master_servers .= $val ? "$server_name; " : null;
+		}
+		$log_message_master_servers = rtrim ($log_message_master_servers, '; ');
+		$post['group_masters'] = rtrim($group_masters, ';');
+		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
+
+		/** Process group slaves */
+		$log_message_slave_servers = null;
+		foreach ($post['group_slaves'] as $val) {
+			if ($val == 0) {
+				$group_slaves = 0;
+				break;
+			}
+			$group_slaves .= $val . ';';
+			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$log_message_slave_servers .= $val ? "$server_name; " : null;
+		}
+		$log_message_slave_servers = rtrim ($log_message_slave_servers, '; ');
+		$post['group_slaves'] = rtrim($group_slaves, ';');
+		if (!isset($post['group_slaves'])) $post['group_slaves'] = 0;
+
+		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups`";
+		$sql_fields = '(';
+		$sql_values = null;
+		
+		$post['account_id'] = $_SESSION['user']['account_id'];
+		
+		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type');
+
+		foreach ($post as $key => $data) {
+			$clean_data = sanitize($data);
+			if (($key == 'group_name') && empty($clean_data)) return _('No group name defined.');
+			if (!in_array($key, $exclude)) {
+				$sql_fields .= $key . ',';
+				$sql_values .= "'$clean_data',";
+			}
+		}
+		$sql_fields = rtrim($sql_fields, ',') . ')';
+		$sql_values = rtrim($sql_values, ',');
+		
+		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
+		$result = $fmdb->query($query);
+		
+		if (!$fmdb->result) return _('Could not add the group because a database error occurred.');
+
+		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
+		addLogEntry(_('Added server group') . ":\n" . _('Name') . ": {$post['group_name']}\n" .
+				_('Masters') . ": {$log_message_master_servers}\n" .
+				_('Slaves') . ": {$log_message_slave_servers}\n");
 		return true;
 	}
 
@@ -244,9 +328,9 @@ class fm_module_servers {
 	}
 	
 	/**
-	 * Deletes the selected server
+	 * Deletes the selected server/group
 	 */
-	function delete($server_id) {
+	function delete($server_id, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Does the server_id exist for this account? */
@@ -299,53 +383,55 @@ class fm_module_servers {
 	}
 
 
-	function displayRow($row) {
+	function displayRow($row, $type) {
 		global $__FM_CONFIG;
 		
-		$class = ($row->server_status == 'disabled') ? 'disabled' : null;
+		$class = ($row->server_status == 'disabled' || $row->group_status == 'disabled') ? 'disabled' : null;
 		
-		$os_image = setOSIcon($row->server_os_distro);
+		$edit_status = $edit_actions = null;
 		
-		$edit_status = null;
-		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
-		
-		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
-		
-		if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
-			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
-				$edit_actions .= $__FM_CONFIG['icons']['build'];
-				$class = 'build';
+		if ($type == 'servers') {
+			$os_image = setOSIcon($row->server_os_distro);
+
+			$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+
+			$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
+
+			if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
+				if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
+					$edit_actions .= $__FM_CONFIG['icons']['build'];
+					$class = 'build';
+				}
 			}
-		}
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if ($row->server_installed == 'yes') {
-				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';
-				$edit_status .= ($row->server_status == 'active') ? 'disabled' : 'active';
-				$edit_status .= '">';
-				$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-				$edit_status .= '</a>';
+			if (currentUserCan('manage_servers', $_SESSION['module'])) {
+				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				if ($row->server_installed == 'yes') {
+					$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';
+					$edit_status .= ($row->server_status == 'active') ? 'disabled' : 'active';
+					$edit_status .= '">';
+					$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+					$edit_status .= '</a>';
+				}
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			}
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-		}
-		if (isset($row->server_client_version) && version_compare($row->server_client_version, getOption('client_version', 0, $_SESSION['module']), '<')) {
-			$edit_actions = 'Client Upgrade Available<br />';
-			$class = 'attention';
-		}
-		if ($row->server_installed != 'yes') {
-			$edit_actions = 'Client Install Required<br />';
-		}
-		$edit_status = $edit_actions . $edit_status;
-		
-		$edit_name = $row->server_name;
-		$key = ($row->server_key) ? getNameFromID($row->server_key, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'none';
-		$runas = ($row->server_run_as_predefined == 'as defined:') ? $row->server_run_as : $row->server_run_as_predefined;
-		
-		$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
-		
-		if ($class) $class = 'class="' . $class . '"';
-		
-		echo <<<HTML
+			if (isset($row->server_client_version) && version_compare($row->server_client_version, getOption('client_version', 0, $_SESSION['module']), '<')) {
+				$edit_actions = 'Client Upgrade Available<br />';
+				$class = 'attention';
+			}
+			if ($row->server_installed != 'yes') {
+				$edit_actions = 'Client Install Required<br />';
+			}
+			$edit_status = $edit_actions . $edit_status;
+
+			$edit_name = $row->server_name;
+			$key = ($row->server_key) ? getNameFromID($row->server_key, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'none';
+			$runas = ($row->server_run_as_predefined == 'as defined:') ? $row->server_run_as : $row->server_run_as_predefined;
+
+			$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
+
+			if ($class) $class = 'class="' . $class . '"';
+
+			echo <<<HTML
 		<tr id="$row->server_id" $class>
 			$checkbox
 			<td>$os_image</td>
@@ -362,19 +448,60 @@ class fm_module_servers {
 		</tr>
 
 HTML;
+		} elseif ($type == 'groups') {
+			$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="group_list[]" value="' . $row->group_id .'" /></td>' : null;
+
+			if (currentUserCan('manage_servers', $_SESSION['module'])) {
+				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';
+				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			}
+			
+			/** Process group masters */
+			foreach (explode(';', $row->group_masters) as $server_id) {
+				$masters[] = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			}
+			$group_masters = implode('; ', $masters);
+			if (empty($group_masters)) $group_masters = _('None');
+			
+			/** Process group slaves */
+			foreach (explode(';', $row->group_slaves) as $server_id) {
+				$slaves[] = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			}
+			$group_slaves = implode('; ', $slaves);
+			if (empty($group_slaves)) $group_slaves = _('None');
+			
+			if ($class) $class = 'class="' . $class . '"';
+
+			echo <<<HTML
+		<tr id="$row->group_id" $class>
+			$checkbox
+			<td>$row->group_name</td>
+			<td>$group_masters</td>
+			<td>$group_slaves</td>
+			<td id="edit_delete_img">$edit_status</td>
+		</tr>
+
+HTML;
+		}
 	}
 
 	/**
 	 * Displays the form to add new server
 	 */
-	function printForm($data = '', $action = 'add') {
+	function printForm($data = '', $action = 'add', $type = 'servers') {
 		global $__FM_CONFIG;
 		
 		$server_id = 0;
 		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
-		$server_chroot_dir = null;
+		$server_chroot_dir = $group_name = null;
 		$ucaction = ucfirst($action);
+		$uctype = ucfirst($type);
 		$server_installed = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -384,50 +511,55 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 
-		/** Show/hide divs */
-		if (isset($server_run_as_predefined) && $server_run_as_predefined == 'as defined:') {
-			$runashow = 'block';
-		} else {
-			$runashow = 'none';
-			$server_run_as = null;
-		}
-		$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
-		
-		$disabled = ($server_installed == 'yes') ? 'disabled' : null;
-		
-		if ($server_installed == 'yes') {
-			if (strpos($server_update_method, 'http') === false) {
-				$server_update_method_choices = array($server_update_method);
-			} else {
-				$server_update_method_choices = array('http', 'https');
-			}
-		} else {
-			$server_update_method_choices = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_update_method');
-		}
-		
-		/** Check name field length */
-		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
-		$server_config_file_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_config_file');
-		$server_root_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_root_dir');
-		$server_chroot_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_chroot_dir');
-		$server_zones_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_zones_dir');
-
-		$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
-		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
-		$server_key = buildSelect('server_key', 'server_key', $this->availableKeys(), $server_key);
-		$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
-		
-		$alternative_help = ($action == 'add') ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
-		
-		$popup_header = buildPopup('header', $ucaction . ' Server');
+		$popup_header = buildPopup('header', $ucaction . ' ' . $uctype);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
+			<form name="manage" id="manage" method="post" action="?type=$type">
+			$popup_header
+				<input type="hidden" name="action" value="$action" />
+				<input type="hidden" name="server_id" value="$server_id" />
+				<input type="hidden" name="sub_type" value="$type" />
+FORM;
+
+		if ($type == 'servers') {
+			/** Show/hide divs */
+			if (isset($server_run_as_predefined) && $server_run_as_predefined == 'as defined:') {
+				$runashow = 'block';
+			} else {
+				$runashow = 'none';
+				$server_run_as = null;
+			}
+			$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
+
+			$disabled = ($server_installed == 'yes') ? 'disabled' : null;
+
+			if ($server_installed == 'yes') {
+				if (strpos($server_update_method, 'http') === false) {
+					$server_update_method_choices = array($server_update_method);
+				} else {
+					$server_update_method_choices = array('http', 'https');
+				}
+			} else {
+				$server_update_method_choices = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_update_method');
+			}
+
+			/** Check name field length */
+			$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
+			$server_config_file_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_config_file');
+			$server_root_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_root_dir');
+			$server_chroot_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_chroot_dir');
+			$server_zones_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_zones_dir');
+
+			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
+			$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
+			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key'), $server_key);
+			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
+
+			$alternative_help = ($action == 'add') ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
+
+			$return_form .= <<<FORM
 			$alternative_help
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="server_id" value="$server_id" />
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="server_name">Server Name</label></th>
@@ -478,11 +610,50 @@ HTML;
 			});
 		</script>
 FORM;
+		} elseif ($type == 'groups') {
+			$group_masters = (isset($group_masters)) ? explode(';', $group_masters) : null;
+			$group_slaves  = (isset($group_slaves)) ? explode(';', $group_slaves) : null;
+			
+			$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name');
+			$group_masters = buildSelect('group_masters', 'group_masters', $this->availableItems('server'), $group_masters, 1, null, true);
+			$group_slaves = buildSelect('group_slaves', 'group_slaves', $this->availableItems('server'), $group_slaves, 1, null, true);
+
+			$return_form .= sprintf('
+			<table class="form-table">
+				<tr>
+					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" /></td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="group_masters">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="group_slaves">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+			</table>
+		%s
+		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					minimumResultsForSearch: 10,
+					allowClear: true,
+					width: "230px"
+				});
+			});
+		</script>', _('Group Name'), $group_name, $group_name_length, _('Master Servers'), $group_masters, _('Slave Servers'), $group_slaves, $popup_footer);
+		} else {
+			$return_form = buildPopup('header', _('Error'));
+			$return_form .= sprintf('<h3>%s</h3><p>%s</p>', _('Oops!'), _('Invalid request.'));
+			$return_form .= buildPopup('footer', _('OK'), array('cancel'));
+		}
 
 		return $return_form;
 	}
 	
-	function availableKeys($default = 'blank') {
+	function availableItems($type, $default = 'blank') {
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
@@ -494,13 +665,15 @@ FORM;
 			$j++;
 		}
 		
-		$query = "SELECT key_id,key_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}keys WHERE account_id='{$_SESSION['user']['account_id']}' AND key_status='active' ORDER BY key_name ASC";
+		$query = "SELECT {$type}_id,{$type}_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' ORDER BY {$type}_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$j][] = $results[$i]->key_name;
-				$return[$j][] = $results[$i]->key_id;
+				$type_name = $type . '_name';
+				$type_id   = $type . '_id';
+				$return[$j][] = $results[$i]->$type_name;
+				$return[$j][] = $results[$i]->$type_id;
 				$j++;
 			}
 		}
@@ -691,6 +864,32 @@ FORM;
 		return implode("\n", $response);
 	}
 	
+	function availableServers($default = 'blank') {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return = null;
+		
+		$j = 0;
+		if ($default == 'blank') {
+			$return[$j][] = '';
+			$return[$j][] = '';
+			$j++;
+		}
+		
+		$query = "SELECT server_id,server_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}servers WHERE account_id='{$_SESSION['user']['account_id']}' AND server_status='active' ORDER BY server_name ASC";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$return[$j][] = $results[$i]->server_name;
+				$return[$j][] = $results[$i]->server_id;
+				$j++;
+			}
+		}
+		
+		return $return;
+	}
+
 }
 
 if (!isset($fm_module_servers))

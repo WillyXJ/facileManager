@@ -1216,6 +1216,17 @@ function upgradefmDNS_2002($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0-alpha1', '<') ? upgradefmDNS_2001($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(128) NOT NULL,
+  `group_masters` text NOT NULL,
+  `group_slaves` text NOT NULL,
+  `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`group_id`)
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLE;
+
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_option_type` ENUM('global','ratelimit') NOT NULL DEFAULT 'global' AFTER `def_function`;";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_max_parameters` INT(3) NOT NULL DEFAULT '1' ;";

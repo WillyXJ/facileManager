@@ -193,6 +193,17 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
 TABLE;
 
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server_groups` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(128) NOT NULL,
+  `group_masters` text NOT NULL,
+  `group_slaves` text NOT NULL,
+  `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+TABLE;
+
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}soa` (
   `soa_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
