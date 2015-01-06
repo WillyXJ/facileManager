@@ -703,6 +703,7 @@ $(document).ready(function() {
 	$('.process_all_updates').click(function(event) {
 		if (confirm('Are you sure you want to process all updates?')) {
 	        var $this 	= $(this);
+			$this.find('i').addClass('fa-spin');
 			$('#manage_item').fadeIn(200);
 			$('#manage_item_contents').fadeIn(200);
 			$('#manage_item_contents').html('<p>Processing Updates... <i class="fa fa-spinner fa-spin"></i></p>');
@@ -718,6 +719,7 @@ $(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
+					$this.find('i').removeClass('fa-spin');
 					$('#manage_item_contents').html(response);
 					if ($('#manage_item_contents').width() >= 700) {
 						$('#manage_item_contents').addClass('wide');
