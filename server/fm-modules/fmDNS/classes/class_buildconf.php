@@ -1436,7 +1436,7 @@ HTML;
 	function getRateLimits($view_id, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
-		$ratelimits = $ratelimits_domains = null;
+		$ratelimits = $ratelimits_domains = $rate_config_array = null;
 		
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND server_serial_no=0 AND cfg_status="active"');
 		if ($fmdb->num_rows) {
@@ -1466,7 +1466,7 @@ HTML;
 		} else $server_config = array();
 
 		/** Merge arrays */
-		$rate_config_array = array_merge($rate_config_array, $server_config);
+		$rate_config_array = array_merge((array)$rate_config_array, $server_config);
 		
 		
 		/** Check if rrl is supported by server_version */
