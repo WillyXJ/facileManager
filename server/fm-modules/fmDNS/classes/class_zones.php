@@ -150,7 +150,7 @@ class fm_dns_zones {
 			$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 			if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
 			
-			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers');
+			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward');
 		
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
@@ -182,9 +182,12 @@ class fm_dns_zones {
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
 		$required_servers = sanitize($post['domain_required_servers']);
 		if ($post['domain_type'] == 'forward') {
-			$query .= "'forwarders', '" . $required_servers . "')";
-			$result = $fmdb->query($query);
+			$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 			$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
+			
+			$domain_forward = sanitize($post['domain_forward'][0]);
+			$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
+			$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
 		} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
 			$query .= "'masters', '" . $required_servers . "')";
 			$result = $fmdb->query($query);
@@ -258,7 +261,7 @@ class fm_dns_zones {
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 		if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
 		
-		$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers');
+		$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -291,10 +294,17 @@ class fm_dns_zones {
 			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")) {
 				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forwarders'"), 'cfg_data', $required_servers, 'cfg_id');
 			} else {
-				$query .= "'forwarders', '" . $required_servers . "')";
-				$result = $fmdb->query($query);
+				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 			}
 			$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
+			
+			$domain_forward = sanitize($post['domain_forward'][0]);
+			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'")) {
+				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forward'"), 'cfg_data', $domain_forward, 'cfg_id');
+			} else {
+				$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
+			}
+			$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
 		} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
 			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")) {
 				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='masters'"), 'cfg_data', $required_servers, 'cfg_id');
@@ -516,7 +526,7 @@ HTML;
 	 * Displays the form to add new zone
 	 */
 	function printForm($data = '', $action = 'create', $map = 'forward') {
-		global $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$ucaction = ucfirst($action);
 		$domain_id = $domain_view = $domain_name_servers = 0;
@@ -556,16 +566,24 @@ HTML;
 		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 5, null, true);
 
 		$forwarders_show = $masters_show = 'none';
-		$domain_forward_servers = $domain_master_servers = null;
+		$domain_forward_servers = $domain_master_servers = $domain_forward = null;
 		$available_acls = json_encode(array());
 		if ($domain_type == 'forward') {
 			$forwarders_show = 'block';
 			$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
+			$domain_forward = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'");
 			$available_acls = $fm_dns_acls->buildACLJSON($domain_forward_servers, 0, 'none');
 		} elseif (in_array($domain_type, array('slave', 'stub'))) {
 			$masters_show = 'block';
 			$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
 			$available_acls = $fm_dns_acls->buildACLJSON($domain_master_servers, 0, 'none');
+		}
+		
+		/** Build forward options */
+		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = 'forward'";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$forward_dropdown = $fm_module_options->populateDefTypeDropdown($fmdb->last_result[0]->def_type, $domain_forward, 'domain_forward');
 		}
 		
 		if ($action == 'create') {
@@ -607,6 +625,7 @@ HTML;
 					<td>
 						$domain_types
 						<div id="define_forwarders" style="display: $forwarders_show">
+							<p>$forward_dropdown</p>
 							<input type="hidden" name="domain_required_servers[forwarders]" id="domain_required_servers" class="address_match_element" data-placeholder="Define forwarders" value="$domain_forward_servers" /><br />
 							( address_match_element )
 						</div>

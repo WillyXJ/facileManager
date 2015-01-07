@@ -617,8 +617,7 @@ class fm_module_buildconf {
 							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
-							$zones .= "\tforwarders { " . trim($fm_dns_acls->parseACL($domain_forward_servers), '; ') . "; };\n";
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
 					}
 					$zones .= "};\n";
 	

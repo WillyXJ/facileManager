@@ -132,3 +132,11 @@ p.soa_import span {
 	position: relative;
 	top: 2px;
 }
+
+#define_forwarders,
+#define_masters {
+	margin-top: .5em;
+}
+#define_forwarders > p {
+	margin: 7px 0;
+}
