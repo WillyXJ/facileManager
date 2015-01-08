@@ -1,7 +1,9 @@
-1.3.5 (2015-01-07)
+1.3.5 (2015-01-08)
 ==================
 * Server - [improvement] Added support to change the forward option within the
            zone definition. (Issue #168)
+* Server - [improvement] Additional zone options can now be configured for slave
+           zones.
 
 1.3.4 (2014-11-17)
 ==================

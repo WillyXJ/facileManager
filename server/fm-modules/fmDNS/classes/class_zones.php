@@ -597,7 +597,7 @@ HTML;
 			$soa_show = 'none';
 			$soa_templates = null;
 		}
-		$additional_config_link = ($action == 'create' || $domain_type != 'master') ? null : '<tr><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
+		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) ? null : '<tr><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
 		
 		$popup_header = buildPopup('header', $ucaction . ' Zone');
 		$popup_footer = buildPopup('footer');
