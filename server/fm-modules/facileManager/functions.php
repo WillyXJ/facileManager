@@ -1568,10 +1568,8 @@ function arrayKeysExist($keys, $array) {
  * @param string $enable_options Additional options to enable in the div
  * @return string
  */
-function displayPagination($page, $total_pages, $classes = null, $enable_options = null) {
+function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null, $enable_options = null) {
 	global $fmdb;
-	
-	if ($total_pages <= 1 && $enable_options != 'search-form') return;
 	
 	$page_params = null;
 	foreach ($GLOBALS['URI'] as $key => $val) {
@@ -1589,6 +1587,15 @@ function displayPagination($page, $total_pages, $classes = null, $enable_options
 	$page_links = array();
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div>';
+	if (isset($addl_blocks)) {
+		if (is_array($addl_blocks)) {
+			foreach ($addl_blocks as $block) {
+				$page_links[] = '<div>' . $block . '</div>';
+			}
+		} else {
+			$page_links[] = '<div>' . $addl_blocks . '</div>';
+		}
+	}
 	$page_links[] = buildPaginationCountMenu(0, 'pagination');
 	if ($enable_options == 'search-form') $page_links[] = displayRecordSearchForm($page_params);
 
@@ -2811,7 +2818,7 @@ function displayRecordSearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
 		$placeholder = 'Searched for ' . sanitize($_GET['q']);
 		$search_remove = '<div class="search_remove">
-			<i class="fa fa-remove fa-2x"></i>
+			<i class="fa fa-remove fa-lg"></i>
 		</div>';
 	} else {
 		$placeholder = 'Search by keyword';
@@ -2822,7 +2829,7 @@ function displayRecordSearchForm($page_params = null) {
 	<div id="record_search_form_container">
 		<div>
 			<div class="search_icon">
-				<i class="fa fa-search fa-2x"></i>
+				<i class="fa fa-search fa-lg"></i>
 			</div>
 			<div id="record_search_form">
 				<form id="record_search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">

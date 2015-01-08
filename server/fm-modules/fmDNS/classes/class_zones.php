@@ -25,7 +25,7 @@ class fm_dns_zones {
 	/**
 	 * Displays the zone list
 	 */
-	function rows($result, $map, $reload_allowed, $page) {
+	function rows($result, $map, $reload_allowed, $page, $total_pages) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$num_rows = $fmdb->num_rows;
@@ -47,7 +47,9 @@ class fm_dns_zones {
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
 			$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
 
-			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			$addl_blocks = array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu());
+			$fmdb->num_rows = $num_rows;
+			echo displayPagination($page, $total_pages, $addl_blocks);
 			
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -357,6 +359,13 @@ class fm_dns_zones {
 			if ($fmdb->num_rows) {
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
 					return 'The associated records for this zone could not be deleted because a database error occurred.';
+				}
+				unset($fmdb->num_rows);
+			}
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $domain_id, 'record_', 'domain_id');
+			if ($fmdb->num_rows) {
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
+					return _('The associated records for this zone could not be deleted because a database error occurred.');
 				}
 				unset($fmdb->num_rows);
 			}
@@ -1282,6 +1291,24 @@ HTML;
 		unset($temp_zone_array, $temp_zones);
 		
 		return $available_zones;
+	}
+	
+	/**
+	 * Builds the zone listing filter menu
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $ids IDs to convert to names
+	 * @return string
+	 */
+	function buildFilterMenu() {
+		$domain_view = isset($_GET['domain_view']) ? $_GET['domain_view'] : 0;
+	
+		$return = '<form method="GET">' . buildSelect('domain_view', 'domain_view', $this->availableViews(), $domain_view, 1, null, true, null, null, _('Filter Views')) .
+			'&nbsp;<input type="submit" name="" id="" value="' . _('Filter') . '" class="button" /></form>' . "\n";
+		return $return;
 	}
 	
 }

@@ -1,4 +1,4 @@
-2.0-alpha2 (201?-??-??)
+2.0-alpha2 (2015-??-??)
 =======================
 * Server - [bug] Fixed zone preview (introduced in 2.0-alpha1).
 * Server - [bug] Fixed record type menu links (introduced in 2.0-alpha1)
@@ -8,6 +8,9 @@
 * Server - [improvement] Skipped records are no longer displayed to read-only
            accounts.
 * Server - [feature] Added support for resource rate limiting (Issue #118).
+* Server - [bug] Records skipped in a cloned zone are now deleted from the
+           fm_dns_records_skipped database.
+* Server - [feature] Added ability to filter zone listing by views.
 
 2.0-alpha1 (2014-11-20)
 =======================

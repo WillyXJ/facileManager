@@ -135,12 +135,22 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 $user_capabilities = getUserCapabilities($_SESSION['user']['id']);
 $limited_domain_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids", null, false, $sort_direction);
+/** Process domain_view filtering */
+if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
+	foreach ((array) $_GET['domain_view'] as $view_id) {
+		$view_id = sanitize($view_id);
+		(string) $domain_view_sql .= " (domain_view='$view_id' OR domain_view LIKE '$view_id;%' OR domain_view LIKE '%;$view_id;%' OR domain_view LIKE '%;$view_id') OR";
+	}
+	if ($domain_view_sql) {
+		$domain_view_sql = 'AND (' . rtrim($domain_view_sql, ' OR') . ')';
+	}
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-echo displayPagination($page, $total_pages);
 
-$fm_dns_zones->rows($result, $map, $reload_allowed, $page);
+$fm_dns_zones->rows($result, $map, $reload_allowed, $page, $total_pages);
 
 printFooter();
 

@@ -7,6 +7,15 @@ $(document).ready(function() {
 		$('body').addClass('fm-noscroll');
 	}
 	
+	if (onPage('zones-forward.php') || onPage('zones-reverse.php')) {
+		$(function() {
+			$("#pagination_container #domain_view").select2({
+				containerCss: { 'min-width': '200px' },
+				minimumResultsForSearch: 10
+			});
+		});
+	}
+	
 	/* Zone reload button */
     $('#zones').delegate('form', 'click tap', function(e) {
         var $this 	= $(this);
