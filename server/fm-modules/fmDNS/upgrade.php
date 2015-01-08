@@ -1278,6 +1278,23 @@ INSERT;
 		}
 	}
 
+	/** Prepend domain_name_servers with s_ */
+	$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE domain_name_servers!=0";
+	$fmdb->query($query);
+	$num_rows = $fmdb->num_rows;
+	$results = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		$name_server_ids = explode(';', $results[$x]->domain_name_servers);
+		$new_server_ids = null;
+		foreach ($name_server_ids as $server_id) {
+			$new_server_ids[] = 's_' . $server_id;
+		}
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_name_servers='" . implode(';', $new_server_ids) . "' "
+				. "WHERE domain_id=" . $results[$x]->domain_id;
+		$fmdb->query($query);
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
+	}
+
 	return true;
 }
 

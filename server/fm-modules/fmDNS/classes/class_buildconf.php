@@ -510,7 +510,7 @@ class fm_module_buildconf {
 				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
 				if ($SERIALNO != -1) {
 					$server_id = getServerID($server_serial_no, $_SESSION['module']);
-					$query .= " AND (`domain_name_servers`=0 OR `domain_name_servers`='$server_id' OR `domain_name_servers` LIKE '$server_id;%' OR `domain_name_servers` LIKE '%;$server_id;%')";
+					$query .= " AND (`domain_name_servers`=0 OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%')";
 				}
 				$query .= " ORDER BY `domain_clone_domain_id`,`domain_name`";
 				$result = $fmdb->query($query);
@@ -586,8 +586,8 @@ class fm_module_buildconf {
 		}
 
 		/** Build zones */
-		$view_sql = "and (`domain_view`<=0 or `domain_view`=$view_id or `domain_view` LIKE '$view_id;%' or `domain_view` LIKE '%;$view_id' or `domain_view` LIKE '%;$view_id;%')";
-		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id;%' or `domain_name_servers` like '%;$server_id') $view_sql order by `domain_clone_domain_id`,`domain_name`";
+		$view_sql = "AND (`domain_view`<=0 OR `domain_view`=$view_id OR `domain_view` LIKE '$view_id;%' OR `domain_view` LIKE '%;$view_id' OR `domain_view` LIKE '%;$view_id;%')";
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_name_servers`=0 OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}') $view_sql ORDER BY `domain_clone_domain_id`,`domain_name`";
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;

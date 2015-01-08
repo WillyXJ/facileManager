@@ -56,16 +56,26 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
 		}
 		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $_GET['id'], 'server_', $_GET['status'], 'server_id')) {
-				$response = 'This server could not be ' . $_GET['status'] . '.';
-			} else {
-				/* set the server_build_config flag */
-				$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_build_config`='yes' WHERE `server_id`=" . sanitize($_GET['id']);
-				$result = $fmdb->query($query);
-				
-				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-				addLogEntry("Set server '$tmp_name' status to " . $_GET['status'] . '.');
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
+			if ($_GET['type'] == 'servers') {
+				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $_GET['id'], 'server_', $_GET['status'], 'server_id')) {
+					$response = 'This server could not be ' . $_GET['status'] . '.';
+				} else {
+					/* set the server_build_config flag */
+					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_build_config`='yes' WHERE `server_id`=" . sanitize($_GET['id']);
+					$result = $fmdb->query($query);
+
+					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+					addLogEntry("Set server '$tmp_name' status to " . $_GET['status'] . '.');
+					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
+				}
+			} elseif ($_GET['type'] == 'groups') {
+				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $_GET['id'], 'group_', $_GET['status'], 'group_id')) {
+					$response = 'This server group could not be ' . $_GET['status'] . '.';
+				} else {
+					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+					addLogEntry("Set server group '$tmp_name' status to " . $_GET['status'] . '.');
+					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
+				}
 			}
 		}
 		break;
@@ -109,7 +119,7 @@ function buildSubMenu($option_type = 'servers') {
 	$menu_selects = $uri_params = null;
 	
 	foreach ($GLOBALS['URI'] as $param => $val) {
-		if ($param == 'type') continue;
+		if (in_array($param, array('type', 'action', 'id', 'status'))) continue;
 		$uri_params .= "&$param=$val";
 	}
 	

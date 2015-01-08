@@ -339,7 +339,7 @@ class fm_module_servers {
 		if ($fmdb->num_rows) {
 			
 			/** Update all associated domains */
-			$query = "SELECT domain_id,domain_name_servers from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;{$server_id};%' OR `domain_name_servers` LIKE '%;{$server_id}' OR `domain_name_servers` LIKE '{$server_id};%' OR `domain_name_servers`='{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
+			$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers`='s_{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
 			$fmdb->query($query);
 			if ($fmdb->num_rows) {
 				$result = $fmdb->last_result;
@@ -406,7 +406,7 @@ class fm_module_servers {
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				if ($row->server_installed == 'yes') {
-					$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';
+					$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&type=' . $type . '&id=' . $row->server_id . '&status=';
 					$edit_status .= ($row->server_status == 'active') ? 'disabled' : 'active';
 					$edit_status .= '">';
 					$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
@@ -453,7 +453,7 @@ HTML;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->server_id . '&status=';
+				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&type=' . $type . '&id=' . $row->group_id . '&status=';
 				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
