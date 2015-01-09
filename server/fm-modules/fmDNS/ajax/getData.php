@@ -69,21 +69,7 @@ HTML;
 HTML;
 		} else {
 			/** Build array of possible values */
-			$raw_def_type_array = explode(')', str_replace('(', '', $result[0]->def_type));
-			$saved_data = explode(' ', $cfg_data);
-			$i = 0;
-			$dropdown = null;
-			foreach ($raw_def_type_array as $raw_def_type) {
-				$def_type_items = null;
-				if (strlen(trim($raw_def_type))) {
-					$raw_items = explode('|', $raw_def_type);
-					foreach ($raw_items as $item) {
-						$def_type_items[] = trim($item);
-					}
-					$dropdown .= buildSelect('cfg_data[]', 'cfg_data', $def_type_items, $saved_data[$i], 1);
-				}
-				$i++;
-			}
+			$dropdown = $fm_module_options->populateDefTypeDropdown($result[0]->def_type, $cfg_data);
 			echo <<<HTML
 					<th width="33%" scope="row"><label for="cfg_data">Option Value</label></th>
 					<td width="67%">$dropdown</td>

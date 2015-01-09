@@ -602,7 +602,7 @@ FORM;
 	 * Parses for address_match_element and formats
 	 *
 	 * @since 1.3
-	 * @package facileManager
+	 * @package fmDNS
 	 *
 	 * @param string $cfg_name Config name to query
 	 * @param string $cfg_data Data to parse/format
@@ -621,6 +621,39 @@ FORM;
 		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \
 			strpos($cfg_data, 'domain_') !== false || strpos($def_type, 'address_match_element') !== false || \
 			strpos($def_type, 'domain_name') !== false) ? $fm_dns_acls->parseACL($cfg_data) : $cfg_data;
+	}
+	
+
+	/**
+	 * Parses for address_match_element and formats
+	 *
+	 * @since 1.3.5
+	 * @package fmDNS
+	 *
+	 * @param string $cfg_name Config name to query
+	 * @param string $cfg_data Data to parse/format
+	 * @return string Return formated data
+	 */
+	function populateDefTypeDropdown($def_type, $cfg_data, $select_name = 'cfg_data') {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		$raw_def_type_array = explode(')', str_replace('(', '', $def_type));
+		$saved_data = explode(' ', $cfg_data);
+		$i = 0;
+		$dropdown = null;
+		foreach ($raw_def_type_array as $raw_def_type) {
+			$def_type_items = null;
+			if (strlen(trim($raw_def_type))) {
+				$raw_items = explode('|', $raw_def_type);
+				foreach ($raw_items as $item) {
+					$def_type_items[] = trim($item);
+				}
+				$dropdown .= buildSelect($select_name . '[]', $select_name, $def_type_items, $saved_data[$i], 1);
+			}
+			$i++;
+		}
+		
+		return $dropdown;
 	}
 }
 
