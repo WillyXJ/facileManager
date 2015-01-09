@@ -13,6 +13,7 @@
 * Server - [feature] Added ability to filter zone listing by views.
 * Server - [feature] Added support for server grouping for use with master and
            slave name servers. (Issue #148)
+* Server - [bug] Fixed bulk action checkbox logic.
 
 2.0-alpha1 (2014-11-20)
 =======================

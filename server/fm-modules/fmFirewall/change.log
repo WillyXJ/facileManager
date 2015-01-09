@@ -2,6 +2,7 @@
 =======================
 * Server - [bug] Fixed server preview.
 * Server - [bug] Fixed policy ordering.
+* Server - [bug] Fixed bulk action checkbox logic.
 
 1.1-alpha1 (2014-11-20)
 =======================

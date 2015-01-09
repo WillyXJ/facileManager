@@ -34,7 +34,7 @@ class fm_module_servers {
 		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
 			$bulk_actions_list = array('Upgrade', 'Build Config');
 			$title_array[] = array(
-								'title' => '<input type="checkbox" onClick="toggle(this, \'server_list[]\')" />',
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
 								'class' => 'header-tiny'
 							);
 		} else {

@@ -661,7 +661,7 @@ $(document).ready(function() {
 		
 		/* Build array of checked items */
 		event.preventDefault();
-		var serverIDs = $('#table_edits input:checkbox:checked').map(function() {
+		var serverIDs = $('#table_edits input:checkbox:checked').not('.tickall').map(function() {
 			return $(this).val();
 		}).get();
 		

@@ -41,7 +41,7 @@ class fm_module_servers {
 		}
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
-								'title' => '<input type="checkbox" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
 		}

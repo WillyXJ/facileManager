@@ -40,7 +40,7 @@ class fm_sqlpass_passwords {
 						);
 
 			$title_array = array(array(
-								'title' => '<input type="checkbox" onClick="toggle(this, \'group[]\')" checked />',
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'group[]\')" checked />',
 								'class' => 'header-tiny'
 							), 'Server Group', 'Last Changed');
 

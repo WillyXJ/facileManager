@@ -34,7 +34,7 @@ class fm_dns_zones {
 		if (currentUserCan('reload_zones', $_SESSION['module'])) {
 			$bulk_actions_list = array('Reload');
 			$checkbox[] = array(
-								'title' => '<input type="checkbox" onClick="toggle(this, \'domain_list[]\')" />',
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'domain_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
 		} else {
