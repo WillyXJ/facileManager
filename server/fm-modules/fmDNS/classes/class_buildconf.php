@@ -510,7 +510,7 @@ class fm_module_buildconf {
 				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
 				if ($SERIALNO != -1) {
 					$server_id = getServerID($server_serial_no, $_SESSION['module']);
-					$query .= " AND (`domain_name_servers`=0 OR `domain_name_servers`='$server_id' OR `domain_name_servers` LIKE '$server_id;%' OR `domain_name_servers` LIKE '%;$server_id;%')";
+					$query .= " AND (`domain_name_servers`=0 OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%')";
 				}
 				$query .= " ORDER BY `domain_clone_domain_id`,`domain_name`";
 				$result = $fmdb->query($query);
@@ -586,8 +586,8 @@ class fm_module_buildconf {
 		}
 
 		/** Build zones */
-		$view_sql = "and (`domain_view`<=0 or `domain_view`=$view_id or `domain_view` LIKE '$view_id;%' or `domain_view` LIKE '%;$view_id' or `domain_view` LIKE '%;$view_id;%')";
-		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and (`domain_name_servers`=0 or `domain_name_servers`='$server_id' or `domain_name_servers` like '$server_id;%' or `domain_name_servers` like '%;$server_id;%' or `domain_name_servers` like '%;$server_id') $view_sql order by `domain_clone_domain_id`,`domain_name`";
+		$view_sql = "AND (`domain_view`<=0 OR `domain_view`=$view_id OR `domain_view` LIKE '$view_id;%' OR `domain_view` LIKE '%;$view_id' OR `domain_view` LIKE '%;$view_id;%')";
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_name_servers`=0 OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}') $view_sql ORDER BY `domain_clone_domain_id`,`domain_name`";
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
@@ -603,8 +603,9 @@ class fm_module_buildconf {
 
 					$domain_name_file = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
 					$domain_name = isset($zone_result[$i]->domain_name_file) ? $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name_file)) : $domain_name_file;
+					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
 					$zones .= 'zone "' . rtrim($domain_name, '.') . "\" {\n";
-					$zones .= "\ttype " . $zone_result[$i]->domain_type . ";\n";
+					$zones .= "\ttype $domain_type;\n";
 					$file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 					
 					/** Are there multiple zones with the same name? */
@@ -616,13 +617,13 @@ class fm_module_buildconf {
 						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
 					}
 					
-					switch($zone_result[$i]->domain_type) {
+					switch($domain_type) {
 						case 'master':
 						case 'slave':
-							$zones .= "\tfile \"$server_zones_dir/{$zone_result[$i]->domain_type}/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
+							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type). (string) $auto_zone_options;
 							/** Build zone file */
-							if ($zone_result[$i]->domain_type == 'master') {
+							if ($domain_type == 'master') {
 								$files[$server_zones_dir . '/master/db.' . $domain_name_file . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 							}
 							break;
@@ -632,8 +633,7 @@ class fm_module_buildconf {
 							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
-							$zones .= "\tforwarders { " . trim($fm_dns_acls->parseACL($domain_forward_servers), '; ') . "; };\n";
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type). (string) $auto_zone_options;
 					}
 					$zones .= "};\n";
 	
@@ -1357,9 +1357,10 @@ HTML;
 	 *
 	 * @param integer $domain_id The domain_id of the zone
 	 * @param integer $server_serial_no The server serial number
+	 * @param string $domain_type Type of zone (master, slave, etc.)
 	 * @return string
 	 */
-	function getZoneOptions($domain_id, $server_serial_no) {
+	function getZoneOptions($domain_id, $server_serial_no, $domain_type) {
 		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
@@ -1390,17 +1391,17 @@ HTML;
 		$config_array = array_merge($global_config, $server_config);
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
+			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'";
+			$fmdb->get_results($query);
+			if (!$fmdb->num_rows) {
+				continue;
+			} else {
+				$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
+			}
 			list($cfg_info, $cfg_comment) = $cfg_data;
 			
 			$cfg_info = str_replace(',', '; ', $cfg_info);
 
-			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-			$fmdb->get_results($query);
-			if (!$fmdb->num_rows) $def_multiple_values = 'no';
-			else {
-				$result = $fmdb->last_result[0];
-				$def_multiple_values = $result->def_multiple_values;
-			}
 			if ($cfg_comment) {
 				$comment = wordwrap($cfg_comment, 50, "\n");
 				$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
@@ -1502,8 +1503,9 @@ HTML;
 	 * @since 2.0
 	 * @package fmDNS
 	 *
-	 * @param integer $view_id The view_id of the zone
-	 * @param integer $server_serial_no The server serial number for overrides
+	 * @param string $cfg_name Config option name
+	 * @param string $cfg_info Config option values
+	 * @param string $cfg_comment Config option comment
 	 * @return string
 	 */
 	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment) {
@@ -1536,6 +1538,75 @@ HTML;
 		return $config;
 	}
 	
+	/**
+	 * Processes the server groups to determine master/slave arrangement
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param array $zone_array The zone data
+	 * @param integer $server_id The server id to check
+	 * @return array
+	 */
+	function processServerGroups($zone_array, $server_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		extract(get_object_vars($zone_array), EXTR_OVERWRITE);
+		
+		$domain_name_servers = explode(';', $domain_name_servers);
+		if (!count($domain_name_servers) || in_array('0', $domain_name_servers) || 
+				$domain_type != 'master' || in_array('s_' . $server_id, $domain_name_servers)) {
+			return array($domain_type, null);
+		}
+		
+		foreach ($domain_name_servers as $ids) {
+			if ($ids == '0' || strpos($ids, 's_') !== false) continue;
+			
+			if (strpos($ids, 'g_') !== false) {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', str_replace('g_', null, $ids), 'group_', 'group_id');
+				if ($fmdb->num_rows) {
+					extract(get_object_vars($fmdb->last_result[0]));
+					
+					$group_masters = explode(';', $group_masters);
+					$group_slaves = explode(';', $group_slaves);
+					
+					if (in_array($server_id, $group_masters)) {
+						return array($domain_type, null);
+					}
+					
+					if (in_array($server_id, $group_slaves)) {
+						return array('slave', sprintf("\tmasters { %s };\n", $this->resolveServerGroupMasters($group_masters)));
+					}
+				}
+			}
+		}
+		
+		return array($domain_type, null);
+	}
+	
+	/**
+	 * Attempts to resolve the master servers for the group
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param array $zone_array The zone data
+	 * @param integer $server_id The server id to check
+	 * @return array
+	 */
+	function resolveServerGroupMasters($masters) {
+		global $__FM_CONFIG;
+		
+		if (!count($masters)) return null;
+		
+		foreach ($masters as $server_id) {
+			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$server_ip = gethostbyname($server_name);
+			$master_ips[] = ($server_ip != $server_name) ? $server_ip : sprintf(_('Cannot resolve %s'), $server_name);
+		}
+		
+		return implode('; ', (array) $master_ips) . ';';
+	}
 }
 
 if (!isset($fm_module_buildconf))

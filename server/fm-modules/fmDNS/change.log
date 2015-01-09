@@ -11,6 +11,8 @@
 * Server - [bug] Records skipped in a cloned zone are now deleted from the
            fm_dns_records_skipped database.
 * Server - [feature] Added ability to filter zone listing by views.
+* Server - [feature] Added support for server grouping for use with master and
+           slave name servers. (Issue #148)
 
 2.0-alpha1 (2014-11-20)
 =======================

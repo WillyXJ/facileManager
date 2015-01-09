@@ -150,7 +150,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
-	$field = $prefix . 'id';
 	$type_map = null;
 	$action = 'add';
 	
@@ -158,38 +157,41 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
+			if (isset($_POST['item_sub_type']) && sanitize($_POST['item_sub_type']) == 'groups') {
+				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
+				$prefix = 'group_';
+			}
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$field = $prefix . 'id';
 			$type_map = @isset($_POST['request_uri']['option_type']) ? sanitize($_POST['request_uri']['option_type']) : 'global';
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
-			$type_map = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
+			$type_map = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
 			$action = 'create';
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$field = $prefix . 'id';
-			$item_type = $_POST['item_sub_type'] . ' ';
+			$item_type = sanitize($_POST['item_sub_type']) . ' ';
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
 			$prefix = 'soa_';
-			$field = $prefix . 'id';
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};
 	}
 	
+	$field = $prefix . 'id';
+
 	if ($add_new) {
-		if ($_POST['item_type'] == 'logging') {
-			$edit_form = $post_class->printForm(null, $action, $_POST['item_sub_type']);
+		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
+			$edit_form = $post_class->printForm(null, $action, sanitize($_POST['item_sub_type']));
 		} else {
 			$edit_form = $post_class->printForm(null, $action, $type_map, $id);
 		}
@@ -199,8 +201,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		if (!$fmdb->num_rows) returnError();
 		
 		$edit_form_data[] = $results[0];
-		if ($_POST['item_type'] == 'logging') {
-			$edit_form = $post_class->printForm($edit_form_data, 'edit', $_POST['item_sub_type']);
+		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
+			$edit_form = $post_class->printForm($edit_form_data, 'edit', sanitize($_POST['item_sub_type']));
 		} else {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $item_id);
 		}

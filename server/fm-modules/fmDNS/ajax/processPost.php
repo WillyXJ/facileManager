@@ -76,7 +76,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
 
-	$field = $prefix . 'id';
 	$type_map = null;
 	$id = sanitize($_POST['item_id']);
 	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
@@ -86,12 +85,15 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
+			if (isset($_POST['item_sub_type']) && sanitize($_POST['item_sub_type']) == 'groups') {
+				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
+				$prefix = 'group_';
+			}
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
 			$table = 'config';
 			$prefix = 'cfg_';
-			$field = $prefix . 'id';
 			$type_map = 'global';
 			$item_type = 'option';
 			break;
@@ -104,19 +106,19 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$post_class = $fm_module_logging;
 			$table = 'config';
 			$prefix = 'cfg_';
-			$field = $prefix . 'id';
 			if (isset($_POST['item_sub_type'])) $item_type = $_POST['item_sub_type'] . ' ';
 			$type = sanitize($_POST['log_type']);
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
 			$prefix = 'soa_';
-			$field = $prefix . 'id';
 			$type = 'soa';
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};
 	}
+
+	$field = $prefix . 'id';
 
 	switch ($_POST['action']) {
 		case 'add':
@@ -129,7 +131,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'delete':
 			if (isset($id)) {
-				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
+				exit(parseAjaxOutput($post_class->delete(sanitize($id), $type, $server_serial_no)));
 			}
 			break;
 		case 'edit':

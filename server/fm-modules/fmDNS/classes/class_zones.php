@@ -258,7 +258,7 @@ class fm_dns_zones {
 		/** Format domain_name_servers */
 		$log_message_name_servers = null;
 		foreach ($post['domain_name_servers'] as $val) {
-			if ($val == 0) {
+			if ($val == '0') {
 				$domain_name_servers = 0;
 				break;
 			}
@@ -268,7 +268,7 @@ class fm_dns_zones {
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 		if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
-		
+	
 		$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers');
 
 		foreach ($post as $key => $data) {
@@ -573,7 +573,7 @@ HTML;
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
 		$domain_types = buildSelect('domain_type', 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
-		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 5, null, true);
+		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 1, null, true);
 
 		$forwarders_show = $masters_show = 'none';
 		$domain_forward_servers = $domain_master_servers = null;
@@ -761,13 +761,27 @@ HTML;
 		$return[0][] = 'All Servers';
 		$return[0][] = '0';
 		
+		/** Individual servers */
 		$query = "SELECT server_id,server_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}servers WHERE account_id='{$_SESSION['user']['account_id']}' AND server_status='active' ORDER BY server_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$return[$i+1][] = $results[$i]->server_name;
-				$return[$i+1][] = $results[$i]->server_id;
+				$return[$i+1][] = 's_' . $results[$i]->server_id;
+			}
+		}
+		$j = $fmdb->num_rows + 1;
+		
+		/** Server groups */
+		$query = "SELECT group_id,group_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups WHERE account_id='{$_SESSION['user']['account_id']}' AND group_status='active' ORDER BY group_name ASC";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$return[$j][] = $results[$i]->group_name;
+				$return[$j][] = 'g_' . $results[$i]->group_id;
+				$j++;
 			}
 		}
 		return $return;
@@ -1155,7 +1169,7 @@ HTML;
 		if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return 'Invalid zone name.';
 		
 		/** Format domain_clone_domain_id */
-		if (!$post['domain_clone_domain_id']) $post['domain_clone_domain_id'] = 0;
+		if (!$post['domain_clone_domain_id'] && $post['action'] == 'add') $post['domain_clone_domain_id'] = 0;
 		
 		/** Ensure domain_view is set */
 		if (!array_key_exists('domain_view', $post)) {

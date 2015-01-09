@@ -1216,17 +1216,29 @@ function upgradefmDNS_2002($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0-alpha1', '<') ? upgradefmDNS_2001($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(128) NOT NULL,
+  `group_masters` text NOT NULL,
+  `group_slaves` text NOT NULL,
+  `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`group_id`)
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLE;
+
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_option_type` ENUM('global','ratelimit') NOT NULL DEFAULT 'global' AFTER `def_function`;";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_max_parameters` INT(3) NOT NULL DEFAULT '1' ;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_zone_support` VARCHAR(10) NULL DEFAULT NULL AFTER `def_clause_support` ;";
 	
 	$inserts[] = <<<INSERT
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
-`def_function` ,
+`def_function`,
 `def_option_type`,
-`def_option` ,
-`def_type` ,
-`def_multiple_values` ,
+`def_option`,
+`def_type`,
+`def_multiple_values`,
 `def_clause_support`,
 `def_dropdown`,
 `def_max_parameters`
@@ -1250,7 +1262,15 @@ VALUES
 ;
 INSERT;
 
-	$updates = null;
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `fm_dns_functions`.`def_clause_support` LIKE '%Z%';";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'F' WHERE `fm_dns_functions`.`def_option` IN ('forward', 'forwarders');";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'M' WHERE `fm_dns_functions`.`def_option` IN 
+		('also-notify', 'max-transfer-idle-out', 'max-transfer-out', 'notify-source', 'notify-source-v6', 'provide-ixfr', 'transfer-format',
+		'transfers-out', 'update-policy');";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'S' WHERE `fm_dns_functions`.`def_option` IN 
+		('allow-notify', 'alt-transfer-source', 'alt-transfer-source-v6', 'masters', 'max-refresh-time', 'max-retry-time', 'max-transfer-idle-in',
+		'max-transfer-time-in', 'min-refresh-time', 'min-retry-time', 'multi-master', 'request-ixfr', 'transfer-source', 'transfer-source-v6',
+		'transfers-in', 'transfers-per-ns');";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -1265,6 +1285,30 @@ INSERT;
 			$fmdb->query($schema);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
+	}
+
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	/** Prepend domain_name_servers with s_ */
+	$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE domain_name_servers!=0";
+	$fmdb->query($query);
+	$num_rows = $fmdb->num_rows;
+	$results = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		$name_server_ids = explode(';', $results[$x]->domain_name_servers);
+		$new_server_ids = null;
+		foreach ($name_server_ids as $server_id) {
+			$new_server_ids[] = 's_' . $server_id;
+		}
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_name_servers='" . implode(';', $new_server_ids) . "' "
+				. "WHERE domain_id=" . $results[$x]->domain_id;
+		$fmdb->query($query);
+		if (!$fmdb->result || $fmdb->sql_errors) return false;
 	}
 
 	return true;

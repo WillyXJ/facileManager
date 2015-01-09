@@ -85,7 +85,7 @@ $body = '<div id="body_container" class="fm-noscroll">' . "\n";
 if (!empty($response)) $body .= '<div id="response"><p>' . $response . '</p></div>';
 $body .= <<<HTML
 	<h2>Records</h2>
-	<div id="pagination_container" class="submenus">
+	<div id="pagination_container" class="submenus record-types">
 	<div>
 	<div class="stretch"></div>
 	$avail_types
