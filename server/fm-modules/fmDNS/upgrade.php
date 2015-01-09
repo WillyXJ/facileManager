@@ -1230,14 +1230,15 @@ TABLE;
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_option_type` ENUM('global','ratelimit') NOT NULL DEFAULT 'global' AFTER `def_function`;";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_max_parameters` INT(3) NOT NULL DEFAULT '1' ;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_zone_support` VARCHAR(10) NULL DEFAULT NULL AFTER `def_clause_support` ;";
 	
 	$inserts[] = <<<INSERT
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
-`def_function` ,
+`def_function`,
 `def_option_type`,
-`def_option` ,
-`def_type` ,
-`def_multiple_values` ,
+`def_option`,
+`def_type`,
+`def_multiple_values`,
 `def_clause_support`,
 `def_dropdown`,
 `def_max_parameters`
@@ -1261,7 +1262,15 @@ VALUES
 ;
 INSERT;
 
-	$updates = null;
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `fm_dns_functions`.`def_clause_support` LIKE '%Z%';";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'F' WHERE `fm_dns_functions`.`def_option` IN ('forward', 'forwarders');";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'M' WHERE `fm_dns_functions`.`def_option` IN 
+		('also-notify', 'max-transfer-idle-out', 'max-transfer-out', 'notify-source', 'notify-source-v6', 'provide-ixfr', 'transfer-format',
+		'transfers-out', 'update-policy');";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'S' WHERE `fm_dns_functions`.`def_option` IN 
+		('allow-notify', 'alt-transfer-source', 'alt-transfer-source-v6', 'masters', 'max-refresh-time', 'max-retry-time', 'max-transfer-idle-in',
+		'max-transfer-time-in', 'min-refresh-time', 'min-retry-time', 'multi-master', 'request-ixfr', 'transfer-source', 'transfer-source-v6',
+		'transfers-in', 'transfers-per-ns');";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -1273,6 +1282,13 @@ INSERT;
 
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
 			$fmdb->query($schema);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}

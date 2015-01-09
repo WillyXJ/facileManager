@@ -617,11 +617,11 @@ class fm_module_buildconf {
 						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
 					}
 					
-					switch($zone_result[$i]->domain_type) {
+					switch($domain_type) {
 						case 'master':
 						case 'slave':
 							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no). (string) $auto_zone_options;
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type). (string) $auto_zone_options;
 							/** Build zone file */
 							if ($domain_type == 'master') {
 								$files[$server_zones_dir . '/master/db.' . $domain_name_file . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
@@ -633,8 +633,7 @@ class fm_module_buildconf {
 							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
-							$zones .= "\tforwarders { " . trim($fm_dns_acls->parseACL($domain_forward_servers), '; ') . "; };\n";
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type). (string) $auto_zone_options;
 					}
 					$zones .= "};\n";
 	
@@ -1358,9 +1357,10 @@ HTML;
 	 *
 	 * @param integer $domain_id The domain_id of the zone
 	 * @param integer $server_serial_no The server serial number
+	 * @param string $domain_type Type of zone (master, slave, etc.)
 	 * @return string
 	 */
-	function getZoneOptions($domain_id, $server_serial_no) {
+	function getZoneOptions($domain_id, $server_serial_no, $domain_type) {
 		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
@@ -1391,17 +1391,17 @@ HTML;
 		$config_array = array_merge($global_config, $server_config);
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
+			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'";
+			$fmdb->get_results($query);
+			if (!$fmdb->num_rows) {
+				continue;
+			} else {
+				$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
+			}
 			list($cfg_info, $cfg_comment) = $cfg_data;
 			
 			$cfg_info = str_replace(',', '; ', $cfg_info);
 
-			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-			$fmdb->get_results($query);
-			if (!$fmdb->num_rows) $def_multiple_values = 'no';
-			else {
-				$result = $fmdb->last_result[0];
-				$def_multiple_values = $result->def_multiple_values;
-			}
 			if ($cfg_comment) {
 				$comment = wordwrap($cfg_comment, 50, "\n");
 				$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
