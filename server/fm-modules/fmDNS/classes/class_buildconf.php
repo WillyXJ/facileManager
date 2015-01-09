@@ -603,8 +603,9 @@ class fm_module_buildconf {
 
 					$domain_name_file = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
 					$domain_name = isset($zone_result[$i]->domain_name_file) ? $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name_file)) : $domain_name_file;
+					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
 					$zones .= 'zone "' . rtrim($domain_name, '.') . "\" {\n";
-					$zones .= "\ttype " . $zone_result[$i]->domain_type . ";\n";
+					$zones .= "\ttype $domain_type;\n";
 					$file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 					
 					/** Are there multiple zones with the same name? */
@@ -619,10 +620,10 @@ class fm_module_buildconf {
 					switch($zone_result[$i]->domain_type) {
 						case 'master':
 						case 'slave':
-							$zones .= "\tfile \"$server_zones_dir/{$zone_result[$i]->domain_type}/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no);
+							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no). (string) $auto_zone_options;
 							/** Build zone file */
-							if ($zone_result[$i]->domain_type == 'master') {
+							if ($domain_type == 'master') {
 								$files[$server_zones_dir . '/master/db.' . $domain_name_file . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 							}
 							break;
@@ -1502,8 +1503,9 @@ HTML;
 	 * @since 2.0
 	 * @package fmDNS
 	 *
-	 * @param integer $view_id The view_id of the zone
-	 * @param integer $server_serial_no The server serial number for overrides
+	 * @param string $cfg_name Config option name
+	 * @param string $cfg_info Config option values
+	 * @param string $cfg_comment Config option comment
 	 * @return string
 	 */
 	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment) {
@@ -1536,6 +1538,75 @@ HTML;
 		return $config;
 	}
 	
+	/**
+	 * Processes the server groups to determine master/slave arrangement
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param array $zone_array The zone data
+	 * @param integer $server_id The server id to check
+	 * @return array
+	 */
+	function processServerGroups($zone_array, $server_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		extract(get_object_vars($zone_array), EXTR_OVERWRITE);
+		
+		$domain_name_servers = explode(';', $domain_name_servers);
+		if (!count($domain_name_servers) || in_array('0', $domain_name_servers) || 
+				$domain_type != 'master' || in_array('s_' . $server_id, $domain_name_servers)) {
+			return array($domain_type, null);
+		}
+		
+		foreach ($domain_name_servers as $ids) {
+			if ($ids == '0' || strpos($ids, 's_') !== false) continue;
+			
+			if (strpos($ids, 'g_') !== false) {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', str_replace('g_', null, $ids), 'group_', 'group_id');
+				if ($fmdb->num_rows) {
+					extract(get_object_vars($fmdb->last_result[0]));
+					
+					$group_masters = explode(';', $group_masters);
+					$group_slaves = explode(';', $group_slaves);
+					
+					if (in_array($server_id, $group_masters)) {
+						return array($domain_type, null);
+					}
+					
+					if (in_array($server_id, $group_slaves)) {
+						return array('slave', sprintf("\tmasters { %s };\n", $this->resolveServerGroupMasters($group_masters)));
+					}
+				}
+			}
+		}
+		
+		return array($domain_type, null);
+	}
+	
+	/**
+	 * Attempts to resolve the master servers for the group
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param array $zone_array The zone data
+	 * @param integer $server_id The server id to check
+	 * @return array
+	 */
+	function resolveServerGroupMasters($masters) {
+		global $__FM_CONFIG;
+		
+		if (!count($masters)) return null;
+		
+		foreach ($masters as $server_id) {
+			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$server_ip = gethostbyname($server_name);
+			$master_ips[] = ($server_ip != $server_name) ? $server_ip : sprintf(_('Cannot resolve %s'), $server_name);
+		}
+		
+		return implode('; ', (array) $master_ips) . ';';
+	}
 }
 
 if (!isset($fm_module_buildconf))
