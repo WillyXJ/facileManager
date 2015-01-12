@@ -304,7 +304,7 @@ HTML;
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function printUsersForm($data = '', $action = 'add', $form_bits = array(), $button_text = 'Save', $button_id = 'submit', $action_page = 'admin-users.php', $print_form_head = true) {
+	function printUsersForm($data = '', $action = 'add', $form_bits = array(), $button_text = 'Save', $button_id = 'submit', $action_page = 'admin-users.php', $print_form_head = true, $display_type = 'popup') {
 		global $__FM_CONFIG, $fm_name, $fm_login;
 
 		$user_id = 0;
@@ -507,9 +507,9 @@ PERM;
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
+		if ($display_type == 'popup') $return_form .= $popup_header;
 		$return_form .= <<<FORM
-		$popup_header
-			<div class="leftbox">
+			<div>
 			<form id="fm_user_profile">
 			<input type="hidden" name="action" value="$action" />
 			$hidden
@@ -524,12 +524,13 @@ PERM;
 			$user_perm_form
 			</table>
 			</div>
+FORM;
+		if ($display_type == 'popup') $return_form .= <<<FORM
 		</div>
 		<div class="popup-footer">
 			<input type="submit" id="$button_id" name="submit" value="$button_text" class="button primary" $button_disabled />
 			<input type="button" value="Cancel" class="button left" id="cancel_button" />
 		</div>
-		</form>
 		</form>
 		<script>
 			$(document).ready(function() {

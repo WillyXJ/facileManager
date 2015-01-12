@@ -52,7 +52,7 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$available_zones[$i+1][] = displayFriendlyDomainName($results[$i]->domain_name);
+			$available_zones[$i+1][] = (!function_exists('displayFriendlyDomainName')) ? $results[$i]->domain_name : displayFriendlyDomainName($results[$i]->domain_name);
 			$available_zones[$i+1][] = $results[$i]->domain_id;
 		}
 	}
