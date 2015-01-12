@@ -100,12 +100,7 @@ HTML;
 		if (!currentUserCan('manage_passwords', $_SESSION['module'])) $error = 'You do not have permission to perform this task.';
 		
 		if ($error) {
-			if (!$verbose) return '<p class="error">' . $error . '</p>';
-			else return <<<HTML
-				<h2>Password Change Results</h2>
-				<p>$error</p>
-				<br /><input type="submit" value="OK" class="button" id="cancel_button" />
-HTML;
+			return (!$verbose) ? '<p class="error">' . $error . '</p>' : $error;
 		}
 		
 		/** Get default credentials */
@@ -146,11 +141,6 @@ HTML;
 		if (!$verbose) {
 			$return = strpos($verbose_output, '[failed] -') ? '<p class="error">One or more errors occurred during the password change.</p>' : '<p>Password has been changed.</p>';
 		} else {
-			$return = <<<HTML
-<textarea rows="20" cols="85">$verbose_output</textarea>
-<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />
-
-HTML;
 			$return = $verbose_output;
 		}
 		
