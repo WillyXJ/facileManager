@@ -976,7 +976,19 @@ HTML;
 			$name_servers = explode(';', rtrim($domain_name_servers, ';'));
 			$sql_name_servers = 'AND `server_id` IN (';
 			foreach($name_servers as $server) {
-				if (!empty($server)) $sql_name_servers .= "'$server',";
+				if ($server[0] == 's') $server = str_replace('s_', '', $server);
+				
+				/** Process server groups */
+				if ($server[0] == 'g') {
+					$group_id = str_replace('g_', '', $server);
+					$group_masters = getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_masters');
+					
+					foreach (explode(';', $group_masters) as $server) {
+						if (!empty($server)) $sql_name_servers .= "'$server',";
+					}
+				} else {
+					if (!empty($server)) $sql_name_servers .= "'$server',";
+				}
 			}
 			$sql_name_servers = rtrim($sql_name_servers, ',') . ')';
 		} else $sql_name_servers = null;
