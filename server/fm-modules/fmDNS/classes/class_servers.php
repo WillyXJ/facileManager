@@ -254,7 +254,7 @@ class fm_module_servers {
 	/**
 	 * Updates the selected server
 	 */
-	function update($post) {
+	function updateServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (empty($post['server_name'])) return 'No server name defined.';
@@ -306,7 +306,7 @@ class fm_module_servers {
 		}
 		$sql = rtrim($sql_edit, ',');
 		
-		// Update the server
+		/** Update the server */
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
@@ -328,58 +328,147 @@ class fm_module_servers {
 	}
 	
 	/**
+	 * Updates the selected server group
+	 */
+	function updateGroup($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (empty($post['group_name'])) return _('No group name defined.');
+		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'groups', 'group_name');
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(ngettext('Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', 1), $field_length);
+		
+		/** Does the record already exist for this account? */
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $post['group_name'], 'group_', 'group_name', "AND group_id!='{$post['server_id']}'");
+		if ($fmdb->num_rows) return _('This group name already exists.');
+		
+		/** Process group masters */
+		$log_message_master_servers = null;
+		foreach ((array) $post['group_masters'] as $val) {
+			if ($val == 0) {
+				$group_masters = 0;
+				break;
+			}
+			$group_masters .= $val . ';';
+			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$log_message_master_servers .= $val ? "$server_name; " : null;
+		}
+		$log_message_master_servers = rtrim ($log_message_master_servers, '; ');
+		$post['group_masters'] = rtrim($group_masters, ';');
+		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
+
+		/** Process group slaves */
+		$log_message_slave_servers = null;
+		foreach ((array) $post['group_slaves'] as $val) {
+			if ($val == 0) {
+				$group_slaves = 0;
+				break;
+			}
+			$group_slaves .= $val . ';';
+			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$log_message_slave_servers .= $val ? "$server_name; " : null;
+		}
+		$log_message_slave_servers = rtrim ($log_message_slave_servers, '; ');
+		$post['group_slaves'] = rtrim($group_slaves, ';');
+		if (!isset($post['group_slaves'])) $post['group_slaves'] = 0;
+		
+		$post['account_id'] = $_SESSION['user']['account_id'];
+
+		$sql_edit = null;
+		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type');
+
+		foreach ($post as $key => $data) {
+			if (!in_array($key, $exclude)) {
+				$sql_edit .= $key . "='" . sanitize($data) . "',";
+			}
+		}
+		$sql = rtrim($sql_edit, ',');
+
+		/** Update the server */
+		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` SET $sql WHERE `group_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
+		$result = $fmdb->query($query);
+		
+		if (!$fmdb->result) return _('Could not update the group because a database error occurred.');
+
+		/** Return if there are no changes */
+		if (!$fmdb->rows_affected) return true;
+
+		addLogEntry(sprintf(_("Updated server group '%s' to"), $old_name) . ":\n" . _('Name') . ": {$post['group_name']}\n" .
+				_('Masters') . ": {$log_message_master_servers}\n" .
+				_('Slaves') . ": {$log_message_slave_servers}\n");
+		
+		return true;
+	}
+	
+	/**
 	 * Deletes the selected server/group
 	 */
 	function delete($server_id, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Does the server_id exist for this account? */
-		$server_serial_no = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
-		if ($fmdb->num_rows) {
-			
-			/** Update all associated domains */
-			$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers`='s_{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
-			$fmdb->query($query);
+		if ($type == 'servers') {
+			$server_serial_no = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 			if ($fmdb->num_rows) {
-				$result = $fmdb->last_result;
-				$count = $fmdb->num_rows;
-				for ($i=0; $i < $count; $i++) {
-					$serverids = null;
-					foreach (explode(';', $result[$i]->domain_name_servers) as $server) {
-						if ($server == $server_id) continue;
-						$serverids .= $server . ';';
+
+				/** Update all associated domains */
+				$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers`='s_{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
+				$fmdb->query($query);
+				if ($fmdb->num_rows) {
+					$result = $this->updateNameServerAssignments($fmdb->last_result, $fmdb->num_rows, 's_' . $server_id);
+					if ($result !== true) {
+						return $result;
 					}
-					$serverids = rtrim($serverids, ';');
-					
-					/** Set new domain_name_servers list */
-					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_name_servers`='$serverids' WHERE `domain_id`={$result[$i]->domain_id} AND `account_id`='{$_SESSION['user']['account_id']}'";
-					$result2 = $fmdb->query($query);
-					if (!$fmdb->rows_affected) {
-						return 'The associated zones for this server could not be updated because a database error occurred.';
-					}
+				}
+
+				/** Delete associated config options */
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
+					return 'The associated server configs could not be deleted because a database error occurred.';
+				}
+
+				/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
+				if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false) === false) {
+					return 'The server could not be removed from the fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds table because a database error occurred.';
+				}
+
+				/** Delete server */
+				$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_id, 'server_', 'deleted', 'server_id')) {
+					addLogEntry("Deleted server '$tmp_name' ($server_serial_no).");
+					return true;
 				}
 			}
 
-			/** Delete associated config options */
-			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
-				return 'The associated server configs could not be deleted because a database error occurred.';
+			return _('This server could not be deleted.');
+		} else {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $server_id, 'group_', 'group_id');
+			if ($fmdb->num_rows) {
+
+				/** Update all associated domains */
+				$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;g_{$server_id};%' OR `domain_name_servers` LIKE '%;g_{$server_id}' OR `domain_name_servers` LIKE 'g_{$server_id};%' OR `domain_name_servers`='g_{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
+				$fmdb->query($query);
+				if ($fmdb->num_rows) {
+					$result = $this->updateNameServerAssignments($fmdb->last_result, $fmdb->num_rows, 'g_' . $server_id);
+					if ($result !== true) {
+						return $result;
+					}
+				}
+
+				/** Delete group */
+				$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $server_id, 'group_', 'deleted', 'group_id')) {
+					addLogEntry("Deleted server group '$tmp_name'.");
+					return true;
+				}
 			}
-			
-			/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
-			if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false) === false) {
-				return 'The server could not be removed from the fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds table because a database error occurred.';
-			}
-			
-			/** Delete server */
-			$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_id, 'server_', 'deleted', 'server_id')) {
-				addLogEntry("Deleted server '$tmp_name' ($server_serial_no).");
-				return true;
-			}
+
+			return _('This server group could not be deleted.');
 		}
-		
-		return 'This server could not be deleted.';
+
+		return _('There is something wrong with your request.');
 	}
 
 
@@ -412,7 +501,7 @@ class fm_module_servers {
 					$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 					$edit_status .= '</a>';
 				}
-				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			}
 			if (isset($row->server_client_version) && version_compare($row->server_client_version, getOption('client_version', 0, $_SESSION['module']), '<')) {
 				$edit_actions = 'Client Upgrade Available<br />';
@@ -458,7 +547,7 @@ HTML;
 				$edit_status .= '">';
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
-				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			}
 			
 			/** Process group masters */
@@ -496,7 +585,7 @@ HTML;
 	function printForm($data = '', $action = 'add', $type = 'servers') {
 		global $__FM_CONFIG;
 		
-		$server_id = 0;
+		$server_id = $group_id = 0;
 		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$server_chroot_dir = $group_name = null;
@@ -510,6 +599,8 @@ HTML;
 		} elseif (@is_object($data[0])) {
 			extract(get_object_vars($data[0]));
 		}
+		
+		if ($type == 'groups') $server_id = $group_id;
 
 		$popup_header = buildPopup('header', $ucaction . ' ' . $uctype);
 		$popup_footer = buildPopup('footer');
@@ -890,6 +981,39 @@ FORM;
 		return $return;
 	}
 
+	/**
+	 * Updates the name server assignments
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $result Database results
+	 * @param integer $count Number of db results
+	 * @param integer $server_id Server ID to remove from assignments
+	 * @return boolean
+	 */
+	function updateNameServerAssignments($result, $count, $server_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		for ($i=0; $i < $count; $i++) {
+			$serverids = null;
+			foreach (explode(';', $result[$i]->domain_name_servers) as $server) {
+				if ($server == $server_id) continue;
+				$serverids .= $server . ';';
+			}
+			$serverids = rtrim($serverids, ';');
+
+			/** Set new domain_name_servers list */
+			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_name_servers`='$serverids' WHERE `domain_id`={$result[$i]->domain_id} AND `account_id`='{$_SESSION['user']['account_id']}'";
+			$result2 = $fmdb->query($query);
+			if (!$fmdb->rows_affected) {
+				return _('The associated zones for this server or group could not be updated because a database error occurred.');
+			}
+		}
+		
+		return true;
+	}
 }
 
 if (!isset($fm_module_servers))

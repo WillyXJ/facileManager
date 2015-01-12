@@ -29,7 +29,7 @@ include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
 $response = isset($response) ? $response : null;
 
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['servers']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'servers';
-$display_type = ucfirst($__FM_CONFIG['servers']['avail_types'][$type]);
+$display_type = ($type == 'servers') ? _('Name Servers') : _('Name Server Groups');
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -49,7 +49,11 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_servers->update($_POST);
+			if ($_POST['sub_type'] == 'servers') {
+				$result = $fm_module_servers->updateServer($_POST);
+			} elseif ($_POST['sub_type'] == 'groups') {
+				$result = $fm_module_servers->updateGroup($_POST);
+			}
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -86,7 +90,7 @@ printHeader();
 @printMenu();
 
 $avail_types = buildSubMenu($type);
-echo printPageHeader($response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader($response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 	
 $sort_direction = null;
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
