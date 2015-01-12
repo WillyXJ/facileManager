@@ -63,7 +63,8 @@ class fm_sqlpass_passwords {
 			
 HTML;
 			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], $_SESSION['module'])) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
-			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'Set Password', 'set_sql_password', 'config-passwords', false);
+			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'Set Password', 'set_sql_password', 'config-passwords', false, 'embed');
+			echo '<div><input type="submit" id="set_sql_password" name="submit" value="Set Password" class="button primary" disabled /></div>';
 			echo '</form>';
 		}
 	}
@@ -146,11 +147,11 @@ HTML;
 			$return = strpos($verbose_output, '[failed] -') ? '<p class="error">One or more errors occurred during the password change.</p>' : '<p>Password has been changed.</p>';
 		} else {
 			$return = <<<HTML
-<h2>Password Change Results</h2>
 <textarea rows="20" cols="85">$verbose_output</textarea>
 <br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />
 
 HTML;
+			$return = $verbose_output;
 		}
 		
 		return $return;

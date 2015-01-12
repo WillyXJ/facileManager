@@ -1,6 +1,7 @@
 1.1-alpha2 (201?-??-??)
 =======================
 * Server - [bug] Fixed bulk action checkbox logic.
+* Server - [bug] Fixed password setting form and output logic.
 
 1.1-alpha1 (2014-11-20)
 =======================

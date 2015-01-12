@@ -38,8 +38,11 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	if (!currentUserCan('manage_passwords', $_SESSION['module'])) returnUnAuth(true);
 
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_passwords.php');
+	if ($_POST['verbose']) echo buildPopup('header', 'Password Change Results') . '<pre>';
 	echo $fm_sqlpass_passwords->setPassword();
+	if ($_POST['verbose']) echo '</pre>' . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 
+	exit;
 /** Handle everything else */
 } elseif (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$table = 'sqlpass_' . $_POST['item_type'];

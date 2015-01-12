@@ -14,7 +14,7 @@ $(document).ready(function() {
 		} else {
 			$('#manage_item').fadeIn(200);
 			$('#manage_item_contents').fadeIn(200);
-			$('#manage_item_contents').html('<h2>Password Change Results</h2><p>Processing...please wait. <i class="fa fa-spinner fa-spin"></i></p>');
+			$('#manage_item_contents').html('<p>Processing...please wait. <i class="fa fa-spinner fa-spin"></i></p>');
 		}
 		
 		$.ajax({
