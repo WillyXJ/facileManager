@@ -26,6 +26,11 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
+/** Handle mass updates */
+if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
+	return;
+}
+
 $class_dir = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/';
 foreach (scandir($class_dir) as $class_file) {
 	if (in_array($class_file, array('.', '..'))) continue;

@@ -78,11 +78,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				returnUnAuth();
 			}
 			
-			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 			$bulk_function = 'doBulkServerBuild';
 			break;
 	}
-	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results');
 	$result = "<pre>\n";
 	if (is_array($_POST['item_id'])) {
 		foreach ($_POST['item_id'] as $serial_no) {
@@ -93,11 +91,10 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		}
 	}
 	$result .= "</pre>\n<p class=\"complete\">" . ucwords($_POST['bulk_action']) . ' is complete.</p>';
-	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL('Servers'));
+	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL('Servers'));
 
 /** Handle mass updates */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
-	echo buildPopup('header', 'Updates Results');
 	$result = "<pre>\n";
 	
 	/** Server config builds */
@@ -110,9 +107,6 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				$result .= $fm_shared_module_servers->doClientUpgrade($server_results[$i]->server_serial_no);
 				$result .= "\n";
 			} elseif ($server_results[$i]->server_build_config != 'no') {
-				if (!isset($fm_module_servers)) {
-					include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-				}
 				$result .= $fm_shared_module_servers->doBulkServerBuild($server_results[$i]->server_serial_no);
 				$result .= "\n";
 			}
@@ -127,7 +121,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	
 	$result .= "</pre>\n<p class=\"complete\">All updates have been processed.</p>\n";
 	unset($_SESSION['display-rebuild-all']);
-	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+	echo buildPopup('header', 'Updates Results') . $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {

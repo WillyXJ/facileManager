@@ -203,12 +203,15 @@ class fm_shared_module_servers {
 		}
 		
 		if (count($response) == 1) {
+			if (!isset($fm_module_servers)) {
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+			}
 			foreach (makePlainText($fm_module_servers->buildServerConfig($server_serial_no), true) as $line) {
 				$response[] = ' --> ' . $line;
 			}
 		}
 		
-		$response[] = "\n";
+		$response[] = null;
 		
 		return implode("\n", $response);
 	}

@@ -1,8 +1,9 @@
-1.1-alpha2 (201?-??-??)
+1.1-alpha2 (2015-??-??)
 =======================
 * Server - [bug] Fixed server preview.
 * Server - [bug] Fixed policy ordering.
 * Server - [bug] Fixed bulk action checkbox logic.
+* Server - [bug] Fixed process all routine (introduced in 1.1-alpha1).
 
 1.1-alpha1 (2014-11-20)
 =======================
