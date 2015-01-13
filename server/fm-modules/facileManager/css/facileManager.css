@@ -1140,14 +1140,6 @@ span.not_installed {
 	color: #000;
 }
 
-.leftbox {
-	float: left;
-}
-
-.rightbox {
-	float: right;
-}
-
 #userperms {
 	margin-left: 21em;
 }
@@ -1191,8 +1183,6 @@ span.not_installed {
 	box-shadow: rgba(0,0,0,.30) 0 2px 3px !important;
 	-moz-box-shadow: rgba(0,0,0,.30) 0 2px 3px !important;
 	-webkit-box-shadow: rgba(0,0,0,.30) 0 2px 5px !important;
-	min-width: 48%;
-	max-width: 48%;
 	margin-top: .6em;
 }
 
@@ -1329,29 +1319,54 @@ span.not_installed {
 }
 
 #pagination_container,
-#record_search_form_container {
+#record_search_form_container,
+div.fm-table {
 	display: table;
 	width: 100%;
+}
+
+#pagination_container,
+#record_search_form_container {
 	white-space: nowrap;
 	margin-bottom: -2px;
 	position: relative;
 }
 #pagination_container > div,
-#record_search_form_container > div {
+#record_search_form_container > div,
+div.fm-table > div {
 	display: table-row;
 }
 #pagination_container > div > div,
-#record_search_form_container > div > div {
+#record_search_form_container > div > div,
+div.fm-table > div > div {
 	display: table-cell;
 }
-#pagination_container > div > div {
+#pagination_container > div > div,
+div.fm-table > div > div {
 	padding: 0 1em;
 }
-#pagination_container > div > div:first-child {
+#pagination_container > div > div:first-child,
+div.fm-table > div > div:first-child {
 	padding: 0 1em 0 0;
 }
-#pagination_container > div > div:last-child {
+#pagination_container > div > div:last-child,
+div.fm-table > div > div:last-child {
 	padding: 0 0 0 1em;
+}
+div.fm-table > div > div:first-child:nth-last-child(1) {
+	width: 100%;
+	padding: 0;
+}
+div.fm-table > div > div:first-child:nth-last-child(2) {
+	width: 48%;
+}
+div.fm-table > div > div:first-child:nth-last-child(3) {
+	width: 32%;
+}
+div.fm-table > div > div.fm-half {
+	width: 50%;
+}
+#pagination_container > div > div:last-child {
 	text-align: right;
 }
 #pagination_container > div > div:nth-child(2) {

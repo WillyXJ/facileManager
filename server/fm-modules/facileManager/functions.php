@@ -975,7 +975,7 @@ DASH;
 			if (!function_exists('buildModuleDashboard')) {
 				include($functions_file);
 			}
-			$body = @buildModuleDashboard();
+			$body = sprintf('<div class="fm-table"><div>%s</div></div>', @buildModuleDashboard());
 		} else {
 			$body = '<p>You have no modules installed.</p>';
 		}

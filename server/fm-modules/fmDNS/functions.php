@@ -101,7 +101,8 @@ function buildModuleDashboard() {
 	$record_count = $fmdb->num_rows;
 
 	$dashboard = <<<DASH
-	<div id="shadow_box" class="leftbox">
+	<div>
+	<div id="shadow_box">
 		<div id="shadow_container">
 		<h3>Summary</h3>
 		<li>You have <b>$server_count</b> name servers configured.</li>
@@ -109,15 +110,18 @@ function buildModuleDashboard() {
 		<li>You have <b>$record_count</b> records.</li>
 		</div>
 	</div>
+	</div>
 DASH;
 
 	if ($error_display) {
 		$dashboard .= <<<DASH
-	<div id="shadow_box" class="rightbox">
+	<div>
+	<div id="shadow_box">
 		<div id="shadow_container">
 		<h3>Needs Attention</h3>
 		$error_display
 		</div>
+	</div>
 	</div>
 DASH;
 	}
