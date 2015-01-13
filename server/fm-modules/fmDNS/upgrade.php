@@ -1218,7 +1218,8 @@ function upgradefmDNS_2002($__FM_CONFIG, $running_version) {
 	
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` (
-  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
   `group_name` varchar(128) NOT NULL,
   `group_masters` text NOT NULL,
   `group_slaves` text NOT NULL,
