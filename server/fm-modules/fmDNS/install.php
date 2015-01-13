@@ -518,24 +518,38 @@ VALUES
 ('options', 'version', '( quoted_string | none )', 'no', 'O', NULL, 'no'),
 ('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
 ('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', NULL, 'yes'),
-('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
-('options', 'ratelimit', 'referrals-per-second', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'nodata-per-second', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'nxdomains-per-second', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'errors-per-second', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'all-per-second', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'window', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'log-only', '( yes | no )', 'no', 'OV', NULL, 'yes'),
-('options', 'ratelimit', 'qps-scale', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'ipv4-prefix-length', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'ipv6-prefix-length', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'slip', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'exempt-clients', '( address_match_element )', 'yes', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'max-table-size', '( integer )', 'no', 'OV', NULL, 'no'),
-('options', 'ratelimit', 'min-table-size', '( integer )', 'no', 'OV', NULL, 'no')
+('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'MS', 'yes')
 ;
 INSERT;
 	
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`
+)
+VALUES 
+('options', 'ratelimit', 'referrals-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'nodata-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'nxdomains-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'errors-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'all-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'window', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'log-only', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'ratelimit', 'qps-scale', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'ipv4-prefix-length', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'ipv6-prefix-length', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'slip', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'exempt-clients', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'ratelimit', 'max-table-size', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'min-table-size', '( integer )', 'no', 'OV', 'no')
+;
+INSERT;
+
 	$inserts[] = <<<INSERT
 INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_function` ,
@@ -548,7 +562,7 @@ INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_max_parameters`
 )
 VALUES 
-('options', 'ratelimit', 'responses-per-second', '( [size integer] [ratio fixedpoint] integer )', 'no', 'OV', 'no', '5'),
+('options', 'ratelimit', 'responses-per-second', '( [size integer] [ratio fixedpoint] integer )', 'no', 'OV', 'no', '5')
 ;
 INSERT;
 
