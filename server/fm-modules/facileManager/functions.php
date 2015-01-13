@@ -700,7 +700,7 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 						break;
 					}
 				}
-			} elseif (isset($option_select) && (string)$option_select === $options[$i][1]) {
+			} elseif (isset($option_select) && (string)$option_select === (string)$options[$i][1]) {
 				$selected = ' selected';
 			}
 			$type_options.="<option$selected value=\"{$options[$i][1]}\">{$options[$i][0]}</option>\n";
