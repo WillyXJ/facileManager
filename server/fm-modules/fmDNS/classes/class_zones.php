@@ -1244,15 +1244,15 @@ HTML;
 		}
 		
 		/** Does the record already exist for this account? */
+		$domain_id_sql = (isset($post['domain_id'])) ? 'AND domain_id!=' . sanitize($post['domain_id']) : null;
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_SESSION['user']['account_id'], 'view_', 'account_id');
 		if (!$fmdb->num_rows) { /** No views defined - all zones must be unique */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name');
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
 			if ($fmdb->num_rows) return 'Zone already exists.';
 		} else { /** All zones must be unique per view */
 			$defined_views = $fmdb->last_result;
 			
 			/** Format domain_view */
-			$domain_id_sql = (isset($post['domain_id'])) ? 'AND domain_id!=' . sanitize($post['domain_id']) : null;
 			if (!$post['domain_view'] || in_array(0, $post['domain_view'])) {
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
 				if ($fmdb->num_rows) {
