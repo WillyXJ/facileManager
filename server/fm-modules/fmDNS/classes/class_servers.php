@@ -706,8 +706,8 @@ FORM;
 			$group_slaves  = (isset($group_slaves)) ? explode(';', $group_slaves) : null;
 			
 			$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name');
-			$group_masters = buildSelect('group_masters', 'group_masters', $this->availableItems('server'), $group_masters, 1, null, true);
-			$group_slaves = buildSelect('group_slaves', 'group_slaves', $this->availableItems('server'), $group_slaves, 1, null, true);
+			$group_masters = buildSelect('group_masters', 'group_masters', $this->availableItems('server'), $group_masters, 1, null, true, null, null, _('Select master servers'));
+			$group_slaves = buildSelect('group_slaves', 'group_slaves', $this->availableItems('server'), $group_slaves, 1, null, true, null, null, _('Select slave servers'));
 
 			$return_form .= sprintf('
 			<table class="form-table">
