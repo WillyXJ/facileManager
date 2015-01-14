@@ -1,4 +1,4 @@
-2.0-alpha2 (201?-??-??)
+2.0-alpha2 (2015-01-13)
 =======================
 * Client - [improvement] Added support for sudoers includedir parameter and no
            longer disables requiretty and env_reset globally.
