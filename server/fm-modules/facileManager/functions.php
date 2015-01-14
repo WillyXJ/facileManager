@@ -2848,4 +2848,19 @@ HTML;
 }
 
 
+/**
+ * Dummy function in case gettext is not installed
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $text Text to translate
+ * @return string $text
+ */
+if (!function_exists('_')) {
+	function _($text) {
+		return $text;
+	}
+}
+
 ?>
