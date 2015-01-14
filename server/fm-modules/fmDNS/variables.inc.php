@@ -33,8 +33,7 @@ if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 $__FM_CONFIG['fmDNS'] = array(
 		'version'							=> '2.0-alpha2',
 		'client_version'					=> '2.0-alpha2',
-		'description'						=> 'Easily manage one or more ISC BIND servers through a web interface.  No more editing configuration
-												and zone files manually.',
+		'description'						=> _('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.'),
 		'prefix'							=> 'dns_',
 		'required_dns_version'				=> '9.3',
 		'required_fm_version'				=> '2.0-alpha2',
@@ -123,19 +122,17 @@ $__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixe
 $named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkconf') . ', ' . findProgram('named-checkzone') : '/path/to/named-checkconf, /path/to/named-checkzone';
 $__FM_CONFIG['fmDNS']['default']['options'] = array(
 		'enable_named_checks' => array(
-				'description' => array('Enable named Checks', 'Enable or disable named-checkconf and named-checkzone utilities.</p>
-								<p>sudo must be installed on ' . php_uname('n') . ' with the following in sudoers:</p>
+				'description' => array(_('Enable named Checks'), _('Enable or disable named-checkconf and named-checkzone utilities.') . '</p>
+								<p>' . sprintf(_('sudo must be installed on %s with the following in sudoers:'), php_uname('n')) . '</p>
 								<pre>' . $__FM_CONFIG['webserver']['user_info']['name'] . ' ALL=(root) NOPASSWD: ' . $named_check_utils . '</pre>'),
 				'default_value' => 'no',
 				'type' => 'checkbox'),
 		'purge_config_files' => array(
-				'description' => array('Purge Configuration Files', 'When enabled, configuration files will be deleted on the DNS
-								servers before building the server config. This can be handy if you want to remove unused files.'),
+				'description' => array(_('Purge Configuration Files'), _('When enabled, configuration files will be deleted on the DNS servers before building the server config. This can be handy if you want to remove unused files.')),
 				'default_value' => 'no',
 				'type' => 'checkbox'),
 		'auto_create_ptr_zones' => array(
-				'description' => array('Create Reverse Zones Automatically', 'While creating A records and choosing to create the associated'
-					. ' PTR record, reverse zones can be automatically created if they are missing.'),
+				'description' => array(_('Create Reverse Zones Automatically'), _('While creating A records and choosing to create the associated PTR record, reverse zones can be automatically created if they are missing.')),
 				'default_value' => 'no',
 				'type' => 'checkbox')
 	);

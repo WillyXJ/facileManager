@@ -33,7 +33,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	if (array_key_exists('reset_pwd', $_POST)) {
 		$result = $fm_login->processUserPwdResetForm($_POST['user_id']);
 		if ($result === true) {
-			echo '<p>Password reset email has been sent to ' . $_POST['user_id'] . '.</p>';
+			printf(_('<p>Password reset email has been sent to %s.</p>'), $_POST['user_id']);
 		} else {
 			echo '<p class="error">' . $result . '</p>';
 		}

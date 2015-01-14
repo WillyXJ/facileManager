@@ -4,6 +4,7 @@
 * Server - [bug] Fixed policy ordering.
 * Server - [bug] Fixed bulk action checkbox logic.
 * Server - [bug] Fixed process all routine (introduced in 1.1-alpha1).
+* Server - [feature] Added i18n support (Issue #106).
 
 1.1-alpha1 (2014-11-20)
 =======================

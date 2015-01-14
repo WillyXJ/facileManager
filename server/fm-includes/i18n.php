@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2014 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -17,25 +17,52 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
- | Includes common module tools                                            |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
-if ($_SESSION['module'] != $fm_name) {
-	$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
-	if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
-		include($module_tools_file);
-	}
+/**
+ * facileManager language translation functions
+ *
+ * @package facileManager
+ * @subpackage i18n
+ */
 
-	if (method_exists($fm_module_tools, 'connectTests')) {
-		$tools_option[] = sprintf('
-			<h2>%s</h2>
-			<p>%s</p>
-			<p class="step"><input id="connect-test" name="submit" type="submit" value="%s" class="button" %s/></p>
-			<br />', _('Connection Tests'), sprintf(_('Test the connectivity of your %s servers with the %s server.'), $_SESSION['module'], $fm_name),
-				_('Run Tests'), $disabled);
+$directory = ABSPATH . 'fm-modules/' . $fm_name . '/languages';
+$domain = $fm_name;
+$encoding = 'UTF-8';
+
+$_SESSION['language'] = getLanguage($directory);
+
+putenv('LANG=' . $_SESSION['language']); 
+setlocale(LC_ALL, $_SESSION['language']);
+ 
+bindtextdomain($domain, $directory); 
+bind_textdomain_codeset($domain, $encoding);
+ 
+textdomain($domain);
+
+
+/**
+ * Returns if access to a zone is allowed
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $directory Directory where language files are located
+ * @return string
+ */
+function getLanguage($directory) {
+	session_start();
+
+	if (isset($_SESSION['language'])) $_SESSION['language'];
+	
+	$supported_languages = scandir($directory);
+	$languages = explode(',', str_replace('-', '_', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
+	
+	foreach ($languages as $lang) {
+		if (in_array($lang, $supported_languages)) {
+			return $lang;
+		}
 	}
+	
+	return 'en_US';
 }
-
-?>

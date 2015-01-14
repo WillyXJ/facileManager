@@ -53,14 +53,14 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $_GET['id'], 'service_', $_GET['status'], 'service_id')) {
-				$response = 'This service could not be ' . $_GET['status'] . '.';
+				$response = sprintf(_('This service could not be set to %s.') . "\n", $_GET['status']);
 			} else {
 				/* set the service_build_config flag */
 				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}services` SET `service_build_config`='yes' WHERE `service_id`=" . sanitize($_GET['id']);
 				$result = $fmdb->query($query);
 				
 				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
-				addLogEntry("Set service '$tmp_name' status to " . $_GET['status'] . '.');
+				addLogEntry(sprintf(_('Set service (%s) status to %s.'), $tmp_name, $_GET['status']));
 				header('Location: ' . $GLOBALS['basename']);
 			}
 		}

@@ -47,7 +47,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : 'Success';
 	} else {
 		$save_result = $fm_settings->save();
-		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : '<p>These settings have been saved.</p>'. "\n";
+		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : sprintf("<p>%s</p>\n", _('These settings have been saved.'));
 	}
 
 /** Handle module settings */
@@ -56,7 +56,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 	$save_result = $fm_module_settings->save();
-	echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : '<p>These settings have been saved.</p>'. "\n";
+	echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" :sprintf("<p>%s</p>\n", _('These settings have been saved.'));
 
 /** Handle bulk actions */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
@@ -91,7 +91,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		}
 	}
 	$result .= "</pre>\n<p class=\"complete\">" . ucwords($_POST['bulk_action']) . ' is complete.</p>';
-	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL('Servers'));
+	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $result . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL('Servers'));
 
 /** Handle mass updates */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
@@ -119,9 +119,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		include($include_file);
 	}
 	
-	$result .= "</pre>\n<p class=\"complete\">All updates have been processed.</p>\n";
+	$result .= "</pre>\n<p class=\"complete\">" . _('All updates have been processed.') . "</p>\n";
 	unset($_SESSION['display-rebuild-all']);
-	echo buildPopup('header', 'Updates Results') . $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+	echo buildPopup('header', _('Updates Results')) . $result . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {

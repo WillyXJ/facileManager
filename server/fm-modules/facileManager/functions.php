@@ -250,7 +250,8 @@ HTML;
 			}
 
 			$star = currentUserCan('do_everything') ? $__FM_CONFIG['icons']['star'] . ' ' : null;
-			$change_pwd_link = ($auth_method == 1) ? '<li><a class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#"><span>Edit Profile</span></a></li>' . "\n" : null;
+			$change_pwd_link = ($auth_method == 1) ? sprintf('<li><a class="account_settings" id="%s" href="#"><span>%s</span></a></li>' . "\n", $_SESSION['user']['id'], _('Edit Profile')) : null;
+			$logout = _('Logout');
 			$user_account_menu = <<<HTML
 		<div id="topheadpartright" style="padding: 0 1px 0 0;">
 			<div id="cssmenu">
@@ -259,7 +260,7 @@ HTML;
 					<ul class="sub-right">
 						<li class="text-only"><span>$star{$_SESSION['user']['name']}</span></li>
 						$change_pwd_link
-						<li class="last"><a href="{$GLOBALS['RELPATH']}?logout"><span>Logout</span></a></li>
+						<li class="last"><a href="{$GLOBALS['RELPATH']}?logout"><span>$logout</span></a></li>
 					</ul>
 				</li>
 			</ul>
@@ -306,10 +307,12 @@ HTML;
 		}
 	
 		$help_file = buildHelpFile();
+		$help_text = _('Help');
 	
+		$process_all_text = _('Process All Available Updates');
 		$process_all = <<<HTML
 		<div id="topheadpartright" style="display: none;">
-			<a class="single_line process_all_updates" href="#" title="Process All Available Updates"><i class="fa fa-refresh fa-lg"></i></a>
+			<a class="single_line process_all_updates" href="#" title="$process_all_text"><i class="fa fa-refresh fa-lg"></i></a>
 			<span class="update_count"></span>
 		</div>
 HTML;
@@ -325,7 +328,7 @@ $account_menu
 $module_toolbar_left
 $user_account_menu
 		<div id="topheadpartright">
-			<a class="single_line help_link" href="#">Help</a>
+			<a class="single_line help_link" href="#">$help_text</a>
 		</div>
 $module_menu
 $module_toolbar_right
@@ -667,7 +670,7 @@ function basicUpdate($table, $id, $update_field, $update_value, $field = 'id') {
 function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
 	global $fmdb;
 	
-	$query = "show columns from $tbl_name like '$column_name';";
+	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name';";
 	$result = $fmdb->get_results($query);
 	
 	$result = $fmdb->last_result;
@@ -690,7 +693,7 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
  */
 function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = 'Select an option') {
 	$type_options = null;
-	if (is_array($options[0])) {
+	if (@is_array($options[0])) {
 		for ($i = 0; $i < count($options); $i++) {
 			$selected = null;
 			if (is_array($option_select)) {
@@ -790,7 +793,7 @@ function functionalCheck() {
 			}
 			$html_checks = @moduleFunctionalCheck();
 		} else {
-			$html_checks = '<p>You have no modules installed.</p>';
+			$html_checks = sprintf('<p>%s</p>', _('You have no modules installed.'));
 		}
 	}
 	
@@ -977,7 +980,7 @@ DASH;
 			}
 			$body = sprintf('<div class="fm-table"><div>%s</div></div>', @buildModuleDashboard());
 		} else {
-			$body = '<p>You have no modules installed.</p>';
+			$body = sprintf('<p>%s</p>', _('You have no modules installed.'));
 		}
 	}
 
@@ -1132,7 +1135,7 @@ HTML;
 			}
 			$body .= @buildModuleHelpFile();
 		} else {
-			$body .= '<p>You have no modules installed.</p>';
+			$body .= sprintf('<p>%s</p>', _('You have no modules installed.'));
 		}
 	}
 
@@ -1171,6 +1174,7 @@ function addLogEntry($log_data, $module = null, $link = null) {
 function getAvailableModules() {
 	global $fm_name;
 	
+	$modules = null;
 	$module_dir = ABSPATH . 'fm-modules';
 	if ($handle = opendir($module_dir)) {
 		$blacklist = array('.', '..', 'shared', strtolower($fm_name));
@@ -1189,7 +1193,7 @@ function getAvailableModules() {
 		}
 	}
 	
-	return null;
+	return array();
 }
 
 /**
@@ -1436,8 +1440,8 @@ function buildDateMenu($date = null) {
 		$previous_date = date("Y-m-d", strtotime("yesterday"));
 	}
 
-	$next = '<a href="?' . $uri . '&date=' . $next_date . '">next &rarr;</a>';
-	$previous = '<a href="?' . $uri . '&date=' . $previous_date . '">&larr; previous</a>';
+	$next = sprintf('<a href="?%s&date=%s">%s</a>', $uri, $next_date, _('next &rarr;'));
+	$previous = sprintf('<a href="?%s&date=%s">%s</a>', $uri, $previous_date, _('&larr; previous'));
 	
 	$date_menu = <<<HTML
 	<div id="datemenu">
@@ -1672,7 +1676,8 @@ HTML;
  * @param string $message Message to display
  * @return null
  */
-function bailOut($message, $title = 'Requirement Error') {
+function bailOut($message, $title = null) {
+	if (!$title) $title = _('Requirement Error');
 	printHeader($title, 'install');
 	echo $message;
 	exit(printFooter());
@@ -1691,7 +1696,7 @@ function bailOut($message, $title = 'Requirement Error') {
  * @return string
  */
 function displayProgress($step, $result, $noisy = true) {
-	$output = ($result == true) ? 'Success' : 'Failed';
+	$output = ($result == true) ? _('Success') : _('Failed');
 	$color = strtolower($output);
 	
 	$message = <<<HTML
@@ -1782,7 +1787,7 @@ function isSiteSecure(){
 function getColumnLength($tbl_name, $column_name) {
 	global $fmdb;
 	
-	$query = "show columns from $tbl_name like '$column_name';";
+	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name';";
 	$result = $fmdb->get_results($query);
 	
 	$result = $fmdb->last_result;
@@ -1984,7 +1989,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	if ($allowed_to_add) {
 		if ($name) $name = ' name="' . $name . '"';
 		if ($rel) $rel = ' rel="' . $rel . '"';
-		echo '<a id="plus" href="#" title="Add New"' . $name . $rel . '>' . $__FM_CONFIG['icons']['add'] . '</a>';
+		printf('<a id="plus" href="#" title="%s"%s%s>%s</a>', _('Add New'), $name, $rel, $__FM_CONFIG['icons']['add']);
 	}
 	
 	echo '</h2>' . "\n";
@@ -2097,8 +2102,8 @@ function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 	if (is_array($bulk_actions_list)) {
 		$bulk_actions[] = null;
 		
-		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1, '', false, null, null, 'Bulk Actions') . 
-			'<input type="submit" name="bulk_apply" id="bulk_apply" value="Apply" class="button" />' . "\n";
+		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1, '', false, null, null, _('Bulk Actions')) . 
+			'<input type="submit" name="bulk_apply" id="bulk_apply" value="' . _('Apply') . '" class="button" />' . "\n";
 	}
 }
 
@@ -2235,13 +2240,15 @@ function formatLogKeyData($strip, $key, $data) {
  * @param string $link_display Show or Hide the page back link
  * @return string
  */
-function fMDie($message = 'An unknown error occurred.', $link_display = 'show') {
+function fMDie($message = null, $link_display = 'show') {
 	global $fm_name;
+	
+	if (!$message) $message = _('An unknown error occurred.');
 	
 	printHeader('Error', 'install', false, false);
 	
 	echo '<p>' . $message . '</p>';
-	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">&larr; Back</a></p>';
+	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>';
 	
 	exit;
 }
@@ -2257,7 +2264,7 @@ function fMDie($message = 'An unknown error occurred.', $link_display = 'show') 
  * @return string
  */
 function unAuth($link_display = 'show') {
-	fMDie('You do not have permission to view this page. Please contact your administrator for access.', $link_display);
+	fMDie(_('You do not have permission to view this page. Please contact your administrator for access.'), $link_display);
 }
 
 
@@ -2363,7 +2370,7 @@ function handleHiddenFlags() {
 	/** Recover authentication in case of lockout */
 	if (defined('FM_NO_AUTH') && FM_NO_AUTH) {
 		setOption('auth_method', 0);
-		@addLogEntry('Manually reset authentication method.', $fm_name);
+		@addLogEntry(_('Manually reset authentication method.'), $fm_name);
 	}
 }
 
@@ -2609,9 +2616,8 @@ function hasExceededMaxInputVars() {
  */
 function checkMaxInputVars() {
 	if ($required_input_vars = hasExceededMaxInputVars()) {
-		fMDie('PHP max_input_vars (' . ini_get('max_input_vars') . ') has been reached and ' . $required_input_vars . ' or more are required. Please 
-			increase the limit to fulfill this request. One method is to set the following in ' . ABSPATH . '.htaccess:
-			<p><code>php_value max_input_vars ' . $required_input_vars . '</code></p>', true);
+		fMDie(sprintf(_('PHP max_input_vars (%1$d) has been reached and %2$s or more are required. Please increase the limit to fulfill this request. One method is to set the following in %3$s.htaccess:') .
+			'<p><code>php_value max_input_vars %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH), true);
 	}
 }
 
@@ -2701,8 +2707,10 @@ function getMenuURL($search_slug = null) {
  * @param string $link Link to provide for a button
  * @return string Returns the popup section
  */
-function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
+function buildPopup($section, $text = null, $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
 	global $__FM_CONFIG;
+	
+	if (!$text) $text = _('Save');
 	
 	if ($section == 'header') {
 		return <<<HTML
@@ -2768,7 +2776,7 @@ function parseAjaxOutput($output) {
 			echo $message_array['content'];
 		}
 	} else {
-		echo 'Success';
+		echo _('Success');
 	}
 }
 
@@ -2819,12 +2827,12 @@ function countServerUpdates() {
  */
 function displayRecordSearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
-		$placeholder = 'Searched for ' . sanitize($_GET['q']);
+		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
 		$search_remove = '<div class="search_remove">
 			<i class="fa fa-remove fa-lg"></i>
 		</div>';
 	} else {
-		$placeholder = 'Search by keyword';
+		$placeholder = _('Search by keyword');
 		$search_remove = null;
 	}
 	

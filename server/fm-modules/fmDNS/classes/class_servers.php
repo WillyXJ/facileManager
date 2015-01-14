@@ -34,10 +34,10 @@ class fm_module_servers {
 		$bulk_actions_list = null;
 //		if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$bulk_actions_list[] = 'Upgrade';
+			$bulk_actions_list[] = _('Upgrade');
 		}
 		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-			$bulk_actions_list[] = 'Build Config';
+			$bulk_actions_list[] = _('Build Config');
 		}
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
@@ -47,7 +47,7 @@ class fm_module_servers {
 		}
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', sprintf('There are no %s.', $type));
+			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', sprintf(_('There are no %s.'), $type));
 		} else {
 			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
 			
@@ -59,24 +59,24 @@ class fm_module_servers {
 
 			if ($type == 'servers') {
 				$title_array[] = array('class' => 'header-tiny header-nosort');
-				$title_array = array_merge($title_array, array(array('title' => 'Hostname', 'rel' => 'server_name'),
-					array('title' => 'Serial No', 'rel' => 'server_serial_no'),
-					array('title' => 'Method', 'rel' => 'server_update_method'),
-					array('title' => 'Key', 'class' => 'header-nosort'),
-					array('title' => 'Server Type', 'class' => 'header-nosort'),
-					array('title' => 'Run-as', 'rel' => 'server_run_as_predefined'),
-					array('title' => 'Config File', 'rel' => 'server_config_file'),
-					array('title' => 'Server Root', 'rel' => 'server_root_dir'),
-					array('title' => 'Zones Directory', 'rel' => 'server_zones_dir'),
+				$title_array = array_merge($title_array, array(array('title' => _('Hostname'), 'rel' => 'server_name'),
+					array('title' => _('Serial No'), 'rel' => 'server_serial_no'),
+					array('title' => _('Method'), 'rel' => 'server_update_method'),
+					array('title' => _('Key'), 'class' => 'header-nosort'),
+					array('title' => _('Server Type'), 'class' => 'header-nosort'),
+					array('title' => _('Run-as'), 'rel' => 'server_run_as_predefined'),
+					array('title' => _('Config File'), 'rel' => 'server_config_file'),
+					array('title' => _('Server Root'), 'rel' => 'server_root_dir'),
+					array('title' => _('Zones Directory'), 'rel' => 'server_zones_dir'),
 					));
 			} elseif ($type == 'groups') {
 				$title_array = array_merge($title_array, array(array('title' => _('Group Name'), 'rel' => 'group_name'),
-					array('title' => 'Master Servers', 'class' => 'header-nosort'),
-					array('title' => 'Slave Servers', 'class' => 'header-nosort'),
+					array('title' => _('Master Servers'), 'class' => 'header-nosort'),
+					array('title' => _('Slave Servers'), 'class' => 'header-nosort'),
 					));
 			}
 			$title_array[] = array(
-								'title' => 'Actions',
+								'title' => _('Actions'),
 								'class' => 'header-actions header-nosort'
 							);
 
@@ -96,15 +96,15 @@ class fm_module_servers {
 	function addServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['server_name'])) return 'No server name defined.';
+		if (empty($post['server_name'])) return _('No server name defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($post['server_name']) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(ngettext('Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name');
-		if ($fmdb->num_rows) return 'This server name already exists.';
+		if ($fmdb->num_rows) return _('This server name already exists.');
 		
 		if (empty($post['server_root_dir'])) $post['server_root_dir'] = $__FM_CONFIG['ns']['named_root_dir'];
 		if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
@@ -126,7 +126,7 @@ class fm_module_servers {
 		if ($post['server_update_method'] == 'cron') {
 			$post['server_update_port'] = 0;
 		}
-		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return 'Server update port must be a valid TCP port.';
+		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return _('Server update port must be a valid TCP port.');
 		if (empty($post['server_update_port'])) {
 			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
 			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
@@ -151,7 +151,7 @@ class fm_module_servers {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'server_name') && empty($clean_data)) return 'No server name defined.';
+			if (($key == 'server_name') && empty($clean_data)) return _('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -163,7 +163,7 @@ class fm_module_servers {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the server because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the server because a database error occurred.');
 
 		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
 		$tmp_runas = $post['server_run_as_predefined'] ? $post['server_run_as_predefined'] : $post['server_run_as'];
@@ -257,7 +257,7 @@ class fm_module_servers {
 	function updateServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['server_name'])) return 'No server name defined.';
+		if (empty($post['server_name'])) return _('No server name defined.');
 		if (empty($post['server_root_dir'])) $post['server_root_dir'] = $__FM_CONFIG['ns']['named_root_dir'];
 		if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
 		if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
@@ -269,11 +269,11 @@ class fm_module_servers {
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($post['server_name']) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(ngettext('Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name', "AND server_id!='{$post['server_id']}'");
-		if ($fmdb->num_rows) return 'This server name already exists.';
+		if ($fmdb->num_rows) return _('This server name already exists.');
 		
 		/** Process server_key */
 		if (!isset($post['server_key']) || !is_numeric($post['server_key'])) $post['server_key'] = 0;
@@ -282,7 +282,7 @@ class fm_module_servers {
 		if ($post['server_update_method'] == 'cron') {
 			$post['server_update_port'] = 0;
 		}
-		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return 'Server update port must be a valid TCP port.';
+		if (!empty($post['server_update_port']) && !verifyNumber($post['server_update_port'], 1, 65535, false)) return _('Server update port must be a valid TCP port.');
 		if (empty($post['server_update_port'])) {
 			if ($post['server_update_method'] == 'http') $post['server_update_port'] = 80;
 			elseif ($post['server_update_method'] == 'https') $post['server_update_port'] = 443;
@@ -311,7 +311,7 @@ class fm_module_servers {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the server because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the server because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -426,18 +426,18 @@ class fm_module_servers {
 
 				/** Delete associated config options */
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
-					return 'The associated server configs could not be deleted because a database error occurred.';
+					return _('The associated server configs could not be deleted because a database error occurred.');
 				}
 
 				/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
 				if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false) === false) {
-					return 'The server could not be removed from the fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds table because a database error occurred.';
+					return sprintf(_('The server could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds');
 				}
 
 				/** Delete server */
 				$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_id, 'server_', 'deleted', 'server_id')) {
-					addLogEntry("Deleted server '$tmp_name' ($server_serial_no).");
+					addLogEntry(sprintf(_("Server '%s' (%s) was deleted"), $tmp_name, $server_serial_no));
 					return true;
 				}
 			}
@@ -460,7 +460,7 @@ class fm_module_servers {
 				/** Delete group */
 				$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $server_id, 'group_', 'deleted', 'group_id')) {
-					addLogEntry("Deleted server group '$tmp_name'.");
+					addLogEntry(sprintf(_("Server group '%s' was deleted."), $tmp_name));
 					return true;
 				}
 			}
@@ -504,11 +504,11 @@ class fm_module_servers {
 				$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			}
 			if (isset($row->server_client_version) && version_compare($row->server_client_version, getOption('client_version', 0, $_SESSION['module']), '<')) {
-				$edit_actions = 'Client Upgrade Available<br />';
+				$edit_actions = _('Client Upgrade Available') . '<br />';
 				$class = 'attention';
 			}
 			if ($row->server_installed != 'yes') {
-				$edit_actions = 'Client Install Required<br />';
+				$edit_actions = _('Client Install Required') . '<br />';
 			}
 			$edit_status = $edit_actions . $edit_status;
 
@@ -777,7 +777,7 @@ FORM;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return '<p class="error">This server is not found.</p>';
+		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>', _('This server is not found.'));
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
@@ -814,16 +814,16 @@ FORM;
 				if ($action == 'buildconf') {
 					/* set the server_update_config flag */
 					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
-					$response = '<p>This server will be updated on the next cron run.</p>'. "\n";
+					$response = sprintf('<p>%s</p>'. "\n", _('This server will be updated on the next cron run.'));
 				} else {
-					$response = '<p>This server receives updates via cron - please manage the server manually.</p>'. "\n";
+					$response = sprintf('<p>%s</p>'. "\n", _('This server receives updates via cron - please manage the server manually.'));
 				}
 				break;
 			case 'http':
 			case 'https':
 				/** Test the port first */
 				if (!socketTest($server_name, $server_update_port, 10)) {
-					return '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
 				}
 				
 				/** Remote URL to use */
@@ -837,7 +837,7 @@ FORM;
 				if (!is_array($post_result)) {
 					/** Something went wrong */
 					if (empty($post_result)) {
-						return '<p class="error">It appears ' . $server_name . ' does not have php configured properly within httpd or httpd is not running.</p>';
+						return sprintf('<p class="error">%s</p>', sprintf(_('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
 					}
 					return '<p class="error">' . $post_result . '</p>';
 				} else {
@@ -858,18 +858,18 @@ FORM;
 			case 'ssh':
 				/** Test the port first */
 				if (!socketTest($server_name, $server_update_port, 10)) {
-					return '<p class="error">Failed: could not access ' . $server_name . ' using ' . $server_update_method . ' (tcp/' . $server_update_port . ').</p>'. "\n";
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
 				}
 				
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return '<p class="error">Failed: SSH key is not defined.</p>'. "\n";
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL('General')));
 				}
 				
 				$temp_ssh_key = '/tmp/fm_id_rsa';
 				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-					return '<p class="error">Failed: could not load SSH key into ' . $temp_ssh_key . '.</p>'. "\n";
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
 				}
 				
 				@chmod($temp_ssh_key, 0400);
@@ -879,7 +879,7 @@ FORM;
 				if ($retval) {
 					/** Something went wrong */
 					@unlink($temp_ssh_key);
-					return '<p class="error">Could not login via SSH.</p>'. "\n";
+					return sprintf('<p class="error">%s</p>'. "\n", _('Could not login via SSH.'));
 				}
 				unset($post_result);
 				
@@ -932,18 +932,18 @@ FORM;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($server_id), 'server_', 'server_id');
-		if (!$fmdb->num_rows) return 'This server is not found.';
+		if (!$fmdb->num_rows) return _('This server is not found.');
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
 		$response[] = $server_name;
 		
 		if ($server_installed != 'yes') {
-			$response[] = ' --> Failed: Client is not installed.';
+			$response[] = ' --> ' . _('Failed: Client is not installed.');
 		}
 		
 		if (count($response) == 1 && $server_status != 'active') {
-			$response[] = ' --> Failed: Server is ' . $server_status . '.';
+			$response[] = ' --> ' . sprintf(_('Failed: Server is %s.'), $server_status);
 		}
 		
 		if (count($response) == 1) {

@@ -106,7 +106,7 @@ code {
 }
 .form-table tr.pwdhint th {
 	position: relative;
-	top: -6px;
+	top: -3px;
 }
 
 textarea {

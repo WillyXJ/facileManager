@@ -58,7 +58,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_GET['domain_id'], 'domain_', $_GET['status'], 'domain_id')) {
-				$response = '<p class="error">This item could not be '. $_GET['status'] .'.</p>'. "\n";
+				$response = sprintf('<p class="error">' . _('This item could not be set to %s.') . "</p>\n", $_GET['status']);
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
@@ -87,7 +87,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 				}
 				$tmp_file = TMP_FILE_EXPORTS . $filename . date("Ymdhis");
 				if (!file_put_contents($tmp_file, $zone_contents)) {
-					$response = '<p>Zone file export failed to write to temp file: ' . $tmp_file . '. Please correct and try again.</p>';
+					$response = sprintf('<p>%s</p>', sprintf(_('Zone file export failed to write to temp file: %s. Please correct and try again.'), $tmp_file));
 					break;
 				}
 				
@@ -121,7 +121,7 @@ printHeader();
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
-if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . getMenuURL('Servers') . '">Click here</a> to manage one or more servers.</p>';
+if (!$reload_allowed && !$response) $response = '<p>' . sprintf(_('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL('Servers')) . '</p>';
 
 echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	

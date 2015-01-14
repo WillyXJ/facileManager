@@ -27,11 +27,11 @@ class fm_module_settings {
 	function save() {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (!currentUserCan('manage_settings', $_SESSION['module'])) return 'You do not have permission to make these changes.';
+		if (!currentUserCan('manage_settings', $_SESSION['module'])) return _('You do not have permission to make these changes.');
 		
 		$exclude = array('save', 'item_type');
 		
-		$log_message = $log_message_head = "Set options to the following:\n";
+		$log_message = $log_message_head = _('Set options to the following:') . "\n";
 		$new_array = null;
 		$result = false;
 		
@@ -45,7 +45,7 @@ class fm_module_settings {
 				}
 				
 				/** Ensure non-empty option */
-				if (empty($data)) return 'Empty values are not allowed.';
+				if (empty($data)) return _('Empty values are not allowed.');
 				
 				/** Check if the option has changed */
 				$current_value = getOption($key, $_SESSION['user']['account_id'], $_SESSION['module']);
@@ -75,7 +75,7 @@ class fm_module_settings {
 	
 				if (!$result) {
 					if ($log_message != $log_message_head) addLogEntry($log_message);
-					return 'These settings could not be saved because of a database error.';
+					return _('These settings could not be saved because of a database error.');
 				}
 		
 				if (is_array($option_value)) {
@@ -120,7 +120,7 @@ class fm_module_settings {
 			$saved_options = array();
 		}
 		
-		if (!$option_rows = @buildSettingsForm($saved_options, $__FM_CONFIG[$_SESSION['module']]['default']['options'])) return '<p>There are no settings for this module.</p>';
+		if (!$option_rows = @buildSettingsForm($saved_options, $__FM_CONFIG[$_SESSION['module']]['default']['options'])) return sprintf('<p>%s</p>', _('There are no settings for this module.'));
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">

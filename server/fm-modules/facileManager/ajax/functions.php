@@ -29,11 +29,11 @@
  * @package facileManager
  */
 function returnError($window = true) {
-	$msg = 'There was a problem with your request.'; 
+	$msg = _('There was a problem with your request.'); 
 	if ($window) {
 		echo buildPopup('header', 'Error');
 		echo "<p>$msg</p>\n";
-		echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	} else {
 		echo '<p class="error">' . $msg . "</p>\n";
 	}
@@ -48,11 +48,11 @@ function returnError($window = true) {
  * @package facileManager
  */
 function returnUnAuth($window = true) {
-	$msg = 'You do not have permission to make these changes.';
+	$msg = _('You do not have permission to make these changes.');
 	if ($window) {
-		echo buildPopup('header', 'Error');
+		echo buildPopup('header', _('Error'));
 		echo "<p>$msg</p>\n";
-		echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	} else {
 		echo '<p class="error">' . $msg . "</p>\n";
 	}

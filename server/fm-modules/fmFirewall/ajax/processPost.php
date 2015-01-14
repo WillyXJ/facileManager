@@ -37,7 +37,7 @@ foreach (scandir($class_dir) as $class_file) {
 	include($class_dir . $class_file);
 }
 
-$unpriv_message = 'You do not have sufficient privileges.';
+$unpriv_message = _('You do not have sufficient privileges.');
 $checks_array = @array('servers' => 'manage_servers',
 					'services' => 'manage_services',
 					'objects' => 'manage_objects',
@@ -134,7 +134,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				}
 				exit('Success');
 			}
-			exit('The sort order could not be updated due to an invalid request.');
+			exit(_('The sort order could not be updated due to an invalid request.'));
 	}
 
 	exit;

@@ -16,6 +16,7 @@
 * Server - [bug] Fixed bulk action checkbox logic.
 * Server - [bug] Fixed issue where zones could not be updated when there are no
            views defined.
+* Server - [feature] Added i18n support (Issue #106).
 
 2.0-alpha1 (2014-11-20)
 =======================

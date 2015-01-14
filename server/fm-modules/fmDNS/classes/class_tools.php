@@ -43,8 +43,8 @@ class fm_module_tools {
 		
 		/** Handle unsupported message */
 		if ($generate_count || $origin_count) {
-			$unsupported[] = '<h4>Unsupported Entries:</h4>';
-			$unsupported[] = '<p class="soa_import">' . $fm_name . ' currently does not support importing $GENERATE and $ORIGIN entries which were found in your zone file.</p>';
+			$unsupported[] = sprintf('<h4>%s:</h4>', _('Unsupported Entries'));
+			$unsupported[] = '<p class="soa_import">' . sprintf(_('%s currently does not support importing $GENERATE and $ORIGIN entries which were found in your zone file.'), $fm_name) . '</p>';
 			$unsupported = implode("\n", $unsupported);
 		} else $unsupported = null;
 		

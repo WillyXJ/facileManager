@@ -29,7 +29,7 @@ class fm_module_groups {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="groups">There are no groups defined.</p>';
+			printf('<p id="table_edits" class="noresult" name="groups">%s</p>', _('There are no groups defined.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_module_groups {
 							'name' => 'groups'
 						);
 
-			$title_array = array('Group Name', $type . 's', array('title' => 'Comment', 'style' => 'width: 40%;'));
-			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;'));
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -73,7 +73,7 @@ class fm_module_groups {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'group_name') && empty($clean_data)) return 'No group name defined.';
+			if (($key == 'group_name') && empty($clean_data)) return _('No group name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -85,7 +85,7 @@ class fm_module_groups {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the group because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the group because a database error occurred.');
 
 		addLogEntry("Added {$post['group_type']} group:\nName: {$post['group_name']}\n" .
 				"Comment: {$post['group_comment']}");
@@ -118,7 +118,7 @@ class fm_module_groups {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the group because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the group because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -140,7 +140,7 @@ class fm_module_groups {
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $group_id, 'group_', 'group_id');
 		if ($fmdb->num_rows) {
 			/** Is the group_id present in a policy? */
-			if (isItemInPolicy($group_id, 'group')) return 'This group could not be deleted because it is associated with one or more policies.';
+			if (isItemInPolicy($group_id, 'group')) return _('This group could not be deleted because it is associated with one or more policies.');
 			
 			/** Delete group */
 			$tmp_name = getNameFromID($group_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
@@ -150,7 +150,7 @@ class fm_module_groups {
 			}
 		}
 		
-		return 'This group could not be deleted.';
+		return _('This group could not be deleted.');
 	}
 
 
@@ -238,39 +238,40 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Group');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
+		$return_form = sprintf('
 		<form name="manage" id="manage" method="post" action="">
-		$popup_header
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="group_id" value="$group_id" />
-			<input type="hidden" name="group_type" value="$group_type" />
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="group_id" value="%d" />
+			<input type="hidden" name="group_type" value="%s" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="group_name">Group Name</label></th>
-					<td width="67%"><input name="group_name" id="group_name" type="text" value="$group_name" size="40" placeholder="http" maxlength="$group_name_length" /></td>
+					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" placeholder="http" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="group_items">$uc_group_type</label></th>
-					<td width="67%">
-						$group_items
+					<th width="33&#37;" scope="row"><label for="group_items">%s</label></th>
+					<td width="67&#37;">
+						%s
 					</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="group_comment">Comment</label></th>
-					<td width="67%"><textarea id="group_comment" name="group_comment" rows="4" cols="30">$group_comment</textarea></td>
+					<th width="33&#37;" scope="row"><label for="group_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="group_comment" name="group_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '200px',
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>', $popup_header, $action, $group_id, $group_type, _('Group Name'),
+				$group_name, $group_name_length, $uc_group_type, $group_items,
+				_('Comment'), $group_comment, $popup_footer);
 
 		return $return_form;
 	}
@@ -279,15 +280,15 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['group_name'])) return 'No group name defined.';
+		if (empty($post['group_name'])) return _('No group name defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name');
-		if ($field_length !== false && strlen($post['group_name']) > $field_length) return 'Group name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(ngettext('Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $post['group_name'], 'group_', 'group_name', "AND group_type='{$post['group_type']}' AND group_id!={$post['group_id']}");
-		if ($fmdb->num_rows) return 'This group name already exists.';
+		if ($fmdb->num_rows) return _('This group name already exists.');
 		
 		/** Process assigned items */
 		$post['group_items'] = implode(';', $post['group_items']);

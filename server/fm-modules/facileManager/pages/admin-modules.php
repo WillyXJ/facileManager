@@ -27,7 +27,7 @@ if (!currentUserCan('manage_modules')) unAuth();
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 
 $output = $avail_modules = $response = null;
-$import_output = '<p>Processing... <i class="fa fa-spinner fa-spin"></i></p>';
+$import_output = sprintf('<p>%s <i class="fa fa-spinner fa-spin"></i></p>', _('Processing...'));
 
 if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
 	if (currentUserCan('manage_modules')) {
@@ -56,15 +56,12 @@ echo '<div id="body_container">';
 if (!empty($response) || !empty($fm_new_version_available)) echo '<div id="response">' . $fm_new_version_available . '<p>' . $response . '</p></div>';
 
 $table_info = array('class' => 'display_results modules');
-$title_array = array('Module', 'Description');
+$title_array = array(_('Module'), _('Description'));
 $header = displayTableHeader($table_info, $title_array);
 
 $modules = getAvailableModules();
 if (count($modules)) {
-	$module_display = <<<HTML
-			<p>The following modules have been detected:</p>
-			$header
-HTML;
+	$module_display = sprintf('<p>%s</p>', _('The following modules have been detected:')) . $header;
 
 	foreach ($modules as $module_name) {
 		/** Include module variables */
@@ -73,25 +70,25 @@ HTML;
 		$activate_link = $upgrade_link = $status_options = null;
 		$class = array();
 		
-		$uninstall_link = '<a href="?action=uninstall&module=' . $module_name . '"><span class="not_installed" onClick="return del(\'Are you sure you want to delete this module?\');">Uninstall</span></a>' . "\n";
+		$uninstall_link = sprintf('<a href="?action=uninstall&module=%s"><span class="not_installed" onClick="return del(\'%s\');">%s</span></a>' . "\n", $module_name, _('Are you sure you want to delete this module?'), _('Uninstall'));
 		
 		/** Get module status */
 		$module_version = getOption('version', 0, $module_name);
 		if ($module_version !== false) {
 			if (in_array($module_name, getActiveModules())) {
-				$activate_link = '<a href="?action=deactivate&module=' . $module_name . '">Deactivate</a>' . "\n";
+				$activate_link = sprintf('<a href="?action=deactivate&module=%s">%s</a>' . "\n", $module_name, _('Deactivate'));
 				$class[] = 'active';
 			}
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
 				if (!in_array($module_name, getActiveModules())) {
-					$activate_link = '<span class="activate_link"><a href="?action=activate&module=' . $module_name . '">Activate</a></span>' . "\n" . $uninstall_link;
+					$activate_link = sprintf('<span class="activate_link"><a href="?action=activate&module=%s">%s</a></span>' . "\n", $module_name, _('Activate')) . $uninstall_link;
 				}
 			} else {
 				include(ABSPATH . 'fm-includes/version.php');
 				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-					$upgrade_link = '<span class="upgrade_link"><a href="#" id="module_upgrade" name="' . $module_name . '" />Upgrade Now</a></span>' . "\n";
+					$upgrade_link = sprintf('<span class="upgrade_link"><a href="#" id="module_upgrade" name="%s" />%s</a></span>' . "\n", $module_name, _('Upgrade Now'));
 				} else {
-					$upgrade_link .= '<span class="upgrade_link">' . $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required<br />before this module can be upgraded.</span>';
+					$upgrade_link .= sprintf('<span class="upgrade_link">' . _('%s v%s or later is required<br />before this module can be upgraded.') . '</span>', $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
 				}
 				$activate_link = $uninstall_link;
 				$class[] = 'upgrade';
@@ -101,9 +98,9 @@ HTML;
 			$module_version = $__FM_CONFIG[$module_name]['version'];
 			include(ABSPATH . 'fm-includes/version.php');
 			if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-				$status_options .= '<a href="#" id="module_install" name="' . $module_name . '" />Install Now</a>';
+				$status_options .= sprintf('<a href="#" id="module_install" name="%s" />%s</a>', $module_name, _('Install Now'));
 			} else {
-				$status_options .= $fm_name . ' v' . $__FM_CONFIG[$module_name]['required_fm_version'] . ' or later is required.';
+				$status_options .= sprintf(_('%s v%s or later is required.'), $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
 			}
 		}
 		
@@ -129,8 +126,8 @@ MODULE;
 			</table>
 HTML;
 } else {
-	$module_display = '<p>There are no modules detected. You must first install the files in <code>' . ABSPATH . 'fm-modules</code> and then return to this page.</p>' . "\n";
-	$module_display .= '<p>If you don\'t have any modules, you can download them from the <a href="http://www.facilemanager.com/modules/">module directory</a>.</p>' . "\n";
+	$module_display = sprintf(_('<p>There are no modules detected. You must first install the files in %s and then return to this page.</p>') . "\n", '<code>' . ABSPATH . 'fm-modules</code>');
+	$module_display .= sprintf(_('<p>If you don\'t have any modules, you can download them from the %smodule directory</a>.</p>') . "\n", '<a href="http://www.facilemanager.com/modules/">');
 }
 
 echo '
