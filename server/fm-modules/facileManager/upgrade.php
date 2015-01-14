@@ -48,7 +48,7 @@ function fmUpgrade($database) {
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
-		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update');
+		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update', true, 0, $fm_name);
 	}
 	
 	displayProgress('Upgrading Schema', $success);
