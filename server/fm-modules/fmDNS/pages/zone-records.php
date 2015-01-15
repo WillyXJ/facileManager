@@ -154,6 +154,7 @@ if ($record_type == 'SOA') {
 		$body .= sprintf('</div><div class="new-container">
 	<a name="#manage"></a>
 	<h2>%s</h2>
+	%s
 	<p><input type="submit" name="submit" value="%s" class="button" /></p>
 </form></div>' . "\n", _('Add Record'), $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id), _('Validate'));
 	}
