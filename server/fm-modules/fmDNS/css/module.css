@@ -189,3 +189,7 @@ p.soa_import span {
 #define_forwarders > p {
 	margin: 7px 0;
 }
+
+#clone_override p {
+	margin: 5px 0;
+}

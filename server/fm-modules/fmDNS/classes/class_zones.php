@@ -705,7 +705,7 @@ HTML;
 						<div id="clone_override" style="display: $clone_override_show">
 							<p><input type="checkbox" id="domain_clone_dname_override" name="domain_clone_dname_override" value="yes" $clone_dname_checked /><label for="domain_clone_dname_override"> Override DNAME Resource Record Setting</label></p>
 							<div id="clone_dname_options" style="display: $clone_dname_options_show">
-								<p>$clone_dname_dropdown</p>
+								$clone_dname_dropdown
 							</div>
 						</div>
 					</td>
