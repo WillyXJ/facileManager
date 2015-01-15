@@ -1095,6 +1095,8 @@ function buildHelpFile() {
 			</ul>
 			<p><i>You can reset the authentication method by setting the following in config.inc.php:</i></p>
 			<p><i>define('FM_NO_AUTH', true);</i></p>
+			<p><b>Client Registration</b><br />
+			You can choose to allow clients to automatically register in the database or not.</p>
 			<p><b>SSL</b><br />
 			You can choose to have $fm_name enforce the use of SSL when a user tries to access the web app.</p>
 			<p><b>Mailing</b><br />

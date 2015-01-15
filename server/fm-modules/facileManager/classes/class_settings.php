@@ -423,11 +423,11 @@ class fm_settings {
 					</div>
 					<div id="setting-row">
 						<div class="description">
-							<label for="client_auto_register">Client Automatic Registration</label>
+							<label for="client_auto_register">Automatic Client Registration</label>
 							<p>Allow clients to automatically register with $fm_name.</p>
 						</div>
 						<div class="choices">
-							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" $client_auto_register_checked /><label for="client_auto_register">Allow Client Automatic Registration</label>
+							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" $client_auto_register_checked /><label for="client_auto_register">Allow Automatic Client Registration</label>
 						</div>
 					</div>
 				</div>
