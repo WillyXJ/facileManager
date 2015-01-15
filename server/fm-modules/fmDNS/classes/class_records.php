@@ -465,7 +465,7 @@ class fm_dns_records {
 		global $__FM_CONFIG, $disabled;
 		
 		$soa_id = 0;
-		$soa_name = $soa_templates = $create_template = null;
+		$soa_name = $soa_templates = $create_template = $template_name = null;
 		$map = isset($_GET['map']) ? $_GET['map'] : 'forward';
 		
 		if ($result) {
@@ -496,8 +496,8 @@ class fm_dns_records {
 			$template_name_show_hide = 'none';
 			$create_template = sprintf('<tr>
 			<th>%s</th>
-			<td><input type="checkbox" id="soa_create_template" name="{$action}[$soa_id][soa_template]" value="yes" /><label for="soa_create_template"> %s</label></td>
-		</tr>', _('Create Template'), _('yes'));
+			<td><input type="checkbox" id="soa_create_template" name="%s[%d][soa_template]" value="yes" /><label for="soa_create_template"> %s</label></td>
+		</tr>', _('Create Template'), $action, $soa_id, _('yes'));
 		} else {
 			$template_name_show_hide = 'table-row';
 			$create_template = <<<HTML
@@ -508,11 +508,12 @@ HTML;
 	
 		if (array_search('template_name', $show) !== false) {
 			$soa_default_checked = $soa_id == $this->getDefaultSOA() ? 'checked' : null;
-			$template_name = sprintf('<tr id="soa_template_name" style="display: $template_name_show_hide">
-			<th>%s</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_name]" size="25" value="$soa_name" /><br />
-			<input type="checkbox" id="soa_default" name="{$action}[$soa_id][soa_default]" value="yes" $soa_default_checked /><label for="soa_default"> %s</label></td>
-		</tr>', _('Template Name'), _('Make Default Template'));
+			$template_name = sprintf('<tr id="soa_template_name" style="display: %1$s">
+			<th>%2$s</th>
+			<td><input type="text" name="%3$s[%7$d][soa_name]" size="25" value="%4$s" /><br />
+			<input type="checkbox" id="soa_default" name="%3$s[%7$d][soa_default]" value="yes" %5$s /><label for="soa_default"> %6$s</label></td>
+		</tr>', $template_name_show_hide, _('Template Name'), $action, $soa_name,
+					$soa_default_checked, _('Make Default Template'), $soa_id);
 		}
 	
 		return <<<HTML
