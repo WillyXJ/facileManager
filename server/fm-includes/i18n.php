@@ -56,7 +56,7 @@ function getLanguage($directory) {
 	if (isset($_SESSION['language'])) $_SESSION['language'];
 	
 	$supported_languages = scandir($directory);
-	$languages = explode(',', str_replace('-', '_', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
+	$languages = @explode(',', str_replace('-', '_', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
 	
 	foreach ($languages as $lang) {
 		if (in_array($lang, $supported_languages)) {

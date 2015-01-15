@@ -326,6 +326,13 @@ WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'software_update_interval');
 INSERT;
 
+	$inserts[] = <<<INSERT
+INSERT INTO $database.`fm_options` (`account_id` ,`option_name`, `option_value`) 
+	SELECT 0, 'client_auto_register', 1 FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'client_auto_register');
+INSERT;
+
 /** Update user capabilities */
 if ($link) {
 	$fm_user_caps_query = "SELECT option_value FROM $database.`fm_options` WHERE option_name='fm_user_caps';";

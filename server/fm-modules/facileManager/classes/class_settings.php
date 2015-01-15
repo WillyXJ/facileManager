@@ -226,9 +226,11 @@ class fm_settings {
 		$ldap_user_template = getOption('ldap_user_template');
 		$ldap_user_template_list = buildSelect('ldap_user_template', 'ldap_user_template', $this->buildUserList(), $ldap_user_template);
 
+		/** Client Autoregistration Section */
+		$client_auto_register_checked = (getOption('client_auto_register')) ? 'checked' : null;
+
 		/** SSL Section */
-		$enforce_ssl = getOption('enforce_ssl');
-		$enforce_ssl_checked = ($enforce_ssl) ? 'checked' : null;
+		$enforce_ssl_checked = (getOption('enforce_ssl')) ? 'checked' : null;
 		$fm_port_ssl = getOption('fm_port_ssl');
 		
 		/** Mailing Section */
@@ -238,8 +240,7 @@ class fm_settings {
 			 $fm_mailing_options_style = 'style="display: block;"';
 		} else $mail_enable_checked = $fm_mailing_options_style = null;
 		
-		$mail_smtp_auth = getOption('mail_smtp_auth');
-		if ($mail_smtp_auth) {
+		if (getOption('mail_smtp_auth')) {
 			 $mail_smtp_auth_checked = 'checked';
 			 $mail_smtp_auth_options_style = 'style="display: block;"';
 		} else $mail_smtp_auth_checked = $mail_smtp_auth_options_style = null;
@@ -247,8 +248,7 @@ class fm_settings {
 		$mail_smtp_host = getOption('mail_smtp_host');
 		$mail_smtp_user = getOption('mail_smtp_user');
 		$mail_smtp_pass = getOption('mail_smtp_pass');
-		$mail_smtp_tls = getOption('mail_smtp_tls');
-		$mail_smtp_tls_checked = ($mail_smtp_tls) ? 'checked' : null;
+		$mail_smtp_tls_checked = (getOption('mail_smtp_tls')) ? 'checked' : null;
 		
 		$mail_from = getOption('mail_from');
 		
@@ -283,6 +283,7 @@ class fm_settings {
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">
 			<input type="hidden" name="item_type" value="fm_settings" />
 			<input type="hidden" name="ldap_group_require" value="0" />
+			<input type="hidden" name="client_auto_register" value="0" />
 			<input type="hidden" name="enforce_ssl" value="0" />
 			<input type="hidden" name="mail_enable" value="0" />
 			<input type="hidden" name="mail_smtp_auth" value="0" />
@@ -418,6 +419,15 @@ class fm_settings {
 							<div class="choices">
 								$ldap_user_template_list
 							</div>
+						</div>
+					</div>
+					<div id="setting-row">
+						<div class="description">
+							<label for="client_auto_register">Client Automatic Registration</label>
+							<p>Allow clients to automatically register with $fm_name.</p>
+						</div>
+						<div class="choices">
+							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" $client_auto_register_checked /><label for="client_auto_register">Allow Client Automatic Registration</label>
 						</div>
 					</div>
 				</div>

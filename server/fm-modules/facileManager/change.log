@@ -1,22 +1,27 @@
+2.0-beta1 (2015-??-??)
+======================
+* Server - [security] - Added ability to enable/disable automatic client
+           registration in the database. (Issue #122)
+
 2.0-alpha2 (2015-01-13)
 =======================
 * Client - [improvement] Added support for sudoers includedir parameter and no
            longer disables requiretty and env_reset globally.
 * Server - [bug] Fixed Firefox css issues (introduced in 2.0-alpha1).
 * Server - [improvement] Skips apache rewrite module check for CGI/FCGI
-           implementations (Issue #91).
+           implementations. (Issue #91)
 * Server - [feature] FM_NO_HTACCESS is now a supported defined constant to
-           remove .htaccess requirement (Issue #73).
+           remove .htaccess requirement. (Issue #73)
 * Server - [improvement] Updated help file.
 * Server - [bug] Installer now checks to ensure the database and records already
-           exist before running (Issue #166).
+           exist before running. (Issue #166)
 * Server - [improvement] Remove the Admin->Users menu item when authentication
            is not used.
 * Server - [improvement] Fixed PHP session errors when no authentication is used.
 * Server - [bug] Fixed bulk action checkbox logic.
 * Server - [bug] Fixed PHP errors during user account window when using a module
            other than fmDNS (introduced in 1.3).
-* Server - [feature] Added i18n support (Issue #106).
+* Server - [feature] Added i18n support. (Issue #106)
 * Server - [bug] Fixed upgrade messages after facileManager is upgraded.
 
 2.0-alpha1 (2014-11-20)

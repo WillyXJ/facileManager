@@ -314,11 +314,14 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Firewall');
 		$popup_footer = buildPopup('footer');
 		
+		$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
+
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="">
 		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="server_id" value="$server_id" />
+			$alternative_help
 			<table class="form-table">
 				<tr>
 					<th width="33%" scope="row"><label for="server_name">Server Name</label></th>

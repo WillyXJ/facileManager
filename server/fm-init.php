@@ -200,6 +200,8 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	} elseif (defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 	}
+	
+	if (isset($_POST['module_name'])) $_SESSION['module'] = $_POST['module_name'];
 
 	/** Include module functions file */
 	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {

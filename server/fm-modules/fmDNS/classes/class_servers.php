@@ -647,7 +647,7 @@ FORM;
 			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key'), $server_key);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
-			$alternative_help = ($action == 'add') ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
+			$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
 
 			$return_form .= <<<FORM
 			$alternative_help

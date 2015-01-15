@@ -44,7 +44,7 @@ function fmUpgrade($database) {
 	echo '<center><table class="form-table">' . "\n";
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 34) ? fmUpgrade_1202($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 37) ? fmUpgrade_2002($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -516,6 +516,23 @@ function fmUpgrade_1202($database) {
 				'view_logs'			=> 'View Logs'
 			);
 		if (!setOption('fm_user_caps', $fm_user_caps)) return false;
+	}
+
+	return $success;
+}
+
+
+/** fM v2.0-beta1 **/
+function fmUpgrade_2002($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 34) ? fmUpgrade_1202($database) : true;
+	
+	if ($success) {
+		if (!setOption('client_auto_register', 1)) return false;
 	}
 
 	return $success;

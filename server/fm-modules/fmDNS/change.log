@@ -1,3 +1,8 @@
+2.0-beta1 (2015-??-??)
+======================
+* Server - [security] - Added ability to enable/disable automatic client
+           registration in the database. (Issue #122)
+
 2.0-alpha2 (2015-01-13)
 =======================
 * Server - [bug] Fixed zone preview (introduced in 2.0-alpha1).

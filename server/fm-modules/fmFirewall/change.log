@@ -1,3 +1,8 @@
+1.1-beta1 (2015-??-??)
+======================
+* Server - [security] - Added ability to enable/disable automatic client
+           registration in the database. (Issue #122)
+
 1.1-alpha2 (2015-01-13)
 =======================
 * Server - [bug] Fixed server preview.

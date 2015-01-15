@@ -48,7 +48,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 			if (array_key_exists('addserial', $_GET)) {
 				/** Client expects an array for a good return */
 				$data = $_POST;
-				
+
 				/** Does the record already exist for this account? */
 				basicGet('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['server_name'], 'server_', 'server_name');
 				if ($fmdb->num_rows) {
@@ -56,10 +56,14 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 					$_POST['server_id'] = $server_array[0]->server_id;
 					$update_server = moduleAddServer('update');
 				} else {
-					/** Add new server */
-					$add_server = moduleAddServer('add');
-					if ($add_server === false) {
-						$data = _('Could not add server to account.') . "\n";
+					if (getOption('client_auto_register')) {
+						/** Add new server */
+						$add_server = moduleAddServer('add');
+						if ($add_server !== true) {
+							$data = _('Could not add server to account.') . "\n";
+						}
+					} else {
+						$data = _('Client automatic registration is not allowed.') . "\n";
 					}
 				}
 			}
