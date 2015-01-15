@@ -2,6 +2,8 @@
 ======================
 * Server - [security] - Added ability to enable/disable automatic client
            registration in the database. (Issue #122)
+* Server - [feature] - Added the option to use DNAME resource records for cloned
+           zones with a per-zone override. (Issue #169)
 
 2.0-alpha2 (2015-01-13)
 =======================

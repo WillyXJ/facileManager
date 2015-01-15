@@ -134,6 +134,10 @@ $__FM_CONFIG['fmDNS']['default']['options'] = array(
 		'auto_create_ptr_zones' => array(
 				'description' => array(_('Create Reverse Zones Automatically'), _('While creating A records and choosing to create the associated PTR record, reverse zones can be automatically created if they are missing.')),
 				'default_value' => 'no',
+				'type' => 'checkbox'),
+		'clones_use_dnames' => array(
+				'description' => array(_('Use DNAME Resource Records for Clones'), _('When creating cloned zones, use the DNAME resource record rather than a full clone (when available).')),
+				'default_value' => 'yes',
 				'type' => 'checkbox')
 	);
 

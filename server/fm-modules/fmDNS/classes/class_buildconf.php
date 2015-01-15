@@ -835,7 +835,11 @@ class fm_module_buildconf {
 		
 		/** Is this a cloned zone */
 		if (isset($domain->parent_domain_id)) {
-			$full_zone_clone = true;
+//			echo '<pre>';print_r($domain);echo '</pre>';
+			$full_zone_clone = (getOption('clones_use_dnames', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') ? true : false;
+			if ($domain->domain_clone_dname) {
+				$full_zone_clone = ($domain->domain_clone_dname == 'yes') ? true : false;
+			}
 			
 			/** Are there any additional records? */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->parent_domain_id, 'record_', 'domain_id', "AND `record_status`='active'");
@@ -1061,6 +1065,7 @@ class fm_module_buildconf {
 			$parent_zone->domain_id = $zone->domain_clone_domain_id;
 			$parent_zone->domain_name = $zone->domain_name;
 			$parent_zone->domain_name_file = $zone->domain_name;
+			$parent_zone->domain_clone_dname = $zone->domain_clone_dname;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
 			

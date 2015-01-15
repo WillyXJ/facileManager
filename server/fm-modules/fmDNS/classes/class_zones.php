@@ -648,6 +648,18 @@ HTML;
 			$soa_show = 'none';
 			$soa_templates = null;
 		}
+		
+		/** Clone options */
+		if ($domain_clone_domain_id) {
+			$clone_override_show = 'block';
+			$clone_dname_checked = $domain_clone_dname ? 'checked' : null;
+			$clone_dname_options_show = $domain_clone_dname ? 'block' : 'none';
+			$clone_dname_dropdown = buildSelect('domain_clone_dname', 'domain_clone_dname', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_clone_dname'), $domain_clone_dname);
+		} else {
+			$clone_override_show = $clone_dname_options_show = 'none';
+			$clone_dname_checked = $clone_dname_dropdown = null;
+		}
+		
 		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) ? null : '<tr><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
 		
 		$popup_header = buildPopup('header', $ucaction . ' Zone');
@@ -688,7 +700,15 @@ HTML;
 				</tr>
 				<tr>
 					<th><label for="domain_clone_domain_id">Clone Of (optional)</label></th>
-					<td>$clone</td>
+					<td>
+						$clone
+						<div id="clone_override" style="display: $clone_override_show">
+							<p><input type="checkbox" id="domain_clone_dname_override" name="domain_clone_dname_override" value="yes" $clone_dname_checked /><label for="domain_clone_dname_override"> Override DNAME Resource Record Setting</label></p>
+							<div id="clone_dname_options" style="display: $clone_dname_options_show">
+								<p>$clone_dname_dropdown</p>
+							</div>
+						</div>
+					</td>
 				</tr>
 				<tr>
 					<th><label for="domain_name_servers">DNS Servers</label></th>
@@ -717,6 +737,13 @@ HTML;
 					width: '300px',
 					tokenSeparators: [",", " ", ";"],
 					data: $available_acls
+				});
+				$("#domain_clone_dname_override").click(function() {
+					if ($(this).is(':checked')) {
+						$('#clone_dname_options').show('slow');
+					} else {
+						$('#clone_dname_options').slideUp();
+					}
 				});
 			});
 		</script>
@@ -1233,6 +1260,13 @@ HTML;
 		/** Format domain_clone_domain_id */
 		if (!$post['domain_clone_domain_id'] && $post['action'] == 'add') $post['domain_clone_domain_id'] = 0;
 		
+		/** domain_clone_dname override */
+		if (!$post['domain_clone_dname_override']) {
+			$post['domain_clone_dname'] = null;
+		} else {
+			unset($post['domain_clone_dname_override']);
+		}
+		
 		/** Ensure domain_view is set */
 		if (!array_key_exists('domain_view', $post)) {
 			$post['domain_view'] = ($post['domain_clone_domain_id']) ? -1 : 0;
@@ -1257,7 +1291,7 @@ HTML;
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
 				if ($fmdb->num_rows) {
 					/** Zone exists for views, but what about on the same server? */
-					if (!$post['domain_name_servers'] || in_array(0, $post['domain_name_servers'])) {
+					if (!$post['domain_name_servers'] || in_array('0', $post['domain_name_servers'])) {
 						return _('Zone already exists for all views.');
 					}
 				}

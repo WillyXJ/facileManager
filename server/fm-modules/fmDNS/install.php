@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_mapping` enum('forward','reverse') NOT NULL DEFAULT 'forward',
   `domain_type` enum('master','slave','forward','stub') NOT NULL DEFAULT 'master',
   `domain_clone_domain_id` int(11) NOT NULL DEFAULT '0',
+  `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL,
   `domain_reload` enum('yes','no') NOT NULL DEFAULT 'no',
   `domain_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`domain_id`)
@@ -580,6 +581,13 @@ INSERT INTO $database.`fm_options` (option_name, option_value, module_name)
 	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'client_version'
+		AND module_name='$module');
+INSERT;
+	$inserts[] = <<<INSERT
+INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+	SELECT 'clones_use_dnames', '{$__FM_CONFIG[$module]['default']['options']['clones_use_dnames']['default_value']}', '$module' FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'clones_use_dnames'
 		AND module_name='$module');
 INSERT;
 
