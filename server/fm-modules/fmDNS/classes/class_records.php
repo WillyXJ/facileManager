@@ -97,6 +97,10 @@ class fm_dns_records {
 			if ($key != 'account_id') {
 				$log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			}
+			if ($key == 'soa_default' && $data == 'yes') {
+				$query = "UPDATE `$table` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
+				$result = $fmdb->query($query);
+			}
 		}
 		$sql_fields = rtrim($sql_fields, ',') . ')';
 		$sql_values = rtrim($sql_values, ',');
