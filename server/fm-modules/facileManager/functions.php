@@ -176,7 +176,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 	if (isset($_SESSION['module'])) {
 		$module_css_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'module.css';
 		$module_css = (file_exists(ABSPATH . $module_css_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/css" />' : null;
-		$module_js_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'module.js';
+		$module_js_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'module.php';
 		$module_js = (file_exists(ABSPATH . $module_js_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/javascript" charset="utf-8"></script>' : null;
 	} else {
 		$module_css = $module_js = null;
@@ -198,7 +198,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.css?ver=$fm_version" type="text/css" />
 		$module_css
-		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js?ver=$fm_version" type="text/javascript" charset="utf-8"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.php?ver=$fm_version" type="text/javascript" charset="utf-8"></script>
 		$module_js
 	</head>
 <body>
@@ -309,7 +309,7 @@ HTML;
 		$help_file = buildHelpFile();
 		$help_text = _('Help');
 	
-		$process_all_text = _('Process All Available Updates');
+		$process_all_text = _('Process all available updates now');
 		$process_all = <<<HTML
 		<div id="topheadpartright" style="display: none;">
 			<a class="single_line process_all_updates" href="#" title="$process_all_text"><i class="fa fa-refresh fa-lg"></i></a>

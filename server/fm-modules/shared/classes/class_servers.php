@@ -96,7 +96,7 @@ class fm_shared_module_servers {
 				case 'ssh':
 					/** Test the port first */
 					if (!socketTest($server_name, $server_update_port, 10)) {
-						$response[] = ' --> ' . sprintf(_('Failed: could not access %s using  (tcp/%d).'), $server_name, $server_update_method, $server_update_port);
+						$response[] = ' --> ' . sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port);
 						break;
 					}
 					
