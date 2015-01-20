@@ -3,6 +3,7 @@
 * Server - [security] Added ability to enable/disable automatic client
            registration in the database. (Issue #122)
 * Server - [bug] Fixed PHP error at login screen when session times out.
+* Server - [improvement] Upgraded to select2 3.5.2.
 
 2.0-alpha2 (2015-01-13)
 =======================
