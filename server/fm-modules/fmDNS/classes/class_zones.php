@@ -116,12 +116,17 @@ class fm_dns_zones {
 		/** Format domain_name_servers */
 		$log_message_name_servers = null;
 		foreach ($post['domain_name_servers'] as $val) {
-			if ($val == 0) {
+			if ($val == '0') {
 				$domain_name_servers = 0;
+				$log_message_name_servers = _('All Servers');
 				break;
 			}
 			$domain_name_servers .= $val . ';';
-			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			if ($val[0] == 's') {
+				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			} elseif ($val[0] == 'g') {
+				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+			}
 			$log_message_name_servers .= $val ? "$server_name; " : null;
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
@@ -135,7 +140,7 @@ class fm_dns_zones {
 			
 			$parent_domain = $fmdb->last_result;
 			foreach ($parent_domain[0] as $field => $value) {
-				if ($field == 'domain_id') continue;
+				if (in_array($field, array('domain_id', 'domain_template_id'))) continue;
 				if ($field == 'domain_clone_domain_id') {
 					$sql_values .= sanitize($post['domain_clone_domain_id']) . ',';
 				} elseif ($field == 'domain_name') {
@@ -177,21 +182,7 @@ class fm_dns_zones {
 			}
 			if (!$post['domain_view']) $post['domain_view'] = 0;
 			
-			/** Format domain_name_servers */
-			$log_message_name_servers = null;
-			foreach ($post['domain_name_servers'] as $val) {
-				if ($val == 0) {
-					$domain_name_servers = 0;
-					break;
-				}
-				$domain_name_servers .= $val . ';';
-				$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-				$log_message_name_servers .= $val ? "$server_name; " : null;
-			}
-			$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
-			if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
-			
-			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward');
+			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id');
 		
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
@@ -199,12 +190,16 @@ class fm_dns_zones {
 					if (is_array($data)) $data = implode(';', $data);
 					$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
 					if ($key == 'domain_view') $data = $log_message_views;
-					if ($key == 'domain_name_servers') $data = $log_message_name_servers;
+					if ($key == 'domain_name_servers') $data = rtrim($log_message_name_servers, '; ');
 					if ($key == 'soa_id') {
 						$soa_name = $data ? getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name') : 'Custom';
 						$log_message .= formatLogKeyData('_id', $key, $soa_name);
 					} else {
 						$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+					}
+					if ($key == 'domain_default' && $data == 'yes') {
+						$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
+						$result = $fmdb->query($query);
 					}
 				}
 			}
@@ -311,6 +306,10 @@ class fm_dns_zones {
 				if ($key == 'domain_view') $data = $log_message_views;
 				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
 				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+				if ($key == 'domain_default' && $data == 'yes') {
+					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
+					$result = $fmdb->query($query);
+				}
 			}
 		}
 		$sql_edit .= "domain_reload='no'";
@@ -576,12 +575,12 @@ HTML;
 	/**
 	 * Displays the form to add new zone
 	 */
-	function printForm($data = '', $action = 'create', $map = 'forward') {
+	function printForm($data = '', $action = 'create', $map = 'forward', $show = array('popup', 'template_menu', 'create_template', 'template_name')) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$ucaction = ucfirst($action);
 		$domain_id = $domain_view = $domain_name_servers = 0;
-		$domain_type = $domain_clone_domain_id = $domain_name = null;
+		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
 		$disabled = $action == 'create' ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -638,15 +637,18 @@ HTML;
 		}
 		
 		if ($action == 'create') {
+			$domain_template_id = $this->getDefaultZone();
+			$zone_show = $domain_template_id ? 'none' : 'block';
 			$soa_show = 'block';
 			global $fm_dns_records;
-			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$soa_templates = '<tr id="define_soa">
 					<th>SOA</th>
 					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates(), $fm_dns_records->getDefaultSOA()) . '</td></tr>';
 		} else {
+			$zone_show = 'block';
 			$soa_show = 'none';
-			$soa_templates = null;
+			$soa_templates = $domain_templates = null;
 		}
 		
 		/** Clone options */
@@ -660,21 +662,54 @@ HTML;
 			$clone_dname_checked = $clone_dname_dropdown = null;
 		}
 		
-		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) ? null : '<tr><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
+		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) ? null : '<tr class="include-with-template"><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
 		
 		$popup_header = buildPopup('header', $ucaction . ' Zone');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<HTML
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
+		if (array_search('create_template', $show) !== false) {
+			$template_name_show_hide = 'none';
+			$create_template = sprintf('<tr>
+			<th>%s</th>
+			<td><input type="checkbox" id="domain_create_template" name="domain_template" value="yes" /><label for="domain_create_template"> %s</label></td>
+		</tr>', _('Create Template'), _('yes'));
+		} else {
+			$template_name_show_hide = 'table-row';
+			$create_template = <<<HTML
+			<input type="hidden" id="domain_create_template" name="domain_template" value="yes" />
+			<input type="hidden" name="domain_default" value="no" />
+HTML;
+		}
+	
+		if (array_search('template_menu', $show) !== false) {
+			$classes = 'zone-form';
+			$select_template = '<tr id="define_template" class="include-with-template">
+					<th>Template</th>
+					<td>' . buildSelect('domain_template_id', 'domain_template_id', $this->availableZoneTemplates(), $domain_template_id) . '</td></tr>';
+		} else {
+			$classes = 'zone-template-form';
+			$select_template = null;
+		}
+		
+		if (array_search('template_name', $show) !== false) {
+			$default_checked = ($domain_id == $this->getDefaultZone()) ? 'checked' : null;
+			$template_name = sprintf('<tr id="domain_template_default" style="display: %s">
+			<th></th>
+			<td><input type="checkbox" id="domain_default" name="domain_default" value="yes" %s /><label for="domain_default"> %s</label></td>
+		</tr>', $template_name_show_hide, $default_checked, _('Make Default Template'));
+		}
+	
+		$return_form = (array_search('popup', $show) !== false) ? '<form name="manage" id="manage" method="post" action="">' . $popup_header : null;
+		
+		$return_form .= <<<HTML
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="domain_id" value="$domain_id" />
-			<table class="form-table zone-form">
-				<tr>
+			<table class="form-table $classes">
+				<tr class="include-with-template">
 					<th><label for="domain_name">Domain Name</label></th>
 					<td><input type="text" id="domain_name" name="domain_name" size="40" value="$domain_name" maxlength="$domain_name_length" /></td>
 				</tr>
+				$select_template
 				<tr>
 					<th><label for="domain_view">Views</label></th>
 					<td>$views</td>
@@ -716,9 +751,14 @@ HTML;
 				</tr>
 				$soa_templates
 				$additional_config_link
+				$create_template
+				$template_name
 			</table>
-		$popup_footer
-		</form>
+HTML;
+
+		$return_form .= (array_search('popup', $show) !== false) ? $popup_footer . '</form>' : null;
+
+		$return_form .= <<<HTML
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
@@ -745,6 +785,18 @@ HTML;
 						$('#clone_dname_options').slideUp();
 					}
 				});
+				$("#domain_create_template").click(function() {
+					if ($(this).is(':checked')) {
+						$('#domain_template_name').show('slow');
+					} else {
+						$('#domain_template_name').slideUp();
+					}
+				});
+				if ($('#domain_template_id').val() != '') {
+					$('.zone-form > tbody > tr:not(.include-with-template, #domain_template_default)').slideUp();
+				} else {
+					$('.zone-form > tbody > tr:not(.include-with-template, #domain_template_default)').show('slow');
+				}
 			});
 		</script>
 HTML;
@@ -799,7 +851,7 @@ HTML;
 		
 		$domain_id_sql = (!empty($domain_id)) ? "AND domain_id!=$domain_id" : null;
 		
-		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE domain_clone_domain_id=0 AND domain_mapping='$map' AND domain_type='master' AND domain_status='active' $domain_id_sql ORDER BY domain_name ASC";
+		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE domain_clone_domain_id=0 AND domain_mapping='$map' AND domain_type='master' AND domain_status='active' AND domain_template='no' $domain_id_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$clone_results = $fmdb->last_result;
@@ -1007,8 +1059,7 @@ HTML;
 				
 				/** Process server groups */
 				if ($server[0] == 'g') {
-					$group_id = str_replace('g_', '', $server);
-					$group_masters = getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_masters');
+					$group_masters = getNameFromID(preg_replace('/\D/', null, $server), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_masters');
 					
 					foreach (explode(';', $group_masters) as $server) {
 						if (!empty($server)) $sql_name_servers .= "'$server',";
@@ -1243,19 +1294,33 @@ HTML;
 		/** Empty domain names are not allowed */
 		if (empty($post['domain_name'])) return _('No zone name defined.');
 		
-		$post['domain_name'] = rtrim(strtolower($post['domain_name']), '.');
+		if ($post['domain_template'] != 'yes') {
+			$post['domain_name'] = rtrim(strtolower($post['domain_name']), '.');
+
+			/** Perform domain name validation */
+			if (!isset($post['domain_mapping'])) {
+				global $map;
+				$post['domain_mapping'] = $map;
+			}
+			if ($post['domain_mapping'] == 'reverse') {
+				$post['domain_name'] = $this->fixDomainTypos($post['domain_name']);
+			} else {
+				$post['domain_name'] = function_exists('idn_to_ascii') ? idn_to_ascii($post['domain_name']) : $post['domain_name'];
+			}
+			if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return _('Invalid zone name.');
+		}
 		
-		/** Perform domain name validation */
-		if (!isset($post['domain_mapping'])) {
-			global $map;
-			$post['domain_mapping'] = $map;
+		/** Is this based on a template? */
+		if ($post['domain_template_id']) {
+			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping');
+			foreach ($include as $key) {
+				$new_post[$key] = $post[$key];
+			}
+			$post = $new_post;
+			unset($new_post, $post['domain_template']);
+
+			return $post;
 		}
-		if ($post['domain_mapping'] == 'reverse') {
-			$post['domain_name'] = $this->fixDomainTypos($post['domain_name']);
-		} else {
-			$post['domain_name'] = function_exists('idn_to_ascii') ? idn_to_ascii($post['domain_name']) : $post['domain_name'];
-		}
-		if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return _('Invalid zone name.');
 		
 		/** Format domain_clone_domain_id */
 		if (!$post['domain_clone_domain_id'] && $post['action'] == 'add') $post['domain_clone_domain_id'] = 0;
@@ -1279,16 +1344,16 @@ HTML;
 		
 		/** Does the record already exist for this account? */
 		$domain_id_sql = (isset($post['domain_id'])) ? 'AND domain_id!=' . sanitize($post['domain_id']) : null;
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $_SESSION['user']['account_id'], 'view_', 'account_id');
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_SESSION['user']['account_id'], 'view_', 'account_id');
 		if (!$fmdb->num_rows) { /** No views defined - all zones must be unique */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
 			if ($fmdb->num_rows) return _('Zone already exists.');
 		} else { /** All zones must be unique per view */
 			$defined_views = $fmdb->last_result;
 			
 			/** Format domain_view */
 			if (!$post['domain_view'] || in_array(0, $post['domain_view'])) {
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
 				if ($fmdb->num_rows) {
 					/** Zone exists for views, but what about on the same server? */
 					if (!$post['domain_name_servers'] || in_array('0', $post['domain_name_servers'])) {
@@ -1304,9 +1369,9 @@ HTML;
 						break;
 					}
 					$domain_view .= $val . ';';
-					basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', "AND (domain_view='$val' OR domain_view=0 OR domain_view LIKE '$val;%' OR domain_view LIKE '%;$val;%' OR domain_view LIKE '%;$val') $domain_id_sql");
+					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', "AND (domain_view='$val' OR domain_view=0 OR domain_view LIKE '$val;%' OR domain_view LIKE '%;$val;%' OR domain_view LIKE '%;$val') $domain_id_sql");
 					if ($fmdb->num_rows) {
-						$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
+						$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 						return sprintf(_("Zone already exists for the '%s' view."), $view_name);
 					}
 				}
@@ -1315,7 +1380,7 @@ HTML;
 		}
 		
 		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name');
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
 		if ($field_length !== false && strlen($post['domain_name']) > $field_length) return sprintf(ngettext('Zone name is too long (maximum %d character).', 'Zone name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** No need to process more if zone is cloned */
@@ -1361,18 +1426,31 @@ HTML;
 		
 		if ($ids) {
 			if ($ids == -1) return sprintf('<i>%s</i>', _('inherited'));
+			
+			$table = $type;
+			
 			/** Process multiple IDs */
 			if (strpos($ids, ';')) {
 				$ids_array = explode(';', rtrim($ids, ';'));
 				if (in_array('0', $ids_array)) $name = 'All ' . ucfirst($type) . 's';
 				else {
 					$name = null;
-					foreach ($ids_array as $view_id) {
-						$name .= getNameFromID($view_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $type . 's', $type . '_', $type . '_id', $type . '_name') . ', ';
+					foreach ($ids_array as $id) {
+						if ($id[0] == 'g') {
+							$table = 'server_group';
+							$type = 'group';
+						}
+						$name .= getNameFromID(preg_replace('/\D/', null, $id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table . 's', $type . '_', $type . '_id', $type . '_name') . ', ';
 					}
 					$name = rtrim($name, ', ');
 				}
-			} else $name = getNameFromID($ids, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $type . 's', $type . '_', $type . '_id', $type . '_name');
+			} else {
+				if ($ids[0] == 'g') {
+					$table = 'server_group';
+					$type = 'group';
+				}
+				$name = getNameFromID(preg_replace('/\D/', null, $ids), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table . 's', $type . '_', $type . '_id', $type . '_name');
+			}
 		} else $name = 'All ' . ucfirst($type) . 's';
 		
 		return $name;
@@ -1420,6 +1498,57 @@ HTML;
 			'&nbsp;<input type="submit" name="" id="" value="' . _('Filter') . '" class="button" /></form>' . "\n";
 		return $return;
 	}
+	
+	
+	/**
+	 * Returns the default zone ID
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @return integer
+	 */
+	function getDefaultZone() {
+		global $fmdb, $__FM_CONFIG;
+		
+		$query = "SELECT domain_id FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' 
+			AND domain_status='active' AND domain_default='yes' LIMIT 1";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			return $fmdb->last_result[0]->domain_id;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Builds an array of available zone templates
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @return array
+	 */
+	function availableZoneTemplates() {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return[0][] = null;
+		$return[0][] = null;
+		
+		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' 
+			AND domain_status='active' AND domain_template='yes' ORDER BY domain_name ASC";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$return[$i+1][] = $fmdb->last_result[$i]->domain_name;
+				$return[$i+1][] = $fmdb->last_result[$i]->domain_id;
+			}
+		}
+		return $return;
+	}
+	
 	
 }
 

@@ -43,6 +43,7 @@ if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['modul
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $record_type == 'SOA') $record_type = $default_record_type;
+if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id') && $record_type == 'SOA') $record_type = $default_record_type;
 
 printHeader();
 @printMenu();
@@ -64,11 +65,11 @@ $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'
 sort($supported_record_types);
 $supported_record_types[] = 'SOA';
 
-$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
-$zone_access_allowed = zoneAccessIsAllowed(array($domain_id, $parent_domain_id));
+$parent_domain_id = getZoneParentID($domain_id);
+$zone_access_allowed = zoneAccessIsAllowed(array_merge(array($domain_id), $parent_domain_id));
 		
 if (!in_array($record_type, $supported_record_types)) $record_type = $default_record_type;
-$avail_types = buildRecordTypes($record_type, array($domain_id, $parent_domain_id), $map, $supported_record_types, $search_query);
+$avail_types = buildRecordTypes($record_type, array_merge(array($domain_id), $parent_domain_id), $map, $supported_record_types, $search_query);
 
 $response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
@@ -128,7 +129,7 @@ if ($record_type == 'SOA') {
 			$ip_sort = false;
 			break;
 	}
-	$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+	$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '" . join("','", $parent_domain_id) . "')" : "='$domain_id'";
 	$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
 	$sort_direction = null;
 
@@ -192,6 +193,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 			if (empty($type)) continue;
 			if (in_array($type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) continue;
 			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $type == 'SOA') continue;
+			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id') && $type == 'SOA') continue;
 
 			$select = ($record_type == $type) ? ' class="selected"' : '';
 			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\">$type</a></span>\n";

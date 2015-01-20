@@ -41,8 +41,11 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
 				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
-				$form_data = $_POST;
 			} else {
+				if ($_POST['domain_template'] == 'yes') {
+					header('Location: templates-zones.php');
+					exit;
+				}
 				$redirect_record_type = (isset($_POST['soa_id']) && $_POST['soa_id']) ? 'NS' : 'SOA';
 				header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=' . $redirect_record_type);
 			}
@@ -53,7 +56,6 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
 				$response = '<p class="error">' . $zone_update_status . '</p>'. "\n";
-				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
 		}
 		if (isset($_GET['status'])) {

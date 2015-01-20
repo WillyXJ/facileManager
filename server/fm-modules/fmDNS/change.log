@@ -5,6 +5,7 @@
 * Server - [feature] - Added the option to use DNAME resource records for cloned
            zones with a per-zone override. (Issue #169)
 * Server - [bug] Fixed issue where multiple SOA templates could be marked as default.
+* Server - [feature] Added support for zone templates. (Issue #154)
 
 2.0-alpha2 (2015-01-13)
 =======================

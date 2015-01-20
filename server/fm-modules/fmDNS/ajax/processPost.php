@@ -62,6 +62,7 @@ $checks_array = array('servers' => 'manage_servers',
 					'logging' => 'manage_servers',
 					'controls' => 'manage_servers',
 					'domains' => 'manage_zones',
+					'domain' => 'manage_zones',
 					'soa' => 'manage_zones'
 				);
 $allowed_capabilities = array_unique($checks_array);
@@ -72,11 +73,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		exit;
 	}
 	
-	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
-	$item_type = $_POST['item_type'];
-	$prefix = substr($item_type, 0, -1) . '_';
+	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . sanitize($_POST['item_type']);
 
-	$type_map = null;
 	$id = sanitize($_POST['item_id']);
 	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
 	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
@@ -87,38 +85,32 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$post_class = $fm_module_servers;
 			if (isset($_POST['item_sub_type']) && sanitize($_POST['item_sub_type']) == 'groups') {
 				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
-				$prefix = 'group_';
 			}
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
 			$table = 'config';
-			$prefix = 'cfg_';
-			$type_map = 'global';
-			$item_type = 'option';
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
-			$type_map = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
-			$action = 'create';
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;
 			$table = 'config';
-			$prefix = 'cfg_';
-			if (isset($_POST['item_sub_type'])) $item_type = $_POST['item_sub_type'] . ' ';
 			$type = sanitize($_POST['log_type']);
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
-			$prefix = 'soa_';
-			$type = 'soa';
+			$server_serial_no = $type = sanitize($_POST['item_type']);
+			break;
+		case 'domain':
+			$post_class = $fm_module_templates;
+			$server_serial_no = 'domain';
+			$type = sanitize($_POST['item_type']) . 's';
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};
 	}
-
-	$field = $prefix . 'id';
 
 	switch ($_POST['action']) {
 		case 'add':

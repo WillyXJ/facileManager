@@ -519,7 +519,8 @@ class fm_module_buildconf {
 					$zone_result = $fmdb->last_result;
 					for ($i=0; $i < $count; $i++) {
 						/** Is this a clone id? */
-						if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], $zone_result, $count);
+						if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'clone');
+						elseif ($zone_result[$i]->domain_template_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'template');
 						
 						if (getSOACount($zone_result[$i]->domain_id)) {
 							$domain_name = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
@@ -587,14 +588,15 @@ class fm_module_buildconf {
 
 		/** Build zones */
 		$view_sql = "AND (`domain_view`<=0 OR `domain_view`=$view_id OR `domain_view` LIKE '$view_id;%' OR `domain_view` LIKE '%;$view_id' OR `domain_view` LIKE '%;$view_id;%')";
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_name_servers`=0 OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}') $view_sql ORDER BY `domain_clone_domain_id`,`domain_name`";
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND `domain_template`='no' AND (`domain_name_servers`=0 OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}') $view_sql ORDER BY `domain_clone_domain_id`,`domain_name`";
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
 			$zone_result = $fmdb->last_result;
 			for ($i=0; $i < $count; $i++) {
 				/** Is this a clone id? */
-				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], $view_id);
+				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'clone');
+				elseif ($zone_result[$i]->domain_template_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'template');
 				if ($zone_result[$i] == false) continue;
 				
 				/** Valid SOA and NS records must exist */
@@ -621,7 +623,7 @@ class fm_module_buildconf {
 						case 'master':
 						case 'slave':
 							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type). (string) $auto_zone_options;
+							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type). (string) $auto_zone_options;
 							/** Build zone file */
 							if ($domain_type == 'master') {
 								$files[$server_zones_dir . '/master/db.' . $domain_name_file . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
@@ -792,7 +794,7 @@ class fm_module_buildconf {
 		
 		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE 
 			domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.account_id='{$_SESSION['user']['account_id']}'
-			AND s.soa_id=d.soa_id AND d.domain_id={$domain->domain_id}";
+			AND s.soa_id=d.soa_id AND (d.domain_id={$domain->domain_id} OR d.domain_id={$domain->domain_template_id})";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$soa_result = $fmdb->last_result;
@@ -835,7 +837,6 @@ class fm_module_buildconf {
 		
 		/** Is this a cloned zone */
 		if (isset($domain->parent_domain_id)) {
-//			echo '<pre>';print_r($domain);echo '</pre>';
 			$full_zone_clone = (getOption('clones_use_dnames', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') ? true : false;
 			if ($domain->domain_clone_dname) {
 				$full_zone_clone = ($domain->domain_clone_dname == 'yes') ? true : false;
@@ -851,10 +852,8 @@ class fm_module_buildconf {
 			global $fm_dns_records;
 			if (!class_exists('fm_dns_records')) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			if ($skipped_records = $fm_dns_records->getSkippedRecordIDs($domain->parent_domain_id)) $full_zone_clone = false;
-		}
-		
-		if (isset($domain->parent_domain_id)) {
-			$valid_domain_ids = $full_zone_clone == false ? "IN ('{$domain->domain_id}', '{$domain->parent_domain_id}')" : "='{$domain->domain_id}' AND record_type='NS'";
+			
+			$valid_domain_ids = $full_zone_clone == false ? "IN ('{$domain->domain_id}', '{$domain->parent_domain_id}', '" . join("','", getZoneParentID($domain->parent_domain_id)) . "')" : "='{$domain->domain_id}' AND record_type='NS'";
 		} else {
 			$valid_domain_ids = "='{$domain->domain_id}'";
 		}
@@ -1027,14 +1026,9 @@ class fm_module_buildconf {
 			$result = $fmdb->last_result;
 			$data = $result[0];
 			extract(get_object_vars($data), EXTR_SKIP);
-			
-//			if (isset($zone)) {
-//				$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database1.\n" : "Success.\n";
-//				$msg = "Success.\n";
-//			} else {
-				$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') || !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
-				$msg = "Success.\n";
-//			}
+
+			$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') || !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
+			$msg = "Success.\n";
 			if (isset($built_domain_ids)) {
 				$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
 			}
@@ -1055,22 +1049,24 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function mergeZoneDetails($zone, $view_id) {
+	function mergeZoneDetails($zone, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
-		basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $zone->domain_clone_domain_id, 'domain_', 'domain_id');
+		if ($type == 'clone') {
+			basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $zone->domain_clone_domain_id, 'domain_', 'domain_id');
+		} elseif ($type == 'template') {
+			basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $zone->domain_template_id, 'domain_', 'domain_id');
+		}
 		if ($fmdb->num_rows) {
 			$parent_zone = $fmdb->last_result[0];
 			$parent_zone->parent_domain_id = $zone->domain_id;
-			$parent_zone->domain_id = $zone->domain_clone_domain_id;
+			$parent_zone->domain_id = ($zone->domain_clone_domain_id) ? $zone->domain_clone_domain_id : $zone->domain_template_id;
 			$parent_zone->domain_name = $zone->domain_name;
 			$parent_zone->domain_name_file = $zone->domain_name;
 			$parent_zone->domain_clone_dname = $zone->domain_clone_dname;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
 			
-//			if (!in_array($view_id, explode(';', $parent_zone->domain_view))) return false;
-
 			return $parent_zone;
 		}
 		
@@ -1360,20 +1356,25 @@ HTML;
 	 * @since 1.3
 	 * @package fmDNS
 	 *
-	 * @param integer $domain_id The domain_id of the zone
+	 * @param array $domain_ids The domain_ids of the zone
 	 * @param integer $server_serial_no The server serial number
 	 * @param string $domain_type Type of zone (master, slave, etc.)
 	 * @return string
 	 */
-	function getZoneOptions($domain_id, $server_serial_no, $domain_type) {
+	function getZoneOptions($domain_ids, $server_serial_no, $domain_type) {
 		global $fmdb, $__FM_CONFIG, $fm_module_options;
+		
+		/** Remove zeros */
+		foreach ($domain_ids as $key => $id) {
+			if (!$id) unset($domain_ids[$key]);
+		}
 		
 		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
 		$config = null;
 		
 		$server_root_dir = getNameFromID($server_serial_no, "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
 		
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id='$domain_id' AND server_serial_no=0 AND cfg_status='active'");
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id IN ('" . join("','", $domain_ids) . "') AND server_serial_no=0 AND cfg_status='active'");
 		if ($fmdb->num_rows) {
 			$config_result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
@@ -1383,7 +1384,7 @@ HTML;
 		} else $global_config = array();
 
 		/** Override with server-specific configs */
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id='$domain_id' AND server_serial_no=$server_serial_no AND cfg_status='active'");
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id IN ('" . join("','", $domain_ids) . "') AND server_serial_no=$server_serial_no AND cfg_status='active'");
 		if ($fmdb->num_rows) {
 			$server_config_result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
@@ -1568,7 +1569,7 @@ HTML;
 			if ($ids == '0' || strpos($ids, 's_') !== false) continue;
 			
 			if (strpos($ids, 'g_') !== false) {
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', str_replace('g_', null, $ids), 'group_', 'group_id');
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', preg_replace('/\D/', null, $ids), 'group_', 'group_id');
 				if ($fmdb->num_rows) {
 					extract(get_object_vars($fmdb->last_result[0]));
 					

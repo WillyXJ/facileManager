@@ -82,9 +82,18 @@ class fm_module_templates {
 		}
 		
 		$field_name = $prefix . '_name';
-		$edit_name = $row->$field_name;
+		if ($prefix == 'domain') {
+			if (!getSOACount($row->domain_id) && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
+			elseif (!getNSCount($row->domain_id) && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
+			else {
+				$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
+			}
+			$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$row->domain_mapping}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . _('Edit zone records') . '">' . displayFriendlyDomainName($row->$field_name) . "</a>" : displayFriendlyDomainName($row->$field_name);
+		} else {
+			$edit_name = $row->$field_name;
+		}
 		$field_name = $prefix . '_default';
-		$star = $row->$field_name == 'yes' ? str_replace('Super Admin', 'Default Template', $__FM_CONFIG['icons']['star']) : null;
+		$star = $row->$field_name == 'yes' ? str_replace(_('Super Admin'), _('Default Template'), $__FM_CONFIG['icons']['star']) : null;
 		
 		$field_id = $prefix . '_id';
 		echo <<<HTML
@@ -95,13 +104,13 @@ HTML;
 		$row = get_object_vars($row);
 		
 		$excluded_fields = array($prefix . '_id', 'account_id', $prefix . '_template', $prefix . '_default',
-				$prefix . '_name', $prefix . '_status');
+				$prefix . '_name', $prefix . '_status', $prefix . '_template_id');
 		
 		if ($prefix == 'soa') {
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));
 		}
 		if ($prefix == 'domain') {
-			$excluded_fields = array_merge($excluded_fields, array('soa_serial_no', 'soa_id', $prefix . '_mapping', $prefix . '_clone_domain_id', $prefix . '_reload'));
+			$excluded_fields = array_merge($excluded_fields, array('soa_serial_no', 'soa_id', $prefix . '_clone_domain_id', $prefix . '_reload', $prefix . '_clone_dname'));
 		}
 
 		foreach ($row as $key => $val) {
@@ -132,19 +141,28 @@ HTML;
 		echo $edit_status . "</tr>\n";
 	}
 	
-	function printForm($data = '', $action = 'add') {
-		global $fm_dns_records;
-		if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
-		
+	function printForm($data = '', $action = 'add', $template_type) {
+		$popup_header = buildPopup('header', ucfirst($action) . ' Template');
 		$force_action = $action == 'add' ? 'create' : 'update';
-		
-		$ucaction = ucfirst($action);
-		$form = '<form method="POST" action="zone-records-validate.php">
-<input type="hidden" name="domain_id" value="0" />
-<input type="hidden" name="record_type" value="SOA" />' . "\n";
-		$form .= buildPopup('header', $ucaction . ' Template');
 
-		$form .= $fm_dns_records->buildSOA($data, array('template_name'), $force_action);
+		switch ($template_type) {
+			case 'soa':
+				global $fm_dns_records;
+				if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+
+				$form = '<form method="POST" action="zone-records-validate.php">
+					<input type="hidden" name="domain_id" value="0" />
+					<input type="hidden" name="record_type" value="SOA" />' . "\n";
+				$form .= $popup_header;
+
+				$form .= $fm_dns_records->buildSOA($data, array('template_name'), $force_action);
+				break;
+			case 'domain':
+				global $fm_dns_zones;
+				$form = '<form name="manage" id="manage" method="post" action="">' . $popup_header;
+				$form .= $fm_dns_zones->printForm($data, $force_action, 'forward', array('template_name'));
+				break;
+		}
 		
 		$form .= buildPopup('footer');
 		$form .= '</form>';
@@ -155,11 +173,11 @@ HTML;
 	/**
 	 * Deletes the selected template
 	 */
-	function delete($id, $server_serial_no = 0, $prefix) {
+	function delete($id, $table, $prefix) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $prefix, $prefix . '_', $prefix . '_id', $prefix . '_name');
-		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $prefix, $id, $prefix . '_', 'deleted', $prefix . '_id') === false) {
+		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $prefix . '_', $prefix . '_id', $prefix . '_name');
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $id, $prefix . '_', 'deleted', $prefix . '_id') === false) {
 			return _('This template could not be deleted because a database error occurred.');
 		} else {
 			addLogEntry("Deleted $prefix template '$tmp_name'.");

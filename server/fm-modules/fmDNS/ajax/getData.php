@@ -40,8 +40,8 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 		if (strpos($result[0]->def_type, 'address_match_element') !== false) {
 			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
 
-			printf('<th width="33%" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67%"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
 					%s</td>
 					<script>
 					$(".address_match_element").select2({
@@ -58,14 +58,14 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 					});
 					</script>', _('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif ($result[0]->def_dropdown == 'no') {
-			printf('<th width="33%" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67%"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
 					%s</td>', _('Option Value'), $cfg_data, $result[0]->def_type);
 		} else {
 			/** Build array of possible values */
 			$dropdown = $fm_module_options->populateDefTypeDropdown($result[0]->def_type, $cfg_data);
-			printf('<th width="33%" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67%">%s</td>', _('Option Value'), $dropdown);
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;">%s</td>', _('Option Value'), $dropdown);
 		}
 	}
 	exit;
@@ -105,6 +105,7 @@ $checks_array = array('servers' => 'manage_servers',
 					'logging' => 'manage_servers',
 					'controls' => 'manage_servers',
 					'domains' => 'manage_zones',
+					'domain' => 'manage_zones',
 					'soa' => 'manage_zones'
 				);
 
@@ -149,6 +150,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$post_class = $fm_dns_zones;
 			$type_map = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
 			$action = 'create';
+			if (!$add_new) $item_id = array('popup', 'template_menu');
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;
@@ -159,25 +161,31 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		case 'soa':
 			$post_class = $fm_module_templates;
 			$prefix = 'soa_';
+			$type_map = sanitize($_POST['item_type']);
+			break;
+		case 'domain':
+			$post_class = $fm_module_templates;
+			$prefix = 'domain_';
+			$type_map = sanitize($_POST['item_type']);
+			$table .= 's';
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};
 	}
 	
-	$field = $prefix . 'id';
-
 	if ($add_new) {
 		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
 			$edit_form = $post_class->printForm(null, $action, sanitize($_POST['item_sub_type']));
+		} elseif ($_POST['item_type'] == 'domains') {
+			$edit_form = $post_class->printForm(null, $action, $type_map);
 		} else {
 			$edit_form = $post_class->printForm(null, $action, $type_map, $id);
 		}
 	} else {
-		basicGet('fm_' . $table, $id, $prefix, $field);
-		$results = $fmdb->last_result;
+		basicGet('fm_' . $table, $id, $prefix, $prefix . 'id');
 		if (!$fmdb->num_rows) returnError();
 		
-		$edit_form_data[] = $results[0];
+		$edit_form_data[] = $fmdb->last_result[0];
 		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', sanitize($_POST['item_sub_type']));
 		} else {

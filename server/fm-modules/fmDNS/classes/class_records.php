@@ -31,7 +31,7 @@ class fm_dns_records {
 		$return = null;
 		
 		if (!$result) {
-			$return = sprintf('<p id="table_edits" class="noresult">%s</p>', sprintf(_('There are no %s records.', $record_type)));
+			$return = sprintf('<p id="table_edits" class="noresult">%s</p>', sprintf(_('There are no %s records.'), $record_type));
 		} else {
 			$results = $fmdb->last_result;
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
@@ -242,6 +242,7 @@ class fm_dns_records {
 			$title_array[] = array('title' => _('Name'), 'rel' => $type . '_name');
 			$title_array[] = array('title' => _('Name Servers'), 'rel' => $type . '_name_servers');
 			$title_array[] = array('title' => _('Views'), 'rel' => $type . '_views');
+			$title_array[] = array('title' => _('Map'), 'rel' => $type . '_mapping');
 			$title_array[] = array('title' => _('Type'), 'rel' => $type . '_type');
 		}
 		if (!in_array($type, array('SOA', 'DOMAIN'))) {
@@ -511,7 +512,7 @@ HTML;
 		}
 	
 		if (array_search('template_name', $show) !== false) {
-			$soa_default_checked = $soa_id == $this->getDefaultSOA() ? 'checked' : null;
+			$soa_default_checked = ($soa_id == $this->getDefaultSOA()) ? 'checked' : null;
 			$template_name = sprintf('<tr id="soa_template_name" style="display: %1$s">
 			<th>%2$s</th>
 			<td><input type="text" name="%3$s[%7$d][soa_name]" size="25" value="%4$s" /><br />

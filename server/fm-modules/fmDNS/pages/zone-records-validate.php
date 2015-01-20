@@ -36,10 +36,11 @@ if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !c
 /** Make sure we can handle all of the variables */
 checkMaxInputVars();
 
-$domain_info['id']       = $domain_id;
-$domain_info['name']     = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
-$domain_info['map']      = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
-$domain_info['clone_of'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+$domain_info['id']          = $domain_id;
+$domain_info['name']        = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+$domain_info['map']         = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+$domain_info['clone_of']    = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+$domain_info['template_id'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
 
 if (isset($_POST['update'])) {
 	if ($_POST['update']['soa_template_chosen']) {
@@ -99,7 +100,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	extract($domain_info, EXTR_PREFIX_ALL, 'domain');
 	
 	/** Skips only allowed with clone zones and imports */
-	$skips_allowed = ($type == 'update' && $domain_clone_of) ? true : false;
+	$skips_allowed = ($type == 'update' && ($domain_clone_of || $domain_template_id)) ? true : false;
 	
 	foreach ($data_array as $id => $data) {
 		if (!is_array($data)) continue;
@@ -345,8 +346,8 @@ function buildSQLRecords($record_type, $domain_id) {
 		array_shift($sql_results[$result[0]->soa_id]);
 		return $sql_results;
 	} else {
-		$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
-		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+		$parent_domain_id = getZoneParentID($domain_id);
+		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '" . join("','", $parent_domain_id) . "')" : "='$domain_id'";
 		
 		if (in_array($record_type, array('A', 'AAAA'))) {
 			$record_sql = "AND domain_id $valid_domain_ids AND record_type IN ('A', 'AAAA')";

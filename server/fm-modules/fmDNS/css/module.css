@@ -139,12 +139,14 @@ p.soa_import span {
 #recordmenu ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; }
 #recordmenu > ul > li > ul > li a:hover{ background-color:rgba(100,100,100,0.95); color: #fff; };
 
-.form-table.zone-form {
+.form-table.zone-form,
+.form-table.zone-template-form {
 	font-size: 14px;
 	white-space: normal;
 }
 
-.form-table.zone-form input[type=text] {
+.form-table.zone-form input[type=text],
+.form-table.zone-template-form input[type=text] {
 	width: 24em;
 }
 

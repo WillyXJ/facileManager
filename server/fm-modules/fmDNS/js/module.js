@@ -237,6 +237,14 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#manage_item_contents").delegate('#domain_template_id', 'change', function(e) {
+		if ($(this).val() != '') {
+			$('.zone-form > tbody > tr:not(.include-with-template, #domain_template_default)').slideUp();
+		} else {
+			$('.zone-form > tbody > tr:not(.include-with-template, #domain_template_default)').show('slow');
+		}
+	});
+	
 	$("#manage_item_contents").delegate('#domain_type', 'change', function(e) {
 		if ($(this).val() == 'forward') {
 			$('#define_forwarders').show('slow');

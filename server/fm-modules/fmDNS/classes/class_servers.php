@@ -554,7 +554,10 @@ HTML;
 			foreach (explode(';', $row->group_masters) as $server_id) {
 				$masters[] = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			}
-			$group_masters = implode('; ', $masters);
+			
+			$group_masters = implode('; ', array_map(function($value) {
+				return $value == null ? sprintf('<i>%s</i>', _('missing')) : $value;
+			}, $masters));
 			if (empty($group_masters)) $group_masters = _('None');
 			
 			/** Process group slaves */

@@ -1323,6 +1323,7 @@ function upgradefmDNS_2003($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL AFTER `domain_clone_domain_id`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_template_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_default`;";
 	
 	$inserts = $updates = null;
 	

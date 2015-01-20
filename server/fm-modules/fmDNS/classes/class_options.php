@@ -301,7 +301,7 @@ HTML;
 		
 		$cfg_isparent = buildSelect('cfg_isparent', 'cfg_isparent', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_isparent'), $cfg_isparent, 1);
 		$cfg_parent = buildSelect('cfg_parent', 'cfg_parent', $this->availableParents($cfg_id, $cfg_type), $cfg_parent);
-		$avail_options_array = $this->availableOptions($action, $server_serial_no, $cfg_type);
+		$avail_options_array = $this->availableOptions($action, $server_serial_no, $cfg_type, $cfg_name);
 		$cfg_avail_options = buildSelect('cfg_name', 'cfg_name', $avail_options_array, $cfg_name, 1, $disabled, false, 'displayOptionPlaceholder()');
 
 		$query = "SELECT def_type FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='$cfg_type' AND 
@@ -458,7 +458,7 @@ FORM;
 	}
 
 
-	function availableOptions($action, $server_serial_no, $option_type = 'global') {
+	function availableOptions($action, $server_serial_no, $option_type = 'global', $cfg_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$temp_array = null;
@@ -510,7 +510,7 @@ FORM;
 			$query .= "%'";
 		} else {
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
-				AND def_option_type='$option_type'";
+				AND def_option_type='$option_type' AND def_option='$cfg_name'";
 		}
 		$query .= " ORDER BY def_option ASC";
 		

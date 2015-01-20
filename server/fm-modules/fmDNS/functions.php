@@ -151,6 +151,15 @@ function buildModuleToolbar() {
 			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
 		</div>', _('Clone of'), $domain_mapping, $parent_domain_id, $record_type_uri, _('Edit parent zone records'), $domain_name);
 		}
+		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
+			extract(get_object_vars($fmdb->last_result[0]));
+			$domain_name = displayFriendlyDomainName($domain_name);
+			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
+			$domain_menu .= sprintf('<div id="topheadpart">
+			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
+		</div>', _('Based on template'), $domain_mapping, $parent_domain_id, $record_type_uri, _('Edit template zone records'), $domain_name);
+		}
 	} else $domain_menu = null;
 	
 	return array($domain_menu, null);
@@ -389,6 +398,8 @@ function getSOACount($domain_id) {
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `soa_id`= (SELECT DISTINCT(`soa_id`) FROM 
 			`fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `soa_id`!=0 AND (`domain_id`='$domain_id' OR
 				`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+					`domain_id`='$domain_id') OR
+				`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 					`domain_id`='$domain_id')
 			)) AND `soa_status`!='deleted'";
 	}
@@ -401,6 +412,8 @@ function getNSCount($domain_id) {
 	
 	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE (`domain_id`='$domain_id' OR
 			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`='$domain_id') OR
+			`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 				`domain_id`='$domain_id')
 		) AND `record_type`='NS' AND `record_status`='active'";
 	$fmdb->get_results($query);
@@ -573,12 +586,12 @@ function getModuleBadgeCounts($type) {
 		if ($domain_count) $domain_results = $fmdb->last_result;
 		for ($i=0; $i<$domain_count; $i++) {
 			if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master') {
+				$domain_results[$i]->domain_type == 'master' && $domain_results[$i]->domain_template == 'no') {
 				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 					$badge_counts[$domain_results[$i]->domain_mapping]++;
 				}
 			} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master') {
+				$domain_results[$i]->domain_type == 'master' && $domain_results[$i]->domain_template == 'no') {
 				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 					$badge_counts[$domain_results[$i]->domain_mapping]++;
 				}
@@ -824,6 +837,30 @@ function zoneAccessIsAllowed($domain_ids, $included_action = null) {
 	} else {
 		return currentUserCan('access_specific_zones', $_SESSION['module'], array_merge(array(0), $domain_ids));
 	}
+}
+
+
+/**
+ * Returns the parent ID of the domain
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $domain_id Domain ID to check
+ * @return integer
+ */
+function getZoneParentID($domain_id) {
+	global $__FM_CONFIG;
+	
+	$parent_domain_id[] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+	if ($parent_domain_id[0]) {
+		$parent_domain_id[] = getNameFromID($parent_domain_id[0], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+	} else {
+		$parent_domain_id[0] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+	}
+	
+	return $parent_domain_id;
 }
 
 
