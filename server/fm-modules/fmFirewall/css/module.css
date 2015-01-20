@@ -55,10 +55,10 @@ table.legend tr td span {
 }
 
 #table_edits.grab tbody tr {
-	cursor: url(https://mail.google.com/mail/images/2/openhand.cur) 8 8, move;
+	cursor: url(http://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
 }
 #table_edits.grabbing tbody tr {
-	cursor: url(https://mail.google.com/mail/images/2/closedhand.cur) 8 8, move;
+	cursor: url(http://www.google.com/intl/en_ALL/mapfiles/closedhand.cur) 8 8, move;
 }
 p.checkbox_desc {
 	font-size: 10px;
