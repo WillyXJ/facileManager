@@ -953,7 +953,7 @@ HTML;
 				case 'https':
 					/** Test the port first */
 					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
-						$response .= '[' . $name_servers[$i]->server_name . '] ' . sprintf(_('Failed: could not access $s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
+						$response .= '[' . $name_servers[$i]->server_name . '] ' . sprintf(_('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
 						$failures = true;
 						break;
 					}
@@ -988,7 +988,7 @@ HTML;
 				case 'ssh':
 					/** Test the port first */
 					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
-						$response .= '[' . $name_servers[$i]->server_name . '] ' . sprintf(_('Failed: could not access $s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
+						$response .= '[' . $name_servers[$i]->server_name . '] ' . sprintf(_('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
 						$failures = true;
 						break;
 					}
