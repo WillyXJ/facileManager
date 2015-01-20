@@ -70,9 +70,12 @@ class fm_module_templates {
 			/** Cannot delete templates in use */
 			if ($prefix == 'soa') {
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $row->soa_id, 'domain_', 'soa_id');
-				if ($fmdb->num_rows) {
-					$show_delete = false;
-				}
+			}
+			if ($prefix == 'domain') {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $row->domain_id, 'domain_', 'domain_template_id');
+			}
+			if ($fmdb->num_rows) {
+				$show_delete = false;
 			}
 			
 			$edit_status .= $show_delete ? '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>' : null;
