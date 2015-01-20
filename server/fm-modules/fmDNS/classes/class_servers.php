@@ -473,7 +473,7 @@ class fm_module_servers {
 
 
 	function displayRow($row, $type) {
-		global $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG;
 		
 		$class = ($row->server_status == 'disabled' || $row->group_status == 'disabled') ? 'disabled' : null;
 		
@@ -501,7 +501,13 @@ class fm_module_servers {
 					$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 					$edit_status .= '</a>';
 				}
-				$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$query = "SELECT group_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups WHERE account_id='{$_SESSION['user']['account_id']}' AND group_status!='deleted' AND 
+					(group_masters='{$row->server_id}' OR group_masters LIKE '{$row->server_id};%' OR group_masters LIKE '%;{$row->server_id};%' OR group_masters LIKE '%;{$row->server_id}'
+					OR group_slaves='{$row->server_id}' OR group_slaves LIKE '{$row->server_id};%' OR group_slaves LIKE '%;{$row->server_id};%' OR group_slaves LIKE '%;{$row->server_id}')";
+				$result = $fmdb->get_results($query);
+				if (!$fmdb->num_rows) {
+					$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				}
 			}
 			if (isset($row->server_client_version) && version_compare($row->server_client_version, getOption('client_version', 0, $_SESSION['module']), '<')) {
 				$edit_actions = _('Client Upgrade Available') . '<br />';
@@ -547,7 +553,12 @@ HTML;
 				$edit_status .= '">';
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
-				$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$query = "SELECT domain_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND 
+					(domain_name_servers='g_{$row->group_id}' OR domain_name_servers LIKE 'g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id}')";
+				$result = $fmdb->get_results($query);
+				if (!$fmdb->num_rows) {
+					$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				}
 			}
 			
 			/** Process group masters */
@@ -558,7 +569,7 @@ HTML;
 			$group_masters = implode('; ', array_map(function($value) {
 				return $value == null ? sprintf('<i>%s</i>', _('missing')) : $value;
 			}, $masters));
-			if (empty($group_masters)) $group_masters = _('None');
+			if (empty($group_masters) || !count($masters) || (count($masters) == 1 && empty($masters[0]))) $group_masters = _('None');
 			
 			/** Process group slaves */
 			foreach (explode(';', $row->group_slaves) as $server_id) {

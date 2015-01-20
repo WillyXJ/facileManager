@@ -6,6 +6,9 @@
            zones with a per-zone override. (Issue #169)
 * Server - [bug] Fixed issue where multiple SOA templates could be marked as default.
 * Server - [feature] Added support for zone templates. (Issue #154)
+* Server - [feature] Added i18n support (Issue #106).
+* Server - [improvement] Servers and groups cannot be deleted when associated
+           (introduced in 2.0-alpha2).
 
 2.0-alpha2 (2015-01-13)
 =======================
@@ -25,7 +28,6 @@
 * Server - [bug] Fixed bulk action checkbox logic.
 * Server - [bug] Fixed issue where zones could not be updated when there are no
            views defined.
-* Server - [feature] Added i18n support (Issue #106).
 
 2.0-alpha1 (2014-11-20)
 =======================
