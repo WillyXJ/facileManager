@@ -671,6 +671,7 @@ FORM;
 	
 	
 	function getAssocChannels($cfg_id) {
+		if (!$cfg_id) return null;
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;

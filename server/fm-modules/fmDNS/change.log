@@ -10,6 +10,7 @@
 * Server - [improvement] Servers and groups cannot be deleted when associated
            (introduced in 2.0-alpha2).
 * Server - [improvement] jQuery is now used to enable/disable items.
+* Server - [bug] Fixed channel selection within logging category definition.
 
 2.0-alpha2 (2015-01-13)
 =======================
