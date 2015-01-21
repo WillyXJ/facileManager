@@ -174,7 +174,7 @@ class fm_dns_keys {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->key_id . '&status=';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->key_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= '">';
 			$edit_status .= ($row->key_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];

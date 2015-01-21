@@ -140,7 +140,18 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				if ($delete_status !== true) {
 					echo $delete_status;
 				} else {
-					echo 'Success';
+					exit('Success');
+				}
+			}
+			break;
+		case 'edit':
+			if (isset($_POST['item_status'])) {
+				if (!updateStatus('fm_users', $id, 'user_', sanitize($_POST['item_status']), 'user_id')) {
+					exit(sprintf(_('This user could not be set to %s.') . "\n", $_POST['item_status']));
+				} else {
+					$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
+					addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])));
+					exit('Success');
 				}
 			}
 			break;

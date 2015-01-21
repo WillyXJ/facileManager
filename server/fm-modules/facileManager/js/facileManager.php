@@ -1,4 +1,7 @@
 <?php
+if (!defined('AJAX')) define('AJAX', true);
+require_once('../../../fm-init.php');
+
 echo '$(document).ready(function() {
 	
 	var KEYCODE_ENTER = 13;
@@ -219,6 +222,72 @@ echo '$(document).ready(function() {
 				}
 				$(".datepicker").datepicker();
 				$(".form-table input, .form-table select").first().focus();
+			}
+		});
+		
+		return false;
+    });
+
+	/* Form status changes */
+    $("#table_edits").delegate("a.status_form_link", "click tap", function(e) {
+        var $this 		= $(this);
+        var $row_id		= $this.parent().parent();
+        item_id			= $row_id.attr("id");
+        item_status		= $this.attr("rel");
+        item_type		= $("#table_edits").attr("name");
+        var url_var_type = getUrlVars()["type"];
+        var server_serial_no	= getUrlVars()["server_serial_no"];
+
+		var form_data = {
+			item_id: item_id,
+			item_type: item_type,
+			item_status: item_status,
+			url_var_type: url_var_type,
+			server_serial_no: server_serial_no,
+			action: "edit",
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/facileManager/ajax/processPost.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response == "Success") {
+					$row_id.removeClass();
+					$row_id.addClass(item_status);
+					if (item_status == "disabled") {
+						$this.attr("rel", "active");
+						$this.html("' . addslashes($__FM_CONFIG['icons']['enable']) . '");
+					} else {
+						$this.attr("rel", "disabled");
+						$this.html("' . addslashes($__FM_CONFIG['icons']['disable']) . '");
+					}
+				} else {
+					var eachLine = response.split("\n");
+					if (eachLine.length <= 2) {
+						$("#response").html("<p class=\"error\">"+response+"</p>");
+						$("#response")
+							.css("opacity", 0)
+							.slideDown(400, function() {
+								$("#response").animate(
+									{ opacity: 1 },
+									{ queue: false, duration: 200 }
+								);
+							});
+						$("#response").delay(3000).fadeTo(200, 0.00, function() {
+							$("#response").slideUp(400);
+						});
+					} else {
+						$("#manage_item").fadeIn(200);
+						$("#manage_item_contents").fadeIn(200);
+						$("#manage_item_contents").html(response);
+						if ($("#manage_item_contents").width() >= 700) {
+							$("#manage_item_contents").addClass("wide");
+						}
+					}
+				}
 			}
 		});
 		
@@ -901,7 +970,7 @@ function showHideBox(div, selectbox, testvalue) {
 function getUrlVars() {
 	var vars = {};
 	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-		vars[key] = value;
+		vars[key] = value.replace(/#/gi, "");
 	});
 	return vars;
 }

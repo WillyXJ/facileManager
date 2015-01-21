@@ -251,7 +251,7 @@ class fm_users {
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if ($row->user_template_only == 'no') {
 				if ($row->user_id != $_SESSION['user']['id']) {
-					$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->user_id . '&status=';
+					$edit_status .= '<a class="status_form_link" href="#" rel="';
 					$edit_status .= ($row->user_status == 'active') ? 'disabled">' . $__FM_CONFIG['icons']['disable'] : 'active">' . $__FM_CONFIG['icons']['enable'];
 					$edit_status .= '</a>';
 	

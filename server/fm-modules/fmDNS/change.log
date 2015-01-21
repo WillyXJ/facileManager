@@ -9,6 +9,7 @@
 * Server - [feature] Added i18n support (Issue #106).
 * Server - [improvement] Servers and groups cannot be deleted when associated
            (introduced in 2.0-alpha2).
+* Server - [improvement] jQuery is now used to enable/disable items.
 
 2.0-alpha2 (2015-01-13)
 =======================

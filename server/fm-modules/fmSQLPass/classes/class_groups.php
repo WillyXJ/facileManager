@@ -147,9 +147,8 @@ class fm_sqlpass_groups {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->group_id . '&status=';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= isset($row->server_serial_no) ? '&server_serial_no=' . $row->server_serial_no : null;
 			$edit_status .= '">';
 			$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';

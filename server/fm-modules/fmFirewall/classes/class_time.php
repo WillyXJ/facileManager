@@ -170,7 +170,7 @@ class fm_module_time {
 		
 		if (currentUserCan('manage_time', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->time_id . '&status=';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->time_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= '">';
 			$edit_status .= ($row->time_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];

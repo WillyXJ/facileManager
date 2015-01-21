@@ -76,14 +76,6 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type'] . $server_serial_no_uri);
 			}
 		}
-		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $_GET['id'], 'cfg_', $_GET['status'], 'cfg_id')) {
-				$response = sprintf(_('This %s could not be set to %s.') . "\n", $type, $_GET['status']);
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
-			}
-		}
 	}
 } $server_serial_no_uri = null;
 

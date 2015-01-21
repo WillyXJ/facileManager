@@ -67,6 +67,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
+			$object = _('firewall');
 			break;
 		case 'services':
 			$post_class = $fm_module_services;
@@ -82,12 +83,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$prefix = 'time_';
 			$field = $prefix . 'id';
 			$item_type .= ' ';
+			$object = _('time restriction');
 			break;
 		case 'policies':
 			$post_class = $fm_module_policies;
 			$prefix = 'policy_';
 			$field = $prefix . 'id';
 			$item_type = 'policys';
+			$object = _('policy');
 			break;
 	}
 
@@ -106,23 +109,19 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			}
 			break;
 		case 'edit':
-			if (!empty($_POST)) {
-				if (!$post_class->update($_POST)) {
-					$response = '<div class="error"><p>This ' . $table . ' could not be updated.</p></div>'. "\n";
-					$form_data = $_POST;
-				} else header('Location: ' . $GLOBALS['basename']);
-			}
-			if (isset($_GET['status'])) {
-				if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', $_GET['status'], 'view_id')) {
-					$response = '<div class="error"><p>This ' . $table . ' could not be '. $_GET['status'] .'.</p></div>'. "\n";
-				} else header('Location: ' . $GLOBALS['basename']);
-			}
-			if (!isset($_POST['id']) && isset($_GET['id'])) {
-				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', 'view_id');
-				if (!$fmdb->num_rows) {
-					$response = '<div class="error"><p>This ' . $table . ' is not found in the database.</p></div>'. "\n";
+			if (isset($_POST['item_status'])) {
+				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $field)) {
+					exit(sprintf(_('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
-					$form_data = $fmdb->last_result;
+					if ($server_serial_no) setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . 'name');
+					if ($server_serial_no && $_POST['item_type'] == 'policies') {
+						$tmp_server = getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+						addLogEntry(sprintf(_('Set %s for %s status to %s.'), $object, $tmp_server, sanitize($_POST['item_status'])));
+					} else {
+						addLogEntry(sprintf(_('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+					}
+					exit('Success');
 				}
 			}
 			break;

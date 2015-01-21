@@ -2,6 +2,7 @@
 =======================
 * Server - [bug] Fixed bulk action checkbox logic.
 * Server - [bug] Fixed password setting form and output logic.
+* Server - [improvement] jQuery is now used to enable/disable items.
 
 1.1-alpha1 (2014-11-20)
 =======================

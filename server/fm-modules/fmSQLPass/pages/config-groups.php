@@ -48,15 +48,6 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
-		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', $_GET['id'], 'group_', $_GET['status'], 'group_id')) {
-				$response = 'This backup group could not be '. $_GET['status'] .'.'. "\n";
-			} else {
-				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
-				addLogEntry("Set server group '$tmp_name' status to " . $_GET['status'] . '.');
-				header('Location: ' . $GLOBALS['basename']);
-			}
-		}
 	}
 }
 

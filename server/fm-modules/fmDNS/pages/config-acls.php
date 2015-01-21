@@ -57,16 +57,6 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
 			}
 		}
-		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $_GET['id'], 'acl_', $_GET['status'], 'acl_id')) {
-				$response = sprintf(_('This item could not be set to %s.') . "\n", $_GET['status']);
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-				addLogEntry(sprintf(_('Set ACL (%s) status to %s.'), $tmp_name, $_GET['status']));
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-			}
-		}
 	}
 }
 

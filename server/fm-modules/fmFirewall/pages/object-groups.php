@@ -48,19 +48,6 @@ if (currentUserCan('manage_objects', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
-		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $_GET['id'], 'group_', $_GET['status'], 'group_id')) {
-				$response = sprintf(_('This group could not be set to %s.') . "\n", $_GET['status']);
-			} else {
-				/* set the group_build_config flag */
-				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}groups` SET `group_build_config`='yes' WHERE `group_id`=" . sanitize($_GET['id']);
-				$result = $fmdb->query($query);
-				
-				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
-				addLogEntry(sprintf(_('Set group (%s) status to %s.'), $tmp_name, $_GET['status']));
-				header('Location: ' . $GLOBALS['basename']);
-			}
-		}
 		break;
 	}
 }

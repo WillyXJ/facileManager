@@ -4,6 +4,7 @@
            registration in the database. (Issue #122)
 * Server - [bug] Fixed PHP error at login screen when session times out.
 * Server - [improvement] Upgraded to select2 3.5.2.
+* Server - [improvement] jQuery is now used to enable/disable users.
 
 2.0-alpha2 (2015-01-13)
 =======================

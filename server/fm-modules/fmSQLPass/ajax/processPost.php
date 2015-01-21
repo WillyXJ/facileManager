@@ -33,14 +33,15 @@ if (!function_exists('returnUnAuth')) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'functions.php');
 }
 
+$unpriv_message = _('You do not have sufficient privileges.');
 /** Handle password changes */
 if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'set_mysql_password') {
 	if (!currentUserCan('manage_passwords', $_SESSION['module'])) returnUnAuth(true);
 
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_passwords.php');
-	if ($_POST['verbose']) echo buildPopup('header', 'Password Change Results') . '<pre>';
+	if ($_POST['verbose']) echo buildPopup('header', _('Password Change Results')) . '<pre>';
 	echo $fm_sqlpass_passwords->setPassword();
-	if ($_POST['verbose']) echo '</pre>' . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+	if ($_POST['verbose']) echo '</pre>' . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 
 	exit;
 /** Handle everything else */
@@ -71,11 +72,14 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 			}
 			break;
 		case 'edit':
-			if (!empty($_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
-				if (!$post_class->update($_POST)) {
-					$response = '<div class="error"><p>This ' . $item_type . ' could not be updated.</p></div>'. "\n";
-					$form_data = $_POST;
-				} else header('Location: ' . $GLOBALS['basename']);
+			if (isset($_POST['item_status'])) {
+				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $field)) {
+					exit(sprintf(_('This item could not be set to %s.') . "\n", $_POST['item_status']));
+				} else {
+					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . 'name');
+					addLogEntry(sprintf(_('Set %s (%s) status to %s.'), substr($item_type, 0, -1), $tmp_name, sanitize($_POST['item_status'])));
+					exit('Success');
+				}
 			}
 			break;
 	}
@@ -83,6 +87,6 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	exit;
 }
 
-echo 'You do not have sufficient privileges.';
+echo $unpriv_message;
 
 ?>

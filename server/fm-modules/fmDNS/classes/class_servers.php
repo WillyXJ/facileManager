@@ -495,7 +495,7 @@ class fm_module_servers {
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				if ($row->server_installed == 'yes') {
-					$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&type=' . $type . '&id=' . $row->server_id . '&status=';
+					$edit_status .= '<a class="status_form_link" href="#" rel="';
 					$edit_status .= ($row->server_status == 'active') ? 'disabled' : 'active';
 					$edit_status .= '">';
 					$edit_status .= ($row->server_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
@@ -548,7 +548,7 @@ HTML;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-				$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&type=' . $type . '&id=' . $row->group_id . '&status=';
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];

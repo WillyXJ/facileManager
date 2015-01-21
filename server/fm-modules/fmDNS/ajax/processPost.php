@@ -78,26 +78,37 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	$id = sanitize($_POST['item_id']);
 	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
 	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
-
+	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
+	$item_type = $_POST['item_type'];
+	$prefix = substr($item_type, 0, -1) . '_';
+	
 	/* Determine which class we need to deal with */
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
-			if (isset($_POST['item_sub_type']) && sanitize($_POST['item_sub_type']) == 'groups') {
+			$object = _('server');
+			if (isset($_POST['url_var_type']) && sanitize($_POST['url_var_type']) == 'groups') {
 				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
+				$prefix = 'group_';
+				$object = _('server group');
 			}
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
-			$table = 'config';
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
+			$prefix = 'cfg_';
+			$object = _('option');
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;
-			$table = 'config';
-			$type = sanitize($_POST['log_type']);
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
+			$prefix = 'cfg_';
+			$type = isset($_POST['url_var_type']) ? sanitize($_POST['url_var_type']) : 'channel';
+			$object = $type;
+			$field_data = $prefix . 'data';
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
@@ -110,7 +121,10 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};
+			$object = substr($item_type, 0, -1);
 	}
+	
+	if (!isset($field_data)) $field_data = $prefix . 'name';
 
 	switch ($_POST['action']) {
 		case 'add':
@@ -127,23 +141,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			}
 			break;
 		case 'edit':
-			if (!empty($_POST)) {
-				if (!$post_class->update($_POST)) {
-					$response = '<div class="error"><p>This ' . $table . ' could not be updated.</p></div>'. "\n";
-					$form_data = $_POST;
-				} else header('Location: ' . $GLOBALS['basename']);
-			}
-			if (isset($_GET['status'])) {
-				if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', $_GET['status'], 'view_id')) {
-					$response = '<div class="error"><p>This ' . $table . ' could not be '. $_GET['status'] .'.</p></div>'. "\n";
-				} else header('Location: ' . $GLOBALS['basename']);
-			}
-			if (!isset($_POST['id']) && isset($_GET['id'])) {
-				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', 'view_id');
-				if (!$fmdb->num_rows) {
-					$response = '<div class="error"><p>This ' . $table . ' is not found in the database.</p></div>'. "\n";
+			if (isset($_POST['item_status'])) {
+				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $prefix . 'id')) {
+					exit(sprintf(_('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
-					$form_data = $fmdb->last_result;
+					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
+					addLogEntry(sprintf(_('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+					exit('Success');
 				}
 			}
 			break;
