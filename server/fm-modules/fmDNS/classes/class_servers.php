@@ -70,7 +70,7 @@ class fm_module_servers {
 					array('title' => _('Zones Directory'), 'rel' => 'server_zones_dir'),
 					));
 			} elseif ($type == 'groups') {
-				$title_array = array_merge($title_array, array(array('title' => _('Group Name'), 'rel' => 'group_name'),
+				$title_array = array_merge((array)$title_array, array(array('title' => _('Group Name'), 'rel' => 'group_name'),
 					array('title' => _('Master Servers'), 'class' => 'header-nosort'),
 					array('title' => _('Slave Servers'), 'class' => 'header-nosort'),
 					));
