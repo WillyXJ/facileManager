@@ -552,7 +552,7 @@ FORM;
 			$record_count = $fmdb->last_result[0]->record_count;
 		}
 		
-		$template_icon = (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="fa fa-picture-o" title="%s"></i>', _('Based on a template')) : null;
+		$template_icon = (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', _('Based on a template')) : null;
 		
 		echo <<<HTML
 		<tr title="$response" id="$row->domain_id" $class>

@@ -195,3 +195,7 @@ p.soa_import span {
 #clone_override p {
 	margin: 5px 0;
 }
+
+.template-icon {
+	margin-left: 7px;
+}
