@@ -11,6 +11,7 @@
            (introduced in 2.0-alpha2).
 * Server - [improvement] jQuery is now used to enable/disable items.
 * Server - [bug] Fixed channel selection within logging category definition.
+* Server - [feature] Supports TXT records larger than 255 characters. (Issue #171)
 
 2.0-alpha2 (2015-01-13)
 =======================

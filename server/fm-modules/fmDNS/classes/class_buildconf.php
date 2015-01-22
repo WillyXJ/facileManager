@@ -935,7 +935,7 @@ class fm_module_buildconf {
 						break;
 					case 'TXT':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . "\t\"" . $record_result[$i]->record_value . "\"" . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . "\t\"" . join('" " ', $this->characterSplit($record_result[$i]->record_value)) . "\"" . $record_comment . "\n";
 						break;
 					case 'SSHFP':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
@@ -1612,6 +1612,20 @@ HTML;
 		}
 		
 		return implode('; ', (array) $master_ips) . ';';
+	}
+	
+	/**
+	 * Attempts to resolve the master servers for the group
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param string $text The text to split
+	 * @param integer $limit The number of characters to split at
+	 * @return array
+	 */
+	function characterSplit($text, $limit = 255) {
+		return explode("\n", wordwrap($text, $limit, "\n", true));
 	}
 }
 
