@@ -1337,10 +1337,6 @@ div.fm-table > div {
 div.fm-table > div > div {
 	display: table-cell;
 }
-#pagination_container > div > div:not(.submenus, #record_search_form_container),
-div.fm-table > div > div {
-	padding: 0 1em;
-}
 #pagination_container > div > div:first-child,
 div.fm-table > div > div:first-child {
 	padding: 0 1em 0 0;
