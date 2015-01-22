@@ -751,12 +751,8 @@ tbody {
 	top: -1px;
 }
 
-#configtypesmenu.submenus {
-	top: -7px;
-}
-
 #configtypesmenu.dropdown {
-	top: 3px;
+	top: -1px;
 }
 
 #response {
@@ -1341,7 +1337,7 @@ div.fm-table > div {
 div.fm-table > div > div {
 	display: table-cell;
 }
-#pagination_container > div > div,
+#pagination_container > div > div:not(.submenus, #record_search_form_container),
 div.fm-table > div > div {
 	padding: 0 1em;
 }
@@ -1374,7 +1370,7 @@ div.fm-table > div > div.fm-half {
 }
 
 #pagination_container.submenus {
-	top: -2.5em;
+	top: -31px;
 	position: relative;
 	margin-bottom: -1.6em;
 }
@@ -1606,9 +1602,6 @@ pre {
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
 	#pagination_container {
-		top: -3px;
-	}
-	#record_search_form > form {
 		top: -3px;
 	}
 }

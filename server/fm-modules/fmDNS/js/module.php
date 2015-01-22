@@ -1,4 +1,7 @@
 <?php
+if (!defined('CLIENT')) define('CLIENT', true);
+require_once('../../../fm-init.php');
+
 echo '
 $(document).ready(function() {
 	

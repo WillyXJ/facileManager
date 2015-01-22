@@ -29,11 +29,7 @@ class fm_module_templates {
 		global $fmdb;
 		
 		if (!$result) {
-			if ($template_type == 'domain') {
-				echo '<p id="table_edits" class="noresult" name="' . $template_type . '">Zone templates are not yet supported.</p>';
-			} else {
-				printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $template_type, _('There are no templates.'));
-			}
+			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $template_type, _('There are no templates.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
