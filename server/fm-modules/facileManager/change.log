@@ -6,6 +6,8 @@
 * Server - [improvement] Upgraded to select2 3.5.2.
 * Server - [improvement] jQuery is now used to enable/disable users.
 * Server - [improvement] The installer and upgrader received a facelift.
+* Server - [bug] Fixed an issue where user permissions could not be removed when
+           editing a user account.
 
 2.0-alpha2 (2015-01-13)
 =======================

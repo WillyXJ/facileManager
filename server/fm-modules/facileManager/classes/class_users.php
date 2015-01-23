@@ -174,7 +174,7 @@ class fm_users {
 		
 		$sql_edit = null;
 		
-		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax');
+		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax', 'process_user_caps');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -432,7 +432,7 @@ HTML;
 				<tr id="userperms">
 					<th width="33%" scope="row">$fm_name</th>
 					<td width="67%">
-						<input type="hidden" name"process_user_caps" value="1" />
+						<input type="hidden" name="process_user_caps" value="1" />
 						$fm_perm_boxes
 					</td>
 				</tr>
