@@ -34,11 +34,13 @@ $_SESSION['language'] = getLanguage($directory);
 
 putenv('LANG=' . $_SESSION['language']); 
 setlocale(LC_ALL, $_SESSION['language']);
- 
-bindtextdomain($domain, $directory); 
-bind_textdomain_codeset($domain, $encoding);
- 
-textdomain($domain);
+
+if (function_exists('textdomain')) {
+	bindtextdomain($domain, $directory); 
+	bind_textdomain_codeset($domain, $encoding);
+
+	textdomain($domain);
+}
 
 
 /**

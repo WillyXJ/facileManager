@@ -62,7 +62,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 
 	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
 		
-	if (!defined('INSTALL') && !defined('CLIENT')) {
+	if (!defined('INSTALL') && !defined('CLIENT') && !defined('FM_NO_CHECKS')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 		
 		/** Handle special cases with config.inc.php */
@@ -217,7 +217,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			include_once($module_functions_file);
 		}
 
-		if (!defined('CLIENT') && !defined('INSTALL') && !defined('UPGRADE')) {
+		if (!defined('CLIENT') && !defined('INSTALL') && !defined('UPGRADE') && !defined('FM_NO_CHECKS')) {
 			if (function_exists('buildModuleMenu')) {
 				buildModuleMenu();
 			}

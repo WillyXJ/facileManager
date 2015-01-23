@@ -29,8 +29,6 @@ class fmdb {
 	 * @param string $dbhost
 	 */
 	function fmdb($dbuser, $dbpassword, $dbname, $dbhost) {
-		$this->sql_errors = false;
-		$this->last_error = null;
 		return $this->connect($dbuser, $dbpassword, $dbname, $dbhost);
 	}
 
@@ -68,6 +66,9 @@ class fmdb {
 	 * Perform the mysql query
 	 */
 	function query($query) {
+		$this->sql_errors = false;
+		$this->last_error = null;
+		
 		$this->result = @mysql_query($query, $this->dbh);
 		
 		// If there is an error then take note of it..

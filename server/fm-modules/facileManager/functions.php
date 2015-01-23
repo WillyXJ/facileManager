@@ -19,6 +19,21 @@
  +-------------------------------------------------------------------------+
 */
 
+/**
+ * Dummy function in case gettext is not installed
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $text Text to translate
+ * @return string $text
+ */
+if (!function_exists('_')) {
+	function _($text) {
+		return $text;
+	}
+}
+
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 
 /** Include shared classes */
@@ -2857,20 +2872,5 @@ HTML;
 	return $form;
 }
 
-
-/**
- * Dummy function in case gettext is not installed
- *
- * @since 2.0
- * @package facileManager
- *
- * @param string $text Text to translate
- * @return string $text
- */
-if (!function_exists('_')) {
-	function _($text) {
-		return $text;
-	}
-}
 
 ?>

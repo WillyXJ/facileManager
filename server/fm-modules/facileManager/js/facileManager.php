@@ -1,5 +1,5 @@
 <?php
-if (!defined('CLIENT')) define('CLIENT', true);
+if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
 echo '$(document).ready(function() {

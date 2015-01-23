@@ -583,7 +583,7 @@ function displaySetupMessage($message = 1, $url = null) {
 	
 	switch ($message) {
 		case 1:
-			sprintf('
+			printf('
 	<center>
 	<p>' . _('Database upgrade for %1$s is complete! Click \'Next\' to start using %1$s.') . '</p>
 	<p class="step"><a href="%2$s" class="button">' . _('Next') . '</a></p>
