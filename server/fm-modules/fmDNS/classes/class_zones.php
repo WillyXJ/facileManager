@@ -1322,7 +1322,7 @@ HTML;
 			unset($new_post, $post['domain_template']);
 
 			return $post;
-		}
+		} else unset($post['domain_template_id']);
 		
 		/** Format domain_clone_domain_id */
 		if (!$post['domain_clone_domain_id'] && $post['action'] == 'add') $post['domain_clone_domain_id'] = 0;

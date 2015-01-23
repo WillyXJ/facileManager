@@ -44,11 +44,13 @@ if (array_key_exists('submit', $_POST)) {
 			}
 			break;
 		case _('Save'):
-			$insert_id = $fm_dns_zones->add($_POST);
-			if (!is_numeric($insert_id)) {
-				$response = $insert_id;
-			} else {
-				$selected_zone = $insert_id;
+			if (currentUserCan('manage_zones', $_SESSION['module'])) {
+				$insert_id = $fm_dns_zones->add($_POST);
+				if (!is_numeric($insert_id)) {
+					$response = $insert_id;
+				} else {
+					$selected_zone = $insert_id;
+				}
 			}
 			break;
 	}
@@ -57,7 +59,7 @@ if (array_key_exists('submit', $_POST)) {
 $available_zones = $fm_dns_zones->availableZones(true, 'master', true);
 $button = null;
 if ($available_zones) {
-	$zone_options = buildSelect('domain_id', 1, $available_zones, $selected_zone);
+	$zone_options = buildSelect('domain_id', 'zone_import_domain_list', $available_zones, $selected_zone);
 	if (currentUserCan('run_tools') && currentUserCan('manage_records', $_SESSION['module'])) {
 		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="' . _('Import Records') . '" class="button" /></p>';
 	}

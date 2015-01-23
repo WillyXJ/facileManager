@@ -21,7 +21,7 @@ echo '$(document).ready(function() {
 			minimumResultsForSearch: 10
 		});
 		$("#admin-tools-select select").select2({
-			width: "300px",
+			containerCss: { "min-width": "300px" },
 			minimumResultsForSearch: 10
 		});
 		$(function() {
