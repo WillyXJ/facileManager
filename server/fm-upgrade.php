@@ -53,6 +53,8 @@ if ($app_compat) {
 
 $step = isset($_GET['step']) ? $_GET['step'] : 0;
 
+$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+
 printHeader(_('Upgrade'), 'install');
 
 switch ($step) {
@@ -61,9 +63,12 @@ switch ($step) {
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
 			header('Location: /fm-install.php');
 		}
-		echo '<center><p>';
-		printf(_("I have detected you recently upgraded %s, but have not upgraded the database.<br />Click 'Upgrade' to start the upgrade process."), $fm_name);
-		printf('</p><p class="step"><a href="?step=2" class="button click_once">%s</a></p></center>', _('Upgrade'));
+		printf('<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window"><p>', $branding_logo, _('Upgrade'));
+		printf(_("I have detected you recently upgraded %s, but have not upgraded the database. Click 'Upgrade' to start the upgrade process."), $fm_name);
+		printf('</p><p class="step"><a href="?step=2" class="button click_once">%s</a></p></div>', _('Upgrade'));
 		break;
 	case 2:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {

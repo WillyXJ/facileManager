@@ -698,10 +698,8 @@ tbody {
 }
 
 #configtypesmenu {
-//	float: right;
 	position: relative;
 	font-size: 14px;
-//	margin-bottom: -2.2em;
 }
 #configtypesmenu:nth-child(3) {
 	top: -3px;

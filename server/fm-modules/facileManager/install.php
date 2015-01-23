@@ -35,23 +35,36 @@
  * @subpackage Installer
  */
 function createConfig() {
+	global $fm_name, $branding_logo;
+	
 	$temp_config = generateConfig();
 	$temp_file = ABSPATH . 'config.inc.php';
 	
 	if (!file_exists($temp_file) || !file_get_contents($temp_file)) {
 		if (@file_put_contents($temp_file, '') === false) {
+
 			printf('
+	<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window">
 	<p>' . _('I cannot create %s so please manually create it with the following contents:') . '</p>
-	<textarea rows="20">%s</textarea>
+	<textarea rows="18">%s</textarea>
 	<p>' . _('Once done, click "Install."') . '</p>
-	<p class="step"><a href="?step=3" class="button click_once">' . _('Install') . '</a></p>', "<code>$temp_file</code>", $temp_config);
+	<p class="step"><a href="?step=3" class="button click_once">' . _('Install') . '</a></p></div>', 
+			$branding_logo, _('Install'), "<code>$temp_file</code>", $temp_config);
 		} else {
-			echo '<form method="post" action="?step=3"><center><table class="form-table">' . "\n";
+			printf('<form method="post" action="?step=3">
+	<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window">
+		<table class="form-table">' . "\n", $branding_logo, _('Install'));
 			
 			$retval = @file_put_contents($temp_file, $temp_config) ? true : false;
 			displayProgress(_('Creating Configuration File'), $retval);
 			
-			echo "</table>\n</center>\n";
+			echo "</table>\n</div>\n";
 			
 			if ($retval) {
 				echo '<p style="text-align: center;">' .
@@ -112,21 +125,28 @@ CFG;
  * @subpackage Installer
  */
 function fmInstall($link, $database) {
-	echo '<form method="post" action="?step=3"><center><table class="form-table">' . "\n";
+	global $fm_name, $branding_logo;
+	
+	printf('<form method="post" action="?step=3">
+	<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window">
+<table class="form-table">' . "\n", $branding_logo, _('Install'));
 
 	$retval = installDatabase($link, $database);
 	
-	echo "</table>\n</center>\n";
+	echo "</table>\n";
 
 	if ($retval) {
-		echo '<p style="text-align: center;">' . _("Database setup is complete! Now let's create your administrative account.") .
+		echo '<p>' . _("Database setup is complete! Now let's create your administrative account.") .
 			'</p><p class="step"><a href="?step=4" class="button">' . _('Continue') . '</a></p>';
 	} else {
-		echo '<p style="text-align: center;">' . _("Database setup failed. Please try again.") .
+		echo '<p>' . _("Database setup failed. Please try again.") .
 			'</p><p class="step"><a href="?step=3" class="button click_once">' . _('Try Again') . '</a></p>';
 	}
 	
-	echo "</form>\n";
+	echo "</div></form>\n";
 }
 
 

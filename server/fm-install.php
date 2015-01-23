@@ -53,6 +53,8 @@ if ($app_compat) {
 
 $step = isset($_GET['step']) ? $_GET['step'] : 0;
 
+$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+
 switch ($step) {
 	case 0:
 	case 1:
@@ -135,7 +137,10 @@ switch ($step) {
 		printHeader(_('Installation'), 'install');
 		include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 		
-		echo '<center><p>';
+		printf('<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window"><p>', $branding_logo, _('Install'));
 		printf(_("Installation is complete! Click 'Next' to login and start using %s."), $fm_name);
 		printf('</p><p class="step"><a href="%s" class="button">%s</a></p></center>', $GLOBALS['RELPATH'], _('Next'));
 		break;
@@ -152,7 +157,7 @@ printFooter();
  * @subpackage Installer
  */
 function displaySetup($error = null) {
-	global $fm_name;
+	global $fm_name, $branding_logo;
 	
 	if ($error) {
 		$error = sprintf('<strong>' . _('ERROR: %s') . "</strong>\n", $error);
@@ -165,30 +170,33 @@ function displaySetup($error = null) {
 	
 	printf('
 <form method="post" action="?step=2">
-	<center>
-	%1$s
+	<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window">
+	%s
 	<p>' . _('Before we can install the backend database, your database credentials are needed. (They will also be used to generate the <code>config.inc.php</code> file.)') . '</p>
-	<table class="form-table">
+	<table>
 		<tr>
 			<th><label for="dbhost">' . _('Database Host') . '</label></th>
-			<td><input type="text" size="25" name="dbhost" id="dbhost" value="%2$s" placeholder="localhost" /></td>
+			<td><input type="text" size="25" name="dbhost" id="dbhost" value="%s" placeholder="localhost" /></td>
 		</tr>
 		<tr>
 			<th><label for="dbname">' . _('Database Name') . '</label></th>
-			<td><input type="text" size="25" name="dbname" id="dbname" value="%3$s" placeholder="%3$s" /></td>
+			<td><input type="text" size="25" name="dbname" id="dbname" value="%s" placeholder="%3$s" /></td>
 		</tr>
 		<tr>
 			<th><label for="dbuser">' . _('Username') . '</label></th>
-			<td><input type="text" size="25" name="dbuser" id="dbuser" value="%4$s" placeholder="' . _('username') . '" /></td>
+			<td><input type="text" size="25" name="dbuser" id="dbuser" value="%s" placeholder="' . _('username') . '" /></td>
 		</tr>
 		<tr>
 			<th><label for="dbpass">' . _('Password') . '</label></th>
-			<td><input type="password" size="25" name="dbpass" id="dbpass" value="%5$s" placeholder="' . _('password') . '" /></td>
+			<td><input type="password" size="25" name="dbpass" id="dbpass" value="%s" placeholder="' . _('password') . '" /></td>
 		</tr>
 	</table>
-	</center>
 	<p class="step"><input name="submit" type="submit" value="' . _('Submit') . '" class="button" /></p>
-</form>', $error, $dbhost, $dbname, $dbuser, $dbpass);
+	</div>
+</form>', $branding_logo, _('Install'), $error, $dbhost, $dbname, $dbuser, $dbpass);
 }
 
 /**
@@ -230,33 +238,36 @@ function processSetup() {
  * @subpackage Installer
  */
 function displayAccountSetup($error = null) {
-	global $__FM_CONFIG;
+	global $__FM_CONFIG, $branding_logo;
 
 	if ($error) {
 		$error = sprintf('<strong>' . _('ERROR: %s') . "</strong>\n", $error);
 	}
 	
 	printf('
-<form method="post" action="?step=5">
-	<center>
-	%1$s
-	<p>' . _('Ok, now create your super-admin account') . '</p>
+<form method="post" action="?step=5" class="disable-auto-complete">
+	<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window">
+	%3$s
+	<p style="text-align: center;">' . _('Ok, now create your super-admin account') . '</p>
 	<table class="form-table">
 		<tr>
 			<th><label for="user_login">' . _('Username') . '</label></th>
-			<td><input type="text" size="25" name="user_login" id="user_login" placeholder="username" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%2$s\');" /></td>
+			<td><input type="text" size="25" name="user_login" id="user_login" placeholder="username" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%4$s\');" /></td>
 		</tr>
 		<tr>
 			<th><label for="user_email">' . _('Email') . '</label></th>
-			<td><input type="email" size="25" name="user_email" id="user_email" placeholder="email address" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%2$s\');" /></td>
+			<td><input type="email" size="25" name="user_email" id="user_email" placeholder="email address" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%4$s\');" /></td>
 		</tr>
 		<tr>
 			<th><label for="user_password">' . _('Password') . '</label></th>
-			<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%2$s\');" /></td>
+			<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd(\'user_password\', \'createaccount\', \'%4$s\');" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<th><label for="cpassword">' . _('Confirm Password') . '</label></th>
-			<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd(\'cpassword\', \'createaccount\', \'%2$s\');" /></td>
+			<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd(\'cpassword\', \'createaccount\', \'%4$s\');" /></td>
 		</tr>
 		<tr>
 			<th>' . _('Password Validity') . '</th>
@@ -264,12 +275,12 @@ function displayAccountSetup($error = null) {
 		</tr>
 		<tr class="pwdhint">
 			<th width="33&#37;" scope="row">' . _('Hint') . '</th>
-			<td width="67&#37;">%3$s</td>
+			<td width="67&#37;">%5$s</td>
 		</tr>
 	</table>
-	</center>
 	<p class="step"><input id="createaccount" name="submit" type="submit" value="' . _('Submit') . '" class="button" disabled /></p>
-</form>', $error, $GLOBALS['PWD_STRENGTH'], $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]);
+	</div>
+</form>', $branding_logo, _('Install'), $error, $GLOBALS['PWD_STRENGTH'], $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]);
 }
 
 /**

@@ -35,13 +35,16 @@
  * @subpackage Upgrader
  */
 function fmUpgrade($database) {
-	global $fmdb;
+	global $fmdb, $branding_logo;
 	include(ABSPATH . 'fm-includes/version.php');
 	include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 	
 	$GLOBALS['running_db_version'] = getOption('fm_db_version');
 	
-	echo '<center><table class="form-table">' . "\n";
+	printf('<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = ($GLOBALS['running_db_version'] < 37) ? fmUpgrade_2002($database) : true;
@@ -53,13 +56,15 @@ function fmUpgrade($database) {
 	
 	displayProgress(_('Upgrading Schema'), $success);
 
-	echo "</table>\n</center>\n";
+	echo "</table>";
 	
 	if ($success) {
 		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules.php');
 	} else {
 		displaySetupMessage(2);
 	}
+	
+	echo "</div>";
 }
 
 
@@ -584,14 +589,12 @@ function displaySetupMessage($message = 1, $url = null) {
 	switch ($message) {
 		case 1:
 			printf('
-	<center>
 	<p>' . _('Database upgrade for %1$s is complete! Click \'Next\' to start using %1$s.') . '</p>
-	<p class="step"><a href="%2$s" class="button">' . _('Next') . '</a></p>
-	</center>', $fm_name, $url);
+	<p class="step"><a href="%2$s" class="button">' . _('Next') . '</a></p>', $fm_name, $url);
 			break;
 		case 2:
 			echo '
-	<p style="text-align: center;">' . _('Database upgrade failed. Please try again.') . '</p>
+	<p>' . _('Database upgrade failed. Please try again.') . '</p>
 	<p class="step"><a href="?step=2" class="button">' . _('Try Again') . '</a></p>';
 			break;
 	}

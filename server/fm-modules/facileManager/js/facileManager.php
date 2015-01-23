@@ -865,6 +865,8 @@ echo '$(document).ready(function() {
 		location.search = $.param(queryParameters);
 		return false;
 	});
+	
+	$(".disable-auto-complete").attr("autocomplete", "off");
 
 });
 
@@ -884,7 +886,6 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 	var pwd2 = document.getElementById("cpassword");
 	if (pwd1.value.length==0) {
 		strength.innerHTML = "No Password";
-		strength.style.color = "black";
 		strength.style.background = "";
 		button.disabled = true;
 	} else {

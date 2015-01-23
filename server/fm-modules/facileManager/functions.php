@@ -184,7 +184,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 	if ($css == 'facileManager') {
 		$head = $menu ? getTopHeader($help) : null;
 	} else {
-		$logo = '<h1 id="logo"><img alt="' . $fm_name . '" src="' . $GLOBALS['RELPATH'] . 'fm-includes/images/logo.png" /></h1>' . "\n";
+		$logo = '<h1 class="center"><img alt="' . $fm_name . '" src="' . $GLOBALS['RELPATH'] . 'fm-includes/images/logo.png" /></h1>' . "\n";
 	}
 	
 	/** Module css and js includes */
@@ -1694,9 +1694,16 @@ HTML;
  * @return null
  */
 function bailOut($message, $title = null) {
+	global $fm_name;
+	
+	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+
 	if (!$title) $title = _('Requirement Error');
 	printHeader($title, 'install');
-	echo $message;
+	printf('<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window"><p>%s</p></div>', $branding_logo, $title, $message);
 	exit(printFooter());
 }
 
@@ -2260,12 +2267,16 @@ function formatLogKeyData($strip, $key, $data) {
 function fMDie($message = null, $link_display = 'show') {
 	global $fm_name;
 	
+	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+
 	if (!$message) $message = _('An unknown error occurred.');
 	
 	printHeader('Error', 'install', false, false);
 	
-	echo '<p>' . $message . '</p>';
+	printf('<div id="fm-branding"><img src="%s" /><span>%s</span></div>
+		<div id="window"><p>%s</p>', $branding_logo, _('Oops!'), $message);
 	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>';
+	echo '</div>';
 	
 	exit;
 }

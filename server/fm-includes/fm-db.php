@@ -36,18 +36,18 @@ class fmdb {
 		global $__FM_CONFIG;
 		$this->dbh = @mysql_connect($dbhost, $dbuser, $dbpassword);
 		if (!$this->dbh) {
-			bailOut('<center>' . _('The connection to the database has failed. Please check the configuration.') . '</center><p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">' . _('Try Again') . '</a></p>');
+			bailOut(_('The connection to the database has failed. Please check the configuration.') . '<p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">' . _('Try Again') . '</a></p>');
 		}
 
 		$this->select($dbname);
 		if (!@mysql_query("SELECT * FROM `fm_options`", $this->dbh)) {
-			bailOut('<center>' . _('The database is installed; however, the associated application tables are missing. Click \'Start Setup\' to start the installation process.') . '<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
+			bailOut(_('The database is installed; however, the associated application tables are missing. Click \'Start Setup\' to start the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
 		}
 		
 		/** Check if there is an admin account */
 		$this->query("SELECT * FROM `fm_users` WHERE `user_id`=1");
 		if (!$this->num_rows) {
-			bailOut('<center>' . _('The database is installed; however, an administrative account was not created. Click \'Continue Setup\' to continue the installation process.') . '<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">' . _('Continue Setup') . '</a></p>');
+			bailOut(_('The database is installed; however, an administrative account was not created. Click \'Continue Setup\' to continue the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">' . _('Continue Setup') . '</a></p>');
 		}
 	}
 
@@ -58,7 +58,7 @@ class fmdb {
 	function select($db) {
 		global $__FM_CONFIG;
 		if (!@mysql_select_db($db, $this->dbh)) {
-			bailOut('<center>' . _('The database is not installed.  Click \'Start Setup\' to start the installation process.') . '<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
+			bailOut(_('The database is not installed. Click \'Start Setup\' to start the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
 		}
 	}
 	
