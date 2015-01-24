@@ -89,7 +89,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	}
 	
 	echo $edit_form;
-} else {
+} elseif (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
 	$include_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'getData.php';
 	if (file_exists($include_file)) {
 		include($include_file);

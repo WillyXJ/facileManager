@@ -171,7 +171,7 @@ p.soa_import span {
 .new-container {
 	position: absolute;
 	width: 100%;
-	bottom: 10em;
+	bottom: 11em;
 	max-height: 326px;
 	overflow: auto;
 }

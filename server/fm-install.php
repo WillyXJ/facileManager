@@ -251,7 +251,7 @@ function displayAccountSetup($error = null) {
 	</div>
 	<div id="window">
 	%3$s
-	<p style="text-align: center;">' . _('Ok, now create your super-admin account') . '</p>
+	<p>' . _('Ok, now create your super-admin account') . '</p>
 	<table class="form-table">
 		<tr>
 			<th><label for="user_login">' . _('Username') . '</label></th>
@@ -298,9 +298,15 @@ function processAccountSetup($link, $database) {
 	}
 	
 	extract($_POST);
-	$user = sanitize($_POST['user_login']);
-	$pass = sanitize($_POST['user_password']);
-	$email = sanitize($_POST['user_email']);
+	$user = sanitize($user_login);
+	$pass = sanitize($user_password);
+	$email = sanitize($user_email);
+	
+	/** Ensure username and password are defined */
+	if (empty($user) || empty($pass)) {
+		printHeader(_('Installation'), 'install');
+		exit(displayAccountSetup(_('Username and password cannot be empty.')));
+	}
 	
 	$query = "INSERT INTO $database.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
 	$result = mysql_query($query, $link) or die(mysql_error());

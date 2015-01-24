@@ -161,4 +161,5 @@ strong {
 
 .form-table tr.pwdhint th, .form-table tr.pwdhint td {
 	font-size: 8pt;
+	vertical-align: top;
 }

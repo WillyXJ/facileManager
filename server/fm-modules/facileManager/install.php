@@ -64,18 +64,18 @@ function createConfig() {
 			$retval = @file_put_contents($temp_file, $temp_config) ? true : false;
 			displayProgress(_('Creating Configuration File'), $retval);
 			
-			echo "</table>\n</div>\n";
+			echo "</table>\n";
 			
 			if ($retval) {
-				echo '<p style="text-align: center;">' .
+				echo '<p>' .
 					_("Config file has been created! Now let's create the database schema.") .
 					'</p><p class="step"><a href="?step=3" class="button click_once">' . _('Continue') . '</a></p>';
 			} else {
-				echo '<p style="text-align: center;">' . _('Config file creation failed. Please try again.') .
+				echo '<p>' . _('Config file creation failed. Please try again.') .
 					'</p><p class="step"><a href="?step=2" class="button click_once">' . _('Try Again') . '</a></p>';
 			}
 			
-			echo "</form>\n";
+			echo "</div></form>\n";
 		}
 	}
 }

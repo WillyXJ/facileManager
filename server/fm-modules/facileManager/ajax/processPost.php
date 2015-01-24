@@ -157,7 +157,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			break;
 	}
 /** Handle everything else */
-} else {
+} elseif (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
 	$include_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processPost.php';
 	if (file_exists($include_file)) {
 		include($include_file);

@@ -42,8 +42,10 @@ if (!isValidDomain($domain_id)) header('Location: ' . getMenuURL('Zones'));
 if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
-if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $record_type == 'SOA') $record_type = $default_record_type;
-if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id') && $record_type == 'SOA') $record_type = $default_record_type;
+if ($record_type == 'SOA') {
+	if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) $record_type = $default_record_type;
+	elseif (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) $record_type = $default_record_type;
+}
 
 printHeader();
 @printMenu();
@@ -192,8 +194,13 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 		foreach ($used_record_types as $type) {
 			if (empty($type)) continue;
 			if (in_array($type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) continue;
-			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $type == 'SOA') continue;
-			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id') && $type == 'SOA') continue;
+			if ($type == 'SOA') {
+				/** Skip clones */
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) continue;
+				
+				/** Skip templates */
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) continue;
+			}
 
 			$select = ($record_type == $type) ? ' class="selected"' : '';
 			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\">$type</a></span>\n";
