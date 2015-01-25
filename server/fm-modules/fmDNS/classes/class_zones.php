@@ -996,12 +996,12 @@ HTML;
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						return $response . '<p class="error">' . sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL('Settings')) . '</p>'. "\n";
+						return '<p class="error">' . sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL('Settings')) . '</p>'. "\n";
 					}
 					
 					$temp_ssh_key = '/tmp/fm_id_rsa';
 					if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-						return $response . '<p class="error">' . sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key) . '</p>'. "\n";
+						return '<p class="error">' . sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key) . '</p>'. "\n";
 					}
 					
 					@chmod($temp_ssh_key, 0400);
@@ -1010,9 +1010,9 @@ HTML;
 					
 					@unlink($temp_ssh_key);
 					
-					if ($retval) {
+					if (!is_array($post_result)) {
 						/** Something went wrong */
-						return sprintf('<p class="error">%s</p>'. "\n", _('Zone reload failed.'));
+						return sprintf('<p class="error">%s</p>'. "\n", $post_result);
 					} else {
 						if (!count($post_result)) $post_result[] = _('Zone reload was successful.');
 						
