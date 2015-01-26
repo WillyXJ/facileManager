@@ -139,7 +139,7 @@ function autoCreatePTR($domain_id, $record_type, $data) {
 				);
 
 		global $fm_dns_records;
-		$fm_dns_records->add($data['PTR'], 'PTR', $array);
+		$fm_dns_records->add($data['PTR'], 'PTR', $array, 'replace');
 	}
 }
 ?>

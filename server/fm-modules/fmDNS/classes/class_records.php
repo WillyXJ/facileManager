@@ -54,7 +54,7 @@ class fm_dns_records {
 	/**
 	 * Adds the new record
 	 */
-	function add($domain_id, $record_type, $new_array) {
+	function add($domain_id, $record_type, $new_array, $operation = 'insert') {
 		global $fmdb, $__FM_CONFIG;
 		
 		$domain_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
@@ -73,14 +73,21 @@ class fm_dns_records {
 			}
 		}
 		
+		$new_array['account_id'] = $_SESSION['user']['account_id'];
+		
+		/** Replacing? */
+		if ($operation == 'replace' && $record_type == 'PTR') {
+			$query = "UPDATE fm_{$__FM_CONFIG['fmDNS']['prefix']}records SET record_status='deleted' WHERE account_id='{$_SESSION['user']['account_id']}'
+				AND domain_id=$domain_id AND record_name='{$new_array['record_name']}' AND record_status!='deleted' LIMIT 1";
+			$fmdb->query($query);
+		}
+		
 		$sql_insert = "INSERT INTO `$table`";
 		$sql_fields = '(';
 		if ($record_type != 'SOA' && $record_type) {
 			$sql_fields .= 'domain_id,record_type,';
 			$sql_values .= "$domain_id,'$record_type',";
 		}
-		
-		$new_array['account_id'] = $_SESSION['user']['account_id'];
 		
 		/** Process default integers */
 		if (array_key_exists('record_priority', $new_array) && !is_numeric($new_array['record_priority'])) $new_array['record_priority'] = 0;
@@ -147,12 +154,13 @@ class fm_dns_records {
 		
 		$record_type_sql = ($record_type != 'SOA') ? ",record_type='$record_type'" : null;
 		
+		$excluded_keys = array('record_skipped', 'PTR');
 		$null_keys = array('record_key_tag');
 		
 		$sql_edit = null;
 		
 		foreach ($array as $key => $data) {
-			if ($key == 'record_skipped') continue;
+			if (in_array($key, $excluded_keys)) continue;
 			if (in_array($key, $null_keys) && empty($data)) {
 				$sql_edit .= $key . '=NULL,';
 			} else {
@@ -412,10 +420,10 @@ class fm_dns_records {
 			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr__NUM_" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr__NUM_">' . _('Create PTR') . '</label>' : null;
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . _('Create PTR') . '</label>' : null;
 			} else {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr__NUM_" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr__NUM_">' . _('Create PTR') . '</label><br />' : ' align="center">';
-				$field_values['data']['Actions'] .= '<input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete_' . $record_id . '">' . _('Delete') . '</label>';
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . _('Create PTR') . '</label><br />' : ' align="center">';
+				$field_values['data']['Actions'] .= '<label><input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" />' . _('Delete') . '</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;

@@ -1,3 +1,8 @@
+2.0-?? (2015-??-??)
+======================
+* Server - [feature] Automatically updates PTR record when updating an existing
+           A record and ticking 'Create PTR' box. (Issue #129)
+
 2.0-beta1 (2015-01-24)
 ======================
 * Server - [security] Added ability to enable/disable automatic client
