@@ -446,16 +446,12 @@ span.grey {
 	color: #aaa;
 }
 
-.display_results tbody tr.attention,
-.modules .active.upgrade {
-	background-color: #f5ebeb;
-}
 .display_results tbody tr.attention td:first-child,
 .display_results tbody tr.disabled td:first-child,
 .display_results tbody tr.build td:first-child,
 .modules .active.upgrade td:first-child {
-	border-left: 3px #CB3739 solid;
-	padding-left: 1.6em;
+	border-left: 3px solid;
+	padding-left: 1.8em;
 }
 .display_results tbody tr.disabled td:first-child {
 	border-color: #aaa;
@@ -465,6 +461,13 @@ span.grey {
 }
 .display_results tbody tr.build td:first-child {
 	border-color: #2ea2cc;
+}
+.display_results tbody tr.attention,
+.modules .active.upgrade {
+	background-color: #f5ebeb;
+}
+.display_results tbody tr.attention td:first-child{
+	border-color: #CB3739;
 }
 .display_results th.header-actions {
 	width: 110px;
