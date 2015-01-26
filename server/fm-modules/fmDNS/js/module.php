@@ -199,6 +199,21 @@ $(document).ready(function() {
 		return false;
     });
 
+	/* Record delete checkbox */
+	$(".display_results").delegate("input[id^=\'record_delete_\']", "click tap", function(e) {
+		$(this).parent().parent().removeClass();
+		if ($(this).is(":checked")) {
+			$(this).parent().parent().addClass("attention");
+		} else {
+			var status_id = $(this).attr("id").replace("record_delete", "status");
+			if ($("#" + status_id).val() == "disabled") {
+				$(this).parent().parent().addClass("disabled");
+			} else {
+				$(this).parent().parent().addClass("active");
+			}
+		}
+	});
+
 	$("#manage_item_contents").delegate("#server_update_method", "change", function(e) {
 		if ($(this).val() == "cron") {
 			$("#server_update_port_option").slideUp();

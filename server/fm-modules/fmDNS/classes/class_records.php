@@ -324,10 +324,10 @@ class fm_dns_records {
 		$statusopt[0][] = 'active';
 		$statusopt[1][] = _('Disabled');
 		$statusopt[1][] = 'disabled';
-		$status = BuildSelect($action . '[_NUM_][record_status]', '_NUM_', $statusopt, $record_status);
+		$status = BuildSelect($action . '[_NUM_][record_status]', 'status__NUM_', $statusopt, $record_status);
 		$field_values['class'] = $record_status;
 		
-		$class = buildSelect($action . '[_NUM_][record_class]', '_NUM_', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $record_class);
+		$class = buildSelect($action . '[_NUM_][record_class]', 'class__NUM_', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $record_class);
 
 		if ($type == 'PTR') {
 			$domain_map = getNameFromID($parent_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
@@ -412,10 +412,10 @@ class fm_dns_records {
 			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">' . _('Create PTR') . '</label>' : null;
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr__NUM_" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr__NUM_">' . _('Create PTR') . '</label>' : null;
 			} else {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr[_NUM_]" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr[_NUM_]">' . _('Create PTR') . '</label><br />' : ' align="center">';
-				$field_values['data']['Actions'] .= '<input type="checkbox" id="record_delete[' . $record_id . ']" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete[' . $record_id . ']">' . _('Delete') . '</label>';
+				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><input type="checkbox" id="record_ptr__NUM_" name="' . $action . '[_NUM_][PTR]" /><label for="record_ptr__NUM_">' . _('Create PTR') . '</label><br />' : ' align="center">';
+				$field_values['data']['Actions'] .= '<input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" /><label for="record_delete_' . $record_id . '">' . _('Delete') . '</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
