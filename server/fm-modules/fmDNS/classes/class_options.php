@@ -618,7 +618,7 @@ FORM;
 		
 		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \
 			strpos($cfg_data, 'domain_') !== false || strpos($def_type, 'address_match_element') !== false || \
-			strpos($def_type, 'domain_name') !== false) ? $fm_dns_acls->parseACL($cfg_data) : $cfg_data;
+			strpos($def_type, 'domain_name') !== false) ? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
 	}
 	
 

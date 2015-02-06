@@ -1406,8 +1406,6 @@ HTML;
 			}
 			list($cfg_info, $cfg_comment) = $cfg_data;
 			
-			$cfg_info = str_replace(',', '; ', $cfg_info);
-
 			if ($cfg_comment) {
 				$comment = wordwrap($cfg_comment, 50, "\n");
 				$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
