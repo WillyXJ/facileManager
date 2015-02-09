@@ -504,7 +504,7 @@ FORM;
 			if (isset($result[0]->def_type)) $def_type = $result[0]->def_type;
 		} else $def_type = null;
 		
-		return (strpos($cfg_data, 'acl_') !== false || strpos($def_type, 'address_match_element') !== false) ? $fm_dns_acls->parseACL($cfg_data) : $cfg_data;
+		return (strpos($cfg_data, 'acl_') !== false || strpos($def_type, 'address_match_element') !== false) ? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
 	}
 	
 

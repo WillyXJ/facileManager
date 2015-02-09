@@ -1368,8 +1368,6 @@ HTML;
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			list($cfg_info, $cfg_comment) = $cfg_data;
 			
-			$cfg_info = str_replace(',', '; ', $cfg_info);
-
 			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 			$fmdb->get_results($query);
 			if (!$fmdb->num_rows) $def_multiple_values = 'no';
