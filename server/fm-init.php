@@ -91,7 +91,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		/** Process password resets */
 		if (!$fm_login->isLoggedIn() && array_key_exists('forgot_password', $_GET)) {
-			$message = array_key_exists('keyInvalid', $_GET) ? sprintf('<p class="failed">%s</p>', _('That key is invalid.')) : null;
+			$message = array_key_exists('keyInvalid', $_GET) ? sprintf('<p class="failed">%s</p>', _('The specified key is invalid.')) : null;
 			if (count($_POST)) {
 				$result = $fm_login->processUserPwdResetForm($_POST['user_login']);
 				if ($result === true) {
@@ -117,11 +117,18 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			
 			$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
 			if ($_POST['is_ajax']) {
-				if (is_array($logged_in)) {
+				if (!$logged_in) {
+					echo 'failed';
+				} elseif (isUpgradeAvailable()) {
+					if (currentUserCan(array('do_everything', 'manage_modules')) || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
+						echo $GLOBALS['RELPATH'] . 'fm-upgrade.php';
+					} else {
+						session_destroy();
+						printf('<p class="failed">' . _('The database for %1s and its modules still needs to be upgraded.<br />Please contact a privileged user.') . '</p>', $fm_name);
+					}
+				} elseif (is_array($logged_in)) {
 					list($reset_key, $user_login) = $logged_in;
 					echo "password_reset.php?key=$reset_key&login=$user_login";
-				} elseif (!$logged_in) {
-					echo 'failed';
 				} else echo $_SERVER['REQUEST_URI'];
 			} else {
 				if (!$logged_in) $fm_login->printLoginForm();
@@ -165,11 +172,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			/** Once logged in process the menuing */
 			if ($fm_login->isLoggedIn()) {
 				if (isUpgradeAvailable()) {
-					if (currentUserCan('do_everything') || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
-						header('Location: ' . $GLOBALS['RELPATH'] . 'fm-upgrade.php');
-					} else {
-						$response = sprintf('<p class="error">** ' . _('The database for %1s still needs to be upgraded. Please contact a super-admin.') . ' **</p>', $fm_name);
-					}
+					$fm_login->logout();
+					header('Location: ' . $GLOBALS['RELPATH']);
+					exit;
 				}
 			}
 		}

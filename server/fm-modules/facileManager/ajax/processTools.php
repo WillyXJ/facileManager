@@ -25,6 +25,7 @@
 define('AJAX', true);
 require_once('../../../fm-init.php');
 
+$response = null;
 include(ABSPATH . 'fm-modules/facileManager/classes/class_tools.php');
 $shared_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processTools.php';
 if (file_exists($shared_tools_file) && $_SESSION['module'] != $fm_name) {
@@ -44,7 +45,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$response = buildPopup('header', _('Installing Module'));
 				$response .= $fm_tools->installModule($module_name);
 				if ($fmdb->last_error) $response .= $fmdb->last_error;
-				$response .= buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), "{$GLOBALS['RELPATH']}admin-modules.php");
+				$response .= buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(_('Modules')));
 				
 				echo $response;
 				exit;
@@ -55,7 +56,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$response = buildPopup('header', _('Upgrading Module'));
 				$response .= $fm_tools->upgradeModule($module_name);
 				if ($fmdb->last_error) $response .= $fmdb->last_error;
-				$response .= buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), "{$GLOBALS['RELPATH']}admin-modules.php");
+				$response .= buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(_('Modules')));
 				
 				echo $response;
 				exit;

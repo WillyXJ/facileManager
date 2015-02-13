@@ -27,7 +27,7 @@
  *
  */
 
-if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
@@ -47,7 +47,7 @@ if (isset($fm_name)) {
 	$__FM_CONFIG['module']['icons']['sub_delete']	= '<img class="clone_remove" id="__ID__" src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Delete" title="Delete" width="12" />';
 }
 
-$__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
 $__FM_CONFIG['records']['cert_types'] = array(
@@ -116,11 +116,11 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmDNS'
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa'=>'soa', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views'=>'view',
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped'=>'record'
 											);
-$__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
 
 /** Default values */
 $named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkconf') . ', ' . findProgram('named-checkzone') : '/path/to/named-checkconf, /path/to/named-checkzone';
-$__FM_CONFIG['fmDNS']['default']['options'] = array(
+$__FM_CONFIG['fmDNS']['default']['options'] = @array(
 		'enable_named_checks' => array(
 				'description' => array(_('Enable named Checks'), _('Enable or disable named-checkconf and named-checkzone utilities.') . '</p>
 								<p>' . sprintf(_('sudo must be installed on %s with the following in sudoers:'), php_uname('n')) . '</p>

@@ -39,6 +39,8 @@ function fmUpgrade($database) {
 	include(ABSPATH . 'fm-includes/version.php');
 	include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 	
+	$errors = false;
+	
 	$GLOBALS['running_db_version'] = getOption('fm_db_version');
 	
 	printf('<div id="fm-branding">
@@ -52,13 +54,32 @@ function fmUpgrade($database) {
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
 		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update', true, 0, $fm_name);
+	} else {
+		$errors = true;
 	}
 	
-	displayProgress(_('Upgrading Schema'), $success);
+	displayProgress(_('Upgrading Core Schema'), $success);
+	
+	/** Upgrade any necessary modules */
+	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_tools.php');
+	$fmdb->get_results("SELECT module_name FROM fm_options WHERE option_name='version'");
+	$num_rows = $fmdb->num_rows;
+	$module_list = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		$module_name = $module_list[$x]->module_name;
+		$success = $fm_tools->upgradeModule($module_name, 'quiet');
+		if (!$success || $fmdb->last_error) {
+			$errors = true;
+			$success = false;
+		} else {
+			$success = true;
+		}
+		displayProgress(sprintf(_('Upgrading %s Schema'), $module_name), $success);
+	}
 
 	echo "</table>";
 	
-	if ($success) {
+	if (!$errors) {
 		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules.php');
 	} else {
 		displaySetupMessage(2);
@@ -313,6 +334,8 @@ INSERT;
 		}
 	}
 
+	upgradeConfig('fm_db_version', 22, false);
+	
 	return $success;
 }
 
@@ -339,6 +362,8 @@ function fmUpgrade_106($database) {
 		}
 	}
 
+	upgradeConfig('fm_db_version', 27, false);
+	
 	return $success;
 }
 
@@ -379,6 +404,8 @@ INSERT;
 		}
 	}
 
+	upgradeConfig('fm_db_version', 28, false);
+	
 	return $success;
 }
 
@@ -495,6 +522,8 @@ function fmUpgrade_1201($database) {
 		
 	}
 
+	upgradeConfig('fm_db_version', 32, false);
+	
 	return $success;
 }
 
@@ -523,6 +552,8 @@ function fmUpgrade_1202($database) {
 		if (!setOption('fm_user_caps', $fm_user_caps)) return false;
 	}
 
+	upgradeConfig('fm_db_version', 34, false);
+	
 	return $success;
 }
 
@@ -540,6 +571,8 @@ function fmUpgrade_2002($database) {
 		if (!setOption('client_auto_register', 1)) return false;
 	}
 
+	upgradeConfig('fm_db_version', 37, false);
+	
 	return $success;
 }
 

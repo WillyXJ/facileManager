@@ -1,6 +1,8 @@
 2.0-beta2 (2015-0?-??)
 ======================
 * Server - [improvement] The installer now uses checkmarks instead of text.
+* Server - [improvement] Modules can now be managed in bulk.
+* Server - [improvement] The upgrader will now run the module upgrade routines.
 
 2.0-beta1 (2015-01-24)
 ======================

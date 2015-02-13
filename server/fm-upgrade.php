@@ -67,7 +67,7 @@ switch ($step) {
 		<img src="%s" /><span>%s</span>
 	</div>
 	<div id="window"><p>', $branding_logo, _('Upgrade'));
-		printf(_("I have detected you recently upgraded %s, but have not upgraded the database. Click 'Upgrade' to start the upgrade process."), $fm_name);
+		printf(_("I have detected you recently upgraded %s and its modules, but have not upgraded the database. Click 'Upgrade' to start the upgrade process."), $fm_name);
 		printf('</p><p class="step"><a href="?step=2" class="button click_once">%s</a></p></div>', _('Upgrade'));
 		break;
 	case 2:

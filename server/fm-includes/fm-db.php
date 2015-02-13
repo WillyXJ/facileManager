@@ -133,7 +133,11 @@ class fmdb {
 		$str = htmlspecialchars($str, ENT_QUOTES);
 
 		// Is error output turned on or not..
-		if (getOption('show_errors')) {
+		if (defined('INSTALL') || defined('UPGRADE')) {
+			if ($query) {
+				$this->last_error = $str;
+			}
+		} elseif (getOption('show_errors')) {
 			// If there is an error then take note of it
 			if ($query) {
 				$this->last_error = "<div id='error'>

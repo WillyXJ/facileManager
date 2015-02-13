@@ -27,7 +27,7 @@
  *
  */
 
-if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmFirewall'] = array(
@@ -43,7 +43,7 @@ $__FM_CONFIG['fmFirewall'] = array(
 $__FM_CONFIG['module']['icons']['action']['active']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
 $__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action___d.png" border="0" alt="__Action__ (' . _('disabled') . ')" title="__Action__ (' . _('disabled') . ')" width="12" />';
 
-$__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
 /** TCP Flags */
 $__FM_CONFIG['tcp_flags']				= array('URG' => 1, 'ACK' => 2, 'PSH' => 4,
@@ -103,6 +103,6 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFire
 											'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'policies'=>'policy', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'servers'=>'server',
 											'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'services'=>'service', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'time'=>'time'
 											);
-$__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
 
 ?>

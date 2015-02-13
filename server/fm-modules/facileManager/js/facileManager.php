@@ -84,14 +84,16 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				$("#password").val("");
 				if(response == "failed") {
-					$("#password").val("");
 					if ($("#username").val() == "") {
 						$("#username").focus();
 					} else {
 						$("#password").focus();
 					}
 					$("#login_form").effect("shake", { times:3 }, 15);	
+				} else if (response.indexOf("failed") >=0) {
+					$("#message").html(response);
 				} else {
 					window.location = response;
 				}
@@ -528,7 +530,7 @@ echo '$(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup\"), #module_install, #module_upgrade",
+    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply\"), #module_install, #module_upgrade",
     "click tap",function(e){
         var $this 	= $(this);
         task		= $this.attr("id");
@@ -725,7 +727,7 @@ echo '$(document).ready(function() {
 	/* Bulk items */
 	$("#bulk_apply").click(function(event) {
 		/* Do not process if no action is selected */
-		if ($("#bulk_action").val() == "' . _('Bulk Actions') . '") {
+		if ($("#bulk_action").val() == "") {
 			return;
 		}
 		

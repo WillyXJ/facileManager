@@ -31,19 +31,24 @@ $import_output = sprintf('<p>%s <i class="fa fa-spinner fa-spin"></i></p>', _('P
 
 if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
 	if (currentUserCan('manage_modules')) {
-		if ($fm_tools->manageModule(sanitize($_GET['action']), sanitize($_GET['module']))) {
-			$response = $_GET['module'] . ' was ' . sanitize($_GET['action']);
-			$response .= substr(sanitize($_GET['action']), -1) == 'e' ? 'd.' : 'ed.';
+		if ($_GET['action'] == 'activate') {
+			$action_verb = _('activated');
+		} elseif ($_GET['action'] == 'deactivate') {
+			$action_verb = _('deactivated');
+		} elseif ($_GET['action'] == 'uninstall') {
+			$action_verb = _('uninstalled');
+		}
+		if ($fm_tools->manageModule(sanitize($_GET['module']), sanitize($_GET['action']))) {
+			$response = sprintf(_('%s was %s'), $_GET['module'], $action_verb);
 			addLogEntry($response, $fm_name);
 			
 			if ($_GET['module'] == $_SESSION['module']) $_SESSION['module'] = $fm_name;
 			
-			header('Location: ' . $GLOBALS['basename']);
+			header('Location: ' . getMenuURL(_('Modules')));
 		} else {
-			$response = 'This module could not be ' . sanitize($_GET['action']);
-			$response .= substr(sanitize($_GET['action']), -1) == 'e' ? 'd.' : 'ed.';
+			$response = sprintf(_('Could not %s this module.'), sanitize($_GET['action']));
 		}
-	} else header('Location: ' . $GLOBALS['basename']);
+	} else header('Location: ' . getMenuURL(_('Modules')));
 }
 
 require(ABSPATH . 'fm-includes/version.php');
@@ -55,13 +60,29 @@ printHeader();
 echo '<div id="body_container">';
 if (!empty($response) || !empty($fm_new_version_available)) echo '<div id="response">' . $fm_new_version_available . '<p>' . $response . '</p></div>';
 
-$table_info = array('class' => 'display_results modules');
-$title_array = array(_('Module'), _('Description'));
+$table_info = array(
+				'class' => 'display_results modules',
+				'id' => 'table_edits',
+				'name' => 'modules'
+			);
+
+if (currentUserCan('manage_modules')) {
+	$bulk_actions_list = array(_('Activate'), _('Deactivate'));
+}
+if (count((array) $bulk_actions_list)) {
+	$title_array[] = array(
+						'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'module_list[]\')" />',
+						'class' => 'header-tiny header-nosort'
+					);
+}
+$title_array[] = _('Module');
+$title_array[] = _('Description');
+
 $header = displayTableHeader($table_info, $title_array);
 
 $modules = getAvailableModules();
 if (count($modules)) {
-	$module_display = sprintf('<p>%s</p>', _('The following modules have been detected:')) . $header;
+	$module_display = sprintf('<p>%s</p>', _('The following modules have been detected:')) . @buildBulkActionMenu($bulk_actions_list, 'module_list') . $header;
 
 	foreach ($modules as $module_name) {
 		/** Include module variables */
@@ -86,7 +107,7 @@ if (count($modules)) {
 			} else {
 				include(ABSPATH . 'fm-includes/version.php');
 				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-					$upgrade_link = sprintf('<span class="upgrade_link"><a href="#" id="module_upgrade" name="%s" />%s</a></span>' . "\n", $module_name, _('Upgrade Now'));
+					$upgrade_link = sprintf('<span class="upgrade_link"><a href="#" id="module_upgrade" name="%s" />%s</a></span>' . "\n", $module_name, _('Update Database Now'));
 				} else {
 					$upgrade_link .= sprintf('<span class="upgrade_link">' . _('%s v%s or later is required<br />before this module can be upgraded.') . '</span>', $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
 				}
@@ -110,8 +131,11 @@ if (count($modules)) {
 		}
 		$class = implode(' ', array_unique($class));
 		
+		$checkbox = (currentUserCan('manage_modules')) ? '<td><input type="checkbox" name="module_list[]" value="' . $module_name .'" class="modules" /></td>' : null;
+		
 		$avail_modules .= <<<MODULE
 					<tr class="$class">
+						$checkbox
 						<td><h3>$module_name</h3><div class="module_actions">$status_options</div></td>
 						<td><p>{$__FM_CONFIG[$module_name]['description']}</p><p>Version $module_version $upgrade_link</p>
 						$module_new_version_available</td>

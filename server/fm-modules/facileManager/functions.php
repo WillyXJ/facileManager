@@ -83,6 +83,7 @@ function throwHTTPError($code = '404') {
 function isUpgradeAvailable() {
 	global $fmdb;
 	
+	/** fM Core */
 	include(ABSPATH . 'fm-includes/version.php');
 	
 	$running_db_version = getOption('fm_db_version');
@@ -94,6 +95,14 @@ function isUpgradeAvailable() {
 	}
 	
 	if ($running_db_version < $fm_db_version) return true;
+	
+	/** Module upgrades */
+	$fmdb->get_results("SELECT module_name,option_value FROM fm_options WHERE option_name='version'");
+	for ($x=0; $x<$fmdb->num_rows; $x++) {
+		$module_name = $fmdb->last_result[$x]->module_name;
+		include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+		if (version_compare($fmdb->last_result[$x]->option_value, $__FM_CONFIG[$module_name]['version'], '<')) return true;
+	}
 	
 	return false;
 }
@@ -1720,11 +1729,13 @@ function bailOut($message, $title = null) {
  * @return string
  */
 function displayProgress($step, $result, $noisy = true) {
+	global $fmdb;
+	
 	if ($result == true) {
 		$output = '<i class="fa fa-check fa-lg"></i>';
 		$status = 'success';
 	} else {
-		$output = '<i class="fa fa-times fa-lg"></i>';
+		$output = '<a href="#" class="error-message tooltip-right" data-tooltip="' . $fmdb->last_error . '"><i class="fa fa-times fa-lg"></i></a>';
 		$status = 'failed';
 	}
 	
@@ -1739,7 +1750,7 @@ HTML;
 	if ($noisy) {
 		echo $message;
 		return $result;
-	} else return $message;
+	} else return $result;
 }
 
 

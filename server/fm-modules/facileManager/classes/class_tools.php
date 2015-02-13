@@ -45,7 +45,7 @@ class fm_tools {
 			if (function_exists($function)) {
 				$output = $function(null, $__FM_CONFIG['db']['name'], $module_name, false);
 			}
-			if (strpos($output, 'Success') === false) {
+			if ($output != true) {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
 				return sprintf('<p>' . _('%s installation failed!') . '</p>%s', $module_name, $error);
 			}
@@ -62,7 +62,7 @@ class fm_tools {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function upgradeModule($module_name = null) {
+	function upgradeModule($module_name = null, $process = 'noisy') {
 		global $fmdb;
 		
 		if (!$module_name) {
@@ -81,11 +81,13 @@ class fm_tools {
 				$output = $function($module_name);
 			}
 			if ($output !== true) {
+				if ($process == 'quiet') return false;
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
 				return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
 			} else {
 				setOption('version', $__FM_CONFIG[$module_name]['version'], 'auto', false, 0, $module_name);
 				if ($fmdb->last_error) {
+					if ($process == 'quiet') return false;
 					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
 					return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
 				}
@@ -95,7 +97,7 @@ class fm_tools {
 			addLogEntry(sprintf(_('%s was upgraded to %s.'), $module_name, $__FM_CONFIG[$module_name]['version']), $module_name);
 		}
 		
-		return sprintf('<p>' . _('%s was upgraded successfully! Make sure you upgrade your clients with the updated client files (if applicable).') . '</p>', $module_name);
+		return ($process == 'quiet') ? true : sprintf('<p>' . _('%s was upgraded successfully! Make sure you upgrade your clients with the updated client files (if applicable).') . '</p>', $module_name);
 	}
 	
 	/**
@@ -104,7 +106,7 @@ class fm_tools {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function manageModule($action = null, $module_name = null) {
+	function manageModule($module_name = null, $action = null) {
 		global $__FM_CONFIG;
 		
 		if (!$module_name || !in_array($module_name, getAvailableModules())) {
@@ -116,13 +118,18 @@ class fm_tools {
 		
 		switch($action) {
 			case 'activate':
+				/** Ensure $module_name is not already active */
 				if (in_array($module_name, getActiveModules())) return;
+				
+				/** Ensure $module_name is installed */
+				if (getOption('version', 0, $module_name) === false) return;
 				
 				$current_active_modules[] = $module_name;
 				return setOption('fm_active_modules', $current_active_modules, 'auto', true, $_SESSION['user']['account_id']);
 
 				break;
 			case 'deactivate':
+				/** Ensure $module_name is not already deactivated */
 				if (!in_array($module_name, getActiveModules())) return;
 				
 				$new_array = array();

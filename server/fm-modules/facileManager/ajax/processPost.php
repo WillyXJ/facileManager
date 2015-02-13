@@ -60,8 +60,24 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 /** Handle bulk actions */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
-	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('upgrade', 'build config'))) {
+	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('update', 'build config', 'activate', 'deactivate'))) {
 	switch($_POST['bulk_action']) {
+		/** Handle module activate/deactivate */
+		case 'activate':
+		case 'deactivate':
+		case 'uninstall':
+			/** Check permissions */
+			if (!currentUserCan('manage_modules')) {
+				returnUnAuth();
+			}
+			
+			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
+
+			$bulk_class = $fm_tools;
+			$bulk_function = 'manageModule';
+			$page = _('Modules');
+			
+			break;
 		/** Handle client upgrades */
 		case 'upgrade':
 			/** Check permissions */
@@ -69,7 +85,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				returnUnAuth();
 			}
 			
+			$bulk_class = $fm_shared_module_servers;
 			$bulk_function = 'doClientUpgrade';
+			$page = _('Servers');
 			break;
 		/** Handle client server config builds */
 		case 'build config':
@@ -78,20 +96,23 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				returnUnAuth();
 			}
 			
+			$bulk_class = $fm_shared_module_servers;
 			$bulk_function = 'doBulkServerBuild';
+			$page = _('Servers');
 			break;
 	}
-	$result = "<pre>\n";
+	$output = null;
 	if (is_array($_POST['item_id'])) {
-		foreach ($_POST['item_id'] as $serial_no) {
-			if (!is_numeric($serial_no)) continue;
+		foreach ($_POST['item_id'] as $id) {
+//			if (!is_numeric($id)) continue;
 			
-			$result .= $fm_shared_module_servers->$bulk_function($serial_no);
-			$result .= "\n";
+			$result = $bulk_class->$bulk_function($id, $_POST['bulk_action']);
+			if (!is_int($result)) $output .= $result . "\n";
 		}
 	}
-	$result .= "</pre>\n<p class=\"complete\">" . ucwords($_POST['bulk_action']) . ' is complete.</p>';
-	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $result . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL('Servers'));
+	if (isset($output)) $output = "<pre>$output</pre>\n";
+	$output .= "<p class=\"complete\">" . _('Complete') . '.</p>';
+	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $output . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL($page));
 
 /** Handle mass updates */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {

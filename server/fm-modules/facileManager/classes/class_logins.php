@@ -62,6 +62,7 @@ class fm_login {
 			</tr>
 		</table>
 		%6$s
+		<div id="message"></div>
 		</form>
 		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'), _('Password'), $forgot_link);
 		
@@ -320,6 +321,8 @@ class fm_login {
 			$this->updateSessionDB($_SESSION['user']['name']);
 			@session_unset($_SESSION['user']);
 			setcookie('myid', '');
+			@session_destroy();
+			unset($_COOKIE['myid']);
 		}
 	}
 	

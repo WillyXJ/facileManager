@@ -31,7 +31,7 @@ $fm_version = '2.0-beta1';
  *
  * @global int $fm_db_version
  */
-$fm_db_version = 38;
+$fm_db_version = 40;
 
 /**
  * Holds the required PHP version
