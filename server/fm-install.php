@@ -325,7 +325,7 @@ function checkAccountCreation($link, $database) {
 	$query = "SELECT user_id FROM $database.fm_users WHERE user_id='1'";
 	$result = mysql_query($query, $link);
 	
-	return ($result && mysql_num_rows($result)) ? true : false;
+	return ($result === false || ($result && @mysql_num_rows($result))) ? true : false;
 }
 
 ?>

@@ -157,7 +157,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		/** Ensure selected module is indeed active */
 		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name && !in_array($_SESSION['module'], getActiveModules())) {
 			$_SESSION['module'] = $fm_name;
-			header('Location: ' . $GLOBALS['RELPATH'] . 'admin-modules');
+			header('Location: ' . $GLOBALS['RELPATH'] . 'admin-modules.php');
 			exit;
 		}
 		

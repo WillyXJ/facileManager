@@ -1,3 +1,7 @@
+2.0-beta2 (2015-0?-??)
+======================
+* Server - [improvement] The installer now uses checkmarks instead of text.
+
 2.0-beta1 (2015-01-24)
 ======================
 * Server - [security] Added ability to enable/disable automatic client

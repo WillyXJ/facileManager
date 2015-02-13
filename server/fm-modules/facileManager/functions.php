@@ -1720,20 +1720,25 @@ function bailOut($message, $title = null) {
  * @return string
  */
 function displayProgress($step, $result, $noisy = true) {
-	$output = ($result == true) ? _('Success') : _('Failed');
-	$color = strtolower($output);
+	if ($result == true) {
+		$output = '<i class="fa fa-check fa-lg"></i>';
+		$status = 'success';
+	} else {
+		$output = '<i class="fa fa-times fa-lg"></i>';
+		$status = 'failed';
+	}
 	
 	$message = <<<HTML
 	<tr>
 		<th>$step</th>
-		<td class="status $color">$output!</td>
+		<td class="status $status">$output</td>
 	</tr>
 
 HTML;
 
 	if ($noisy) {
 		echo $message;
-		return $output;
+		return $result;
 	} else return $message;
 }
 

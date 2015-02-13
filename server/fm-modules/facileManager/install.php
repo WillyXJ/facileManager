@@ -159,11 +159,11 @@ function installDatabase($link, $database) {
 		$result = mysql_query($query, $link);
 		$output = displayProgress(_('Creating Database'), $result);
 	} else {
-		$output = _('Success');
+		$output = true;
 	}
 	
-	if ($output == _('Success')) $output = installSchema($link, $database);
-	if ($output == _('Success')) {
+	if ($output == true) $output = installSchema($link, $database);
+	if ($output == true) {
 		$modules = getAvailableModules();
 		if (count($modules)) {
 			echo '<tr>
@@ -178,7 +178,7 @@ function installDatabase($link, $database) {
 					if (function_exists($function)) {
 						$output = $function($link, $database, $module_name);
 					}
-					if ($output == _('Success')) {
+					if ($output == true) {
 						addLogEntry(sprintf(_('%s %s was born.'), $module_name, $fm_version), $module_name, $link);
 					}
 				}
@@ -186,7 +186,7 @@ function installDatabase($link, $database) {
 		}
 	}
 	
-	return ($output == _('Success')) ? true : false;
+	return ($output == true) ? true : false;
 }
 
 
