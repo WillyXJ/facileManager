@@ -1728,14 +1728,21 @@ function bailOut($message, $title = null) {
  * @param boolean $noisy Whether the result should be echoed
  * @return string
  */
-function displayProgress($step, $result, $noisy = true) {
+function displayProgress($step, $result, $process = 'noisy', $error = null) {
 	global $fmdb;
 	
 	if ($result == true) {
 		$output = '<i class="fa fa-check fa-lg"></i>';
 		$status = 'success';
 	} else {
-		$output = '<a href="#" class="error-message tooltip-right" data-tooltip="' . $fmdb->last_error . '"><i class="fa fa-times fa-lg"></i></a>';
+		global $fmdb;
+		
+		if (!$error) $error = $fmdb->last_error;
+		if ($error) {
+			$output = '<a href="#" class="error-message tooltip-right" data-tooltip="' . $error . '"><i class="fa fa-times fa-lg"></i></a>';
+		} else {
+			$output = '<i class="fa fa-times fa-lg"></i>';
+		}
 		$status = 'failed';
 	}
 	
@@ -1747,9 +1754,11 @@ function displayProgress($step, $result, $noisy = true) {
 
 HTML;
 
-	if ($noisy) {
+	if ($process == 'noisy') {
 		echo $message;
 		return $result;
+	} elseif ($process == 'display') {
+		return $message;
 	} else return $result;
 }
 

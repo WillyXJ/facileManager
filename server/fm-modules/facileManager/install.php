@@ -384,8 +384,7 @@ INSERT;
 	foreach ($table as $schema) {
 		$result = @mysql_query($schema, $link);
 		if (mysql_error()) {
-			echo mysql_error();
-			return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result);
+			return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result, 'noisy', mysql_error());
 		}
 	}
 
@@ -396,8 +395,7 @@ INSERT;
 		foreach ($inserts as $query) {
 			$result = @mysql_query($query, $link);
 			if (mysql_error()) {
-				echo mysql_error();
-				return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result);
+				return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result, 'noisy', mysql_error());
 			}
 		}
 	}

@@ -20,7 +20,7 @@
  +-------------------------------------------------------------------------+
 */
 
-function installfmSQLPassSchema($link, $database, $module, $noisy = true) {
+function installfmSQLPassSchema($link, $database, $module, $noisy = 'noisy') {
 	/** Include module variables */
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
@@ -94,13 +94,13 @@ INSERT;
 		if ($link) {
 			$result = mysql_query($schema, $link);
 			if (mysql_error($link)) {
-				return mysql_error($link);
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
 			}
 		} else {
 			global $fmdb;
 			$result = $fmdb->query($schema);
 			if ($fmdb->last_error) {
-				return $fmdb->last_error;
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
 			}
 		}
 	}
@@ -110,12 +110,12 @@ INSERT;
 		if ($link) {
 			$result = mysql_query($query, $link);
 			if (mysql_error($link)) {
-				return mysql_error($link);
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
 			}
 		} else {
 			$result = $fmdb->query($query);
 			if ($fmdb->last_error) {
-				return $fmdb->last_error;
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
 			}
 		}
 	}
