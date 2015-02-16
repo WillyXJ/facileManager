@@ -72,7 +72,8 @@ function checkAppVersions($single_check = true) {
 		}
 	}
 	
-	/** Apache mod_rewrite module */
+	/*
+	// Apache mod_rewrite module
 	if (!in_array('mod_rewrite', apache_get_modules())) {
 		if ($single_check) {
 			bailOut(sprintf('<p style="text-align: center;">Your Apache installation appears to be missing the mod_rewrite module which is required by %1s.</p>', $fm_name));
@@ -83,11 +84,21 @@ function checkAppVersions($single_check = true) {
 	} else {
 		if (!$single_check) $requirement_check .= displayProgress('Apache mod_rewrite Loaded', true, false);
 	}
+	*/
 	
 	/** .htaccess file */
 	if (!file_exists(ABSPATH . '.htaccess')) {
 		if (is_writeable(ABSPATH)) {
-			file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_rewrite.c>
+			file_put_contents(ABSPATH . '.htaccess', '<ifmodule mod_headers.c>
+    <FilesMatch "\.(js|css|txt)$">
+        Header set Cache-Control "max-age=7200"
+    </FilesMatch>
+    <FilesMatch "\.(jpe?g|png|gif|ico)$">
+        Header set Cache-Control "max-age=2592000"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f

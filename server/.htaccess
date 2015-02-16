@@ -1,3 +1,12 @@
+<ifmodule mod_headers.c>
+    <FilesMatch "\.(js|css|txt)$">
+        Header set Cache-Control "max-age=7200"
+    </FilesMatch>
+    <FilesMatch "\.(jpe?g|png|gif|ico)$">
+        Header set Cache-Control "max-age=2592000"
+    </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
