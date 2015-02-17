@@ -15,6 +15,7 @@ label {
 	cursor: pointer;
 	position: relative;
 	top: -1px;
+	color: #000;
 }
 
 label.radio {

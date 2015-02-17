@@ -200,15 +200,19 @@ $(document).ready(function() {
     });
 
 	$(".existing-container .display_results").delegate("input:not([id^=\'record_delete_\']), select", "change", function(e) {
-		$(this).parent().parent().addClass("build");
+		if ($(this).attr("type") == "checkbox") {
+			$(this).parent().parent().parent().addClass("build");
+		} else {
+			$(this).parent().parent().addClass("build");
+		}
     });
 
 	/* Record delete checkbox */
 	$(".display_results").delegate("input[id^=\'record_delete_\']", "click tap", function(e) {
 		if ($(this).is(":checked")) {
-			$(this).parent().parent().addClass("attention");
+			$(this).parent().parent().parent().addClass("attention");
 		} else {
-			$(this).parent().parent().removeClass("attention");
+			$(this).parent().parent().parent().removeClass("attention");
 		}
 	});
 

@@ -130,7 +130,7 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_id!={$post['cfg_id']} AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_id!={$post['cfg_id']} AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->cfg_id != $post['cfg_id']) {
@@ -138,7 +138,6 @@ class fm_module_options {
 				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
 				$fmdb->get_results($query);
 				if ($num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
-					var_dump($num_same_config);exit;
 					return 'This record already exists.';
 				}
 			}

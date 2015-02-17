@@ -39,7 +39,23 @@ class fm_module_buildconf {
 			$preview .= str_repeat('=', 75) . "\n";
 			$preview .= $filename . ":\n";
 			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $contents . "\n\n";
+			if (strpos($check_status, 'error') !== false) {
+				$i = 1;
+				$contents_array = explode("\n", $contents);
+				foreach ($contents_array as $line) {
+					$preview .= '<font color="#ccc">' . str_pad($i, strlen(count($contents_array)), ' ', STR_PAD_LEFT) . '</font> ';
+					if (strpos($check_status, "$filename:$i:") !== false) {
+						$preview .= sprintf('<font color="red">%s</font>', $line);
+					} else {
+						$preview .= $line;
+					}
+					$preview .= "\n";
+					$i++;
+				}
+				$preview .= "\n";
+			} else {
+				$preview .= "$contents\n\n";
+			}
 		}
 		
 		return array($preview, $check_status);
