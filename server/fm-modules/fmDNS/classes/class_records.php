@@ -498,7 +498,7 @@ class fm_dns_records {
 		}
 		
 		if (array_search('template_menu', $show) !== false) {
-			$soa_templates = buildSelect("{$action}[soa_template_chosen]", 'soa_template_chosen', $this->availableSOATemplates(), $soa_id);
+			$soa_templates = buildSelect("{$action}[soa_template_chosen]", 'soa_template_chosen', $this->availableSOATemplates(sanitize($_GET['map'])), $soa_id);
 			$soa_templates = sprintf('<div class="soa-template-dropdown">
 		<strong>%s</strong>
 		%s
@@ -527,6 +527,15 @@ HTML;
 			<input type="checkbox" id="soa_default" name="%3$s[%7$d][soa_default]" value="yes" %5$s /><label for="soa_default"> %6$s</label></td>
 		</tr>', $template_name_show_hide, _('Template Name'), $action, $soa_name,
 					$soa_default_checked, _('Make Default Template'), $soa_id);
+		}
+		
+		if (array_key_exists('map', $_GET) && sanitize($_GET['map']) == 'reverse') {
+			$template_append = null;
+		} else {
+			$template_append = sprintf('<tr>
+			<th>Append Domain</th>
+			<td><input type="radio" id="append[0]" name="%1$s[%2$s][soa_append]" value="yes" %3$s /><label class="radio" for="append[0]"> yes</label> <input type="radio" id="append[1]" name="%1$s[%2$s][soa_append]" value="no" %4$s /><label class="radio" for="append[1]"> no</label></td>
+		</tr>', $action, $soa_id, $yeschecked, $nochecked);
 		}
 	
 		return <<<HTML
@@ -561,10 +570,7 @@ HTML;
 			<th>TTL</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_ttl]" size="25" value="$soa_ttl" $disabled /></td>
 		</tr>
-		<tr>
-			<th>Append Domain</th>
-			<td><input type="radio" id="append[0]" name="{$action}[$soa_id][soa_append]" value="yes" $yeschecked /><label class="radio" for="append[0]"> yes</label> <input type="radio" id="append[1]" name="{$action}[$soa_id][soa_append]" value="no" $nochecked /><label class="radio" for="append[1]"> no</label></td>
-		</tr>
+		$template_append
 		$create_template
 		$template_name
 	</table>
@@ -631,14 +637,19 @@ HTML;
 	 *
 	 * @return array
 	 */
-	function availableSOATemplates() {
+	function availableSOATemplates($map) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$return[0][] = _('Custom');
 		$return[0][] = '0';
 		
-		$query = "SELECT soa_id,soa_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}soa WHERE account_id='{$_SESSION['user']['account_id']}' 
-			AND soa_status='active' AND soa_template='yes' ORDER BY soa_name ASC";
+		if ($map == 'forward') {
+			$query = "SELECT soa_id,soa_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}soa WHERE account_id='{$_SESSION['user']['account_id']}' 
+				AND soa_status='active' AND soa_template='yes' ORDER BY soa_name ASC";
+		} else {
+			$query = "SELECT soa_id,soa_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}soa WHERE account_id='{$_SESSION['user']['account_id']}' 
+				AND soa_status='active' AND soa_template='yes' AND soa_append='no' ORDER BY soa_name ASC";
+		}
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;

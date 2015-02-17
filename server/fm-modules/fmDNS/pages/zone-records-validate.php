@@ -254,6 +254,9 @@ function validateEntry($action, $id, $data, $record_type) {
 			$fm_dns_records->assignSOA($_POST['create']['soa_template_chosen'], $_POST['domain_id']);
 			header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $_POST['domain_id'] . '&record_type=SOA');
 		}
+		if (!isset($data['soa_append'])) {
+			$data['soa_append'] = 'no';
+		}
 		foreach ($data as $key => $val) {
 			if (in_array($key, array('domain_id', 'soa_status'))) continue;
 			if ($key == 'soa_email_address') {

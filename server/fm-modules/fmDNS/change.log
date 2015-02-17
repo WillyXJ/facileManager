@@ -3,6 +3,8 @@
 * Server - [feature] Automatically updates PTR record when updating an existing
            A record and ticking 'Create PTR' box. (Issue #129)
 * Server - [bug] Fixed address_match_element display during build config.
+* Server - [improvement] Appending domains in SOA records for reverse zones
+           are no longer allowed. (Issue #176)
 
 2.0-beta1 (2015-01-24)
 ======================

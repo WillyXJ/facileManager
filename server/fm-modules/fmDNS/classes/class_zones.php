@@ -646,7 +646,7 @@ HTML;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$soa_templates = '<tr id="define_soa">
 					<th>SOA</th>
-					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates(), $fm_dns_records->getDefaultSOA()) . '</td></tr>';
+					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates($map), $fm_dns_records->getDefaultSOA()) . '</td></tr>';
 		} else {
 			$zone_show = 'block';
 			$soa_show = 'none';
