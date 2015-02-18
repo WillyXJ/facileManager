@@ -493,7 +493,7 @@ To reset your password, click the following link:
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
 		if ($ldap_encryption == 'SSL') {
-			$ldap_connect = @ldap_connect('ldaps://' . $ldap_server . ':' . $ldap_port_ssl);
+			$ldap_connect = @ldap_connect('ldaps://' . $ldap_server, $ldap_port_ssl);
 		} else {
 			$ldap_connect = @ldap_connect($ldap_server, $ldap_port);
 		}
@@ -506,11 +506,9 @@ To reset your password, click the following link:
 			}
 			
 			/** Set referrals */
-			if (!$ldap_referrals) {
-				if(!@ldap_set_option($ldap_connect, LDAP_OPT_REFERRALS, 0)) {
-					@ldap_close($ldap_connect);
-					return false;
-				}
+			if(!@ldap_set_option($ldap_connect, LDAP_OPT_REFERRALS, $ldap_referrals)) {
+				@ldap_close($ldap_connect);
+				return false;
 			}
 			
 			/** Start TLS if requested */
@@ -568,13 +566,15 @@ To reset your password, click the following link:
 	function createUserFromTemplate($username) {
 		global $fmdb;
 		
+		$template_user_id = getOption('ldap_user_template');
+		
 		/** User does not exist in database - get the template user */
-		$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_id` = " . getOption('ldap_user_template'));
+		$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_id` = " . $template_user_id);
 		if (!$fmdb->num_rows) return false;
 		
 		/** Attempt to add the new LDAP user to the database based on the template */
-		$fmdb->query("INSERT INTO `fm_users` (`account_id`,`user_login`, `user_password`, `user_email`, `user_auth_type`, `user_caps`) 
-					SELECT `account_id`, '$username', '', '', 2, `user_caps` from `fm_users` WHERE `user_id`=" . getOption('ldap_user_template'));
+		$fmdb->query("INSERT INTO `fm_users` (`account_id`,`user_login`, `user_password`, `user_email`, `user_default_module`, `user_auth_type`, `user_caps`) 
+					SELECT `account_id`, '$username', '', '', `user_default_module`, 2, `user_caps` from `fm_users` WHERE `user_id`=" . $template_user_id);
 		if (!$fmdb->rows_affected) return false;
 		
 		/** Get the user results now */

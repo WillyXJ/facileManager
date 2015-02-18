@@ -365,7 +365,7 @@ class fm_settings {
 						<div id="setting-row">
 							<div class="description">
 								<label for="ldap_referrals">Referrals</label>
-								<p>Enable or disabled LDAP referrals.</p>
+								<p>Enable or disable LDAP referrals.</p>
 							</div>
 							<div class="choices">
 								$ldap_referrals_list
@@ -693,11 +693,13 @@ FORM;
 		
 		basicGetList('fm_users', 'user_login', 'user_', $sql = 'AND user_auth_type<2');
 		
-		$user_list = null;
+		$user_list[0][] = _('None');
+		$user_list[0][] = 0;
+		
 		$user_result = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$user_list[$i][] = $user_result[$i]->user_login;
-			$user_list[$i][] = $user_result[$i]->user_id;
+		for ($i=1; $i<=$fmdb->num_rows; $i++) {
+			$user_list[$i][] = $user_result[$i-1]->user_login;
+			$user_list[$i][] = $user_result[$i-1]->user_id;
 		}
 		
 		return $user_list;

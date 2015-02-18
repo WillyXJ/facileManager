@@ -181,7 +181,7 @@ echo '$(document).ready(function() {
     });
     
 	/* Form edits */
-    $("#table_edits").delegate("a.edit_form_link", "click tap", function(e) {
+    $("#table_edits").delegate("a.edit_form_link, a.copy_form_link", "click tap", function(e) {
         var $this 		= $(this);
         var $row_id		= $this.parent().parent();
         item_id			= $row_id.attr("id");
@@ -212,6 +212,10 @@ echo '$(document).ready(function() {
 			is_ajax: 1
 		};
 
+		if ($(this).hasClass("copy_form_link") == true) {
+			form_data["add_form"] = true;
+		}
+		
 		$.ajax({
 			type: "POST",
 			url: "fm-modules/facileManager/ajax/getData.php",
@@ -500,6 +504,17 @@ echo '$(document).ready(function() {
 			}
 		});
     });
+
+	/* Account authentication method changes */
+	$("#manage_item_contents").delegate("#user_auth_type", "change", function(e) {
+		if ($(this).val() == 2) {
+			$("tr.user_password").hide();
+			$("input#submit").removeAttr("disabled");
+		} else {
+			$("tr.user_password").show();
+			$("input#submit").attr("disabled", "disabled");
+		}
+	});
 
 	/* Account password reset */
     $(".reset_password").click(function() {

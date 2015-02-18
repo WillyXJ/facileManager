@@ -48,6 +48,7 @@ $__FM_CONFIG['icons']['ok']				= sprintf('<img src="fm-modules/%1$s/images/ok24.
 $__FM_CONFIG['icons']['add']			= sprintf('<img src="fm-modules/%1$s/images/plus16.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Add New'));
 $__FM_CONFIG['icons']['edit']			= sprintf('<img src="fm-modules/%1$s/images/edit24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit'));
 $__FM_CONFIG['icons']['delete']			= sprintf('<img src="fm-modules/%1$s/images/delete24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Delete'));
+$__FM_CONFIG['icons']['copy']			= sprintf('<img src="fm-modules/%1$s/images/copy24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Duplicate'));
 $__FM_CONFIG['icons']['enable']			= sprintf('<img src="fm-modules/%1$s/images/enable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Enable'));
 $__FM_CONFIG['icons']['disable']		= sprintf('<img src="fm-modules/%1$s/images/disable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Disable'));
 $__FM_CONFIG['icons']['popout']			= sprintf('<img src="fm-modules/%1$s/images/popout24.png" border="0" alt="%2$s" title="%2$s" width="20" class="popout" />', $fm_name, _('Popout'));

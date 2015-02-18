@@ -5,6 +5,9 @@
 * Server - [improvement] The upgrader will now run the module upgrade routines.
 * Server - [improvement] Server config build previews now display line numbers
            and highlight lines in question.
+* Server - [feature] User accounts can now be created from a user template.
+* Server - [improvement] LDAP user template can now be undefined which will deny
+           authentication. This is to add another level of user access control.
 
 2.0-beta1 (2015-01-24)
 ======================

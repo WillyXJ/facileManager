@@ -274,7 +274,7 @@ HTML;
 			}
 
 			$star = currentUserCan('do_everything') ? $__FM_CONFIG['icons']['star'] . ' ' : null;
-			$change_pwd_link = ($auth_method == 1) ? sprintf('<li><a class="account_settings" id="%s" href="#"><span>%s</span></a></li>' . "\n", $_SESSION['user']['id'], _('Edit Profile')) : null;
+			$change_pwd_link = ($auth_method) ? sprintf('<li><a class="account_settings" id="%s" href="#"><span>%s</span></a></li>' . "\n", $_SESSION['user']['id'], _('Edit Profile')) : null;
 			$logout = _('Logout');
 			$user_account_menu = <<<HTML
 		<div id="topheadpartright" style="padding: 0 1px 0 0;">
@@ -1097,6 +1097,9 @@ function buildHelpFile() {
 				<li><b>Manage Settings</b><br />
 				This permission grants the user access to change system settings at Settings &rarr; <a href="__menu{Settings}">General</a>.</li>
 			</ul>
+			
+			<p>New user accounts can be created quickly from a template by duplicating the template user. This will prompt you for the new 
+			username and password while giving you the ability to change any other settings prior to user creation.</p>
 			<p><i>The 'User Management' or 'Super Admin' permission is required for these actions.</i></p>
 		</div>
 	</li>
@@ -1114,7 +1117,8 @@ function buildHelpFile() {
 				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users}">Users</a>.</li>
 				<li><b>LDAP Authentication</b><br />
 				Users are authenticated against a defined LDAP server. Upon success, users are created in the $fm_name database using the selected 
-				template account for granular permissions within the environment. These users cannot be disabled nor can their passwords be changed 
+				template account for granular permissions within the environment. If no template is selected then user authentication will fail 
+				(this is another method of controlling access to $fm_name). These users cannot be disabled nor can their passwords be changed 
 				within $fm_name. The PHP LDAP extensions have to be installed before this option is available.</li>
 			</ul>
 			<p><i>You can reset the authentication method by setting the following in config.inc.php:</i></p>

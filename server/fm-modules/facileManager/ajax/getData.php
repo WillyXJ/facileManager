@@ -45,7 +45,10 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
-	$form_bits = array('user_login', 'user_email', 'user_password', 'user_module');
+	$form_bits = array('user_login', 'user_email', 'user_module');
+	if (getOption('auth_method') == 1) {
+		$form_bits[] = 'user_password';
+	}
 	$edit_form = '<div id="popup_response" style="display: none;"></div>' . "\n";
 	basicGet('fm_users', $_SESSION['user']['id'], 'user_', 'user_id');
 	$results = $fmdb->last_result;
@@ -73,9 +76,19 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
 	if ($add_new) {
-		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_password', 'user_options', 'user_perms', 'user_module') : array('user_password');
+		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_auth_method', 'user_password', 'user_options', 'user_perms', 'user_module') : array('user_password');
 
-		$edit_form = $fm_users->printUsersForm(null, 'add', $form_bits);
+		$form_data = null;
+		if ($id) {
+			basicGet('fm_users', $id, 'user_', 'user_id');
+			$results = $fmdb->last_result;
+			if (!$fmdb->num_rows) returnError();
+
+			$form_data[] = $results[0];
+			$form_data[0]->user_login = null;
+			$form_data[0]->user_template_only = false;
+		}
+		$edit_form = $fm_users->printUsersForm($form_data, 'add', $form_bits);
 	} else {
 		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_options', 'user_perms', 'user_module') : array('user_password');
 

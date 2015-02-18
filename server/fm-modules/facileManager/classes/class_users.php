@@ -83,12 +83,16 @@ class fm_users {
 		} else {
 			$user_template_only = 'no';
 			$user_status = 'active';
-			$user_auth_type = 1;
+			$user_auth_type = sanitize($user_auth_type);
 		}
 
 		if (empty($user_login)) return _('No username defined.');
-		if (empty($user_password) && $user_template_only == 'no') return _('No password defined.');
-		if ($user_password != $cpassword && $user_template_only == 'no') return _('Passwords do not match.');
+		if ($user_auth_type == 2) {
+			$user_password = null;
+		} else {
+			if (empty($user_password) && $user_template_only == 'no') return _('No password defined.');
+			if ($user_password != $cpassword && $user_template_only == 'no') return _('Passwords do not match.');
+		}
 		if (empty($user_email) && $user_template_only == 'no') return _('No e-mail address defined.');
 		
 		/** Check name field length */
@@ -248,6 +252,9 @@ class fm_users {
 
 		if (currentUserCan('manage_users') && $_SESSION['user']['id'] != $row->user_id) {
 			$edit_status = null;
+			if ($row->user_template_only == 'yes') {
+				$edit_status .= '<a class="copy_form_link" href="#">' . $__FM_CONFIG['icons']['copy'] . '</a>';
+			}
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if ($row->user_template_only == 'no') {
 				if ($row->user_id != $_SESSION['user']['id']) {
@@ -352,30 +359,44 @@ HTML;
 				</tr>';
 		}
 
+		if (in_array('user_auth_method', $form_bits) && getOption('auth_method')) {
+			if (!isset($user_auth_type)) {
+				$user_auth_type = 1;
+			}
+			
+			$auth_method_types = $__FM_CONFIG['options']['auth_method'];
+			if (array_shift($auth_method_types) && count($auth_method_types) > 1) {
+				$return_form_rows .= '<tr>
+					<th width="33%" scope="row"><label for="user_email">' . _('Authentication Method') . '</label></th>
+					<td width="67%">' . buildSelect('user_auth_type', 'user_auth_type', $auth_method_types, $user_auth_type) . '</td>
+				</tr>';
+			}
+		}
+		
 		if (in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) {
 			if ($action == 'add') $button_disabled = 'disabled';
 			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
-			$return_form_rows .= '<tr>
+			$return_form_rows .= '<tr class="user_password">
 					<th width="33%" scope="row"><label for="user_password">' . _('User Password') . '</label></th>
 					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'user_password\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
 				</tr>
-				<tr>
+				<tr class="user_password">
 					<th width="33%" scope="row"><label for="cpassword">' . _('Confirm Password') . '</label></th>
 					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'cpassword\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
 				</tr>
-				<tr>
+				<tr class="user_password">
 					<th width="33%" scope="row">' . _('Password Validity') . '</th>
 					<td width="67%"><div id="passwd_check">' . _('No Password') . '</div></td>
 				</tr>
-				<tr class="pwdhint">
+				<tr class="pwdhint user_password">
 					<th width="33%" scope="row">' . _('Hint') . '</th>
 					<td width="67%">' . $__FM_CONFIG['password_hint'][$strength] . '</td>
 				</tr>';
 		}
 		
 		if (in_array('user_module', $form_bits)) {
-			$active_modules = $user_id ? getActiveModules(true) : getActiveModules();
+			$active_modules = ($user_id == $_SESSION['user']['id']) ? getActiveModules(true) : getActiveModules();
 			$user_module_options = buildSelect('user_default_module', 'user_default_module', $active_modules, $user_default_module);
 			unset($active_modules);
 			$return_form_rows .= '<tr>
@@ -507,6 +528,7 @@ PERM;
 		<script>
 			$(document).ready(function() {
 				$("select").select2({
+					containerCss: { "min-width": "165px" },
 					minimumResultsForSearch: -1
 				});
 				$("select.wide_select").select2({
