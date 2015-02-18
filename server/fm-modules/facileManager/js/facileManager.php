@@ -257,14 +257,21 @@ echo '$(document).ready(function() {
 			success: function(response)
 			{
 				if (response == "Success") {
-					$row_id.removeClass();
+					$row_id.removeClass("active disabled build");
 					$row_id.addClass(item_status);
 					if (item_status == "disabled") {
 						$this.attr("rel", "active");
 						$this.html("' . addslashes($__FM_CONFIG['icons']['enable']) . '");
+						$this.parent().find("#build").hide();
 					} else {
 						$this.attr("rel", "disabled");
 						$this.html("' . addslashes($__FM_CONFIG['icons']['disable']) . '");
+						if (item_type == "servers") {
+							if ($row_id.hasClass("attention") === false) {
+								$row_id.addClass("build");
+								$this.parent().find("a.edit_form_link").first().before("' . addslashes($__FM_CONFIG['module']['icons']['build']) . '");
+							}
+						}
 					}
 				} else {
 					var eachLine = response.split("\n");
