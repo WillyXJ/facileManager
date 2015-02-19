@@ -1,4 +1,4 @@
-2.0-?? (2015-??-??)
+2.0-beta2 (2015-02-18)
 ======================
 * Server - [feature] Automatically updates PTR record when updating an existing
            A record and ticking 'Create PTR' box. (Issue #129)

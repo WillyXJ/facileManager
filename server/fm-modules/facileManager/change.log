@@ -1,4 +1,4 @@
-2.0-beta2 (2015-0?-??)
+2.0-beta2 (2015-02-18)
 ======================
 * Server - [improvement] The installer now uses checkmarks instead of text.
 * Server - [improvement] Modules can now be managed in bulk.
