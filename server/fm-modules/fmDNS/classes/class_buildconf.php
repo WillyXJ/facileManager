@@ -951,7 +951,7 @@ class fm_module_buildconf {
 						break;
 					case 'TXT':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . "\t\"" . join('" " ', $this->characterSplit($record_result[$i]->record_value)) . "\"" . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . "\t(\"" . join("\";\n\t\t\"", $this->characterSplit($record_result[$i]->record_value)) . "\")" . $record_comment . "\n";
 						break;
 					case 'SSHFP':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
