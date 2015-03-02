@@ -60,10 +60,10 @@ class fm_module_servers {
 			if ($type == 'servers') {
 				$title_array[] = array('class' => 'header-tiny header-nosort');
 				$title_array = array_merge($title_array, array(array('title' => _('Hostname'), 'rel' => 'server_name'),
-					array('title' => _('Serial No'), 'rel' => 'server_serial_no'),
 					array('title' => _('Method'), 'rel' => 'server_update_method'),
 					array('title' => _('Key'), 'class' => 'header-nosort'),
 					array('title' => _('Server Type'), 'class' => 'header-nosort'),
+					array('title' => _('Version'), 'class' => 'header-nosort'),
 					array('title' => _('Run-as'), 'rel' => 'server_run_as_predefined'),
 					array('title' => _('Config File'), 'rel' => 'server_config_file'),
 					array('title' => _('Server Root'), 'rel' => 'server_root_dir'),
@@ -530,11 +530,11 @@ class fm_module_servers {
 		<tr id="$row->server_id" $class>
 			$checkbox
 			<td>$os_image</td>
-			<td>$edit_name</td>
-			<td>$row->server_serial_no</td>
+			<td title="$row->server_serial_no">$edit_name</td>
 			<td>$row->server_update_method $port</td>
 			<td>$key</td>
 			<td>$row->server_type</td>
+			<td>$row->server_version</td>
 			<td>$runas</td>
 			<td>$row->server_config_file</td>
 			<td>$row->server_root_dir</td>

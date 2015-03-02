@@ -1,3 +1,7 @@
+1.1-?? (2015-??-??)
+======================
+* Server - [feature] Firewall version is displayed on the servers page. (Issue #180)
+
 1.1-beta1 (2015-01-24)
 ======================
 * Server - [security] Added ability to enable/disable automatic client

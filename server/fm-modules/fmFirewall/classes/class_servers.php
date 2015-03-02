@@ -53,7 +53,7 @@ class fm_module_servers {
 						);
 
 			$title_array[] = array('class' => 'header-tiny');
-			$title_array = array_merge($title_array, array(_('Hostname'), _('Serial No'), _('Method'), _('Firewall Type'), _('Config File')));
+			$title_array = array_merge($title_array, array(_('Hostname'), _('Method'), _('Firewall Type'), _('Version'), _('Config File')));
 			$title_array[] = array(
 								'title' => _('Actions'),
 								'class' => 'header-actions'
@@ -255,10 +255,10 @@ class fm_module_servers {
 		<tr id="$row->server_id" $class>
 			$checkbox
 			<td>$os_image</td>
-			<td>$edit_name</td>
-			<td>$row->server_serial_no</td>
+			<td title="$row->server_serial_no">$edit_name</td>
 			<td>$row->server_update_method $port</td>
 			<td>$row->server_type</td>
+			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>
 			<td id="edit_delete_img">$edit_status</td>
 		</tr>

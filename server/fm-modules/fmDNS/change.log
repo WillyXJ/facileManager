@@ -2,6 +2,7 @@
 ======================
 * Server - [improvement] Added better support for long TXT RR (introduced in
            2.0-beta1). (Issue #171 #179)
+* Server - [feature] DNS server version is displayed on the servers page. (Issue #180)
 
 2.0-beta2 (2015-02-18)
 ======================
