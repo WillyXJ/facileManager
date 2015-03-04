@@ -78,6 +78,11 @@ switch ($step) {
 		@include(ABSPATH . 'config.inc.php');
 		$link = @mysql_connect($__FM_CONFIG['db']['host'], $__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass']);
 		
+		if (!$link) {
+			bailOut(_('The connection to the database has failed. Please check the configuration.') . '<p class="step"><a href="" class="button">' . _('Try Again') . '</a></p>');
+			break;
+		}
+		
 		if (version_compare(mysql_get_server_info(), $required_mysql_version, '<')) {
 			bailOut(sprintf('<p style="text-align: center;">' . _('Your MySQL server (%1$s) is running MySQL version %2$s but %3$s %4$s requires at least %5$s.') . '</p>', $__FM_CONFIG['db']['host'], mysql_get_server_info(), $fm_name, $fm_version, $required_mysql_version));
 			break;
