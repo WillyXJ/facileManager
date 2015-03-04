@@ -1495,10 +1495,13 @@ HTML;
 	 */
 	function buildFilterMenu() {
 		$domain_view = isset($_GET['domain_view']) ? $_GET['domain_view'] : 0;
-	
-		$return = '<form method="GET">' . buildSelect('domain_view', 'domain_view', $this->availableViews(), $domain_view, 1, null, true, null, null, _('Filter Views')) .
+		
+		$available_views = $this->availableViews();
+		if (count($available_views) > 1) {
+			return '<form method="GET">' . buildSelect('domain_view', 'domain_view', $available_views, $domain_view, 1, null, true, null, null, _('Filter Views')) .
 			'&nbsp;<input type="submit" name="" id="" value="' . _('Filter') . '" class="button" /></form>' . "\n";
-		return $return;
+		}
+		return null;
 	}
 	
 	
