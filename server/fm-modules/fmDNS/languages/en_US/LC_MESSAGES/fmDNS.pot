@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-17 09:37-0700\n"
+"POT-Creation-Date: 2015-03-05 15:20-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -399,7 +399,7 @@ msgstr ""
 msgid "ACL '%s' was deleted"
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_buildconf.php:1609
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_buildconf.php:1625
 #, php-format
 msgid "Cannot resolve %s"
 msgstr ""
@@ -471,7 +471,7 @@ msgid "There are no keys."
 msgstr ""
 
 #: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_keys.php:43
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:65
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:64
 msgid "Key"
 msgstr ""
 
@@ -623,11 +623,11 @@ msgstr ""
 msgid "A database error occurred."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_options.php:192
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_options.php:191
 msgid "This option could not be deleted."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_options.php:195
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_options.php:194
 #, php-format
 msgid "Option '%s' for %s was deleted."
 msgstr ""
@@ -779,7 +779,7 @@ msgstr ""
 msgid "Make Default Template"
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_records.php:637
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_records.php:643
 msgid "Custom"
 msgstr ""
 
@@ -801,15 +801,15 @@ msgid "Hostname"
 msgstr ""
 
 #: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:63
-msgid "Serial No"
-msgstr ""
-
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:64
 msgid "Method"
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:66
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:65
 msgid "Server Type"
+msgstr ""
+
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:66
+msgid "Version"
 msgstr ""
 
 #: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_servers.php:67
@@ -1304,11 +1304,11 @@ msgstr ""
 msgid "inherited"
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_zones.php:1499
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_zones.php:1501
 msgid "Filter Views"
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_zones.php:1500
+#: /var/www/html/fM/server/fm-modules/fmDNS/classes/class_zones.php:1502
 msgid "Filter"
 msgstr ""
 
@@ -1429,8 +1429,8 @@ msgstr ""
 
 #: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:192
 #: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:198
-#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:281
-#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:286
+#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:284
+#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:289
 msgid "Invalid"
 msgstr ""
 
@@ -1447,15 +1447,15 @@ msgstr ""
 msgid "Invalid value"
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:448
+#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:451
 msgid "Reverse zone does not exist."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:478
+#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:481
 msgid "Created reverse zone."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:481
+#: /var/www/html/fM/server/fm-modules/fmDNS/pages/zone-records-validate.php:484
 msgid "Forward domain not found."
 msgstr ""
 
