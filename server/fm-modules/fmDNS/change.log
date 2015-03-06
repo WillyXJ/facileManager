@@ -1,5 +1,5 @@
-2.0-?? (2015-??-??)
-======================
+2.0-rc1 (2015-03-05)
+====================
 * Server - [improvement] Added better support for long TXT RR (introduced in
            2.0-beta1). (Issue #171 #179)
 * Server - [feature] DNS server version is displayed on the servers page. (Issue #180)

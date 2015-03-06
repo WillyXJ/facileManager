@@ -1,5 +1,5 @@
-2.0-?? (2015-??-??)
-======================
+2.0-rc1 (2015-03-05)
+====================
 * Server - [improvement] The installer provides the correct error message when
            the database connection fails.
 * Server - [improvement] The installer now works with MySQL auto_increment_offset
