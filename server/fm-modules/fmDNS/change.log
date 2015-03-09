@@ -1,3 +1,7 @@
+2.0-?? (2015-??-??)
+====================
+* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
+
 2.0-rc1 (2015-03-05)
 ====================
 * Server - [improvement] Added better support for long TXT RR (introduced in

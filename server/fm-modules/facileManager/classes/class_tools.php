@@ -208,13 +208,13 @@ class fm_tools {
 		$exclude_warnings = array('Warning: Using a password on the command line interface can be insecure.' . "\n");
 		
 		$curdate = date("Y-m-d_H.i.s");
-		$sql_file = '/tmp/' . $__FM_CONFIG['db']['name'] . '_' . $curdate . '.sql';
+		$sql_file = sys_get_temp_dir() . '/' . $__FM_CONFIG['db']['name'] . '_' . $curdate . '.sql';
 		$error_log = str_replace('.sql', '.err', $sql_file);
 		
 		$mysqldump = findProgram('mysqldump');
 		if (!$mysqldump) return sprintf('<p class="error">' . _('mysqldump is not found on %s.') . '</p>', php_uname('n'));
 		
-		$command_string = "$mysqldump --opt -Q -h {$__FM_CONFIG['db']['host']} -u {$__FM_CONFIG['db']['user']} -p{$__FM_CONFIG['db']['pass']} {$__FM_CONFIG['db']['name']} > /tmp/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
+		$command_string = "$mysqldump --opt -Q -h {$__FM_CONFIG['db']['host']} -u {$__FM_CONFIG['db']['user']} -p{$__FM_CONFIG['db']['pass']} {$__FM_CONFIG['db']['name']} > " . sys_get_temp_dir() . "/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
 		@system($command_string, $retval);
 		$retarr = @file_get_contents($error_log);
 		

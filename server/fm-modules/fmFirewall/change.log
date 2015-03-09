@@ -1,3 +1,7 @@
+1.1-?? (2015-??-??)
+====================
+* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
+
 1.1-rc1 (2015-03-05)
 ====================
 * Server - [feature] Firewall version is displayed on the servers page. (Issue #180)

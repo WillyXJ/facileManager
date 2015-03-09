@@ -318,10 +318,11 @@ function fmUpgrade_105($database) {
 	if ($success) {
 		$table = $inserts = $updates = null;
 
+		$tmp = sys_get_temp_dir();
 		/** Schema change */
 		$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_options` (`option_name`, `option_value`) 
-	SELECT 'fm_temp_directory', '/tmp' FROM DUAL
+	SELECT 'fm_temp_directory', '$tmp' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'fm_temp_directory');
 INSERT;

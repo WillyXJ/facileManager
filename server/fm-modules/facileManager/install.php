@@ -325,9 +325,10 @@ WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'time_format');
 INSERT;
 
+	$tmp = sys_get_temp_dir();
 	$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_options` (`account_id` ,`option_name`, `option_value`) 
-	SELECT 0, 'fm_temp_directory', '/tmp' FROM DUAL
+	SELECT 0, 'fm_temp_directory', '$tmp' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'fm_temp_directory');
 INSERT;

@@ -353,14 +353,14 @@ function upgradeFM($url, $data) {
 	$message = "Extracting client files.\n";
 	echo fM($message);
 	addLogEntry($message);
-	extractFiles(array('/tmp/' . $core_file, '/tmp/' . $module_file));
+	extractFiles(array(sys_get_temp_dir() . '/' . $core_file, sys_get_temp_dir() . '/' . $module_file));
 	
 	/** Cleanup */
 	$message = "Cleaning up.\n";
 	echo fM($message);
 	addLogEntry($message);
-	@unlink('/tmp/' . $core_file);
-	@unlink('/tmp/' . $module_file);
+	@unlink(sys_get_temp_dir() . '/' . $core_file);
+	@unlink(sys_get_temp_dir() . '/' . $module_file);
 	
 	$message = "Client upgrade complete.\n";
 	echo fM($message);
@@ -729,7 +729,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 	switch($update_method) {
 		/** cron */
 		case 'c':
-			$tmpfile = '/tmp/crontab.facileManager';
+			$tmpfile = sys_get_temp_dir() . '/crontab.facileManager';
 			$dump = shell_exec('crontab -l | grep -v ' . $argv[0] . '> ' . $tmpfile . ' 2>/dev/null');
 			
 			/** Handle special cases */
@@ -988,7 +988,7 @@ function downloadfMFile($file, $module = false) {
 	echo fM($base_url . "\n");
 	addLogEntry("Downloading $base_url\n");
 	
-	$local_file = '/tmp/' . $file;
+	$local_file = sys_get_temp_dir() . '/' . $file;
 	@unlink($local_file);
 	
 	$fh = fopen($local_file, 'w+');
@@ -1027,7 +1027,7 @@ function downloadfMFile($file, $module = false) {
  * @param array $files Files to extract
  */
 function extractFiles($files = array()) {
-	$tmp_dir = '/tmp/fM_files';
+	$tmp_dir = sys_get_temp_dir() . '/fM_files';
 	if (!is_dir($tmp_dir)) mkdir($tmp_dir);
 	
 	foreach ($files as $filename) {

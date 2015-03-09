@@ -881,7 +881,7 @@ FORM;
 					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL('General')));
 				}
 				
-				$temp_ssh_key = '/tmp/fm_id_rsa';
+				$temp_ssh_key = sys_get_temp_dir() . '/fm_id_rsa';
 				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
 					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
 				}

@@ -100,7 +100,7 @@ if (function_exists('posix_getpwuid')) {
 
 /** Constants */
 if (!defined('TMP_FILE_EXPORTS')) {
-	define('TMP_FILE_EXPORTS', '/tmp');
+	define('TMP_FILE_EXPORTS', sys_get_temp_dir());
 }
 
 /** PWD_STRENGTH */

@@ -123,13 +123,15 @@ class fm_settings {
 	function generateSSHKeyPair() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		/** Create the ssh key pair */
-		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f /tmp/fm_id_rsa -N ''", $exec_array, $retval);
-		$array['ssh_key_priv'] = @file_get_contents('/tmp/fm_id_rsa');
-		$array['ssh_key_pub'] = @file_get_contents('/tmp/fm_id_rsa.pub');
+		$tmp = sys_get_temp_dir();
 		
-		@unlink('/tmp/fm_id_rsa');
-		@unlink('/tmp/fm_id_rsa.pub');
+		/** Create the ssh key pair */
+		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f $tmp/fm_id_rsa -N ''", $exec_array, $retval);
+		$array['ssh_key_priv'] = @file_get_contents($tmp . '/fm_id_rsa');
+		$array['ssh_key_pub'] = @file_get_contents($tmp . '/fm_id_rsa.pub');
+		
+		@unlink($tmp . '/fm_id_rsa');
+		@unlink($tmp . '/fm_id_rsa.pub');
 		
 		if ($retval) {
 			return _('SSH key generation failed.');
@@ -170,6 +172,8 @@ class fm_settings {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		$local_hostname = php_uname('n');
+		
+		$tmp = sys_get_temp_dir();
 		
 		$save_button = currentUserCan('manage_settings') ? sprintf('<p><input type="button" name="save" id="save_fm_settings" value="%s" class="button primary" /></p>', _('Save')) : null;
 		$sshkey_button = currentUserCan('manage_settings') ? sprintf('<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="%s" class="button" />', _('Generate')) : null;
@@ -568,7 +572,7 @@ class fm_settings {
 							<p>Temporary directory on $local_hostname to use for scratch files (must be writeable by {$__FM_CONFIG['webserver']['user_info']['name']}).</p>
 						</div>
 						<div class="choices">
-							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="$fm_temp_directory" size="40" placeholder="/tmp" />
+							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="$fm_temp_directory" size="40" placeholder="$tmp" />
 						</div>
 					</div>
 				</div>
