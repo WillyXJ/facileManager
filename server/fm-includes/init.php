@@ -93,7 +93,16 @@ function checkAppVersions($single_check = true) {
 	if (!defined('FM_NO_HTACCESS')) {
 		if (!file_exists(ABSPATH . '.htaccess')) {
 			if (is_writeable(ABSPATH)) {
-				file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_rewrite.c>
+				file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_headers.c>
+	<FilesMatch "\.(js|css|txt)$">
+		Header set Cache-Control "max-age=7200"
+	</FilesMatch>
+	<FilesMatch "\.(jpe?g|png|gif|ico)$">
+		Header set Cache-Control "max-age=2592000"
+	</FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -105,7 +114,16 @@ RewriteRule . index.php [L]
 			} else {
 				if ($single_check) {
 					bailOut(sprintf(_('I cannot create the missing %1s.htaccess which is required by %2s so please create it with the following contents:'), ABSPATH, $fm_name) . 
-				'<textarea rows="8">&lt;IfModule mod_rewrite.c&gt;
+				'<textarea rows="8">&lt;IfModule mod_headers.c&gt;
+	&lt;FilesMatch "\.(js|css|txt)$"&gt;
+		Header set Cache-Control "max-age=7200"
+	&lt;/FilesMatch&gt;
+	&lt;FilesMatch "\.(jpe?g|png|gif|ico)$"&gt;
+		Header set Cache-Control "max-age=2592000"
+	&lt;/FilesMatch&gt;
+&lt;/IfModule&gt;
+
+&lt;IfModule mod_rewrite.c&gt;
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
