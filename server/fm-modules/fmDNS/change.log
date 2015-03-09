@@ -1,6 +1,7 @@
 2.0-?? (2015-??-??)
 ====================
 * Server - [improvement] Swapped /tmp for sys_get_temp_dir().
+* Server - [improvement] SSH keys can now be saved if the file already exists.
 
 2.0-rc1 (2015-03-05)
 ====================

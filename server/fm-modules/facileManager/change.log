@@ -2,6 +2,7 @@
 ====================
 * Server - [improvement] Swapped /tmp for sys_get_temp_dir().
 * Server - [improvement] Incorporated mod_headers to save bandwidth.
+* Server - [improvement] SSH keys can now be saved if the file already exists.
 
 2.0-rc1 (2015-03-05)
 ====================
