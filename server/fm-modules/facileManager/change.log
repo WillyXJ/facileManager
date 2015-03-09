@@ -1,6 +1,7 @@
 2.0-?? (2015-??-??)
 ====================
 * Server - [improvement] Swapped /tmp for sys_get_temp_dir().
+* Server - [improvement] Incorporated mod_headers to save bandwidth.
 
 2.0-rc1 (2015-03-05)
 ====================
