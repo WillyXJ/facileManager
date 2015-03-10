@@ -15,7 +15,7 @@ echo '$(document).ready(function() {
 		$(".datepicker").datepicker();
 		$("select").select2({minimumResultsForSearch: 10});
 		$("#bulk_action").select2({minimumResultsForSearch: -1, width: "120px", allowClear: true});
-		$("#server_serial_no").select2({minimumResultsForSearch: 10});
+		$("#server_serial_no").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "100px" }});
 		$("#settings select").select2({
 			width: "200px",
 			minimumResultsForSearch: 10
