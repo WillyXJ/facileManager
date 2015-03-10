@@ -74,7 +74,7 @@ class fm_dns_views {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_name, 'view_', 'view_name');
 		if ($fmdb->num_rows) return _('This view already exists.');
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', $server_serial_no, '$view_name', '$view_comment')";
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$view_name', '$view_comment')";
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return _('Could not add the view because a database error occurred.');
@@ -204,7 +204,7 @@ HTML;
 		$view_id = 0;
 		$view_name = $view_root_dir = $view_zones_dir = $view_comment = null;
 		$ucaction = ucfirst($action);
-		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($data))

@@ -2,6 +2,8 @@
 ====================
 * Server - [improvement] Swapped /tmp for sys_get_temp_dir().
 * Server - [improvement] SSH keys can now be saved if the file already exists.
+* Server - [improvement] Config overrides can now be defined for server groups
+           (introduced in 2.0-alpha2).
 
 2.0-rc1 (2015-03-05)
 ====================

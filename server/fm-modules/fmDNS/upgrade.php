@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.0-beta1', '<') ? upgradefmDNS_2003($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.0-rc2', '<') ? upgradefmDNS_2004($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1382,6 +1382,33 @@ function upgradefmDNS_2003($__FM_CONFIG, $running_version) {
 	setOption('clones_use_dnames', $__FM_CONFIG['fmDNS']['default']['options']['clones_use_dnames']['default_value'], 'auto', false, 0, $module_name);
 
 	setOption('version', '2.0-beta1', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 2.0-rc2 */
+function upgradefmDNS_2004($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.0-beta1', '<') ? upgradefmDNS_2003($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
+	
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.0-rc2', 'auto', false, 0, $module_name);
 	
 	return true;
 }

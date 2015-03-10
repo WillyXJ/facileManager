@@ -321,12 +321,26 @@ function buildServerSubMenu($server_serial_no = 0, $class = null) {
 	
 	$server_array[0][] = _('All Servers');
 	$server_array[0][] = '0';
+	
+	$j = 1;
+	/** Server Groups */
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_');
+	if ($fmdb->num_rows) {
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[$j][] = $results[$i]->group_name;
+			$server_array[$j][] = 'g' . $results[$i]->group_id;
+			$j++;
+		}
+	}
+	/** Server names */
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[$i+1][] = $results[$i]->server_name;
-			$server_array[$i+1][] = $results[$i]->server_serial_no;
+			$server_array[$j][] = $results[$i]->server_name;
+			$server_array[$j][] = $results[$i]->server_serial_no;
+			$j++;
 		}
 	}
 	$server_list = buildSelect('server_serial_no', 'server_serial_no', $server_array, $server_serial_no, 1, null, false, 'this.form.submit()');

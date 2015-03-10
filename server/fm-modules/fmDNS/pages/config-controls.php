@@ -76,7 +76,7 @@ echo <<<HTML
 
 HTML;
 	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', "AND server_serial_no=$server_serial_no");
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', "AND server_serial_no='$server_serial_no'");
 $fm_dns_controls->rows($result);
 
 printFooter();

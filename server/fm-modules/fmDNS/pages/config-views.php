@@ -83,7 +83,7 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array($sort_field, 'view_name'), 'view_', "AND server_serial_no=$server_serial_no", null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array($sort_field, 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $fm_dns_views->rows($result);
 
 printFooter();

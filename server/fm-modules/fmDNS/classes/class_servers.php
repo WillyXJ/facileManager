@@ -1029,6 +1029,33 @@ FORM;
 		
 		return true;
 	}
+
+	/**
+	 * Looks up the server group IDs
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param integer $server_id Server ID to lookup
+	 * @return array
+	 */
+	function getServerGroupIDs($server_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$query = "SELECT group_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND `group_status`='active'
+			AND (group_masters='$server_id' OR group_masters LIKE '$server_id;%' OR group_masters LIKE '%;$server_id;%' OR group_masters LIKE '%;$server_id' OR
+			group_slaves='$server_id' OR group_slaves LIKE '$server_id;%' OR group_slaves LIKE '%;$server_id;%' OR group_slaves LIKE '%;$server_id')";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$array[] = $fmdb->last_result[$i]->group_id;
+			}
+			return $array;
+		}
+		
+		return false;
+	}
 }
 
 if (!isset($fm_module_servers))

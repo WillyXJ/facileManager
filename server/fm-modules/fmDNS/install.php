@@ -28,7 +28,7 @@ function installfmDNSSchema($link = null, $database, $module, $noisy = 'noisy') 
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}acls` (
   `acl_id` INT(11) NOT NULL AUTO_INCREMENT ,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `acl_name` VARCHAR(255) NOT NULL ,
   `acl_predefined` ENUM( 'none',  'any',  'localhost',  'localnets',  'as defined:') NOT NULL ,
   `acl_addresses` TEXT NOT NULL ,
@@ -42,7 +42,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}config` (
   `cfg_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `cfg_type` varchar(255) NOT NULL DEFAULT 'global',
   `view_id` int(11) NOT NULL DEFAULT '0',
   `domain_id` int(11) NOT NULL DEFAULT '0',
@@ -61,7 +61,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}controls` (
   `control_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `control_ip` varchar(15) NOT NULL DEFAULT '*',
   `control_port` int(5) NOT NULL DEFAULT '953',
   `control_addresses` text NOT NULL,
@@ -245,7 +245,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}views` (
   `view_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `view_name` VARCHAR(255) NOT NULL ,
   `view_comment` text,
   `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'

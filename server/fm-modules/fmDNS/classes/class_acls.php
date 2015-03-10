@@ -219,7 +219,7 @@ HTML;
 		$acl_name = $acl_addresses = $acl_comment = null;
 		$acl_predefined = 'as defined:';
 		$ucaction = ucfirst($action);
-		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -283,7 +283,7 @@ FORM;
 		
 		$acl_list = null;
 		$i = 0;
-		$serial_sql = $server_serial_no ? "AND server_serial_no IN (0,$server_serial_no)" : "AND server_serial_no=0";
+		$serial_sql = $server_serial_no ? "AND server_serial_no IN ('0','$server_serial_no')" : "AND server_serial_no='0'";
 		
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_status='active'");
 		if ($fmdb->num_rows) {
