@@ -717,7 +717,26 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
  */
 function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = 'Select an option') {
 	$type_options = null;
-	if (@is_array($options[0])) {
+	if (countArrayDimensions($options) == 3) {
+		foreach ($options as $optgroup => $optarray) {
+			if (is_string($optgroup)) $type_options .= '<optgroup label="' . $optgroup . '">';
+			for ($i = 0; $i < count($optarray); $i++) {
+				$selected = null;
+				if (is_array($option_select)) {
+					foreach ($option_select as $key) {
+						if (isset($key) && $key == $optarray[$i][1]) {
+							$selected = ' selected';
+							break;
+						}
+					}
+				} elseif (isset($option_select) && (string)$option_select === (string)$optarray[$i][1]) {
+					$selected = ' selected';
+				}
+				$type_options.="<option$selected value=\"{$optarray[$i][1]}\">{$optarray[$i][0]}</option>\n";
+			}
+			if (is_string($optgroup)) $type_options .= '</optgroup>';
+		}
+	} elseif (countArrayDimensions($options) == 2) {
 		for ($i = 0; $i < count($options); $i++) {
 			$selected = null;
 			if (is_array($option_select)) {
@@ -2912,5 +2931,24 @@ HTML;
 	return $form;
 }
 
+
+/**
+ * Counts the number of dimensions in an array
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param array $array Array to count
+ * @return int Number of dimensions
+ */
+function countArrayDimensions($array) {
+	if (is_array(reset($array))) {
+		$count = countArrayDimensions(reset($array)) + 1;
+	} else {
+		$count = 1;
+	}
+	
+	return $count;
+}
 
 ?>

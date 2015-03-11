@@ -319,27 +319,31 @@ HTML;
 function buildServerSubMenu($server_serial_no = 0, $class = null) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$server_array[0][] = _('All Servers');
-	$server_array[0][] = '0';
+	$server_array[0][] = null;
+	$server_array[0][0][] = _('All Servers');
+	$server_array[0][0][] = '0';
 	
-	$j = 1;
+	$j = 0;
 	/** Server Groups */
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_');
 	if ($fmdb->num_rows) {
+		$server_array[_('Groups')][] = null;
 		$results = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[$j][] = $results[$i]->group_name;
-			$server_array[$j][] = 'g' . $results[$i]->group_id;
+			$server_array[_('Groups')][$j][] = $results[$i]->group_name;
+			$server_array[_('Groups')][$j][] = 'g' . $results[$i]->group_id;
 			$j++;
 		}
 	}
+	$j = 0;
 	/** Server names */
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
 	if ($fmdb->num_rows) {
+		$server_array[_('Servers')][] = null;
 		$results = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[$j][] = $results[$i]->server_name;
-			$server_array[$j][] = $results[$i]->server_serial_no;
+			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+			$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
 			$j++;
 		}
 	}
