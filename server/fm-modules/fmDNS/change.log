@@ -4,6 +4,10 @@
 * Server - [improvement] SSH keys can now be saved if the file already exists.
 * Server - [improvement] Config overrides can now be defined for server groups
            (introduced in 2.0-alpha2).
+* Server - [bug] The correct comments for views and config options are displayed
+           when defining a server override.
+* Server - [bug] Sanitized view names that contain illegal system characters for
+           filenames.
 
 2.0-rc1 (2015-03-05)
 ====================

@@ -168,6 +168,28 @@ class fm_module_buildconf {
 					}
 				}
 
+				$server_acl_array = array();
+				/** Override with group-specific configs */
+				if (is_array($server_group_ids)) {
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no IN ("' . implode('","g', $server_group_ids) . '")');
+					if ($fmdb->num_rows) {
+						$server_acl_result = $fmdb->last_result;
+						$acl_config_count = $fmdb->num_rows;
+						for ($j=0; $j < $acl_config_count; $j++) {
+							if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
+								$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
+							} else {
+								$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
+								$server_acl_addresses = null;
+								foreach($addresses as $address) {
+									if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+								}
+								$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+							}
+						}
+					} else $server_acl_array = array();
+				}
+
 				/** Override with server-specific ACLs */
 				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="' . $server_serial_no . '"');
 				if ($fmdb->num_rows) {
@@ -185,7 +207,7 @@ class fm_module_buildconf {
 							$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 						}
 					}
-				} else $server_acl_array = array();
+				}
 
 				/** Merge arrays */
 				$acl_array = array_merge($global_acl_array, $server_acl_array);
@@ -271,7 +293,7 @@ class fm_module_buildconf {
 					$server_config_result = $fmdb->last_result;
 					$global_config_count = $fmdb->num_rows;
 					for ($j=0; $j < $global_config_count; $j++) {
-						$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
+						$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 					}
 				} else $server_config = array();
 			}
@@ -282,7 +304,7 @@ class fm_module_buildconf {
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($j=0; $j < $global_config_count; $j++) {
-					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
+					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 				}
 			}
 
@@ -360,7 +382,11 @@ class fm_module_buildconf {
 			
 
 			/** Build Views */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no')");
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no', 'g" . implode("','g", $server_group_ids) . "')");
+			} else {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no')");
+			}
 			if ($fmdb->num_rows) {
 				$view_result = $fmdb->last_result;
 				$view_count = $fmdb->num_rows;
@@ -382,15 +408,28 @@ class fm_module_buildconf {
 						}
 					} else $view_config = array();
 
+					$server_view_config = array();
+					/** Override with group-specific configs */
+					if (is_array($server_group_ids)) {
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no IN ('" . implode("','g", $server_group_ids) . "') AND view_id='" . $view_result[$i]->view_id . "'");
+						if ($fmdb->num_rows) {
+							$server_config_result = $fmdb->last_result;
+							$view_config_count = $fmdb->num_rows;
+							for ($j=0; $j < $view_config_count; $j++) {
+								$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+							}
+						} else $server_view_config = array();
+					}
+
 					/** Override with server-specific configs */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no='$server_serial_no' AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$server_config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
 						for ($j=0; $j < $view_config_count; $j++) {
-							$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
+							$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 						}
-					} else $server_view_config = array();
+					}
 
 					/** Merge arrays */
 					$config_array = array_merge($view_config, $server_view_config);
@@ -456,20 +495,20 @@ class fm_module_buildconf {
 								}
 							}
 						}
-						$data->files[$server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys'] = $key_config;
+						$data->files[$server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys'] = $key_config;
 					}
 					
 					/** Generate zone file */
-					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, $view_result[$i]->view_name, $include_hint_zone);
+					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, sanitize($view_result[$i]->view_name, '-'), $include_hint_zone);
 					if ($error) $message = $error;
 					
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
 						/** Include view keys if present */
-						if (@array_key_exists($server_zones_dir . '/views.conf.' . $view_result[$i]->view_name . '.keys', $data->files)) {
-							$config .= "\tinclude \"" . $server_zones_dir . "/views.conf." . $view_result[$i]->view_name . ".keys\";\n";
+						if (@array_key_exists($server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys', $data->files)) {
+							$config .= "\tinclude \"" . $server_zones_dir . "/views.conf." . sanitize($view_result[$i]->view_name, '-') . ".keys\";\n";
 						}
-						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . $view_result[$i]->view_name . "\";\n";
+						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . sanitize($view_result[$i]->view_name, '-') . "\";\n";
 						$files = array_merge($files, $tmp_files);
 					}
 					
