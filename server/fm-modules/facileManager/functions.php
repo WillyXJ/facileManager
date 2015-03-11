@@ -2942,7 +2942,7 @@ HTML;
  * @return int Number of dimensions
  */
 function countArrayDimensions($array) {
-	if (is_array(reset($array))) {
+	if (is_array(@reset($array))) {
 		$count = countArrayDimensions(reset($array)) + 1;
 	} else {
 		$count = 1;

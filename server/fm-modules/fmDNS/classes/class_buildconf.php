@@ -151,6 +151,7 @@ class fm_module_buildconf {
 				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
 			}
 			
+			
 			/** Build ACLs */
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="0"');
 			if ($fmdb->num_rows) {
@@ -167,31 +168,12 @@ class fm_module_buildconf {
 						$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
 					}
 				}
+			} else $global_acl_array = array();
 
-				$server_acl_array = array();
-				/** Override with group-specific configs */
-				if (is_array($server_group_ids)) {
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no IN ("' . implode('","g', $server_group_ids) . '")');
-					if ($fmdb->num_rows) {
-						$server_acl_result = $fmdb->last_result;
-						$acl_config_count = $fmdb->num_rows;
-						for ($j=0; $j < $acl_config_count; $j++) {
-							if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-								$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
-							} else {
-								$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
-								$server_acl_addresses = null;
-								foreach($addresses as $address) {
-									if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
-								}
-								$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
-							}
-						}
-					} else $server_acl_array = array();
-				}
-
-				/** Override with server-specific ACLs */
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="' . $server_serial_no . '"');
+			$server_acl_array = array();
+			/** Override with group-specific configs */
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no IN ("' . implode('","g', $server_group_ids) . '")');
 				if ($fmdb->num_rows) {
 					$server_acl_result = $fmdb->last_result;
 					$acl_config_count = $fmdb->num_rows;
@@ -208,27 +190,46 @@ class fm_module_buildconf {
 						}
 					}
 				}
+			}
 
-				/** Merge arrays */
-				$acl_array = array_merge($global_acl_array, $server_acl_array);
-
-				/** Format ACL config */
-				foreach ($acl_array as $acl_name => $acl_data) {
-					list($acl_item, $acl_comment) = $acl_data;
-					if ($acl_comment) {
-						$comment = wordwrap($acl_comment, 50, "\n");
-						$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
-						unset($comment);
+			/** Override with server-specific ACLs */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="' . $server_serial_no . '"');
+			if ($fmdb->num_rows) {
+				$server_acl_result = $fmdb->last_result;
+				$acl_config_count = $fmdb->num_rows;
+				for ($j=0; $j < $acl_config_count; $j++) {
+					if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
+						$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
+					} else {
+						$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
+						$server_acl_addresses = null;
+						foreach($addresses as $address) {
+							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+						}
+						$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 					}
-					$config .= 'acl "' . $acl_name . "\" {\n";
-					$config .= "\t" . $acl_item . ";\n";
-					$config .= "};\n\n";
 				}
 			}
-			
+
+			/** Merge arrays */
+			$acl_array = array_merge($global_acl_array, $server_acl_array);
+
+			/** Format ACL config */
+			foreach ($acl_array as $acl_name => $acl_data) {
+				list($acl_item, $acl_comment) = $acl_data;
+				if ($acl_comment) {
+					$comment = wordwrap($acl_comment, 50, "\n");
+					$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+					unset($comment);
+				}
+				$config .= 'acl "' . $acl_name . "\" {\n";
+				$config .= "\t" . $acl_item . ";\n";
+				$config .= "};\n\n";
+			}
+
 
 			/** Build logging config */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in ("0", "' . $server_serial_no . '")');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in ("0", "' . $server_serial_no . '", "g' . implode('","g', $server_group_ids) . '")');
 			if ($fmdb->num_rows) {
 				$logging_result = $fmdb->last_result;
 				$count = $fmdb->num_rows;
@@ -295,7 +296,7 @@ class fm_module_buildconf {
 					for ($j=0; $j < $global_config_count; $j++) {
 						$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 					}
-				} else $server_config = array();
+				}
 			}
 
 			/** Override with server-specific configs */
@@ -348,7 +349,7 @@ class fm_module_buildconf {
 			
 			
 			/** Build controls configs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '", "g' . implode('","g', $server_group_ids) . '") AND control_status="active"');
 			if ($fmdb->num_rows) {
 				$control_result = $fmdb->last_result;
 				$control_config_count = $fmdb->num_rows;
@@ -418,7 +419,7 @@ class fm_module_buildconf {
 							for ($j=0; $j < $view_config_count; $j++) {
 								$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 							}
-						} else $server_view_config = array();
+						}
 					}
 
 					/** Override with server-specific configs */
