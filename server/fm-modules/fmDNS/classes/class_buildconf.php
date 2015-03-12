@@ -173,7 +173,7 @@ class fm_module_buildconf {
 			$server_acl_array = array();
 			/** Override with group-specific configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no IN ("' . implode('","g', $server_group_ids) . '")');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no IN ("g' . implode('","g', $server_group_ids) . '")');
 				if ($fmdb->num_rows) {
 					$server_acl_result = $fmdb->last_result;
 					$acl_config_count = $fmdb->num_rows;
@@ -289,7 +289,7 @@ class fm_module_buildconf {
 			$server_config = array();
 			/** Override with group-specific configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("' . implode('","g', $server_group_ids) . '") AND cfg_status="active"');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("g' . implode('","g', $server_group_ids) . '") AND cfg_status="active"');
 				if ($fmdb->num_rows) {
 					$server_config_result = $fmdb->last_result;
 					$global_config_count = $fmdb->num_rows;
@@ -412,7 +412,7 @@ class fm_module_buildconf {
 					$server_view_config = array();
 					/** Override with group-specific configs */
 					if (is_array($server_group_ids)) {
-						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no IN ('" . implode("','g", $server_group_ids) . "') AND view_id='" . $view_result[$i]->view_id . "'");
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no IN ('g" . implode("','g", $server_group_ids) . "') AND view_id='" . $view_result[$i]->view_id . "'");
 						if ($fmdb->num_rows) {
 							$server_config_result = $fmdb->last_result;
 							$view_config_count = $fmdb->num_rows;
