@@ -678,7 +678,7 @@ HTML;
 		} else {
 			$template_name_show_hide = 'table-row';
 			$create_template = <<<HTML
-			<input type="hidden" id="domain_create_template" name="domain_template" value="yes" />
+			<input type="hidden" id="domain_create_template" name="domain_template" value="no" />
 			<input type="hidden" name="domain_default" value="no" />
 HTML;
 		}
@@ -810,7 +810,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', 'AND domain_template="no"');
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
 			$clone_results = $fmdb->last_result;
