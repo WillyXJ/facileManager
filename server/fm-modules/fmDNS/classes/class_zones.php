@@ -474,7 +474,7 @@ class fm_dns_zones {
 		$zone_access_allowed = zoneAccessIsAllowed(array($row->domain_id));
 		
 		if ($row->domain_status == 'disabled') $classes[] = 'disabled';
-		$response = null;
+		$response = $add_new = null;
 		
 		$checkbox = (currentUserCan('reload_zones', $_SESSION['module'])) ? '<td></td>' : null;
 		
@@ -488,6 +488,12 @@ class fm_dns_zones {
 		if (!$ns_count && $row->domain_type == 'master' && !$response) {
 			$response = _('One more more NS records still needs to be created for this zone');
 			$classes[] = 'attention';
+		}
+		
+		if ($row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) {
+			global $map;
+			
+			$add_new = displayAddNew($map, $row->domain_id, _('Clone this zone'), 'fa-plus-square-o');
 		}
 		
 		$clones = $this->cloneDomainsList($row->domain_id);
@@ -558,7 +564,7 @@ FORM;
 		<tr title="$response" id="$row->domain_id" $class>
 			$checkbox
 			<td>$row->domain_id</td>
-			<td><b>$edit_name</b> $template_icon $clone_names</td>
+			<td><b>$edit_name</b> $template_icon $add_new $clone_names</td>
 			<td>$row->domain_type
 				$clone_types</td>
 			<td>$domain_view
@@ -592,6 +598,9 @@ HTML;
 			}
 		} elseif (@is_object($data[0])) {
 			extract(get_object_vars($data[0]));
+		} elseif (!empty($_POST) && array_key_exists('is_ajax', $_POST)) {
+			extract($_POST);
+			$domain_clone_dname = null;
 		}
 		
 		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
@@ -641,7 +650,6 @@ HTML;
 		if ($action == 'create') {
 			$domain_template_id = $this->getDefaultZone();
 			$zone_show = $domain_template_id ? 'none' : 'block';
-			$soa_show = 'block';
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$soa_templates = '<tr id="define_soa">
@@ -649,7 +657,6 @@ HTML;
 					<td>' . buildSelect('soa_id', 'soa_id', $fm_dns_records->availableSOATemplates($map), $fm_dns_records->getDefaultSOA()) . '</td></tr>';
 		} else {
 			$zone_show = 'block';
-			$soa_show = 'none';
 			$soa_templates = $domain_templates = null;
 		}
 		
@@ -659,6 +666,10 @@ HTML;
 			$clone_dname_checked = $domain_clone_dname ? 'checked' : null;
 			$clone_dname_options_show = $domain_clone_dname ? 'block' : 'none';
 			$clone_dname_dropdown = buildSelect('domain_clone_dname', 'domain_clone_dname', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_clone_dname'), $domain_clone_dname);
+			if (isset($no_template)) {
+				$domain_template_id = 0;
+				$zone_show = 'block';
+			}
 		} else {
 			$clone_override_show = $clone_dname_options_show = 'none';
 			$clone_dname_checked = $clone_dname_dropdown = null;
@@ -798,6 +809,13 @@ HTML;
 					$('.zone-form > tbody > tr:not(.include-with-template, #domain_template_default)').slideUp();
 				} else {
 					$('.zone-form > tbody > tr:not(.include-with-template, #domain_template_default)').show('slow');
+				}
+				if ($('#domain_clone_domain_id').val() != '') {
+					$('.zone-form > tbody > tr#define_soa').slideUp();
+				} else {
+					if($('#domain_template_id').val() == '') {
+						$('.zone-form > tbody > tr#define_soa').show('slow');
+					}
 				}
 			});
 		</script>

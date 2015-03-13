@@ -135,11 +135,11 @@ echo '$(document).ready(function() {
 	});
 	
 	/* Form adds */
-    $("#plus").click(function() {
-        var $this 		= $(this);
-        item_type		= $("#table_edits").attr("name");
-        item_sub_type	= $this.attr("name");
-        item_id			= $this.attr("rel");
+	$("#plus").click(function() {
+		var $this 		= $(this);
+		item_type		= $("#table_edits").attr("name");
+		item_sub_type	= $this.attr("name");
+		item_id			= $this.attr("rel");
 		var server_serial_no	= getUrlVars()["server_serial_no"];
 		var queryParameters = {}, queryString = location.search.substring(1),
 			re = /([^&=]+)=([^&]*)/g, m;
@@ -151,7 +151,7 @@ echo '$(document).ready(function() {
 		$("#manage_item_contents").fadeIn(200);
 		$("#response").fadeOut();
 		$this.parent().parent().removeClass("response");
-		
+
 		var form_data = {
 			add_form: true,
 			item_type: item_type,
@@ -176,20 +176,20 @@ echo '$(document).ready(function() {
 				$(".form-table input:text, .form-table select").first().focus();
 			}
 		});
-		
+
 		return false;
-    });
-    
+	});
+
 	/* Form edits */
-    $("#table_edits").delegate("a.edit_form_link, a.copy_form_link", "click tap", function(e) {
-        var $this 		= $(this);
-        var $row_id		= $this.parent().parent();
-        item_id			= $row_id.attr("id");
-        item_type		= $("#table_edits").attr("name");
-        item_sub_type	= $this.attr("name");
-        var server_serial_no	= getUrlVars()["server_serial_no"];
-        var view_id		= getUrlVars()["view_id"];
-        var domain_id		= getUrlVars()["domain_id"];
+	$("#table_edits").delegate("a.edit_form_link, a.copy_form_link", "click tap", function(e) {
+		var $this 		= $(this);
+		var $row_id		= $this.parent().parent();
+		item_id			= $row_id.attr("id");
+		item_type		= $("#table_edits").attr("name");
+		item_sub_type	= $this.attr("name");
+		var server_serial_no	= getUrlVars()["server_serial_no"];
+		var view_id		= getUrlVars()["view_id"];
+		var domain_id		= getUrlVars()["domain_id"];
 		var queryParameters = {}, queryString = location.search.substring(1),
 			re = /([^&=]+)=([^&]*)/g, m;
 		while (m = re.exec(queryString)) {

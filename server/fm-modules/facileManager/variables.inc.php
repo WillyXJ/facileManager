@@ -45,7 +45,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 $__FM_CONFIG['icons']['fail']			= sprintf('<img src="fm-modules/%1$s/images/error24.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Failed'));
 $__FM_CONFIG['icons']['caution']		= sprintf('<img src="fm-modules/%1$s/images/orangequestion.jpg" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Caution'));
 $__FM_CONFIG['icons']['ok']				= sprintf('<img src="fm-modules/%1$s/images/ok24.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));
-$__FM_CONFIG['icons']['add']			= sprintf('<img src="fm-modules/%1$s/images/plus16.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Add New'));
+$__FM_CONFIG['icons']['add']			= sprintf('<img src="fm-modules/%1$s/images/plus16.png" border="0" alt="_TITLE_" title="_TITLE_" />', $fm_name);
 $__FM_CONFIG['icons']['edit']			= sprintf('<img src="fm-modules/%1$s/images/edit24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit'));
 $__FM_CONFIG['icons']['delete']			= sprintf('<img src="fm-modules/%1$s/images/delete24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Delete'));
 $__FM_CONFIG['icons']['copy']			= sprintf('<img src="fm-modules/%1$s/images/copy24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Duplicate'));

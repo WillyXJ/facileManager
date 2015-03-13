@@ -6,12 +6,12 @@ echo '
 $(document).ready(function() {
 	
 	more_clicks = 0;
-	
+
 	/* Add body class */
 	if (onPage("zone-records.php")) {
 		$("body").addClass("fm-noscroll");
 	}
-	
+
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
 		$(function() {
 			$("#pagination_container #domain_view").select2({
@@ -20,16 +20,16 @@ $(document).ready(function() {
 			});
 		});
 	}
-	
+
 	/* Zone reload button */
-    $("#zones").delegate("form", "click tap", function(e) {
-        var $this 	= $(this);
-        domain_id	= $this.attr("id");
+	$("#zones").delegate("form", "click tap", function(e) {
+		var $this 	= $(this);
+		domain_id	= $this.attr("id");
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . _('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
-		
+
 		var form_data = {
 			domain_id: domain_id,
 			is_ajax: 1
@@ -42,7 +42,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$("#manage_item_contents").html(response);
-		
+
 				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
 					$this.fadeOut(400);
 					$this.parent().parent().removeClass("build");
@@ -50,19 +50,19 @@ $(document).ready(function() {
 				}
 			}
 		});
-		
+
 		return false;
-    });
+	});
 
 	/* Zone reload link */
-    $("a.zone_reload").click(function(e) {
-        var $this 	= $(this);
-        domain_id	= $this.attr("id");
+	$("a.zone_reload").click(function(e) {
+		var $this 	= $(this);
+		domain_id	= $this.attr("id");
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . _('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
-		
+
 		var form_data = {
 			domain_id: domain_id,
 			is_ajax: 1
@@ -75,7 +75,7 @@ $(document).ready(function() {
 			success: function(response)
 			{
 				$("#manage_item_contents").html(response);
-		
+
 				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
 					$("#response").delay(3000).fadeTo(200, 0.00, function() {
 						$("#response").slideUp(400);
@@ -83,13 +83,58 @@ $(document).ready(function() {
 				}
 			}
 		});
-		
+
 		return false;
-    });
+	});
+
+	/* Add clone */
+	$("#zones").delegate("#plus", "click tap", function(e) {
+		var $this 		= $(this);
+		item_type		= $("#table_edits").attr("name");
+		item_sub_type	= $this.attr("name");
+		domain_clone_id	= $this.attr("rel");
+		var queryParameters = {}, queryString = location.search.substring(1),
+			re = /([^&=]+)=([^&]*)/g, m;
+		while (m = re.exec(queryString)) {
+			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+		}
+
+		$("#manage_item").fadeIn(200);
+		$("#manage_item_contents").fadeIn(200);
+		$("#response").fadeOut();
+		$this.parent().parent().removeClass("response");
+
+		var form_data = {
+			add_form: true,
+			item_type: item_type,
+			item_sub_type: item_sub_type,
+			domain_clone_domain_id: domain_clone_id,
+			no_template: true,
+			request_uri: queryParameters,
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/fmDNS/ajax/getData.php",
+			data: form_data,
+			success: function(response)
+			{
+				$("#manage_item_contents").html(response);
+				if ($("#manage_item_contents").width() >= 700) {
+					$("#manage_item_contents").addClass("wide");
+				}
+				$(".datepicker").datepicker();
+				$(".form-table input:text, .form-table select").first().focus();
+			}
+		});
+
+		return false;
+	});
 
 	/* Add more records */
-    $("#add_records").click(function() {
-        var $this 		= $(this);
+	$("#add_records").click(function() {
+		var $this 		= $(this);
 		var item_id		= getUrlVars()["domain_id"];
 		var item_type	= getUrlVars()["record_type"];
 
@@ -111,16 +156,16 @@ $(document).ready(function() {
 				more_clicks = more_clicks + 1;
 			}
 		});
-		
+
 		return false;
-    });
-    
+	});
+
 	/* Zone clone deletes */
-    $("#table_edits").delegate("img.clone_remove", "click tap", function(e) {
-        var $this 		= $(this);
-        var $clone		= $this.parent().attr("class");
-        item_type		= $("#table_edits").attr("name");
-        item_id			= $this.attr("id");
+	$("#table_edits").delegate("img.clone_remove", "click tap", function(e) {
+		var $this 		= $(this);
+		var $clone		= $this.parent().attr("class");
+		item_type		= $("#table_edits").attr("name");
+		item_id			= $this.attr("id");
 
 		var form_data = {
 			item_id: item_id,
@@ -158,22 +203,22 @@ $(document).ready(function() {
 				}
 			});
 		}
-		
+
 		return false;
-    });
+	});
 
 	/* Zone clone edits */
-    $("#table_edits").delegate("a.clone_edit", "click tap", function(e) {
-        var $this 		= $(this);
-        item_id			= $this.attr("id");
-        item_type		= $("#table_edits").attr("name");
-        item_sub_type	= $this.attr("name");
+	$("#table_edits").delegate("a.clone_edit", "click tap", function(e) {
+		var $this 		= $(this);
+		item_id			= $this.attr("id");
+		item_type		= $("#table_edits").attr("name");
+		item_sub_type	= $this.attr("name");
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#response").fadeOut();
 		$("#body_container").removeClass("response");
-		
+
 		var form_data = {
 			item_id: item_id,
 			item_type: item_type,
@@ -195,9 +240,9 @@ $(document).ready(function() {
 				$(".form-table input, .form-table select").first().focus();
 			}
 		});
-		
+
 		return false;
-    });
+	});
 
 	$(".existing-container .display_results").delegate("input:not([id^=\'record_delete_\']), select", "change", function(e) {
 		if ($(this).attr("type") == "checkbox") {
@@ -205,7 +250,7 @@ $(document).ready(function() {
 		} else {
 			$(this).parent().parent().addClass("build");
 		}
-    });
+	});
 
 	/* Record delete checkbox */
 	$(".display_results").delegate("input[id^=\'record_delete_\']", "click tap", function(e) {
@@ -223,7 +268,7 @@ $(document).ready(function() {
 			$("#server_update_port_option").show("slow");
 		}
 	});
-	
+
 	$("#manage_item_contents").delegate("#cfg_destination", "change", function(e) {
 		if ($(this).val() == "file") {
 			$("#syslog_options").slideUp();
@@ -236,7 +281,7 @@ $(document).ready(function() {
 			$("#destination_option").slideUp();
 		}
 	});
-	
+
 	$("#body_container").delegate("#soa_template_chosen", "change", function(e) {
 		if ($(this).val() == "0") {
 			$("#custom-soa-form").show("slow");
@@ -244,13 +289,13 @@ $(document).ready(function() {
 			$("#custom-soa-form").slideUp();
 		}
 	});
-	
+
 	if ($("#soa_template_chosen").val() !== undefined) {
 		if ($("#soa_template_chosen").val() != 0) {
 			$("#custom-soa-form").hide();
 		}
 	}
-	
+
 	$("#soa_create_template").click(function() {
 		if ($(this).is(":checked")) {
 			$("#soa_template_name").show("slow");
@@ -258,7 +303,7 @@ $(document).ready(function() {
 			$("#soa_template_name").slideUp();
 		}
 	});
-	
+
 	$("#manage_item_contents").delegate("#domain_template_id", "change", function(e) {
 		if ($(this).val() != "") {
 			$(".zone-form > tbody > tr:not(.include-with-template, #domain_template_default)").slideUp();
@@ -266,7 +311,7 @@ $(document).ready(function() {
 			$(".zone-form > tbody > tr:not(.include-with-template, #domain_template_default)").show("slow");
 		}
 	});
-	
+
 	$("#manage_item_contents").delegate("#domain_type", "change", function(e) {
 		if ($(this).val() == "forward") {
 			$("#define_forwarders").show("slow");
@@ -286,7 +331,7 @@ $(document).ready(function() {
 			$("#define_soa").slideUp();
 		}
 	});
-	
+
 	$("#manage_item_contents").delegate("#domain_clone_domain_id", "change", function(e) {
 		if ($(this).val() == 0) {
 			$("#define_soa").show("slow");
@@ -296,7 +341,7 @@ $(document).ready(function() {
 			$("#clone_override").show("slow");
 		}
 	});
-	
+
 	$("#manage_item_contents").delegate("#domain_mapping", "change", function(e) {
 		var form_data = {
 			get_available_clones: true,
@@ -313,7 +358,7 @@ $(document).ready(function() {
 				$("#domain_clone_domain_id").html(response);
 			}
 		});
-		
+
 		return false;
 	});
 	

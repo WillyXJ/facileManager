@@ -2040,12 +2040,16 @@ function setOSIcon($server_os) {
 
 
 /**
- * Returns an icon for the server OS
+ * Displays the page header
  *
  * @since 1.0
  * @package facileManager
  *
- * @param string $server_os Server OS to return the icon for
+ * @param string $response Page form response
+ * @param string $title The page title
+ * @param bool $allowed_to_add Whether the user can add new
+ * @param string $name Name value of plus sign
+ * @param string $rel Rel value of plus sign
  * @return string
  */
 function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null) {
@@ -2059,9 +2063,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	echo '<h2>' . $title;
 	
 	if ($allowed_to_add) {
-		if ($name) $name = ' name="' . $name . '"';
-		if ($rel) $rel = ' rel="' . $rel . '"';
-		printf('<a id="plus" href="#" title="%s"%s%s>%s</a>', _('Add New'), $name, $rel, $__FM_CONFIG['icons']['add']);
+		echo displayAddNew($name, $rel);
 	}
 	
 	echo '</h2>' . "\n";
@@ -2949,6 +2951,36 @@ function countArrayDimensions($array) {
 	}
 	
 	return $count;
+}
+
+
+/**
+ * Displays the add new link
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $name Name value of plus sign
+ * @param string $rel Rel value of plus sign
+ * @param string $title The title of plus sign
+ * @param string $style Use an image or font
+ * @return string
+ */
+function displayAddNew($name = null, $rel = null, $title = null, $style = 'image') {
+	global $__FM_CONFIG;
+	
+	if (empty($title)) $title = _('Add New');
+	
+	if ($name) $name = ' name="' . $name . '"';
+	if ($rel) $rel = ' rel="' . $rel . '"';
+	
+	if ($style == 'image') {
+		$image = str_replace('_TITLE_', $title, $__FM_CONFIG['icons']['add']);
+	} else {
+		$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
+	}
+	
+	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
 }
 
 ?>

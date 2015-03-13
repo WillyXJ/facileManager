@@ -1,4 +1,4 @@
-2.0-rc1 (2015-03-11)
+2.0-rc2 (2015-03-11)
 ====================
 * Server - [improvement] Swapped /tmp for sys_get_temp_dir().
 * Server - [improvement] SSH keys can now be saved if the file already exists.
@@ -8,6 +8,7 @@
            when defining a server override.
 * Server - [bug] Sanitized view names that contain illegal system characters for
            filenames.
+* Server - [improvement] Added button to clone a zone.
 
 2.0-rc1 (2015-03-05)
 ====================
