@@ -682,7 +682,7 @@ HTML;
 		
 		if (array_search('create_template', $show) !== false) {
 			$template_name_show_hide = 'none';
-			$create_template = sprintf('<tr>
+			$create_template = sprintf('<tr id="create_template">
 			<th>%s</th>
 			<td><input type="checkbox" id="domain_create_template" name="domain_template" value="yes" /><label for="domain_create_template"> %s</label></td>
 		</tr>', _('Create Template'), _('yes'));
@@ -812,9 +812,11 @@ HTML;
 				}
 				if ($('#domain_clone_domain_id').val() != '') {
 					$('.zone-form > tbody > tr#define_soa').slideUp();
+					$('.zone-form > tbody > tr#create_template').slideUp();
 				} else {
 					if($('#domain_template_id').val() == '') {
 						$('.zone-form > tbody > tr#define_soa').show('slow');
+						$('.zone-form > tbody > tr#create_template').show('slow');
 					}
 				}
 			});

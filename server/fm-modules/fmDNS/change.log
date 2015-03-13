@@ -9,6 +9,7 @@
 * Server - [bug] Sanitized view names that contain illegal system characters for
            filenames.
 * Server - [improvement] Added button to clone a zone.
+* Server - [bug] Cloned zones cannot be templates (introduced in 2.0-beta1).
 
 2.0-rc1 (2015-03-05)
 ====================

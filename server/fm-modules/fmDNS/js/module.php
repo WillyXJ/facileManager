@@ -335,9 +335,11 @@ $(document).ready(function() {
 	$("#manage_item_contents").delegate("#domain_clone_domain_id", "change", function(e) {
 		if ($(this).val() == 0) {
 			$("#define_soa").show("slow");
+			$("#create_template").show("slow");
 			$("#clone_override").slideUp();
 		} else {
 			$("#define_soa").slideUp();
+			$("#create_template").slideUp();
 			$("#clone_override").show("slow");
 		}
 	});
