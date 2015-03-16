@@ -830,7 +830,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', 'AND domain_template="no"');
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', 'AND domain_template="no" ORDER BY domain_name');
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
 			$clone_results = $fmdb->last_result;

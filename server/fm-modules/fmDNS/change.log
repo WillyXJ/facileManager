@@ -1,3 +1,7 @@
+2.0-?? (2015-??-??)
+====================
+* Server - [improvement] Zone clones are now sorted by name.
+
 2.0-rc2 (2015-03-11)
 ====================
 * Server - [improvement] Swapped /tmp for sys_get_temp_dir().
