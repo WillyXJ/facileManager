@@ -283,6 +283,8 @@ class fm_settings {
 			 $software_update_options_style = 'style="display: block;"';
 		} else $software_update_checked = $software_update_options_style = null;
 
+		$ssh_user = getOption('ssh_user');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">
 			<input type="hidden" name="item_type" value="fm_settings" />
@@ -608,6 +610,15 @@ class fm_settings {
 					</div>
 				</div>
 				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label>SSH Username</label>
+							<p>The local system user to use for client interaction via SSH.</p>
+						</div>
+						<div class="choices">
+							<input name="ssh_user" id="ssh_user" type="text" value="$ssh_user" size="40" placeholder="fm_user" />
+						</div>
+					</div>
 					<div id="setting-row">
 						<div class="description">
 							<label>SSH Key Pair</label>

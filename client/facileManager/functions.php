@@ -753,7 +753,13 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			break;
 		/** ssh */
 		case 's':
-			$user = 'fm_user';
+			$raw_data = getPostData(str_replace('genserial', 'ssh=user', $url), $data);
+			$user = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+			$result = ($user) ? 'ok' : 'failed';
+			if ($result == 'failed') {
+				echo fM("Installation failed.  No SSH user found for this account.\n");
+				exit(1);
+			}
 			
 			/** Get local users */
 			$passwd_users = explode("\n", preg_replace('/:.*/', '', @file_get_contents('/etc/passwd')));
@@ -768,7 +774,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			
 			/** Add ssh public key */
 			echo fM("  --> Installing SSH key...");
-			$raw_data = getPostData(str_replace('genserial', 'sshkey', $url), $data);
+			$raw_data = getPostData(str_replace('genserial', 'ssh=key_pub', $url), $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if (strpos($raw_data, 'ssh-rsa') !== false) {
 				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys2'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys2', $raw_data, FILE_APPEND) : true;
@@ -855,33 +861,39 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
  * @since 1.0
  * @package facileManager
  *
- * @param string $user Username to add
+ * @param array $user_info User information to add
+ * @param array $passwd_users Array of existing system users
  * @return boolean
  */
 function addUser($user_info, $passwd_users) {
-	list($user, $user_name) = $user_info;
+	list($user_name, $user_comment) = $user_info;
 	
 	$retval = false;
 	
 	switch (PHP_OS) {
 		case 'Linux':
 		case 'OpenBSD':
-			if (!in_array($user, $passwd_users)) {
-				$result = system(findProgram('useradd') . " -m -c '$username' $user", $retval);
-			}
-			if (!$retval) {
-				if (!is_dir("/home/$user/.ssh")) {
-					@mkdir("/home/$user/.ssh");
-					@chown("/home/$user/.ssh", $user);
-					@chgrp("/home/$user/.ssh", $user);
-				}
-				return "/home/$user/.ssh";
-			}
+			$cmd = findProgram('useradd') . " -m -c '$user_comment' $user_name";
 			break;
 		case 'FreeBSD':
+			$cmd = findProgram('pw') . " useradd $user_name -m -c '$user_comment'";
 			break;
 		case 'Darwin':
+			/** Not yet supported */
+			$cmd = null;
 			break;
+	}
+
+	if (!in_array($user_name, $passwd_users) && $cmd) {
+		$result = system($cmd, $retval);
+	}
+	
+	if (!$retval) {
+		$ssh_dir = shell_exec("grep $user_name /etc/passwd | awk -F: '{print $6}'");
+		if ($ssh_dir && $ssh_dir != '/') {
+			createDir($ssh_dir, $user_name);
+			return $ssh_dir;
+		}
 	}
 	
 	return false;
@@ -1137,5 +1149,25 @@ function addSudoersConfig($module_name, $sudoers_line, $user) {
 	}
 }
 
+
+/**
+ * Creates directory and sets permissions
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $dir Directory to work with
+ * @param string $user Username to set ownership of
+ * @return boolean
+ */
+function createDir($dir, $user) {
+	if (!is_dir($dir)) {
+		@mkdir($dir);
+		@chown($dir, $user);
+		@chgrp($dir, $user);
+	}
+	
+	return true;
+}
 
 ?>

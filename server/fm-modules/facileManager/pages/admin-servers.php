@@ -23,7 +23,7 @@
 */
 
 /** Handle client installations */
-if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey'), $_GET)) {
+if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'), $_GET)) {
 	if (!defined('CLIENT')) define('CLIENT', true);
 	
 	require_once('fm-init.php');
@@ -99,8 +99,8 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 				$fm_shared_module_servers->updateClientVersion();
 			}
 			
-			if (array_key_exists('sshkey', $_GET)) {
-				$data = getOption('ssh_key_pub', $_SESSION['user']['account_id']);
+			if (array_key_exists('ssh', $_GET)) {
+				$data = getOption('ssh_' . $_GET['ssh'], $_SESSION['user']['account_id']);
 			}
 		} else {
 			$data = sprintf(_('failed\n\nInstallation aborted. %s is not an active module.'), $_POST['module_name']) . "\n";

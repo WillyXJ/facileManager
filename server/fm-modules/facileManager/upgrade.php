@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 37) ? fmUpgrade_2002($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 42) ? fmUpgrade_200($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -573,6 +573,25 @@ function fmUpgrade_2002($database) {
 	}
 
 	upgradeConfig('fm_db_version', 37, false);
+	
+	return $success;
+}
+
+
+/** fM v2.0 **/
+function fmUpgrade_200($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 37) ? fmUpgrade_2002($database) : true;
+	
+	if ($success) {
+		if (!setOption('ssh_user', 'fm_user')) return false;
+	}
+
+	upgradeConfig('fm_db_version', 42, false);
 	
 	return $success;
 }
