@@ -583,7 +583,7 @@ HTML;
 	/**
 	 * Displays the form to add new zone
 	 */
-	function printForm($data = '', $action = 'create', $map = 'forward', $show = array('popup', 'template_menu', 'create_template', 'template_name')) {
+	function printForm($data = '', $action = 'create', $map = 'forward', $show = array('popup', 'template_menu', 'create_template')) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$ucaction = ucfirst($action);
@@ -709,6 +709,7 @@ HTML;
 			$template_name = sprintf('<tr id="domain_template_default" style="display: %s">
 			<th></th>
 			<td><input type="checkbox" id="domain_default" name="domain_default" value="yes" %s /><label for="domain_default"> %s</label></td>
+			<input type="hidden" id="domain_create_template" name="domain_template" value="yes" />
 		</tr>', $template_name_show_hide, $default_checked, _('Make Default Template'));
 		}
 	

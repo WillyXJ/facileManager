@@ -298,7 +298,7 @@ class fm_dns_records {
 		if (in_array($type, $append)) $title_array[] = array('title' => _('Append Domain'), 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null, 'rel' => 'record_append');
 		
 		if (!in_array($type, array('SOA', 'DOMAIN'))) $title_array[] = array('title' => _('Status'), 'rel' => 'record_status');
-		if (empty($_POST)) {
+		if (empty($_POST) || $type == 'DOMAIN') {
 			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 		} else {
 			$title_array[] = array('title' => _('Valid'), 'style' => 'text-align: center;');
