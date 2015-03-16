@@ -317,37 +317,7 @@ HTML;
  * @subpackage fmDNS
  */
 function buildServerSubMenu($server_serial_no = 0, $class = null) {
-	global $fmdb, $__FM_CONFIG;
-	
-	$server_array[0][] = null;
-	$server_array[0][0][] = _('All Servers');
-	$server_array[0][0][] = '0';
-	
-	$j = 0;
-	/** Server Groups */
-	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_');
-	if ($fmdb->num_rows) {
-		$server_array[_('Groups')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[_('Groups')][$j][] = $results[$i]->group_name;
-			$server_array[_('Groups')][$j][] = 'g' . $results[$i]->group_id;
-			$j++;
-		}
-	}
-	$j = 0;
-	/** Server names */
-	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
-	if ($fmdb->num_rows) {
-		$server_array[_('Servers')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
-			$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
-			$j++;
-		}
-	}
-	$server_list = buildSelect('server_serial_no', 'server_serial_no', $server_array, $server_serial_no, 1, null, false, 'this.form.submit()');
+	$server_list = buildSelect('server_serial_no', 'server_serial_no', availableDNSServers(), $server_serial_no, 1, null, false, 'this.form.submit()');
 	
 	$hidden_inputs = null;
 	foreach ($GLOBALS['URI'] as $param => $value) {
@@ -881,5 +851,54 @@ function getZoneParentID($domain_id) {
 	return $parent_domain_id;
 }
 
+
+/**
+ * Returns an array of servers and groups
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $server_id_type What server ID should be used (serial|id)
+ * @return array
+ */
+function availableDNSServers($server_id_type = 'serial') {
+	global $fmdb, $__FM_CONFIG;
+	
+	$server_array[0][] = null;
+	$server_array[0][0][] = _('All Servers');
+	$server_array[0][0][] = '0';
+	
+	$j = 0;
+	/** Server Groups */
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_');
+	if ($fmdb->num_rows) {
+		$server_array[_('Groups')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[_('Groups')][$j][] = $results[$i]->group_name;
+			$server_array[_('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+			$j++;
+		}
+	}
+	$j = 0;
+	/** Server names */
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
+	if ($fmdb->num_rows) {
+		$server_array[_('Servers')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+			if ($server_id_type == 'serial') {
+				$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
+			} elseif ($server_id_type == 'id') {
+				$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+			}
+			$j++;
+		}
+	}
+	
+	return $server_array;
+}
 
 ?>

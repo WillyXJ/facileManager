@@ -630,7 +630,7 @@ HTML;
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
 		$domain_types = buildSelect('domain_type', 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
-		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', $this->availableDNSServers(), $domain_name_servers, 1, null, true);
+		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableDNSServers('id'), $domain_name_servers, 1, null, true);
 
 		$forwarders_show = $masters_show = 'none';
 		$domain_forward_servers = $domain_master_servers = $domain_forward = null;
@@ -908,38 +908,6 @@ HTML;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$return[$i+1][] = $results[$i]->view_name;
 				$return[$i+1][] = $results[$i]->view_id;
-			}
-		}
-		return $return;
-	}
-	
-	function availableDNSServers() {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return[0][] = _('All Servers');
-		$return[0][] = '0';
-		
-		/** Individual servers */
-		$query = "SELECT server_id,server_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}servers WHERE account_id='{$_SESSION['user']['account_id']}' AND server_status='active' ORDER BY server_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i+1][] = $results[$i]->server_name;
-				$return[$i+1][] = 's_' . $results[$i]->server_id;
-			}
-		}
-		$j = $fmdb->num_rows + 1;
-		
-		/** Server groups */
-		$query = "SELECT group_id,group_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups WHERE account_id='{$_SESSION['user']['account_id']}' AND group_status='active' ORDER BY group_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$j][] = $results[$i]->group_name;
-				$return[$j][] = 'g_' . $results[$i]->group_id;
-				$j++;
 			}
 		}
 		return $return;

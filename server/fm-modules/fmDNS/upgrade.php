@@ -1413,4 +1413,31 @@ function upgradefmDNS_2004($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 2.0 */
+function upgradefmDNS_200($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.0-rc2', '<') ? upgradefmDNS_2004($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
+	
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.0', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
 ?>
