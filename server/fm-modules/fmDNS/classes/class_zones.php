@@ -1002,7 +1002,12 @@ HTML;
 					
 					@chmod($temp_ssh_key, 0400);
 					
-					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$name_servers[$i]->server_update_port} -l fm_user {$name_servers[$i]->server_name} 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php zones id=$domain_id'", $post_result, $retval);
+					$ssh_user = getOption('ssh_user');
+					if (!$ssh_user) {
+						return '<p class="error">' . sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL('Settings')) . '</p>'. "\n";
+					}
+		
+					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$name_servers[$i]->server_update_port} -l $ssh_user {$name_servers[$i]->server_name} 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php zones id=$domain_id'", $post_result, $retval);
 					
 					@unlink($temp_ssh_key);
 					

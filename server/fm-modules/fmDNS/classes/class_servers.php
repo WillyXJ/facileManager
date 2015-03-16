@@ -579,6 +579,9 @@ HTML;
 			if (empty($group_slaves)) $group_slaves = _('None');
 			
 			if ($class) $class = 'class="' . $class . '"';
+			
+			$group_masters = wordwrap($group_masters);
+			$group_slaves = wordwrap($group_slaves);
 
 			echo <<<HTML
 		<tr id="$row->group_id" $class>
@@ -889,8 +892,13 @@ FORM;
 				
 				@chmod($temp_ssh_key, 0400);
 				
+				$ssh_user = getOption('ssh_user');
+				if (!$ssh_user) {
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL('General')));
+				}
+		
 				/** Test SSH authentication */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l fm_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/dns.php'", $post_result, $retval);
+				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/dns.php'", $post_result, $retval);
 				if ($retval) {
 					/** Something went wrong */
 					@unlink($temp_ssh_key);
@@ -899,7 +907,7 @@ FORM;
 				unset($post_result);
 				
 				/** Run build */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l fm_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php $action " . implode(' ', $options) . "'", $post_result, $retval);
+				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php $action " . implode(' ', $options) . "'", $post_result, $retval);
 				
 				@unlink($temp_ssh_key);
 				

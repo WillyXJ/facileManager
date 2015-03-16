@@ -377,6 +377,7 @@ BODY;
 			$ssh_key_loaded = @file_put_contents($temp_ssh_key, $ssh_key);
 			@chmod($temp_ssh_key, 0400);
 		}
+		$ssh_user = getOption('ssh_user');
 
 		/** Get server list */
 		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
@@ -405,8 +406,10 @@ BODY;
 							$return .= 'no SSH key defined';
 						} elseif ($ssh_key_loaded === false) {
 							$return .= 'could not load SSH key into ' . $temp_ssh_key;
+						} elseif (!$ssh_user) {
+							$return .= 'no SSH user defined';
 						} else {
-							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l fm_user {$results[$x]->server_name} uptime", $post_result, $retval);
+							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} uptime", $post_result, $retval);
 							if ($retval) {
 								$return .= 'ssh key login failed';
 							} else {
