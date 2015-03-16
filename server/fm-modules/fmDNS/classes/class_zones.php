@@ -601,6 +601,12 @@ HTML;
 		} elseif (!empty($_POST) && array_key_exists('is_ajax', $_POST)) {
 			extract($_POST);
 			$domain_clone_dname = null;
+			$domain_template_id = getNameFromID($domain_clone_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+			if ($domain_template_id) {
+				$domain_name_servers = getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers');
+			} else {
+				$domain_name_servers = getNameFromID($domain_clone_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers');
+			}
 		}
 		
 		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
