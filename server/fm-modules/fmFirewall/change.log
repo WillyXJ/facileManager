@@ -1,31 +1,18 @@
-1.1-?? (2015-??-??)
-====================
-* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
-* Server - [improvement] SSH keys can now be saved if the file already exists.
-
-1.1-rc1 (2015-03-05)
-====================
-* Server - [feature] Firewall version is displayed on the servers page. (Issue #180)
-
-1.1-beta1 (2015-01-24)
-======================
+1.1 (2015-??-??)
+================
+* Server - [feature] Added ability to update all servers with a single click on
+           the top menu bar. (Issue #116)
+* Server - [bug] Fixed server preview.
+* Server - [bug] Fixed policy ordering.
+* Server - [bug] Fixed bulk action checkbox logic.
+* Server - [feature] Added i18n support (Issue #106).
 * Server - [security] Added ability to enable/disable automatic client
            registration in the database. (Issue #122)
 * Server - [bug] Fixed cursor hand when resorting the policy rules.
 * Server - [improvement] jQuery is now used to enable/disable items.
-
-1.1-alpha2 (2015-01-13)
-=======================
-* Server - [bug] Fixed server preview.
-* Server - [bug] Fixed policy ordering.
-* Server - [bug] Fixed bulk action checkbox logic.
-* Server - [bug] Fixed process all routine (introduced in 1.1-alpha1).
-* Server - [feature] Added i18n support (Issue #106).
-
-1.1-alpha1 (2014-11-20)
-=======================
-* Server - [feature] Added ability to update all servers with a single click on
-           the top menu bar. (Issue #116)
+* Server - [feature] Firewall version is displayed on the servers page. (Issue #180)
+* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
+* Server - [improvement] SSH keys can now be saved if the file already exists.
 
 1.0.4 (2014-12-30)
 ==================

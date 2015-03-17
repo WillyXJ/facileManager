@@ -31,11 +31,11 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmFirewall'] = array(
-		'version'							=> '1.1-rc1',
-		'client_version'					=> '1.1-rc1',
+		'version'							=> '1.1',
+		'client_version'					=> '1.1',
 		'description'						=> _('Managing software firewalls should not be difficult. Manage one or more software firewall servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files individually.'),
 		'prefix'							=> 'fw_',
-		'required_fm_version'				=> '2.0-rc1',
+		'required_fm_version'				=> '2.0',
 		'min_client_auto_upgrade_version'	=> '1.0.2'
 	);
 

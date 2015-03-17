@@ -1,48 +1,13 @@
 2.0 (2015-??-??)
 ================
-* Both   - [feature] Added ability to define the SSH user to use. (Issue #182)
-
-2.0-rc2 (2015-03-11)
-====================
-* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
-* Server - [improvement] Incorporated mod_headers to save bandwidth.
-* Server - [improvement] SSH keys can now be saved if the file already exists.
-* Server - [improvement] Admin logs are now wordwrapped if the data is too long.
-
-2.0-rc1 (2015-03-05)
-====================
-* Server - [improvement] The installer provides the correct error message when
-           the database connection fails.
-* Server - [improvement] The installer now works with MySQL auto_increment_offset
-           that is greater than one.
-
-2.0-beta2 (2015-02-18)
-======================
-* Server - [improvement] The installer now uses checkmarks instead of text.
-* Server - [improvement] Modules can now be managed in bulk.
-* Server - [improvement] The upgrader will now run the module upgrade routines.
-* Server - [improvement] Server config build previews now display line numbers
-           and highlight lines in question.
-* Server - [feature] User accounts can now be created from a user template.
-* Server - [improvement] LDAP user template can now be undefined which will deny
-           authentication. This is to add another level of user access control.
-
-2.0-beta1 (2015-01-24)
-======================
-* Server - [security] Added ability to enable/disable automatic client
-           registration in the database. (Issue #122)
-* Server - [bug] Fixed PHP error at login screen when session times out.
-* Server - [improvement] Upgraded to select2 3.5.2.
-* Server - [improvement] jQuery is now used to enable/disable users.
-* Server - [improvement] The installer and upgrader received a facelift.
-* Server - [bug] Fixed an issue where user permissions could not be removed when
-           editing a user account.
-
-2.0-alpha2 (2015-01-13)
-=======================
+* Server - [improvement] Updated pagination handling.
+* Server - [feature] Added ability to update all servers with a single click on
+           the top menu bar. (Issue #116)
+* Server - [improvement] Improved support for Admin Tools error messages.
+* Server - [improvement] Popup boxes are now draggable.
+* Server - [feature] Added framework for record searching. (Issue #149)
 * Client - [improvement] Added support for sudoers includedir parameter and no
            longer disables requiretty and env_reset globally.
-* Server - [bug] Fixed Firefox css issues (introduced in 2.0-alpha1).
 * Server - [improvement] Skips apache rewrite module check for CGI/FCGI
            implementations. (Issue #91)
 * Server - [feature] FM_NO_HTACCESS is now a supported defined constant to
@@ -58,15 +23,31 @@
            other than fmDNS (introduced in 1.3).
 * Server - [feature] Added i18n support. (Issue #106)
 * Server - [bug] Fixed upgrade messages after facileManager is upgraded.
-
-2.0-alpha1 (2014-11-20)
-=======================
-* Server - [improvement] Updated pagination handling.
-* Server - [feature] Added ability to update all servers with a single click on
-           the top menu bar. (Issue #116)
-* Server - [improvement] Improved support for Admin Tools error messages.
-* Server - [improvement] Popup boxes are now draggable.
-* Server - [feature] Added framework for record searching. (Issue #149)
+* Server - [security] Added ability to enable/disable automatic client
+           registration in the database. (Issue #122)
+* Server - [bug] Fixed PHP error at login screen when session times out.
+* Server - [improvement] Upgraded to select2 3.5.2.
+* Server - [improvement] jQuery is now used to enable/disable users.
+* Server - [improvement] The installer and upgrader received a facelift.
+* Server - [bug] Fixed an issue where user permissions could not be removed when
+           editing a user account.
+* Server - [improvement] The installer now uses checkmarks instead of text.
+* Server - [improvement] Modules can now be managed in bulk.
+* Server - [improvement] The upgrader will now run the module upgrade routines.
+* Server - [improvement] Server config build previews now display line numbers
+           and highlight lines in question.
+* Server - [feature] User accounts can now be created from a user template.
+* Server - [improvement] LDAP user template can now be undefined which will deny
+           authentication. This is to add another level of user access control.
+* Server - [improvement] The installer provides the correct error message when
+           the database connection fails.
+* Server - [improvement] The installer now works with MySQL auto_increment_offset
+           that is greater than one.
+* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
+* Server - [improvement] Incorporated mod_headers to save bandwidth.
+* Server - [improvement] SSH keys can now be saved if the file already exists.
+* Server - [improvement] Admin logs are now wordwrapped if the data is too long.
+* Both   - [feature] Added ability to define the SSH user to use. (Issue #182)
 
 1.3.1 (2014-11-10)
 ==================
