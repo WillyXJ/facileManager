@@ -80,7 +80,7 @@ function fmUpgrade($database) {
 	echo "</table>";
 	
 	if (!$errors) {
-		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules.php');
+		displaySetupMessage(1, $GLOBALS['RELPATH']);
 	} else {
 		displaySetupMessage(2);
 	}
