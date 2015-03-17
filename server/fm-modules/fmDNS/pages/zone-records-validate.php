@@ -177,8 +177,10 @@ function validateEntry($action, $id, $data, $record_type) {
 	$html = null;
 	$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
 	
-	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append)) {
+	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';
+	} elseif (!isset($data['record_append'])) {
+		$data['record_append'] = 'no';
 	}
 	if (!empty($data['record_value'])) {
 		$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);

@@ -972,7 +972,8 @@ class fm_module_buildconf {
 					case 'CNAME':
 					case 'DNAME':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Aliases';
-						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
+						$record_array[$record_result[$i]->record_type]['Data'][] = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type . $separator . $record_value . $record_comment . "\n";
 						break;
 					case 'DHCID':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';

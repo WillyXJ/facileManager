@@ -51,6 +51,7 @@
 * Server - [improvement] Added button to clone a zone.
 * Server - [bug] Cloned zones cannot be templates (introduced in 2.0-beta1).
 * Server - [improvement] Zone clones are now sorted by name.
+* Server - [improvement] CNAME records are handled better regarding domain appending.
 
 1.3.6 (2015-02-09)
 ==================
