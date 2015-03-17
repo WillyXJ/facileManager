@@ -670,7 +670,6 @@ class fm_module_buildconf {
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND `domain_template`='no' AND 
 			((`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' $group_sql))
 			 $view_sql ORDER BY `domain_clone_domain_id`,`domain_name`";
-//file_put_contents('/tmp/php.log', "$query\n", FILE_APPEND);
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;

@@ -1087,7 +1087,6 @@ HTML;
 		} else $sql_name_servers = null;
 		
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' $sql_name_servers ORDER BY `server_update_method`";
-		file_put_contents('/tmp/php.log', "$query\n", FILE_APPEND);
 		$result = $fmdb->query($query);
 		
 		/** No name servers so return */
