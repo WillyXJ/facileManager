@@ -394,7 +394,10 @@ function getSOACount($domain_id) {
 				`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 					`domain_id`='$domain_id') OR
 				`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
-					`domain_id`='$domain_id')
+					`domain_id`='$domain_id') OR
+				`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+					`domain_id`=(SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+					`domain_id`='$domain_id'))
 			)) AND `soa_status`!='deleted'";
 	}
 	$fmdb->get_results($query);
@@ -408,7 +411,10 @@ function getNSCount($domain_id) {
 			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 				`domain_id`='$domain_id') OR
 			`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
-				`domain_id`='$domain_id')
+				`domain_id`='$domain_id') OR
+			`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`=(SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`='$domain_id'))
 		) AND `record_type`='NS' AND `record_status`='active'";
 	$fmdb->get_results($query);
 	return $fmdb->num_rows;
