@@ -49,10 +49,11 @@ if (isset($_POST['action'])) {
 				exit(serialize('Zone ID is not found.'));
 			}
 			
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php zones id=' . $_POST['domain_id'] . ' 2>&1', $output, $retval);
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php zones id=' . $_POST['domain_id'] . ' 2>&1', $rawoutput, $retval);
 			if ($retval) {
 				/** Something went wrong */
 				$output[] = 'Zone reload failed.';
+				$output[] = $rawoutput;
 			} else {
 				$output[] = 'Zone reload was successful.';
 			}

@@ -177,16 +177,13 @@ function buildConf($url, $data) {
 	if (!$data['dryrun']) {
 		addLogEntry($message);
 		if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
-			/** Freeze dynamic zones to support reloading */
-			$last_line = system(findProgram('rndc') . ' freeze 2>&1', $retval);
-			addLogEntry($last_line);
-		
-			$last_line = system(findProgram('rndc') . ' reload 2>&1', $retval);
-			addLogEntry($last_line);
+			$rndc_actions = array('freeze', 'reload', 'thaw');
 			
-			/** Thaw dynamic zones */
-			$last_line = system(findProgram('rndc') . ' thaw 2>&1', $retval);
-			addLogEntry($last_line);
+			/** Handle dynamic zones to support reloading */
+			foreach ($rndc_actions as $action) {
+				$last_line = system(findProgram('rndc') . " $action 2>&1", $retval);
+				if ($retval) return processReloadFailure($last_line);
+			}
 		} else {
 			$message = "The server is not running. Attempting to start it.\n";
 			if ($debug) echo fM($message);
@@ -194,19 +191,13 @@ function buildConf($url, $data) {
 			$named_rc_script = getStartupScript();
 			if ($named_rc_script === false) {
 				$last_line = "Cannot locate the start script.\n";
-				if ($debug) echo fM($last_line);
-				addLogEntry($last_line);
 				$retval = true;
 			} else {
 				$last_line = system($named_rc_script . ' 2>&1', $retval);
 			}
 		}
 		if ($retval) {
-			addLogEntry($last_line);
-			$message = "There was an error reloading the server.  Please check the logs for details.\n";
-			if ($debug) echo fM($message);
-			addLogEntry($message);
-			return false;
+			return processReloadFailure($last_line);
 		} else {
 			/** Only update reloaded zones */
 			$data['reload_domain_ids'] = $reload_domain_ids;
@@ -422,6 +413,26 @@ function manageCache($action, $message) {
 	}
 	
 	exit;
+}
+
+
+/**
+ * Logs and outputs error messages
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $last_line Output from previously run command
+ * @return boolean
+ */
+function processReloadFailure($last_line) {
+	if ($debug) echo fM($last_line);
+	addLogEntry($last_line);
+	$message = "There was an error reloading the server.  Please check the logs for details.\n";
+	if ($debug) echo fM($message);
+	addLogEntry($message);
+	return false;
 }
 
 ?>
