@@ -48,19 +48,6 @@ if (currentUserCan('manage_time', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
-		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $_GET['id'], 'time_', $_GET['status'], 'time_id')) {
-				$response = 'This time could not be ' . $_GET['status'] . '.';
-			} else {
-				/* set the time_build_config flag */
-				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time` SET `time_build_config`='yes' WHERE `time_id`=" . sanitize($_GET['id']);
-				$result = $fmdb->query($query);
-				
-				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
-				addLogEntry("Set time '$tmp_name' status to " . $_GET['status'] . '.');
-				header('Location: ' . $GLOBALS['basename']);
-			}
-		}
 		break;
 	}
 }

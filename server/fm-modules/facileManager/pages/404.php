@@ -28,15 +28,12 @@
  *
  */
 
-printHeader('File Not Found', 'install');
+printHeader(_('File Not Found'), 'install');
 
-echo <<<HTML
-<div id="message"><p class="failed">file not found</p></div>
-<p>The file you tried ({$_SERVER['REQUEST_URI']}) is not found at this location.  The URL or link may be outdated or incorrect.</p>
-<p>If you typed the URL in the address bar, please make sure the spelling is correct.</p>
-<p id="forgotton_link"><a href="javascript:history.back();">&larr; Back</a></p>
-
-HTML;
+printf('<div id="message"><p class="failed">' . _('File Not Found') . '</p></div>
+<p>' . _('The file you tried (%s) is not found at this location. The URL or link may be outdated or incorrect.') . '</p>
+<p>' . _('If you typed the URL in the address bar, please make sure the spelling is correct.') . '</p>
+<p id="forgotton_link"><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>', $_SERVER['REQUEST_URI']);
 
 exit(printFooter());
 

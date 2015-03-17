@@ -29,7 +29,7 @@ class fm_module_objects {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="objects">There are no ' . $type . ' objects defined.</p>';
+			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', sprintf(_('There are no %s objects defined.'), $type));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,10 +40,10 @@ class fm_module_objects {
 							'name' => 'objects'
 						);
 
-			$title_array = array('Object Name', 'Address');
-			if ($type != 'address') $title_array[] = 'Netmask';
-			$title_array[] = array('title' => 'Comment', 'style' => 'width: 40%;');
-			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(_('Object Name'), _('Address'));
+			if ($type != 'address') $title_array[] = _('Netmask');
+			$title_array[] = array('title' => _('Comment'), 'style' => 'width: 40%;');
+			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -75,7 +75,7 @@ class fm_module_objects {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'object_name') && empty($clean_data)) return 'No object name defined.';
+			if (($key == 'object_name') && empty($clean_data)) return _('No object name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -87,7 +87,7 @@ class fm_module_objects {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the object because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the object because a database error occurred.');
 
 		addLogEntry("Added object:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
 				"Address: {$post['object_address']} / {$post['object_mask']}\nComment: {$post['object_comment']}");
@@ -120,7 +120,7 @@ class fm_module_objects {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}objects` SET $sql WHERE `object_id`={$post['object_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the object because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the object because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -142,17 +142,17 @@ class fm_module_objects {
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $object_id, 'object_', 'object_id');
 		if ($fmdb->num_rows) {
 			/** Is the object_id present in a policy? */
-			if (isItemInPolicy($object_id, 'object')) return 'This object could not be deleted because it is associated with one or more policies.';
+			if (isItemInPolicy($object_id, 'object')) return _('This object could not be deleted because it is associated with one or more policies.');
 			
 			/** Delete object */
 			$tmp_name = getNameFromID($object_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $object_id, 'object_', 'deleted', 'object_id')) {
-				addLogEntry("Deleted object '$tmp_name'.");
+				addLogEntry(sprintf(_('Object (%s) was deleted.'), $tmp_name));
 				return true;
 			}
 		}
 		
-		return 'This object could not be deleted.';
+		return _('This object could not be deleted.');
 	}
 
 
@@ -262,24 +262,24 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['object_name'])) return 'No object name defined.';
-		if (empty($post['object_address'])) return 'No object address defined.';
+		if (empty($post['object_name'])) return _('No object name defined.');
+		if (empty($post['object_address'])) return _('No object address defined.');
 		if ($post['object_type'] == 'network') {
-			if (empty($post['object_mask'])) return 'No object netmask defined.';
+			if (empty($post['object_mask'])) return _('No object netmask defined.');
 		}
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name');
-		if ($field_length !== false && strlen($post['object_name']) > $field_length) return 'Object name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['object_name']) > $field_length) return sprintf(ngettext('Object name is too long (maximum %d character).', 'Object name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $post['object_name'], 'object_', 'object_name', "AND object_type='{$post['object_type']}' AND object_id!={$post['object_id']}");
-		if ($fmdb->num_rows) return 'This object name already exists.';
+		if ($fmdb->num_rows) return _('This object name already exists.');
 		
 		/** Check address and mask */
-		if (!verifyIPAddress($post['object_address'])) return 'Address is invalid.';
+		if (!verifyIPAddress($post['object_address'])) return _('Address is invalid.');
 		if ($post['object_type'] == 'network') {
-			if (!verifyIPAddress($post['object_mask'])) return 'Netmask is invalid.';
+			if (!verifyIPAddress($post['object_mask'])) return _('Netmask is invalid.');
 		}
 		
 		return $post;

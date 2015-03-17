@@ -32,7 +32,7 @@ define('CLIENT', true);
 
 require_once('fm-init.php');
 
-$message = '<p>Please enter your new password.</p>';
+$message = null;
 
 /** Redirect if key and login are not set */
 if (!count($_POST) && (!array_key_exists('key', $_GET) || !array_key_exists('login', $_GET))) header('Location: ' . $GLOBALS['RELPATH']);
@@ -45,9 +45,9 @@ if (count($_POST)) {
 	extract($_GET);
 	
 	if ($user_password != $cpassword) {
-		$message = '<p class="failed">The passwords do not match.</p>';
+		$message = sprintf('<p class="failed">%s</p>', _('The passwords do not match.'));
 	} else {
-		if (!resetPassword(sanitize($login), sanitize($key), sanitize($user_password))) $message = '<p class="failed">Your password failed to get updated.</p>';
+		if (!resetPassword(sanitize($login), sanitize($key), sanitize($user_password))) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
 		else {
 			require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 			$fm_login->checkPassword($login, $user_password);
@@ -65,44 +65,42 @@ printPasswordResetForm($message);
  * @since 1.0
  * @package facileManager
  */
-function printPasswordResetForm($message=null) {
-	global $__FM_CONFIG;
+function printPasswordResetForm($message = null) {
+	global $__FM_CONFIG, $fm_name;
 
-	printHeader('Password Reset', 'install');
+	printHeader(_('Password Reset'), 'install');
 	
-	if (class_exists('fmdb')) $GLOBALS['PWD_STRENGTH'] = getOption('auth_fm_pw_strength');
-	$strength = $GLOBALS['PWD_STRENGTH'];
-	echo <<<HTML
-	<form id="forgotpwd" method="post" action="{$_SERVER['REQUEST_URI']}">
+	if (class_exists('fmdb')) $strength = getOption('auth_fm_pw_strength');
+	if ($strength) $GLOBALS['PWD_STRENGTH'] = $strength;
+	echo '<form id="forgotpwd" method="post" action="' . $_SERVER['REQUEST_URI'] . '">
 		<input type="hidden" name="reset_pwd" value="1" />
-		<center>
-		<div id="message">$message</div>
+		<div id="fm-branding">
+			<img src="' . $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png' . '" /><span>' . _('Password Reset') . '</span>
+		</div>
+		<div id="window">
+		<div id="message">' . $message . '</div>
 		<table class="form-table">
 			<tr>
-				<th><label for="user_password">New Password</label></th>
-				<td><input type="password" size="25" name="user_password" id="user_password" placeholder="password" onkeyup="javascript:checkPasswd('user_password', 'resetpwd', '$strength');" /></td>
+				<th><label for="user_password">' . _('New Password') . '</label></th>
+				<td><input type="password" size="25" name="user_password" id="user_password" placeholder="' . _('password') . '" onkeyup="javascript:checkPasswd(\'user_password\', \'resetpwd\', \'' . $GLOBALS['PWD_STRENGTH'] . '\');" /></td>
 			</tr>
 			<tr>
-				<th><label for="cpassword">Confirm Password</label></th>
-				<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="password again" onkeyup="javascript:checkPasswd('cpassword', 'resetpwd', '$strength');" /></td>
+				<th><label for="cpassword">' . _('Confirm Password') . '</label></th>
+				<td><input type="password" size="25" name="cpassword" id="cpassword" placeholder="' . _('password again') . '" onkeyup="javascript:checkPasswd(\'cpassword\', \'resetpwd\', \'' . $GLOBALS['PWD_STRENGTH'] . '\');" /></td>
 			</tr>
 			<tr>
-				<th>Password Validity</th>
-				<td><div id="passwd_check">No Password</div></td>
+				<th>' . _('Password Validity') . '</th>
+				<td><div id="passwd_check">' . _('No Password') . '</div></td>
 			</tr>
 			<tr class="pwdhint">
-				<th width="33%" scope="row">Hint</th>
-				<td width="67%">
-				{$__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]}
-				<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
+				<th width="33%" scope="row">' . ('Hint') . '</th>
+				<td width="67%">' . $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]. '
 				</td>
 			</tr>
 		</table>
-		</center>
-		<p class="step"><input id="resetpwd" name="submit" type="submit" value="Submit" class="button" disable /></p>
-	</form>
-
-HTML;
+		<p class="step"><input id="resetpwd" name="submit" type="submit" value="' . _('Submit') . '" class="button" disabled /></p>
+		</div>
+	</form>';
 }
 
 
@@ -162,15 +160,14 @@ function resetPassword($fm_login, $key, $user_password) {
 function printResetConfirmation() {
 	global $fm_name;
 
-	printHeader('Password Reset', 'install');
+	printHeader(_('Password Reset'), 'install');
 	
-	echo <<<HTML
-	<center>
-	<p>Your password has been updated!  Click 'Next' to login and start using $fm_name.</p>
-	<p class="step"><a href="{$GLOBALS['RELPATH']}" class="button">Next</a></p>
-	</center>
-
-HTML;
+	printf('<div id="fm-branding">
+		<img src="' . $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png' . '" /><span>' . _('Password Reset') . '</span>
+	</div>
+	<div id="window"><p>' . _("Your password has been updated! Click 'Next' to login and start using %s.") . '</p>
+		<p class="step"><a href="%s" class="button">' . _('Next') . '</a></p>
+		</div>', $fm_name, $GLOBALS['RELPATH']);
 }
 
 ?>

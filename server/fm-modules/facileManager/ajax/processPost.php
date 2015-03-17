@@ -47,7 +47,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : 'Success';
 	} else {
 		$save_result = $fm_settings->save();
-		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : '<p>These settings have been saved.</p>'. "\n";
+		echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : sprintf("<p>%s</p>\n", _('These settings have been saved.'));
 	}
 
 /** Handle module settings */
@@ -56,12 +56,28 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 	$save_result = $fm_module_settings->save();
-	echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" : '<p>These settings have been saved.</p>'. "\n";
+	echo ($save_result !== true) ? '<p class="error">' . $save_result . '</p>'. "\n" :sprintf("<p>%s</p>\n", _('These settings have been saved.'));
 
 /** Handle bulk actions */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
-	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('upgrade', 'build config'))) {
+	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('upgrade', 'build config', 'activate', 'deactivate'))) {
 	switch($_POST['bulk_action']) {
+		/** Handle module activate/deactivate */
+		case 'activate':
+		case 'deactivate':
+		case 'uninstall':
+			/** Check permissions */
+			if (!currentUserCan('manage_modules')) {
+				returnUnAuth();
+			}
+			
+			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
+
+			$bulk_class = $fm_tools;
+			$bulk_function = 'manageModule';
+			$page = _('Modules');
+			
+			break;
 		/** Handle client upgrades */
 		case 'upgrade':
 			/** Check permissions */
@@ -69,7 +85,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				returnUnAuth();
 			}
 			
+			$bulk_class = $fm_shared_module_servers;
 			$bulk_function = 'doClientUpgrade';
+			$page = _('Servers');
 			break;
 		/** Handle client server config builds */
 		case 'build config':
@@ -78,22 +96,53 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				returnUnAuth();
 			}
 			
-			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+			$bulk_class = $fm_shared_module_servers;
 			$bulk_function = 'doBulkServerBuild';
+			$page = _('Servers');
 			break;
 	}
-	$result = buildPopup('header', ucwords($_POST['bulk_action']) . ' Results');
-	$result .= "<pre>\n";
+	$output = null;
 	if (is_array($_POST['item_id'])) {
-		foreach ($_POST['item_id'] as $serial_no) {
-			if (!is_numeric($serial_no)) continue;
+		foreach ($_POST['item_id'] as $id) {
+//			if (!is_numeric($id)) continue;
 			
-			$result .= $fm_shared_module_servers->$bulk_function($serial_no);
-			$result .= "\n";
+			$result = $bulk_class->$bulk_function($id, $_POST['bulk_action']);
+			if (!is_int($result)) $output .= $result . "\n";
 		}
 	}
-	$result .= "\n" . ucwords($_POST['bulk_action']) . ' is complete.</pre>';
-	echo $result . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL('Servers'));
+	if (isset($output)) $output = "<pre>$output</pre>\n";
+	$output .= "<p class=\"complete\">" . _('Complete') . '.</p>';
+	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $output . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL($page));
+
+/** Handle mass updates */
+} elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
+	$result = "<pre>\n";
+	
+	/** Server config builds */
+	if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND server_status="active" AND server_installed="yes"');
+		$server_count = $fmdb->num_rows;
+		$server_results = $fmdb->last_result;
+		for ($i=0; $i<$server_count; $i++) {
+			if (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
+				$result .= $fm_shared_module_servers->doClientUpgrade($server_results[$i]->server_serial_no);
+				$result .= "\n";
+			} elseif ($server_results[$i]->server_build_config != 'no') {
+				$result .= $fm_shared_module_servers->doBulkServerBuild($server_results[$i]->server_serial_no);
+				$result .= "\n";
+			}
+		}
+	}
+	
+	/** Module mass updates */
+	$include_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processPost.php';
+	if (file_exists($include_file)) {
+		include($include_file);
+	}
+	
+	$result .= "</pre>\n<p class=\"complete\">" . _('All updates have been processed.') . "</p>\n";
+	unset($_SESSION['display-rebuild-all']);
+	echo buildPopup('header', _('Updates Results')) . $result . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
@@ -112,13 +161,24 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				if ($delete_status !== true) {
 					echo $delete_status;
 				} else {
-					echo 'Success';
+					exit('Success');
+				}
+			}
+			break;
+		case 'edit':
+			if (isset($_POST['item_status'])) {
+				if (!updateStatus('fm_users', $id, 'user_', sanitize($_POST['item_status']), 'user_id')) {
+					exit(sprintf(_('This user could not be set to %s.') . "\n", $_POST['item_status']));
+				} else {
+					$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
+					addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])));
+					exit('Success');
 				}
 			}
 			break;
 	}
 /** Handle everything else */
-} else {
+} elseif (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
 	$include_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'processPost.php';
 	if (file_exists($include_file)) {
 		include($include_file);

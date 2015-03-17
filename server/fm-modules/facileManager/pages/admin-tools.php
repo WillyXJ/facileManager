@@ -31,14 +31,14 @@ if (!class_exists('fm_tools')) {
 $admin_tools = $output = $block_style = $classes = null;
 $response = isset($response) ? $response : null;
 $tools_option = array();
-$import_output = '<p>Processing...</p>';
+$import_output = sprintf('<p>%s <i class="fa fa-spinner fa-spin"></i></p>', _('Processing...'));
 
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
-		case 'Clean Up Database':
+		case _('Clean Up Database'):
 			$response = $fm_tools->cleanupDatabase();
 			break;
-		case 'Backup Database':
+		case _('Backup Database'):
 			$response = $fm_tools->backupDatabase();
 			if (!$response) header('Location: ' . $GLOBALS['basename']);
 			break;
@@ -48,25 +48,17 @@ if (array_key_exists('submit', $_POST)) {
 printHeader();
 @printMenu();
 
-if (!empty($response)) echo '<div id="response">' . $response . '</div>';
-echo '<div id="body_container"';
-if (!empty($response)) echo ' style="margin-top: 4em;"';
+$backup_button = findProgram('mysqldump') ? sprintf('<p class="step"><input id="db-backup" name="submit" type="submit" value="%s" class="button" /></p>', _('Backup Database')) : sprintf(_('<p>The required mysqldump utility is not found on %s.</p>'), php_uname('n'));
 
-$backup_button = findProgram('mysqldump') ? '<p class="step"><input id="db-backup" name="submit" type="submit" value="Backup Database" class="button" /></p>' : '<p>The required mysqldump utility is not found on ' . php_uname('n') . '.</p>';
-
-$tools_option[] = <<<HTML
-			<h2>Backup Database</h2>
-			<p>Run an ad hoc backup of your database.</p>
+$tools_option[] = '<h2>' . _('Backup Database') . '</h2>
+			<p>' . _('Run an ad hoc backup of your database.') . "</p>
 			$backup_button
-			<br />
-HTML;
+			<br />";
 
-$tools_option[] = <<<HTML
-			<h2>Clean Up Database</h2>
-			<p>You should periodically clean up your database to permanently remove deleted items. Make sure you backup your database first!</p>
-			<p class="step"><input id="db-cleanup" name="submit" type="submit" value="Clean Up Database" class="button" /></p>
-			<br />
-HTML;
+$tools_option[] = '<h2>' . _('Clean Up Database') . '</h2>
+			<p>' . _('You should periodically clean up your database to permanently remove deleted items. Make sure you backup your database first!') . '</p>
+			<p class="step"><input id="db-cleanup" name="submit" type="submit" value="' . _('Clean Up Database') . '" class="button" /></p>
+			<br />';
 
 /** Get available module tools */
 $module_var_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'variables.inc.php';
@@ -86,8 +78,11 @@ foreach ($tools_option as $tool) {
 	$admin_tools .= $tool;
 }
 
+echo '<div id="body_container">' . "\n";
+if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
+else echo '<div id="response" style="display: none;"></div>' . "\n";
+
 echo <<<HTML
->
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="" id="admin-tools-form">
 		$admin_tools

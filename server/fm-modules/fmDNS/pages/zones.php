@@ -34,13 +34,6 @@ $map = (isset($_POST['createZone'][0]['domain_mapping'])) ? sanitize(strtolower(
 $response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_zones', $_SESSION['module'])) {
-	if (isset($_POST['action']) && $_POST['action'] == 'reload') {
-		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
-//			$response = $fm_dns_zones->buildZoneConfig($_POST['domain_id']);
-		} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
-		unset($_POST);
-	}
-	
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'create';
 	switch ($action) {
 	case 'create':
@@ -48,8 +41,11 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
 				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
-				$form_data = $_POST;
 			} else {
+				if ($_POST['domain_template'] == 'yes') {
+					header('Location: templates-zones.php');
+					exit;
+				}
 				$redirect_record_type = (isset($_POST['soa_id']) && $_POST['soa_id']) ? 'NS' : 'SOA';
 				header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=' . $redirect_record_type);
 			}
@@ -60,12 +56,11 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
 				$response = '<p class="error">' . $zone_update_status . '</p>'. "\n";
-				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_GET['domain_id'], 'domain_', $_GET['status'], 'domain_id')) {
-				$response = '<p class="error">This item could not be '. $_GET['status'] .'.</p>'. "\n";
+				$response = sprintf('<p class="error">' . _('This item could not be set to %s.') . "</p>\n", $_GET['status']);
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
@@ -94,7 +89,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 				}
 				$tmp_file = TMP_FILE_EXPORTS . $filename . date("Ymdhis");
 				if (!file_put_contents($tmp_file, $zone_contents)) {
-					$response = '<p>Zone file export failed to write to temp file: ' . $tmp_file . '. Please correct and try again.</p>';
+					$response = sprintf('<p>%s</p>', sprintf(_('Zone file export failed to write to temp file: %s. Please correct and try again.'), $tmp_file));
 					break;
 				}
 				
@@ -128,7 +123,7 @@ printHeader();
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
-if (!$reload_allowed && !$response) $response = '<p>You currently have no name servers hosting zones.  <a href="' . getMenuURL('Servers') . '">Click here</a> to manage one or more servers.</p>';
+if (!$reload_allowed && !$response) $response = '<p>' . sprintf(_('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL('Servers')) . '</p>';
 
 echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	
@@ -142,12 +137,22 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 $user_capabilities = getUserCapabilities($_SESSION['user']['id']);
 $limited_domain_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids", null, false, $sort_direction);
+/** Process domain_view filtering */
+if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
+	foreach ((array) $_GET['domain_view'] as $view_id) {
+		$view_id = sanitize($view_id);
+		(string) $domain_view_sql .= " (domain_view='$view_id' OR domain_view LIKE '$view_id;%' OR domain_view LIKE '%;$view_id;%' OR domain_view LIKE '%;$view_id') OR";
+	}
+	if ($domain_view_sql) {
+		$domain_view_sql = 'AND (' . rtrim($domain_view_sql, ' OR') . ')';
+	}
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-echo displayPagination($page, $total_pages);
 
-$fm_dns_zones->rows($result, $map, $reload_allowed, $page);
+$fm_dns_zones->rows($result, $map, $reload_allowed, $page, $total_pages);
 
 printFooter();
 

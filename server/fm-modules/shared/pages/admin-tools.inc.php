@@ -29,12 +29,12 @@ if ($_SESSION['module'] != $fm_name) {
 	}
 
 	if (method_exists($fm_module_tools, 'connectTests')) {
-		$tools_option[] = <<<HTML
-			<h2>Connection Tests</h2>
-			<p>Test the connectivity of your {$_SESSION['module']} servers with the $fm_name server.</p>
-			<p class="step"><input id="connect-test" name="submit" type="submit" value="Run Tests" class="button" $disabled /></p>
-			<br />
-HTML;
+		$tools_option[] = sprintf('
+			<h2>%s</h2>
+			<p>%s</p>
+			<p class="step"><input id="connect-test" name="submit" type="submit" value="%s" class="button" %s/></p>
+			<br />', _('Connection Tests'), sprintf(_('Test the connectivity of your %s servers with the %s server.'), $_SESSION['module'], $fm_name),
+				_('Run Tests'), $disabled);
 	}
 }
 

@@ -26,36 +26,34 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {
 	
-	$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
+	$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
 
 	echo buildPopup('header', 'Reload Results') . '<pre>';
-	if (is_array($_POST['item_id'])) {
-		foreach ($_POST['item_id'] as $domain_id) {
-			if (!is_numeric($domain_id)) continue;
-			
-			echo $fm_dns_zones->doBulkZoneReload($domain_id);
-			echo "\n";
-		}
-	}
+	echo processBulkDomainIDs($_POST['item_id']);
 	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.</pre>' . $popup_footer;
 	
 	exit;
+
+	/** Handle mass updates */
+} elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
+	$result .= processBulkDomainIDs(getZoneReloads('ids'));
+	return;
 }
 
-$unpriv_message = 'You do not have sufficient privileges.';
+$unpriv_message = _('You do not have sufficient privileges.');
 $checks_array = array('servers' => 'manage_servers',
 					'views' => 'manage_servers',
 					'acls' => 'manage_servers',
@@ -64,6 +62,7 @@ $checks_array = array('servers' => 'manage_servers',
 					'logging' => 'manage_servers',
 					'controls' => 'manage_servers',
 					'domains' => 'manage_zones',
+					'domain' => 'manage_zones',
 					'soa' => 'manage_zones'
 				);
 $allowed_capabilities = array_unique($checks_array);
@@ -74,51 +73,58 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		exit;
 	}
 	
-	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
-	$item_type = $_POST['item_type'];
-	$prefix = substr($item_type, 0, -1) . '_';
+	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . sanitize($_POST['item_type']);
 
-	$field = $prefix . 'id';
-	$type_map = null;
 	$id = sanitize($_POST['item_id']);
 	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
 	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
-
+	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
+	$item_type = $_POST['item_type'];
+	$prefix = substr($item_type, 0, -1) . '_';
+	
 	/* Determine which class we need to deal with */
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
+			$object = _('server');
+			if (isset($_POST['url_var_type']) && sanitize($_POST['url_var_type']) == 'groups') {
+				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
+				$prefix = 'group_';
+				$object = _('server group');
+			}
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
-			$table = 'config';
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$field = $prefix . 'id';
-			$type_map = 'global';
-			$item_type = 'option';
+			$object = _('option');
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
-			$type_map = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
-			$action = 'create';
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;
-			$table = 'config';
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$field = $prefix . 'id';
-			if (isset($_POST['item_sub_type'])) $item_type = $_POST['item_sub_type'] . ' ';
-			$type = sanitize($_POST['log_type']);
+			$type = isset($_POST['url_var_type']) ? sanitize($_POST['url_var_type']) : 'channel';
+			$object = $type;
+			$field_data = $prefix . 'data';
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
-			$prefix = 'soa_';
-			$field = $prefix . 'id';
-			$type = 'soa';
+			$server_serial_no = $type = sanitize($_POST['item_type']);
+			break;
+		case 'domain':
+			$post_class = $fm_module_templates;
+			$server_serial_no = 'domain';
+			$type = sanitize($_POST['item_type']) . 's';
 			break;
 		default:
 			$post_class = ${"fm_dns_${_POST['item_type']}"};
+			$object = substr($item_type, 0, -1);
 	}
+	
+	if (!isset($field_data)) $field_data = $prefix . 'name';
 
 	switch ($_POST['action']) {
 		case 'add':
@@ -131,27 +137,18 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'delete':
 			if (isset($id)) {
-				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
+				exit(parseAjaxOutput($post_class->delete(sanitize($id), $type, $server_serial_no)));
 			}
 			break;
 		case 'edit':
-			if (!empty($_POST)) {
-				if (!$post_class->update($_POST)) {
-					$response = '<div class="error"><p>This ' . $table . ' could not be updated.</p></div>'. "\n";
-					$form_data = $_POST;
-				} else header('Location: ' . $GLOBALS['basename']);
-			}
-			if (isset($_GET['status'])) {
-				if (!updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', $_GET['status'], 'view_id')) {
-					$response = '<div class="error"><p>This ' . $table . ' could not be '. $_GET['status'] .'.</p></div>'. "\n";
-				} else header('Location: ' . $GLOBALS['basename']);
-			}
-			if (!isset($_POST['id']) && isset($_GET['id'])) {
-				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_GET['id'], 'view_', 'view_id');
-				if (!$fmdb->num_rows) {
-					$response = '<div class="error"><p>This ' . $table . ' is not found in the database.</p></div>'. "\n";
+			if (isset($_POST['item_status'])) {
+				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $prefix . 'id')) {
+					exit(sprintf(_('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
-					$form_data = $fmdb->last_result;
+					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
+					addLogEntry(sprintf(_('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+					exit('Success');
 				}
 			}
 			break;
@@ -161,5 +158,30 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 }
 
 echo $unpriv_message;
+
+/**
+ * Processes the array of domain ids for reload
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $domain_id_array Array of domain_ids to process
+ * @return string
+ */
+function processBulkDomainIDs($domain_id_array) {
+	global $fm_dns_zones;
+
+	$return = null;
+	if (is_array($domain_id_array)) {
+		foreach ($domain_id_array as $domain_id) {
+			if (!is_numeric($domain_id)) continue;
+			
+			$return .= $fm_dns_zones->doBulkZoneReload($domain_id) . "\n";
+		}
+	}
+	
+	return $return;
+}
 
 ?>

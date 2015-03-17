@@ -19,6 +19,21 @@
  +-------------------------------------------------------------------------+
 */
 
+/**
+ * Dummy function in case gettext is not installed
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $text Text to translate
+ * @return string $text
+ */
+if (!function_exists('_')) {
+	function _($text) {
+		return $text;
+	}
+}
+
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 
 /** Include shared classes */
@@ -68,6 +83,7 @@ function throwHTTPError($code = '404') {
 function isUpgradeAvailable() {
 	global $fmdb;
 	
+	/** fM Core */
 	include(ABSPATH . 'fm-includes/version.php');
 	
 	$running_db_version = getOption('fm_db_version');
@@ -79,6 +95,14 @@ function isUpgradeAvailable() {
 	}
 	
 	if ($running_db_version < $fm_db_version) return true;
+	
+	/** Module upgrades */
+	$fmdb->get_results("SELECT module_name,option_value FROM fm_options WHERE option_name='version'");
+	for ($x=0; $x<$fmdb->num_rows; $x++) {
+		$module_name = $fmdb->last_result[$x]->module_name;
+		include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+		if (version_compare($fmdb->last_result[$x]->option_value, $__FM_CONFIG[$module_name]['version'], '<')) return true;
+	}
 	
 	return false;
 }
@@ -169,15 +193,15 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 	if ($css == 'facileManager') {
 		$head = $menu ? getTopHeader($help) : null;
 	} else {
-		$logo = '<h1 id="logo"><img alt="' . $fm_name . '" src="' . $GLOBALS['RELPATH'] . 'fm-includes/images/logo.png" /></h1>' . "\n";
+		$logo = '<h1 class="center"><img alt="' . $fm_name . '" src="' . $GLOBALS['RELPATH'] . 'fm-includes/images/logo.png" /></h1>' . "\n";
 	}
 	
 	/** Module css and js includes */
 	if (isset($_SESSION['module'])) {
 		$module_css_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'module.css';
-		$module_css = (file_exists(ABSPATH . $module_css_file)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/css" />' : null;
-		$module_js_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'module.js';
-		$module_js = (file_exists(ABSPATH . $module_js_file)) ? '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/javascript" charset="utf-8"></script>' : null;
+		$module_css = (file_exists(ABSPATH . $module_css_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/css" />' : null;
+		$module_js_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'module.php';
+		$module_js = (file_exists(ABSPATH . $module_js_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/javascript" charset="utf-8"></script>' : null;
 	} else {
 		$module_css = $module_js = null;
 	}
@@ -191,13 +215,14 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version" rel="stylesheet" type="text/css">
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.css?ver=$fm_version" type="text/css" />
 		$module_css
-		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.js?ver=$fm_version" type="text/javascript" charset="utf-8"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-modules/$fm_name/js/$fm_name.php?ver=$fm_version" type="text/javascript" charset="utf-8"></script>
 		$module_js
 	</head>
 <body>
@@ -249,7 +274,8 @@ HTML;
 			}
 
 			$star = currentUserCan('do_everything') ? $__FM_CONFIG['icons']['star'] . ' ' : null;
-			$change_pwd_link = ($auth_method == 1) ? '<li><a class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#"><span>Edit Profile</span></a></li>' . "\n" : null;
+			$change_pwd_link = ($auth_method) ? sprintf('<li><a class="account_settings" id="%s" href="#"><span>%s</span></a></li>' . "\n", $_SESSION['user']['id'], _('Edit Profile')) : null;
+			$logout = _('Logout');
 			$user_account_menu = <<<HTML
 		<div id="topheadpartright" style="padding: 0 1px 0 0;">
 			<div id="cssmenu">
@@ -258,7 +284,7 @@ HTML;
 					<ul class="sub-right">
 						<li class="text-only"><span>$star{$_SESSION['user']['name']}</span></li>
 						$change_pwd_link
-						<li class="last"><a href="{$GLOBALS['RELPATH']}?logout"><span>Logout</span></a></li>
+						<li class="last"><a href="{$GLOBALS['RELPATH']}?logout"><span>$logout</span></a></li>
 					</ul>
 				</li>
 			</ul>
@@ -297,7 +323,7 @@ HTML;
 			
 			/** Include module toolbar items */
 			if (function_exists('buildModuleToolbar')) {
-				$module_toolbar = @buildModuleToolbar();
+				list($module_toolbar_left, $module_toolbar_right) = @buildModuleToolbar();
 			}
 		} else {
 			$module_menu = null;
@@ -305,7 +331,16 @@ HTML;
 		}
 	
 		$help_file = buildHelpFile();
-		
+		$help_text = _('Help');
+	
+		$process_all_text = _('Process all available updates now');
+		$process_all = <<<HTML
+		<div id="topheadpartright" style="display: none;">
+			<a class="single_line process_all_updates" href="#" title="$process_all_text"><i class="fa fa-refresh fa-lg"></i></a>
+			<span class="update_count"></span>
+		</div>
+HTML;
+	
 		$return = <<<HTML
 	<div id="tophead">
 		<div id="topheadpart">
@@ -314,12 +349,14 @@ HTML;
 			v$fm_version
 		</div>
 $account_menu
-$module_toolbar
+$module_toolbar_left
 $user_account_menu
 		<div id="topheadpartright">
-			<a class="single_line help_link" href="#">Help</a>
+			<a class="single_line help_link" href="#">$help_text</a>
 		</div>
 $module_menu
+$module_toolbar_right
+$process_all
 	</div>
 	<div id="help">
 		<div id="help_topbar">
@@ -367,14 +404,14 @@ function printMenu() {
 		$sub_menu_html = '</li>';
 		$show_top_badge_count = true;
 		
-		list($menu_title, $page_title, $capability, $module, $slug, $class, $badge_count) = $main_menu_array;
-		if (!is_array($class)) {
-			$class = !empty($class) ? array_fill(0, 1, $class) : array();
+		list($menu_title, $page_title, $capability, $module, $slug, $classes, $badge_count) = $main_menu_array;
+		if (!is_array($classes)) {
+			$classes = !empty($classes) ? array_fill(0, 1, $classes) : array();
 		}
 		
 		/** Check if menu item is current page */
 		if ($slug == findTopLevelMenuSlug($filtered_submenu)) {
-			array_push($class, 'current', 'arrow');
+			array_push($classes, 'current', 'arrow');
 			
 			if (array_key_exists($slug, $filtered_submenu)) {
 				$show_top_badge_count = false;
@@ -404,8 +441,8 @@ HTML;
 		}
 		
 		/** Build submenus */
-		if (!count($class) && count($filtered_submenu[$slug]) > 1) {
-			array_push($class, 'has-sub');
+		if (!count($classes) && count($filtered_submenu[$slug]) > 1) {
+			array_push($classes, 'has-sub');
 			foreach ($filtered_submenu[$slug] as $submenu_array) {
 				if (!empty($submenu_array[0])) {
 					if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
@@ -423,10 +460,10 @@ HTML;
 HTML;
 		}
 		
-		$arrow = (in_array('arrow', $class)) ? '<u></u>' : null;
+		$arrow = (in_array('arrow', $classes)) ? '<u></u>' : null;
 		
 		/** Join all of the classes */
-		if (count($class)) $class = ' class="' . implode(' ', $class) . '"';
+		if (count($classes)) $class = ' class="' . implode(' ', $classes) . '"';
 		else $class = null;
 		
 		if (empty($slug) && !empty($class)) {
@@ -569,7 +606,7 @@ function basicGet($table, $id, $prefix = '', $field = 'id', $sql = '', $account_
  * @since 1.0
  * @package facileManager
  */
-function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = null, $ip_sort = false, $direction = 'ASC') {
+function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = null, $ip_sort = false, $direction = 'ASC', $count_only = false) {
 	global $fmdb;
 	
 	switch($sql) {
@@ -595,7 +632,9 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 		$sort = "ORDER BY `$primary_field`" . $secondary_fields;
 	}
 	
-	$disp_query = "SELECT * FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
+	$disp_query = 'SELECT ';
+	$disp_query .= $count_only ? 'COUNT(*) count' : '*';
+	$disp_query .= " FROM `$table` WHERE `{$prefix}status`!='deleted' AND account_id='{$_SESSION['user']['account_id']}' $sql $sort $direction $limit";
 	return $fmdb->query($disp_query);
 }
 
@@ -655,7 +694,7 @@ function basicUpdate($table, $id, $update_field, $update_value, $field = 'id') {
 function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
 	global $fmdb;
 	
-	$query = "show columns from $tbl_name like '$column_name';";
+	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name';";
 	$result = $fmdb->get_results($query);
 	
 	$result = $fmdb->last_result;
@@ -678,16 +717,38 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
  */
 function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = 'Select an option') {
 	$type_options = null;
-	if (is_array($options[0])) {
+	if (countArrayDimensions($options) == 3) {
+		foreach ($options as $optgroup => $optarray) {
+			if (is_string($optgroup)) $type_options .= '<optgroup label="' . $optgroup . '">';
+			for ($i = 0; $i < count($optarray); $i++) {
+				$selected = null;
+				if (is_array($option_select)) {
+					foreach ($option_select as $key) {
+						if (isset($key) && $key == $optarray[$i][1]) {
+							$selected = ' selected';
+							break;
+						}
+					}
+				} elseif (isset($option_select) && (string)$option_select === (string)$optarray[$i][1]) {
+					$selected = ' selected';
+				}
+				$type_options.="<option$selected value=\"{$optarray[$i][1]}\">{$optarray[$i][0]}</option>\n";
+			}
+			if (is_string($optgroup)) $type_options .= '</optgroup>';
+		}
+	} elseif (countArrayDimensions($options) == 2) {
 		for ($i = 0; $i < count($options); $i++) {
+			$selected = null;
 			if (is_array($option_select)) {
 				foreach ($option_select as $key) {
 					if (isset($key) && $key == $options[$i][1]) {
 						$selected = ' selected';
 						break;
-					} else $selected = '';
+					}
 				}
-			} else $selected = (isset($option_select) && $option_select == $options[$i][1]) ? ' selected' : '';
+			} elseif (isset($option_select) && (string)$option_select === (string)$options[$i][1]) {
+				$selected = ' selected';
+			}
 			$type_options.="<option$selected value=\"{$options[$i][1]}\">{$options[$i][0]}</option>\n";
 		}
 	} else {
@@ -775,7 +836,7 @@ function functionalCheck() {
 			}
 			$html_checks = @moduleFunctionalCheck();
 		} else {
-			$html_checks = '<p>You have no modules installed.</p>';
+			$html_checks = sprintf('<p>%s</p>', _('You have no modules installed.'));
 		}
 	}
 	
@@ -960,9 +1021,9 @@ DASH;
 			if (!function_exists('buildModuleDashboard')) {
 				include($functions_file);
 			}
-			$body = @buildModuleDashboard();
+			$body = sprintf('<div class="fm-table"><div>%s</div></div>', @buildModuleDashboard());
 		} else {
-			$body = '<p>You have no modules installed.</p>';
+			$body = sprintf('<p>%s</p>', _('You have no modules installed.'));
 		}
 	}
 
@@ -1055,6 +1116,9 @@ function buildHelpFile() {
 				<li><b>Manage Settings</b><br />
 				This permission grants the user access to change system settings at Settings &rarr; <a href="__menu{Settings}">General</a>.</li>
 			</ul>
+			
+			<p>New user accounts can be created quickly from a template by duplicating the template user. This will prompt you for the new 
+			username and password while giving you the ability to change any other settings prior to user creation.</p>
 			<p><i>The 'User Management' or 'Super Admin' permission is required for these actions.</i></p>
 		</div>
 	</li>
@@ -1072,9 +1136,14 @@ function buildHelpFile() {
 				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users}">Users</a>.</li>
 				<li><b>LDAP Authentication</b><br />
 				Users are authenticated against a defined LDAP server. Upon success, users are created in the $fm_name database using the selected 
-				template account for granular permissions within the environment. These users cannot be disabled nor can their passwords be changed 
+				template account for granular permissions within the environment. If no template is selected then user authentication will fail 
+				(this is another method of controlling access to $fm_name). These users cannot be disabled nor can their passwords be changed 
 				within $fm_name. The PHP LDAP extensions have to be installed before this option is available.</li>
 			</ul>
+			<p><i>You can reset the authentication method by setting the following in config.inc.php:</i></p>
+			<p><i>define('FM_NO_AUTH', true);</i></p>
+			<p><b>Client Registration</b><br />
+			You can choose to allow clients to automatically register in the database or not.</p>
 			<p><b>SSL</b><br />
 			You can choose to have $fm_name enforce the use of SSL when a user tries to access the web app.</p>
 			<p><b>Mailing</b><br />
@@ -1115,7 +1184,7 @@ HTML;
 			}
 			$body .= @buildModuleHelpFile();
 		} else {
-			$body .= '<p>You have no modules installed.</p>';
+			$body .= sprintf('<p>%s</p>', _('You have no modules installed.'));
 		}
 	}
 
@@ -1154,6 +1223,7 @@ function addLogEntry($log_data, $module = null, $link = null) {
 function getAvailableModules() {
 	global $fm_name;
 	
+	$modules = null;
 	$module_dir = ABSPATH . 'fm-modules';
 	if ($handle = opendir($module_dir)) {
 		$blacklist = array('.', '..', 'shared', strtolower($fm_name));
@@ -1172,7 +1242,7 @@ function getAvailableModules() {
 		}
 	}
 	
-	return null;
+	return array();
 }
 
 /**
@@ -1419,8 +1489,8 @@ function buildDateMenu($date = null) {
 		$previous_date = date("Y-m-d", strtotime("yesterday"));
 	}
 
-	$next = '<a href="?' . $uri . '&date=' . $next_date . '">next &rarr;</a>';
-	$previous = '<a href="?' . $uri . '&date=' . $previous_date . '">&larr; previous</a>';
+	$next = sprintf('<a href="?%s&date=%s">%s</a>', $uri, $next_date, _('next &rarr;'));
+	$previous = sprintf('<a href="?%s&date=%s">%s</a>', $uri, $previous_date, _('&larr; previous'));
 	
 	$date_menu = <<<HTML
 	<div id="datemenu">
@@ -1550,53 +1620,63 @@ function arrayKeysExist($keys, $array) {
  *
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
- * @param string classes Additional classes to apply to the div
+ * @param string $classes Additional classes to apply to the div
+ * @param string $enable_options Additional options to enable in the div
  * @return string
  */
-function displayPagination($page, $total_pages, $classes = null) {
-	if ($total_pages <= 1) return;
+function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null, $enable_options = null) {
+	global $fmdb;
 	
-	$search = null;
+	$page_params = null;
 	foreach ($GLOBALS['URI'] as $key => $val) {
 		if ($key == 'p') continue;
-		$search .= $key . '=' . $val . '&';
+		$page_params .= $key . '=' . $val . '&';
+	}
+	
+	if ($page < 1) {
+		$page = 1;
+	}
+	if ($page > $total_pages) {
+		$page = $total_pages;
 	}
 	
 	$page_links = array();
-	$end_size = 1;
-	$mid_size = 2;
-	$dots = false;
 	$page_links[] = '<div id="pagination_container">';
+	$page_links[] = '<div>';
+	if (isset($addl_blocks)) {
+		if (is_array($addl_blocks)) {
+			foreach ($addl_blocks as $block) {
+				$page_links[] = '<div>' . $block . '</div>';
+			}
+		} else {
+			$page_links[] = '<div>' . $addl_blocks . '</div>';
+		}
+	}
+	$page_links[] = buildPaginationCountMenu(0, 'pagination');
+	if ($enable_options == 'search-form') $page_links[] = displayRecordSearchForm($page_params);
+
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
+	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
+	$page_links[] = '<span>' . $fmdb->num_rows . ' items</span>';
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=1\">&laquo;</a>";
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page - 1) . '">&lsaquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=1\">&laquo;</a>";
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page - 1) . '">&lsaquo;</a>';
 	}
+	
 	/** Page number */
-	for ($p=1; $p<=$total_pages; $p++) {
-		if ($p == $page) {
-			$page_links[] = '<span class="current">' . $p . '</span>';
-			$dots = true;
-		} else {
-			if ($p <= $end_size || ($page && $p >= $page - $mid_size && $p <= $page + $mid_size) || $p > $total_pages - $end_size) {
-				$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . $p . '">' . $p . '</a>';
-				$dots = true;
-			} elseif ($dots) {
-				$page_links[] = '<span class="text">...</span>';
-				$dots = false;
-			}
-		}
-	}
+	$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . $total_pages;
+	
 	/** Next link */
 	if ($page < $total_pages) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . ($page + 1) . '">&rsaquo;</a>';
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$search}p=" . $total_pages . '">&raquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page + 1) . '">&rsaquo;</a>';
+		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . $total_pages . '">&raquo;</a>';
 	}
 
+	$page_links[] = '</form>';
 	$page_links[] = '</div>';
-	$page_links[] = buildPaginationCountMenu(0, 'pagination');
+	$page_links[] = '</div>';
 	$page_links[] = '</div>';
 	
 	return join("\n", $page_links);
@@ -1645,9 +1725,17 @@ HTML;
  * @param string $message Message to display
  * @return null
  */
-function bailOut($message, $title = 'Requirement Error') {
+function bailOut($message, $title = null) {
+	global $fm_name;
+	
+	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+
+	if (!$title) $title = _('Requirement Error');
 	printHeader($title, 'install');
-	echo $message;
+	printf('<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window"><p>%s</p></div>', $branding_logo, $title, $message);
 	exit(printFooter());
 }
 
@@ -1663,22 +1751,38 @@ function bailOut($message, $title = 'Requirement Error') {
  * @param boolean $noisy Whether the result should be echoed
  * @return string
  */
-function displayProgress($step, $result, $noisy = true) {
-	$output = ($result == true) ? 'Success' : 'Failed';
-	$color = strtolower($output);
+function displayProgress($step, $result, $process = 'noisy', $error = null) {
+	global $fmdb;
+	
+	if ($result == true) {
+		$output = '<i class="fa fa-check fa-lg"></i>';
+		$status = 'success';
+	} else {
+		global $fmdb;
+		
+		if (!$error) $error = $fmdb->last_error;
+		if ($error) {
+			$output = '<a href="#" class="error-message tooltip-right" data-tooltip="' . $error . '"><i class="fa fa-times fa-lg"></i></a>';
+		} else {
+			$output = '<i class="fa fa-times fa-lg"></i>';
+		}
+		$status = 'failed';
+	}
 	
 	$message = <<<HTML
 	<tr>
 		<th>$step</th>
-		<td class="status $color">$output!</td>
+		<td class="status $status">$output</td>
 	</tr>
 
 HTML;
 
-	if ($noisy) {
+	if ($process == 'noisy') {
 		echo $message;
-		return $output;
-	} else return $message;
+		return $result;
+	} elseif ($process == 'display') {
+		return $message;
+	} else return $result;
 }
 
 
@@ -1755,7 +1859,7 @@ function isSiteSecure(){
 function getColumnLength($tbl_name, $column_name) {
 	global $fmdb;
 	
-	$query = "show columns from $tbl_name like '$column_name';";
+	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name';";
 	$result = $fmdb->get_results($query);
 	
 	$result = $fmdb->last_result;
@@ -1936,12 +2040,16 @@ function setOSIcon($server_os) {
 
 
 /**
- * Returns an icon for the server OS
+ * Displays the page header
  *
  * @since 1.0
  * @package facileManager
  *
- * @param string $server_os Server OS to return the icon for
+ * @param string $response Page form response
+ * @param string $title The page title
+ * @param bool $allowed_to_add Whether the user can add new
+ * @param string $name Name value of plus sign
+ * @param string $rel Rel value of plus sign
  * @return string
  */
 function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null) {
@@ -1955,9 +2063,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	echo '<h2>' . $title;
 	
 	if ($allowed_to_add) {
-		if ($name) $name = ' name="' . $name . '"';
-		if ($rel) $rel = ' rel="' . $rel . '"';
-		echo '<a id="plus" href="#" title="Add New"' . $name . $rel . '>' . $__FM_CONFIG['icons']['add'] . '</a>';
+		echo displayAddNew($name, $rel);
 	}
 	
 	echo '</h2>' . "\n";
@@ -2070,8 +2176,8 @@ function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 	if (is_array($bulk_actions_list)) {
 		$bulk_actions[] = null;
 		
-		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1, '', false, null, null, 'Bulk Actions') . 
-			'<input type="submit" name="bulk_apply" id="bulk_apply" value="Apply" class="button" />' . "\n";
+		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1, '', false, null, null, _('Bulk Actions')) . 
+			'<input type="submit" name="bulk_apply" id="bulk_apply" value="' . _('Apply') . '" class="button" />' . "\n";
 	}
 }
 
@@ -2208,13 +2314,19 @@ function formatLogKeyData($strip, $key, $data) {
  * @param string $link_display Show or Hide the page back link
  * @return string
  */
-function fMDie($message = 'An unknown error occurred.', $link_display = 'show') {
+function fMDie($message = null, $link_display = 'show') {
 	global $fm_name;
+	
+	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+
+	if (!$message) $message = _('An unknown error occurred.');
 	
 	printHeader('Error', 'install', false, false);
 	
-	echo '<p>' . $message . '</p>';
-	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">&larr; Back</a></p>';
+	printf('<div id="fm-branding"><img src="%s" /><span>%s</span></div>
+		<div id="window"><p>%s</p>', $branding_logo, _('Oops!'), $message);
+	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>';
+	echo '</div>';
 	
 	exit;
 }
@@ -2230,7 +2342,7 @@ function fMDie($message = 'An unknown error occurred.', $link_display = 'show') 
  * @return string
  */
 function unAuth($link_display = 'show') {
-	fMDie('You do not have permission to view this page. Please contact your administrator for access.', $link_display);
+	fMDie(_('You do not have permission to view this page. Please contact your administrator for access.'), $link_display);
 }
 
 
@@ -2336,7 +2448,7 @@ function handleHiddenFlags() {
 	/** Recover authentication in case of lockout */
 	if (defined('FM_NO_AUTH') && FM_NO_AUTH) {
 		setOption('auth_method', 0);
-		@addLogEntry('Manually reset authentication method.', $fm_name);
+		@addLogEntry(_('Manually reset authentication method.'), $fm_name);
 	}
 }
 
@@ -2582,9 +2694,8 @@ function hasExceededMaxInputVars() {
  */
 function checkMaxInputVars() {
 	if ($required_input_vars = hasExceededMaxInputVars()) {
-		fMDie('PHP max_input_vars (' . ini_get('max_input_vars') . ') has been reached and ' . $required_input_vars . ' or more are required. Please 
-			increase the limit to fulfill this request. One method is to set the following in ' . ABSPATH . '.htaccess:
-			<p><code>php_value max_input_vars ' . $required_input_vars . '</code></p>', true);
+		fMDie(sprintf(_('PHP max_input_vars (%1$d) has been reached and %2$s or more are required. Please increase the limit to fulfill this request. One method is to set the following in %3$s.htaccess:') .
+			'<p><code>php_value max_input_vars %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH), true);
 	}
 }
 
@@ -2674,8 +2785,10 @@ function getMenuURL($search_slug = null) {
  * @param string $link Link to provide for a button
  * @return string Returns the popup section
  */
-function buildPopup($section, $text = 'Save', $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
+function buildPopup($section, $text = null, $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
 	global $__FM_CONFIG;
+	
+	if (!$text) $text = _('Save');
 	
 	if ($section == 'header') {
 		return <<<HTML
@@ -2741,7 +2854,7 @@ function parseAjaxOutput($output) {
 			echo $message_array['content'];
 		}
 	} else {
-		echo 'Success';
+		echo _('Success');
 	}
 }
 
@@ -2759,4 +2872,115 @@ function parseMenuLinks($html) {
 	$string = preg_replace("/__menu{(.+?)}/esim", "getMenuURL('\\1')", $html);
 	return $string;
 }
+
+
+/**
+ * Gets the count for servers requiring a config build
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @return integer Record count
+ */
+function countServerUpdates() {
+	global $fmdb, $__FM_CONFIG;
+	
+	if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND (server_build_config!="no" OR server_client_version!="' . getOption('client_version', 0, $_SESSION['module']) . '") AND server_status="active" AND server_installed="yes"', null, false, null, true);
+		if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
+	}
+			
+	return 0;
+}
+
+
+/**
+ * Builds and displays the search form
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $page_params Current page parameters in URI
+ * @return string Search form
+ */
+function displayRecordSearchForm($page_params = null) {
+	if (isset($_GET['q'])) {
+		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
+		$search_remove = '<div class="search_remove">
+			<i class="fa fa-remove fa-lg"></i>
+		</div>';
+	} else {
+		$placeholder = _('Search by keyword');
+		$search_remove = null;
+	}
+	
+	$form = <<<HTML
+	<div id="record_search_form_container">
+		<div>
+			<div class="search_icon">
+				<i class="fa fa-search fa-lg"></i>
+			</div>
+			<div id="record_search_form">
+				<form id="record_search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
+					<input type="text" placeholder="$placeholder" />
+				</form>
+			</div>
+			$search_remove
+		</div>
+	</div>
+HTML;
+	
+	return $form;
+}
+
+
+/**
+ * Counts the number of dimensions in an array
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param array $array Array to count
+ * @return int Number of dimensions
+ */
+function countArrayDimensions($array) {
+	if (is_array(@reset($array))) {
+		$count = countArrayDimensions(reset($array)) + 1;
+	} else {
+		$count = 1;
+	}
+	
+	return $count;
+}
+
+
+/**
+ * Displays the add new link
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $name Name value of plus sign
+ * @param string $rel Rel value of plus sign
+ * @param string $title The title of plus sign
+ * @param string $style Use an image or font
+ * @return string
+ */
+function displayAddNew($name = null, $rel = null, $title = null, $style = 'image') {
+	global $__FM_CONFIG;
+	
+	if (empty($title)) $title = _('Add New');
+	
+	if ($name) $name = ' name="' . $name . '"';
+	if ($rel) $rel = ' rel="' . $rel . '"';
+	
+	if ($style == 'image') {
+		$image = str_replace('_TITLE_', $title, $__FM_CONFIG['icons']['add']);
+	} else {
+		$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
+	}
+	
+	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
+}
+
 ?>

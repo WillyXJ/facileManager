@@ -73,7 +73,7 @@ class fm_module_buildconf {
 			$data = $server_result[0];
 			extract(get_object_vars($data), EXTR_SKIP);
 			
-			/** Disabled DNS server */
+			/** Disabled server */
 			if ($server_status != 'active') {
 				$error = "Server is $server_status.\n";
 				if ($compress) echo gzcompress(serialize($error));
@@ -103,10 +103,7 @@ class fm_module_buildconf {
 				$data->files = array_merge($data->files, $files);
 			}
 			
-//			print_r($data);
-//			exit;
-			
-			return get_object_vars($data);
+			return array(get_object_vars($data), null);
 		}
 		
 		/** Bad server */
@@ -152,12 +149,12 @@ class fm_module_buildconf {
 			
 			/** process server config build */
 			$config = $this->buildServerConfig($post_data);
-			return $config;
+			return array($config, null);
 			
 		}
 		
-		/** Bad DNS server */
-		$error = "DNS server is not found.\n";
+		/** Bad server */
+		$error = "Server is not found.\n";
 		if ($compress) echo gzcompress(serialize($error));
 		else echo serialize($error);
 	}

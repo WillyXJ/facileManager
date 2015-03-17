@@ -36,7 +36,7 @@ extract($_POST);
 
 /** Should the user be here? */
 if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
-if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
+if (!zoneAccessIsAllowed(array($domain_id))) unAuth();
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 
 if (isset($update) && is_array($update)) {
@@ -85,7 +85,7 @@ if (isset($create) && is_array($create)) {
 	
 	if (isset($import_records)) {
 		$domain_name = displayFriendlyDomainName(getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-		addLogEntry("Imported $record_count records from '$import_file' into $domain_name.");
+		addLogEntry(sprintf(ngettext('Imported %d records from \'%1$s\' into %2$s.'), $record_count, $import_file, $domain_name));
 	}
 }
 
@@ -101,7 +101,7 @@ if (isset($record_type) && $domain_id && !isset($import_records)) {
 
 
 function autoCreatePTR($domain_id, $record_type, $data) {
-	if ($record_type == 'A' && isset($data['PTR']) && currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $data['PTR']))) {
+	if ($record_type == 'A' && isset($data['PTR']) && zoneAccessIsAllowed(array($data['PTR']))) {
 		global $__FM_CONFIG;
 
 		$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
@@ -139,7 +139,7 @@ function autoCreatePTR($domain_id, $record_type, $data) {
 				);
 
 		global $fm_dns_records;
-		$fm_dns_records->add($data['PTR'], 'PTR', $array);
+		$fm_dns_records->add($data['PTR'], 'PTR', $array, 'replace');
 	}
 }
 ?>

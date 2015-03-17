@@ -29,7 +29,7 @@ class fm_module_tools {
 		global $__FM_CONFIG, $fm_name;
 		
 		if (!currentUserCan('manage_records', $_SESSION['module'])) return $this->unAuth('zone');
-		if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $_POST['domain_id']))) return $this->unAuth('zone');
+		if (!zoneAccessIsAllowed(array($_POST['domain_id']))) return $this->unAuth('zone');
 		
 		$raw_contents = file_get_contents($_FILES['import-file']['tmp_name']);
 		/** Strip commented lines */
@@ -43,8 +43,8 @@ class fm_module_tools {
 		
 		/** Handle unsupported message */
 		if ($generate_count || $origin_count) {
-			$unsupported[] = '<h4>Unsupported Entries:</h4>';
-			$unsupported[] = '<p class="soa_import">' . $fm_name . ' currently does not support importing $GENERATE and $ORIGIN entries which were found in your zone file.</p>';
+			$unsupported[] = sprintf('<h4>%s:</h4>', _('Unsupported Entries'));
+			$unsupported[] = '<p class="soa_import">' . sprintf(_('%s currently does not support importing $GENERATE and $ORIGIN entries which were found in your zone file.'), $fm_name) . '</p>';
 			$unsupported = implode("\n", $unsupported);
 		} else $unsupported = null;
 		
@@ -338,7 +338,13 @@ BODY;
 	function checkDuplicates($array, $domain_id) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE record_status!='deleted' AND domain_id='$domain_id' AND ";
+		$parent_id = getParentDomainID($domain_id);
+		if ($parent_id == $domain_id) {
+			$domain_id_sql = "='$domain_id'";
+		} else {
+			$domain_id_sql = "IN ($domain_id, $parent_id)";
+		}
+		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE record_status!='deleted' AND domain_id $domain_id_sql AND ";
 		
 		foreach ($array as $key => $data) {
 			if ($key == 'record_comment' && $data == 'none') {
@@ -365,11 +371,13 @@ BODY;
 		
 		/** Load ssh key for use */
 		$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-		$temp_ssh_key = '/tmp/fm_id_rsa';
+		$temp_ssh_key = sys_get_temp_dir() . '/fm_id_rsa';
 		if ($ssh_key) {
+			if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 			$ssh_key_loaded = @file_put_contents($temp_ssh_key, $ssh_key);
 			@chmod($temp_ssh_key, 0400);
 		}
+		$ssh_user = getOption('ssh_user');
 
 		/** Get server list */
 		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
@@ -398,8 +406,10 @@ BODY;
 							$return .= 'no SSH key defined';
 						} elseif ($ssh_key_loaded === false) {
 							$return .= 'could not load SSH key into ' . $temp_ssh_key;
+						} elseif (!$ssh_user) {
+							$return .= 'no SSH user defined';
 						} else {
-							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l fm_user {$results[$x]->server_name} uptime", $post_result, $retval);
+							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} uptime", $post_result, $retval);
 							if ($retval) {
 								$return .= 'ssh key login failed';
 							} else {

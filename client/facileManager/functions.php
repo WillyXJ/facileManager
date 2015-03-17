@@ -353,14 +353,14 @@ function upgradeFM($url, $data) {
 	$message = "Extracting client files.\n";
 	echo fM($message);
 	addLogEntry($message);
-	extractFiles(array('/tmp/' . $core_file, '/tmp/' . $module_file));
+	extractFiles(array(sys_get_temp_dir() . '/' . $core_file, sys_get_temp_dir() . '/' . $module_file));
 	
 	/** Cleanup */
 	$message = "Cleaning up.\n";
 	echo fM($message);
 	addLogEntry($message);
-	@unlink('/tmp/' . $core_file);
-	@unlink('/tmp/' . $module_file);
+	@unlink(sys_get_temp_dir() . '/' . $core_file);
+	@unlink(sys_get_temp_dir() . '/' . $module_file);
 	
 	$message = "Client upgrade complete.\n";
 	echo fM($message);
@@ -729,7 +729,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 	switch($update_method) {
 		/** cron */
 		case 'c':
-			$tmpfile = '/tmp/crontab.facileManager';
+			$tmpfile = sys_get_temp_dir() . '/crontab.facileManager';
 			$dump = shell_exec('crontab -l | grep -v ' . $argv[0] . '> ' . $tmpfile . ' 2>/dev/null');
 			
 			/** Handle special cases */
@@ -753,7 +753,13 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			break;
 		/** ssh */
 		case 's':
-			$user = 'fm_user';
+			$raw_data = getPostData(str_replace('genserial', 'ssh=user', $url), $data);
+			$user = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+			$result = ($user) ? 'ok' : 'failed';
+			if ($result == 'failed') {
+				echo fM("Installation failed.  No SSH user found for this account.\n");
+				exit(1);
+			}
 			
 			/** Get local users */
 			$passwd_users = explode("\n", preg_replace('/:.*/', '', @file_get_contents('/etc/passwd')));
@@ -768,7 +774,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			
 			/** Add ssh public key */
 			echo fM("  --> Installing SSH key...");
-			$raw_data = getPostData(str_replace('genserial', 'sshkey', $url), $data);
+			$raw_data = getPostData(str_replace('genserial', 'ssh=key_pub', $url), $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if (strpos($raw_data, 'ssh-rsa') !== false) {
 				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys2'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys2', $raw_data, FILE_APPEND) : true;
@@ -785,34 +791,8 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			}
 			
 			/** Add an entry to sudoers */
-			$sudoers = findFile('sudoers');
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
-			
-			if (!$sudoers) {
-				echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
-				echo fM("\n      $sudoers_line\n");
-				
-				echo fM("\nInstallation aborted.\n");
-				exit(1);
-			} else {
-				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
-				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
-					$sudoers_update = system($cmd, $retval);
-				
-					if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
-					else echo fM("  --> The sudoers entry has been added.\n");
-				} else echo fM("  --> The sudoers entry already exists...skipping\n");
-				
-				/** Check for bad settings and disable */
-				$bad_settings = array('requiretty', 'env_reset');
-				foreach ($bad_settings as $setting) {
-					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
-					if ($found_bad != 0) {
-						echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
-						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
-					}
-				}
-			}
+			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'ssh';
 			
@@ -858,41 +838,15 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			} else echo fM("      --> $link_name already exists...skipping\n");
 			
 			/** Add an entry to sudoers */
-			$sudoers = findFile('sudoers');
 			$user = getParameterValue('^User', $httpdconf, ' ');
 			if ($user[0] == '$') {
 				$user_var = preg_replace(array('/\$/', '/{/', '/}/'), '', $user);
 				$user = getParameterValue($user_var, findFile('envvars'), '=');
 			}
+			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
 			
-			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
-			
-			if (!$sudoers) {
-				echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
-				echo fM("\n      $sudoers_line\n");
-				
-				echo fM("\nInstallation aborted.\n");
-				exit(1);
-			} else {
-				$cmd = "echo '$sudoers_line' >> $sudoers 2>/dev/null";
-				if (strpos(file_get_contents($sudoers), $sudoers_line) === false) {
-					$sudoers_update = system($cmd, $retval);
-				
-					if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
-					else echo fM("  --> The sudoers entry has been added.\n");
-				} else echo fM("  --> The sudoers entry already exists...skipping\n");
-				
-				/** Check for bad settings and disable */
-				$bad_settings = array('requiretty', 'env_reset');
-				foreach ($bad_settings as $setting) {
-					$found_bad = shell_exec("grep $setting $sudoers | grep -cv '^#'");
-					if ($found_bad != 0) {
-						echo fM("  --> Disabling 'Defaults $setting' in $sudoers...\n");
-						shell_exec("sed -i 's/.*$setting/#&/' $sudoers");
-					}
-				}
-			}
+			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'http';
 
@@ -907,33 +861,39 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
  * @since 1.0
  * @package facileManager
  *
- * @param string $user Username to add
+ * @param array $user_info User information to add
+ * @param array $passwd_users Array of existing system users
  * @return boolean
  */
 function addUser($user_info, $passwd_users) {
-	list($user, $user_name) = $user_info;
+	list($user_name, $user_comment) = $user_info;
 	
 	$retval = false;
 	
 	switch (PHP_OS) {
 		case 'Linux':
 		case 'OpenBSD':
-			if (!in_array($user, $passwd_users)) {
-				$result = system(findProgram('useradd') . " -m -c '$username' $user", $retval);
-			}
-			if (!$retval) {
-				if (!is_dir("/home/$user/.ssh")) {
-					@mkdir("/home/$user/.ssh");
-					@chown("/home/$user/.ssh", $user);
-					@chgrp("/home/$user/.ssh", $user);
-				}
-				return "/home/$user/.ssh";
-			}
+			$cmd = findProgram('useradd') . " -m -c '$user_comment' $user_name";
 			break;
 		case 'FreeBSD':
+			$cmd = findProgram('pw') . " useradd $user_name -m -c '$user_comment'";
 			break;
 		case 'Darwin':
+			/** Not yet supported */
+			$cmd = null;
 			break;
+	}
+
+	if (!in_array($user_name, $passwd_users) && $cmd) {
+		$result = system($cmd, $retval);
+	}
+	
+	if (!$retval) {
+		$ssh_dir = shell_exec("grep $user_name /etc/passwd | awk -F: '{print $6}'");
+		if ($ssh_dir && $ssh_dir != '/') {
+			createDir($ssh_dir, $user_name);
+			return $ssh_dir;
+		}
 	}
 	
 	return false;
@@ -1040,7 +1000,7 @@ function downloadfMFile($file, $module = false) {
 	echo fM($base_url . "\n");
 	addLogEntry("Downloading $base_url\n");
 	
-	$local_file = '/tmp/' . $file;
+	$local_file = sys_get_temp_dir() . '/' . $file;
 	@unlink($local_file);
 	
 	$fh = fopen($local_file, 'w+');
@@ -1079,7 +1039,7 @@ function downloadfMFile($file, $module = false) {
  * @param array $files Files to extract
  */
 function extractFiles($files = array()) {
-	$tmp_dir = '/tmp/fM_files';
+	$tmp_dir = sys_get_temp_dir() . '/fM_files';
 	if (!is_dir($tmp_dir)) mkdir($tmp_dir);
 	
 	foreach ($files as $filename) {
@@ -1148,5 +1108,66 @@ function getParameterValue($param, $file, $delimiter = '=') {
 	return trim(str_replace(array('"', "'"), '', $raw_line[1]));
 }
 
+
+/**
+ * Added sudoers entries
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $module_name Module to add line for
+ * @param string $sudoers_line Sudo lines
+ * @param string $user User with permissions
+ */
+function addSudoersConfig($module_name, $sudoers_line, $user) {
+	$sudoers_file = findFile('sudoers');
+	$sudoers_options[] = "Defaults:$user  !requiretty";
+	$sudoers_options[] = "Defaults:$user  !env_reset";
+	$sudoers_line = implode("\n", $sudoers_options) . "\n" . $sudoers_line;
+	unset($sudoers_options);
+
+	if (!$sudoers_file) {
+		echo fM("  --> It does not appear sudo is installed.  Please install it and add the following to the sudoers file:\n");
+		echo fM("\n      $sudoers_line\n");
+
+		echo fM("\nInstallation aborted.\n");
+		exit(1);
+	} else {
+		$includedir = getParameterValue('includedir', $sudoers_file, ' ');
+		if ($includedir) {
+			if (is_dir($includedir)) {
+				$sudoers_file = $includedir . '/99_' . $module_name;
+			}
+		}
+		$cmd = "echo '$sudoers_line' >> $sudoers_file 2>/dev/null";
+		if (strpos(file_get_contents($sudoers_file), $sudoers_line) === false) {
+			$sudoers_update = system($cmd, $retval);
+
+			if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
+			else echo fM("  --> The sudoers entry has been added.\n");
+		} else echo fM("  --> The sudoers entry already exists...skipping\n");
+	}
+}
+
+
+/**
+ * Creates directory and sets permissions
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $dir Directory to work with
+ * @param string $user Username to set ownership of
+ * @return boolean
+ */
+function createDir($dir, $user) {
+	if (!is_dir($dir)) {
+		@mkdir($dir);
+		@chown($dir, $user);
+		@chgrp($dir, $user);
+	}
+	
+	return true;
+}
 
 ?>

@@ -33,7 +33,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	if (array_key_exists('reset_pwd', $_POST)) {
 		$result = $fm_login->processUserPwdResetForm($_POST['user_id']);
 		if ($result === true) {
-			echo '<p>Password reset email has been sent to ' . $_POST['user_id'] . '.</p>';
+			printf(_('<p>Password reset email has been sent to %s.</p>'), $_POST['user_id']);
 		} else {
 			echo '<p class="error">' . $result . '</p>';
 		}
@@ -45,7 +45,10 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
-	$form_bits = array('user_login', 'user_email', 'user_password', 'user_module');
+	$form_bits = array('user_login', 'user_email', 'user_module');
+	if (getOption('auth_method') == 1) {
+		$form_bits[] = 'user_password';
+	}
 	$edit_form = '<div id="popup_response" style="display: none;"></div>' . "\n";
 	basicGet('fm_users', $_SESSION['user']['id'], 'user_', 'user_id');
 	$results = $fmdb->last_result;
@@ -73,9 +76,19 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
 	if ($add_new) {
-		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_password', 'user_options', 'user_perms', 'user_module') : array('user_password');
+		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_auth_method', 'user_password', 'user_options', 'user_perms', 'user_module') : array('user_password');
 
-		$edit_form = $fm_users->printUsersForm(null, 'add', $form_bits);
+		$form_data = null;
+		if ($id) {
+			basicGet('fm_users', $id, 'user_', 'user_id');
+			$results = $fmdb->last_result;
+			if (!$fmdb->num_rows) returnError();
+
+			$form_data[] = $results[0];
+			$form_data[0]->user_login = null;
+			$form_data[0]->user_template_only = false;
+		}
+		$edit_form = $fm_users->printUsersForm($form_data, 'add', $form_bits);
 	} else {
 		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_options', 'user_perms', 'user_module') : array('user_password');
 
@@ -89,7 +102,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	}
 	
 	echo $edit_form;
-} else {
+} elseif (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
 	$include_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'getData.php';
 	if (file_exists($include_file)) {
 		include($include_file);

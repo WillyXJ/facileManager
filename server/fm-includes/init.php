@@ -47,47 +47,62 @@ function checkAppVersions($single_check = true) {
 	
 	/** PHP Version */
 	if (version_compare(PHP_VERSION, $required_php_version, '<')) {
+		$message = sprintf(_('Your server is running PHP version %1$s but %2$s %3$s requires at least %4$s.'), PHP_VERSION, $fm_name, $fm_version, $required_php_version);
 		if ($single_check) {
-			bailOut(sprintf('<p style="text-align: center;">Your server is running PHP version %1$s but %2$s %3$s requires at least %4$s.</p>', PHP_VERSION, $fm_name, $fm_version, $required_php_version));
+			bailOut($message);
 		} else {
-			$requirement_check .= displayProgress("PHP >= $required_php_version", false, false);
+			$requirement_check .= displayProgress("PHP >= $required_php_version", false, 'display', $message);
 			$error = true;
 		}
 	} else {
-		if (!$single_check) $requirement_check .= displayProgress("PHP >= $required_php_version", true, false);
+		if (!$single_check) $requirement_check .= displayProgress("PHP >= $required_php_version", true, 'display');
 	}
 
 	/** PHP Extensions */
 	$required_php_extensions = array('mysql', 'mysqli', 'curl', 'posix', 'filter', 'json');
-	foreach ($required_php_extensions as $extenstion) {
-		if (!extension_loaded($extenstion)) {
+	foreach ($required_php_extensions as $extension) {
+		if (!extension_loaded($extension)) {
+			$message = sprintf(_('Your PHP installation appears to be missing the %1s extension which is required by %2s.'), $extension, $fm_name);
 			if ($single_check) {
-				bailOut(sprintf('<p style="text-align: center;">Your PHP installation appears to be missing the %1s extension which is required by %2s.</p>', $extenstion, $fm_name));
+				bailOut($message);
 			} else {
-				$requirement_check .= displayProgress("PHP $extenstion Extension", false, false);
+				$requirement_check .= displayProgress(_(sprintf('PHP %1s Extension', $extension)), false, 'display', $message);
 				$error = true;
 			}
 		} else {
-			if (!$single_check) $requirement_check .= displayProgress("PHP $extenstion Extension", true, false);
+			if (!$single_check) $requirement_check .= displayProgress(_(sprintf('PHP %1s Extension', $extension)), true, 'display');
 		}
 	}
 	
 	/** Apache mod_rewrite module */
-	if (!in_array('mod_rewrite', apache_get_modules())) {
-		if ($single_check) {
-			bailOut(sprintf('<p style="text-align: center;">Your Apache installation appears to be missing the mod_rewrite module which is required by %1s.</p>', $fm_name));
+	if (function_exists('apache_get_modules')) {
+		if (!in_array('mod_rewrite', apache_get_modules())) {
+			$message = sprintf(_('Your Apache installation appears to be missing the mod_rewrite module which is required by %1s.'), $fm_name);
+			if ($single_check) {
+				bailOut($message);
+			} else {
+				$requirement_check .= displayProgress(_('Apache mod_rewrite Loaded'), false, 'display', $message);
+				$error = true;
+			}
 		} else {
-			$requirement_check .= displayProgress('Apache mod_rewrite Loaded', false, false);
-			$error = true;
+			if (!$single_check) $requirement_check .= displayProgress(_('Apache mod_rewrite Loaded'), true, 'display');
 		}
-	} else {
-		if (!$single_check) $requirement_check .= displayProgress('Apache mod_rewrite Loaded', true, false);
 	}
 	
 	/** .htaccess file */
-	if (!file_exists(ABSPATH . '.htaccess')) {
-		if (is_writeable(ABSPATH)) {
-			file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_rewrite.c>
+	if (!defined('FM_NO_HTACCESS')) {
+		if (!file_exists(ABSPATH . '.htaccess')) {
+			if (is_writeable(ABSPATH)) {
+				file_put_contents(ABSPATH . '.htaccess', '<IfModule mod_headers.c>
+	<FilesMatch "\.(js|css|txt)$">
+		Header set Cache-Control "max-age=7200"
+	</FilesMatch>
+	<FilesMatch "\.(jpe?g|png|gif|ico)$">
+		Header set Cache-Control "max-age=2592000"
+	</FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -96,10 +111,19 @@ RewriteRule . index.php [L]
 </IfModule>
 
 ');
-		} else {
-			if ($single_check) {
-				bailOut(sprintf('<p style="text-align: center;">I cannot create the missing %1s.htaccess which is required by %2s so please create it with the following contents:</p>', ABSPATH, $fm_name) . 
-				'<textarea rows="8">&lt;IfModule mod_rewrite.c&gt;
+			} else {
+				if ($single_check) {
+					bailOut(sprintf(_('I cannot create the missing %1s.htaccess which is required by %2s so please create it with the following contents:'), ABSPATH, $fm_name) . 
+				'<textarea rows="8">&lt;IfModule mod_headers.c&gt;
+	&lt;FilesMatch "\.(js|css|txt)$"&gt;
+		Header set Cache-Control "max-age=7200"
+	&lt;/FilesMatch&gt;
+	&lt;FilesMatch "\.(jpe?g|png|gif|ico)$"&gt;
+		Header set Cache-Control "max-age=2592000"
+	&lt;/FilesMatch&gt;
+&lt;/IfModule&gt;
+
+&lt;IfModule mod_rewrite.c&gt;
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -107,13 +131,14 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . index.php [L]
 &lt;/IfModule&gt;
 </textarea>');
-			} else {
-				$requirement_check .= displayProgress('.htaccess File Present', false, false);
-				$error = true;
+				} else {
+					$requirement_check .= displayProgress(_('.htaccess File Present'), false, 'display');
+					$error = true;
+				}
 			}
+		} else {
+			if (!$single_check) $requirement_check .= displayProgress(_('.htaccess File Present'), true, 'display');
 		}
-	} else {
-		if (!$single_check) $requirement_check .= displayProgress('.htaccess File Present', true, false);
 	}
 	
 	/** Test rewrites */
@@ -121,30 +146,26 @@ RewriteRule . index.php [L]
 		if (dns_get_record($_SERVER['SERVER_NAME'], DNS_A + DNS_AAAA)) {
 			$test_output = getPostData($GLOBALS['FM_URL'] . 'admin-accounts.php?verify', array('module_type' => 'CLIENT'));
 			$test_output = isSerialized($test_output) ? unserialize($test_output) : $test_output;
-			if (strpos($test_output, 'Account is not found.') === false) {
+			if (strpos($test_output, _('Account is not found.')) === false) {
+				$message = sprintf(_('The required .htaccess file appears to not work with your Apache configuration which is required by %1s.'), $fm_name);
 				if ($single_check) {
-					bailOut(sprintf('<p style="text-align: center;">The required .htaccess file appears to not work with your Apache configuration which is required by %1s.</p>', $fm_name));
+					bailOut($message);
 				} else {
-					$requirement_check .= displayProgress('Test Rewrites', false, false);
+					$requirement_check .= displayProgress(_('Test Rewrites'), false, 'display', $message);
 					$error = true;
 				}
 			} else {
-				if (!$single_check) $requirement_check .= displayProgress('Test Rewrites', true, false);
+				if (!$single_check) $requirement_check .= displayProgress(_('Test Rewrites'), true, 'display');
 			}
 		}
 	}
 	
 	if ($error) {
-		$requirement_check = <<<HTML
-			<center><table class="form-table">
-			<tr>
-				<td colspan="2" id="install_module_list" class="bottom_line"><p><b>System Requirement Checks</p></td>
-			</tr>
-			$requirement_check
-			</table></center>
-			<p class="step"><a href="{$_SERVER['PHP_SELF']}" class="button">Try Again</a></p>
-
-HTML;
+		$requirement_check = sprintf('
+			<div id="window">
+			<table class="form-table">%s</table>
+			<p class="step"><a href="%s" class="button">%s</a></p></div>',
+				$requirement_check, $_SERVER['PHP_SELF'], _('Try Again'));
 	} else $requirement_check = null;
 	
 	return $requirement_check;

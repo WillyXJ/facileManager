@@ -20,7 +20,7 @@
  +-------------------------------------------------------------------------+
 */
 
-function installfmDNSSchema($link = null, $database, $module, $noisy = true) {
+function installfmDNSSchema($link = null, $database, $module, $noisy = 'noisy') {
 	/** Include module variables */
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
@@ -28,7 +28,7 @@ function installfmDNSSchema($link = null, $database, $module, $noisy = true) {
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}acls` (
   `acl_id` INT(11) NOT NULL AUTO_INCREMENT ,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `acl_name` VARCHAR(255) NOT NULL ,
   `acl_predefined` ENUM( 'none',  'any',  'localhost',  'localnets',  'as defined:') NOT NULL ,
   `acl_addresses` TEXT NOT NULL ,
@@ -42,7 +42,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}config` (
   `cfg_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `cfg_type` varchar(255) NOT NULL DEFAULT 'global',
   `view_id` int(11) NOT NULL DEFAULT '0',
   `domain_id` int(11) NOT NULL DEFAULT '0',
@@ -61,7 +61,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}controls` (
   `control_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `control_ip` varchar(15) NOT NULL DEFAULT '*',
   `control_port` int(5) NOT NULL DEFAULT '953',
   `control_addresses` text NOT NULL,
@@ -76,6 +76,9 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domains` (
   `domain_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
+  `domain_template` ENUM('yes','no') NOT NULL DEFAULT 'no',
+  `domain_default` ENUM('yes','no') NOT NULL DEFAULT 'no',
+  `domain_template_id` INT(11) NOT NULL DEFAULT '0',
   `soa_id` int(11) NOT NULL DEFAULT '0',
   `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT  '0',
   `domain_name` varchar(255) NOT NULL DEFAULT '',
@@ -84,6 +87,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_mapping` enum('forward','reverse') NOT NULL DEFAULT 'forward',
   `domain_type` enum('master','slave','forward','stub') NOT NULL DEFAULT 'master',
   `domain_clone_domain_id` int(11) NOT NULL DEFAULT '0',
+  `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL,
   `domain_reload` enum('yes','no') NOT NULL DEFAULT 'no',
   `domain_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`domain_id`)
@@ -92,13 +96,18 @@ TABLE;
 
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+  `def_id` int(11) NOT NULL AUTO_INCREMENT,
   `def_function` enum('options','logging','key','view') NOT NULL,
+  `def_option_type` enum('global','ratelimit') NOT NULL DEFAULT 'global',
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
   `def_multiple_values` enum('yes','no') NOT NULL DEFAULT 'no',
   `def_clause_support` varchar(10) NOT NULL DEFAULT 'O',
+  `def_zone_support` VARCHAR(10) NULL DEFAULT NULL,
   `def_dropdown` enum('yes','no') NOT NULL DEFAULT 'no',
-  UNIQUE KEY `def_option` (`def_option`)
+  `def_max_parameters` int(3) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`def_id`),
+  KEY `def_option` (`def_option`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 TABLE;
 
@@ -187,6 +196,18 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
 TABLE;
 
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server_groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `group_name` varchar(128) NOT NULL,
+  `group_masters` text NOT NULL,
+  `group_slaves` text NOT NULL,
+  `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+TABLE;
+
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}soa` (
   `soa_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -224,7 +245,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}views` (
   `view_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `server_serial_no` int(11) NOT NULL DEFAULT '0',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `view_name` VARCHAR(255) NOT NULL ,
   `view_comment` text,
   `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
@@ -340,168 +361,213 @@ INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_type` ,
 `def_multiple_values` ,
 `def_clause_support`,
+`def_zone_support`,
 `def_dropdown`
 )
 VALUES 
-('key', 'algorithm', 'string', 'no', 'K', 'no'),
-('key', 'secret', 'quoted_string', 'no', 'K', 'no'),
-('options', 'acache-cleaning-interval', '( minutes )', 'no', 'OV', 'no'),
-('options', 'acache-enable', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'additional-from-auth', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'additional-from-cache', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'allow-notify', '( address_match_element )', 'yes', 'OVZ', 'no'),
-('options', 'allow-query', '( address_match_element )', 'yes', 'OVZ', 'no'),
-('options', 'allow-query-cache', '( address_match_element )', 'yes', 'OV', 'no'),
-('options', 'allow-query-cache-on', '( address_match_element )', 'yes', 'OV', 'no'),
-('options', 'allow-query-on', '( address_match_element )', 'yes', 'OVZ', 'no'),
-('options', 'allow-recursion', '( address_match_element )', 'yes', 'OV', 'no'),
-('options', 'allow-recursion-on', '( address_match_element )', 'yes', 'OV', 'no'),
-('options', 'allow-transfer', '( address_match_element )', 'yes', 'OVZ', 'no'),
-('options', 'allow-update', '( address_match_element )', 'yes', 'OVZ', 'no'),
-('options', 'allow-update-forwarding', '( address_match_element )', 'yes', 'OVZ', 'no'),
-('options', 'also-notify', '( ipv4_address | ipv6_address ) [ port ( ip_port | * ) ]', 'yes', 'OVZ', 'no'),
-('options', 'alt-transfer-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
-('options', 'alt-transfer-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
-('options', 'attach-cache', '( quoted_string )', 'no', 'OV', 'no'),
-('options', 'auth-nxdomain', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'auto-dnssec', '( allow | maintain | create | off )', 'no', 'OVZ', 'yes'),
-('options', 'avoid-v4-udp-ports', '( ip_port )', 'yes', 'O', 'no'), 
-('options', 'avoid-v6-udp-ports', '( ip_port )', 'yes', 'O', 'no'),
-('options', 'bindkeys-file', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'blackhole', '( address_match_element )', 'yes', 'O', 'no'),
-('options', 'bogus', '( yes | no )', 'no', 'S', 'yes'),
-('options', 'check-dup-records', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
-('options', 'check-integrity', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'check-mx', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
-('options', 'check-mx-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
-('options', 'check-names', '( warn | fail | ignore )', 'no', 'Z', 'yes'),
-('options', 'check-sibling', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'check-srv-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'yes'),
-('options', 'check-wildcard', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'cleaning-interval', '( minutes )', 'no', 'OV', 'no'),
-('options', 'clients-per-query', '( integer )', 'no', 'OV', 'no'),
-('options', 'coresize', '( size_in_bytes )', 'no', 'O', 'no'),
-('options', 'database', '( quoted_string )', 'no', 'Z', 'no'),
-('options', 'datasize', '( size_in_bytes )', 'no', 'O', 'no'),
-('options', 'delegation-only', '( yes | no )', 'no', 'Z', 'yes'),
-('options', 'deny-answer-address', '( address_match_element ) [ except-from { ( address_match_element ) } ]', 'yes', 'OV', 'no'),
-('options', 'deny-answer-aliases', '( quoted_string ) [ except-from { ( address_match_element ) } ]', 'yes', 'OV', 'no'),
-('options', 'dialup', '( yes | no | notify | refresh | passive | notify-passive )', 'no', 'OVZ', 'yes'),
-('options', 'disable-algorithms', '( string )', 'yes', 'OV', 'no'),
-('options', 'disable-empty-zone', '( quoted_string )', 'no', 'OV', 'no'),
-('options', 'dnssec-accept-expired', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'dnssec-dnskey-kskonly', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'dnssec-enable', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'dnssec-lookaside', 'domain trust-anchor domain', 'no', 'OV', 'no'),
-('options', 'dnssec-must-be-secure', 'domain ( yes | no )', 'no', 'OV', 'no'),
-('options', 'dnssec-secure-to-insecure', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'dnssec-validation', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'dual-stack-servers', '( quoted_string )', 'yes', 'OV', 'no'),
-('options', 'dump-file', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'edns', '( yes | no )', 'no', 'S', 'yes'),
-('options', 'edns-udp-size', '( size_in_bytes )', 'no', 'OSV', 'no'),
-('options', 'empty-contact', '( string )', 'no', 'OV', 'no'),
-('options', 'empty-server', '( string )', 'no', 'OV', 'no'),
-('options', 'empty-zones-enable', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'files', '( integer )', 'no', 'O', 'no'),
-('options', 'flush-zones-on-shutdown', '( yes | no )', 'no', 'O', 'yes'),
-('options', 'forward', '( first | only )', 'no', 'OVZ', 'yes'),
-('options', 'forwarders', '[ port ( ip_port | * ) ] { ( ipv4_address | ipv6_address ) } [ port ( ip_port | * ) ]', 'yes', 'OVZ', 'no'),
-('options', 'heartbeat-interval', '( minutes )', 'no', 'O', 'no'),
-('options', 'hostname', '( quoted_string | none )', 'no', 'O', 'no'),
-('options', 'interface-interval', '( minutes )', 'no', 'O', 'no'),
-('options', 'ixfr-from-differences', '( yes | no )', 'no', 'Z', 'yes'),
-('options', 'journal', '( quoted_string )', 'no', 'Z', 'no'),
-('options', 'key-directory', '( quoted_string )', 'no', 'OVZ', 'no'),
-('options', 'lame-ttl', '( seconds )', 'no', 'OV', 'no'),
-('options', 'listen-on', '[ port ( ip_port | * ) ] { ( ipv4_address ) }', 'yes', 'OR', 'no'),
-('options', 'listen-on-v6', '[ port ( ip_port | * ) ] { ( ipv6_address ) }', 'yes', 'O', 'no'),
-('options', 'managed-keys-directory', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'masterfile-format', '( text | raw )', 'no', 'OVZ', 'yes'),
-('options', 'masters', '( { ipv4_address | ipv6_address } )', 'yes', 'OVZ', 'no'),
-('options', 'match-clients', '( address_match_element )', 'yes', 'V', 'no'),
-('options', 'match-destinations', '( address_match_element )', 'yes', 'V', 'no'),
-('options', 'match-mapped-addresses', '( yes | no )', 'no', 'O', 'yes'),
-('options', 'match-recursive-only', '( yes | no )', 'no', 'V', 'yes'),
-('options', 'max-acache-size', '( size_in_bytes )', 'no', 'OV', 'no'),
-('options', 'max-cache-size', '( size_in_bytes )', 'no', 'OV', 'no'),
-('options', 'max-cache-ttl', '( seconds )', 'no', 'OV', 'no'),
-('options', 'max-clients-per-query', '( integer )', 'no', 'OV', 'no'),
-('options', 'max-journal-size', '( size_in_bytes )', 'no', 'OVZ', 'no'),
-('options', 'max-ncache-ttl', '( seconds )', 'no', 'OV', 'no'),
-('options', 'max-refresh-time', '( seconds )', 'no', 'OVZ', 'no'),
-('options', 'max-retry-time', '( seconds )', 'no', 'OVZ', 'no'),
-('options', 'max-transfer-idle-in', '( minutes )', 'no', 'OVZ', 'no'),
-('options', 'max-transfer-idle-out', '( minutes )', 'no', 'OVZ', 'no'),
-('options', 'max-transfer-time-in', '( minutes )', 'no', 'OVZ', 'no'),
-('options', 'max-transfer-time-out', '( minutes )', 'no', 'OVZ', 'no'),
-('options', 'max-udp-size', '( size_in_bytes )', 'no', 'OSV', 'no'),
-('options', 'memstatistics', '( yes | no )', 'no', 'O', 'yes'),
-('options', 'memstatistics-file', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'min-refresh-time', '( seconds )', 'no', 'OVZ', 'no'),
-('options', 'min-retry-time', '( seconds )', 'no', 'OVZ', 'no'),
-('options', 'minimal-responses', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'multi-master', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'ndots', '( integer )', 'no', 'R', 'no'),
-('options', 'notify', '( yes | no | explicit )', 'no', 'OVZ', 'yes'),
-('options', 'notify-delay', '( seconds )', 'no', 'OVZ', 'no'),
-('options', 'notify-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
-('options', 'notify-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
-('options', 'notify-to-soa', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'pid-file', '( quoted_string | none )', 'no', 'O', 'no'),
-('options', 'port', '( ip_port )', 'no', 'O', 'no'),
-('options', 'preferred-glue', '( A | AAAA )', 'no', 'OV', 'yes'),
-('options', 'provide-ixfr', '( yes | no )', 'no', 'S', 'yes'),
-('options', 'query-source', 'address ( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
-('options', 'query-source-v6', 'address ( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'no'),
-('options', 'querylog', '( yes | no )', 'no', 'O', 'yes'),
-('options', 'random-device', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'recursing-file', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'recursion', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'recursive-clients', '( integer )', 'no', 'O', 'no'),
-('options', 'request-ixfr', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'request-nsid', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'reserved-sockets', '( integer )', 'no', 'O', 'no'),
-('options', 'search', '( quoted_string )', 'yes', 'R', 'no'),
-('options', 'secroots-file', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'serial-query-rate', '( integer )', 'no', 'O', 'no'),
-('options', 'server-id', '( quoted_string | none | hostname )', 'no', 'O', 'no'),
-('options', 'session-keyfile', '( quoted_string | none )', 'no', 'O', 'no'),
-('options', 'session-keyname', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'session-keyalg', '( string )', 'no', 'O', 'no'),
-('options', 'sig-signing-nodes', '( integer )', 'no', 'OVZ', 'no'),
-('options', 'sig-signing-signatures', '( integer )', 'no', 'OVZ', 'no'),
-('options', 'sig-signing-type', '( integer )', 'no', 'OVZ', 'no'),
-('options', 'sig-validity-interval', '( days )', 'no', 'OVZ', 'no'),
-('options', 'sortlist', '( address_match_element )', 'yes', 'OV', 'no'),
-('options', 'stacksize', '( size_in_bytes )', 'no', 'O', 'no'),
-('options', 'statistics-file', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'tcp-clients', '( integer )', 'no', 'O', 'no'),
-('options', 'tcp-listen-queue', '( integer )', 'no', 'O', 'no'),
-('options', 'tkey-dhkey', '( quoted_string integer )', 'no', 'O', 'no'),
-('options', 'tkey-domain', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'tkey-gssapi-credential', '( quoted_string )', 'no', 'O', 'no'),
-('options', 'transfer-format', '( many-answers | one-answer )', 'no', 'OSVZ', 'yes'),
-('options', 'transfer-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
-('options', 'transfer-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'no'),
-('options', 'transfers', '( integer )', 'no', 'S', 'no'),
-('options', 'transfers-in', '( integer )', 'no', 'O', 'no'),
-('options', 'transfers-out', '( integer )', 'no', 'O', 'no'),
-('options', 'transfers-per-ns', '( integer )', 'no', 'O', 'no'),
-('options', 'try-tcp-refresh', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'update-check-ksk', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'update-policy', '( local | { update-policy-rule } )', 'no', 'Z', 'no'),
-('options', 'use-alt-transfer-source', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'use-v4-udp-ports', '( range ip_port ip_port )', 'no', 'O', 'no'),
-('options', 'use-v6-udp-ports', '( range ip_port ip_port )', 'no', 'O', 'no'),
-('options', 'view', '( quoted_string )', 'no', 'R', 'no'),
-('options', 'version', '( quoted_string | none )', 'no', 'O', 'no'),
-('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'yes'),
-('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', 'yes'),
-('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'yes')
+('key', 'algorithm', 'string', 'no', 'K', NULL, 'no'),
+('key', 'secret', 'quoted_string', 'no', 'K', NULL, 'no'),
+('options', 'acache-cleaning-interval', '( minutes )', 'no', 'OV', NULL, 'no'),
+('options', 'acache-enable', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'additional-from-auth', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'additional-from-cache', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'allow-notify', '( address_match_element )', 'yes', 'OVZ', 'S', 'no'),
+('options', 'allow-query', '( address_match_element )', 'yes', 'OVZ', 'MS', 'no'),
+('options', 'allow-query-cache', '( address_match_element )', 'yes', 'OV', NULL, 'no'),
+('options', 'allow-query-cache-on', '( address_match_element )', 'yes', 'OV', NULL, 'no'),
+('options', 'allow-query-on', '( address_match_element )', 'yes', 'OVZ', 'MS', 'no'),
+('options', 'allow-recursion', '( address_match_element )', 'yes', 'OV', NULL, 'no'),
+('options', 'allow-recursion-on', '( address_match_element )', 'yes', 'OV', NULL, 'no'),
+('options', 'allow-transfer', '( address_match_element )', 'yes', 'OVZ', 'MS', 'no'),
+('options', 'allow-update', '( address_match_element )', 'yes', 'OVZ', 'MS', 'no'),
+('options', 'allow-update-forwarding', '( address_match_element )', 'yes', 'OVZ', 'MS', 'no'),
+('options', 'also-notify', '( ipv4_address | ipv6_address ) [ port ( ip_port | * ) ]', 'yes', 'OVZ', 'M', 'no'),
+('options', 'alt-transfer-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'S', 'no'),
+('options', 'alt-transfer-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'S', 'no'),
+('options', 'attach-cache', '( quoted_string )', 'no', 'OV', NULL, 'no'),
+('options', 'auth-nxdomain', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'auto-dnssec', '( allow | maintain | create | off )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'avoid-v4-udp-ports', '( ip_port )', 'yes', 'O', NULL, 'no'),
+('options', 'avoid-v6-udp-ports', '( ip_port )', 'yes', 'O', NULL, 'no'),
+('options', 'bindkeys-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'blackhole', '( address_match_element )', 'yes', 'O', NULL, 'no'),
+('options', 'bogus', '( yes | no )', 'no', 'S', NULL, 'yes'),
+('options', 'check-dup-records', '( fail | warn | ignore )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'check-integrity', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'check-mx', '( fail | warn | ignore )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'check-mx-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'check-names', '( warn | fail | ignore )', 'no', 'Z', 'MS', 'yes'),
+('options', 'check-sibling', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'check-srv-cname', '( fail | warn | ignore )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'check-wildcard', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'cleaning-interval', '( minutes )', 'no', 'OV', NULL, 'no'),
+('options', 'clients-per-query', '( integer )', 'no', 'OV', NULL, 'no'),
+('options', 'coresize', '( size_in_bytes )', 'no', 'O', NULL, 'no'),
+('options', 'database', '( quoted_string )', 'no', 'Z', 'MS', 'no'),
+('options', 'datasize', '( size_in_bytes )', 'no', 'O', NULL, 'no'),
+('options', 'delegation-only', '( yes | no )', 'no', 'Z', 'MS', 'yes'),
+('options', 'deny-answer-address', '( address_match_element ) [ except-from { ( address_match_element ) } ]', 'yes', 'OV', NULL, 'no'),
+('options', 'deny-answer-aliases', '( quoted_string ) [ except-from { ( address_match_element ) } ]', 'yes', 'OV', NULL, 'no'),
+('options', 'dialup', '( yes | no | notify | refresh | passive | notify-passive )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'disable-algorithms', '( string )', 'yes', 'OV', NULL, 'no'),
+('options', 'disable-empty-zone', '( quoted_string )', 'no', 'OV', NULL, 'no'),
+('options', 'dnssec-accept-expired', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'dnssec-dnskey-kskonly', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'dnssec-enable', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'dnssec-lookaside', 'domain trust-anchor domain', 'no', 'OV', NULL, 'no'),
+('options', 'dnssec-must-be-secure', 'domain ( yes | no )', 'no', 'OV', NULL, 'no'),
+('options', 'dnssec-secure-to-insecure', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'dnssec-validation', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'dual-stack-servers', '( quoted_string )', 'yes', 'OV', NULL, 'no'),
+('options', 'dump-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'edns', '( yes | no )', 'no', 'S', NULL, 'yes'),
+('options', 'edns-udp-size', '( size_in_bytes )', 'no', 'OSV', NULL, 'no'),
+('options', 'empty-contact', '( string )', 'no', 'OV', NULL, 'no'),
+('options', 'empty-server', '( string )', 'no', 'OV', NULL, 'no'),
+('options', 'empty-zones-enable', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'files', '( integer )', 'no', 'O', NULL, 'no'),
+('options', 'flush-zones-on-shutdown', '( yes | no )', 'no', 'O', NULL, 'yes'),
+('options', 'forward', '( first | only )', 'no', 'OVZ', 'F', 'yes'),
+('options', 'forwarders', '[ port ( ip_port | * ) ] { ( ipv4_address | ipv6_address ) } [ port ( ip_port | * ) ]', 'yes', 'OVZ', 'F', 'no'),
+('options', 'heartbeat-interval', '( minutes )', 'no', 'O', NULL, 'no'),
+('options', 'hostname', '( quoted_string | none )', 'no', 'O', NULL, 'no'),
+('options', 'interface-interval', '( minutes )', 'no', 'O', NULL, 'no'),
+('options', 'ixfr-from-differences', '( yes | no )', 'no', 'Z', 'MS', 'yes'),
+('options', 'journal', '( quoted_string )', 'no', 'Z', 'MS', 'no'),
+('options', 'key-directory', '( quoted_string )', 'no', 'OVZ', 'MS', 'no'),
+('options', 'lame-ttl', '( seconds )', 'no', 'OV', NULL, 'no'),
+('options', 'listen-on', '[ port ( ip_port | * ) ] { ( ipv4_address ) }', 'yes', 'OR', NULL, 'no'),
+('options', 'listen-on-v6', '[ port ( ip_port | * ) ] { ( ipv6_address ) }', 'yes', 'O', NULL, 'no'),
+('options', 'managed-keys-directory', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'masterfile-format', '( text | raw )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'masters', '( { ipv4_address | ipv6_address } )', 'yes', 'OVZ', 'S', 'no'),
+('options', 'match-clients', '( address_match_element )', 'yes', 'V', NULL, 'no'),
+('options', 'match-destinations', '( address_match_element )', 'yes', 'V', NULL, 'no'),
+('options', 'match-mapped-addresses', '( yes | no )', 'no', 'O', NULL, 'yes'),
+('options', 'match-recursive-only', '( yes | no )', 'no', 'V', NULL, 'yes'),
+('options', 'max-acache-size', '( size_in_bytes )', 'no', 'OV', NULL, 'no'),
+('options', 'max-cache-size', '( size_in_bytes )', 'no', 'OV', NULL, 'no'),
+('options', 'max-cache-ttl', '( seconds )', 'no', 'OV', NULL, 'no'),
+('options', 'max-clients-per-query', '( integer )', 'no', 'OV', NULL, 'no'),
+('options', 'max-journal-size', '( size_in_bytes )', 'no', 'OVZ', 'MS', 'no'),
+('options', 'max-ncache-ttl', '( seconds )', 'no', 'OV', NULL, 'no'),
+('options', 'max-refresh-time', '( seconds )', 'no', 'OVZ', 'S', 'no'),
+('options', 'max-retry-time', '( seconds )', 'no', 'OVZ', 'S', 'no'),
+('options', 'max-transfer-idle-in', '( minutes )', 'no', 'OVZ', 'S', 'no'),
+('options', 'max-transfer-idle-out', '( minutes )', 'no', 'OVZ', 'M', 'no'),
+('options', 'max-transfer-time-in', '( minutes )', 'no', 'OVZ', 'S', 'no'),
+('options', 'max-transfer-time-out', '( minutes )', 'no', 'OVZ', 'M', 'no'),
+('options', 'max-udp-size', '( size_in_bytes )', 'no', 'OSV', NULL, 'no'),
+('options', 'memstatistics', '( yes | no )', 'no', 'O', NULL, 'yes'),
+('options', 'memstatistics-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'min-refresh-time', '( seconds )', 'no', 'OVZ', 'S', 'no'),
+('options', 'min-retry-time', '( seconds )', 'no', 'OVZ', 'S', 'no'),
+('options', 'minimal-responses', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'multi-master', '( yes | no )', 'no', 'OVZ', 'S', 'yes'),
+('options', 'ndots', '( integer )', 'no', 'R', NULL, 'no'),
+('options', 'notify', '( yes | no | explicit )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'notify-delay', '( seconds )', 'no', 'OVZ', 'MS', 'no'),
+('options', 'notify-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'M', 'no'),
+('options', 'notify-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'M', 'no'),
+('options', 'notify-to-soa', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'pid-file', '( quoted_string | none )', 'no', 'O', NULL, 'no'),
+('options', 'port', '( ip_port )', 'no', 'O', NULL, 'no'),
+('options', 'preferred-glue', '( A | AAAA )', 'no', 'OV', NULL, 'yes'),
+('options', 'provide-ixfr', '( yes | no )', 'no', 'S', 'M', 'yes'),
+('options', 'query-source', 'address ( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'MS', 'no'),
+('options', 'query-source-v6', 'address ( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OVZ', 'MS', 'no'),
+('options', 'querylog', '( yes | no )', 'no', 'O', NULL, 'yes'),
+('options', 'random-device', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'recursing-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'recursion', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'recursive-clients', '( integer )', 'no', 'O', NULL, 'no'),
+('options', 'request-ixfr', '( yes | no )', 'no', 'OVZ', 'S', 'yes'),
+('options', 'request-nsid', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'reserved-sockets', '( integer )', 'no', 'O', NULL, 'no'),
+('options', 'search', '( quoted_string )', 'yes', 'R', NULL, 'no'),
+('options', 'secroots-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'serial-query-rate', '( integer )', 'no', 'O', NULL, 'no'),
+('options', 'server-id', '( quoted_string | none | hostname )', 'no', 'O', NULL, 'no'),
+('options', 'session-keyfile', '( quoted_string | none )', 'no', 'O', NULL, 'no'),
+('options', 'session-keyname', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'session-keyalg', '( string )', 'no', 'O', NULL, 'no'),
+('options', 'sig-signing-nodes', '( integer )', 'no', 'OVZ', 'MS', 'no'),
+('options', 'sig-signing-signatures', '( integer )', 'no', 'OVZ', 'MS', 'no'),
+('options', 'sig-signing-type', '( integer )', 'no', 'OVZ', 'MS', 'no'),
+('options', 'sig-validity-interval', '( days )', 'no', 'OVZ', 'MS', 'no'),
+('options', 'sortlist', '( address_match_element )', 'yes', 'OV', NULL, 'no'),
+('options', 'stacksize', '( size_in_bytes )', 'no', 'O', NULL, 'no'),
+('options', 'statistics-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'tcp-clients', '( integer )', 'no', 'O', NULL, 'no'),
+('options', 'tcp-listen-queue', '( integer )', 'no', 'O', NULL, 'no'),
+('options', 'tkey-dhkey', '( quoted_string integer )', 'no', 'O', NULL, 'no'),
+('options', 'tkey-domain', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'tkey-gssapi-credential', '( quoted_string )', 'no', 'O', NULL, 'no'),
+('options', 'transfer-format', '( many-answers | one-answer )', 'no', 'OSVZ', 'M', 'yes'),
+('options', 'transfer-source', '( ipv4_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'S', 'no'),
+('options', 'transfer-source-v6', '( ipv6_address | * ) [ port ( ip_port | * ) ]', 'no', 'OSVZ', 'S', 'no'),
+('options', 'transfers', '( integer )', 'no', 'S', NULL, 'no'),
+('options', 'transfers-in', '( integer )', 'no', 'O', 'S', 'no'),
+('options', 'transfers-out', '( integer )', 'no', 'O', 'M', 'no'),
+('options', 'transfers-per-ns', '( integer )', 'no', 'O', 'S', 'no'),
+('options', 'try-tcp-refresh', '( yes | no )', 'no', 'OVZ', NULL, 'yes'),
+('options', 'update-check-ksk', '( yes | no )', 'no', 'OVZ', NULL, 'yes'),
+('options', 'update-policy', '( local | { update-policy-rule } )', 'no', 'Z', 'MS', 'no'),
+('options', 'use-alt-transfer-source', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'use-v4-udp-ports', '( range ip_port ip_port )', 'no', 'O', NULL, 'no'),
+('options', 'use-v6-udp-ports', '( range ip_port ip_port )', 'no', 'O', NULL, 'no'),
+('options', 'view', '( quoted_string )', 'no', 'R', NULL, 'no'),
+('options', 'version', '( quoted_string | none )', 'no', 'O', NULL, 'no'),
+('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
+('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'MS', 'yes')
 ;
 INSERT;
 	
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`
+)
+VALUES 
+('options', 'ratelimit', 'referrals-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'nodata-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'nxdomains-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'errors-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'all-per-second', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'window', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'log-only', '( yes | no )', 'no', 'OV', 'yes'),
+('options', 'ratelimit', 'qps-scale', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'ipv4-prefix-length', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'ipv6-prefix-length', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'slip', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'exempt-clients', '( address_match_element )', 'yes', 'OV', 'no'),
+('options', 'ratelimit', 'max-table-size', '( integer )', 'no', 'OV', 'no'),
+('options', 'ratelimit', 'min-table-size', '( integer )', 'no', 'OV', 'no')
+;
+INSERT;
+
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`,
+`def_max_parameters`
+)
+VALUES 
+('options', 'ratelimit', 'responses-per-second', '( [size integer] [ratio fixedpoint] integer )', 'no', 'OV', 'no', '5')
+;
+INSERT;
+
 	
 	/** fm_options inserts */
 	$inserts[] = <<<INSERT
@@ -516,6 +582,13 @@ INSERT INTO $database.`fm_options` (option_name, option_value, module_name)
 	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'client_version'
+		AND module_name='$module');
+INSERT;
+	$inserts[] = <<<INSERT
+INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+	SELECT 'clones_use_dnames', '{$__FM_CONFIG[$module]['default']['options']['clones_use_dnames']['default_value']}', '$module' FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'clones_use_dnames'
 		AND module_name='$module');
 INSERT;
 
@@ -574,13 +647,13 @@ INSERT;
 		if ($link) {
 			$result = mysql_query($schema, $link);
 			if (mysql_error($link)) {
-				return mysql_error($link);
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
 			}
 		} else {
 			global $fmdb;
 			$result = $fmdb->query($schema);
 			if ($fmdb->last_error) {
-				return $fmdb->last_error;
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
 			}
 		}
 	}
@@ -590,12 +663,12 @@ INSERT;
 		if ($link) {
 			$result = mysql_query($query, $link);
 			if (mysql_error($link)) {
-				return mysql_error($link);
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
 			}
 		} else {
 			$result = $fmdb->query($query);
 			if ($fmdb->last_error) {
-				return $fmdb->last_error;
+				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
 			}
 		}
 	}

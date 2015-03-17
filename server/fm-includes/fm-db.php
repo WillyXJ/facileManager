@@ -29,8 +29,6 @@ class fmdb {
 	 * @param string $dbhost
 	 */
 	function fmdb($dbuser, $dbpassword, $dbname, $dbhost) {
-		$this->sql_errors = false;
-		$this->last_error = null;
 		return $this->connect($dbuser, $dbpassword, $dbname, $dbhost);
 	}
 
@@ -38,18 +36,18 @@ class fmdb {
 		global $__FM_CONFIG;
 		$this->dbh = @mysql_connect($dbhost, $dbuser, $dbpassword);
 		if (!$this->dbh) {
-			bailOut('<center>The connection to the database has failed.  Please check the configuration.</center><p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">Try Again</a></p>');
+			bailOut(_('The connection to the database has failed. Please check the configuration.') . '<p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">' . _('Try Again') . '</a></p>');
 		}
 
 		$this->select($dbname);
 		if (!@mysql_query("SELECT * FROM `fm_options`", $this->dbh)) {
-			bailOut('<center>The database is installed; however, the associated application tables are missing.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">Start Setup</a></p>');
+			bailOut(_('The database is installed; however, the associated application tables are missing. Click \'Start Setup\' to start the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
 		}
 		
 		/** Check if there is an admin account */
-		$this->query("SELECT * FROM `fm_users` WHERE `user_id`=1");
+		$this->query("SELECT * FROM `fm_users` ORDER BY user_id LIMIT 1");
 		if (!$this->num_rows) {
-			bailOut('<center>The database is installed; however, an administrative account was not created.  Click \'Continue Setup\' to continue the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">Continue Setup</a></p>');
+			bailOut(_('The database is installed; however, an administrative account was not created. Click \'Continue Setup\' to continue the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">' . _('Continue Setup') . '</a></p>');
 		}
 	}
 
@@ -60,7 +58,7 @@ class fmdb {
 	function select($db) {
 		global $__FM_CONFIG;
 		if (!@mysql_select_db($db, $this->dbh)) {
-			bailOut('<center>The database is not installed.  Click \'Start Setup\' to start the installation process.<center><p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">Start Setup</a></p>');
+			bailOut(_('The database is not installed. Click \'Start Setup\' to start the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
 		}
 	}
 	
@@ -68,6 +66,9 @@ class fmdb {
 	 * Perform the mysql query
 	 */
 	function query($query) {
+		$this->sql_errors = false;
+		$this->last_error = null;
+		
 		$this->result = @mysql_query($query, $this->dbh);
 		
 		// If there is an error then take note of it..
@@ -92,7 +93,6 @@ class fmdb {
 				$i++;
 			}
 			$num_rows = 0;
-//			unset($this->last_result);
 			while ($row = @mysql_fetch_object($this->result)) {
 				$this->last_result[$num_rows] = $row;
 				$num_rows++;
@@ -129,15 +129,19 @@ class fmdb {
 	 * Print SQL/DB error.
 	 */
 	function print_error($query = '') {
-		$str = mysql_error($this->dbh) . " | Query: [$query]";
+		$str = mysql_error($this->dbh) . ' | ' . _('Query') . ": [$query]";
 		$str = htmlspecialchars($str, ENT_QUOTES);
 
 		// Is error output turned on or not..
-		if (getOption('show_errors')) {
+		if (defined('INSTALL') || defined('UPGRADE')) {
+			if ($query) {
+				$this->last_error = $str;
+			}
+		} elseif (getOption('show_errors')) {
 			// If there is an error then take note of it
 			if ($query) {
 				$this->last_error = "<div id='error'>
-				<p class='wpdberror'><strong>Database error:</strong> [$str]</p>
+				<p class='wpdberror'><strong>" . _('Database error') . ":</strong> [$str]</p>
 				</div>";
 			}
 		} else {

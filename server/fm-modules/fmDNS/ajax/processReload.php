@@ -26,8 +26,14 @@
 if (is_array($_POST) && count($_POST)) {
 	include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 	
-	if (isset($_POST['domain_id']) && currentUserCan('reload_zones', $_SESSION['module'])) {
-		echo buildPopup('header', 'Zone Reload Results');
+	/** Clean variable */
+	$domain_id = intval($_POST['domain_id']);
+	
+	/** Ensure user is allowed to reload zone */
+	$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload');
+
+	if ($domain_id && $zone_access_allowed) {
+		echo buildPopup('header', _('Zone Reload Results'));
 		
 		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
 			$response = $fm_dns_zones->buildZoneConfig($_POST['domain_id']);
@@ -35,8 +41,8 @@ if (is_array($_POST) && count($_POST)) {
 		
 		echo $response . "<br />\n";
 	} else {
-		echo buildPopup('header', 'Error');
-		echo '<p>You are not authorized to reload this zone.</p>' . "\n";
+		echo buildPopup('header', _('Error'));
+		printf('<p>%s</p>' . "\n", _('You are not authorized to reload this zone.'));
 	}
 }
 

@@ -1,3 +1,57 @@
+2.0-?? (2015-??-??)
+====================
+* Server - [feature] Added the ability to use clones in a split-view environment.
+           (Issue #165)
+* Server - [feature] Added support for keys in address_match_elements. (Issue #157)
+* Server - [feature] Added ability to reload all zones with a single click on the
+           top menu bar. (Issue #116)
+* Server - [feature] New zones can now be created with the zone import wizard.
+* Server - [improvement] Zone imports now check for duplicate records with parent
+           zone when importing to a cloned zone.
+* Server - [bug] Fixed handling of hint zone writes when named.root is not writeable.
+* Server - [feature] Added record searching functionality. (Issue #149)
+* Server - [improvement] Added graphical representation to skipped records in
+           the cloned zone view.
+* Server - [improvement] Can now edit cloned zone details.
+* Server - [improvement] Skipped records are no longer displayed to read-only
+           accounts.
+* Server - [feature] Added support for resource rate limiting (Issue #118).
+* Server - [bug] Records skipped in a cloned zone are now deleted from the
+           fm_dns_records_skipped database.
+* Server - [feature] Added ability to filter zone listing by views.
+* Server - [feature] Added support for server grouping for use with master and
+           slave name servers. (Issue #148)
+* Server - [bug] Fixed bulk action checkbox logic.
+* Server - [bug] Fixed issue where zones could not be updated when there are no
+           views defined.
+* Server - [security] Added ability to enable/disable automatic client
+           registration in the database. (Issue #122)
+* Server - [feature] Added the option to use DNAME resource records for cloned
+           zones with a per-zone override. (Issue #169)
+* Server - [bug] Fixed issue where multiple SOA templates could be marked as default.
+* Server - [feature] Added support for zone templates. (Issue #154)
+* Server - [feature] Added i18n support (Issue #106).
+* Server - [improvement] jQuery is now used to enable/disable items.
+* Server - [bug] Fixed channel selection within logging category definition.
+* Server - [feature] Supports TXT records larger than 255 characters. (Issue #171)
+* Server - [feature] Automatically updates PTR record when updating an existing
+           A record and ticking 'Create PTR' box. (Issue #129)
+* Server - [bug] Fixed address_match_element display during build config.
+* Server - [improvement] Appending domains in SOA records for reverse zones
+           are no longer allowed. (Issue #176)
+* Server - [improvement] Added better support for long TXT RR (introduced in
+           2.0-beta1). (Issue #171 #179)
+* Server - [feature] DNS server version is displayed on the servers page. (Issue #180)
+* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
+* Server - [improvement] SSH keys can now be saved if the file already exists.
+* Server - [bug] The correct comments for views and config options are displayed
+           when defining a server override.
+* Server - [bug] Sanitized view names that contain illegal system characters for
+           filenames.
+* Server - [improvement] Added button to clone a zone.
+* Server - [bug] Cloned zones cannot be templates (introduced in 2.0-beta1).
+* Server - [improvement] Zone clones are now sorted by name.
+
 1.3.6 (2015-02-09)
 ==================
 * Server - [bug] Fixed address_match_element parsing. (Issue #173).

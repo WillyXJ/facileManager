@@ -32,13 +32,13 @@ function moduleFunctionalCheck() {
 	$html_checks = null;
 	
 	/** Count active name servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active name servers defined.  <a href="' . getMenuURL('Servers') . '">Click here</a> to define one or more to manage.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . _('You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL('Servers'));
 	
 	/** Count global options */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : '<p>You currently have no global options defined for named.conf.  <a href="' . getMenuURL('Options') . '">Click here</a> to define one or more.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : sprintf('<p>' . _('You currently have no global options defined for named.conf. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL('Options'));
 	
 	/** Count zones */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : '<p>You currently have no zones defined.  <a href="' . getMenuURL('Zones') . '">Click here</a> to define one or more.</p>';
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : sprintf('<p>' . _('You currently have no zones defined. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL('Zones'));
 	
 	foreach ($checks as $val) {
 		$html_checks .= $val;
@@ -65,11 +65,11 @@ function buildModuleDashboard() {
 	$server_results = $fmdb->last_result;
 	for ($i=0; $i<$server_count; $i++) {
 		if ($server_results[$i]->server_installed != 'yes') {
-			$errors .= '<b>' . $server_results[$i]->server_name . '</b> client is not installed.' . "\n";
+			$errors .= sprintf(_('<b>%s</b> client is not installed.') . "\n", $server_results[$i]->server_name);
 		} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-			$errors .= '<a href="' . getMenuURL('Servers') . '"><b>' . $server_results[$i]->server_name . '</b></a> client needs to be upgraded.' . "\n";
+			$errors .= sprintf(_('<a href="%s"><b>%s</b></a> client needs to be upgraded.') . "\n", getMenuURL('Servers'), $server_results[$i]->server_name);
 		} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
-			$errors .= '<a href="' . getMenuURL('Servers') . '"><b>' . $server_results[$i]->server_name . '</b></a> needs a new configuration built.' . "\n";
+			$errors .= sprintf(_('<a href="%s"><b>%s</b></a> needs a new configuration built.') . "\n", getMenuURL('Servers'), $server_results[$i]->server_name);
 		}
 	}
 	/** Zone stats */
@@ -101,7 +101,8 @@ function buildModuleDashboard() {
 	$record_count = $fmdb->num_rows;
 
 	$dashboard = <<<DASH
-	<div id="shadow_box" class="leftbox">
+	<div>
+	<div id="shadow_box">
 		<div id="shadow_container">
 		<h3>Summary</h3>
 		<li>You have <b>$server_count</b> name servers configured.</li>
@@ -109,17 +110,18 @@ function buildModuleDashboard() {
 		<li>You have <b>$record_count</b> records.</li>
 		</div>
 	</div>
+	</div>
 DASH;
 
 	if ($error_display) {
-		$dashboard .= <<<DASH
-	<div id="shadow_box" class="rightbox">
+		$dashboard .= sprintf('<div>
+	<div id="shadow_box">
 		<div id="shadow_container">
-		<h3>Needs Attention</h3>
-		$error_display
+		<h3>%s</h3>
+		%s
 		</div>
 	</div>
-DASH;
+	</div>', _('Needs Attention'), $error_display);
 	}
 
 	return $dashboard;
@@ -137,25 +139,30 @@ function buildModuleToolbar() {
 	
 	if (isset($_REQUEST['domain_id'])) {
 		$domain = displayFriendlyDomainName(getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-		$domain_menu = <<<HTML
-		<div id="topheadpart">
-			<span class="single_line">Domain:&nbsp;&nbsp; $domain</span>
-		</div>
-HTML;
+		$domain_menu = '<div id="topheadpart">
+			<span class="single_line">' . _('Domain') . ':&nbsp;&nbsp; ' . $domain . '</span>
+		</div>';
 		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
 			extract(get_object_vars($fmdb->last_result[0]));
 			$domain_name = displayFriendlyDomainName($domain_name);
 			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
-			$domain_menu .= <<<HTML
-		<div id="topheadpart">
-			<span class="single_line">Clone of:&nbsp;&nbsp; <a href="zone-records.php?map=$domain_mapping&domain_id=$parent_domain_id$record_type_uri" title="Edit parent zone records">$domain_name</a></span>
-		</div>
-HTML;
+			$domain_menu .= sprintf('<div id="topheadpart">
+			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
+		</div>', _('Clone of'), $domain_mapping, $parent_domain_id, $record_type_uri, _('Edit parent zone records'), $domain_name);
+		}
+		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
+			extract(get_object_vars($fmdb->last_result[0]));
+			$domain_name = displayFriendlyDomainName($domain_name);
+			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
+			$domain_menu .= sprintf('<div id="topheadpart">
+			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
+		</div>', _('Based on template'), $domain_mapping, $parent_domain_id, $record_type_uri, _('Edit template zone records'), $domain_name);
 		}
 	} else $domain_menu = null;
 	
-	return $domain_menu;
+	return array($domain_menu, null);
 }
 
 /**
@@ -310,19 +317,7 @@ HTML;
  * @subpackage fmDNS
  */
 function buildServerSubMenu($server_serial_no = 0, $class = null) {
-	global $fmdb, $__FM_CONFIG;
-	
-	$server_array[0][] = 'All Servers';
-	$server_array[0][] = '0';
-	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
-	if ($fmdb->num_rows) {
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[$i+1][] = $results[$i]->server_name;
-			$server_array[$i+1][] = $results[$i]->server_serial_no;
-		}
-	}
-	$server_list = buildSelect('server_serial_no', 'server_serial_no', $server_array, $server_serial_no, 1, null, false, 'this.form.submit()');
+	$server_list = buildSelect('server_serial_no', 'server_serial_no', availableDNSServers(), $server_serial_no, 1, null, false, 'this.form.submit()');
 	
 	$hidden_inputs = null;
 	foreach ($GLOBALS['URI'] as $param => $value) {
@@ -348,6 +343,7 @@ HTML;
 function moduleAddServer($action) {
 	include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/classes/class_servers.php');
 	
+	$action .= 'Server';
 	return $fm_module_servers->$action($_POST);
 }
 
@@ -390,6 +386,8 @@ function getSOACount($domain_id) {
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `soa_id`= (SELECT DISTINCT(`soa_id`) FROM 
 			`fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `soa_id`!=0 AND (`domain_id`='$domain_id' OR
 				`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+					`domain_id`='$domain_id') OR
+				`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 					`domain_id`='$domain_id')
 			)) AND `soa_status`!='deleted'";
 	}
@@ -402,6 +400,8 @@ function getNSCount($domain_id) {
 	
 	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE (`domain_id`='$domain_id' OR
 			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
+				`domain_id`='$domain_id') OR
+			`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 				`domain_id`='$domain_id')
 		) AND `record_type`='NS' AND `record_status`='active'";
 	$fmdb->get_results($query);
@@ -443,7 +443,7 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 				$cidr_array = explode('/', $ip_address);
 				list($ip_address, $cidr) = $cidr_array;
 				/** Valid CIDR? */
-				if (!verifyNumber($cidr, 0, 32)) return "$ip_address/$cidr is not valid.";
+				if (!verifyNumber($cidr, 0, 32)) return sprintf(_('%s is not valid.'), "$ip_address/$cidr");
 			}
 			/** Create full IP */
 			$ip_octets = explode('.', $ip_address);
@@ -453,7 +453,7 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 			$ip_address = implode('.', $ip_octets);
 		}
 		
-		if (verifyIPAddress($ip_address) === false) return "$ip_address is not valid.";
+		if (verifyIPAddress($ip_address) === false) return sprintf(_('%s is not valid.'), $ip_address);
 	}
 	
 	return $data;
@@ -574,12 +574,12 @@ function getModuleBadgeCounts($type) {
 		if ($domain_count) $domain_results = $fmdb->last_result;
 		for ($i=0; $i<$domain_count; $i++) {
 			if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master') {
+				$domain_results[$i]->domain_type == 'master' && $domain_results[$i]->domain_template == 'no') {
 				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 					$badge_counts[$domain_results[$i]->domain_mapping]++;
 				}
 			} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master') {
+				$domain_results[$i]->domain_type == 'master' && $domain_results[$i]->domain_template == 'no') {
 				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 					$badge_counts[$domain_results[$i]->domain_mapping]++;
 				}
@@ -714,25 +714,26 @@ function removeRestrictedRR($rr) {
  */
 function buildModuleMenu() {
 	$badge_counts = getModuleBadgeCounts('zones');
-	addObjectPage('Zones', 'Zones', array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'], 'zones.php');
-		addSubmenuPage('zones.php', 'Forward', 'Forward Zones', null, $_SESSION['module'], 'zones-forward.php', null, null, $badge_counts['forward']);
-		addSubmenuPage('zones.php', 'Reverse', 'Reverse Zones', null, $_SESSION['module'], 'zones-reverse.php', null, null, $badge_counts['reverse']);
-		addSubmenuPage('zones.php', null, 'Records', null, $_SESSION['module'], 'zone-records.php');
-		addSubmenuPage('zones.php', null, 'Record Validation', null, $_SESSION['module'], 'zone-records-validate.php');
+	addObjectPage(_('Zones'), _('Zones'), array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'], 'zones.php');
+		addSubmenuPage('zones.php', _('Forward'), _('Forward Zones'), null, $_SESSION['module'], 'zones-forward.php', null, null, $badge_counts['forward']);
+		addSubmenuPage('zones.php', _('Reverse'), _('Reverse Zones'), null, $_SESSION['module'], 'zones-reverse.php', null, null, $badge_counts['reverse']);
+		addSubmenuPage('zones.php', null, _('Records'), null, $_SESSION['module'], 'zone-records.php');
+		addSubmenuPage('zones.php', null, _('Record Validation'), null, $_SESSION['module'], 'zone-records-validate.php');
 	
-	addObjectPage('Config', 'Name Servers', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', 'Servers', 'Name Servers', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
-		addSubmenuPage('config-servers.php', 'Views', 'Views', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-views.php');
-		addSubmenuPage('config-servers.php', 'ACLs', 'Access Control Lists', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
-		addSubmenuPage('config-servers.php', 'Keys', 'Keys', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
-		addSubmenuPage('config-servers.php', 'Options', 'Options', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
-		addSubmenuPage('config-servers.php', 'Logging', 'Logging', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
-		addSubmenuPage('config-servers.php', 'Controls', 'Controls', array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
+	addObjectPage(_('Config'), _('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', _('Servers'), _('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
+		addSubmenuPage('config-servers.php', _('Views'), _('Views'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-views.php');
+		addSubmenuPage('config-servers.php', _('ACLs'), _('Access Control Lists'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
+		addSubmenuPage('config-servers.php', _('Keys'), _('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
+		addSubmenuPage('config-servers.php', _('Options'), _('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
+		addSubmenuPage('config-servers.php', _('Logging'), _('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
+		addSubmenuPage('config-servers.php', _('Controls'), _('Controls'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
 	
-	addObjectPage('Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
-		addSubmenuPage('templates-soa.php', 'Templates', 'SOA', array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
+	addObjectPage(_('Templates'), _('Zones'), array('manage_zones', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
+		addSubmenuPage('templates-soa.php', _('SOA'), _('SOA Templates'), array('manage_zones', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
+		addSubmenuPage('templates-soa.php', _('Zones'), _('Zone Templates'), array('manage_zones', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-zones.php');
 
-	addSettingsPage($_SESSION['module'], $_SESSION['module'] . ' Settings', array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
+	addSettingsPage($_SESSION['module'], sprintf(_('%s Settings'), $_SESSION['module']), array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }
 
 
@@ -752,4 +753,152 @@ function displayFriendlyDomainName($domain_name) {
 	
 	return $new_domain_name;
 }
+
+
+/**
+ * Gets the count for domains requiring a reload
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param id $domain_id Domain ID to check
+ * @return integer
+ */
+function getParentDomainID($domain_id) {
+	global $__FM_CONFIG;
+	
+	$parent_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+	
+	return ($parent_id) ? $parent_id : $domain_id;
+}
+
+
+/**
+ * Gets the count for zones requiring a reload
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $return_what What to return (count|ids)
+ * @return integer|array
+ */
+function getZoneReloads($return_what) {
+	global $fmdb, $__FM_CONFIG;
+	
+	$zone_count = 0;
+	$zone_ids = array();
+	
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_reload!="no"');
+	if ($fmdb->num_rows) {
+		$num_rows = $fmdb->num_rows;
+		$domain_list = $fmdb->last_result;
+		for ($i=0; $i<$num_rows; $i++) {
+			$zone_access_allowed = zoneAccessIsAllowed(array($domain_list[$i]->domain_id, $domain_list[$i]->domain_clone_domain_id));
+			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {
+				$zone_count++;
+				$zone_ids[] = $domain_list[$i]->domain_clone_domain_id ? $domain_list[$i]->domain_clone_domain_id : $domain_list[$i]->domain_id;
+			}
+		}
+	}
+	
+	return $return_what == 'count' ? $zone_count : $zone_ids;
+}
+
+
+/**
+ * Returns if access to a zone is allowed
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $domain_ids Domain IDs to check
+ * @param string $included_action Included action to check against
+ * @return boolean
+ */
+function zoneAccessIsAllowed($domain_ids, $included_action = null) {
+	if ($included_action == 'reload') {
+		return currentUserCan('access_specific_zones', $_SESSION['module'], array_merge(array(0), $domain_ids)) & 
+			currentUserCan('reload_zones', $_SESSION['module']);
+	} else {
+		return currentUserCan('access_specific_zones', $_SESSION['module'], array_merge(array(0), $domain_ids));
+	}
+}
+
+
+/**
+ * Returns the parent ID of the domain
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $domain_id Domain ID to check
+ * @return integer
+ */
+function getZoneParentID($domain_id) {
+	global $__FM_CONFIG;
+	
+	$parent_domain_id[] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+	if ($parent_domain_id[0]) {
+		$parent_domain_id[] = getNameFromID($parent_domain_id[0], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+	} else {
+		$parent_domain_id[0] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+	}
+	
+	return $parent_domain_id;
+}
+
+
+/**
+ * Returns an array of servers and groups
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $server_id_type What server ID should be used (serial|id)
+ * @return array
+ */
+function availableDNSServers($server_id_type = 'serial') {
+	global $fmdb, $__FM_CONFIG;
+	
+	$server_array[0][] = null;
+	$server_array[0][0][] = _('All Servers');
+	$server_array[0][0][] = '0';
+	
+	$j = 0;
+	/** Server Groups */
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_');
+	if ($fmdb->num_rows) {
+		$server_array[_('Groups')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[_('Groups')][$j][] = $results[$i]->group_name;
+			$server_array[_('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+			$j++;
+		}
+	}
+	$j = 0;
+	/** Server names */
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
+	if ($fmdb->num_rows) {
+		$server_array[_('Servers')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+			if ($server_id_type == 'serial') {
+				$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
+			} elseif ($server_id_type == 'id') {
+				$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+			}
+			$j++;
+		}
+	}
+	
+	return $server_array;
+}
+
 ?>

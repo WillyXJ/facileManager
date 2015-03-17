@@ -31,7 +31,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.
 if (is_array($_POST) && count($_POST)) {
 	if (isset($_POST['action']) && $_POST['action'] == 'build') {
 		if (!currentUserCan('build_server_configs', $_SESSION['module'])) {
-			exit('<p class="error">You are not authorized to build server configs.</p>');
+			exit(sprintf('<p class="error">%s</p>', _('You are not authorized to build server configs.')));
 		}
 		$server_serial_no = getNameFromID($_POST['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
 		exit($fm_module_servers->buildServerConfig($server_serial_no));
@@ -48,6 +48,6 @@ if (file_exists($module_ajax_file) && $_SESSION['module'] != $fm_name) {
 	include($module_ajax_file);
 }
 
-echo buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 
 ?>

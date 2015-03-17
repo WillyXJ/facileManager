@@ -30,16 +30,17 @@ extract($_POST);
 
 /** Should the user be here? */
 if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
-if (!currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id))) unAuth();
+if (!zoneAccessIsAllowed(array($domain_id))) unAuth();
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 
 /** Make sure we can handle all of the variables */
 checkMaxInputVars();
 
-$domain_info['id']       = $domain_id;
-$domain_info['name']     = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
-$domain_info['map']      = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
-$domain_info['clone_of'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+$domain_info['id']          = $domain_id;
+$domain_info['name']        = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+$domain_info['map']         = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+$domain_info['clone_of']    = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+$domain_info['template_id'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
 
 if (isset($_POST['update'])) {
 	if ($_POST['update']['soa_template_chosen']) {
@@ -65,30 +66,28 @@ foreach($_POST as $name => $array) {
 printHeader();
 @printMenu();
 
-echo <<<HTML
-<div id="body_container">
-	<h2>Record Validation</h2>
+printf('<div id="body_container">
+	<h2>%s</h2>
 	<form method="POST" action="zone-records-write.php">
-	<input type="hidden" name="domain_id" value="$domain_id">
-	<input type="hidden" name="record_type" value="$record_type">
-	<input type="hidden" name="map" value="$map">
+	<input type="hidden" name="domain_id" value="%d">
+	<input type="hidden" name="record_type" value="%s">
+	<input type="hidden" name="map" value="%s">
 	<table class="display_results">
 		<thead>
 			<tr>
-				$header
+				%s
 			</tr>
 		</thead>
 		<tbody>
-			$body
+			%s
 		</tbody>
 	</table>
 	<p>
-		<input type="reset" value="Back" onClick="history.go(-1)" class="button" />
-		<input type="submit" name="submit" value="Submit" class="button primary" />
+		<input type="reset" value="%s" onClick="history.go(-1)" class="button" />
+		<input type="submit" name="submit" value="%s" class="button primary" />
 	</p>
 </form>
-</div>
-HTML;
+</div>', _('Record Validation'), $domain_id, $record_type, $map, $header, $body, _('Back'), _('Submit'));
 
 printFooter();
 
@@ -101,20 +100,20 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	extract($domain_info, EXTR_PREFIX_ALL, 'domain');
 	
 	/** Skips only allowed with clone zones and imports */
-	$skips_allowed = ($type == 'update' && $domain_clone_of) ? true : false;
+	$skips_allowed = ($type == 'update' && ($domain_clone_of || $domain_template_id)) ? true : false;
 	
 	foreach ($data_array as $id => $data) {
 		if (!is_array($data)) continue;
 		if (isset($data['Delete'])) {
-			$action = 'Delete';
+			$action = _('Delete');
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');
 			$value[$id] = $data;
 		} elseif (array_key_exists('record_skipped', $data) && $skips_allowed) {
 			if ($data['record_skipped'] == 'on') {
-				$action = 'Skip Import';
+				$action = _('Skip Import');
 				$html.= buildInputReturn('skip', $id ,'record_status', 'active');
 			} else {
-				$action = 'Include';
+				$action = _('Include');
 				$html.= buildInputReturn('skip', $id ,'record_status', 'deleted');
 			}
 			$value[$id] = $data;
@@ -136,7 +135,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	foreach ($value as $id => $array) {
 		if (count($input_error[$id]['errors'])) {
 			$img = $__FM_CONFIG['icons']['fail'];
-			$action = 'None';
+			$action = _('None');
 		} else {
 			$img = $__FM_CONFIG['icons']['ok'];
 		}
@@ -151,7 +150,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 				$html .= ' class="center"';
 			}
 			if (empty($array[$head_array['rel']])) {
-				$array[$head_array['rel']] = "<i>empty</i>";
+				$array[$head_array['rel']] = sprintf('<i>%s</i>', _('empty'));
 			}
 			$html .= '>' . $array[$head_array['rel']];
 			if (($head_array['rel'] == 'record_value' && $array['record_append'] == 'yes') ||
@@ -190,20 +189,20 @@ function validateEntry($action, $id, $data, $record_type) {
 					$data[$key] = $val;
 				}
 				if (!verifyName($val, true, $record_type)) {
-					$messages['errors'][$key] = 'Invalid';
+					$messages['errors'][$key] = _('Invalid');
 				}
 			}
 			
 			if (in_array($key, array('record_ttl', 'record_priority', 'record_weight', 'record_port'))) {
 				if (!empty($val) && verifyNumber($val) === false) {
-					$messages['errors'][$key] = 'Invalid';
+					$messages['errors'][$key] = _('Invalid');
 				}
 			}
 			
 			if ($record_type == 'A') {
 				if ($key == 'record_value') {
 					if (verifyIPAddress($val) === false) {
-						$messages['errors'][$key] = 'Invalid IP';
+						$messages['errors'][$key] = _('Invalid IP');
 					}
 				}
 				if ($key == 'PTR') {
@@ -222,11 +221,11 @@ function validateEntry($action, $id, $data, $record_type) {
 				if ($key == 'record_name') {
 					if ($domain_map == 'reverse') {
 						if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain)) === false) {
-							$messages['errors'][$key] = 'Invalid record';
+							$messages['errors'][$key] = _('Invalid record');
 						}
 					} else {
 						if (!verifyCNAME('yes', $data['record_name'], false, true)) {
-							$messages['errors'][$key] = 'Invalid record';
+							$messages['errors'][$key] = _('Invalid record');
 						}
 					}
 				}
@@ -238,7 +237,7 @@ function validateEntry($action, $id, $data, $record_type) {
 					$val = $data['record_append'] == 'yes' || $val == '@' ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
 					if (!verifyCNAME($data['record_append'], $val)) {
-						$messages['errors'][$key] = 'Invalid value';
+						$messages['errors'][$key] = _('Invalid value');
 					}
 				}
 			}
@@ -254,6 +253,9 @@ function validateEntry($action, $id, $data, $record_type) {
 			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			$fm_dns_records->assignSOA($_POST['create']['soa_template_chosen'], $_POST['domain_id']);
 			header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $_POST['domain_id'] . '&record_type=SOA');
+		}
+		if (!isset($data['soa_append'])) {
+			$data['soa_append'] = 'no';
 		}
 		foreach ($data as $key => $val) {
 			if (in_array($key, array('domain_id', 'soa_status'))) continue;
@@ -279,12 +281,12 @@ function validateEntry($action, $id, $data, $record_type) {
 					$val = $data['soa_append'] == 'yes' ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
 					if (!verifyCNAME($data['soa_append'], $val, false)) {
-						$messages['errors'][$key] = 'Invalid';
+						$messages['errors'][$key] = _('Invalid');
 					}
 				} else {
 					if (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
 						if (!verifyNAME($val, false)) {
-							$messages['errors'][$key] = 'Invalid';
+							$messages['errors'][$key] = _('Invalid');
 						}
 					}
 				}
@@ -347,8 +349,8 @@ function buildSQLRecords($record_type, $domain_id) {
 		array_shift($sql_results[$result[0]->soa_id]);
 		return $sql_results;
 	} else {
-		$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
-		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+		$parent_domain_id = getZoneParentID($domain_id);
+		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '" . join("','", $parent_domain_id) . "')" : "='$domain_id'";
 		
 		if (in_array($record_type, array('A', 'AAAA'))) {
 			$record_sql = "AND domain_id $valid_domain_ids AND record_type IN ('A', 'AAAA')";
@@ -446,7 +448,7 @@ function checkPTRZone($ip, $domain_id) {
 		if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
 			return autoCreatePTRZone($zone, $domain_id);
 		}
-		return array(null, 'Reverse zone does not exist.');
+		return array(null, _('Reverse zone does not exist.'));
 	}
 }
 
@@ -476,9 +478,9 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		}
 		$retval = $fm_dns_zones->add($ptr_array);
 
-		return !is_int($retval) ? array(null, $retval) : array($retval, 'Created reverse zone.');
+		return !is_int($retval) ? array(null, $retval) : array($retval, _('Created reverse zone.'));
 	}
 
-	return array(null, 'Forward domain not found.');
+	return array(null, _('Forward domain not found.'));
 }
 ?>

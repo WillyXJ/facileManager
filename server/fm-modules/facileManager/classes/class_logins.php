@@ -31,41 +31,40 @@ class fm_login {
 	 */
 	function printLoginForm() {
 		global $fm_name;
-		printHeader('Login', 'login');
+		
+		printHeader(_('Login'), 'login');
 		
 		/** Cannot change password without mail_enable defined */
 		$mail_enable = (getOption('fm_db_version') >= 18) ? getOption('mail_enable') : false;
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : false;
-		$forgot_link = ($mail_enable && $auth_method == 1) ? '<p id="forgotton_link"><a href="?forgot_password">Forgot your password?</a></p>' : null;
+		$forgot_link = ($mail_enable && $auth_method == 1) ? sprintf('<p id="forgotton_link"><a href="?forgot_password">%s</a></p>', _('Forgot your password?')) : null;
 		
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
-		echo <<<HTML
-		<form id="loginform" action="{$_SERVER['REQUEST_URI']}" method="post">
+		printf('<form id="loginform" action="%1$s" method="post">
 		<div id="fm-branding">
-			<img src="$branding_logo" /><span>Login</span>
+			<img src="%2$s" /><span>%3$s</span>
 		</div>
 		<div id="login_form">
 		<table>
 			<tr>
 				<td>
 					<div class="input-wrapper">
-						<input type="text" size="25" name="username" id="username" placeholder="Username" />
+						<input type="text" size="25" name="username" id="username" placeholder="%4$s" />
 					</div>
 				</td>
 				<td>
 					<div class="input-wrapper">
-						<input type="password" size="25" name="password" id="password" placeholder="Password" />
+						<input type="password" size="25" name="password" id="password" placeholder="%5$s" />
 					</div>
 				</td>
-				<td><input name="submit" id="loginbtn" type="submit" value="Login" class="button" /></td>
+				<td><input name="submit" id="loginbtn" type="submit" value="%3$s" class="button" /></td>
 			</tr>
 		</table>
-		$forgot_link
+		%6$s
+		<div id="message"></div>
 		</form>
-		</div>
-	
-HTML;
+		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'), _('Password'), $forgot_link);
 		
 		exit(printFooter());
 	}
@@ -85,33 +84,31 @@ HTML;
 		if (!getOption('mail_enable') || getOption('auth_method') != 1) header('Location: ' . $GLOBALS['RELPATH']);
 
 		global $fm_name;
-		printHeader('Password Reset', 'login');
+		printHeader(_('Password Reset'), 'login');
 		
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 		
-		echo <<<HTML
-		<form id="loginform" action="{$_SERVER['PHP_SELF']}?forgot_password" method="post">
+		printf('<form id="loginform" action="%s?forgot_password" method="post">
 		<input type="hidden" name="reset_pwd" value="1" />
 		<div id="fm-branding">
-			<img src="$branding_logo" /><span>Reset Password</span>
+			<img src="%s" /><span>%s</span>
 		</div>
 		<div id="login_form">
 		<table>
 			<tr>
 				<td>
 					<div class="input-wrapper">
-						<input type="text" name="user_login" id="user_login" placeholder="Username" style="width: 400px;" />
+						<input type="text" name="user_login" id="user_login" placeholder="%s" style="width: 400px;" />
 					</div>
 				</td>
-				<td><input name="submit" id="forgotbtn" type="submit" value="Submit" class="button" /></td>
+				<td><input name="submit" id="forgotbtn" type="submit" value="%s" class="button" /></td>
 			</tr>
 		</table>
-		<p id="forgotton_link"><a href="{$GLOBALS['RELPATH']}">&larr; Login form</a></p>
-		<div id="message">$message</div>
+		<p id="forgotton_link"><a href="%s">&larr; %s</a></p>
+		<div id="message">%s</div>
 		</form>
-		</div>
-	
-HTML;
+		</div>', $_SERVER['PHP_SELF'], $branding_logo, _('Reset Password'), _('Username'),
+				_('Submit'), $GLOBALS['RELPATH'], _('Login form'), $message);
 	}
 	
 		
@@ -175,7 +172,7 @@ HTML;
 		if (getOption('fm_db_version') >= 18) {
 			if (!getOption('auth_method')) {
 				if (!isset($_COOKIE['myid'])) {
-					session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+					session_set_cookie_params(strtotime('+1 week'));
 					@session_start();
 	
 					$_SESSION['user']['logged_in'] = true;
@@ -187,12 +184,14 @@ HTML;
 						$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
 					}
 	
-					setcookie('myid', session_id(), time() + 60 * 60 * 24 * 7);
+					setcookie('myid', session_id(), strtotime('+1 week'));
 				}
 				
-				session_set_cookie_params(time() + 60 * 60 * 24 * 7);
-				@session_id($_COOKIE['myid']);
-				@session_start();
+				session_set_cookie_params(strtotime('+1 week'));
+				if (!empty($_COOKIE['myid'])) {
+					@session_id($_COOKIE['myid']);
+					@session_start();
+				}
 	
 				return true;
 			}
@@ -203,7 +202,7 @@ HTML;
 			$myid = $_COOKIE['myid'];
 				
 			/** Init the session. */
-			session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+			session_set_cookie_params(strtotime('+1 week'));
 			session_id($myid);
 			@session_start();
 				
@@ -213,7 +212,6 @@ HTML;
 				if (strtotime("-1 hour") > $_SESSION['user']['last_login']) {
 					$_SESSION['user']['last_login'] = strtotime("-15 minutes");
 					$_SESSION['user']['ipaddr'] = isset($_SERVER['REMOTE_HOST']) ? $_SERVER['REMOTE_HOST'] : $_SERVER['REMOTE_ADDR'];
-//					$this->updateSessionDB($_SESSION['user']);
 				}
 				
 				/** Should the user be logged in? */
@@ -317,13 +315,14 @@ HTML;
 			$myid = $_COOKIE['myid'];
 			
 			// Init the session.
-			session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+			session_set_cookie_params(strtotime('+1 week'));
 			session_id($myid);
 			@session_start();
 			$this->updateSessionDB($_SESSION['user']['name']);
 			@session_unset($_SESSION['user']);
-//			session_destroy();
 			setcookie('myid', '');
+			@session_destroy();
+			unset($_COOKIE['myid']);
 		}
 	}
 	
@@ -341,11 +340,11 @@ HTML;
 		global $fm_name;
 		
 		$user_info = getUserInfo($fm_login);
-		if (isEmailAddressValid($user_info['user_email']) === false) return 'There is no valid e-mail address associated with this user.';
+		if (isEmailAddressValid($user_info['user_email']) === false) return _('There is no valid e-mail address associated with this user.');
 		
 		$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
 		if (!file_exists($phpmailer_file)) {
-			return 'Unable to send email - PHPMailer class is missing.';
+			return _('Unable to send email - PHPMailer class is missing.');
 		} else {
 			require $phpmailer_file;
 		}
@@ -365,7 +364,7 @@ HTML;
 		$mail->From = getOption('mail_from');
 		$mail->AddAddress($user_info['user_email']);
 		
-		$mail->Subject = $fm_name . ' Password Reset';
+		$mail->Subject = sprintf(_('%s Password Reset'), $fm_name);
 		$mail->Body = $this->buildPwdResetEmail($user_info, $uniq_hash, true, $mail->Subject, $mail->From);
 		$mail->AltBody = $this->buildPwdResetEmail($user_info, $uniq_hash, false);
 		$mail->IsHTML(true);
@@ -373,7 +372,7 @@ HTML;
 		$mail->IsSMTP();
 		
 		if(!$mail->Send()) {
-			return 'Mailer Error: ' . $mail->ErrorInfo;
+			return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
 		}
 		
 		return true;
@@ -423,17 +422,16 @@ HTML;
 </html>
 BODY;
 		} else {
-			$body = <<<BODY
-Hi {$user_info['user_login']},
+			$body = sprintf('Hi %s,
 
-You (or somebody else) has requested a link to reset your $fm_name password.
+You (or somebody else) has requested a link to reset your %s password.
 
-If you don't want to reset your password, then you can ignore this message.
+If you don\'t want to reset your password, then you can ignore this message.
 
 To reset your password, click the following link:
 
-{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}
-BODY;
+%s',
+	$user_info['user_login'], $fm_name, "{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}");
 		}
 		
 		return $body;
@@ -451,7 +449,7 @@ BODY;
 	function setSession($user) {
 		global $fm_name;
 		
-		session_set_cookie_params(time() + 60 * 60 * 24 * 7);
+		session_set_cookie_params(strtotime('+1 week'));
 		@session_start();
 		$_SESSION['user']['logged_in'] = true;
 		$_SESSION['user']['id'] = $user->user_id;
@@ -464,7 +462,7 @@ BODY;
 		if (getOption('fm_db_version') < 32) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
 		setUserModule($user->user_default_module);
-		setcookie('myid', session_id(), time() + 60 * 60 * 24 * 7);
+		setcookie('myid', session_id(), strtotime('+1 week'));
 	}
 	
 	
@@ -495,7 +493,7 @@ BODY;
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
 		if ($ldap_encryption == 'SSL') {
-			$ldap_connect = @ldap_connect('ldaps://' . $ldap_server . ':' . $ldap_port_ssl);
+			$ldap_connect = @ldap_connect('ldaps://' . $ldap_server, $ldap_port_ssl);
 		} else {
 			$ldap_connect = @ldap_connect($ldap_server, $ldap_port);
 		}
@@ -508,11 +506,9 @@ BODY;
 			}
 			
 			/** Set referrals */
-			if (!$ldap_referrals) {
-				if(!@ldap_set_option($ldap_connect, LDAP_OPT_REFERRALS, 0)) {
-					@ldap_close($ldap_connect);
-					return false;
-				}
+			if(!@ldap_set_option($ldap_connect, LDAP_OPT_REFERRALS, $ldap_referrals)) {
+				@ldap_close($ldap_connect);
+				return false;
 			}
 			
 			/** Start TLS if requested */
@@ -570,13 +566,15 @@ BODY;
 	function createUserFromTemplate($username) {
 		global $fmdb;
 		
+		$template_user_id = getOption('ldap_user_template');
+		
 		/** User does not exist in database - get the template user */
-		$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_id` = " . getOption('ldap_user_template'));
+		$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_id` = " . $template_user_id);
 		if (!$fmdb->num_rows) return false;
 		
 		/** Attempt to add the new LDAP user to the database based on the template */
-		$fmdb->query("INSERT INTO `fm_users` (`account_id`,`user_login`, `user_password`, `user_email`, `user_auth_type`, `user_caps`) 
-					SELECT `account_id`, '$username', '', '', 2, `user_caps` from `fm_users` WHERE `user_id`=" . getOption('ldap_user_template'));
+		$fmdb->query("INSERT INTO `fm_users` (`account_id`,`user_login`, `user_password`, `user_email`, `user_default_module`, `user_auth_type`, `user_caps`) 
+					SELECT `account_id`, '$username', '', '', `user_default_module`, 2, `user_caps` from `fm_users` WHERE `user_id`=" . $template_user_id);
 		if (!$fmdb->rows_affected) return false;
 		
 		/** Get the user results now */

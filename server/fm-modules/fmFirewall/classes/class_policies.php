@@ -29,7 +29,7 @@ class fm_module_policies {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="policies">There are no firewall policies.</p>';
+			printf('<p id="table_edits" class="noresult" name="policies">%s</p>', _('There are no firewall policies.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -41,9 +41,9 @@ class fm_module_policies {
 						);
 			if (currentUserCan('manage_servers', $_SESSION['module']) && $num_rows > 1) $table_info['class'] .= ' grab';
 
-			$title_array = array(array('class' => 'header-tiny'), 'Source', 'Destination', 'Service', 'Interface',
-									'Direction', 'Time', array('title' => 'Comment', 'style' => 'width: 20%;'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(array('class' => 'header-tiny'), _('Source'), _('Destination'), _('Service'), _('Interface'),
+									_('Direction'), _('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -136,7 +136,7 @@ HTML;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the policy because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the policy because a database error occurred.');
 
 		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
@@ -161,10 +161,10 @@ HTML;
 			$policy_result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				$order_id = array_search($policy_result[$i]->policy_id, $new_sort_order);
-				if ($order_id === false) return 'The sort order could not be updated due to an invalid request.';
+				if ($order_id === false) return _('The sort order could not be updated due to an invalid request.');
 				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET `policy_order_id`=$order_id WHERE `policy_id`={$policy_result[$i]->policy_id} AND `server_serial_no`={$post['server_serial_no']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 				$result = $fmdb->query($query);
-				if ($result === false) return 'Could not update the policy order because a database error occurred.';
+				if ($result === false) return _('Could not update the policy order because a database error occurred.');
 			}
 			
 			setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
@@ -201,7 +201,7 @@ HTML;
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET $sql WHERE `policy_id`={$post['policy_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the firewall policy because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the firewall policy because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -230,7 +230,7 @@ HTML;
 			}
 		}
 		
-		return 'This policy could not be deleted.';
+		return _('This policy could not be deleted.');
 	}
 
 
@@ -242,11 +242,10 @@ HTML;
 		$edit_status = $edit_actions = null;
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-//			$edit_status = '<a id="plus" href="#" title="Add New" name="' . $type . '">' . $__FM_CONFIG['icons']['add'] . '</a>';
 			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->policy_id . '&status=';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->policy_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '&server_serial_no=' . $row->server_serial_no . '">';
+			$edit_status .= '">';
 			$edit_status .= ($row->policy_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
@@ -491,7 +490,7 @@ FORM;
 	function availableTimes() {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return[0][] = 'none';
+		$return[0][] = _('none');
 		$return[0][] = '';
 		
 		$query = "SELECT time_id,time_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time WHERE account_id='{$_SESSION['user']['account_id']}' AND time_status='active' ORDER BY time_name ASC";

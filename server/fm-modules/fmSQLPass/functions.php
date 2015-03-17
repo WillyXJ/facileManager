@@ -68,11 +68,13 @@ function buildModuleDashboard() {
 	$summary .= ' defined.</li>' . "\n";
 	
 	$dashboard = <<<DASH
-	<div id="shadow_box" class="leftbox">
+	<div class="fm-half">
+	<div id="shadow_box">
 		<div id="shadow_container">
 		<h3>Summary</h3>
 		$summary
 		</div>
+	</div>
 	</div>
 DASH;
 

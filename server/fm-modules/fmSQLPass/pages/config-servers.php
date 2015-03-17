@@ -48,15 +48,6 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
-		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $_GET['id'], 'server_', $_GET['status'], 'server_id')) {
-				$response = 'This database server could not be '. $_GET['status'] .'.'. "\n";
-			} else {
-				$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-				addLogEntry("Set database server '$tmp_name' status to " . $_GET['status'] . '.');
-				header('Location: ' . $GLOBALS['basename']);
-			}
-		}
 	}
 }
 

@@ -35,31 +35,57 @@
  * @subpackage Upgrader
  */
 function fmUpgrade($database) {
-	global $fmdb;
+	global $fmdb, $branding_logo;
 	include(ABSPATH . 'fm-includes/version.php');
 	include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 	
+	$errors = false;
+	
 	$GLOBALS['running_db_version'] = getOption('fm_db_version');
 	
-	echo '<center><table class="form-table">' . "\n";
+	printf('<div id="fm-branding">
+		<img src="%s" /><span>%s</span>
+	</div>
+	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 34) ? fmUpgrade_1202($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 42) ? fmUpgrade_200($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
-		setOption($fm_name . '_version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update');
+		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update', true, 0, $fm_name);
+	} else {
+		$errors = true;
 	}
 	
-	displayProgress('Upgrading Schema', $success);
-
-	echo "</table>\n</center>\n";
+	displayProgress(_('Upgrading Core Schema'), $success);
 	
-	if ($success) {
+	/** Upgrade any necessary modules */
+	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_tools.php');
+	$fmdb->get_results("SELECT module_name FROM fm_options WHERE option_name='version'");
+	$num_rows = $fmdb->num_rows;
+	$module_list = $fmdb->last_result;
+	for ($x=0; $x<$num_rows; $x++) {
+		$module_name = $module_list[$x]->module_name;
+		$success = $fm_tools->upgradeModule($module_name, 'quiet');
+		if (!$success || $fmdb->last_error) {
+			$errors = true;
+			$success = false;
+		} else {
+			$success = true;
+		}
+		displayProgress(sprintf(_('Upgrading %s Schema'), $module_name), $success);
+	}
+
+	echo "</table>";
+	
+	if (!$errors) {
 		displaySetupMessage(1, $GLOBALS['RELPATH'] . 'admin-modules.php');
 	} else {
 		displaySetupMessage(2);
 	}
+	
+	echo "</div>";
 }
 
 
@@ -292,10 +318,11 @@ function fmUpgrade_105($database) {
 	if ($success) {
 		$table = $inserts = $updates = null;
 
+		$tmp = sys_get_temp_dir();
 		/** Schema change */
 		$inserts[] = <<<INSERT
 INSERT INTO $database.`fm_options` (`option_name`, `option_value`) 
-	SELECT 'fm_temp_directory', '/tmp' FROM DUAL
+	SELECT 'fm_temp_directory', '$tmp' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'fm_temp_directory');
 INSERT;
@@ -308,6 +335,8 @@ INSERT;
 		}
 	}
 
+	upgradeConfig('fm_db_version', 22, false);
+	
 	return $success;
 }
 
@@ -334,6 +363,8 @@ function fmUpgrade_106($database) {
 		}
 	}
 
+	upgradeConfig('fm_db_version', 27, false);
+	
 	return $success;
 }
 
@@ -374,6 +405,8 @@ INSERT;
 		}
 	}
 
+	upgradeConfig('fm_db_version', 28, false);
+	
 	return $success;
 }
 
@@ -490,6 +523,8 @@ function fmUpgrade_1201($database) {
 		
 	}
 
+	upgradeConfig('fm_db_version', 32, false);
+	
 	return $success;
 }
 
@@ -518,6 +553,46 @@ function fmUpgrade_1202($database) {
 		if (!setOption('fm_user_caps', $fm_user_caps)) return false;
 	}
 
+	upgradeConfig('fm_db_version', 34, false);
+	
+	return $success;
+}
+
+
+/** fM v2.0-beta1 **/
+function fmUpgrade_2002($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 34) ? fmUpgrade_1202($database) : true;
+	
+	if ($success) {
+		if (!setOption('client_auto_register', 1)) return false;
+	}
+
+	upgradeConfig('fm_db_version', 37, false);
+	
+	return $success;
+}
+
+
+/** fM v2.0 **/
+function fmUpgrade_200($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 37) ? fmUpgrade_2002($database) : true;
+	
+	if ($success) {
+		if (!setOption('ssh_user', 'fm_user')) return false;
+	}
+
+	upgradeConfig('fm_db_version', 42, false);
+	
 	return $success;
 }
 
@@ -547,7 +622,7 @@ function upgradeConfig($field, $value, $logit = true) {
 		include(ABSPATH . 'fm-includes/version.php');
 		include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 		
-		addLogEntry("$fm_name was upgraded to $fm_version.", $fm_name);
+		addLogEntry(sprintf(_('%s was upgraded to %s.'), $fm_name, $fm_version), $fm_name);
 	}
 	
 	return true;
@@ -566,20 +641,14 @@ function displaySetupMessage($message = 1, $url = null) {
 	
 	switch ($message) {
 		case 1:
-			echo <<<HTML
-	<center>
-	<p>Database upgrade for $fm_name is complete!  Click 'Next' to start using $fm_name.</p>
-	<p class="step"><a href="$url" class="button">Next</a></p>
-	</center>
-
-HTML;
+			printf('
+	<p>' . _('Database upgrade for %1$s is complete! Click \'Next\' to start using %1$s.') . '</p>
+	<p class="step"><a href="%2$s" class="button">' . _('Next') . '</a></p>', $fm_name, $url);
 			break;
 		case 2:
-			echo <<<HTML
-	<p style="text-align: center;">Database upgrade failed.  Please try again.</p>
-	<p class="step"><a href="?step=2" class="button">Try Again</a></p>
-
-HTML;
+			echo '
+	<p>' . _('Database upgrade failed. Please try again.') . '</p>
+	<p class="step"><a href="?step=2" class="button">' . _('Try Again') . '</a></p>';
 			break;
 	}
 }

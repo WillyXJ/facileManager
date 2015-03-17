@@ -66,6 +66,7 @@ $fmdb->query($query);
 $log_count = $fmdb->num_rows;
 
 $total_pages = ceil($log_count / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
 $pagination = displayPagination($page, $total_pages);
 
 $log_search_module = isset($log_search_module) ? $log_search_module : 'All Modules';
@@ -121,17 +122,12 @@ function displayLogData($page, $search_sql = null) {
 	$log_count = $fmdb->num_rows;
 	
 	if (!$log_count) {
-		echo <<<ROW
-				<tr>
-					<td colspan="4"><p class="no_results">There are no log results.</p></td>
-				</tr>
-
-ROW;
+		printf('<tr><td colspan="4"><p class="no_results">%s</p></td></tr>', _('There are no log results.'));
 	}
 
 	for ($i=0; $i<$log_count; $i++) {
 		extract(get_object_vars($result[$i]), EXTR_OVERWRITE);
-		$log_data = nl2br($log_data);
+		$log_data = nl2br(wordwrap($log_data, 80, "\n", true));
 		if (isset($_POST['log_search_query'])) $log_data = str_replace($_POST['log_search_query'], '<span class="highlighted">' . $_POST['log_search_query'] . '</span>', $log_data);
 		$user_name = $user_id ? getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_login') : $fm_name;
 		$log_timestamp = date($date_format . ' ' . $time_format . ' e', $log_timestamp);
@@ -150,7 +146,7 @@ ROW;
 function buildModuleList() {
 	global $fmdb;
 	
-	$array[0] = array_fill(0, 2, 'All Modules');
+	$array[0] = array_fill(0, 2, _('All Modules'));
 	
 	$query = "SELECT DISTINCT log_module FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']})";
 	$fmdb->get_results($query);
@@ -167,7 +163,7 @@ function buildModuleList() {
 function buildUserList() {
 	global $fmdb;
 	
-	$array[0] = array('All Users', 0);
+	$array[0] = array(_('All Users'), 0);
 	
 	$query = "SELECT user_id,user_login FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} ORDER BY user_login";
 	$fmdb->get_results($query);

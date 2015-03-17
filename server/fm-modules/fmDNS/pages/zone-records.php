@@ -42,39 +42,57 @@ if (!isValidDomain($domain_id)) header('Location: ' . getMenuURL('Zones'));
 if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
-if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $record_type == 'SOA') $record_type = $default_record_type;
+if ($record_type == 'SOA') {
+	if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) $record_type = $default_record_type;
+	elseif (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) $record_type = $default_record_type;
+}
 
 printHeader();
 @printMenu();
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
-$zone_access_allowed = true;
+$search_query = null;
+if (isset($_GET['q'])) {
+	$search_query = ' AND (';
+	$search_text = sanitize($_GET['q']);
+	$fields = array('name', 'value', 'ttl', 'class', 'text', 'comment');
+	foreach ($fields as $field) {
+		$search_query .= "record_$field LIKE '%$search_text%' OR ";
+	}
+	$search_query = rtrim($search_query, ' OR ') . ')';
+}
+
 $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
 sort($supported_record_types);
 $supported_record_types[] = 'SOA';
 
-$parent_domain_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
-$zone_access_allowed = currentUserCan('access_specific_zones', $_SESSION['module'], array(0, $domain_id, $parent_domain_id));
+$parent_domain_id = getZoneParentID($domain_id);
+$zone_access_allowed = zoneAccessIsAllowed(array_merge(array($domain_id), $parent_domain_id));
 		
 if (!in_array($record_type, $supported_record_types)) $record_type = $default_record_type;
-$avail_types = buildRecordTypes($record_type, array($domain_id, $parent_domain_id), $map, $supported_record_types);
+$avail_types = buildRecordTypes($record_type, array_merge(array($domain_id), $parent_domain_id), $map, $supported_record_types, $search_query);
 
 $response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
 	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
 }
 if (!getNSCount($domain_id)) {
-	$response = '** One more more NS records still needs to be created for this zone **';
+	$response = sprintf('** %s **', _('One more more NS records still needs to be created for this zone'));
 }
 if (!getSOACount($domain_id)) {
-	$response = '** The SOA record still needs to be created for this zone **';
+	$response = sprintf('** %s **', _('The SOA record still needs to be created for this zone'));
 }
 
-$body = '<div id="body_container">' . "\n";
+$body = '<div id="body_container" class="fm-noscroll">' . "\n";
 if (!empty($response)) $body .= '<div id="response"><p>' . $response . '</p></div>';
-$body .= "	<h2>Records</h2>
-	$avail_types\n";
+$body .= sprintf('<h2>%s</h2>
+	<div id="pagination_container" class="submenus record-types">
+	<div>
+	<div class="stretch"></div>
+	%s
+	</div>
+</div>', _('Records'), $avail_types);
 	
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php">
@@ -92,9 +110,7 @@ if ($record_type == 'SOA') {
 	else $result = null;
 	$body .= $form . $fm_dns_records->buildSOA($result);
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		$body .= '
-	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
-</form>' . "\n";
+		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", _('Validate'));
 	}
 } else {
 	switch ($record_type) {
@@ -115,7 +131,7 @@ if ($record_type == 'SOA') {
 			$ip_sort = false;
 			break;
 	}
-	$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '$parent_domain_id')" : "='$domain_id'";
+	$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '" . join("','", $parent_domain_id) . "')" : "='$domain_id'";
 	$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
 	$sort_direction = null;
 
@@ -124,25 +140,26 @@ if ($record_type == 'SOA') {
 	}
 
 	if (in_array($record_type, array('A', 'AAAA')) && $sort_field == 'record_value') $ip_sort = true;
+	
+	if (isset($search_query)) $record_sql .= $search_query;
 
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
 	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
-	$pagination = displayPagination($page, $total_pages);
-	$body .= $pagination . $form;
+	$pagination = displayPagination($page, $total_pages, null, null, 'search-form');
+	$body .= $pagination . '<div class="overflow-container">' . $form;
+	
+	$body .= '<div class="existing-container">';
 
 	$body .= $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		$body .= '
-	<br /><br />
+		$body .= sprintf('</div><div class="new-container">
 	<a name="#manage"></a>
-	<h2>Add Record</h2>' . "\n";
-
-		$body .= $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id);
-		$body .= '
-	<p><input type="submit" name="submit" value="Validate" class="button" /></p>
-</form>' . "\n";
+	<h2>%s</h2>
+	%s
+	<p><input type="submit" name="submit" value="%s" class="button" /></p>
+</form></div>' . "\n", _('Add Record'), $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id), _('Validate'));
 	}
 }
 
@@ -151,15 +168,17 @@ echo $body . '</div>' . "\n";
 printFooter();
 
 
-function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'forward', $supported_record_types) {
+function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'forward', $supported_record_types, $search_query = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$menu_selects = $menu_sub_selects = null;
 	
+	$q = isset($_GET['q']) ? '&q=' . sanitize($_GET['q']) : null;
+	
 	if (isset($record_type) && $all_domain_ids != null) {
 		list($domain_id, $parent_domain_id) = $all_domain_ids;
 		$query = "SELECT DISTINCT `record_type` FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE `record_status`!='deleted' AND
-			`account_id`={$_SESSION['user']['account_id']} AND `domain_id` IN (" . implode(',', $all_domain_ids) . ")";
+			`account_id`={$_SESSION['user']['account_id']} AND `domain_id` IN (" . implode(',', $all_domain_ids) . ") $search_query";
 		$fmdb->get_results($query);
 		$used_record_types = array();
 		if ($fmdb->num_rows) {
@@ -175,10 +194,16 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 		foreach ($used_record_types as $type) {
 			if (empty($type)) continue;
 			if (in_array($type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) continue;
-			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') && $type == 'SOA') continue;
+			if ($type == 'SOA') {
+				/** Skip clones */
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) continue;
+				
+				/** Skip templates */
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) continue;
+			}
 
 			$select = ($record_type == $type) ? ' class="selected"' : '';
-			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
+			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\">$type</a></span>\n";
 		}
 		
 		/** More record types menu */
@@ -188,27 +213,29 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 					if ($record_type == $type) {
 						$menu_selects .= "<span class=\"selected\"><a class=\"selected\" href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
 					} else {
-						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\"><span>$type</span></a></li>\n";
+						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\"><span>$type</span></a></li>\n";
 					}
 				}
 			}
 			$menu_selects = <<<MENU
-			<div id="recordmenu">
-			<ul>
-				<li class="has-sub"><a href="#"><span>...</span></a>
-					<ul>
-					$menu_sub_selects
-					</ul>
-				</li>
-			</ul>
-			</div>
 			$menu_selects
+			</div>
+			<div id="configtypesmenu" class="nopadding dropdown">
+				<div id="recordmenu">
+				<ul>
+					<li class="has-sub"><a href="#"><span>...</span></a>
+						<ul>
+						$menu_sub_selects
+						</ul>
+					</li>
+				</ul>
+				</div>
 
 MENU;
 		}
 	}
 	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+	return '<div id="configtypesmenu" class="submenus">' . $menu_selects . '</div>';
 }
 
 function isValidDomain($domain_id) {

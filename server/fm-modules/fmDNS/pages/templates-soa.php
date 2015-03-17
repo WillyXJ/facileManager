@@ -18,7 +18,7 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes server keys management page                                   |
+ | Processes SOA templates management page                                 |
  | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */

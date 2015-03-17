@@ -20,14 +20,35 @@ tr.import_swap select {
 	white-space: nowrap;
 }
 
-#clones p {
-	margin: 0;
+.clones td p {
+	margin: 0 0 0 .5em;
 }
 
-img.clone_remove {
+.clones p span.record-additions {
+	color: green;
+	font-size: 8pt;
+}
+.clones p span.record-additions:before {
+	content: '+';
+}
+
+.clones p span.record-subtractions {
+	color: red;
+	font-size: 8pt;
+}
+.clones p span.record-subtractions:before {
+	content: '-';
+}
+
+img.clone_remove,
+a.clone_edit img {
 	position: relative;
 	top: 2px;
 	cursor: pointer;
+	width: 12px;
+}
+a.clone_edit {
+	margin-left: 7px;
 }
 p.soa_import {
 	width: 100%;
@@ -90,7 +111,7 @@ p.soa_import span {
 	background-color: #464646;
 	border-radius:5px 5px 0 0;
 }
-#recordmenu { display:block; padding:0; margin: -6px 0 0 4px; float: right; }
+#recordmenu { display:block; padding:0; margin: -6px 0 0 4px; }
 #recordmenu > ul {list-style:inside none; padding:0; margin:0;}
 #recordmenu > ul > li {list-style: none; padding:3px 1em 1px 0; margin:0; display:block; position:relative;}
 #recordmenu > ul > li > a{ outline:none; display:block; position:relative; text-decoration:none; padding-bottom: 6px; }
@@ -118,12 +139,14 @@ p.soa_import span {
 #recordmenu ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; }
 #recordmenu > ul > li > ul > li a:hover{ background-color:rgba(100,100,100,0.95); color: #fff; };
 
-.form-table.zone-form {
+.form-table.zone-form,
+.form-table.zone-template-form {
 	font-size: 14px;
 	white-space: normal;
 }
 
-.form-table.zone-form input[type=text] {
+.form-table.zone-form input[type=text],
+.form-table.zone-template-form input[type=text] {
 	width: 24em;
 }
 
@@ -133,10 +156,50 @@ p.soa_import span {
 	top: 2px;
 }
 
+.overflow-container {
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
+.existing-container {
+	position: absolute;
+	overflow: auto;
+	bottom: 34.8em;
+	top: 0;
+	width: 100%;
+}
+.new-container {
+	position: absolute;
+	width: 100%;
+	bottom: 11em;
+	max-height: 326px;
+	overflow: auto;
+}
+
+.display_results > tbody > tr > td > span {
+	font-style: italic;
+}
+
 #define_forwarders,
 #define_masters {
 	margin-top: .5em;
 }
 #define_forwarders > p {
 	margin: 7px 0;
+}
+
+#clone_override p {
+	margin: 5px 0;
+}
+
+.template-icon {
+	color: #c0c0c0;
+}
+
+td > .template-icon {
+	margin-left: 7px;
+}
+
+#table_edits > tbody > tr.clones > td {
+	vertical-align: top;
 }

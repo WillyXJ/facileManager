@@ -27,17 +27,16 @@
  *
  */
 
-if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
-		'version'							=> '1.3.6',
-		'client_version'					=> '1.3.4',
-		'description'						=> 'Easily manage one or more ISC BIND servers through a web interface.  No more editing configuration
-												and zone files manually.',
+		'version'							=> '2.0',
+		'client_version'					=> '2.0',
+		'description'						=> _('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.'),
 		'prefix'							=> 'dns_',
 		'required_dns_version'				=> '9.3',
-		'required_fm_version'				=> '1.3.1',
+		'required_fm_version'				=> '2.0',
 		'min_client_auto_upgrade_version'	=> '1.2.5'
 	);
 
@@ -48,7 +47,7 @@ if (isset($fm_name)) {
 	$__FM_CONFIG['module']['icons']['sub_delete']	= '<img class="clone_remove" id="__ID__" src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Delete" title="Delete" width="12" />';
 }
 
-$__FM_CONFIG['icons'] = array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
 $__FM_CONFIG['records']['cert_types'] = array(
@@ -75,8 +74,8 @@ $__FM_CONFIG['records']['sshfp_algorithms'] = array(
 											array('DSA', 2)
 											);
 
-$__FM_CONFIG['options']['avail_types'] = array('Global', 'Logging');
-$__FM_CONFIG['options']['avail_types'] = array('Global');
+$__FM_CONFIG['servers']['avail_types'] = array('servers' => 'Servers', 'groups' => 'Groups');
+$__FM_CONFIG['options']['avail_types'] = array('global' => 'Global', 'ratelimit' => 'Rate Limit');
 $__FM_CONFIG['logging']['avail_types'] = array('channel' => 'channels', 'category' => 'categories');
 
 /** SOA Default Values */
@@ -117,26 +116,28 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmDNS'
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa'=>'soa', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views'=>'view',
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped'=>'record'
 											);
-$__FM_CONFIG['clean']['prefixes']			= array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
 
 /** Default values */
 $named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkconf') . ', ' . findProgram('named-checkzone') : '/path/to/named-checkconf, /path/to/named-checkzone';
-$__FM_CONFIG['fmDNS']['default']['options'] = array(
+$__FM_CONFIG['fmDNS']['default']['options'] = @array(
 		'enable_named_checks' => array(
-				'description' => array('Enable named Checks', 'Enable or disable named-checkconf and named-checkzone utilities.</p>
-								<p>sudo must be installed on ' . php_uname('n') . ' with the following in sudoers:</p>
+				'description' => array(_('Enable named Checks'), _('Enable or disable named-checkconf and named-checkzone utilities.') . '</p>
+								<p>' . sprintf(_('sudo must be installed on %s with the following in sudoers:'), php_uname('n')) . '</p>
 								<pre>' . $__FM_CONFIG['webserver']['user_info']['name'] . ' ALL=(root) NOPASSWD: ' . $named_check_utils . '</pre>'),
 				'default_value' => 'no',
 				'type' => 'checkbox'),
 		'purge_config_files' => array(
-				'description' => array('Purge Configuration Files', 'When enabled, configuration files will be deleted on the DNS
-								servers before building the server config. This can be handy if you want to remove unused files.'),
+				'description' => array(_('Purge Configuration Files'), _('When enabled, configuration files will be deleted on the DNS servers before building the server config. This can be handy if you want to remove unused files.')),
 				'default_value' => 'no',
 				'type' => 'checkbox'),
 		'auto_create_ptr_zones' => array(
-				'description' => array('Create Reverse Zones Automatically', 'While creating A records and choosing to create the associated'
-					. ' PTR record, reverse zones can be automatically created if they are missing.'),
+				'description' => array(_('Create Reverse Zones Automatically'), _('While creating A records and choosing to create the associated PTR record, reverse zones can be automatically created if they are missing.')),
 				'default_value' => 'no',
+				'type' => 'checkbox'),
+		'clones_use_dnames' => array(
+				'description' => array(_('Use DNAME Resource Records for Clones'), _('When creating cloned zones, use the DNAME resource record rather than a full clone (when available).')),
+				'default_value' => 'yes',
 				'type' => 'checkbox')
 	);
 

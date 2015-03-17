@@ -27,13 +27,13 @@ class fm_settings {
 	function save() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		if (!currentUserCan('manage_settings')) return 'You do not have permission to make these changes.';
+		if (!currentUserCan('manage_settings')) return _('You do not have permission to make these changes.');
 		
 		$force_logout = false;
 		$exclude = array('save', 'item_type', 'gen_ssh');
 		$ports = array('ldap_port', 'ldap_port_ssl', 'fm_port_ssl');
 		
-		$log_message = "Set system settings to the following:\n";
+		$log_message = _('Set system settings to the following:') . "\n";
 		
 		foreach ($_POST as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -49,9 +49,9 @@ class fm_settings {
 				unset($account_id);
 				if ($current_value == $data) continue;
 				
-				if ($key == 'mail_from' && isEmailAddressValid($data) === false) return $data . ' is not a valid e-mail address.';
+				if ($key == 'mail_from' && isEmailAddressValid($data) === false) return sprintf(_('%s is not a valid e-mail address.'), $data);
 				if (in_array($key, $ports)) {
-					if (!verifyNumber($data, 1, 65535, false)) return 'Invalid port number specified.';
+					if (!verifyNumber($data, 1, 65535, false)) return _('Invalid port number specified.');
 				}
 				
 				if (isset($data_array)) $data = $data_array;
@@ -73,7 +73,7 @@ class fm_settings {
 				$result = setOption($option, $option_value, $command, false, $account_id);
 				unset($account_id);
 	
-				if (!$result) return 'Could not save settings because a database error occurred.';
+				if (!$result) return _('Could not save settings because a database error occurred.');
 		
 				$log_value = trim($option_value);
 				$log_message .= ucwords(str_replace('_', ' ', $option)) . ': ';
@@ -87,8 +87,8 @@ class fm_settings {
 				} elseif ($option == 'mail_smtp_pass') $log_message .= str_repeat('*', 8);
 				elseif ($option == 'date_format' || $option == 'time_format') $log_message .= date($log_value);
 				elseif ($option == 'ldap_user_template') $log_message .= getNameFromID($log_value, 'fm_users', 'user_', 'user_id', 'user_login');
-				elseif ($option_value == '1') $log_message .= 'Yes';
-				elseif ($option_value == '0') $log_message .= 'No';
+				elseif ($option_value == '1') $log_message .= _('Yes');
+				elseif ($option_value == '0') $log_message .= _('No');
 				else $log_message .= $log_value;
 				
 				$log_message .= "\n";
@@ -123,16 +123,18 @@ class fm_settings {
 	function generateSSHKeyPair() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		/** Create the ssh key pair */
-		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f /tmp/fm_id_rsa -N ''", $exec_array, $retval);
-		$array['ssh_key_priv'] = @file_get_contents('/tmp/fm_id_rsa');
-		$array['ssh_key_pub'] = @file_get_contents('/tmp/fm_id_rsa.pub');
+		$tmp = sys_get_temp_dir();
 		
-		@unlink('/tmp/fm_id_rsa');
-		@unlink('/tmp/fm_id_rsa.pub');
+		/** Create the ssh key pair */
+		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f $tmp/fm_id_rsa -N ''", $exec_array, $retval);
+		$array['ssh_key_priv'] = @file_get_contents($tmp . '/fm_id_rsa');
+		$array['ssh_key_pub'] = @file_get_contents($tmp . '/fm_id_rsa.pub');
+		
+		@unlink($tmp . '/fm_id_rsa');
+		@unlink($tmp . '/fm_id_rsa.pub');
 		
 		if ($retval) {
-			return 'SSH key generation failed.';
+			return _('SSH key generation failed.');
 		}
 		
 		foreach ($array as $key => $data) {
@@ -150,10 +152,10 @@ class fm_settings {
 				/** Update with the new value */
 				$result = setOption($option, $option_value, $command, false, $_SESSION['user']['account_id']);
 		
-				if (!$result) return 'Could not save settings because a database error occurred.';
+				if (!$result) return _('Could not save settings because a database error occurred.');
 			}
 			
-			addLogEntry('Generated system SSH key pair.', $fm_name);
+			addLogEntry(_('Generated system SSH key pair.'), $fm_name);
 		}
 		
 		return true;
@@ -171,12 +173,14 @@ class fm_settings {
 		
 		$local_hostname = php_uname('n');
 		
-		$save_button = currentUserCan('manage_settings') ? '<p><input type="button" name="save" id="save_fm_settings" value="Save" class="button primary" /></p>' : null;
-		$sshkey_button = currentUserCan('manage_settings') ? '<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="Generate" class="button" />' : null;
+		$tmp = sys_get_temp_dir();
+		
+		$save_button = currentUserCan('manage_settings') ? sprintf('<p><input type="button" name="save" id="save_fm_settings" value="%s" class="button primary" /></p>', _('Save')) : null;
+		$sshkey_button = currentUserCan('manage_settings') ? sprintf('<input type="button" name="gen_ssh" id="generate_ssh_key_pair" value="%s" class="button" />', _('Generate')) : null;
 		if ($sshkey_button !== null) {
 			$ssh_priv = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 			if ($ssh_priv) {
-				$sshkey_button = '<p>SSH key pair is generated.</p>';
+				$sshkey_button = sprintf('<p>%s</p>', _('SSH key pair is generated.'));
 				unset($ssh_priv);
 			}
 		}
@@ -194,9 +198,9 @@ class fm_settings {
 			 $auth_fm_options_style = 'style="display: block;"';
 		} else $auth_fm_options_style = null;
 		
-		$password_strength_descriptions = "<p>Required password strength for user accounts.</p>\n";
+		$password_strength_descriptions = sprintf("<p>%s</p>\n", _('Required password strength for user accounts.'));
 		foreach ($__FM_CONFIG['password_hint'] as $strength => $description) {
-			$password_strength_descriptions .= '<p><i>' . ucfirst($strength) . '</i> - ' . ucfirst(substr($description, 32)) . "</p>\n";
+			$password_strength_descriptions .= sprintf("<p><i>%s</i> - %s</p>\n", ucfirst($strength), ucfirst(substr($description, 32)));
 		}
 		
 		/** LDAP Section */
@@ -226,9 +230,11 @@ class fm_settings {
 		$ldap_user_template = getOption('ldap_user_template');
 		$ldap_user_template_list = buildSelect('ldap_user_template', 'ldap_user_template', $this->buildUserList(), $ldap_user_template);
 
+		/** Client Autoregistration Section */
+		$client_auto_register_checked = (getOption('client_auto_register')) ? 'checked' : null;
+
 		/** SSL Section */
-		$enforce_ssl = getOption('enforce_ssl');
-		$enforce_ssl_checked = ($enforce_ssl) ? 'checked' : null;
+		$enforce_ssl_checked = (getOption('enforce_ssl')) ? 'checked' : null;
 		$fm_port_ssl = getOption('fm_port_ssl');
 		
 		/** Mailing Section */
@@ -238,8 +244,7 @@ class fm_settings {
 			 $fm_mailing_options_style = 'style="display: block;"';
 		} else $mail_enable_checked = $fm_mailing_options_style = null;
 		
-		$mail_smtp_auth = getOption('mail_smtp_auth');
-		if ($mail_smtp_auth) {
+		if (getOption('mail_smtp_auth')) {
 			 $mail_smtp_auth_checked = 'checked';
 			 $mail_smtp_auth_options_style = 'style="display: block;"';
 		} else $mail_smtp_auth_checked = $mail_smtp_auth_options_style = null;
@@ -247,11 +252,10 @@ class fm_settings {
 		$mail_smtp_host = getOption('mail_smtp_host');
 		$mail_smtp_user = getOption('mail_smtp_user');
 		$mail_smtp_pass = getOption('mail_smtp_pass');
-		$mail_smtp_tls = getOption('mail_smtp_tls');
-		$mail_smtp_tls_checked = ($mail_smtp_tls) ? 'checked' : null;
+		$mail_smtp_tls_checked = (getOption('mail_smtp_tls')) ? 'checked' : null;
 		
 		$mail_from = getOption('mail_from');
-
+		
 		/** Timestamp formatting */
 		$timezone = getOption('timezone', $_SESSION['user']['account_id']);
 		$timezone_list = $this->buildTimezoneList($timezone);
@@ -279,10 +283,13 @@ class fm_settings {
 			 $software_update_options_style = 'style="display: block;"';
 		} else $software_update_checked = $software_update_options_style = null;
 
+		$ssh_user = getOption('ssh_user');
+		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">
 			<input type="hidden" name="item_type" value="fm_settings" />
 			<input type="hidden" name="ldap_group_require" value="0" />
+			<input type="hidden" name="client_auto_register" value="0" />
 			<input type="hidden" name="enforce_ssl" value="0" />
 			<input type="hidden" name="mail_enable" value="0" />
 			<input type="hidden" name="mail_smtp_auth" value="0" />
@@ -364,7 +371,7 @@ class fm_settings {
 						<div id="setting-row">
 							<div class="description">
 								<label for="ldap_referrals">Referrals</label>
-								<p>Enable or disabled LDAP referrals.</p>
+								<p>Enable or disable LDAP referrals.</p>
 							</div>
 							<div class="choices">
 								$ldap_referrals_list
@@ -418,6 +425,15 @@ class fm_settings {
 							<div class="choices">
 								$ldap_user_template_list
 							</div>
+						</div>
+					</div>
+					<div id="setting-row">
+						<div class="description">
+							<label for="client_auto_register">Automatic Client Registration</label>
+							<p>Allow clients to automatically register with $fm_name.</p>
+						</div>
+						<div class="choices">
+							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" $client_auto_register_checked /><label for="client_auto_register">Allow Automatic Client Registration</label>
 						</div>
 					</div>
 				</div>
@@ -558,7 +574,7 @@ class fm_settings {
 							<p>Temporary directory on $local_hostname to use for scratch files (must be writeable by {$__FM_CONFIG['webserver']['user_info']['name']}).</p>
 						</div>
 						<div class="choices">
-							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="$fm_temp_directory" size="40" placeholder="/tmp" />
+							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="$fm_temp_directory" size="40" placeholder="$tmp" />
 						</div>
 					</div>
 				</div>
@@ -594,6 +610,15 @@ class fm_settings {
 					</div>
 				</div>
 				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label>SSH Username</label>
+							<p>The local system user to use for client interaction via SSH.</p>
+						</div>
+						<div class="choices">
+							<input name="ssh_user" id="ssh_user" type="text" value="$ssh_user" size="40" placeholder="fm_user" />
+						</div>
+					</div>
 					<div id="setting-row">
 						<div class="description">
 							<label>SSH Key Pair</label>
@@ -683,16 +708,18 @@ FORM;
 		
 		basicGetList('fm_users', 'user_login', 'user_', $sql = 'AND user_auth_type<2');
 		
-		$user_list = null;
+		$user_list[0][] = _('None');
+		$user_list[0][] = 0;
+		
 		$user_result = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$user_list[$i][] = $user_result[$i]->user_login;
-			$user_list[$i][] = $user_result[$i]->user_id;
+		for ($i=1; $i<=$fmdb->num_rows; $i++) {
+			$user_list[$i][] = $user_result[$i-1]->user_login;
+			$user_list[$i][] = $user_result[$i-1]->user_id;
 		}
 		
 		return $user_list;
 	}
-
+	
 }
 
 if (!isset($fm_settings))

@@ -32,10 +32,10 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildcon
 
 /** Enforce authentication */
 if (!$fm_login->isLoggedIn()) {
-	exit('<pre>Invalid account.</pre>');
+	exit(sprintf('<pre>%s</pre>', _('Invalid account')));
 }
 
-$preview = $check_status = null;
+$preview = $check_status = $message = null;
 
 if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_serial_no'])) {
 	extract($_GET);
@@ -54,7 +54,7 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	
 	$function = 'build' . ucfirst($config) . 'Config';
 
-	$raw_data = $fm_module_buildconf->$function($data);
+	list($raw_data, $message) = $fm_module_buildconf->$function($data);
 
 	if (!is_array($raw_data)) {
 		$preview = unserialize($raw_data);
@@ -62,11 +62,11 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 		list($preview, $check_status) = $fm_module_buildconf->processConfigs($raw_data);
 	}
 } else {
-	$preview = 'Invalid Server ID.';
+	$preview = _('Invalid Server ID.');
 }
 
-printHeader('Server Config Preview', 'facileManager', false, false);
-echo $check_status . "<pre>\n" . str_replace('<', '&lt;', $preview) . "\n</pre>\n";
+printHeader(_('Server Config Preview'), 'facileManager', false, false);
+echo $message . $check_status . "<pre>\n" . $preview . "\n</pre>\n";
 printFooter();
 
 ?>

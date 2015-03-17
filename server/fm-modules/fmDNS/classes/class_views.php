@@ -29,7 +29,7 @@ class fm_dns_views {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="views">There are no views.</p>';
+			printf('<p id="table_edits" class="noresult" name="views">%s</p>', _('There are no views.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_dns_views {
 							'name' => 'views'
 						);
 
-			$title_array = array(array('title' => 'View Name', 'rel' => 'view_name'), array('title' => 'Comment', 'class' => 'header-nosort'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
+			$title_array = array(array('title' => _('View Name'), 'rel' => 'view_name'), array('title' => _('Comment'), 'class' => 'header-nosort'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -63,7 +63,7 @@ class fm_dns_views {
 		
 		$view_name = sanitize($view_name);
 		
-		if (empty($view_name)) return 'No view name defined.';
+		if (empty($view_name)) return _('No view name defined.');
 		$view_comment = trim($view_comment);
 		
 		/** Check name field length */
@@ -72,12 +72,12 @@ class fm_dns_views {
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_name, 'view_', 'view_name');
-		if ($fmdb->num_rows) return 'This view already exists.';
+		if ($fmdb->num_rows) return _('This view already exists.');
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', $server_serial_no, '$view_name', '$view_comment')";
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$view_name', '$view_comment')";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the view because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the view because a database error occurred.');
 
 		addLogEntry("Added view:\nName: $view_name\nComment: $view_comment");
 		return true;
@@ -89,7 +89,7 @@ class fm_dns_views {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['view_name'])) return 'No view name defined.';
+		if (empty($post['view_name'])) return _('No view name defined.');
 		$post['view_comment'] = trim($post['view_comment']);
 
 		/** Check name field length */
@@ -100,7 +100,7 @@ class fm_dns_views {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', sanitize($post['view_name']), 'view_', 'view_name');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
-			if ($result[0]->view_id != $post['view_id']) return 'This view already exists.';
+			if ($result[0]->view_id != $post['view_id']) return _('This view already exists.');
 		}
 		
 		$exclude = array('submit', 'action', 'view_id', 'page');
@@ -119,7 +119,7 @@ class fm_dns_views {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET $sql WHERE `view_id`={$post['view_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the view because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the view because a database error occurred.');
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -138,7 +138,7 @@ class fm_dns_views {
 		/** Are there any associated zones? */
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', "AND (`domain_view`=$id or `domain_view` LIKE '$id;%' or `domain_view` LIKE '%;$id' or `domain_view` LIKE '%;$id;%')");
 		if ($fmdb->num_rows) {
-			return 'There are zones associated with this view.';
+			return _('There are zones associated with this view.');
 		}
 		
 		/** Are there any corresponding configs to delete? */
@@ -146,14 +146,14 @@ class fm_dns_views {
 		if ($fmdb->num_rows) {
 			/** Delete corresponding configs */
 			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'view_id') === false) {
-				return 'The corresponding configs could not be deleted.';
+				return _('The corresponding configs could not be deleted.');
 			}
 		}
 		
 		/** Delete view */
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $id, 'view_', 'deleted', 'view_id') === false) {
-			return 'This view could not be deleted because a database error occurred.';
+			return _('This view could not be deleted because a database error occurred.');
 		} else {
 //			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry("Deleted view '$tmp_name'.");
@@ -173,9 +173,8 @@ class fm_dns_views {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->view_id . '&status=';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->view_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 			$edit_status .= '">';
 			$edit_status .= ($row->view_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
@@ -205,7 +204,7 @@ HTML;
 		$view_id = 0;
 		$view_name = $view_root_dir = $view_zones_dir = $view_comment = null;
 		$ucaction = ucfirst($action);
-		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($data))

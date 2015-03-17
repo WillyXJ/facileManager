@@ -1,3 +1,10 @@
+1.1 (2015-??-??)
+================
+* Server - [feature] Added support for menu bar notifications. (Issue #116)
+* Server - [bug] Fixed bulk action checkbox logic.
+* Server - [bug] Fixed password setting form and output logic.
+* Server - [improvement] jQuery is now used to enable/disable items.
+
 1.0.1 (2014-08-20)
 ==================
 * Server - [improvement] Gave the popups a facelift.

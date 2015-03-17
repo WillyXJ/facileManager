@@ -23,7 +23,7 @@
 */
 
 /** Handle client installations */
-if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey'), $_GET)) {
+if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'), $_GET)) {
 	if (!defined('CLIENT')) define('CLIENT', true);
 	
 	require_once('fm-init.php');
@@ -48,7 +48,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 			if (array_key_exists('addserial', $_GET)) {
 				/** Client expects an array for a good return */
 				$data = $_POST;
-				
+
 				/** Does the record already exist for this account? */
 				basicGet('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['server_name'], 'server_', 'server_name');
 				if ($fmdb->num_rows) {
@@ -56,10 +56,14 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 					$_POST['server_id'] = $server_array[0]->server_id;
 					$update_server = moduleAddServer('update');
 				} else {
-					/** Add new server */
-					$add_server = moduleAddServer('add');
-					if ($add_server === false) {
-						$data = "Could not add server to account.\n";
+					if (getOption('client_auto_register')) {
+						/** Add new server */
+						$add_server = moduleAddServer('add');
+						if ($add_server !== true) {
+							$data = _('Could not add server to account.') . "\n";
+						}
+					} else {
+						$data = _('Client automatic registration is not allowed.') . "\n";
 					}
 				}
 			}
@@ -81,9 +85,9 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 				}
 				$current_module_version = getOption('client_version', 0, $_POST['module_name']);
 				if ($_POST['server_client_version'] == $current_module_version) {
-					$data = "Latest version: $current_module_version\nNo upgrade available.\n";
+					$data = sprintf(_('Latest version: %s\nNo upgrade available.'), $current_module_version) . "\n";
 				} elseif (version_compare($_POST['server_client_version'], $__FM_CONFIG[$_POST['module_name']]['min_client_auto_upgrade_version'], '<')) {
-					$data = "Latest version: $current_module_version\nThis upgrade requires a manual installation.\n";
+					$data = sprintf(_('Latest version: %s\nThis upgrade requires a manual installation.'), $current_module_version) . "\n";
 				} else {
 					$data = array(
 								'latest_core_version' => $fm_version,
@@ -95,11 +99,11 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'sshkey
 				$fm_shared_module_servers->updateClientVersion();
 			}
 			
-			if (array_key_exists('sshkey', $_GET)) {
-				$data = getOption('ssh_key_pub', $_SESSION['user']['account_id']);
+			if (array_key_exists('ssh', $_GET)) {
+				$data = getOption('ssh_' . $_GET['ssh'], $_SESSION['user']['account_id']);
 			}
 		} else {
-			$data = "failed\n\nInstallation aborted. {$_POST['module_name']} is not an active module.\n";
+			$data = sprintf(_('failed\n\nInstallation aborted. %s is not an active module.'), $_POST['module_name']) . "\n";
 		}
 	}
 	

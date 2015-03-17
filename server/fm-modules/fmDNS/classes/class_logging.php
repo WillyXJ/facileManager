@@ -29,7 +29,7 @@ class fm_module_logging {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="logging">There are no ' . $__FM_CONFIG['logging']['avail_types'][$channel_category] . ' defined.</p>';
+			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(_('There are no %s defined.'), $__FM_CONFIG['logging']['avail_types'][$channel_category]));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,10 +40,10 @@ class fm_module_logging {
 							'name' => 'logging'
 						);
 
-			$title_array[] = array('title' => 'Name', 'rel' => 'cfg_data');
-			if ($channel_category == 'category') $title_array[] = array('title' => 'Channels', 'class' => 'header-nosort');
-			$title_array[] = array('title' => 'Comment', 'class' => 'header-nosort');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions header-nosort');
+			$title_array[] = array('title' => _('Name'), 'rel' => 'cfg_data');
+			if ($channel_category == 'category') $title_array[] = array('title' => _('Channels'), 'class' => 'header-nosort');
+			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -72,13 +72,13 @@ class fm_module_logging {
 		$post['cfg_name'] = $post['sub_type'];
 		$post['cfg_comment'] = trim($post['cfg_comment']);
 		
-		if (empty($channel_name)) return 'No channel name defined.';
+		if (empty($channel_name)) return _('No channel name defined.');
 		
 		/** Ensure unique channel names */
-		if (!$this->validateChannel($post)) return 'This channel already exists.';
+		if (!$this->validateChannel($post)) return _('This channel already exists.');
 		
 		if ($post['cfg_destination'] == 'file') {
-			if (empty($post['cfg_file_path'][0])) return 'No file path defined.';
+			if (empty($post['cfg_file_path'][0])) return _('No file path defined.');
 		}
 		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'cfg_destination',
 					'cfg_file_path', 'cfg_syslog', 'severity', 'print-category', 'print-severity',
@@ -98,7 +98,7 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the channel because a database error occurred.';
+		if (!$result) return _('Could not add the channel because a database error occurred.');
 
 		/** Insert channel children */
 		$post['cfg_isparent'] = 'no';
@@ -150,7 +150,7 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the channel because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the channel because a database error occurred.');
 		
 		$log_message = "Added logging channel:\nName: $channel_name\nDestination: {$post['cfg_destination']}";
 		if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
@@ -179,7 +179,7 @@ class fm_module_logging {
 		$sql_fields = '(';
 		$sql_values = null;
 		
-		if (!isset($post['cfg_data'])) return 'No channel selected.';
+		if (!isset($post['cfg_data'])) return _('No channel selected.');
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
@@ -204,7 +204,7 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return 'Could not add the category because a database error occurred.';
+		if (!$result) return _('Could not add the category because a database error occurred.');
 
 		/** Insert category children */
 		$post['cfg_isparent'] = 'no';
@@ -233,7 +233,7 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the category because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the category because a database error occurred.');
 		
 		addLogEntry("Added logging category:\nName: $category_name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		return true;
@@ -247,12 +247,12 @@ class fm_module_logging {
 		
 		/** Ensure no empty inputs */
 		if ($post['sub_type'] == 'channel') {
-			if (empty($post['cfg_name'])) return 'No channel defined.';
+			if (empty($post['cfg_name'])) return _('No channel defined.');
 			if ($post['cfg_destination'] == 'file') {
-				if (empty($post['cfg_file_path'][0])) return 'No file path defined.';
+				if (empty($post['cfg_file_path'][0])) return _('No file path defined.');
 			}
 		}
-		if ($post['sub_type'] == 'category' && !isset($post['cfg_data'])) return 'No channel defined.';
+		if ($post['sub_type'] == 'category' && !isset($post['cfg_data'])) return _('No channel defined.');
 
 		$post['cfg_comment'] = trim($post['cfg_comment']);
 
@@ -263,7 +263,7 @@ class fm_module_logging {
 			$query = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_parent`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 			$result = $fmdb->query($query);
 			
-			if (!$result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
+			if (!$result) return sprintf(_('Could not update the %s because a database error occurred.'), $post['sub_type']);
 		}
 		
 		/** Update category parent */
@@ -273,7 +273,7 @@ class fm_module_logging {
 		
 		/** Ensure unique channel names */
 		if ($post['sub_type'] == 'channel') {
-			if (!$this->validateChannel($post)) return 'This channel already exists.';
+			if (!$this->validateChannel($post)) return _('This channel already exists.');
 		}
 		
 		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
@@ -323,7 +323,7 @@ class fm_module_logging {
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
 		
-			if (!$fmdb->result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
+			if (!$fmdb->result) return sprintf(_('Could not update the %s because a database error occurred.'), $post['sub_type']);
 			
 			addLogEntry("Updated logging category '$old_name' to the following:\nName: $name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		} else {
@@ -373,7 +373,7 @@ class fm_module_logging {
 			$query = "$sql_insert $sql_fields VALUES $sql_values";
 			$result = $fmdb->query($query);
 		
-			if (!$fmdb->result) return 'Could not update the ' . $post['sub_type'] . ' because a database error occurred.';
+			if (!$fmdb->result) return sprintf(_('Could not update the %s because a database error occurred.'), $post['sub_type']);
 
 			$log_message = "Updated logging channel '$old_name' to the following:\nName: $name\nDestination: {$post['cfg_destination']}";
 			if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
@@ -397,12 +397,12 @@ class fm_module_logging {
 	/**
 	 * Deletes the selected logging channel/category
 	 */
-	function delete($id, $server_serial_no = 0, $type) {
+	function delete($id, $type, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Check if channel is currently associated with category */
 		if ($type == 'channel' && is_array($this->getAssocCategories($id))) {
-			return 'This ' . $type . ' could not be deleted because it is associated with one or more categories.';
+			return sprintf(_('This %s could not be deleted because it is associated with one or more categories.'), $type);
 		}
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
@@ -413,10 +413,10 @@ class fm_module_logging {
 		
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
-			return 'This ' . $type . ' could not be deleted because a database error occurred.';
+			return sprintf(_('This %s could not be deleted because a database error occurred.'), $type);
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry("Deleted logging $type '$tmp_name'.");
+			addLogEntry(sprintf(_("Logging %s '%s' was deleted."), $type, $tmp_name));
 			return true;
 		}
 	}
@@ -429,10 +429,9 @@ class fm_module_logging {
 		
 		$edit_name = ($row->cfg_parent) ? '&nbsp;&nbsp;&nbsp;' : null;
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" name="' . $channel_category . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="' . $edit_uri . 'action=edit&id=' . $row->cfg_id . '&status=';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= '">';
 			$edit_status .= ($row->cfg_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
@@ -484,7 +483,7 @@ HTML;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
 		$uctype = ucfirst($type);
-		$server_serial_no = (isset($_REQUEST['server_serial_no']) && $_REQUEST['server_serial_no'] > 0) ? sanitize($_REQUEST['server_serial_no']) : 0;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$cfg_data = null;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -614,9 +613,9 @@ FORM;
 		</script>
 FORM;
 		} else {
-		$return_form = buildPopup('header', 'Error');
-		$return_form .= '<h3>Oops!</h3><p>Invalid request.</p>';
-		$return_form .= buildPopup('footer', 'OK', array('cancel'));
+			$return_form = buildPopup('header', 'Error');
+			$return_form .= '<h3>Oops!</h3><p>Invalid request.</p>';
+			$return_form .= buildPopup('footer', 'OK', array('cancel'));
 		}
 
 		return $return_form;
@@ -672,6 +671,7 @@ FORM;
 	
 	
 	function getAssocChannels($cfg_id) {
+		if (!$cfg_id) return null;
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;

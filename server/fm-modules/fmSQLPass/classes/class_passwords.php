@@ -40,7 +40,7 @@ class fm_sqlpass_passwords {
 						);
 
 			$title_array = array(array(
-								'title' => '<input type="checkbox" onClick="toggle(this, \'group[]\')" checked />',
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'group[]\')" checked />',
 								'class' => 'header-tiny'
 							), 'Server Group', 'Last Changed');
 
@@ -63,7 +63,8 @@ class fm_sqlpass_passwords {
 			
 HTML;
 			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], $_SESSION['module'])) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
-			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'Set Password', 'set_sql_password', 'config-passwords', false);
+			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'Set Password', 'set_sql_password', 'config-passwords', false, 'embed');
+			echo '<div><input type="submit" id="set_sql_password" name="submit" value="Set Password" class="button primary" disabled /></div>';
 			echo '</form>';
 		}
 	}
@@ -99,12 +100,7 @@ HTML;
 		if (!currentUserCan('manage_passwords', $_SESSION['module'])) $error = 'You do not have permission to perform this task.';
 		
 		if ($error) {
-			if (!$verbose) return '<p class="error">' . $error . '</p>';
-			else return <<<HTML
-				<h2>Password Change Results</h2>
-				<p>$error</p>
-				<br /><input type="submit" value="OK" class="button" id="cancel_button" />
-HTML;
+			return (!$verbose) ? '<p class="error">' . $error . '</p>' : $error;
 		}
 		
 		/** Get default credentials */
@@ -145,12 +141,7 @@ HTML;
 		if (!$verbose) {
 			$return = strpos($verbose_output, '[failed] -') ? '<p class="error">One or more errors occurred during the password change.</p>' : '<p>Password has been changed.</p>';
 		} else {
-			$return = <<<HTML
-<h2>Password Change Results</h2>
-<textarea rows="20" cols="85">$verbose_output</textarea>
-<br /><input type="submit" value="OK" class="button cancel" id="cancel_button" />
-
-HTML;
+			$return = $verbose_output;
 		}
 		
 		return $return;

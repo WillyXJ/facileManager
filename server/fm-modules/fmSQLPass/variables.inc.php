@@ -27,24 +27,26 @@
  *
  */
 
-if (!is_array($__FM_CONFIG)) $__FM_CONFIG = array();
+if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmSQLPass'] = array(
-		'version'				=> '1.0.1',
+		'version'				=> '1.1',
 		'description'			=> 'Change database user passwords across a server farm running multiple database server types.
 									Password complexity requirements are enforced to ensure secure passwords. Currently supported
 									database servers include MySQL.',
 		'prefix'				=> 'sqlpass_',
-		'required_fm_version'	=> '1.3'
+		'required_fm_version'	=> '2.0'
 	);
 
 /** Default values */
 $pwd_strength_desc = null;
-foreach ($__FM_CONFIG['password_hint'] as $strength => $desc) {
-	$pwd_strength_desc .= '<i>' . $strength . '</i> - ' . str_replace('You must choose a password with a', 'A', $__FM_CONFIG['password_hint'][$strength]) . "<br /><br />\n";
+if (isset($__FM_CONFIG['password_hint'])) {
+	foreach ($__FM_CONFIG['password_hint'] as $strength => $desc) {
+		$pwd_strength_desc .= '<i>' . $strength . '</i> - ' . str_replace('You must choose a password with a', 'A', $__FM_CONFIG['password_hint'][$strength]) . "<br /><br />\n";
+	}
 }
-$__FM_CONFIG['fmSQLPass']['default']['options'] = array(
+$__FM_CONFIG['fmSQLPass']['default']['options'] = @array(
 		'minimum_pwd_strength' => array(
 				'description' => array('Minimum Password Strength', rtrim($pwd_strength_desc, "<br /><br />\n")),
 				'default_value' => $GLOBALS['PWD_STRENGTH'],

@@ -29,7 +29,7 @@ class fm_module_time {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="time">There are no time restrictions defined.</p>';
+			printf('<p id="table_edits" class="noresult" name="time">%s</p>', _('There are no time restrictions defined.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_module_time {
 							'name' => 'time'
 						);
 
-			$title_array = array('Restriction Name', 'Date Range', 'Time', 'Weekdays', array('title' => 'Comment', 'style' => 'width: 30%;'));
-			if (currentUserCan('manage_time', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(_('Restriction Name'), _('Date Range'), _('Time'), _('Weekdays'), array('title' => _('Comment'), 'style' => 'width: 30%;'));
+			if (currentUserCan('manage_time', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -74,7 +74,7 @@ class fm_module_time {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'time_name') && empty($clean_data)) return 'No time name defined.';
+			if (($key == 'time_name') && empty($clean_data)) return _('No time name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -86,7 +86,7 @@ class fm_module_time {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the time because a database error occurred.';
+		if (!$fmdb->result) return _('Could not add the time because a database error occurred.');
 
 		/** Format weekdays */
 		$weekdays = $this->formatDays($post['time_weekdays']);
@@ -124,7 +124,7 @@ class fm_module_time {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time` SET $sql WHERE `time_id`={$post['time_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not update the time because a database error occurred.';
+		if (!$fmdb->result) return _('Could not update the time because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -147,17 +147,17 @@ class fm_module_time {
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $time_id, 'time_', 'time_id');
 		if ($fmdb->num_rows) {
 			/** Is the time_id present in a policy? */
-			if (isItemInPolicy($time_id, 'time')) return 'This schedule could not be deleted because it is associated with one or more policies.';
+			if (isItemInPolicy($time_id, 'time')) return _('This schedule could not be deleted because it is associated with one or more policies.');
 			
 			/** Delete time */
 			$tmp_name = getNameFromID($time_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $time_id, 'time_', 'deleted', 'time_id')) {
-				addLogEntry("Deleted time restriction '$tmp_name'.");
+				addLogEntry(sprintf(_('Time restriction (%s) was deleted.'), $tmp_name));
 				return true;
 			}
 		}
 		
-		return 'This time restriction could not be deleted.';
+		return _('This time restriction could not be deleted.');
 	}
 
 
@@ -170,7 +170,7 @@ class fm_module_time {
 		
 		if (currentUserCan('manage_time', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a href="' . $GLOBALS['basename'] . '?action=edit&id=' . $row->time_id . '&status=';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->time_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= '">';
 			$edit_status .= ($row->time_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
@@ -303,15 +303,15 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['time_name'])) return 'No name defined.';
+		if (empty($post['time_name'])) return _('No name defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name');
-		if ($field_length !== false && strlen($post['time_name']) > $field_length) return 'Name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['time_name']) > $field_length) return sprintf(ngettext('Name is too long (maximum %d character).', 'Name is too long (maximum %d characters).', 1), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $post['time_name'], 'time_', 'time_name', "AND time_id!={$post['time_id']}");
-		if ($fmdb->num_rows) return 'This name already exists.';
+		if ($fmdb->num_rows) return _('This name already exists.');
 		
 		/** Process time */
 		$post['time_start_time'] = $post['time_start_time_hour'] . ':' . $post['time_start_time_min'];

@@ -41,7 +41,8 @@ if (!defined('AJAX')) {
 }
 
 $_SERVER['REQUEST_URI'] = !strpos($_SERVER['REQUEST_URI'], '.php') ? str_replace('?', '.php?', $_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'];
-$path_parts = pathinfo($_SERVER['REQUEST_URI']);
+$path_parts = parse_url($_SERVER['REQUEST_URI']);
+$path_parts = array_merge($path_parts, pathinfo($path_parts['path']));
 
 if (file_exists(ABSPATH . 'config.inc.php')) {
 	
@@ -49,16 +50,19 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	require_once(ABSPATH . 'config.inc.php');
 	if (!function_exists('functionalCheck') && is_array($__FM_CONFIG['db'])) {
 		require_once(ABSPATH . 'fm-modules/facileManager/functions.php');
-	} elseif (!function_exists('functionalCheck') && !is_array($__FM_CONFIG['db'])) {
+	} elseif (!function_exists('functionalCheck') || !is_array($__FM_CONFIG['db'])) {
 		/** A config file is empty */
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 	}
 	
+	/** Load language */
+	include_once(ABSPATH . 'fm-includes/i18n.php');
+
 	$GLOBALS['URI'] = convertURIToArray();
 
 	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
 		
-	if (!defined('INSTALL') && !defined('CLIENT')) {
+	if (!defined('INSTALL') && !defined('CLIENT') && !defined('FM_NO_CHECKS')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 		
 		/** Handle special cases with config.inc.php */
@@ -87,13 +91,13 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		/** Process password resets */
 		if (!$fm_login->isLoggedIn() && array_key_exists('forgot_password', $_GET)) {
-			$message = array_key_exists('keyInvalid', $_GET) ? '<p class="failed">That key is invalid.</p>' : null;
+			$message = array_key_exists('keyInvalid', $_GET) ? sprintf('<p class="failed">%s</p>', _('The specified key is invalid.')) : null;
 			if (count($_POST)) {
 				$result = $fm_login->processUserPwdResetForm($_POST['user_login']);
 				if ($result === true) {
-					$message = '<p class="success">Your password reset email has been sent to the address on file.</p>';
+					$message = sprintf('<p class="success">%s</p>', _('Your password reset email has been sent to the address on file.'));
 				} else {
-					$message = '<p class="failed">' . $result . '</p>';
+					$message = sprintf('<p class="failed">%s</p>', $result);
 				}
 				
 				if ($_POST['is_ajax']) {
@@ -113,11 +117,18 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			
 			$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
 			if ($_POST['is_ajax']) {
-				if (is_array($logged_in)) {
+				if (!$logged_in) {
+					echo 'failed';
+				} elseif (isUpgradeAvailable()) {
+					if (currentUserCan(array('do_everything', 'manage_modules')) || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
+						echo $GLOBALS['RELPATH'] . 'fm-upgrade.php';
+					} else {
+						session_destroy();
+						printf('<p class="failed">' . _('The database for %1s and its modules still needs to be upgraded.<br />Please contact a privileged user.') . '</p>', $fm_name);
+					}
+				} elseif (is_array($logged_in)) {
 					list($reset_key, $user_login) = $logged_in;
 					echo "password_reset.php?key=$reset_key&login=$user_login";
-				} elseif (!$logged_in) {
-					echo 'failed';
 				} else echo $_SERVER['REQUEST_URI'];
 			} else {
 				if (!$logged_in) $fm_login->printLoginForm();
@@ -153,7 +164,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		/** Ensure selected module is indeed active */
 		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name && !in_array($_SESSION['module'], getActiveModules())) {
 			$_SESSION['module'] = $fm_name;
-			header('Location: ' . $GLOBALS['RELPATH'] . 'admin-modules');
+			header('Location: ' . $GLOBALS['RELPATH'] . 'admin-modules.php');
 			exit;
 		}
 		
@@ -161,11 +172,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			/** Once logged in process the menuing */
 			if ($fm_login->isLoggedIn()) {
 				if (isUpgradeAvailable()) {
-					if (currentUserCan('do_everything') || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
-						header('Location: ' . $GLOBALS['RELPATH'] . 'fm-upgrade.php');
-					} else {
-						$response = '<p class="error">** The database for ' . $fm_name . ' still needs to be upgraded.  Please contact a super-admin. **</p>';
-					}
+					$fm_login->logout();
+					header('Location: ' . $GLOBALS['RELPATH']);
+					exit;
 				}
 			}
 		}
@@ -189,13 +198,15 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			echo '</pre>';
 		}
 		
-		$page = isset($_GET['p']) ? intval($_GET['p']) : 1;
+		$page = isset($_GET['p']) && intval($_GET['p']) > 0 ? intval($_GET['p']) : 1;
 		
 		/** Build the user menu */
 		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 	} elseif (defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 	}
+	
+	if (isset($_POST['module_name'])) $_SESSION['module'] = $_POST['module_name'];
 
 	/** Include module functions file */
 	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
@@ -211,7 +222,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			include_once($module_functions_file);
 		}
 
-		if (!defined('CLIENT') && !defined('INSTALL') && !defined('UPGRADE')) {
+		if (!defined('CLIENT') && !defined('INSTALL') && !defined('UPGRADE') && !defined('FM_NO_CHECKS')) {
 			if (function_exists('buildModuleMenu')) {
 				buildModuleMenu();
 			}
@@ -221,10 +232,6 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 } else {
 
 	/** A config file doesn't exist */
-
-	require_once(ABSPATH . 'fm-includes/init.php');
-	require_once(ABSPATH . 'fm-includes/version.php');
-	
 	header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 
 }
