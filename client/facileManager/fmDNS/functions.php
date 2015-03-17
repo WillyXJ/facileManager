@@ -177,7 +177,15 @@ function buildConf($url, $data) {
 	if (!$data['dryrun']) {
 		addLogEntry($message);
 		if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
+			/** Freeze dynamic zones to support reloading */
+			$last_line = system(findProgram('rndc') . ' freeze 2>&1', $retval);
+			addLogEntry($last_line);
+		
 			$last_line = system(findProgram('rndc') . ' reload 2>&1', $retval);
+			addLogEntry($last_line);
+			
+			/** Thaw dynamic zones */
+			$last_line = system(findProgram('rndc') . ' thaw 2>&1', $retval);
 			addLogEntry($last_line);
 		} else {
 			$message = "The server is not running. Attempting to start it.\n";
