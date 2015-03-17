@@ -203,3 +203,7 @@ td > .template-icon {
 #table_edits > tbody > tr.clones > td {
 	vertical-align: top;
 }
+
+#define_template p {
+	font-size: 8pt;
+}

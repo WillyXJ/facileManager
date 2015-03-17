@@ -162,8 +162,6 @@ class fm_dns_zones {
 			}
 			$sql_fields = rtrim($sql_fields, ',') . ')';
 			$sql_values = rtrim($sql_values, ',');
-			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-			$result = $fmdb->query($query);
 		} else {
 			/** Format domain_view */
 			$log_message_views = null;
@@ -194,6 +192,8 @@ class fm_dns_zones {
 					if ($key == 'soa_id') {
 						$soa_name = $data ? getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name') : 'Custom';
 						$log_message .= formatLogKeyData('_id', $key, $soa_name);
+					} elseif ($key == 'domain_template_id') {
+						$log_message .= formatLogKeyData(array('domain_', '_id'), $key, getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 					} else {
 						$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 					}
@@ -205,10 +205,9 @@ class fm_dns_zones {
 			}
 			$sql_fields .= 'account_id)';
 			$sql_values .= "'{$_SESSION['user']['account_id']}'";
-			
-			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-			$result = $fmdb->query($query);
 		}
+		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
+		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) return _('Could not add zone because a database error occurred.');
 
@@ -218,26 +217,28 @@ class fm_dns_zones {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
 		$required_servers = sanitize($post['domain_required_servers']);
-		if ($post['domain_type'] == 'forward') {
-			$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
-			$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
-			
-			$domain_forward = sanitize($post['domain_forward'][0]);
-			$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
-			$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
-		} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
-			$query .= "'masters', '" . $required_servers . "')";
-			$result = $fmdb->query($query);
-			$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
+		if (!$post['domain_template_id']) {
+			if ($post['domain_type'] == 'forward') {
+				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
+				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
+
+				$domain_forward = sanitize($post['domain_forward'][0]);
+				$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
+				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
+			} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
+				$query .= "'masters', '" . $required_servers . "')";
+				$result = $fmdb->query($query);
+				$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
+			}
 		}
 		if ($fmdb->sql_errors) return _('Could not add zone because a database error occurred.');
 		
 		addLogEntry($log_message);
 		
 		/* Set the server_build_config flag for servers */
-		if ($post['domain_clone_domain_id']) {
-			if (getSOACount($post['domain_clone_domain_id']) && getNSCount($post['domain_clone_domain_id'])) {
-				setBuildUpdateConfigFlag(getZoneServers($post['domain_clone_domain_id']), 'yes', 'build');
+		if ($post['domain_clone_domain_id'] || $post['domain_template_id']) {
+			if (getSOACount($insert_id) && getNSCount($insert_id)) {
+				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('masters', 'slaves')), 'yes', 'build');
 			}
 		}
 		return $insert_id;
@@ -316,7 +317,7 @@ class fm_dns_zones {
 		
 		/** Set the server_build_config flag for existing servers */
 		if (getSOACount($domain_id) && getNSCount($domain_id)) {
-			setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
+			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 		}
 
 		/** Update the zone */
@@ -331,29 +332,34 @@ class fm_dns_zones {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $domain_id, ";
 		$required_servers = sanitize($post['domain_required_servers']);
-		if ($post['domain_type'] == 'forward') {
-			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")) {
-				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forwarders'"), 'cfg_data', $required_servers, 'cfg_id');
-			} else {
-				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
+		if (!$post['domain_template_id']) {
+			if ($post['domain_type'] == 'forward') {
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")) {
+					basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forwarders'"), 'cfg_data', $required_servers, 'cfg_id');
+				} else {
+					$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
+				}
+				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
+
+				$domain_forward = sanitize($post['domain_forward'][0]);
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'")) {
+					basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forward'"), 'cfg_data', $domain_forward, 'cfg_id');
+				} else {
+					$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
+				}
+				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
+			} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")) {
+					basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='masters'"), 'cfg_data', $required_servers, 'cfg_id');
+				} else {
+					$query .= "'masters', '" . $required_servers . "')";
+					$result = $fmdb->query($query);
+				}
+				$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
 			}
-			$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
-			
-			$domain_forward = sanitize($post['domain_forward'][0]);
-			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'")) {
-				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forward'"), 'cfg_data', $domain_forward, 'cfg_id');
-			} else {
-				$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
-			}
-			$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
-		} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
-			if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")) {
-				basicUpdate("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='masters'"), 'cfg_data', $required_servers, 'cfg_id');
-			} else {
-				$query .= "'masters', '" . $required_servers . "')";
-				$result = $fmdb->query($query);
-			}
-			$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
+		} else {
+			/** Remove all zone config options */
+			basicDelete("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", $domain_id, 'domain_id');
 		}
 		if ($fmdb->sql_errors) return _('Could not update zone because a database error occurred.') . ' ' . $fmdb->last_error;
 		
@@ -362,7 +368,7 @@ class fm_dns_zones {
 
 		/** Set the server_build_config flag for new servers */
 		if (getSOACount($domain_id) && getNSCount($domain_id)) {
-			setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
+			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 		}
 
 		/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
@@ -427,7 +433,7 @@ class fm_dns_zones {
 			}
 			
 			/** Force buildconf for all associated DNS servers */
-			setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
+			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 			
 			/** Delete cloned zones */
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
@@ -704,7 +710,11 @@ HTML;
 			$classes = 'zone-form';
 			$select_template = '<tr id="define_template" class="include-with-template">
 					<th>Template</th>
-					<td>' . buildSelect('domain_template_id', 'domain_template_id', $this->availableZoneTemplates(), $domain_template_id) . '</td></tr>';
+					<td>' . buildSelect('domain_template_id', 'domain_template_id', $this->availableZoneTemplates(), $domain_template_id);
+			if ($action == 'edit') {
+				$select_template .= sprintf('<p>%s</p>', _('Changing the template will delete all config options for this zone.'));
+			}
+			$select_template .= '</td></tr>';
 		} else {
 			$classes = 'zone-template-form';
 			$select_template = null;
@@ -924,7 +934,7 @@ HTML;
 		$domain_details = $fmdb->last_result;
 		extract(get_object_vars($domain_details[0]), EXTR_SKIP);
 		
-		$name_servers = $this->getNameServers($domain_name_servers);
+		$name_servers = $this->getNameServers($domain_name_servers, array('masters'));
 		
 		/** No name servers so return */
 		if (!$name_servers) return sprintf('<p class="error">%s</p>'. "\n", _('There are no DNS servers hosting this zone.'));
@@ -1050,7 +1060,7 @@ HTML;
 		return $response;
 	}
 
-	function getNameServers($domain_name_servers) {
+	function getNameServers($domain_name_servers, $server_types = array('masters', 'slaves')) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Check domain_name_servers */
@@ -1062,10 +1072,12 @@ HTML;
 				
 				/** Process server groups */
 				if ($server[0] == 'g') {
-					$group_masters = getNameFromID(preg_replace('/\D/', null, $server), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_masters');
-					
-					foreach (explode(';', $group_masters) as $server) {
-						if (!empty($server)) $sql_name_servers .= "'$server',";
+					foreach ($server_types as $type) {
+						$group_servers = getNameFromID(preg_replace('/\D/', null, $server), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_' . $type);
+
+						foreach (explode(';', $group_servers) as $server_id) {
+							if (!empty($server_id)) $sql_name_servers .= "'$server_id',";
+						}
 					}
 				} else {
 					if (!empty($server)) $sql_name_servers .= "'$server',";
@@ -1074,7 +1086,8 @@ HTML;
 			$sql_name_servers = rtrim($sql_name_servers, ',') . ')';
 		} else $sql_name_servers = null;
 		
-		$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` where `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' $sql_name_servers ORDER BY `server_update_method`";
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' $sql_name_servers ORDER BY `server_update_method`";
+		file_put_contents('/tmp/php.log', "$query\n", FILE_APPEND);
 		$result = $fmdb->query($query);
 		
 		/** No name servers so return */
@@ -1321,6 +1334,7 @@ HTML;
 			}
 			$post = $new_post;
 			unset($new_post, $post['domain_template']);
+			$post['domain_type'] = getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
 
 			return $post;
 		} else unset($post['domain_template_id']);

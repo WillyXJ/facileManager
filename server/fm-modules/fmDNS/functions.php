@@ -639,24 +639,25 @@ function getModuleBadgeCounts($type) {
  * @subpackage fmDNS
  *
  * @param id $domain_id Domain ID to check
+ * @param array $server_types Type of servers to pull
  * @return string
  */
-function getZoneServers($domain_id) {
+function getZoneServers($domain_id, $server_types = array('masters')) {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
 	$serial_no = null;
 	
 	if ($domain_id) {
 		/** Force buildconf for all associated DNS servers */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			$domain_name_servers = $result[0]->domain_name_servers;
-			
+		if ($domain_template_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
+			$domain_id = $domain_template_id;
+		}
+		$domain_name_servers = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers');
+		if ($domain_name_servers) {
 			if (!isset($fm_dns_zones)) {
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 			}
-			$name_servers = $fm_dns_zones->getNameServers($domain_name_servers);
+			$name_servers = $fm_dns_zones->getNameServers($domain_name_servers, $server_types);
 			
 			/** Loop through name servers */
 			if ($name_servers) {
