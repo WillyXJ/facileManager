@@ -187,7 +187,12 @@ function buildModuleHelpFile() {
 			<p>You can define a zone as a clone of another previously defined master zone.  The cloned zone will contain all of the same records
 			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
 			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
-			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones.</i></p>
+			<p>Zones can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
+			management if you have several zones with a similar framework. You can create a zone template when creating a new zone or you can 
+			completely manage them from <a href="__menu{Zone Templates}">Templates</a>. All zones based on a template will be shown with the
+			<i class="fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
+			with them.</p>
+			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa).</p>
 			<p>Zones that are missing SOA and NS records will be highlighted with a red background and will not be built or reloaded until the 
@@ -205,14 +210,15 @@ function buildModuleHelpFile() {
 			IPv4 and IPv6 records and {$_SESSION['module']} will auto-detect their type.</p>
 			<p>When adding certain records (such as CNAME, MX, SRV, SOA, NS, etc.), you have the option append the domain to the record. This 
 			means {$_SESSION['module']} will automatically add the domain to the record so you don't have to give the fully qualified domain name 
-			in the record value.</p>
+			in the record value. {$_SESSION['module']} will attemnpt to auto-detect whether or not the domain should be appended if no choice is
+			made at the time of record creation.</p>
 			<p><i>The 'Record Management' or 'Super Admin' permission is required to add, edit, and delete records.</i></p>
 			<p>When adding or updating a SOA record for a zone, the domain can be appended to the Master Server and Email Address if selected. This
 			means you could simply enter 'ns1' and 'username' for the Master Server and Email Address respectively. If you prefer to enter the entire
 			entry, make sure you select 'no' for Append Domain.</p>
 			<p>SOA records can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
 			management. You can create a SOA template when managing zone records or you can completely manage them from 
-			<a href="__menu{SOA}">Templates</a>. SOA templates can only be deleted when there are no zones associated with them.</p>
+			<a href="__menu{SOA Templates}">Templates</a>. SOA templates can only be deleted when there are no zones associated with them.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete SOA templates.</i></p>
 			<p>Adding A and AAAA records provides the option of automatically creating the associated PTR record. However, the reverse zone must first
 			exist in order for PTR records to automatically be created. You can enable the automatic reverse zone creation in the 

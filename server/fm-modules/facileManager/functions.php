@@ -1159,6 +1159,9 @@ function buildHelpFile() {
 			Periodically $fm_name and its modules may need to create temporary files or directories on your webserver. Specify the local path for it to use.</p>
 			<p><b>Software Update</b><br />
 			Choose whether you want $fm_name to automatically check for software updates or not.</p>
+			<p><b>SSH Username</b><br />
+			When servers are configured to receive updates via SSH, this username will be created (if not already present) on your clients
+			and will be used for the client interaction.</p>
 			<p><b>SSH Key Pair</b><br />
 			In order for client configs to be updated via SSH, $fm_name needs a 2048-bit passwordless key pair generated. Without this key pair, 
 			clients cannot use the SSH update method. Click the 'Generate' button to have $fm_name automatically generate the necessary key pair.</p>

@@ -179,7 +179,7 @@ function validateEntry($action, $id, $data, $record_type) {
 	
 	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';
-	} elseif (!isset($data['record_append'])) {
+	} elseif (!isset($data['record_append']) && in_array($record_type, $append)) {
 		$data['record_append'] = 'no';
 	}
 	if (!empty($data['record_value'])) {
