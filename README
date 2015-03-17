@@ -35,7 +35,7 @@ Prerequisites
 facileManager (server) requires the following:
 
     * PHP 5.2.0 or later with MySQL support
-    * MySQL 4.0 or later
+    * MySQL 5.0 or later
         - Required MySQL user privileges on the database include 
           SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, LOCK TABLES
     * A working webserver (httpd) with mod_rewrite.so enabled
