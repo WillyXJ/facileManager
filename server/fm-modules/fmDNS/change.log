@@ -42,16 +42,17 @@
 * Server - [improvement] Added better support for long TXT RR (introduced in
            2.0-beta1). (Issue #171 #179)
 * Server - [feature] DNS server version is displayed on the servers page. (Issue #180)
-* Server - [improvement] Swapped /tmp for sys_get_temp_dir().
-* Server - [improvement] SSH keys can now be saved if the file already exists.
+* Server - [improvement] Swapped /tmp for sys_get_temp_dir(). (Issue #164)
+* Server - [improvement] SSH keys can be saved if the file already exists. (Issue #164)
+* Server - [improvement] Incorporated mod_headers to save bandwidth. (Issue #164)
 * Server - [bug] The correct comments for views and config options are displayed
            when defining a server override.
 * Server - [bug] Sanitized view names that contain illegal system characters for
            filenames.
 * Server - [improvement] Added button to clone a zone.
-* Server - [bug] Cloned zones cannot be templates (introduced in 2.0-beta1).
 * Server - [improvement] Zone clones are now sorted by name.
 * Server - [improvement] CNAME records are handled better regarding domain appending.
+* Client - [feature] Server reloads now support freeze and thaw. (Issue #183)
 
 1.3.6 (2015-02-09)
 ==================
