@@ -341,6 +341,12 @@ HTML;
 		</div>
 HTML;
 	
+		if (FM_INCLUDE_SEARCH === true) {
+			$search = '<div id="topheadpartright">
+			<a class="single_line search" href="#" title="' . _('Search this page') . '"><i class="fa fa-search fa-lg"></i></a>' .
+				displaySearchForm() . '</div>';
+		} else $search = null;
+
 		$return = <<<HTML
 	<div id="tophead">
 		<div id="topheadpart">
@@ -356,6 +362,7 @@ $user_account_menu
 		</div>
 $module_menu
 $module_toolbar_right
+$search
 $process_all
 	</div>
 	<div id="help">
@@ -1624,10 +1631,9 @@ function arrayKeysExist($keys, $array) {
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
  * @param string $classes Additional classes to apply to the div
- * @param string $enable_options Additional options to enable in the div
  * @return string
  */
-function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null, $enable_options = null) {
+function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null) {
 	global $fmdb;
 	
 	$page_params = null;
@@ -1656,7 +1662,6 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 		}
 	}
 	$page_links[] = buildPaginationCountMenu(0, 'pagination');
-	if ($enable_options == 'search-form') $page_links[] = displayRecordSearchForm($page_params);
 
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
@@ -2906,25 +2911,25 @@ function countServerUpdates() {
  * @param string $page_params Current page parameters in URI
  * @return string Search form
  */
-function displayRecordSearchForm($page_params = null) {
+function displaySearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
 		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
 		$search_remove = '<div class="search_remove">
 			<i class="fa fa-remove fa-lg"></i>
 		</div>';
 	} else {
-		$placeholder = _('Search by keyword');
+		$placeholder = _('Search this page by keyword');
 		$search_remove = null;
 	}
 	
 	$form = <<<HTML
-	<div id="record_search_form_container">
+	<div id="search_form_container">
 		<div>
 			<div class="search_icon">
 				<i class="fa fa-search fa-lg"></i>
 			</div>
-			<div id="record_search_form">
-				<form id="record_search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
+			<div id="search_form">
+				<form id="search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
 					<input type="text" placeholder="$placeholder" />
 				</form>
 			</div>
@@ -2984,6 +2989,31 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'image
 	}
 	
 	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
+}
+
+
+/**
+ * Creates the SQL based on search input
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param array $fields Table fields to search
+ * @param string $prefix Prefix of the table fields
+ * @return string
+ */
+function createSearchSQL($fields = array(), $prefix = null) {
+	$search_query = null;
+	if (isset($_GET['q'])) {
+		$search_query = ' AND (';
+		$search_text = sanitize($_GET['q']);
+		foreach ($fields as $field) {
+			$search_query .= "$prefix$field LIKE '%$search_text%' OR ";
+		}
+		$search_query = rtrim($search_query, ' OR ') . ')';
+	}
+	
+	return $search_query;
 }
 
 ?>

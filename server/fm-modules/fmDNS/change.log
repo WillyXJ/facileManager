@@ -9,7 +9,7 @@
 * Server - [improvement] Zone imports now check for duplicate records with parent
            zone when importing to a cloned zone.
 * Server - [bug] Fixed handling of hint zone writes when named.root is not writeable.
-* Server - [feature] Added record searching functionality. (Issue #149)
+* Server - [feature] Added searching functionality. (Issue #149 #188)
 * Server - [improvement] Added graphical representation to skipped records in
            the cloned zone view.
 * Server - [improvement] Can now edit cloned zone details.

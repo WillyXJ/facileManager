@@ -47,21 +47,14 @@ if ($record_type == 'SOA') {
 	elseif (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) $record_type = $default_record_type;
 }
 
+define('FM_INCLUDE_SEARCH', true);
+
 printHeader();
 @printMenu();
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 
-$search_query = null;
-if (isset($_GET['q'])) {
-	$search_query = ' AND (';
-	$search_text = sanitize($_GET['q']);
-	$fields = array('name', 'value', 'ttl', 'class', 'text', 'comment');
-	foreach ($fields as $field) {
-		$search_query .= "record_$field LIKE '%$search_text%' OR ";
-	}
-	$search_query = rtrim($search_query, ' OR ') . ')';
-}
+$search_query = createSearchSQL(array('name', 'value', 'ttl', 'class', 'text', 'comment'), 'record_');
 
 $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
 sort($supported_record_types);
@@ -146,7 +139,7 @@ if ($record_type == 'SOA') {
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
 	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
-	$pagination = displayPagination($page, $total_pages, null, null, 'search-form');
+	$pagination = displayPagination($page, $total_pages);
 	$body .= $pagination . '<div class="overflow-container">' . $form;
 	
 	$body .= '<div class="existing-container">';

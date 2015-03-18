@@ -118,8 +118,12 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 	}
 }
 
+define('FM_INCLUDE_SEARCH', true);
+
 printHeader();
 @printMenu();
+
+$search_query = createSearchSQL(array('name', 'mapping', 'type'), 'domain_');
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
@@ -148,7 +152,7 @@ if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
 	}
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql, null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql . (string) $search_query, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 

@@ -860,8 +860,17 @@ echo '$(document).ready(function() {
 		}
 	});
 	
+	$("a.search").click(function() {
+		if ($("#search_form_container").css("display") == "none") {
+			$("#search_form_container").fadeIn();
+			$("#search_form_container input:text").focus();
+		} else {
+			$("#search_form_container").fadeOut();
+		}
+	});
+	
 	/* Search input box */
-	$("#record_search input").keypress(function (e) {
+	$("#search input").keypress(function (e) {
 		if (e.which == 13) {
 			var newValue = $(this).val();
 			var queryParameters = {}, queryString = location.search.substring(1),
