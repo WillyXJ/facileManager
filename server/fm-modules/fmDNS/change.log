@@ -53,6 +53,7 @@
 * Server - [improvement] Zone clones are now sorted by name.
 * Server - [improvement] CNAME records are handled better regarding domain appending.
 * Client - [feature] Server reloads now support freeze and thaw. (Issue #183)
+* Server - [feature] Zones that need attention can be filtered. (Issue #188)
 
 1.3.6 (2015-02-09)
 ==================

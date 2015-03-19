@@ -483,7 +483,7 @@ h4 {
 	background-color:#fff;
 }
 .display_results tbody tr.disabled,
-span.grey {
+.grey {
 	color: #aaa;
 }
 
@@ -530,7 +530,9 @@ span.grey {
 .display_results th input[type="checkbox"] {
 	margin-left: -3px;
 }
-.display_results.sortable th:not(.header-nosort):hover {
+.display_results.sortable th:not(.header-nosort):hover,
+#help_buttons img,
+.eye-attention {
 	cursor: pointer;
 }
 .display_results.sortable th i {
@@ -1308,10 +1310,6 @@ span.not_installed {
 	margin-top: 16px;
 }
 
-#help_buttons img {
-	cursor: pointer;
-}
-
 #help_file_container {
 	padding: 1em;
 	font-size: 9pt;
@@ -1379,13 +1377,16 @@ div.fm-table > div {
 div.fm-table > div > div {
 	display: table-cell;
 }
+#pagination_container > div > div {
+	padding: 0 .5em;
+}
 #pagination_container > div > div:first-child,
 div.fm-table > div > div:first-child {
-	padding: 0 1em 0 0;
+	padding: 0 .5em 0 0;
 }
 #pagination_container > div > div:last-child,
 div.fm-table > div > div:last-child {
-	padding: 0 0 0 1em;
+	padding: 0 0 0 .5em;
 }
 div.fm-table > div > div:first-child:nth-last-child(1) {
 	width: 100%;

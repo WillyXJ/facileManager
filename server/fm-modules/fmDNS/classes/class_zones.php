@@ -28,7 +28,7 @@ class fm_dns_zones {
 	function rows($result, $map, $reload_allowed, $page, $total_pages) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$num_rows = $fmdb->num_rows;
+		$all_num_rows = $num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
 		if (currentUserCan('reload_zones', $_SESSION['module'])) {
@@ -44,10 +44,18 @@ class fm_dns_zones {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="domains">%s</p>', _('There are no zones.'));
 		} else {
+			if (array_key_exists('attention', $_GET)) {
+				$num_rows = $GLOBALS['zone_badge_counts'][$map];
+				$total_pages = ceil($num_rows / $_SESSION['user']['record_count']);
+				if ($page > $total_pages) $page = $total_pages;
+			}
+
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
 			$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
 
-			$addl_blocks = array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu());
+			$classes = (array_key_exists('attention', $_GET)) ? null : ' grey';
+			$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? '<i class="fa fa-eye fa-lg eye-attention' . $classes . '" title="Only view zones that need attention"></i>' : null;
+			$addl_blocks = array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention);
 			$fmdb->num_rows = $num_rows;
 			echo displayPagination($page, $total_pages, $addl_blocks);
 			
@@ -70,8 +78,19 @@ class fm_dns_zones {
 
 			echo displayTableHeader($table_info, $title_array, 'zones');
 			
-			for ($x=$start; $x<$end; $x++) {
-				$this->displayRow($results[$x], $map, $reload_allowed);
+			$y = 0;
+			for ($x=$start; $x<$all_num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
+				if (array_key_exists('attention', $_GET)) {
+					if (!$results[$x]->domain_clone_domain_id && $results[$x]->domain_type == 'master' && $results[$x]->domain_template == 'no' &&
+						(!getSOACount($results[$x]->domain_id) || !getNSCount($results[$x]->domain_id) || $results[$x]->domain_reload != 'no')) {
+							$this->displayRow($results[$x], $map, $reload_allowed);
+							$y++;
+					}
+				} else {
+					$this->displayRow($results[$x], $map, $reload_allowed);
+					$y++;
+				}
 			}
 			
 			echo "</tbody>\n</table>\n";

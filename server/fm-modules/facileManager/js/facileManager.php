@@ -891,7 +891,7 @@ echo '$(document).ready(function() {
 		var queryParameters = {}, queryString = location.search.substring(1),
 			re = /([^&=]+)=([^&]*)/g, m;
 		while (m = re.exec(queryString)) {
-			if (m[1] == "p" || m[1] == "q") continue;
+			if (m[1] == "p" || m[1] == "q" || m[1] == "rc") continue;
 			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
 		}
 
@@ -900,6 +900,22 @@ echo '$(document).ready(function() {
 	});
 	
 	$(".disable-auto-complete").attr("autocomplete", "off");
+	
+	/* Handle the eye-attention */
+	$(".eye-attention").click(function() {
+		var attention	= getUrlVars()["attention"];
+		
+		var queryParameters = {}, queryString = location.search.substring(1),
+			re = /([^&=]+)=([^&]*)/g, m;
+		while (m = re.exec(queryString)) {
+			if (m[1] == "p" || m[1] == "rc" || m[1] == "attention") continue;
+			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+		}
+		if (attention != "only") queryParameters["attention"] = encodeURIComponent("only");
+
+		location.search = $.param(queryParameters);
+		return false;
+	});
 
 });
 

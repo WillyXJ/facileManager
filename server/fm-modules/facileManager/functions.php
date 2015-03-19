@@ -1638,7 +1638,7 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	
 	$page_params = null;
 	foreach ($GLOBALS['URI'] as $key => $val) {
-		if ($key == 'p') continue;
+		if (!$key || $key == 'p') continue;
 		$page_params .= $key . '=' . $val . '&';
 	}
 	

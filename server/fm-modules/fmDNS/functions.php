@@ -727,6 +727,7 @@ function removeRestrictedRR($rr) {
  */
 function buildModuleMenu() {
 	$badge_counts = getModuleBadgeCounts('zones');
+	$GLOBALS['zone_badge_counts'] = $badge_counts;
 	addObjectPage(_('Zones'), _('Zones'), array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'], 'zones.php');
 		addSubmenuPage('zones.php', _('Forward'), _('Forward Zones'), null, $_SESSION['module'], 'zones-forward.php', null, null, $badge_counts['forward']);
 		addSubmenuPage('zones.php', _('Reverse'), _('Reverse Zones'), null, $_SESSION['module'], 'zones-reverse.php', null, null, $badge_counts['reverse']);
