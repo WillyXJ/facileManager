@@ -1588,6 +1588,34 @@ HTML;
 	}
 	
 	
+	/**
+	 * Builds an array of available zone templates
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param int $domain_id Domain ID to get children
+	 * @return array
+	 */
+	function getZoneTemplateChildren($domain_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template') == 'yes') {
+			$children = array();
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_template_id=' . $domain_id);
+			if ($fmdb->num_rows) {
+				for ($x=0; $x<$fmdb->num_rows; $x++) {
+					$children[] = $fmdb->last_result[$x]->domain_id;
+				}
+			}
+			return $children;
+		}
+		
+		return array($domain_id);
+	}
+	
+	
 }
 
 if (!isset($fm_dns_zones))

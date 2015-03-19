@@ -585,19 +585,21 @@ function getModuleBadgeCounts($type) {
 		$domain_count = $fmdb->num_rows;
 		if ($domain_count) $domain_results = $fmdb->last_result;
 		for ($i=0; $i<$domain_count; $i++) {
-			if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master' && $domain_results[$i]->domain_template == 'no') {
-				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
-					$badge_counts[$domain_results[$i]->domain_mapping]++;
-				}
-			} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master' && $domain_results[$i]->domain_template == 'no') {
-				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
-					$badge_counts[$domain_results[$i]->domain_mapping]++;
-				}
-			} elseif ($domain_results[$i]->domain_reload != 'no') {
-				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
-					$badge_counts[$domain_results[$i]->domain_mapping]++;
+			if ($domain_results[$i]->domain_template == 'no') {
+				if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+					$domain_results[$i]->domain_type == 'master') {
+					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
+						$badge_counts[$domain_results[$i]->domain_mapping]++;
+					}
+				} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+					$domain_results[$i]->domain_type == 'master') {
+					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
+						$badge_counts[$domain_results[$i]->domain_mapping]++;
+					}
+				} elseif ($domain_results[$i]->domain_reload != 'no') {
+					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
+						$badge_counts[$domain_results[$i]->domain_mapping]++;
+					}
 				}
 			}
 		}
@@ -770,21 +772,32 @@ function displayFriendlyDomainName($domain_name) {
 
 
 /**
- * Gets the count for domains requiring a reload
+ * Gets the parent domain ID
  *
  * @since 2.0
  * @package facileManager
  * @subpackage fmDNS
  *
  * @param id $domain_id Domain ID to check
+ * @param string $level How deep to traverse (clone, template)
  * @return integer
  */
-function getParentDomainID($domain_id) {
+function getParentDomainID($domain_id, $level = 'clone') {
 	global $__FM_CONFIG;
 	
+	/** Clone */
 	$parent_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+	$domain_id = ($parent_id) ? $parent_id : $domain_id;
+	if ($level == 'clone') {
+		return $domain_id;
+	}
 	
-	return ($parent_id) ? $parent_id : $domain_id;
+	/** Template */
+	if ($level == 'template') {
+		$parent_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+
+		return ($parent_id) ? $parent_id : $domain_id;
+	}
 }
 
 
