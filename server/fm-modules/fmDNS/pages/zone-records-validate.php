@@ -351,8 +351,7 @@ function buildSQLRecords($record_type, $domain_id) {
 		array_shift($sql_results[$result[0]->soa_id]);
 		return $sql_results;
 	} else {
-		$parent_domain_id = getZoneParentID($domain_id);
-		$valid_domain_ids = ($parent_domain_id) ? "IN ('$domain_id', '" . join("','", $parent_domain_id) . "')" : "='$domain_id'";
+		$valid_domain_ids = 'IN (' . join(',', getZoneParentID($domain_id)) . ')';
 		
 		if (in_array($record_type, array('A', 'AAAA'))) {
 			$record_sql = "AND domain_id $valid_domain_ids AND record_type IN ('A', 'AAAA')";

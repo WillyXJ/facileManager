@@ -889,7 +889,7 @@ class fm_module_buildconf {
 		
 		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE 
 			domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.account_id='{$_SESSION['user']['account_id']}'
-			AND s.soa_id=d.soa_id AND (d.domain_id={$domain->domain_id} OR d.domain_id={$domain->domain_template_id})";
+			AND s.soa_id=d.soa_id AND d.domain_id IN ('{$domain->parent_domain_id}','{$domain->domain_id}','{$domain->domain_template_id}')";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$soa_result = $fmdb->last_result;
@@ -902,7 +902,8 @@ class fm_module_buildconf {
 			
 			$domain_name = $this->getDomainName($domain->domain_mapping, $domain_name_trim);
 			
-			$serial = date("Ymd") . $soa_serial_no;
+			$domain_id = isset($domain->parent_domain_id) ? $domain->parent_domain_id : $domain->domain_id;
+			$serial = date("Ymd") . getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no');
 			
 			$zone_file .= '$TTL ' . $soa_ttl . "\n";
 			$zone_file .= "$domain_name IN SOA $master_server $admin_email (\n";
@@ -948,7 +949,7 @@ class fm_module_buildconf {
 			if (!class_exists('fm_dns_records')) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			if ($skipped_records = $fm_dns_records->getSkippedRecordIDs($domain->parent_domain_id)) $full_zone_clone = false;
 			
-			$valid_domain_ids = $full_zone_clone == false ? "IN ('{$domain->domain_id}', '{$domain->parent_domain_id}', '" . join("','", getZoneParentID($domain->parent_domain_id)) . "')" : "='{$domain->domain_id}' AND record_type='NS'";
+			$valid_domain_ids = $full_zone_clone == false ? "IN (" . join(',', getZoneParentID($domain->parent_domain_id)) . ')' : "='{$domain->domain_id}' AND record_type='NS'";
 		} else {
 			$valid_domain_ids = "='{$domain->domain_id}'";
 		}

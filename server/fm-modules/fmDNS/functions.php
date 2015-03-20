@@ -365,7 +365,7 @@ function moduleCompleteClientInstallation() {
 function reloadZoneSQL($domain_id, $reload_zone) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone' WHERE `domain_id`='$domain_id'";
+	$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone' WHERE `domain_id`='$domain_id' OR `domain_clone_domain_id`='$domain_id'";
 	$fmdb->query($query);
 }
 
@@ -596,7 +596,8 @@ function getModuleBadgeCounts($type) {
 					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
 					}
-				} elseif ($domain_results[$i]->domain_reload != 'no') {
+				} elseif ($domain_results[$i]->domain_reload != 'no' && !$domain_results[$i]->domain_clone_domain_id && 
+					$domain_results[$i]->domain_type == 'master') {
 					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
 					}
@@ -868,12 +869,14 @@ function zoneAccessIsAllowed($domain_ids, $included_action = null) {
 function getZoneParentID($domain_id) {
 	global $__FM_CONFIG;
 	
+	$parent_domain_id[] = $domain_id;
 	$parent_domain_id[] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
-	if ($parent_domain_id[0]) {
-		$parent_domain_id[] = getNameFromID($parent_domain_id[0], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+	if ($parent_domain_id[1]) {
+		$parent_domain_id[] = getNameFromID($parent_domain_id[1], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
 	} else {
-		$parent_domain_id[0] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+		$parent_domain_id[1] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
 	}
+	if (!$parent_domain_id[count($parent_domain_id) - 1]) array_pop($parent_domain_id);
 	
 	return $parent_domain_id;
 }

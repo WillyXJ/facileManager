@@ -43,7 +43,7 @@ $(document).ready(function() {
 			{
 				$("#manage_item_contents").html(response);
 
-				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
+				if (response.toLowerCase().indexOf("' . _('failed') . '") == -1 && response.toLowerCase().indexOf("' . _('you are not authorized') . '") == -1) {
 					$this.fadeOut(400);
 					$this.parent().parent().removeClass("build");
 					$this.parent().parent().find("input:checkbox:first").remove();
@@ -76,7 +76,7 @@ $(document).ready(function() {
 			{
 				$("#manage_item_contents").html(response);
 
-				if (response.toLowerCase().indexOf("failed") == -1 && response.toLowerCase().indexOf("you are not authorized") == -1) {
+				if (response.toLowerCase().indexOf("' . _('failed') . '") == -1 && response.toLowerCase().indexOf("' . _('you are not authorized') . '") == -1) {
 					$("#response").delay(3000).fadeTo(200, 0.00, function() {
 						$("#response").slideUp(400);
 					});

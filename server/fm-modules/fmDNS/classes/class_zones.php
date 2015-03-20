@@ -174,6 +174,9 @@ class fm_dns_zones {
 					$sql_values .= "'" . sanitize($post['domain_name_servers']) . "',";
 				} elseif ($field == 'domain_reload') {
 					$sql_values .= "'no',";
+				} elseif ($field == 'domain_clone_dname') {
+					$log_message .= "Use DNAME RRs: {$post['domain_clone_dname']}\n";
+					$sql_values .= "'" . sanitize($post['domain_clone_dname']) . "',";
 				} else {
 					$sql_values .= strlen(sanitize($value)) ? "'" . sanitize($value) . "'," : 'NULL,';
 				}
@@ -436,7 +439,7 @@ class fm_dns_zones {
 			}
 			
 			/** Delete all associated SOA */
-			if ($domain_result->soa_id) {
+			if (!$domain_result->domain_clone_domain_id && $domain_result->soa_id) {
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_result->soa_id, 'soa_', 'soa_id', "AND soa_template='no'");
 				if ($fmdb->num_rows) {
 					if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_result->soa_id, 'soa_', 'deleted', 'soa_id') === false) {
@@ -696,15 +699,15 @@ HTML;
 			$clone_override_show = 'block';
 			$clone_dname_checked = $domain_clone_dname ? 'checked' : null;
 			$clone_dname_options_show = $domain_clone_dname ? 'block' : 'none';
-			$clone_dname_dropdown = buildSelect('domain_clone_dname', 'domain_clone_dname', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_clone_dname'), $domain_clone_dname);
 			if (isset($no_template)) {
 				$domain_template_id = 0;
 				$zone_show = 'block';
 			}
 		} else {
 			$clone_override_show = $clone_dname_options_show = 'none';
-			$clone_dname_checked = $clone_dname_dropdown = null;
+			$clone_dname_checked = null;
 		}
+		$clone_dname_dropdown = buildSelect('domain_clone_dname', 'domain_clone_dname', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_clone_dname'), $domain_clone_dname);
 		
 		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) ? null : '<tr class="include-with-template"><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
 		
@@ -946,9 +949,15 @@ HTML;
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Check domain_id and soa */
-		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s where domain_status='active' and d.account_id='{$_SESSION['user']['account_id']}' and s.soa_id=d.soa_id and d.domain_id=$domain_id";
+		$parent_domain_ids = getZoneParentID($domain_id);
+		if (!isset($parent_domain_ids[2])) {
+			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.soa_id=d.soa_id AND d.domain_id IN (" . join(',', $parent_domain_ids) . ")";
+		} else {
+			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND
+				s.soa_id=(SELECT soa_id FROM fm_dns_domains WHERE domain_id={$parent_domain_ids[2]})";
+		}
 		$result = $fmdb->query($query);
-		if (!$fmdb->num_rows) return false;
+		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>'. "\n", _('Failed: There was no SOA record found for this zone.'));
 
 		$domain_details = $fmdb->last_result;
 		extract(get_object_vars($domain_details[0]), EXTR_SKIP);
