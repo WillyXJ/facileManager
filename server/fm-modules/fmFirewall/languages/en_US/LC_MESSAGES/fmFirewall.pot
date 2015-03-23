@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-05 15:20-0700\n"
+"POT-Creation-Date: 2015-03-23 12:00-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -427,7 +427,7 @@ msgid "Config File"
 msgstr ""
 
 #: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:97
-#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:485
+#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:491
 msgid "No server name defined."
 msgstr ""
 
@@ -499,27 +499,32 @@ msgstr ""
 msgid "Failed: SSH key is not <a href=\"%s\">defined</a>."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:430
+#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:431
 #, php-format
 msgid "Failed: could not load SSH key into %s."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:440
+#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:438
+#, php-format
+msgid "Failed: SSH user is not <a href=\"%s\">defined</a>."
+msgstr ""
+
+#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:446
 msgid "Could not login via SSH."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:489
+#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:495
 #, php-format
 msgid "Server name is too long (maximum %d character)."
 msgid_plural "Server name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:493
+#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:499
 msgid "This server name already exists."
 msgstr ""
 
-#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:514
+#: /var/www/html/fM/server/fm-modules/fmFirewall/classes/class_servers.php:520
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
