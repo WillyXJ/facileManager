@@ -30,7 +30,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
 			case 'import-records':
-				$response = buildPopup('header', _('Zone Import Wizard'));
+				$response = buildPopup('header', __('Zone Import Wizard'));
 				if (!empty($_FILES['import-file']['tmp_name'])) {
 					$block_style = 'style="display: block;"';
 					$response = $fm_module_tools->zoneImportWizard();
@@ -41,7 +41,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				break;
 			case 'dump-cache':
 			case 'clear-cache':
-				$response = buildPopup('header', _('Cache Management Results'));
+				$response = buildPopup('header', __('Cache Management Results'));
 				if (!currentUserCan('manage_servers')) {
 					$_POST = array();
 					break;
@@ -62,7 +62,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 							global $menu;
 							
 							$response = buildPopup('header', 'Error');
-							$response .= sprintf(_('<p>You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), $menu[getParentMenuKey('Servers')][4]);
+							$response .= sprintf(__('<p>You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), $menu[getParentMenuKey('Servers')][4]);
 							break;
 						}
 					}
@@ -71,8 +71,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 						$response .= '<pre>' . $fm_module_servers->manageCache($server_id, $_POST['task']) . '</pre>';
 					}
 				} else {
-					$response = buildPopup('header', _('Error'));
-					$response .= sprintf('<p>%s</p>', _('Please specify at least one server.'));
+					$response = buildPopup('header', __('Error'));
+					$response .= sprintf('<p>%s</p>', __('Please specify at least one server.'));
 				}
 				break;
 		}

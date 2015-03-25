@@ -29,7 +29,7 @@ include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
 $response = isset($response) ? $response : null;
 
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['servers']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'servers';
-$display_type = ($type == 'servers') ? _('Name Servers') : _('Name Server Groups');
+$display_type = ($type == 'servers') ? __('Name Servers') : __('Name Server Groups');
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -62,22 +62,22 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		if (isset($_GET['status'])) {
 			if ($_GET['type'] == 'servers') {
 				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $_GET['id'], 'server_', $_GET['status'], 'server_id')) {
-					$response = sprintf(_('This server could not be set to %s.') . "\n", $_GET['status']);
+					$response = sprintf(__('This server could not be set to %s.') . "\n", $_GET['status']);
 				} else {
 					/* set the server_build_config flag */
 					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_build_config`='yes' WHERE `server_id`=" . sanitize($_GET['id']);
 					$result = $fmdb->query($query);
 
 					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-					addLogEntry(sprintf(_('Set server (%s) status to %s.'), $tmp_name, $_GET['status']));
+					addLogEntry(sprintf(__('Set server (%s) status to %s.'), $tmp_name, $_GET['status']));
 					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
 				}
 			} elseif ($_GET['type'] == 'groups') {
 				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $_GET['id'], 'group_', $_GET['status'], 'group_id')) {
-					$response = sprintf(_('This server group could not be set to %s.') . "\n", $_GET['status']);
+					$response = sprintf(__('This server group could not be set to %s.') . "\n", $_GET['status']);
 				} else {
 					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
-					addLogEntry(sprintf(_('Set server group (%s) status to %s.'), $tmp_name, $_GET['status']));
+					addLogEntry(sprintf(__('Set server group (%s) status to %s.'), $tmp_name, $_GET['status']));
 					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
 				}
 			}

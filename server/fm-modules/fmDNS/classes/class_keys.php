@@ -29,7 +29,7 @@ class fm_dns_keys {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="keys">%s</p>', _('There are no keys.'));
+			printf('<p id="table_edits" class="noresult" name="keys">%s</p>', __('There are no keys.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,12 +40,12 @@ class fm_dns_keys {
 							'name' => 'keys'
 						);
 
-			$title_array = array(array('title' => _('Key'), 'rel' => 'key_name'), 
-				array('title' => _('Algorithm'), 'class' => 'header-nosort'), 
-				array('title' => _('Secret'), 'rel' => 'key_secret'), 
-				array('title' => _('View'), 'class' => 'header-nosort'), 
-				array('title' => _('Comment'), 'class' => 'header-nosort'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
+			$title_array = array(array('title' => __('Key'), 'rel' => 'key_name'), 
+				array('title' => __('Algorithm'), 'class' => 'header-nosort'), 
+				array('title' => __('Secret'), 'rel' => 'key_secret'), 
+				array('title' => __('View'), 'class' => 'header-nosort'), 
+				array('title' => __('Comment'), 'class' => 'header-nosort'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -83,7 +83,7 @@ class fm_dns_keys {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'key_name' || $key == 'key_secret') && empty($clean_data)) return _('No key defined.');
+			if (($key == 'key_name' || $key == 'key_secret') && empty($clean_data)) return __('No key defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -95,7 +95,7 @@ class fm_dns_keys {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not add the key because a database error occurred.');
+		if (!$fmdb->result) return __('Could not add the key because a database error occurred.');
 
 		$view_name = $post['key_view'] ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		addLogEntry("Added key:\nName: {$post['key_name']}\nAlgorithm: {$post['key_algorithm']}\nSecret: {$post['key_secret']}\nView: $view_name\nComment: {$post['key_comment']}");
@@ -108,7 +108,7 @@ class fm_dns_keys {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['key_name']) || empty($post['key_secret'])) return _('No key defined.');
+		if (empty($post['key_name']) || empty($post['key_secret'])) return __('No key defined.');
 		$post['key_comment'] = trim($post['key_comment']);
 
 		/** Check name field length */
@@ -119,7 +119,7 @@ class fm_dns_keys {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', sanitize($post['key_name']), 'key_', 'key_name');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
-			if ($result[0]->key_id != $post['key_id']) return _('This key already exists.');
+			if ($result[0]->key_id != $post['key_id']) return __('This key already exists.');
 		}
 		
 		$exclude = array('submit', 'action', 'key_id');
@@ -138,7 +138,7 @@ class fm_dns_keys {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET $sql WHERE `key_id`={$post['key_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not update the key because a database error occurred.');
+		if (!$fmdb->result) return __('Could not update the key because a database error occurred.');
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -157,10 +157,10 @@ class fm_dns_keys {
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $id, 'key_', 'deleted', 'key_id') === false) {
-			return _('This key could not be deleted because a database error occurred.');
+			return __('This key could not be deleted because a database error occurred.');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(_("Key '%s' was deleted."), $tmp_name));
+			addLogEntry(sprintf(__("Key '%s' was deleted."), $tmp_name));
 			return true;
 		}
 	}

@@ -71,10 +71,10 @@ if (reloadZone($domain_id)) {
 	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
 }
 if (!getNSCount($domain_id)) {
-	$response = sprintf('** %s **', _('One more more NS records still needs to be created for this zone'));
+	$response = sprintf('** %s **', __('One more more NS records still needs to be created for this zone'));
 }
 if (!getSOACount($domain_id)) {
-	$response = sprintf('** %s **', _('The SOA record still needs to be created for this zone'));
+	$response = sprintf('** %s **', __('The SOA record still needs to be created for this zone'));
 }
 
 $body = '<div id="body_container" class="fm-noscroll">' . "\n";
@@ -85,7 +85,7 @@ $body .= sprintf('<h2>%s</h2>
 	<div class="stretch"></div>
 	%s
 	</div>
-</div>', _('Records'), $avail_types);
+</div>', __('Records'), $avail_types);
 	
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php">
@@ -103,7 +103,7 @@ if ($record_type == 'SOA') {
 	else $result = null;
 	$body .= $form . $fm_dns_records->buildSOA($result);
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", _('Validate'));
+		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
 	}
 } else {
 	switch ($record_type) {
@@ -151,7 +151,7 @@ if ($record_type == 'SOA') {
 	<h2>%s</h2>
 	%s
 	<p><input type="submit" name="submit" value="%s" class="button" /></p>
-</form></div>' . "\n", _('Add Record'), $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id), _('Validate'));
+</form></div>' . "\n", __('Add Record'), $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id), __('Validate'));
 	}
 }
 

@@ -34,7 +34,7 @@ $selected_zone = 0;
 /** Process ad-hoc zone creations and record imports */
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
-		case _('Import Records'):
+		case __('Import Records'):
 			if (!empty($_FILES['import-file']['tmp_name'])) {
 				$block_style = 'style="display: block;"';
 				$output = $fm_module_tools->zoneImportWizard();
@@ -43,7 +43,7 @@ if (array_key_exists('submit', $_POST)) {
 				}
 			}
 			break;
-		case _('Save'):
+		case __('Save'):
 			if (currentUserCan('manage_zones', $_SESSION['module'])) {
 				$insert_id = $fm_dns_zones->add($_POST);
 				if (!is_numeric($insert_id)) {
@@ -61,10 +61,10 @@ $button = null;
 if ($available_zones) {
 	$zone_options = buildSelect('domain_id', 'zone_import_domain_list', $available_zones, $selected_zone);
 	if (currentUserCan('run_tools') && currentUserCan('manage_records', $_SESSION['module'])) {
-		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="' . _('Import Records') . '" class="button" /></p>';
+		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="' . __('Import Records') . '" class="button" /></p>';
 	}
 } else {
-	$zone_options = _('You need to define one or more zones first.');
+	$zone_options = __('You need to define one or more zones first.');
 }
 
 $tools_option[] = sprintf('<h2>%s</h2>
@@ -82,13 +82,13 @@ $tools_option[] = sprintf('<h2>%s</h2>
 					</td>
 			</table>
 			%s
-			<br />', _('Import Zone Files'), _('Import records from BIND-compatible zone files.'),
-				_('File to import'), _('Zone to import to'), $zone_options, _('Add New'), _('Add New Zone'), $button);
+			<br />', __('Import Zone Files'), __('Import records from BIND-compatible zone files.'),
+				__('File to import'), __('Zone to import to'), $zone_options, __('Add New'), __('Add New Zone'), $button);
 
 $button = null;
 if (currentUserCan('run_tools') && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$button = sprintf('<p class="step"><input id="dump-cache" name="submit" type="submit" value="%s" class="button" /> '
-			. '<input id="clear-cache" name="submit" type="submit" value="%s" class="button" /></p>', _('Dump Cache'), _('Clear Cache'));
+			. '<input id="clear-cache" name="submit" type="submit" value="%s" class="button" /></p>', __('Dump Cache'), __('Clear Cache'));
 }
 
 $name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableDNSServers('id'), 0, 5, null, true, null, null, 'Select one or more servers');
@@ -99,6 +99,6 @@ $tools_option[] = sprintf('<div id="admin-tools-select">
 			%s
 			%s
 			</div>
-			<br />', _('Cache Management'), _('Dump or clear server cache.'), $name_servers, $button);
+			<br />', __('Cache Management'), __('Dump or clear server cache.'), $name_servers, $button);
 
 ?>

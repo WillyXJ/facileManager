@@ -1710,7 +1710,7 @@ HTML;
 		foreach ($masters as $server_id) {
 			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			$server_ip = gethostbyname($server_name);
-			$master_ips[] = ($server_ip != $server_name) ? $server_ip : sprintf(_('Cannot resolve %s'), $server_name);
+			$master_ips[] = ($server_ip != $server_name) ? $server_ip : sprintf(__('Cannot resolve %s'), $server_name);
 		}
 		
 		return implode('; ', (array) $master_ips) . ';';

@@ -3016,4 +3016,21 @@ function createSearchSQL($fields = array(), $prefix = null) {
 	return $search_query;
 }
 
+
+/**
+ * Translates text using module domain
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $text Text to translate
+ * @param string $domain Domain to use
+ * @return string
+ */
+function __($text, $domain = null) {
+	if (!$domain) $domain = $_SESSION['module'];
+	
+	return dgettext($domain, $text);
+}
+
 ?>

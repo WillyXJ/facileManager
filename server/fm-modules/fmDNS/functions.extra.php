@@ -56,14 +56,14 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 			$available_zones[$i+1][] = $results[$i]->domain_id;
 		}
 	}
-	$zones_list = buildSelect("user_caps[$module_name][access_specific_zones]", 1, $available_zones, $available_zones_perms, 5, null, true, null, 'wide_select', _('Select one or more zones'));
+	$zones_list = buildSelect("user_caps[$module_name][access_specific_zones]", 1, $available_zones, $available_zones_perms, 5, null, true, null, 'wide_select', __('Select one or more zones'));
 	
 	return sprintf('
 							<tr>
 								<th></th>
 								<td><strong>%s</strong><br />%s</td>
 							</tr>
-', _('Limit access to the following zones:'), $zones_list);
+', __('Limit access to the following zones:'), $zones_list);
 	
 }
 

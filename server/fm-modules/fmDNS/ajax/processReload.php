@@ -33,7 +33,7 @@ if (is_array($_POST) && count($_POST)) {
 	$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload');
 
 	if ($domain_id && $zone_access_allowed) {
-		echo buildPopup('header', _('Zone Reload Results'));
+		echo buildPopup('header', __('Zone Reload Results'));
 		
 		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
 			$response = $fm_dns_zones->buildZoneConfig($_POST['domain_id']);
@@ -41,8 +41,8 @@ if (is_array($_POST) && count($_POST)) {
 		
 		echo $response . "<br />\n";
 	} else {
-		echo buildPopup('header', _('Error'));
-		printf('<p>%s</p>' . "\n", _('You are not authorized to reload this zone.'));
+		echo buildPopup('header', __('Error'));
+		printf('<p>%s</p>' . "\n", __('You are not authorized to reload this zone.'));
 	}
 }
 

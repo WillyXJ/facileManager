@@ -56,16 +56,16 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 						tokenSeparators: [",", " ", ";"],
 						data: %s
 					});
-					</script>', _('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
+					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
-					%s</td>', _('Option Value'), $cfg_data, $result[0]->def_type);
+					%s</td>', __('Option Value'), $cfg_data, $result[0]->def_type);
 		} else {
 			/** Build array of possible values */
 			$dropdown = $fm_module_options->populateDefTypeDropdown($result[0]->def_type, $cfg_data);
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67&#37;">%s</td>', _('Option Value'), $dropdown);
+					<td width="67&#37;">%s</td>', __('Option Value'), $dropdown);
 		}
 	}
 	exit;

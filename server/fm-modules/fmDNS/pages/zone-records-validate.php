@@ -87,7 +87,7 @@ printf('<div id="body_container">
 		<input type="submit" name="submit" value="%s" class="button primary" />
 	</p>
 </form>
-</div>', _('Record Validation'), $domain_id, $record_type, $map, $header, $body, _('Back'), _('Submit'));
+</div>', __('Record Validation'), $domain_id, $record_type, $map, $header, $body, __('Back'), __('Submit'));
 
 printFooter();
 
@@ -105,15 +105,15 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	foreach ($data_array as $id => $data) {
 		if (!is_array($data)) continue;
 		if (isset($data['Delete'])) {
-			$action = _('Delete');
+			$action = __('Delete');
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');
 			$value[$id] = $data;
 		} elseif (array_key_exists('record_skipped', $data) && $skips_allowed) {
 			if ($data['record_skipped'] == 'on') {
-				$action = _('Skip Import');
+				$action = __('Skip Import');
 				$html.= buildInputReturn('skip', $id ,'record_status', 'active');
 			} else {
-				$action = _('Include');
+				$action = __('Include');
 				$html.= buildInputReturn('skip', $id ,'record_status', 'deleted');
 			}
 			$value[$id] = $data;
@@ -135,7 +135,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	foreach ($value as $id => $array) {
 		if (count($input_error[$id]['errors'])) {
 			$img = $__FM_CONFIG['icons']['fail'];
-			$action = _('None');
+			$action = __('None');
 		} else {
 			$img = $__FM_CONFIG['icons']['ok'];
 		}
@@ -150,7 +150,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 				$html .= ' class="center"';
 			}
 			if (empty($array[$head_array['rel']])) {
-				$array[$head_array['rel']] = sprintf('<i>%s</i>', _('empty'));
+				$array[$head_array['rel']] = sprintf('<i>%s</i>', __('empty'));
 			}
 			$html .= '>' . $array[$head_array['rel']];
 			if (($head_array['rel'] == 'record_value' && $array['record_append'] == 'yes') ||
@@ -191,20 +191,20 @@ function validateEntry($action, $id, $data, $record_type) {
 					$data[$key] = $val;
 				}
 				if (!verifyName($val, true, $record_type)) {
-					$messages['errors'][$key] = _('Invalid');
+					$messages['errors'][$key] = __('Invalid');
 				}
 			}
 			
 			if (in_array($key, array('record_ttl', 'record_priority', 'record_weight', 'record_port'))) {
 				if (!empty($val) && verifyNumber($val) === false) {
-					$messages['errors'][$key] = _('Invalid');
+					$messages['errors'][$key] = __('Invalid');
 				}
 			}
 			
 			if ($record_type == 'A') {
 				if ($key == 'record_value') {
 					if (verifyIPAddress($val) === false) {
-						$messages['errors'][$key] = _('Invalid IP');
+						$messages['errors'][$key] = __('Invalid IP');
 					}
 				}
 				if ($key == 'PTR') {
@@ -223,11 +223,11 @@ function validateEntry($action, $id, $data, $record_type) {
 				if ($key == 'record_name') {
 					if ($domain_map == 'reverse') {
 						if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain)) === false) {
-							$messages['errors'][$key] = _('Invalid record');
+							$messages['errors'][$key] = __('Invalid record');
 						}
 					} else {
 						if (!verifyCNAME('yes', $data['record_name'], false, true)) {
-							$messages['errors'][$key] = _('Invalid record');
+							$messages['errors'][$key] = __('Invalid record');
 						}
 					}
 				}
@@ -239,7 +239,7 @@ function validateEntry($action, $id, $data, $record_type) {
 					$val = $data['record_append'] == 'yes' || $val == '@' ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
 					if (!verifyCNAME($data['record_append'], $val)) {
-						$messages['errors'][$key] = _('Invalid value');
+						$messages['errors'][$key] = __('Invalid value');
 					}
 				}
 			}
@@ -283,12 +283,12 @@ function validateEntry($action, $id, $data, $record_type) {
 					$val = $data['soa_append'] == 'yes' ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
 					if (!verifyCNAME($data['soa_append'], $val, false)) {
-						$messages['errors'][$key] = _('Invalid');
+						$messages['errors'][$key] = __('Invalid');
 					}
 				} else {
 					if (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
 						if (!verifyNAME($val, false)) {
-							$messages['errors'][$key] = _('Invalid');
+							$messages['errors'][$key] = __('Invalid');
 						}
 					}
 				}
@@ -449,7 +449,7 @@ function checkPTRZone($ip, $domain_id) {
 		if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
 			return autoCreatePTRZone($zone, $domain_id);
 		}
-		return array(null, _('Reverse zone does not exist.'));
+		return array(null, __('Reverse zone does not exist.'));
 	}
 }
 
@@ -479,9 +479,9 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		}
 		$retval = $fm_dns_zones->add($ptr_array);
 
-		return !is_int($retval) ? array(null, $retval) : array($retval, _('Created reverse zone.'));
+		return !is_int($retval) ? array(null, $retval) : array($retval, __('Created reverse zone.'));
 	}
 
-	return array(null, _('Forward domain not found.'));
+	return array(null, __('Forward domain not found.'));
 }
 ?>

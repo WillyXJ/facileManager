@@ -29,7 +29,7 @@ class fm_module_templates {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $template_type, _('There are no templates.'));
+			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $template_type, __('There are no templates.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -43,7 +43,7 @@ class fm_module_templates {
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
 			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($template_type)));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -87,12 +87,12 @@ class fm_module_templates {
 			else {
 				$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
 			}
-			$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$row->domain_mapping}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . _('Edit zone records') . '">' . displayFriendlyDomainName($row->$field_name) . "</a>" : displayFriendlyDomainName($row->$field_name);
+			$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$row->domain_mapping}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . '">' . displayFriendlyDomainName($row->$field_name) . "</a>" : displayFriendlyDomainName($row->$field_name);
 		} else {
 			$edit_name = $row->$field_name;
 		}
 		$field_name = $prefix . '_default';
-		$star = $row->$field_name == 'yes' ? str_replace(_('Super Admin'), _('Default Template'), $__FM_CONFIG['icons']['star']) : null;
+		$star = $row->$field_name == 'yes' ? str_replace(__('Super Admin'), __('Default Template'), $__FM_CONFIG['icons']['star']) : null;
 		
 		$field_id = $prefix . '_id';
 		echo <<<HTML
@@ -177,7 +177,7 @@ HTML;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $prefix . '_', $prefix . '_id', $prefix . '_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $id, $prefix . '_', 'deleted', $prefix . '_id') === false) {
-			return _('This template could not be deleted because a database error occurred.');
+			return __('This template could not be deleted because a database error occurred.');
 		} else {
 			addLogEntry("Deleted $prefix template '$tmp_name'.");
 			return true;

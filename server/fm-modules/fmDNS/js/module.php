@@ -28,7 +28,7 @@ $(document).ready(function() {
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
-		$("#manage_item_contents").html("<p>' . _('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
+		$("#manage_item_contents").html("<p>' . __('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
 		var form_data = {
 			domain_id: domain_id,
@@ -43,7 +43,7 @@ $(document).ready(function() {
 			{
 				$("#manage_item_contents").html(response);
 
-				if (response.toLowerCase().indexOf("' . _('failed') . '") == -1 && response.toLowerCase().indexOf("' . _('you are not authorized') . '") == -1) {
+				if (response.toLowerCase().indexOf("' . __('failed') . '") == -1 && response.toLowerCase().indexOf("' . __('you are not authorized') . '") == -1) {
 					$this.fadeOut(400);
 					$this.parent().parent().removeClass("build");
 					$this.parent().parent().find("input:checkbox:first").remove();
@@ -61,7 +61,7 @@ $(document).ready(function() {
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
-		$("#manage_item_contents").html("<p>' . _('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
+		$("#manage_item_contents").html("<p>' . __('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
 		var form_data = {
 			domain_id: domain_id,
@@ -76,7 +76,7 @@ $(document).ready(function() {
 			{
 				$("#manage_item_contents").html(response);
 
-				if (response.toLowerCase().indexOf("' . _('failed') . '") == -1 && response.toLowerCase().indexOf("' . _('you are not authorized') . '") == -1) {
+				if (response.toLowerCase().indexOf("' . __('failed') . '") == -1 && response.toLowerCase().indexOf("' . __('you are not authorized') . '") == -1) {
 					$("#response").delay(3000).fadeTo(200, 0.00, function() {
 						$("#response").slideUp(400);
 					});
@@ -174,14 +174,14 @@ $(document).ready(function() {
 			is_ajax: 1
 		};
 
-		if (confirm("' . _('Are you sure you want to delete this item?') . '")) {
+		if (confirm("' . __('Are you sure you want to delete this item?') . '")) {
 			$.ajax({
 				type: "POST",
 				url: "fm-modules/facileManager/ajax/processPost.php",
 				data: form_data,
 				success: function(response)
 				{
-					if (response == "' . _('Success') . '") {
+					if (response == "' . __('Success') . '") {
 						$("."+$clone).css({"background-color":"#D98085"});
 						$("."+$clone).fadeOut("slow", function() {
 							$("."+$clone).remove();

@@ -36,8 +36,12 @@ putenv('LANG=' . $_SESSION['language']);
 setlocale(LC_ALL, $_SESSION['language']);
 
 if (function_exists('textdomain')) {
-	bindtextdomain($domain, $directory); 
+	bindtextdomain($domain, $directory);
 	bind_textdomain_codeset($domain, $encoding);
+	if ($SESSION['module'] != $fm_name) {
+		bindtextdomain($SESSION['module'], ABSPATH . 'fm-modules/' . $SESSION['module'] . '/languages');
+		bind_textdomain_codeset($SESSION['module'], $encoding);
+	}
 
 	textdomain($domain);
 }

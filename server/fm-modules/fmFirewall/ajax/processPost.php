@@ -37,7 +37,7 @@ foreach (scandir($class_dir) as $class_file) {
 	include($class_dir . $class_file);
 }
 
-$unpriv_message = _('You do not have sufficient privileges.');
+$unpriv_message = __('You do not have sufficient privileges.');
 $checks_array = @array('servers' => 'manage_servers',
 					'services' => 'manage_services',
 					'objects' => 'manage_objects',
@@ -67,7 +67,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
-			$object = _('firewall');
+			$object = __('firewall');
 			break;
 		case 'services':
 			$post_class = $fm_module_services;
@@ -83,14 +83,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$prefix = 'time_';
 			$field = $prefix . 'id';
 			$item_type .= ' ';
-			$object = _('time restriction');
+			$object = __('time restriction');
 			break;
 		case 'policies':
 			$post_class = $fm_module_policies;
 			$prefix = 'policy_';
 			$field = $prefix . 'id';
 			$item_type = 'policys';
-			$object = _('policy');
+			$object = __('policy');
 			break;
 	}
 
@@ -111,15 +111,15 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'edit':
 			if (isset($_POST['item_status'])) {
 				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $field)) {
-					exit(sprintf(_('This item could not be set to %s.') . "\n", $_POST['item_status']));
+					exit(sprintf(__('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
 					if ($server_serial_no) setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . 'name');
 					if ($server_serial_no && $_POST['item_type'] == 'policies') {
 						$tmp_server = getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-						addLogEntry(sprintf(_('Set %s for %s status to %s.'), $object, $tmp_server, sanitize($_POST['item_status'])));
+						addLogEntry(sprintf(__('Set %s for %s status to %s.'), $object, $tmp_server, sanitize($_POST['item_status'])));
 					} else {
-						addLogEntry(sprintf(_('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+						addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
 					}
 					exit('Success');
 				}
@@ -133,7 +133,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				}
 				exit('Success');
 			}
-			exit(_('The sort order could not be updated due to an invalid request.'));
+			exit(__('The sort order could not be updated due to an invalid request.'));
 	}
 
 	exit;

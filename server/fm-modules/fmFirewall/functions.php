@@ -74,7 +74,7 @@ function buildModuleToolbar() {
 		$server_name = getNameFromID($_GET['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		$domain_menu = sprintf('<div id="topheadpart">
 			<span class="single_line">%s:&nbsp;&nbsp; %s</span>
-		</div>', _('Firewall'), $server_name);
+		</div>', __('Firewall'), $server_name);
 	} else $domain_menu = null;
 	
 	return array($domain_menu, null);
@@ -318,21 +318,21 @@ function getModuleBadgeCounts($type) {
  * @subpackage fmFirewall
  */
 function buildModuleMenu() {
-	addObjectPage(_('Firewalls'), _('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true);
-		addSubmenuPage('config-servers.php', null, _('Firewall Policy'), null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
+	addObjectPage(__('Firewalls'), __('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true);
+		addSubmenuPage('config-servers.php', null, __('Firewall Policy'), null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
 
-	addObjectPage(_('Objects'), _('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', _('Groups'), _('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', _('Hosts'), _('Host Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-host.php');
-		addSubmenuPage('object-groups.php', _('Networks'), _('Network Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-network.php');
+	addObjectPage(__('Objects'), __('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', __('Groups'), __('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', __('Hosts'), __('Host Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-host.php');
+		addSubmenuPage('object-groups.php', __('Networks'), __('Network Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-network.php');
 
-	addObjectPage(_('Services'), _('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
-		addSubmenuPage('service-groups.php', _('Groups'), _('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
-		addSubmenuPage('service-groups.php', _('ICMP'), _('ICMP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-icmp.php');
-		addSubmenuPage('service-groups.php', _('TCP'), _('TCP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-tcp.php');
-		addSubmenuPage('service-groups.php', _('UDP'), _('UDP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-udp.php');
+	addObjectPage(__('Services'), __('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', __('Groups'), __('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('service-groups.php', __('ICMP'), __('ICMP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-icmp.php');
+		addSubmenuPage('service-groups.php', __('TCP'), __('TCP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-tcp.php');
+		addSubmenuPage('service-groups.php', __('UDP'), __('UDP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-udp.php');
 
-	addObjectPage(_('Time'), _('Time Restrictions'), array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
+	addObjectPage(__('Time'), __('Time Restrictions'), array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
 }
 
 

@@ -39,7 +39,7 @@ include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_tem
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {
 	
-	$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
+	$popup_footer = buildPopup('footer', __('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
 
 	echo buildPopup('header', 'Reload Results') . '<pre>';
 	echo processBulkDomainIDs($_POST['item_id']);
@@ -53,7 +53,7 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	return;
 }
 
-$unpriv_message = _('You do not have sufficient privileges.');
+$unpriv_message = __('You do not have sufficient privileges.');
 $checks_array = array('servers' => 'manage_servers',
 					'views' => 'manage_servers',
 					'acls' => 'manage_servers',
@@ -86,18 +86,18 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	switch($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
-			$object = _('server');
+			$object = __('server');
 			if (isset($_POST['url_var_type']) && sanitize($_POST['url_var_type']) == 'groups') {
 				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
 				$prefix = 'group_';
-				$object = _('server group');
+				$object = __('server group');
 			}
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$object = _('option');
+			$object = __('option');
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
@@ -143,11 +143,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'edit':
 			if (isset($_POST['item_status'])) {
 				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $prefix . 'id')) {
-					exit(sprintf(_('This item could not be set to %s.') . "\n", $_POST['item_status']));
+					exit(sprintf(__('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
 					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
-					addLogEntry(sprintf(_('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
 					exit('Success');
 				}
 			}
