@@ -1768,7 +1768,9 @@ function displayProgress($step, $result, $process = 'noisy', $error = null) {
 	} else {
 		global $fmdb;
 		
-		if (!$error) $error = $fmdb->last_error;
+		if (!$error) {
+			$error = is_object($fmdb) ? $fmdb->last_error : mysql_error();
+		}
 		if ($error) {
 			$output = '<a href="#" class="error-message tooltip-right" data-tooltip="' . $error . '"><i class="fa fa-times fa-lg"></i></a>';
 		} else {
@@ -3028,9 +3030,13 @@ function createSearchSQL($fields = array(), $prefix = null) {
  * @return string
  */
 function __($text, $domain = null) {
-	if (!$domain) $domain = $_SESSION['module'];
+	if (function_exists('dgettext')) {
+		if (!$domain) $domain = $_SESSION['module'];
+
+		return dgettext($domain, $text);
+	}
 	
-	return dgettext($domain, $text);
+	return $text;
 }
 
 ?>
