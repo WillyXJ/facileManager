@@ -237,38 +237,36 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' ACL');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="acl_id" value="$acl_id" />
-			<input type="hidden" name="server_serial_no" value="$server_serial_no" />
+		$return_form = '<form name="manage" id="manage" method="post" action="">
+		' . $popup_header . '
+			<input type="hidden" name="action" value="' . $action . '" />
+			<input type="hidden" name="acl_id" value="' . $acl_id . '" />
+			<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="acl_name">ACL Name</label></th>
-					<td width="67%"><input name="acl_name" id="acl_name" type="text" value="$acl_name" size="40" placeholder="internal" maxlength="$acl_name_length" /></td>
+					<th width="33%" scope="row"><label for="acl_name">' . __('ACL Name') . '</label></th>
+					<td width="67%"><input name="acl_name" id="acl_name" type="text" value="' . $acl_name . '" size="40" placeholder="' . __('internal') . '" maxlength="' . $acl_name_length . '" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="acl_predefined">Matched Address List</label></th>
-					<td width="67%">$acl_predefined<br />
-					<textarea name="acl_addresses" rows="7" cols="28" placeholder="Addresses and subnets delimited by space, semi-colon, or newline">$acl_addresses</textarea></td>
+					<th width="33%" scope="row"><label for="acl_predefined">' . __('Matched Address List') . '</label></th>
+					<td width="67%">' . $acl_predefined . '<br />
+					<textarea name="acl_addresses" rows="7" cols="28" placeholder="' . __('Addresses and subnets delimited by space, semi-colon, or newline') . '">' . $acl_addresses . '</textarea></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="acl_comment">Comment</label></th>
-					<td width="67%"><textarea id="acl_comment" name="acl_comment" rows="4" cols="30">$acl_comment</textarea></td>
+					<th width="33%" scope="row"><label for="acl_comment">' . __('Comment') . '</label></th>
+					<td width="67%"><textarea id="acl_comment" name="acl_comment" rows="4" cols="30">' . $acl_comment . '</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
+		' . $popup_footer . '
 		</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '200px',
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>';
 
 		return $return_form;
 	}

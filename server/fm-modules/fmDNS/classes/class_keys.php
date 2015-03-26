@@ -232,39 +232,37 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Key');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="key_id" value="$key_id" />
+		$return_form = '<form name="manage" id="manage" method="post" action="">
+		' . $popup_header . '
+			<input type="hidden" name="action" value="' . $action . '" />
+			<input type="hidden" name="key_id" value="' . $key_id . '" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="key_name">Key Name</label></th>
-					<td width="67%"><input name="key_name" id="key_name" type="text" value="$key_name" size="40" maxlength="$key_name_length" /></td>
+					<th width="33%" scope="row"><label for="key_name">' . __('Key Name') . '</label></th>
+					<td width="67%"><input name="key_name" id="key_name" type="text" value="' . $key_name . '" size="40" maxlength="' . $key_name_length . '" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="key_view">View</label></th>
-					<td width="67%">$key_view</td>
+					<th width="33%" scope="row"><label for="key_view">' . __('View') . '</label></th>
+					<td width="67%">' . $key_view . '</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="key_algorithm">Algorithm</label></th>
-					<td width="67%">$key_algorithm</td>
+					<th width="33%" scope="row"><label for="key_algorithm">' . __('Algorithm') . '</label></th>
+					<td width="67%">' . $key_algorithm . '</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="key_secret">Secret</label></th>
-					<td width="67%"><input name="key_secret" id="key_secret" type="text" value="$key_secret" size="40" maxlength="$key_secret_length" /></td>
+					<th width="33%" scope="row"><label for="key_secret">' . __('Secret') . '</label></th>
+					<td width="67%"><input name="key_secret" id="key_secret" type="text" value="' . $key_secret . '" size="40" maxlength="' . $key_secret_length . '" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="key_comment">Comment</label></th>
-					<td width="67%"><textarea id="key_comment" name="key_comment" rows="4" cols="30">$key_comment</textarea></td>
+					<th width="33%" scope="row"><label for="key_comment">' . __('Comment') . '</label></th>
+					<td width="67%"><textarea id="key_comment" name="key_comment" rows="4" cols="30">' . $key_comment . '</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
+		' . $popup_footer . '
 		</form>
 		<script>
 			$(document).ready(function() { $("#manage select").select2({minimumResultsForSearch: 10}); });
-		</script>
-FORM;
+		</script>';
 
 		return $return_form;
 	}
