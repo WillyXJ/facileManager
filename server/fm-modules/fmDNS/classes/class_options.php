@@ -138,7 +138,7 @@ class fm_module_options {
 				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
 				$fmdb->get_results($query);
 				if ($num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
-					return 'This record already exists.';
+					return __('This record already exists.');
 				}
 			}
 		}
@@ -162,7 +162,7 @@ class fm_module_options {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'A database error occurred. ' . $fmdb->last_error;
+		if (!$fmdb->result) return __('Could not update the option because a database error occurred.');
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -188,7 +188,7 @@ class fm_module_options {
 		$tmp_server_name = $server_serial_no ? getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
-			return __('This option could not be deleted.') . "\n";
+			return __('This option could not be deleted because a database error occurred.');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("Option '%s' for %s was deleted."), $tmp_name, $tmp_server_name));
@@ -327,10 +327,9 @@ HTML;
 		if ($cfg_type == 'ratelimit') {
 			$available_zones = $fm_dns_zones->buildZoneJSON($cfg_data);
 
-			$addl_options = <<<HTML
-				<tr>
-					<th width="33%" scope="row"><label for="cfg_name">Domain</label></th>
-					<td width="67%"><input type="hidden" name="domain_id" class="domain_name" value="$domain_id" /><br />
+			$addl_options = sprintf('<tr>
+					<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="domain_id" class="domain_name" value="%d" /><br />
 					<script>
 					$(".domain_name").select2({
 						createSearchChoice:function(term, data) { 
@@ -340,77 +339,83 @@ HTML;
 							{return {id:term, text:term};} 
 						},
 						multiple: false,
-						width: '200px',
+						width: "200px",
 						tokenSeparators: [",", " ", ";"],
-						data: $available_zones
+						data: %s
 					});
 					$(".domain_name").change(function(){
-						var \$swap = $(this).parent().parent().next().find('td');
+						var $swap = $(this).parent().parent().next().find("td");
 						var form_data = {
-							server_serial_no: getUrlVars()['server_serial_no'],
-							cfg_type: getUrlVars()['option_type'],
-							cfg_name: $(this).parent().parent().next().find('td').find('select').val(),
+							server_serial_no: getUrlVars()["server_serial_no"],
+							cfg_type: getUrlVars()["option_type"],
+							cfg_name: $(this).parent().parent().next().find("td").find("select").val(),
 							get_available_options: true,
-							item_sub_type: 'domain_id',
+							item_sub_type: "domain_id",
 							item_id: $(this).val(),
-							view_id: getUrlVars()['view_id'],
+							view_id: getUrlVars()["view_id"],
 							is_ajax: 1
 						};
 
 						$.ajax({
-							type: 'POST',
-							url: 'fm-modules/fmDNS/ajax/getData.php',
+							type: "POST",
+							url: "fm-modules/fmDNS/ajax/getData.php",
 							data: form_data,
 							success: function(response) {
-								\$swap.html(response);
+								$swap.html(response);
 								
 								$("#manage select").select2({
-									width: '200px',
+									width: "200px",
 									minimumResultsForSearch: 10
 								});
 							}
 						});
 					});
 					</script>
-				</tr>
-HTML;
+				</tr>',
+					__('Domain'), $domain_id, $available_zones
+				);
 		}
 		
-		$return_form = <<<FORM
-		<script>
-			displayOptionPlaceholder("$cfg_data");
+		$return_form = sprintf('<script>
+			displayOptionPlaceholder("%s");
 		</script>
-		<form name="manage" id="manage" method="post" action="$request_uri">
-		$popup_header
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="cfg_id" value="$cfg_id" />
-			<input type="hidden" name="cfg_type" value="$cfg_type" />
-			<input type="hidden" name="$cfg_id_name" value="$cfg_type_id" />
-			$server_serial_no_field
+		<form name="manage" id="manage" method="post" action="%s">
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="cfg_id" value="%d" />
+			<input type="hidden" name="cfg_type" value="%s" />
+			<input type="hidden" name="%s" value="%s" />
+			%s
 			<table class="form-table">
-				$addl_options
+				%s
 				<tr>
-					<th width="33%" scope="row"><label for="cfg_name">Option Name</label></th>
-					<td width="67%">$cfg_avail_options</td>
+					<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr class="value_placeholder">
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="cfg_comment">Comment</label></th>
-					<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
+					<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '200px',
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				$cfg_data, $request_uri, $popup_header,
+				$action, $cfg_id, $cfg_type, $cfg_id_name, $cfg_type_id, $server_serial_no_field,
+				$addl_options,
+				__('Option Name'), $cfg_avail_options,
+				__('Comment'), $cfg_comment,
+				$popup_footer
+			);
 
 		return $return_form;
 	}

@@ -54,7 +54,7 @@ class fm_dns_zones {
 			$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
 
 			$classes = (array_key_exists('attention', $_GET)) ? null : ' grey';
-			$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? '<i class="fa fa-eye fa-lg eye-attention' . $classes . '" title="Only view zones that need attention"></i>' : null;
+			$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? '<i class="fa fa-eye fa-lg eye-attention' . $classes . '" title="' . __('Only view zones that need attention') . '"></i>' : null;
 			$addl_blocks = array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention);
 			$fmdb->num_rows = $num_rows;
 			echo displayPagination($page, $total_pages, $addl_blocks);
@@ -451,7 +451,7 @@ class fm_dns_zones {
 			
 			/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
 			if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $domain_id, 'domain_id', false) === false) {
-				return 'The zone could not be removed from the fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds table because a database error occurred.';
+				return sprintf(__('The zone could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds');
 			}
 			
 			/** Force buildconf for all associated DNS servers */
@@ -731,7 +731,7 @@ HTML;
 		if (array_search('template_menu', $show) !== false) {
 			$classes = 'zone-form';
 			$select_template = '<tr id="define_template" class="include-with-template">
-					<th>Template</th>
+					<th>' . __('Template') . '</th>
 					<td>' . buildSelect('domain_template_id', 'domain_template_id', $this->availableZoneTemplates(), $domain_template_id);
 			if ($action == 'edit') {
 				$select_template .= sprintf('<p>%s</p>', __('Changing the template will delete all config options for this zone.'));
@@ -753,60 +753,68 @@ HTML;
 	
 		$return_form = (array_search('popup', $show) !== false) ? '<form name="manage" id="manage" method="post" action="">' . $popup_header : null;
 		
-		$return_form .= <<<HTML
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="domain_id" value="$domain_id" />
-			<table class="form-table $classes">
+		$return_form .= sprintf('<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="domain_id" value="%d" />
+			<table class="form-table %s">
 				<tr class="include-with-template">
-					<th><label for="domain_name">Domain Name</label></th>
-					<td><input type="text" id="domain_name" name="domain_name" size="40" value="$domain_name" maxlength="$domain_name_length" /></td>
+					<th><label for="domain_name">%s</label></th>
+					<td><input type="text" id="domain_name" name="domain_name" size="40" value="%s" maxlength="%d" /></td>
 				</tr>
-				$select_template
+				%s
 				<tr>
-					<th><label for="domain_view">Views</label></th>
-					<td>$views</td>
-				</tr>
-				<tr>
-					<th><label for="domain_mapping">Zone Map</label></th>
-					<td>$zone_maps</td>
+					<th><label for="domain_view">%s</label></th>
+					<td>%s</td>
 				</tr>
 				<tr>
-					<th><label for="domain_type">Zone Type</label></th>
+					<th><label for="domain_mapping">%s</label></th>
+					<td>%s</td>
+				</tr>
+				<tr>
+					<th><label for="domain_type">%s</label></th>
 					<td>
-						$domain_types
-						<div id="define_forwarders" style="display: $forwarders_show">
-							<p>$forward_dropdown</p>
-							<input type="hidden" name="domain_required_servers[forwarders]" id="domain_required_servers" class="address_match_element" data-placeholder="Define forwarders" value="$domain_forward_servers" /><br />
+						%s
+						<div id="define_forwarders" style="display: %s">
+							<p>%s</p>
+							<input type="hidden" name="domain_required_servers[forwarders]" id="domain_required_servers" class="address_match_element" data-placeholder="%s" value="%s" /><br />
 							( address_match_element )
 						</div>
-						<div id="define_masters" style="display: $masters_show">
-							<input type="hidden" name="domain_required_servers[masters]" id="domain_required_servers" class="address_match_element" data-placeholder="Define masters" value="$domain_master_servers" /><br />
+						<div id="define_masters" style="display: %s">
+							<input type="hidden" name="domain_required_servers[masters]" id="domain_required_servers" class="address_match_element" data-placeholder="%s" value="%s" /><br />
 							( address_match_element )
 						</div>
 					</td>
 				</tr>
 				<tr>
-					<th><label for="domain_clone_domain_id">Clone Of (optional)</label></th>
+					<th><label for="domain_clone_domain_id">%s</label></th>
 					<td>
-						$clone
-						<div id="clone_override" style="display: $clone_override_show">
-							<p><input type="checkbox" id="domain_clone_dname_override" name="domain_clone_dname_override" value="yes" $clone_dname_checked /><label for="domain_clone_dname_override"> Override DNAME Resource Record Setting</label></p>
-							<div id="clone_dname_options" style="display: $clone_dname_options_show">
-								$clone_dname_dropdown
+						%s
+						<div id="clone_override" style="display: %s">
+							<p><input type="checkbox" id="domain_clone_dname_override" name="domain_clone_dname_override" value="yes" %s /><label for="domain_clone_dname_override"> %s</label></p>
+							<div id="clone_dname_options" style="display: %s">
+								%s
 							</div>
 						</div>
 					</td>
 				</tr>
 				<tr>
-					<th><label for="domain_name_servers">DNS Servers</label></th>
-					<td>$name_servers</td>
+					<th><label for="domain_name_servers">%s</label></th>
+					<td>%s</td>
 				</tr>
-				$soa_templates
-				$additional_config_link
-				$create_template
-				$template_name
-			</table>
-HTML;
+				%s
+			</table>',
+				$action, $domain_id, $classes,
+				__('Domain Name'), $domain_name, $domain_name_length,
+				$select_template,
+				__('Views'), $views,
+				__('Zone Map'), $zone_maps,
+				__('Zone Type'), $domain_types,
+				$forwarders_show, $forward_dropdown, __('Define forwarders'), $domain_forward_servers,
+				$masters_show, __('Define masters'), $domain_master_servers,
+				__('Clone Of (optional)'), $clone, $clone_override_show, $clone_dname_checked,
+				__('Override DNAME Resource Record Setting'), $clone_dname_options_show, $clone_dname_dropdown,
+				__('DNS Servers'), $name_servers,
+				$soa_templates . $additional_config_link . $create_template . $template_name
+				);
 
 		$return_form .= (array_search('popup', $show) !== false) ? $popup_footer . '</form>' : null;
 

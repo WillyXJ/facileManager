@@ -237,27 +237,27 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' ACL');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = '<form name="manage" id="manage" method="post" action="">
-		' . $popup_header . '
-			<input type="hidden" name="action" value="' . $action . '" />
-			<input type="hidden" name="acl_id" value="' . $acl_id . '" />
-			<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="acl_id" value="%d" />
+			<input type="hidden" name="server_serial_no" value="%d" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="acl_name">' . __('ACL Name') . '</label></th>
-					<td width="67%"><input name="acl_name" id="acl_name" type="text" value="' . $acl_name . '" size="40" placeholder="' . __('internal') . '" maxlength="' . $acl_name_length . '" /></td>
+					<th width="33&#37;" scope="row"><label for="acl_name">%s</label></th>
+					<td width="67&#37;"><input name="acl_name" id="acl_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="acl_predefined">' . __('Matched Address List') . '</label></th>
-					<td width="67%">' . $acl_predefined . '<br />
-					<textarea name="acl_addresses" rows="7" cols="28" placeholder="' . __('Addresses and subnets delimited by space, semi-colon, or newline') . '">' . $acl_addresses . '</textarea></td>
+					<th width="33&#37;" scope="row"><label for="acl_predefined">%s</label></th>
+					<td width="67&#37;">%s<br />
+					<textarea name="acl_addresses" rows="7" cols="28" placeholder="%s">%s</textarea></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="acl_comment">' . __('Comment') . '</label></th>
-					<td width="67%"><textarea id="acl_comment" name="acl_comment" rows="4" cols="30">' . $acl_comment . '</textarea></td>
+					<th width="33&#37;" scope="row"><label for="acl_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="acl_comment" name="acl_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		' . $popup_footer . '
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
@@ -266,7 +266,14 @@ HTML;
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>';
+		</script>',
+				$popup_header,
+				$action, $acl_id, $server_serial_no,
+				__('ACL Name'), $acl_name, __('internal'), $acl_name_length,
+				__('Matched Address List'), $acl_predefined, __('Addresses and subnets delimited by space, semi-colon, or newline'), $acl_addresses,
+				__('Comment'), $acl_comment,
+				$popup_footer
+			);
 
 		return $return_form;
 	}

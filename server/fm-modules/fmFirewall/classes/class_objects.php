@@ -29,7 +29,7 @@ class fm_module_objects {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', sprintf(_('There are no %s objects defined.'), $type));
+			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', sprintf(__('There are no %s objects defined.'), $type));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,10 +40,10 @@ class fm_module_objects {
 							'name' => 'objects'
 						);
 
-			$title_array = array(_('Object Name'), _('Address'));
-			if ($type != 'address') $title_array[] = _('Netmask');
-			$title_array[] = array('title' => _('Comment'), 'style' => 'width: 40%;');
-			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+			$title_array = array(__('Object Name'), __('Address'));
+			if ($type != 'address') $title_array[] = __('Netmask');
+			$title_array[] = array('title' => __('Comment'), 'style' => 'width: 40%;');
+			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -75,7 +75,7 @@ class fm_module_objects {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'object_name') && empty($clean_data)) return _('No object name defined.');
+			if (($key == 'object_name') && empty($clean_data)) return __('No object name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -87,7 +87,7 @@ class fm_module_objects {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not add the object because a database error occurred.');
+		if (!$fmdb->result) return __('Could not add the object because a database error occurred.');
 
 		addLogEntry("Added object:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
 				"Address: {$post['object_address']} / {$post['object_mask']}\nComment: {$post['object_comment']}");
@@ -120,7 +120,7 @@ class fm_module_objects {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}objects` SET $sql WHERE `object_id`={$post['object_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not update the object because a database error occurred.');
+		if (!$fmdb->result) return __('Could not update the object because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -142,17 +142,17 @@ class fm_module_objects {
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $object_id, 'object_', 'object_id');
 		if ($fmdb->num_rows) {
 			/** Is the object_id present in a policy? */
-			if (isItemInPolicy($object_id, 'object')) return _('This object could not be deleted because it is associated with one or more policies.');
+			if (isItemInPolicy($object_id, 'object')) return __('This object could not be deleted because it is associated with one or more policies.');
 			
 			/** Delete object */
 			$tmp_name = getNameFromID($object_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $object_id, 'object_', 'deleted', 'object_id')) {
-				addLogEntry(sprintf(_('Object (%s) was deleted.'), $tmp_name));
+				addLogEntry(sprintf(__('Object (%s) was deleted.'), $tmp_name));
 				return true;
 			}
 		}
 		
-		return _('This object could not be deleted.');
+		return __('This object could not be deleted.');
 	}
 
 
@@ -214,46 +214,52 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Object');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="?type=$type">
-		$popup_header
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="object_id" value="$object_id" />
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="object_id" value="%s" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="object_name">Object Name</label></th>
-					<td width="67%"><input name="object_name" id="object_name" type="text" value="$object_name" size="40" placeholder="http" maxlength="$object_name_length" /></td>
+					<th width="33&#37;" scope="row"><label for="object_name">%s</label></th>
+					<td width="67&#37;"><input name="object_name" id="object_name" type="text" value="%s" size="40" placeholder="http" maxlength="%s" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="object_type">Object Type</label></th>
-					<td width="67%">
-						$object_type
+					<th width="33&#37;" scope="row"><label for="object_type">%s</label></th>
+					<td width="67&#37;">
+						%s
 					</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="object_address">Address</label></th>
-					<td width="67%"><input name="object_address" id="object_address" type="text" value="$object_address" size="40" placeholder="127.0.0.1" maxlength="$object_address_length" /></td>
+					<th width="33&#37;" scope="row"><label for="object_address">%s</label></th>
+					<td width="67&#37;"><input name="object_address" id="object_address" type="text" value="%s" size="40" placeholder="127.0.0.1" maxlength="%s" /></td>
 				</tr>
-				<tr id="netmask_option" $netmask_option>
-					<th width="33%" scope="row"><label for="object_mask">Netmask</label></th>
-					<td width="67%"><input name="object_mask" id="object_mask" type="text" value="$object_mask" size="40" placeholder="255.255.255.0" maxlength="$object_mask_length" /></td>
+				<tr id="netmask_option" %s>
+					<th width="33&#37;" scope="row"><label for="object_mask">%s</label></th>
+					<td width="67&#37;"><input name="object_mask" id="object_mask" type="text" value="%s" size="40" placeholder="255.255.255.0" maxlength="%s" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="object_comment">Comment</label></th>
-					<td width="67%"><textarea id="object_comment" name="object_comment" rows="4" cols="30">$object_comment</textarea></td>
+					<th width="33&#37;" scope="row"><label for="object_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="object_comment" name="object_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '200px',
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				$type, $popup_header, $action, $object_id,
+				__('Object Name'), $object_name, $object_name_length,
+				__('Object Type'), $object_type,
+				__('Address'), $object_address, $object_address_length,
+				$netmask_option, __('Netmask'), $object_mask, $object_mask_length,
+				__('Comment'), $object_comment,
+				$popup_footer
+			);
 
 		return $return_form;
 	}
@@ -262,10 +268,10 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['object_name'])) return _('No object name defined.');
-		if (empty($post['object_address'])) return _('No object address defined.');
+		if (empty($post['object_name'])) return __('No object name defined.');
+		if (empty($post['object_address'])) return __('No object address defined.');
 		if ($post['object_type'] == 'network') {
-			if (empty($post['object_mask'])) return _('No object netmask defined.');
+			if (empty($post['object_mask'])) return __('No object netmask defined.');
 		}
 		
 		/** Check name field length */
@@ -274,12 +280,12 @@ FORM;
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $post['object_name'], 'object_', 'object_name', "AND object_type='{$post['object_type']}' AND object_id!={$post['object_id']}");
-		if ($fmdb->num_rows) return _('This object name already exists.');
+		if ($fmdb->num_rows) return __('This object name already exists.');
 		
 		/** Check address and mask */
-		if (!verifyIPAddress($post['object_address'])) return _('Address is invalid.');
+		if (!verifyIPAddress($post['object_address'])) return __('Address is invalid.');
 		if ($post['object_type'] == 'network') {
-			if (!verifyIPAddress($post['object_mask'])) return _('Netmask is invalid.');
+			if (!verifyIPAddress($post['object_mask'])) return __('Netmask is invalid.');
 		}
 		
 		return $post;

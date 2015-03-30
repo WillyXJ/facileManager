@@ -29,7 +29,7 @@ class fm_sqlpass_groups {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="groups">There are no server groups.</p>';
+			printf('<p id="table_edits" class="noresult" name="groups">%s</p>', __('There are no server groups.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_sqlpass_groups {
 							'name' => 'groups'
 						);
 
-			$title_array = array('Group Name', 'Associated Servers');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(__('Group Name'), __('Associated Servers'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -66,7 +66,7 @@ class fm_sqlpass_groups {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (`account_id`, `group_name`) VALUES('{$_SESSION['user']['account_id']}', '{$post['group_name']}')";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the group because a database error occurred.';
+		if (!$fmdb->result) return __('Could not add the group because a database error occurred.');
 
 		addLogEntry("Added server group '$group_name'.");
 		return true;
@@ -98,7 +98,7 @@ class fm_sqlpass_groups {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the group because a database error occurred.';
+		if (!$fmdb->result) return __('Could not add the group because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -117,7 +117,7 @@ class fm_sqlpass_groups {
 		// Delete group
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 		if (!updateStatus('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', $id, 'group_', 'deleted', 'group_id')) {
-			return 'This server group could not be deleted.'. "\n";
+			return __('This server group could not be deleted.') . "\n";
 		} else {
 			addLogEntry("Deleted server group '$tmp_name'.");
 			return true;
@@ -190,20 +190,23 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Group');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
-			<input type="hidden" name="action" id="action" value="$action" />
-			<input type="hidden" name="group_id" id="group_id" value="$group_id" />
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		%s
+			<input type="hidden" name="action" id="action" value="%s" />
+			<input type="hidden" name="group_id" id="group_id" value="%d" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="group_name">Group Name</label></th>
-					<td width="67%"><input name="group_name" id="group_name" type="text" value="$group_name" size="40" placeholder="internal" maxlength="$group_name_length" /></td>
+					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
 				</tr>
 			</table>
-		$popup_footer
-		</form>
-FORM;
+		%s
+		</form>',
+				$popup_header,
+				$action, $group_id,
+				__('Group Name'), $group_name, __('internal'), $group_name_length,
+				$popup_footer
+			);
 
 		return $return_form;
 	}
@@ -213,17 +216,17 @@ FORM;
 		
 		$post['group_name'] = sanitize($post['group_name']);
 		
-		if (empty($post['group_name'])) return 'No group name defined.';
+		if (empty($post['group_name'])) return __('No group name defined.');
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
-		if ($field_length !== false && strlen($post['group_name']) > $field_length) return 'Group name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(__('Group name is too long (maximum %d characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', sanitize($post['group_name']), 'group_', 'group_name');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
-			if ($result[0]->group_id != $post['group_id']) return 'This group name already exists.';
+			if ($result[0]->group_id != $post['group_id']) return __('This group name already exists.');
 		}
 		
 		return $post;

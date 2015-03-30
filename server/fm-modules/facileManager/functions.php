@@ -2818,7 +2818,7 @@ HTML;
 		
 		$id = array_search('cancel', $buttons);
 		if ($id !== false) {
-			$text = array_search('submit', $buttons) !== false ? 'Cancel' : $text;
+			$text = array_search('submit', $buttons) !== false ? _('Cancel') : $text;
 			$id = is_numeric($id) ? 'cancel_button' : $id;
 			if ($link !== null) {
 				$cancel = '<a href="' . $link . '" class="button" id="' . $id . '">' . $text . '</a>';

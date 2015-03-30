@@ -220,38 +220,38 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Control');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = '<form name="manage" id="manage" method="post" action="">
-		' . $popup_header . '
-			<input type="hidden" name="action" value="' . $action . '" />
-			<input type="hidden" name="control_id" value="' . $control_id . '" />
-			<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="control_id" value="%d" />
+			<input type="hidden" name="server_serial_no" value="%d" />
 			<input type="hidden" name="control_keys" value="" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="control_ip">' . __('IP Address') . '</label></th>
-					<td width="67%"><input name="control_ip" id="control_ip" type="text" value="' . $control_ip . '" size="40" placeholder="127.0.0.1" /></td>
+					<th width="33&#37;" scope="row"><label for="control_ip">%s</label></th>
+					<td width="67&#37;"><input name="control_ip" id="control_ip" type="text" value="%s" size="40" placeholder="127.0.0.1" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="control_port">' . __('Port') . '</label></th>
-					<td width="67%"><input name="control_port" id="control_port" type="text" value="' . $control_port . '" size="40" placeholder="953" /></td>
+					<th width="33&#37;" scope="row"><label for="control_port">%s</label></th>
+					<td width="67&#37;"><input name="control_port" id="control_port" type="text" value="%s" size="40" placeholder="953" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="control_predefined">' . __('Allowed Address List') . '</label></th>
-					<td width="67%">
-						<input type="hidden" name="control_addresses" id="address_match_element" data-placeholder="' . __('Define allowed hosts') . '" value="' . $control_addresses . '" /><br />
+					<th width="33&#37;" scope="row"><label for="control_predefined">%s</label></th>
+					<td width="67&#37;">
+						<input type="hidden" name="control_addresses" id="address_match_element" data-placeholder="%s" value="%s" /><br />
 						( address_match_element )
 					</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="control_keys">' . __('Keys') . '</label></th>
-					<td width="67%">' . $control_keys . '</td>
+					<th width="33&#37;" scope="row"><label for="control_keys">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="control_comment">' . __('Comment') . '</label></th>
-					<td width="67%"><textarea id="control_comment" name="control_comment" rows="4" cols="30">' . $control_comment . '</textarea></td>
+					<th width="33&#37;" scope="row"><label for="control_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="control_comment" name="control_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		' . $popup_footer . '
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
@@ -273,7 +273,16 @@ HTML;
 					data: $available_acls
 				});
 			});
-		</script>';
+		</script>',
+				$popup_header,
+				$action, $control_id, $server_serial_no,
+				__('IP Address'), $control_ip,
+				__('Port'), $control_port,
+				__('Allowed Address List'), __('Define allowed hosts'), $control_addresses,
+				__('Keys'), $control_keys,
+				__('Comment'), $control_comment,
+				$popup_footer
+			);
 
 		return $return_form;
 	}

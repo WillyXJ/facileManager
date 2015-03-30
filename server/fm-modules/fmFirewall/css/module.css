@@ -14,7 +14,6 @@
 }
 
 .tcp-flags input[type="checkbox"] {
-	height: 10px;
 	margin-left: 10px;
 	margin-right: 10px;
 }

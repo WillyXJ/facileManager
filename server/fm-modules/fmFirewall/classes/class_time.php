@@ -29,7 +29,7 @@ class fm_module_time {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="time">%s</p>', _('There are no time restrictions defined.'));
+			printf('<p id="table_edits" class="noresult" name="time">%s</p>', __('There are no time restrictions defined.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_module_time {
 							'name' => 'time'
 						);
 
-			$title_array = array(_('Restriction Name'), _('Date Range'), _('Time'), _('Weekdays'), array('title' => _('Comment'), 'style' => 'width: 30%;'));
-			if (currentUserCan('manage_time', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+			$title_array = array(__('Restriction Name'), __('Date Range'), __('Time'), __('Weekdays'), array('title' => __('Comment'), 'style' => 'width: 30%;'));
+			if (currentUserCan('manage_time', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -74,7 +74,7 @@ class fm_module_time {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'time_name') && empty($clean_data)) return _('No time name defined.');
+			if (($key == 'time_name') && empty($clean_data)) return __('No time name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -86,7 +86,7 @@ class fm_module_time {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not add the time because a database error occurred.');
+		if (!$fmdb->result) return __('Could not add the time because a database error occurred.');
 
 		/** Format weekdays */
 		$weekdays = $this->formatDays($post['time_weekdays']);
@@ -124,7 +124,7 @@ class fm_module_time {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time` SET $sql WHERE `time_id`={$post['time_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not update the time because a database error occurred.');
+		if (!$fmdb->result) return __('Could not update the time because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -147,17 +147,17 @@ class fm_module_time {
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $time_id, 'time_', 'time_id');
 		if ($fmdb->num_rows) {
 			/** Is the time_id present in a policy? */
-			if (isItemInPolicy($time_id, 'time')) return _('This schedule could not be deleted because it is associated with one or more policies.');
+			if (isItemInPolicy($time_id, 'time')) return __('This schedule could not be deleted because it is associated with one or more policies.');
 			
 			/** Delete time */
 			$tmp_name = getNameFromID($time_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $time_id, 'time_', 'deleted', 'time_id')) {
-				addLogEntry(sprintf(_('Time restriction (%s) was deleted.'), $tmp_name));
+				addLogEntry(sprintf(__('Time restriction (%s) was deleted.'), $tmp_name));
 				return true;
 			}
 		}
 		
-		return _('This time restriction could not be deleted.');
+		return __('This time restriction could not be deleted.');
 	}
 
 
@@ -249,52 +249,61 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Restriction');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="time_id" value="$time_id" />
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="time_id" value="%d" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="time_name">Name</label></th>
-					<td width="67%"><input name="time_name" id="time_name" type="text" value="$time_name" size="40" maxlength="$time_name_length" /></td>
+					<th width="33%" scope="row"><label for="time_name">%s</label></th>
+					<td width="67%"><input name="time_name" id="time_name" type="text" value="$s" size="40" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_start_date">Start Date</label></th>
-					<td width="67%"><input name="time_start_date" id="time_start_date" type="date" value="$time_start_date" size="40" class="datepicker" /></td>
+					<th width="33%" scope="row"><label for="time_start_date">%s</label></th>
+					<td width="67%"><input name="time_start_date" id="time_start_date" type="date" value="%s" size="40" class="datepicker" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_start_time">Start Time</label></th>
-					<td width="67%">$time_start_hour : $time_start_min</td>
+					<th width="33%" scope="row"><label for="time_start_time">%s</label></th>
+					<td width="67%">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_end_date">End Date</label></th>
-					<td width="67%"><input name="time_end_date" id="time_end_date" type="date" value="$time_end_date" size="40" class="datepicker" /></td>
+					<th width="33%" scope="row"><label for="time_end_date">%s</label></th>
+					<td width="67%"><input name="time_end_date" id="time_end_date" type="date" value="%s" size="40" class="datepicker" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_end_time">End Time</label></th>
-					<td width="67%">$time_end_hour : $time_end_min</td>
+					<th width="33%" scope="row"><label for="time_end_time">%s</label></th>
+					<td width="67%">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row">Weekdays</th>
-					<td width="67%" style="white-space: nowrap;">$weekdays_form</td>
+					<th width="33%" scope="row">%s</th>
+					<td width="67%" style="white-space: nowrap;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_comment">Comment</label></th>
-					<td width="67%"><textarea id="time_comment" name="time_comment" rows="4" cols="30">$time_comment</textarea></td>
+					<th width="33%" scope="row"><label for="time_comment">%s</label></th>
+					<td width="67%"><textarea id="time_comment" name="time_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '70px',
+					width: "70px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				$popup_header,
+				$action, $time_id,
+				__('Name'), $time_name, $time_name_length,
+				__('Start Date'), $time_start_date,
+				__('Start Time'), "$time_start_hour : $time_start_min",
+				__('End Date'), $time_end_date,
+				__('End Time'), "$time_end_hour : $time_end_min",
+				__('Weekdays'), $weekdays_form,
+				__('Comment'), $time_comment,
+				$popup_footer
+			);
 
 		return $return_form;
 	}
@@ -303,7 +312,7 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['time_name'])) return _('No name defined.');
+		if (empty($post['time_name'])) return __('No name defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name');
@@ -311,7 +320,7 @@ FORM;
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $post['time_name'], 'time_', 'time_name', "AND time_id!={$post['time_id']}");
-		if ($fmdb->num_rows) return _('This name already exists.');
+		if ($fmdb->num_rows) return __('This name already exists.');
 		
 		/** Process time */
 		$post['time_start_time'] = $post['time_start_time_hour'] . ':' . $post['time_start_time_min'];
@@ -337,11 +346,11 @@ FORM;
 	function formatDates($start, $end) {
 		/** Format date range */
 		if (!$start && !$end) {
-			return 'Everyday';
+			return __('Everyday');
 		} elseif (!$start) {
-			return 'Creation &rarr; ' . date(getOption('date_format', $_SESSION['user']['account_id']), strtotime($end));
+			return __('Creation') . ' &rarr; ' . date(getOption('date_format', $_SESSION['user']['account_id']), strtotime($end));
 		} elseif (!$end) {
-			return date(getOption('date_format', $_SESSION['user']['account_id']), strtotime($start)) . ' &rarr; Infinity';
+			return date(getOption('date_format', $_SESSION['user']['account_id']), strtotime($start)) . ' &rarr; ' . __('Infinity');
 		} else {
 			return date(getOption('date_format', $_SESSION['user']['account_id']), strtotime($start)) . ' &rarr; ' . date(getOption('date_format', $_SESSION['user']['account_id']), strtotime($end));
 		}
@@ -354,7 +363,7 @@ FORM;
 		
 		/** Format weekdays */
 		if (!$weekdays_bits || $weekdays_bits == array_sum($__FM_CONFIG['weekdays'])) {
-			return 'Everyday';
+			return __('Everyday');
 		} else {
 			$weekdays = null;
 			foreach ($__FM_CONFIG['weekdays'] as $day => $bit) {

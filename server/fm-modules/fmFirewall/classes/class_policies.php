@@ -29,7 +29,7 @@ class fm_module_policies {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="policies">%s</p>', _('There are no firewall policies.'));
+			printf('<p id="table_edits" class="noresult" name="policies">%s</p>', __('There are no firewall policies.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -41,9 +41,9 @@ class fm_module_policies {
 						);
 			if (currentUserCan('manage_servers', $_SESSION['module']) && $num_rows > 1) $table_info['class'] .= ' grab';
 
-			$title_array = array(array('class' => 'header-tiny'), _('Source'), _('Destination'), _('Service'), _('Interface'),
-									_('Direction'), _('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+			$title_array = array(array('class' => 'header-tiny'), __('Source'), __('Destination'), __('Service'), __('Interface'),
+									__('Direction'), __('Time'), array('title' => __('Comment'), 'style' => 'width: 20%;'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -136,7 +136,7 @@ HTML;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not add the policy because a database error occurred.');
+		if (!$fmdb->result) return __('Could not add the policy because a database error occurred.');
 
 		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
@@ -161,10 +161,10 @@ HTML;
 			$policy_result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				$order_id = array_search($policy_result[$i]->policy_id, $new_sort_order);
-				if ($order_id === false) return _('The sort order could not be updated due to an invalid request.');
+				if ($order_id === false) return __('The sort order could not be updated due to an invalid request.');
 				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET `policy_order_id`=$order_id WHERE `policy_id`={$policy_result[$i]->policy_id} AND `server_serial_no`={$post['server_serial_no']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 				$result = $fmdb->query($query);
-				if ($result === false) return _('Could not update the policy order because a database error occurred.');
+				if ($result === false) return __('Could not update the policy order because a database error occurred.');
 			}
 			
 			setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
@@ -201,7 +201,7 @@ HTML;
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET $sql WHERE `policy_id`={$post['policy_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not update the firewall policy because a database error occurred.');
+		if (!$fmdb->result) return __('Could not update the firewall policy because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -230,7 +230,7 @@ HTML;
 			}
 		}
 		
-		return _('This policy could not be deleted.');
+		return __('This policy could not be deleted.');
 	}
 
 
@@ -337,51 +337,55 @@ HTML;
 			<input type="hidden" name="policy_services_not" value="0" />
 FORM;
 		if ($type == 'rules') {
-			$return_form .= <<<FORM
+			$return_form .= sprintf('
 			<table class="form-table policy-form">
 				<tr>
-					<th width="33%" scope="row"><label for="policy_interface">Interface</label></th>
-					<td width="67%">$policy_interface</td>
+					<th width="33&#37;" scope="row"><label for="policy_interface">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="policy_direction">Direction</label></th>
-					<td width="67%">$policy_direction</td>
+					<th width="33&#37;" scope="row"><label for="policy_direction">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row">Source</th>
-					<td width="67%">
-						<input name="policy_source_not" id="policy_source_not" value="1" type="checkbox" $source_not_check /><label for="policy_source_not"><b>not</b></label>
-						<p class="checkbox_desc">Use this option to invert the match</p>
-						$source_items
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						<input name="policy_source_not" id="policy_source_not" value="1" type="checkbox" %s /><label for="policy_source_not"><b>%s</b></label>
+						<p class="checkbox_desc">%s</p>
+						%s
 					</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row">Destination</th>
-					<td width="67%">
-						<input name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" $destination_not_check /><label for="policy_destination_not"><b>not</b></label>
-						<p class="checkbox_desc">Use this option to invert the match</p>
-						$destination_items
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						<input name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" %s /><label for="policy_destination_not"><b>%s</b></label>
+						<p class="checkbox_desc">%s</p>
+						%s
 					</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row">Services</th>
-					<td width="67%">
-						<input name="policy_services_not" id="policy_services_not" value="1" type="checkbox" $service_not_check /><label for="policy_services_not"><b>not</b></label>
-						<p class="checkbox_desc">Use this option to invert the match</p>
-						$services_items
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						<input name="policy_services_not" id="policy_services_not" value="1" type="checkbox" %s /><label for="policy_services_not"><b>%s</b></label>
+						<p class="checkbox_desc">%s</p>
+						%s
 					</td>
-				</tr>
-
-FORM;
+				</tr>',
+					__('Interface'), $policy_interface,
+					__('Direction'), $policy_direction,
+					__('Source'), $source_not_check, __('not'), __('Use this option to invert the match'), $source_items,
+					__('Destination'), $destination_not_check, __('not'), __('Use this option to invert the match'), $destination_items,
+					__('Services'), $service_not_check, __('not'), __('Use this option to invert the match'), $services_items
+					);
 			if ($server_firewall_type == 'iptables') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
-				$return_form .= <<<FORM
+				$return_form .= sprintf('
 				<tr>
-					<th width="33%" scope="row"><label for="policy_time">Time Restriction</label></th>
-					<td width="67%">$policy_time</td>
-				</tr>
-
-FORM;
+					<th width="33&#37;" scope="row"><label for="policy_time">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>',
+						__('Time Restriction'), $policy_time
+					);
 			}
 			
 			/** Parse options */
@@ -395,24 +399,26 @@ FORM;
 				$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']">' . $opt_array['desc'] . "</label><br />\n";
 			}
 			
-			$return_form .= <<<FORM
+			$return_form .= sprintf('
 				<tr>
-					<th width="33%" scope="row"><label for="policy_action">Action</label></th>
-					<td width="67%">$policy_action</td>
+					<th width="33&#37;" scope="row"><label for="policy_action">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row">Options</th>
-					<td width="67%">
-						$options
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						%s
 					</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="policy_comment">Comment</label></th>
-					<td width="67%"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">$policy_comment</textarea></td>
+					<th width="33&#37;" scope="row"><label for="policy_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
-			</table>
-
-FORM;
+			</table>',
+					__('Action'), $policy_action,
+					__('Options'), $options,
+					__('Comment'), $policy_comment
+				);
 		}
 		
 		$return_form .= <<<FORM
@@ -490,7 +496,7 @@ FORM;
 	function availableTimes() {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return[0][] = _('none');
+		$return[0][] = __('none');
 		$return[0][] = '';
 		
 		$query = "SELECT time_id,time_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time WHERE account_id='{$_SESSION['user']['account_id']}' AND time_status='active' ORDER BY time_name ASC";

@@ -74,8 +74,8 @@ $__FM_CONFIG['records']['sshfp_algorithms'] = array(
 											array('DSA', 2)
 											);
 
-$__FM_CONFIG['servers']['avail_types'] = array('servers' => 'Servers', 'groups' => 'Groups');
-$__FM_CONFIG['options']['avail_types'] = array('global' => 'Global', 'ratelimit' => 'Rate Limit');
+$__FM_CONFIG['servers']['avail_types'] = array('servers' => __('Servers'), 'groups' => __('Groups'));
+$__FM_CONFIG['options']['avail_types'] = array('global' => __('Global'), 'ratelimit' => __('Rate Limit'));
 $__FM_CONFIG['logging']['avail_types'] = array('channel' => 'channels', 'category' => 'categories');
 
 /** SOA Default Values */

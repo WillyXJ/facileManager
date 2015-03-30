@@ -96,7 +96,7 @@ class fm_module_tools {
 						<input type="hidden" name="create[$count][record_type]" value="SOA" />
 						<input type="hidden" name="create[$count][soa_append]" value="{$soa_array['soa_append']}" />
 						$soa_row
-						<span><label><input style="height: 10px;" type="checkbox" name="create[$count][record_skip]" />Skip Import</label></span>
+						<span><label><input type="checkbox" name="create[$count][record_skip]" />Skip Import</label></span>
 						</p>
 						
 						<h4>Records:</h4>
@@ -287,7 +287,7 @@ HTML;
 						<td><span id="port{$count}" onclick="exchange(this);">{$array['record_port']}</span><input onblur="exchange(this);" type="number" id="port{$count}b" name="create[$count][record_port]" value="{$array['record_port']}" /></td>
 						<td><span id="comment{$count}" onclick="exchange(this);">{$array['record_comment']}</span><input onblur="exchange(this);" type="text" id="comment{$count}b" name="create[$count][record_comment]" value="{$array['record_comment']}" /></td>
 						<td style="text-align: center;" nowrap><input type="hidden" name="create[$count][record_append]" value="{$array['record_append']}" />{$array['record_append']}</td>
-						<td style="text-align: center;"><label><input style="height: 10px;" type="checkbox" name="create[$count][record_skip]" $checked />Skip Import</label></td>
+						<td style="text-align: center;"><label><input type="checkbox" name="create[$count][record_skip]" $checked />Skip Import</label></td>
 					</tr>
 
 ROW;
@@ -300,14 +300,14 @@ ROW;
 						'name' => 'views'
 					);
 
-		$title_array = array('Record', 'TTL', 'Class', 'Type', 'Priority', 'Value', 'Weight', 'Port', 'Comment');
-		$title_array[] = array('title' => 'Append Domain', 'style' => 'text-align: center;', 'nowrap' => null);
-		$title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+		$title_array = array(__('Record'), __('TTL'), __('Class'), __('Type'), __('Priority'), __('Value'), __('Weight'), __('Port'), __('Comment'));
+		$title_array[] = array('title' => __('Append Domain'), 'style' => 'text-align: center;', 'nowrap' => null);
+		$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 		
 		$table_header = displayTableHeader($table_info, $title_array);
 		
-		$popup_header = buildPopup('header', 'Import Verification');
-		$popup_footer = buildPopup('footer', 'Import', array('import' => 'submit', 'cancel_button' => 'cancel'));
+		$popup_header = buildPopup('header', __('Import Verification'));
+		$popup_footer = buildPopup('footer', __('Import'), array('import' => 'submit', 'cancel_button' => 'cancel'));
 		
 		$body = <<<BODY
 		<form method="post" action="zone-records-write.php">
@@ -380,54 +380,54 @@ BODY;
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		for ($x=0; $x<$num_rows; $x++) {
-			$return .= 'Running tests for ' . $results[$x]->server_name . "\n";
+			$return .= sprintf(__("Running tests for %s\n"), $results[$x]->server_name);
 			
 			/** ping tests */
-			$return .= "\t" . str_pad('Ping:', 15);
-			if (pingTest($results[$x]->server_name)) $return .=  'success';
-			else $return .=  'failed';
+			$return .= "\t" . str_pad(__('Ping:'), 15);
+			if (pingTest($results[$x]->server_name)) $return .=  __('success');
+			else $return .=  __('failed');
 			$return .=  "\n";
 
 			/** remote port tests */
-			$return .= "\t" . str_pad('Remote Port:', 15);
+			$return .= "\t" . str_pad(__('Remote Port:'), 15);
 			if ($results[$x]->server_update_method != 'cron') {
 				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
-					$return .= 'success (tcp/' . $results[$x]->server_update_port . ")\n";
+					$return .= __('success') . ' (tcp/' . $results[$x]->server_update_port . ")\n";
 					
 					if ($results[$x]->server_update_method == 'ssh') {
-						$return .= "\t" . str_pad('SSH Login:', 15);
+						$return .= "\t" . str_pad(__('SSH Login:'), 15);
 						if (!$ssh_key) {
-							$return .= 'no SSH key defined';
+							$return .= __('no SSH key defined');
 						} elseif ($ssh_key_loaded === false) {
-							$return .= 'could not load SSH key into ' . $temp_ssh_key;
+							$return .= sprintf(__('could not load SSH key into %s'), $temp_ssh_key);
 						} elseif (!$ssh_user) {
-							$return .= 'no SSH user defined';
+							$return .= __('no SSH user defined');
 						} else {
 							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} uptime", $post_result, $retval);
 							if ($retval) {
-								$return .= 'ssh key login failed';
+								$return .= __('ssh key login failed');
 							} else {
-								$return .= 'success';
+								$return .= __('success');
 							}
 						}
 					} else {
 						/** php tests */
-						$return .= "\t" . str_pad('http page:', 15);
+						$return .= "\t" . str_pad(__('http page:'), 15);
 						$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
 									$_SESSION['module'] . '/reload.php', null);
-						if ($php_result == 'Incorrect parameters defined.') $return .= 'success';
-						else $return .= 'failed';
+						if ($php_result == 'Incorrect parameters defined.') $return .= __('success');
+						else $return .= __('failed');
 					}
 					
-				} else $return .=  'failed (tcp/' . $results[$x]->server_update_port . ')';
-			} else $return .= 'skipping (host updates via cron)';
+				} else $return .=  __('failed') . ' (tcp/' . $results[$x]->server_update_port . ')';
+			} else $return .= __('skipping (host updates via cron)');
 			$return .=  "\n";
 			
 			/** dns tests */
-			$return .= "\t" . str_pad('DNS:', 15);
+			$return .= "\t" . str_pad(__('DNS:'), 15);
 			$port = 53;
-			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  'success (tcp/' . $port . ')';
-			else $return .=  'failed (tcp/' . $port . ')';
+			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  __('success') . ' (tcp/' . $port . ')';
+			else $return .=  __('failed') . ' (tcp/' . $port . ')';
 			$return .=  "\n";
 
 			$return .=  "\n";
@@ -440,9 +440,9 @@ BODY;
 	
 	
 	function unAuth($message) {
-		$response = buildPopup('header', 'Error');
-		$response .= "<p>You do not have permission to access this $message.</p>";
-		return $response . buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+		$response = buildPopup('header', _('Error'));
+		$response .= sprintf('<p>%s</p>', sprintf(__('You do not have permission to access this %s.'), $message));
+		return $response . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	}
 	
 }

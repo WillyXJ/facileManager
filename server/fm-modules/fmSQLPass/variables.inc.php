@@ -32,9 +32,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 /** Module Version */
 $__FM_CONFIG['fmSQLPass'] = array(
 		'version'				=> '1.1',
-		'description'			=> 'Change database user passwords across a server farm running multiple database server types.
-									Password complexity requirements are enforced to ensure secure passwords. Currently supported
-									database servers include MySQL.',
+		'description'			=> __('Change database user passwords across a server farm running multiple database server types. Password complexity requirements are enforced to ensure secure passwords. Currently supported database servers include MySQL.'),
 		'prefix'				=> 'sqlpass_',
 		'required_fm_version'	=> '2.0'
 	);
@@ -48,16 +46,16 @@ if (isset($__FM_CONFIG['password_hint'])) {
 }
 $__FM_CONFIG['fmSQLPass']['default']['options'] = @array(
 		'minimum_pwd_strength' => array(
-				'description' => array('Minimum Password Strength', rtrim($pwd_strength_desc, "<br /><br />\n")),
+				'description' => array(__('Minimum Password Strength'), rtrim($pwd_strength_desc, "<br /><br />\n")),
 				'default_value' => $GLOBALS['PWD_STRENGTH'],
 				'type' => 'select',
 				'options' => array_keys($__FM_CONFIG['password_hint'])),
 		'admin_username' => array(
-				'description' => array('Default Username', 'Default MySQL user to login as. This will be overridden if the user is defined at the server level.'),
+				'description' => array(__('Default Username'), __('Default MySQL user to login as. This will be overridden if the user is defined at the server level.')),
 				'default_value' => null,
 				'type' => 'text'),
 		'admin_password' => array(
-				'description' => array('Default Password', 'Default MySQL user password to login with. This will be overridden if the password is defined at the server level.'),
+				'description' => array(__('Default Password'), __('Default MySQL user password to login with. This will be overridden if the password is defined at the server level.')),
 				'default_value' => null,
 				'type' => 'password')
 	);

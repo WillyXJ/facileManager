@@ -664,50 +664,48 @@ FORM;
 			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key'), $server_key);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
-			$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
+			$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
 
-			$return_form .= <<<FORM
-			$alternative_help
-			<table class="form-table">
+			$return_form .= $alternative_help . sprintf('<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="server_name">Server Name</label></th>
-					<td width="67%"><input name="server_name" id="server_name" type="text" value="$server_name" size="40" placeholder="dns1.local" maxlength="$server_name_length" /></td>
+					<th width="33&#37;" scope="row"><label for="server_name">%s</label></th>
+					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="dns1.local" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_key">Key</label></th>
-					<td width="67%">$server_key</td>
+					<th width="33&#37;" scope="row"><label for="server_key">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_type">Server Type</label></th>
-					<td width="67%">$server_type</td>
+					<th width="33&#37;" scope="row"><label for="server_type">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_run_as_predefined">Run-as Account</label></th>
-					<td width="67%">$server_run_as_predefined
-					<div id="run_as" style="display: $runashow"><input name="server_run_as" id="server_run_as" type="text" placeholder="Other run-as account" value="$server_run_as" /></div></td>
+					<th width="33&#37;" scope="row"><label for="server_run_as_predefined">%s</label></th>
+					<td width="67&#37;">%s
+					<div id="run_as" style="display: %s"><input name="server_run_as" id="server_run_as" type="text" placeholder="%s" value="%s" /></div></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_update_method">Update Method</label></th>
-					<td width="67%">$server_update_method<div id="server_update_port_option" $server_update_port_style><input type="number" name="server_update_port" value="$server_update_port" placeholder="80" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></div></td>
+					<th width="33&#37;" scope="row"><label for="server_update_method">%s</label></th>
+					<td width="67&#37;">%s<div id="server_update_port_option" %s><input type="number" name="server_update_port" value="%s" placeholder="80" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></div></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_config_file">Config File</label></th>
-					<td width="67%"><input name="server_config_file" id="server_config_file" type="text" value="$server_config_file" size="40" placeholder="{$__FM_CONFIG['ns']['named_config_file']}" maxlength="$server_config_file_length" /></td>
+					<th width="33&#37;" scope="row"><label for="server_config_file">%s</label></th>
+					<td width="67&#37;"><input name="server_config_file" id="server_config_file" type="text" value="%s" size="40" placeholder="%s" maxlength="%s" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_root_dir">Server Root</label></th>
-					<td width="67%"><input name="server_root_dir" id="server_root_dir" type="text" value="$server_root_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_root_dir']}" maxlength="$server_root_dir_length" /></td>
+					<th width="33&#37;" scope="row"><label for="server_root_dir">%s</label></th>
+					<td width="67&#37;"><input name="server_root_dir" id="server_root_dir" type="text" value="%s" size="40" placeholder="%s" maxlength="%s" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_chroot_dir">Server Chroot</label></th>
-					<td width="67%"><input name="server_chroot_dir" id="server_chroot_dir" type="text" value="$server_chroot_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_chroot_dir']}" maxlength="$server_chroot_dir_length" /></td>
+					<th width="33&#37;" scope="row"><label for="server_chroot_dir">%s</label></th>
+					<td width="67&#37;"><input name="server_chroot_dir" id="server_chroot_dir" type="text" value="%s" size="40" placeholder="%s" maxlength="%s" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_zones_dir">Zone File Directory</label></th>
-					<td width="67%"><input name="server_zones_dir" id="server_zones_dir" type="text" value="$server_zones_dir" size="40" placeholder="{$__FM_CONFIG['ns']['named_zones_dir']}" maxlength="$server_zones_dir_length" /></td>
+					<th width="33&#37;" scope="row"><label for="server_zones_dir">%s</label></th>
+					<td width="67&#37;"><input name="server_zones_dir" id="server_zones_dir" type="text" value="%s" size="40" placeholder="%s" maxlength="%s" /></td>
 				</tr>
 			</table>
-		$popup_footer
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
@@ -716,8 +714,18 @@ FORM;
 					allowClear: true
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				__('Server Name'), $server_name, $server_name_length,
+				__('Key'), $server_key,
+				__('Server Type'), $server_type,
+				__('Run-as Account'), $server_run_as_predefined, $runashow, __('Other run-as account'), $server_run_as,
+				__('Update Method'), $server_update_method, $server_update_port_style, $server_update_port,
+				__('Config File'), $server_config_file, $__FM_CONFIG['ns']['named_config_file'], $server_config_file_length,
+				__('Server Root'), $server_root_dir, $__FM_CONFIG['ns']['named_root_dir'], $server_root_dir_length,
+				__('Server Chroot'), $server_chroot_dir, $__FM_CONFIG['ns']['named_chroot_dir'], $server_chroot_dir_length,
+				__('Zone File Directory'), $server_zones_dir, $__FM_CONFIG['ns']['named_zones_dir'], $server_zones_dir_length,
+				$popup_footer
+				);
 		} elseif ($type == 'groups') {
 			$group_masters = (isset($group_masters)) ? explode(';', $group_masters) : null;
 			$group_slaves  = (isset($group_slaves)) ? explode(';', $group_slaves) : null;
@@ -753,9 +761,9 @@ FORM;
 			});
 		</script>', __('Group Name'), $group_name, $group_name_length, __('Master Servers'), $group_masters, __('Slave Servers'), $group_slaves, $popup_footer);
 		} else {
-			$return_form = buildPopup('header', __('Error'));
+			$return_form = buildPopup('header', _('Error'));
 			$return_form .= sprintf('<h3>%s</h3><p>%s</p>', __('Oops!'), __('Invalid request.'));
-			$return_form .= buildPopup('footer', __('OK'), array('cancel'));
+			$return_form .= buildPopup('footer', _('OK'), array('cancel'));
 		}
 
 		return $return_form;

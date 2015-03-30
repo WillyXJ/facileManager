@@ -47,47 +47,47 @@ class fm_module_tools {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		for ($x=0; $x<$num_rows; $x++) {
-			$return .= 'Running tests for ' . $results[$x]->server_name . "\n";
+			$return .= sprintf(__("Running tests for %s\n"), $results[$x]->server_name);
 			
 			/** ping tests */
-			$return .= "\tPing:\t\t";
-			if (pingTest($results[$x]->server_name)) $return .=  'success';
-			else $return .=  'failed';
+			$return .= "\t" . str_pad(__('Ping:'), 15);
+			if (pingTest($results[$x]->server_name)) $return .=  __('success');
+			else $return .=  __('failed');
 			$return .=  "\n";
 
 			/** remote port tests */
-			$return .= "\tRemote Port:\t";
+			$return .= "\t" . str_pad(__('Remote Port:'), 15);
 			if ($results[$x]->server_update_method != 'cron') {
 				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
-					$return .= 'success (tcp/' . $results[$x]->server_update_port . ")\n";
+					$return .= __('success') . ' (tcp/' . $results[$x]->server_update_port . ")\n";
 					
 					if ($results[$x]->server_update_method == 'ssh') {
-						$return .= "\tSSH Login:\t";
+						$return .= "\t" . str_pad(__('SSH Login:'), 15);
 						if (!$ssh_key) {
-							$return .= 'no SSH key defined';
+							$return .= __('no SSH key defined');
 						} elseif ($ssh_key_loaded === false) {
-							$return .= 'could not load SSH key into ' . $temp_ssh_key;
+							$return .= sprintf(__('could not load SSH key into %s'), $temp_ssh_key);
 						} elseif (!$ssh_user) {
-							$return .= 'no SSH user defined';
+							$return .= __('no SSH user defined');
 						} else {
 							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} uptime", $post_result, $retval);
 							if ($retval) {
-								$return .= 'ssh key login failed';
+								$return .= __('ssh key login failed');
 							} else {
-								$return .= 'success';
+								$return .= __('success');
 							}
 						}
 					} else {
 						/** php tests */
-						$return .= "\thttp page:\t\t";
+						$return .= "\t" . str_pad(__('http page:'), 15);
 						$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
 									$_SESSION['module'] . '/reload.php', null);
-						if ($php_result == 'Incorrect parameters defined.') $return .= 'success';
-						else $return .= 'failed';
+						if ($php_result == 'Incorrect parameters defined.') $return .= __('success');
+						else $return .= __('failed');
 					}
 					
-				} else $return .=  'failed (tcp/' . $results[$x]->server_update_port . ')';
-			} else $return .= 'skipping (host updates via cron)';
+				} else $return .=  __('failed') . ' (tcp/' . $results[$x]->server_update_port . ')';
+			} else $return .= __('skipping (host updates via cron)');
 			$return .=  "\n\n";
 		}
 		

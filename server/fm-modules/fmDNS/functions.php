@@ -100,18 +100,20 @@ function buildModuleDashboard() {
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', 'record_id', 'record_');
 	$record_count = $fmdb->num_rows;
 
-	$dashboard = <<<DASH
-	<div>
+	$dashboard = sprintf('<div>
 	<div id="shadow_box">
 		<div id="shadow_container">
-		<h3>Summary</h3>
-		<li>You have <b>$server_count</b> name servers configured.</li>
-		<li>You have <b>$domain_count</b> zones defined.</li>
-		<li>You have <b>$record_count</b> records.</li>
+		<h3>%s</h3>
+		<li>%s</li>
+		<li>%s</li>
+		<li>%s</li>
 		</div>
 	</div>
-	</div>
-DASH;
+	</div>', __('Summary'),
+			sprintf(__('You have <b>%s</b> name servers configured.'), $server_count),
+			sprintf(__('You have <b>%s</b> zones defined.'), $domain_count),
+			sprintf(__('You have <b>%s</b> records.'), $record_count)
+			);
 
 	if ($error_display) {
 		$dashboard .= sprintf('<div>

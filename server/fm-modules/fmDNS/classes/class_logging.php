@@ -531,46 +531,45 @@ FORM;
 				$syslogshow = 'none';
 			}
 	
-			$return_form .= <<<FORM
-				<table class="form-table">
+			$return_form .= sprintf('<table class="form-table">
 					<tr>
-						<th width="33%" scope="row"><label for="cfg_name">Channel Name</label></th>
-						<td width="67%"><input name="cfg_name" id="cfg_name" type="text" value="$cfg_data" size="40" /></td>
+						<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
+						<td width="67&#37;"><input name="cfg_name" id="cfg_name" type="text" value="%s" size="40" /></td>
 					</tr>
 					<tr>
-						<th width="33%" scope="row"><label for="cfg_destination">Logging Destination</label></th>
-						<td width="67%">
-							$cfg_destination
-							<div id="destination_option" style="display: $fileshow">
-								<input type="text" name="cfg_file_path[]" value="$cfg_file_path" placeholder="/path/to/file" /><br />
-								versions $cfg_file_versions <input type="number" name="cfg_file_path[]" value="$cfg_file_size" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
-								$cfg_file_size_spec
+						<th width="33&#37;" scope="row"><label for="cfg_destination">%s</label></th>
+						<td width="67&#37;">
+							%s
+							<div id="destination_option" style="display: %s">
+								<input type="text" name="cfg_file_path[]" value="%s" placeholder="/path/to/file" /><br />
+								versions %s <input type="number" name="cfg_file_path[]" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
+								%s
 							</div>
-							<div id="syslog_options" style="display: $syslogshow">$cfg_syslog</div></td>
+							<div id="syslog_options" style="display: %s">%s</div></td>
 					</tr>
 					</span>
 					<tr>
-						<th width="33%" scope="row"><label for="cfg_severity">Severity</label></th>
-						<td width="67%">$cfg_severity</td>
+						<th width="33&#37;" scope="row"><label for="cfg_severity">%s</label></th>
+						<td width="67&#37;">%s</td>
 					</tr>
 					<tr>
-						<th width="33%" scope="row"><label for="print-category">Print Category (optional)</label></th>
-						<td width="67%">$cfg_print_category</td>
+						<th width="33&#37;" scope="row"><label for="print-category">%s</label></th>
+						<td width="67&#37;">%s</td>
 					</tr>
 					<tr>
-						<th width="33%" scope="row"><label for="print-severity">Print Severity (optional)</label></th>
-						<td width="67%">$cfg_print_severity</td>
+						<th width="33&#37;" scope="row"><label for="print-severity">%s</label></th>
+						<td width="67&#37;">%s</td>
 					</tr>
 					<tr>
-						<th width="33%" scope="row"><label for="print-time">Print Time (optional)</label></th>
-						<td width="67%">$cfg_print_time</td>
+						<th width="33&#37;" scope="row"><label for="print-time">%s</label></th>
+						<td width="67&#37;">%s</td>
 					</tr>
 					<tr>
-						<th width="33%" scope="row"><label for="cfg_comment">Comment</label></th>
-						<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
+						<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
+						<td width="67&#37;"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">%s</textarea></td>
 					</tr>
 				</table>
-				$popup_footer
+				%s
 			</form>
 		<script>
 			$(document).ready(function() {
@@ -579,43 +578,55 @@ FORM;
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				__('Channel Name'), $cfg_data,
+				__('Logging Destination'), $cfg_destination, $fileshow, $cfg_file_path,
+					$cfg_file_versions, $cfg_file_size, $cfg_file_size_spec, $syslogshow, $cfg_syslog,
+				__('Severity'), $cfg_severity,
+				__('Print Category (optional)'), $cfg_print_category,
+				__('Print Severity (optional)'), $cfg_print_severity,
+				__('Print Time (optional)'), $cfg_print_time,
+				__('Comment'), $cfg_comment,
+				$popup_footer
+			);
 		} elseif ($type == 'category') {
 			$cfg_name = buildSelect('cfg_name', 'cfg_name', $this->availableCategories($cfg_data), $cfg_data);
 			$cfg_data = buildSelect('cfg_data', 'cfg_data', $this->availableChannels(), $this->getAssocChannels($cfg_id), 4, null, true);
 	
-			$return_form .= <<<FORM
-				<table class="form-table">
+			$return_form .= sprintf('<table class="form-table">
 					<tr>
-						<th width="33%" scope="row"><label for="cfg_name">Category</label></th>
-						<td width="67%">$cfg_name</td>
+						<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
+						<td width="67&#37;">%s</td>
 					</tr>
 					<tr>
-						<th width="33%" scope="row"><label for="cfg_data">Channels</label></th>
-						<td width="67%">$cfg_data</td>
+						<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+						<td width="67&#37;">%s</td>
 					</tr>
 					<tr>
-						<th width="33%" scope="row"><label for="cfg_comment">Comment</label></th>
-						<td width="67%"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">$cfg_comment</textarea></td>
+						<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
+						<td width="67&#37;"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">%s</textarea></td>
 					</tr>
 				</table>
-				$popup_footer
+				%s
 			</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
 					allowClear: true,
-					width: '235px',
+					width: "235px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				__('Category'), $cfg_name,
+				__('Channels'), $cfg_data,
+				__('Comment'), $cfg_comment,
+				$popup_footer
+			);
 		} else {
-			$return_form = buildPopup('header', 'Error');
-			$return_form .= '<h3>Oops!</h3><p>Invalid request.</p>';
-			$return_form .= buildPopup('footer', 'OK', array('cancel'));
+			$return_form = buildPopup('header', _('Error'));
+			$return_form .= sprintf('<h3>%s</h3><p>%s</p>', __('Oops!'), __('Invalid request.'));
+			$return_form .= buildPopup('footer', _('OK'), array('cancel'));
 		}
 
 		return $return_form;

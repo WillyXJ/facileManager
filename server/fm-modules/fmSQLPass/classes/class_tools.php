@@ -33,26 +33,26 @@ class fm_module_tools {
 		/** Get server list */
 		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
 		
-		if (!$fmdb->num_rows) return 'There are no servers defined.';
+		if (!$fmdb->num_rows) return __('There are no servers defined.');
 		
 		/** Process server list */
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		for ($x=0; $x<$num_rows; $x++) {
-			$return .= 'Running tests for ' . $results[$x]->server_name . "\n";
+			$return .= sprintf(__("Running tests for %s\n"), $results[$x]->server_name);
 			
 			/** ping tests */
-			$return .= "\tPing:\t\t\t";
-			if (pingTest($results[$x]->server_name)) $return .=  'success';
-			else $return .=  'failed';
+			$return .= "\t" . str_pad(__('Ping:'), 15);
+			if (pingTest($results[$x]->server_name)) $return .=  __('success');
+			else $return .=  __('failed');
 			$return .=  "\n";
 
 			/** SQL tests */
-			$return .= "\t" . $results[$x]->server_type . ":\t\t\t";
+			$return .= "\t" . str_pad($results[$x]->server_type. ':', 15);
 			$port = $results[$x]->server_port ? $results[$x]->server_port : $__FM_CONFIG['fmSQLPass']['default']['ports'][$results[$x]->server_type];
 
-			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  'success (tcp/' . $port . ')';
-			else $return .=  'failed (tcp/' . $port . ')';
+			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  __('success') . ' (tcp/' . $port . ')';
+			else $return .=  __('failed') . ' (tcp/' . $port . ')';
 			$return .=  "\n\n";
 		}
 		

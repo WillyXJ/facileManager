@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-25 14:31-0600\n"
+"POT-Creation-Date: 2015-03-30 17:06-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -293,13 +293,6 @@ msgstr ""
 msgid ".htaccess File Present"
 msgstr ""
 
-#: server/fm-includes/init.php:149
-#: server/fm-modules/facileManager/classes/class_accounts.php:33
-#: server/fm-modules/facileManager/classes/class_accounts.php:60
-#: server/fm-modules/facileManager/classes/class_accounts.php:64
-msgid "Account is not found."
-msgstr ""
-
 #: server/fm-includes/init.php:150
 #, php-format
 msgid ""
@@ -350,39 +343,39 @@ msgstr ""
 msgid "Requirement Error"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2187
+#: server/fm-modules/facileManager/functions.php:2189
 msgid "Bulk Actions"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2188
+#: server/fm-modules/facileManager/functions.php:2190
 msgid "Apply"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2330
+#: server/fm-modules/facileManager/functions.php:2332
 msgid "An unknown error occurred."
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2335
+#: server/fm-modules/facileManager/functions.php:2337
 msgid "Oops!"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2336
+#: server/fm-modules/facileManager/functions.php:2338
 #: server/fm-modules/facileManager/pages/404.php:36
 #, php-format
 msgid "&larr; Back"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2353
+#: server/fm-modules/facileManager/functions.php:2355
 msgid ""
 "You do not have permission to view this page. Please contact your "
 "administrator for access."
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2459
+#: server/fm-modules/facileManager/functions.php:2461
 msgid "Manually reset authentication method."
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2705
+#: server/fm-modules/facileManager/functions.php:2707
 #, php-format
 msgid ""
 "PHP max_input_vars (%1$d) has been reached and %2$s or more are required. "
@@ -390,26 +383,31 @@ msgid ""
 "following in %3$s.htaccess:"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2799
+#: server/fm-modules/facileManager/functions.php:2801
 #: server/fm-modules/facileManager/classes/class_settings.php:178
 msgid "Save"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2865
+#: server/fm-modules/facileManager/functions.php:2821
+#: server/fm-modules/facileManager/classes/class_users.php:525
+msgid "Cancel"
+msgstr ""
+
+#: server/fm-modules/facileManager/functions.php:2867
 #: server/fm-modules/facileManager/classes/class_accounts.php:48
 msgid "Success"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2916
+#: server/fm-modules/facileManager/functions.php:2918
 #, php-format
 msgid "Searched for %s"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2921
+#: server/fm-modules/facileManager/functions.php:2923
 msgid "Search this page by keyword"
 msgstr ""
 
-#: server/fm-modules/facileManager/functions.php:2980
+#: server/fm-modules/facileManager/functions.php:2982
 msgid "Add New"
 msgstr ""
 
@@ -903,6 +901,12 @@ msgstr ""
 msgid "You are not authorized to run this tool."
 msgstr ""
 
+#: server/fm-modules/facileManager/classes/class_accounts.php:33
+#: server/fm-modules/facileManager/classes/class_accounts.php:60
+#: server/fm-modules/facileManager/classes/class_accounts.php:64
+msgid "Account is not found."
+msgstr ""
+
 #: server/fm-modules/facileManager/classes/class_accounts.php:45
 msgid "Server is not found."
 msgstr ""
@@ -1176,10 +1180,6 @@ msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_users.php:517
 msgid "User Details"
-msgstr ""
-
-#: server/fm-modules/facileManager/classes/class_users.php:525
-msgid "Cancel"
 msgstr ""
 
 #: server/fm-modules/facileManager/js/facileManager.php:108

@@ -29,7 +29,7 @@ class fm_module_servers {
 		global $fmdb;
 		
 		if (!$result) {
-			echo '<p id="table_edits" class="noresult" name="servers">There are no servers defined.</p>';
+			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no servers defined.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_module_servers {
 							'name' => 'servers'
 						);
 
-			$title_array = array('Hostname', 'Type', 'Groups');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => 'Actions', 'class' => 'header-actions');
+			$title_array = array(__('Hostname'), __('Type'), __('Groups'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -63,15 +63,15 @@ class fm_module_servers {
 		
 		$server_name = sanitize($server_name);
 		
-		if (empty($server_name)) return 'No server name defined.';
+		if (empty($server_name)) return __('No server name defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($server_name) > $field_length) return 'Server name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($server_name) > $field_length) return sprintf(__('Server name is too long (maximum %d characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $server_name, 'server_', 'server_name');
-		if ($fmdb->num_rows) return 'This server name already exists.';
+		if ($fmdb->num_rows) return __('This server name already exists.');
 		
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers`";
 		$sql_fields = '(';
@@ -82,7 +82,7 @@ class fm_module_servers {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
 		/** Set default ports */
-		if (!empty($post['server_port']) && !verifyNumber($post['server_port'], 1, 65535, false)) return 'Server port must be a valid TCP port.';
+		if (!empty($post['server_port']) && !verifyNumber($post['server_port'], 1, 65535, false)) return __('Server port must be a valid TCP port.');
 		if (empty($post['server_port'])) {
 			$post['server_port'] = $__FM_CONFIG['fmSQLPass']['default']['ports'][$post['server_type']];
 		}
@@ -135,7 +135,7 @@ class fm_module_servers {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the server because a database error occurred.';
+		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
 
 		addLogEntry($log_message);
 		return true;
@@ -147,7 +147,7 @@ class fm_module_servers {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['server_name'])) return 'No server name defined.';
+		if (empty($post['server_name'])) return __('No server name defined.');
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
@@ -156,11 +156,11 @@ class fm_module_servers {
 		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
-			if ($result[0]->server_id != $post['server_id']) return 'This server name already exists.';
+			if ($result[0]->server_id != $post['server_id']) return __('This server name already exists.');
 		}
 		
 		/** Set default ports */
-		if (!empty($post['server_port']) && !verifyNumber($post['server_port'], 1, 65535, false)) return 'Server port must be a valid TCP port.';
+		if (!empty($post['server_port']) && !verifyNumber($post['server_port'], 1, 65535, false)) return __('Server port must be a valid TCP port.');
 		if (empty($post['server_port'])) {
 			$post['server_port'] = $__FM_CONFIG['fmSQLPass']['default']['ports'][$post['server_type']];
 		}
@@ -211,7 +211,7 @@ class fm_module_servers {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return 'Could not add the server because a database error occurred.';
+		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -235,7 +235,7 @@ class fm_module_servers {
 		// Delete server
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		if (!updateStatus('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $id, 'server_', 'deleted', 'server_id')) {
-			return 'This database server could not be deleted.'. "\n";
+			return __('This database server could not be deleted.') . "\n";
 		} else {
 			addLogEntry("Deleted database server '$tmp_name'.");
 			return true;
@@ -327,7 +327,7 @@ HTML;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
 
 		$server_types = buildSelect('server_type', 'server_type', $this->getServerTypes(), $server_type);
-		$groups = (is_array($group_options)) ? buildSelect('server_groups', 1, $group_options, $server_groups, 4, null, true) : 'Server Groups need to be defined first.';
+		$groups = (is_array($group_options)) ? buildSelect('server_groups', 1, $group_options, $server_groups, 4, null, true) : __('Server Groups need to be defined first.');
 		
 		/** Handle credentials */
 		if (isSerialized($server_credentials)) {
@@ -339,49 +339,57 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Server');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
-			<input type="hidden" name="action" id="action" value="$action" />
-			<input type="hidden" name="server_type" id="server_type" value="$server_type" />
-			<input type="hidden" name="server_id" id="server_id" value="$server_id" />
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		%s
+			<input type="hidden" name="action" id="action" value="%s" />
+			<input type="hidden" name="server_type" id="server_type" value="%s" />
+			<input type="hidden" name="server_id" id="server_id" value="%d" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="server_name">Hostname</label></th>
-					<td width="67%"><input name="server_name" id="server_name" type="text" value="$server_name" size="40" maxlength="$server_name_length" /></td>
+					<th width="33&#37;" scope="row"><label for="server_name">%s</label></th>
+					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" maxlength="%s" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_type">Server Type</label></th>
-					<td width="67%">$server_types</td>
+					<th width="33&#37;" scope="row"><label for="server_type">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_port">Server Port</label></th>
-					<td width="67%"><input type="number" name="server_port" value="$server_port" placeholder="3306" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></td>
+					<th width="33&#37;" scope="row"><label for="server_port">%s</label></th>
+					<td width="67&#37;"><input type="number" name="server_port" value="%d" placeholder="3306" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_groups">Groups</label></th>
-					<td width="67%">$groups</td>
+					<th width="33&#37;" scope="row"><label for="server_groups">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_cred_user">Username</label></th>
-					<td width="67%"><input name="server_credentials[]" id="server_cred_user" type="text" value="$server_cred_user" size="40" /></td>
+					<th width="33&#37;" scope="row"><label for="server_cred_user">%s</label></th>
+					<td width="67&#37;"><input name="server_credentials[]" id="server_cred_user" type="text" value="%s" size="40" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="server_cred_password">Password</label></th>
-					<td width="67%"><input name="server_credentials[]" id="server_cred_password" type="password" value="$server_cred_password" size="40" /></td>
+					<th width="33&#37;" scope="row"><label for="server_cred_password">%s</label></th>
+					<td width="67&#37;"><input name="server_credentials[]" id="server_cred_password" type="password" value="%s" size="40" /></td>
 				</tr>
 			</table>
-		$popup_footer
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '200px',
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				$popup_header,
+				$action, $server_type, $server_id,
+				__('Hostname'), $server_name, $server_name_length,
+				__('Server Type'), $server_types,
+				__('Server Port'), $server_port,
+				__('Groups'), $groups,
+				__('Username'), $server_cred_user,
+				__('Password'), $server_cred_password,
+				$popup_footer
+			);
 
 		return $return_form;
 	}

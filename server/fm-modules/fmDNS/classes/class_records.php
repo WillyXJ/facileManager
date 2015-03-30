@@ -541,41 +541,46 @@ HTML;
 			$template_append = null;
 		} else {
 			$template_append = sprintf('<tr>
-			<th>Append Domain</th>
-			<td><input type="radio" id="append[0]" name="%1$s[%2$s][soa_append]" value="yes" %3$s /><label class="radio" for="append[0]"> yes</label> <input type="radio" id="append[1]" name="%1$s[%2$s][soa_append]" value="no" %4$s /><label class="radio" for="append[1]"> no</label></td>
-		</tr>', $action, $soa_id, $yeschecked, $nochecked);
+			<th>%s</th>
+			<td><input type="radio" id="append[0]" name="%2$s[%3$s][soa_append]" value="yes" %4$s /><label class="radio" for="append[0]"> %6$s</label> <input type="radio" id="append[1]" name="%2$s[%3$s][soa_append]" value="no" %5$s /><label class="radio" for="append[1]"> %7$s</label></td>
+		</tr>', __('Append Domain'), $action, $soa_id, $yeschecked, $nochecked, __('yes'), __('no'));
 		}
+		
+		$labels = array(
+			__('Master Server'),
+			__('Email Address'),
+			__('Refresh'),
+			__('Retry'),
+			__('Expire'),
+			__('TTL'),
+		);
 	
 		return <<<HTML
 		$soa_templates
 	<div id="custom-soa-form">
 	<table class="form-table">
 		<tr>
-			<th width="120">Serial Number</th>
-			<td><span style="position: relative; top: -2px;">Auto Generated</span></td>
-		</tr>
-		<tr>
-			<th>Master Server</th>
+			<th>{$labels[0]}</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_master_server]" size="25" value="$soa_master_server" $disabled /></td>
 		</tr>
 		<tr>
-			<th>Email Address</th>
+			<th>{$labels[1]}</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_email_address]" size="25" value="$soa_email_address" $disabled /></td>
 		</tr>
 		<tr>
-			<th>Refresh</th>
+			<th>{$labels[2]}</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_refresh]" size="25" value="$soa_refresh" $disabled /></td>
 		</tr>
 		<tr>
-			<th>Retry</th>
+			<th>{$labels[3]}</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_retry]" size="25" value="$soa_retry" $disabled /></td>
 		</tr>
 		<tr>
-			<th>Expire</th>
+			<th>{$labels[4]}</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_expire]" size="25" value="$soa_expire" $disabled /></td>
 		</tr>
 		<tr>
-			<th>TTL</th>
+			<th>{$labels[5]}</th>
 			<td><input type="text" name="{$action}[$soa_id][soa_ttl]" size="25" value="$soa_ttl" $disabled /></td>
 		</tr>
 		$template_append

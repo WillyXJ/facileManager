@@ -94,7 +94,7 @@ class fm_dns_views {
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
-		if ($field_length !== false && strlen($post['view_name']) > $field_length) return 'View name is too long (maximum ' . $field_length . ' characters).';
+		if ($field_length !== false && strlen($post['view_name']) > $field_length) return sprintf(__('View name is too long (maximum %s characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', sanitize($post['view_name']), 'view_', 'view_name');
@@ -219,26 +219,29 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' View');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="">
-		$popup_header
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		%s
 			<input type="hidden" name="page" id="page" value="views" />
-			<input type="hidden" name="action" id="action" value="$action" />
-			<input type="hidden" name="view_id" id="view_id" value="$view_id" />
-			<input type="hidden" name="server_serial_no" value="$server_serial_no" />
+			<input type="hidden" name="action" id="action" value="%s" />
+			<input type="hidden" name="view_id" id="view_id" value="%d" />
+			<input type="hidden" name="server_serial_no" value="%d" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="view_name">View Name</label></th>
-					<td width="67%"><input name="view_name" id="view_name" type="text" value="$view_name" size="40" placeholder="internal" maxlength="$view_name_length" /></td>
+					<th width="33%" scope="row"><label for="view_name">%s</label></th>
+					<td width="67%"><input name="view_name" id="view_name" type="text" value="%s" size="40" placeholder="internal" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="view_comment">Comment</label></th>
-					<td width="67%"><textarea id="view_comment" name="view_comment" rows="4" cols="30">$view_comment</textarea></td>
+					<th width="33%" scope="row"><label for="view_comment">%s</label></th>
+					<td width="67%"><textarea id="view_comment" name="view_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
-		</form>
-FORM;
+		%s
+		</form>',
+				$popup_header,
+				$action, $view_id, $server_serial_no,
+				__('View Name'), $view_name, $view_name_length,
+				__('Comment'), $view_comment, $popup_footer
+				);
 
 		return $return_form;
 	}

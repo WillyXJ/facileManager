@@ -29,7 +29,7 @@ class fm_module_services {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="services">%s</p>', sprintf(_('There are no %s services defined.'), strtoupper($type)));
+			printf('<p id="table_edits" class="noresult" name="services">%s</p>', sprintf(__('There are no %s services defined.'), strtoupper($type)));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,8 +40,8 @@ class fm_module_services {
 							'name' => 'services'
 						);
 
-			$title_array = ($type == 'icmp') ? array(_('Service Name'), _('ICMP Type'), _('ICMP Code'), _('Comment')) : array(_('Service Name'), _('Source Ports'), _('Dest Ports'), _('Flags'), _('Comment'));
-			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+			$title_array = ($type == 'icmp') ? array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), __('Comment')) : array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), __('Comment'));
+			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -73,7 +73,7 @@ class fm_module_services {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'service_name') && empty($clean_data)) return _('No service name defined.');
+			if (($key == 'service_name') && empty($clean_data)) return __('No service name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$clean_data',";
@@ -85,7 +85,7 @@ class fm_module_services {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not add the service because a database error occurred.');
+		if (!$fmdb->result) return __('Could not add the service because a database error occurred.');
 
 		addLogEntry("Added service:\nName: {$post['service_name']}\nType: {$post['service_type']}\n" .
 				"Update Method: {$post['service_update_method']}\nConfig File: {$post['service_config_file']}");
@@ -118,7 +118,7 @@ class fm_module_services {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}services` SET $sql WHERE `service_id`={$post['service_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return _('Could not update the service because a database error occurred.');
+		if (!$fmdb->result) return __('Could not update the service because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -140,7 +140,7 @@ class fm_module_services {
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $service_id, 'service_', 'service_id');
 		if ($fmdb->num_rows) {
 			/** Is the service_id present in a policy? */
-			if (isItemInPolicy($service_id, 'service')) return _('This service could not be deleted because it is associated with one or more policies.');
+			if (isItemInPolicy($service_id, 'service')) return __('This service could not be deleted because it is associated with one or more policies.');
 			
 			/** Delete service */
 			$tmp_name = getNameFromID($service_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
@@ -150,7 +150,7 @@ class fm_module_services {
 			}
 		}
 		
-		return _('This service could not be deleted.');
+		return __('This service could not be deleted.');
 	}
 
 
@@ -261,47 +261,46 @@ HTML;
 		$popup_header = buildPopup('header', $ucaction . ' Service');
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="?type=$type">
-		$popup_header
-			<input type="hidden" name="action" value="$action" />
-			<input type="hidden" name="service_id" value="$service_id" />
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="service_id" value="%s" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="service_name">Service Name</label></th>
-					<td width="67%"><input name="service_name" id="service_name" type="text" value="$service_name" size="40" placeholder="http" maxlength="$service_name_length" /></td>
+					<th width="33&#37;" scope="row"><label for="service_name">%s</label></th>
+					<td width="67&#37;"><input name="service_name" id="service_name" type="text" value="%s" size="40" placeholder="http" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="service_type">Service Type</label></th>
-					<td width="67%">
-						$service_type
-						<div id="icmp_option" style="display: $icmp_option;">
-							<label for="service_icmp_type">Type</label> <input type="number" name="service_icmp_type" value="$service_icmp_type" style="width: 5em;" onkeydown="return validateNumber(event)" placeholder="0" max="40" /><br />
-							<label for="service_icmp_code">Code</label> <input type="number" name="service_icmp_code" value="$service_icmp_code" style="width: 5em;" onkeydown="return validateNumber(event)" placeholder="0" max="15" />
+					<th width="33&#37;" scope="row"><label for="service_type">%s</label></th>
+					<td width="67&#37;">
+						%s
+						<div id="icmp_option" style="display: %s;">
+							<label for="service_icmp_type">Type</label> <input type="number" name="service_icmp_type" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" placeholder="0" max="40" /><br />
+							<label for="service_icmp_code">Code</label> <input type="number" name="service_icmp_code" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" placeholder="0" max="15" />
 						</div>
-						<div id="tcpudp_option" style="display: $tcpudp_option;">
-							<h4>Source Port Range</h4>
-							<label for="port_src_start">Start</label> <input type="number" name="port_src[]" value="$port_src_start" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" /> 
-							<label for="port_src_end">End</label> <input type="number" name="port_src[]" value="$port_src_end" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" />
-							<h4>Destination Port Range</h4>
-							<label for="port_dest_start">Start</label> <input type="number" name="port_dest[]" value="$port_dest_start" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" /> 
-							<label for="port_dest_end">End</label> <input type="number" name="port_dest[]" value="$port_dest_end" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" />
+						<div id="tcpudp_option" style="display: %s;">
+							<h4>%s</h4>
+							<label for="port_src_start">%s</label> <input type="number" name="port_src[]" value="%s" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" /> 
+							<label for="port_src_end">%s</label> <input type="number" name="port_src[]" value="%s" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" />
+							<h4>%s</h4>
+							<label for="port_dest_start">%s</label> <input type="number" name="port_dest[]" value="%s" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" /> 
+							<label for="port_dest_end">%s</label> <input type="number" name="port_dest[]" value="%s" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" />
 						</div>
-						<div id="tcp_option" style="display: $tcp_option;">
-							<h4>TCP Flags</h4>
+						<div id="tcp_option" style="display: %s;">
+							<h4>%s</h4>
 							<table class="form-table tcp-flags">
 								<tbody>
 									<tr>
 										<th></th>
-										$tcp_flags_head
+										%s
 									</tr>
 									<tr>
-										<th style="text-align: right;" title="Only iptables uses the Mask bit">Mask</th>
-										$tcp_flags_mask_form
+										<th style="text-align: right;" title="%s">%s</th>
+										%s
 									</tr>
 									<tr>
-										<th style="text-align: right;">Settings</th>
-										$tcp_flags_settings_form
+										<th style="text-align: right;">%s</th>
+										%s
 									</tr>
 								</tbody>
 							</table>
@@ -309,21 +308,32 @@ HTML;
 					</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="service_comment">Comment</label></th>
-					<td width="67%"><textarea id="service_comment" name="service_comment" rows="4" cols="30">$service_comment</textarea></td>
+					<th width="33&#37;" scope="row"><label for="service_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="service_comment" name="service_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
-		$popup_footer
+		%s
 		</form>
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '200px',
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
-FORM;
+		</script>',
+				$type, $popup_header,
+				$action, $service_id,
+				__('Service Name'), $service_name, $service_name_length,
+				__('Service Type'), $service_type,
+				$icmp_option, $service_icmp_type, $service_icmp_code,
+				$tcpudp_option, __('Source Port Range'), __('Start'), $port_src_start, __('End'), $port_src_end,
+				__('Destination Port Range'), __('Start'), $port_dest_start, __('End'), $port_dest_end,
+				$tcp_option, __('TCP Flags'), $tcp_flags_head, __('Only iptables uses the Mask bit'), __('Mask'),
+				$tcp_flags_mask_form, __('Settings'), $tcp_flags_settings_form,
+				__('Comment'), $service_comment,
+				$popup_footer
+			);
 
 		return $return_form;
 	}
@@ -332,7 +342,7 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (empty($post['service_name'])) return _('No service name defined.');
+		if (empty($post['service_name'])) return __('No service name defined.');
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name');
@@ -340,12 +350,12 @@ FORM;
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $post['service_name'], 'service_', 'service_name', "AND service_type='{$post['service_type']}' AND service_id!={$post['service_id']}");
-		if ($fmdb->num_rows) return _('This service name already exists.');
+		if ($fmdb->num_rows) return __('This service name already exists.');
 		
 		/** Set ports */
 		if ($post['service_type'] != 'icmp') {
 			foreach ($post['port_src'] as $port) {
-				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return sprintf(_('Source ports must be a valid %s port range.'), strtoupper($post['service_type']));
+				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return sprintf(__('Source ports must be a valid %s port range.'), strtoupper($post['service_type']));
 				if (empty($port) || $port == 0) {
 					$post['port_src'] = array('', '');
 					break;
@@ -356,7 +366,7 @@ FORM;
 			if ($post['service_src_ports'] == ':') $post['service_src_ports'] = null;
 			
 			foreach ($post['port_dest'] as $port) {
-				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return sprintf(_('Destination ports must be a valid %s port range.'), strtoupper($post['service_type']));
+				if (!empty($port) && !verifyNumber($port, 0, 65535, false)) return sprintf(__('Destination ports must be a valid %s port range.'), strtoupper($post['service_type']));
 				if (empty($port) || $port == 0) {
 					$post['port_dest'] = array('', '');
 					break;
@@ -369,10 +379,10 @@ FORM;
 			unset($post['service_icmp_code']);
 			unset($post['service_icmp_type']);
 		} else {
-			if (!empty($post['service_icmp_type']) && !verifyNumber($post['service_icmp_type'], -1, 40, false)) return _('ICMP type is invalid.');
+			if (!empty($post['service_icmp_type']) && !verifyNumber($post['service_icmp_type'], -1, 40, false)) return __('ICMP type is invalid.');
 			if (empty($post['service_icmp_type'])) $post['service_icmp_type'] = 0;
 			
-			if (!empty($post['service_icmp_code']) && !verifyNumber($post['service_icmp_code'], -1, 15, false)) return _('ICMP code is invalid.');
+			if (!empty($post['service_icmp_code']) && !verifyNumber($post['service_icmp_code'], -1, 15, false)) return __('ICMP code is invalid.');
 			if (empty($post['service_icmp_code'])) $post['service_icmp_code'] = 0;
 		}
 		

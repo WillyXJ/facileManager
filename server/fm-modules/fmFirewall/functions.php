@@ -55,7 +55,7 @@ function moduleFunctionalCheck() {
 function buildModuleDashboard() {
 	global $fmdb, $__FM_CONFIG;
 	
-	return sprintf('<p>%s has no dashboard content yet.</p>', $_SESSION['module']);
+	return sprintf('<p>%s</p>', sprintf(__('%s has no dashboard content yet.'), $_SESSION['module']));
 
 }
 
