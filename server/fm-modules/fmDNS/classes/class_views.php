@@ -227,12 +227,12 @@ HTML;
 			<input type="hidden" name="server_serial_no" value="%d" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="view_name">%s</label></th>
-					<td width="67%"><input name="view_name" id="view_name" type="text" value="%s" size="40" placeholder="internal" maxlength="%d" /></td>
+					<th width="33&#37;" scope="row"><label for="view_name">%s</label></th>
+					<td width="67&#37;"><input name="view_name" id="view_name" type="text" value="%s" size="40" placeholder="internal" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="view_comment">%s</label></th>
-					<td width="67%"><textarea id="view_comment" name="view_comment" rows="4" cols="30">%s</textarea></td>
+					<th width="33&#37;" scope="row"><label for="view_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="view_comment" name="view_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
 		%s
@@ -241,7 +241,7 @@ HTML;
 				$action, $view_id, $server_serial_no,
 				__('View Name'), $view_name, $view_name_length,
 				__('Comment'), $view_comment, $popup_footer
-				);
+			);
 
 		return $return_form;
 	}

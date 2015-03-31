@@ -95,7 +95,7 @@ if (isset($record_type) && $domain_id && !isset($import_records)) {
 	if ($domain_id) {
 		header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);
 	} else {
-		header('Location: ' . $menu[getParentMenuKey('SOA')][4]);
+		header('Location: ' . $menu[getParentMenuKey(__('SOA'))][4]);
 	}
 }
 

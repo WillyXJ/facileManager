@@ -32,13 +32,13 @@ function moduleFunctionalCheck() {
 	$html_checks = null;
 	
 	/** Count active name servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . __('You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL('Servers'));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . __('You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL(__('Servers')));
 	
 	/** Count global options */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : sprintf('<p>' . __('You currently have no global options defined for named.conf. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL('Options'));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : sprintf('<p>' . __('You currently have no global options defined for named.conf. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL(__('Options')));
 	
 	/** Count zones */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : sprintf('<p>' . __('You currently have no zones defined. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL('Zones'));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_')) ? null : sprintf('<p>' . __('You currently have no zones defined. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL(__('Zones')));
 	
 	foreach ($checks as $val) {
 		$html_checks .= $val;
@@ -67,9 +67,9 @@ function buildModuleDashboard() {
 		if ($server_results[$i]->server_installed != 'yes') {
 			$errors .= sprintf(__('<b>%s</b> client is not installed.') . "\n", $server_results[$i]->server_name);
 		} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-			$errors .= sprintf(__('<a href="%s"><b>%s</b></a> client needs to be upgraded.') . "\n", getMenuURL('Servers'), $server_results[$i]->server_name);
+			$errors .= sprintf(__('<a href="%s"><b>%s</b></a> client needs to be upgraded.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
 		} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
-			$errors .= sprintf(__('<a href="%s"><b>%s</b></a> needs a new configuration built.') . "\n", getMenuURL('Servers'), $server_results[$i]->server_name);
+			$errors .= sprintf(__('<a href="%s"><b>%s</b></a> needs a new configuration built.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
 		}
 	}
 	/** Zone stats */

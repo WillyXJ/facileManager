@@ -35,8 +35,8 @@ if (isset($_GET['record_type'])) {
 	$record_type = $default_record_type;
 }
 
-$domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . getMenuURL('Zones'));
-if (!isValidDomain($domain_id)) header('Location: ' . getMenuURL('Zones'));
+$domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . getMenuURL(__('Zones')));
+if (!isValidDomain($domain_id)) header('Location: ' . getMenuURL(__('Zones')));
 
 /** Does the user have access? */
 if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();

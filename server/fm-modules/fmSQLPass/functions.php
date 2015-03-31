@@ -33,10 +33,10 @@ function moduleFunctionalCheck() {
 	$checks = array();
 	
 	/** Count active database servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf(__('<p>You currently have no active database servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), getMenuURL('Servers'));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf(__('<p>You currently have no active database servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), getMenuURL(__('Servers')));
 	
 	/** Count groups */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : sprintf(__('<p>You currently have no database server groups defined. <a href="%s">Click here</a> to define one or more.</p>'), getMenuURL('Server Groups'));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : sprintf(__('<p>You currently have no database server groups defined. <a href="%s">Click here</a> to define one or more.</p>'), getMenuURL(__('Server Groups')));
 	
 	foreach ($checks as $val) {
 		$html_checks .= $val;

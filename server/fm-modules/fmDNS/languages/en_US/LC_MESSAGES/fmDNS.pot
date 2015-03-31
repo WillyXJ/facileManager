@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-30 17:06-0600\n"
+"POT-Creation-Date: 2015-03-31 14:31-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,6 +32,20 @@ msgid ""
 "here</a> to define one or more to manage."
 msgstr ""
 
+#: server/fm-modules/fmDNS/functions.php:35
+#: server/fm-modules/fmDNS/functions.php:70
+#: server/fm-modules/fmDNS/functions.php:72
+#: server/fm-modules/fmDNS/functions.php:743
+#: server/fm-modules/fmDNS/functions.php:920
+#: server/fm-modules/fmDNS/functions.php:923
+#: server/fm-modules/fmDNS/functions.php:925
+#: server/fm-modules/fmDNS/functions.php:927
+#: server/fm-modules/fmDNS/variables.inc.php:77
+#: server/fm-modules/fmDNS/ajax/processTools.php:65
+#: server/fm-modules/fmDNS/pages/zones.php:130
+msgid "Servers"
+msgstr ""
+
 #: server/fm-modules/fmDNS/functions.php:38
 #, php-format
 msgid ""
@@ -39,11 +53,25 @@ msgid ""
 "\">Click here</a> to define one or more."
 msgstr ""
 
+#: server/fm-modules/fmDNS/functions.php:38
+#: server/fm-modules/fmDNS/functions.php:747
+msgid "Options"
+msgstr ""
+
 #: server/fm-modules/fmDNS/functions.php:41
 #, php-format
 msgid ""
 "You currently have no zones defined. <a href=\"%s\">Click here</a> to define "
 "one or more."
+msgstr ""
+
+#: server/fm-modules/fmDNS/functions.php:41
+#: server/fm-modules/fmDNS/functions.php:736
+#: server/fm-modules/fmDNS/functions.php:751
+#: server/fm-modules/fmDNS/functions.php:753
+#: server/fm-modules/fmDNS/pages/zone-records.php:38
+#: server/fm-modules/fmDNS/pages/zone-records.php:39
+msgid "Zones"
 msgstr ""
 
 #: server/fm-modules/fmDNS/functions.php:68
@@ -112,12 +140,6 @@ msgstr ""
 msgid "%s is not valid."
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:736
-#: server/fm-modules/fmDNS/functions.php:751
-#: server/fm-modules/fmDNS/functions.php:753
-msgid "Zones"
-msgstr ""
-
 #: server/fm-modules/fmDNS/functions.php:737
 msgid "Forward"
 msgstr ""
@@ -156,15 +178,6 @@ msgstr ""
 msgid "Name Servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:743
-#: server/fm-modules/fmDNS/functions.php:920
-#: server/fm-modules/fmDNS/functions.php:923
-#: server/fm-modules/fmDNS/functions.php:925
-#: server/fm-modules/fmDNS/functions.php:927
-#: server/fm-modules/fmDNS/variables.inc.php:77
-msgid "Servers"
-msgstr ""
-
 #: server/fm-modules/fmDNS/functions.php:744
 #: server/fm-modules/fmDNS/classes/class_records.php:260
 #: server/fm-modules/fmDNS/classes/class_zones.php:71
@@ -187,10 +200,6 @@ msgstr ""
 msgid "Keys"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:747
-msgid "Options"
-msgstr ""
-
 #: server/fm-modules/fmDNS/functions.php:748
 msgid "Logging"
 msgstr ""
@@ -204,6 +213,7 @@ msgid "Templates"
 msgstr ""
 
 #: server/fm-modules/fmDNS/functions.php:752
+#: server/fm-modules/fmDNS/pages/zone-records-write.php:98
 msgid "SOA"
 msgstr ""
 
@@ -1210,6 +1220,11 @@ msgstr ""
 msgid "Failed: SSH key is not <a href=\"%s\">defined</a>."
 msgstr ""
 
+#: server/fm-modules/fmDNS/classes/class_servers.php:892
+#: server/fm-modules/fmDNS/classes/class_servers.php:905
+msgid "General"
+msgstr ""
+
 #: server/fm-modules/fmDNS/classes/class_servers.php:898
 #: server/fm-modules/fmDNS/classes/class_zones.php:1046
 #, php-format
@@ -1571,6 +1586,11 @@ msgstr ""
 #: server/fm-modules/fmDNS/classes/class_zones.php:1032
 #, php-format
 msgid "Failed: could not access %s (tcp/%d)."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:1040
+#: server/fm-modules/fmDNS/classes/class_zones.php:1053
+msgid "Settings"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_zones.php:1064

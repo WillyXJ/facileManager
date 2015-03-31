@@ -127,7 +127,7 @@ $search_query = createSearchSQL(array('name', 'mapping', 'type'), 'domain_');
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
-if (!$reload_allowed && !$response) $response = '<p>' . sprintf(__('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL('Servers')) . '</p>';
+if (!$reload_allowed && !$response) $response = '<p>' . sprintf(__('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL(__('Servers'))) . '</p>';
 
 echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	

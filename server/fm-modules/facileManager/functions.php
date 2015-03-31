@@ -722,7 +722,8 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
  * @since 1.0
  * @package facileManager
  */
-function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = 'Select an option') {
+function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = null) {
+	if (!$placeholder) $placeholder = _('Select an option');
 	$type_options = null;
 	if (countArrayDimensions($options) == 3) {
 		foreach ($options as $optgroup => $optarray) {

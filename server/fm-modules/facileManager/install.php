@@ -166,9 +166,10 @@ function installDatabase($link, $database) {
 	if ($output == true) {
 		$modules = getAvailableModules();
 		if (count($modules)) {
-			echo '<tr>
-				<td colspan="2" id="install_module_list"><p><b>' . _('The following modules were installed as well:</b><br />(They can always be uninstalled later.)') . '</p></td>
-			</tr>';
+			printf('<tr><td colspan="2" id="install_module_list"><p><b>%s</b><br />%s</p></td></tr>',
+					_('The following modules were installed as well:'),
+					_('(They can always be uninstalled later.)')
+				);
 
 			foreach ($modules as $module_name) {
 				if (file_exists(dirname(__FILE__) . '/../' . $module_name . '/install.php')) {

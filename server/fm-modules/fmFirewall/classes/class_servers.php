@@ -428,7 +428,7 @@ HTML;
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL('General')));
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
 				}
 				
 				$temp_ssh_key = sys_get_temp_dir() . '/fm_id_rsa';
@@ -441,7 +441,7 @@ HTML;
 				
 				$ssh_user = getOption('ssh_user');
 				if (!$ssh_user) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL('General')));
+					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
 				}
 		
 				/** Test SSH authentication */

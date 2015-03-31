@@ -934,21 +934,21 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 	var pwd1 = document.getElementById("user_password");
 	var pwd2 = document.getElementById("cpassword");
 	if (pwd1.value.length==0) {
-		strength.innerHTML = "No Password";
+		strength.innerHTML = "' . _('No Password') . '";
 		strength.style.background = "";
 		button.disabled = true;
 	} else {
 		strength.style.color = "white";
 		if (false == enoughRegex.test(pwd1.value)) {
-			strength.innerHTML = "More Characters";
+			strength.innerHTML = "' . _('More Characters') . '";
 			strength.style.background = "#878787";
 			button.disabled = true;
 		} else if (strongRegex.test(pwd1.value)) {
-			strength.innerHTML = "Strong";
+			strength.innerHTML = "' . _('Strong') . '";
 			strength.style.background = "green";
 			button.disabled = false;
 		} else if (mediumRegex.test(pwd1.value)) {
-			strength.innerHTML = "Medium";
+			strength.innerHTML = "' . _('Medium') . '";
 			strength.style.background = "orange";
 			if (pwdtype == "strong") {
 				button.disabled = true;
@@ -956,7 +956,7 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 				button.disabled = false;
 			}
 		} else {
-			strength.innerHTML = "Weak";
+			strength.innerHTML = "' . _('Weak') . '";
 			strength.style.background = "red";
 			button.disabled = true;
 		}

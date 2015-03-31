@@ -171,8 +171,6 @@ class fm_settings {
 	function printForm() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		$local_hostname = php_uname('n');
-		
 		$tmp = sys_get_temp_dir();
 		
 		$save_button = currentUserCan('manage_settings') ? sprintf('<p><input type="button" name="save" id="save_fm_settings" value="%s" class="button primary" /></p>', _('Save')) : null;
@@ -285,8 +283,8 @@ class fm_settings {
 
 		$ssh_user = getOption('ssh_user');
 		
-		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="{$GLOBALS['basename']}">
+		$return_form = '
+		<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">
 			<input type="hidden" name="item_type" value="fm_settings" />
 			<input type="hidden" name="ldap_group_require" value="0" />
 			<input type="hidden" name="client_auto_register" value="0" />
@@ -300,231 +298,229 @@ class fm_settings {
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label for="auth_method">Authentication Method</label>
-							<p><i>None</i> - Authentication will not be used and all users will have full access.</p>
-							<p><i>Builtin Authentication</i> - Users are authenticated against $fm_name thus allowing them to have specific 
-							privileges within the application.</p>
-							<p><i>LDAP Authentication</i> - Allows users to authenticate against a LDAP server. This option only appears if
-							the PHP LDAP modules are loaded.</p>
+							<label for="auth_method">' . _('Authentication Method') . '</label>
+							<p><i>' . _('None') . '</i> - ' . _('Authentication will not be used and all users will have full access.') . '</p>
+							<p><i>' . _('Builtin Authentication') . '</i> - ' . _('Users are authenticated against $fm_name thus allowing them to have specific privileges within the application.') . '</p>
+							<p><i>' . _('LDAP Authentication') . '</i> - ' . _('Allows users to authenticate against a LDAP server. This option only appears if the PHP LDAP module is loaded.') . '</p>
 						</div>
 						<div class="choices">
-							$auth_method_list
+							' . $auth_method_list . '
 						</div>
 					</div>
-					<div id="auth_fm_options" $auth_fm_options_style>
+					<div id="auth_fm_options" ' . $auth_fm_options_style . '>
 						<div id="setting-row">
 							<div class="description">
-								<label for="auth_fm_pw_strength">Password Strength</label>
-								$password_strength_descriptions
+								<label for="auth_fm_pw_strength">' . _('Password Strength') . '</label>
+								' . $password_strength_descriptions . '
 							</div>
 							<div class="choices">
-								$auth_fm_pw_strength_list
+								' . $auth_fm_pw_strength_list . '
 							</div>
 						</div>
 					</div>
-					<div id="auth_ldap_options" $auth_ldap_options_style>
+					<div id="auth_ldap_options" ' . $auth_ldap_options_style . '>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_server">LDAP Server</label>
-								<p>The DNS hostname or IP address of the server.</p>
+								<label for="ldap_server">' . _('LDAP Server') . '</label>
+								<p>' . _('The DNS hostname or IP address of the server.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_server" id="ldap_server" type="text" value="$ldap_server" size="40" placeholder="ldap.example.com" />
+								<input name="ldap_server" id="ldap_server" type="text" value="' . $ldap_server . '" size="40" placeholder="ldap.example.com" />
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_port">Standard Port</label>
-								<p>TCP/UDP port for non-SSL communication.</p>
+								<label for="ldap_port">' . _('Standard Port') . '</label>
+								<p>' . _('TCP/UDP port for non-SSL communication.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_port" id="ldap_port" type="text" value="$ldap_port" size="10" placeholder="389" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
+								<input name="ldap_port" id="ldap_port" type="text" value="' . $ldap_port . '" size="10" placeholder="389" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_port_ssl">SSL Port</label>
-								<p>TCP/UDP port for SSL communication.</p>
+								<label for="ldap_port_ssl">' . _('SSL Port') . '</label>
+								<p>' . _('TCP/UDP port for SSL communication.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_port_ssl" id="ldap_port_ssl" type="text" value="$ldap_port_ssl" size="10" placeholder="636" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
+								<input name="ldap_port_ssl" id="ldap_port_ssl" type="text" value="' . $ldap_port_ssl . '" size="10" placeholder="636" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_version">Protocol Version</label>
-								<p>Protocol version the server supports.</p>
+								<label for="ldap_version">' . _('Protocol Version') . '</label>
+								<p>' . _('Protocol version the server supports.') . '</p>
 							</div>
 							<div class="choices">
-								$ldap_version_list
+								' . $ldap_version_list . '
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_encryption">Encryption</label>
-								<p>Encryption type the server supports. TLS is only supported by version 3.</p>
+								<label for="ldap_encryption">' . _('Encryption') . '</label>
+								<p>' . _('Encryption type the server supports. TLS is only supported by version 3.') . '</p>
 							</div>
 							<div class="choices">
-								$ldap_encryption_list
+								' . $ldap_encryption_list . '
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_referrals">Referrals</label>
-								<p>Enable or disable LDAP referrals.</p>
+								<label for="ldap_referrals">' . _('Referrals') . '</label>
+								<p>' . _('Enable or disable LDAP referrals.') . '</p>
 							</div>
 							<div class="choices">
-								$ldap_referrals_list
+								' . $ldap_referrals_list . '
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_dn">Distinguished Name (DN)</label>
-								<p>Distinguished Name syntax.</p>
+								<label for="ldap_dn">' . _('Distinguished Name (DN)') . '</label>
+								<p>' . _('Distinguished Name syntax.') . '</p>
 								<p><i>OpenLDAP</i> - uid=&lt;username&gt;,ou=people,dc=domain,dc=local<br />
 								<i>Windows</i> - &lt;username&gt;@domain.local</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_dn" id="ldap_dn" type="text" value="$ldap_dn" size="40" placeholder="uid=&lt;username&gt;,ou=people,dc=domain,dc=local" />
+								<input name="ldap_dn" id="ldap_dn" type="text" value="' . $ldap_dn . '" size="40" placeholder="uid=&lt;username&gt;,ou=people,dc=domain,dc=local" />
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_group_require">Require Group Membership</label>
-								<p>Require user to be a member of a group to authenticate.</p>
+								<label for="ldap_group_require">' . _('Require Group Membership') . '</label>
+								<p>' . _('Require user to be a member of a group to authenticate.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_group_require" id="ldap_group_require" type="checkbox" value="1" $ldap_group_require_checked /><label for="ldap_group_require">Require Group Membership</label>
+								<input name="ldap_group_require" id="ldap_group_require" type="checkbox" value="1" ' . $ldap_group_require_checked . ' /><label for="ldap_group_require">Require Group Membership</label>
 							</div>
 						</div>
-						<div id="ldap_group_require_options" $ldap_group_require_options_style>
+						<div id="ldap_group_require_options" ' . $ldap_group_require_options_style . '>
 							<div id="setting-row">
 								<div class="description">
-									<label for="ldap_group_dn">Group Distinguished Name (DN)</label>
-									<p>Distinguished Name of the group the user must have membership of.</p>
+									<label for="ldap_group_dn">' . _('Group Distinguished Name (DN)') . '</label>
+									<p>' . _('Distinguished Name of the group the user must have membership of.') . '</p>
 								</div>
 								<div class="choices">
-									<input name="ldap_group_dn" id="ldap_group_dn" type="text" value="$ldap_group_dn" size="40" />
+									<input name="ldap_group_dn" id="ldap_group_dn" type="text" value="' . $ldap_group_dn . '" size="40" />
 								</div>
 							</div>
 							<div id="setting-row">
 								<div class="description">
-									<label for="ldap_group_attribute">Group Member Attribute</label>
-									<p>Name of the attribute that contains the usernames of the group members.</p>
+									<label for="ldap_group_attribute">' . _('Group Member Attribute') . '</label>
+									<p>' . _('Name of the attribute that contains the usernames of the group members.') . '</p>
 								</div>
 								<div class="choices">
-									<input name="ldap_group_attribute" id="ldap_group_attribute" type="text" value="$ldap_group_attribute" size="40" />
+									<input name="ldap_group_attribute" id="ldap_group_attribute" type="text" value="' . $ldap_group_attribute . '" size="40" />
 								</div>
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="ldap_user_template">User Template</label>
-								<p>The name of the user account that $fm_name will use as a template for new LDAP users.</p>
+								<label for="ldap_user_template">' . _('User Template') . '</label>
+								<p>' . sprintf(_('The name of the user account that %s will use as a template for new LDAP users.'), $fm_name) . '</p>
 							</div>
 							<div class="choices">
-								$ldap_user_template_list
+								' . $ldap_user_template_list . '
 							</div>
 						</div>
 					</div>
 					<div id="setting-row">
 						<div class="description">
-							<label for="client_auto_register">Automatic Client Registration</label>
-							<p>Allow clients to automatically register with $fm_name.</p>
+							<label for="client_auto_register">' . _('Automatic Client Registration') . '</label>
+							<p>' . sprintf(_('Allow clients to automatically register with %s.'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" $client_auto_register_checked /><label for="client_auto_register">Allow Automatic Client Registration</label>
+							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" ' . $client_auto_register_checked . ' /><label for="client_auto_register">Allow Automatic Client Registration</label>
 						</div>
 					</div>
 				</div>
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label for="enforce_ssl">Enforce SSL</label>
-							<p>Attempt to auto-detect and redirect the user to https.</p>
+							<label for="enforce_ssl">' . _('Enforce SSL') . '</label>
+							<p>' . _('Attempt to auto-detect and redirect the user to https.') . '</p>
 						</div>
 						<div class="choices">
-							<input name="enforce_ssl" id="enforce_ssl" type="checkbox" value="1" $enforce_ssl_checked /><label for="enforce_ssl">Enforce SSL</label>
+							<input name="enforce_ssl" id="enforce_ssl" type="checkbox" value="1" ' . $enforce_ssl_checked . ' /><label for="enforce_ssl">Enforce SSL</label>
 						</div>
 					</div>
 					<div id="setting-row">
 						<div class="description">
-							<label for="fm_port_ssl">HTTPS Port</label>
-							<p>The HTTPS TCP port $fm_name runs on.</p>
+							<label for="fm_port_ssl">' . _('HTTPS Port') . '</label>
+							<p>' . sprintf(_('The HTTPS TCP port %s runs on.'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="fm_port_ssl" id="fm_port_ssl" type="text" value="$fm_port_ssl" size="40" placeholder="443" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
+							<input name="fm_port_ssl" id="fm_port_ssl" type="text" value="' . $fm_port_ssl . '" size="40" placeholder="443" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
 						</div>
 					</div>
 				</div>
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label for="mail_enable">Enable Mailing</label>
-							<p>If this is unchecked, $fm_name will never send an e-mail (including password reset links).</p>
+							<label for="mail_enable">' . _('Enable Mailing') . '</label>
+							<p>' . sprintf(_('If this is unchecked, %s will never send an e-mail (including password reset links).'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="mail_enable" id="mail_enable" type="checkbox" value="1" $mail_enable_checked /><label for="mail_enable">Enable Mailing</label>
+							<input name="mail_enable" id="mail_enable" type="checkbox" value="1" ' . $mail_enable_checked . ' /><label for="mail_enable">Enable Mailing</label>
 						</div>
 					</div>
-					<div id="fm_mailing_options" $fm_mailing_options_style>
+					<div id="fm_mailing_options" ' . $fm_mailing_options_style . '>
 						<div id="setting-row">
 							<div class="description">
-								<label for="mail_smtp_host">SMTP Hostnames</label>
-								<p>Main and backup SMTP servers to use (semi-colon delimited).</p>
+								<label for="mail_smtp_host">' . _('SMTP Hostnames') . '</label>
+								<p>' . _('Main and backup SMTP servers to use (semi-colon delimited).') . '</p>
 							</div>
 							<div class="choices">
-								<input name="mail_smtp_host" id="mail_smtp_host" type="text" value="$mail_smtp_host" size="40" placeholder="smtp1.domain.com;smtp2.domain.com" />
+								<input name="mail_smtp_host" id="mail_smtp_host" type="text" value="' . $mail_smtp_host . '" size="40" placeholder="smtp1.domain.com;smtp2.domain.com" />
 							</div>
 						</div>
 						
 						<div id="setting-row">
 							<div class="description">
-								<label for="mail_smtp_auth">Enable SMTP Authentication</label>
-								<p>Use authentication with your SMTP server.</p>
+								<label for="mail_smtp_auth">' . _('Enable SMTP Authentication') . '</label>
+								<p>' . _('Use authentication with your SMTP server.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="mail_smtp_auth" id="mail_smtp_auth" type="checkbox" value="1" $mail_smtp_auth_checked /><label for="mail_smtp_auth">Enable SMTP Authentication</label>
+								<input name="mail_smtp_auth" id="mail_smtp_auth" type="checkbox" value="1" ' . $mail_smtp_auth_checked . ' /><label for="mail_smtp_auth">Enable SMTP Authentication</label>
 							</div>
 						</div>
-						<div id="mail_smtp_auth_options" $mail_smtp_auth_options_style>
+						<div id="mail_smtp_auth_options" ' . $mail_smtp_auth_options_style . '>
 							<div id="setting-row">
 								<div class="description">
-									<label for="mail_smtp_user">SMTP Username</label>
-									<p>Username your SMTP server requires for authentication.</p>
+									<label for="mail_smtp_user">' . _('SMTP Username') . '</label>
+									<p>' . _('Username your SMTP server requires for authentication.') . '</p>
 								</div>
 								<div class="choices">
-									<input name="mail_smtp_user" id="mail_smtp_user" type="text" value="$mail_smtp_user" size="40" placeholder="username" />
+									<input name="mail_smtp_user" id="mail_smtp_user" type="text" value="' . $mail_smtp_user . '" size="40" placeholder="username" />
 								</div>
 							</div>
 							<div id="setting-row">
 								<div class="description">
-									<label for="mail_smtp_pass">SMTP Password</label>
-									<p>Password your SMTP server requires for authentication.</p>
+									<label for="mail_smtp_pass">' . _('SMTP Password') . '</label>
+									<p>' . _('Password your SMTP server requires for authentication.') . '</p>
 								</div>
 								<div class="choices">
-									<input name="mail_smtp_pass" id="mail_smtp_pass" type="password" value="$mail_smtp_pass" size="40" placeholder="password" />
+									<input name="mail_smtp_pass" id="mail_smtp_pass" type="password" value="' . $mail_smtp_pass . '" size="40" placeholder="password" />
 								</div>
 							</div>
 						</div>
 						
 						<div id="setting-row">
 							<div class="description">
-								<label for="mail_smtp_tls">Enable TLS</label>
-								<p>Use TLS with your SMTP server connection.</p>
+								<label for="mail_smtp_tls">' . _('Enable TLS') . '</label>
+								<p>' . _('Use TLS with your SMTP server connection.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="mail_smtp_tls" id="mail_smtp_tls" type="checkbox" value="1" $mail_smtp_tls_checked /><label for="mail_smtp_tls">Enable TLS</label>
+								<input name="mail_smtp_tls" id="mail_smtp_tls" type="checkbox" value="1" ' . $mail_smtp_tls_checked . ' /><label for="mail_smtp_tls">Enable TLS</label>
 							</div>
 						</div>
 	
 						<div id="setting-row">
 							<div class="description">
-								<label for="mail_from">Mail From</label>
-								<p>E-mails sent by $fm_name should be from this address. This only applies if the mailing method is enabled.</p>
+								<label for="mail_from">' . _('Mail From') . '</label>
+								<p>' . sprintf(_('E-mails sent by %s should be from this address. This only applies if the mailing method is enabled.'), $fm_name) . '</p>
 							</div>
 							<div class="choices">
-								<input name="mail_from" id="mail_from" type="email" value="$mail_from" size="40" placeholder="noreply@mydomain.com" />
+								<input name="mail_from" id="mail_from" type="email" value="' . $mail_from . '" size="40" placeholder="noreply@mydomain.com" />
 							</div>
 						</div>
 					</div>
@@ -532,79 +528,79 @@ class fm_settings {
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label for="timezone">Timezone</label>
-							<p>Choose a city in the same timezone as you.</p>
+							<label for="timezone">' . _('Timezone') . '</label>
+							<p>' . _('Choose a city in the same timezone as you.') . '</p>
 						</div>
 						<div class="choices">
-							$timezone_list
+							' . $timezone_list . '
 						</div>
 					</div>
 					<div id="setting-row">
 						<div class="description">
-							<label for="date_format">Date Format</label>
-							<p>The date format all timestamps will be displayed in. This includes all throughout the UI, log files, and configuration files.</p>
+							<label for="date_format">' . _('Date Format') . '</label>
+							<p>' . _('The date format all timestamps will be displayed in. This includes all throughout the UI, log files, and configuration files.') . '</p>
 						</div>
 						<div class="choices">
-							$date_format_list
+							' . $date_format_list . '
 						</div>
 					</div>
 					<div id="setting-row">
 						<div class="description">
-							<label for="time_format">Time Format</label>
-							<p>The time format all timestamps will be displayed in. This includes all throughout the UI, log files, and configuration files.</p>
+							<label for="time_format">' . _('Time Format') . '</label>
+							<p>' . _('The time format all timestamps will be displayed in. This includes all throughout the UI, log files, and configuration files.') . '</p>
 						</div>
 						<div class="choices">
-							$time_format_list
+							' . $time_format_list . '
 						</div>
 					</div>
 				</div>
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label for="show_errors">Show Errors</label>
-							<p>If this is checked, $fm_name will display application errors when they occur.</p>
+							<label for="show_errors">' . _('Show Errors') . '</label>
+							<p>' . sprintf(_('If this is checked, %s will display application errors when they occur.'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="show_errors" id="show_errors" type="checkbox" value="1" $show_errors_checked /><label for="show_errors">Show Errors</label>
+							<input name="show_errors" id="show_errors" type="checkbox" value="1" ' . $show_errors_checked . ' /><label for="show_errors">Show Errors</label>
 						</div>
 					</div>
 					<div id="setting-row">
 						<div class="description">
-							<label for="fm_temp_directory">Temporary Directory</label>
-							<p>Temporary directory on $local_hostname to use for scratch files (must be writeable by {$__FM_CONFIG['webserver']['user_info']['name']}).</p>
+							<label for="fm_temp_directory">' . _('Temporary Directory') . '</label>
+							<p>' . sprintf(_('Temporary directory on %s to use for scratch files (must be writeable by %s).'), php_uname('n'), $__FM_CONFIG['webserver']['user_info']['name']) . '</p>
 						</div>
 						<div class="choices">
-							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="$fm_temp_directory" size="40" placeholder="$tmp" />
+							<input name="fm_temp_directory" id="fm_temp_directory" type="text" value="' . $fm_temp_directory . '" size="40" placeholder="$tmp" />
 						</div>
 					</div>
 				</div>
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label for="software_update">Software Update</label>
-							<p>If this is checked, $fm_name will automatically check for updates.</p>
+							<label for="software_update">' . _('Software Update') . '</label>
+							<p>' . sprintf(_('If this is checked, %s will automatically check for updates.'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="software_update" id="software_update" type="checkbox" value="1" $software_update_checked /><label for="software_update">Check for Updates</label>
+							<input name="software_update" id="software_update" type="checkbox" value="1" ' . $software_update_checked . ' /><label for="software_update">Check for Updates</label>
 						</div>
 					</div>
-					<div id="software_update_options" $software_update_options_style>
+					<div id="software_update_options" ' . $software_update_options_style . '>
 						<div id="setting-row">
 							<div class="description">
-								<label for="software_update_tree">Software Tree</label>
-								<p>The minimum software tree $fm_name should check updates for.</p>
+								<label for="software_update_tree">' . _('Software Tree') . '</label>
+								<p>' . sprintf(_('The minimum software tree %s should check updates for.'), $fm_name) . '</p>
 							</div>
 							<div class="choices">
-								$software_update_tree_list
+								' . $software_update_tree_list . '
 							</div>
 						</div>
 						<div id="setting-row">
 							<div class="description">
-								<label for="software_update_interval">Update Check Interval</label>
-								<p>The frequency $fm_name should check for updates.</p>
+								<label for="software_update_interval">' . _('Update Check Interval') . '</label>
+								<p>' . sprintf(_('The frequency %s should check for updates.'), $fm_name) . '</p>
 							</div>
 							<div class="choices">
-								$software_update_list
+								' . $software_update_list . '
 							</div>
 						</div>
 					</div>
@@ -612,27 +608,26 @@ class fm_settings {
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
-							<label>SSH Username</label>
-							<p>The local system user to use for client interaction via SSH.</p>
+							<label>' . _('SSH Username') . '</label>
+							<p>' . _('The local system user to use for client interaction via SSH.') . '</p>
 						</div>
 						<div class="choices">
-							<input name="ssh_user" id="ssh_user" type="text" value="$ssh_user" size="40" placeholder="fm_user" />
+							<input name="ssh_user" id="ssh_user" type="text" value="' . $ssh_user . '" size="40" placeholder="fm_user" />
 						</div>
 					</div>
 					<div id="setting-row">
 						<div class="description">
-							<label>SSH Key Pair</label>
-							<p>If a ssh key pair is generated, clients can be updated over ssh.</p>
+							<label>' . _('SSH Key Pair') . '</label>
+							<p>' . _('If a ssh key pair is generated, clients can be updated over ssh.') . '</p>
 						</div>
 						<div id="gen_ssh_action" class="choices">
-							$sshkey_button
+							' . $sshkey_button . '
 						</div>
 					</div>
 				</div>
-			$save_button
+			' . $save_button . '
 			</div>
-		</form>
-FORM;
+		</form>';
 
 		return $return_form;
 	}

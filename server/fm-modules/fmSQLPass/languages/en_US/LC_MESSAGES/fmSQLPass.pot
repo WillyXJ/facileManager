@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-30 17:06-0600\n"
+"POT-Creation-Date: 2015-03-31 14:31-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,11 +23,19 @@ msgid ""
 "\">Click here</a> to define one or more to manage.</p>"
 msgstr ""
 
+#: server/fm-modules/fmSQLPass/functions.php:36
+msgid "Servers"
+msgstr ""
+
 #: server/fm-modules/fmSQLPass/functions.php:39
 #, php-format
 msgid ""
 "<p>You currently have no database server groups defined. <a href=\"%s"
 "\">Click here</a> to define one or more.</p>"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/functions.php:39
+msgid "Server Groups"
 msgstr ""
 
 #: server/fm-modules/fmSQLPass/variables.inc.php:35

@@ -103,7 +103,7 @@ class fm_shared_module_servers {
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						$response[] = ' --> ' . sprintf(_('Failed: SSH key is not %sdefined</a>.'), '<a href="' . getMenuURL('General') . '">');
+						$response[] = ' --> ' . sprintf(_('Failed: SSH key is not %sdefined</a>.'), '<a href="' . getMenuURL(_('General')) . '">');
 						break;
 					}
 					
@@ -118,7 +118,7 @@ class fm_shared_module_servers {
 					
 					$ssh_user = getOption('ssh_user');
 					if (!$ssh_user) {
-						return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL('General')));
+						return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
 					}
 
 					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade 2>&1'", $post_result, $retval);
