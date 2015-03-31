@@ -607,6 +607,7 @@ h4 {
 .modules .module_actions {
 	font-size: 12px;
 	margin-top: -7px;
+	white-space: nowrap;
 }
 .modules h3 {
 	margin-top: .6em;
