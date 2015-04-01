@@ -255,6 +255,8 @@ class fm_dns_zones {
 		}
 		if ($fmdb->sql_errors) return __('Could not add zone because a database error occurred.');
 		
+		$this->updateSOASerialNo($insert_id, 0);
+		
 		addLogEntry($log_message);
 		
 		/* Set the server_build_config flag for servers */
@@ -983,7 +985,9 @@ HTML;
 			switch($name_servers[$i]->server_update_method) {
 				case 'cron':
 					/** Add records to fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads */
-					$this->addZoneReload($name_servers[$i]->server_serial_no, $domain_id, $soa_serial_no);
+					foreach ($this->getZoneCloneChildren($domain_id) as $child_id) {
+						$this->addZoneReload($name_servers[$i]->server_serial_no, $child_id);
+					}
 					
 					/** Set the server_update_config flag */
 					setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'update');
@@ -1082,9 +1086,6 @@ HTML;
 		}
 		$response .= "</textarea>\n";
 		
-		/** Update the SOA serial number */
-//		$this->updateSOASerialNo($domain_id, $soa_serial_no);
-		
 		/** Reset the domain_reload flag */
 		if (!$failures) {
 			global $fm_dns_records;
@@ -1132,10 +1133,10 @@ HTML;
 	}
 	
 	
-	function addZoneReload($server_serial_no, $domain_id, $soa_serial_no) {
+	function addZoneReload($server_serial_no, $domain_id) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads` VALUES($domain_id, $server_serial_no, $soa_serial_no)";
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads` VALUES($domain_id, $server_serial_no)";
 		$result = $fmdb->query($query);
 	}
 	
@@ -1143,9 +1144,15 @@ HTML;
 	function updateSOASerialNo($domain_id, $soa_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$soa_serial_no = ($soa_serial_no == 99) ? 0 : $soa_serial_no + 1;
+		$current_date = date('Ymd');
+
+		/** Ensure soa_serial_no is an integer */
+		$soa_serial_no = (int) $soa_serial_no;
 		
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=" . sprintf('%02d', $soa_serial_no) . " WHERE `domain_id`=$domain_id";
+		/** Increment serial */
+		$soa_serial_no = (strpos($soa_serial_no, $current_date) === false) ? $current_date . '00' : $soa_serial_no + 1;
+		
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=$soa_serial_no WHERE `domain_id`=$domain_id";
 		$result = $fmdb->query($query);
 	}
 	
@@ -1630,6 +1637,30 @@ HTML;
 		}
 		
 		return array($domain_id);
+	}
+	
+	
+	/**
+	 * Builds an array of available zone children
+	 *
+	 * @since 2.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param int $domain_id Domain ID to get children
+	 * @return array
+	 */
+	function getZoneCloneChildren($domain_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$children = array($domain_id);
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_clone_domain_id=' . $domain_id);
+		if ($fmdb->num_rows) {
+			for ($x=0; $x<$fmdb->num_rows; $x++) {
+				$children[] = $fmdb->last_result[$x]->domain_id;
+			}
+		}
+		return $children;
 	}
 	
 	

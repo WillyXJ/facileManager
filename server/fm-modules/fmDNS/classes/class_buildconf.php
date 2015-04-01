@@ -598,8 +598,16 @@ class fm_module_buildconf {
 							$file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 
 							/** Are there multiple zones with the same name? */
-							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result[$i]->domain_id);
-							if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
+							if (isset($zone_result[$i]->parent_domain_id)) {
+								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->parent_domain_id);
+								if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$file_ext";
+							} else {
+								$zone_result[$i]->parent_domain_id = $zone_result[$i]->domain_id;
+								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->domain_id);
+								if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
+							}
+//							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result[$i]->domain_id);
+//							if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
 							
 							/** Build zone file */
 							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . "$file_ext"] = $this->buildZoneFile($zone_result[$i]);
@@ -737,6 +745,9 @@ class fm_module_buildconf {
 	
 					/** Add domain_id to built_domain_ids for tracking */
 					$GLOBALS['built_domain_ids'][] = $zone_result[$i]->domain_id;
+					if (isset($zone_result[$i]->parent_domain_id)) {
+						$GLOBALS['built_domain_ids'][] = $zone_result[$i]->parent_domain_id;
+					}
 				}
 			}
 			
@@ -819,23 +830,36 @@ class fm_module_buildconf {
 			if ($track_reloads && $server_update_config == 'yes') {
 				/** process zone config build */
 				for ($i=0; $i < count($track_reloads); $i++) {
-					$query = "select * from `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` where `domain_status`='active' and `domain_id`=" . $track_reloads[$i]->domain_id;
+					$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . $track_reloads[$i]->domain_id . " OR `domain_clone_domain_id`=" . $track_reloads[$i]->domain_id . 
+							") ORDER BY `domain_clone_domain_id`,`domain_name`";
 					$result = $fmdb->query($query);
 					if ($fmdb->num_rows) {
-						$zone_result = $fmdb->last_result;
-						if (getSOACount($zone_result[0]->domain_id)) {
-							$domain_name = $this->getDomainName($zone_result[0]->domain_mapping, trimFullStop($zone_result[0]->domain_name));
-							$file_ext = ($zone_result[0]->domain_mapping == 'forward') ? 'hosts' : 'rev';
+						$zone_result = $fmdb->last_result[0];
+						/** Is this a clone id? */
+						if ($zone_result->domain_clone_domain_id) $zone_result = $this->mergeZoneDetails($zone_result, 'clone');
+						elseif ($zone_result->domain_template_id) $zone_result = $this->mergeZoneDetails($zone_result, 'template');
+						
+						if (getSOACount($zone_result->domain_id)) {
+							$domain_name = $this->getDomainName($zone_result->domain_mapping, trimFullStop($zone_result->domain_name));
+							$file_ext = ($zone_result->domain_mapping == 'forward') ? 'hosts' : 'rev';
 
 							/** Are there multiple zones with the same name? */
-							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[0]->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result[0]->domain_id);
-							if ($fmdb->num_rows) $file_ext = $zone_result[0]->domain_id . ".$file_ext";
+					if (isset($zone_result->parent_domain_id)) {
+						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->parent_domain_id);
+						if ($fmdb->num_rows) $file_ext = $zone_result->parent_domain_id . ".$file_ext";
+					} else {
+						$zone_result->parent_domain_id = $zone_result->domain_id;
+						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->domain_id);
+						if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
+					}
+//							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result->domain_id);
+//							if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
 							
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/' . $zone_result[0]->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result[0]);
+							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result);
 							
 							/** Track reloads */
-							$data->reload_domain_ids[] = $zone_result[0]->domain_id;
+							$data->reload_domain_ids[] = isset($zone_result->parent_domain_id) ? $zone_result->parent_domain_id : $zone_result->domain_id;
 						}
 					}
 				}
@@ -866,13 +890,15 @@ class fm_module_buildconf {
 	function getReloadRequests($server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "select * from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads where server_serial_no='" . $server_serial_no . "'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads WHERE server_serial_no='" . $server_serial_no . "'";
 		$track_reloads_result = $fmdb->query($query);
 
 		if ($fmdb->num_rows) {
 			$track_reloads = $fmdb->last_result;
 			return $track_reloads;
-		} else return false;
+		}
+		
+		return false;
 	}
 	
 
@@ -903,7 +929,7 @@ class fm_module_buildconf {
 			$domain_name = $this->getDomainName($domain->domain_mapping, $domain_name_trim);
 			
 			$domain_id = isset($domain->parent_domain_id) ? $domain->parent_domain_id : $domain->domain_id;
-			$serial = date("Ymd") . getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no');
+			$serial = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no');
 			
 			$zone_file .= '$TTL ' . $soa_ttl . "\n";
 			$zone_file .= "$domain_name IN SOA $master_server $admin_email (\n";

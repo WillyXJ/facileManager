@@ -134,7 +134,7 @@ class fm_login {
 		$fm_login = $user_info['user_id'];
 		$uniqhash = genRandomString(mt_rand(30, 50));
 		
-		$query = "INSERT INTO fm_pwd_resets VALUES ('$uniqhash', '$fm_login', " . time() . ");";
+		$query = "INSERT INTO fm_pwd_resets VALUES ('$uniqhash', '$fm_login', " . time() . ")";
 		$fmdb->query($query);
 		
 		if (!$fmdb->rows_affected) return false;
@@ -144,7 +144,7 @@ class fm_login {
 		if ($mail_enable) {
 			$result = $this->mailPwdResetLink($fm_login, $uniqhash);
 			if ($result !== true) {
-				$query = "DELETE FROM fm_pwd_resets WHERE pwd_id='$uniqhash' AND pwd_login='$fm_login';";
+				$query = "DELETE FROM fm_pwd_resets WHERE pwd_id='$uniqhash' AND pwd_login='$fm_login'";
 				$fmdb->query($query);
 		
 				return $result;
@@ -297,7 +297,7 @@ class fm_login {
 	function updateSessionDB($fm_login) {
 		global $fmdb;
 		
-		$query = "UPDATE fm_users set user_ipaddr='{$_SESSION['user']['ipaddr']}', user_last_login=" . time() . " WHERE `user_login`='". $fm_login ."' AND `user_status`!='deleted';";
+		$query = "UPDATE fm_users set user_ipaddr='{$_SESSION['user']['ipaddr']}', user_last_login=" . time() . " WHERE `user_login`='". $fm_login ."' AND `user_status`!='deleted'";
 		$fmdb->get_results($query);
 	}
 

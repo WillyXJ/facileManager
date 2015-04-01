@@ -364,7 +364,7 @@ INSERT;
 
 /** Update user capabilities */
 if ($link) {
-	$fm_user_caps_query = "SELECT option_value FROM $database.`fm_options` WHERE option_name='fm_user_caps';";
+	$fm_user_caps_query = "SELECT option_value FROM $database.`fm_options` WHERE option_name='fm_user_caps'";
 	$result = mysql_query($fm_user_caps_query, $link);
 	if ($result) {
 		$row = mysql_fetch_array($result, MYSQL_NUM);

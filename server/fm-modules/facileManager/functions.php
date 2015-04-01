@@ -701,7 +701,7 @@ function basicUpdate($table, $id, $update_field, $update_value, $field = 'id') {
 function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
 	global $fmdb;
 	
-	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name';";
+	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name'";
 	$result = $fmdb->get_results($query);
 	
 	$result = $fmdb->last_result;
@@ -1216,7 +1216,7 @@ function addLogEntry($log_data, $module = null, $link = null) {
 	$user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : 0;
 	$module = isset($module) ? $module : $_SESSION['module'];
 	
-	$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "');";
+	$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
 	if ($link) {
 		$result = @mysql_query($insert, $link) or die(mysql_error());
 	} else {
@@ -1870,7 +1870,7 @@ function isSiteSecure(){
 function getColumnLength($tbl_name, $column_name) {
 	global $fmdb;
 	
-	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name';";
+	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name'";
 	$result = $fmdb->get_results($query);
 	
 	$result = $fmdb->last_result;

@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_default` ENUM('yes','no') NOT NULL DEFAULT 'no',
   `domain_template_id` INT(11) NOT NULL DEFAULT '0',
   `soa_id` int(11) NOT NULL DEFAULT '0',
-  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT  '0',
+  `soa_serial_no` INT(2) NOT NULL DEFAULT  '0',
   `domain_name` varchar(255) NOT NULL DEFAULT '',
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
@@ -236,8 +236,7 @@ TABLE;
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}track_reloads` (
   `domain_id` int(11) NOT NULL,
-  `server_serial_no` int(11) NOT NULL,
-  `soa_id` int(11) NOT NULL
+  `server_serial_no` int(11) NOT NULL
 ) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLE;
 
@@ -613,7 +612,7 @@ INSERT;
 	/** Update user capabilities */
 	$fm_user_caps = null;
 	if ($link) {
-		$fm_user_caps_query = "SELECT option_value FROM $database.`fm_options` WHERE option_name='fm_user_caps';";
+		$fm_user_caps_query = "SELECT option_value FROM $database.`fm_options` WHERE option_name='fm_user_caps'";
 		$result = mysql_query($fm_user_caps_query, $link);
 		if ($result) {
 			$row = mysql_fetch_array($result, MYSQL_NUM);
@@ -636,9 +635,9 @@ INSERT;
 	$fm_user_caps = serialize($fm_user_caps);
 	
 	if ($insert) {
-		$inserts[] = "INSERT INTO $database.`fm_options` (option_name, option_value) VALUES ('fm_user_caps', '$fm_user_caps');";
+		$inserts[] = "INSERT INTO $database.`fm_options` (option_name, option_value) VALUES ('fm_user_caps', '$fm_user_caps')";
 	} else {
-		$inserts[] = "UPDATE $database.`fm_options` SET option_value='$fm_user_caps' WHERE option_name='fm_user_caps';";
+		$inserts[] = "UPDATE $database.`fm_options` SET option_value='$fm_user_caps' WHERE option_name='fm_user_caps'";
 	}
 
 

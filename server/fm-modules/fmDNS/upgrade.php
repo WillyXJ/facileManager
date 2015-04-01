@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.0-rc2', '<') ? upgradefmDNS_2004($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.0', '<') ? upgradefmDNS_200($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -42,7 +42,7 @@ function upgradefmDNSSchema($module_name) {
 function upgradefmDNS_100($__FM_CONFIG) {
 	global $fmdb, $module_name;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_ttl`  `record_ttl` VARCHAR( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  '';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_ttl`  `record_ttl` VARCHAR( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  ''";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -66,7 +66,7 @@ function upgradefmDNS_101($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_type`  `server_type` ENUM(  'bind9' ) NOT NULL DEFAULT  'bind9',
 CHANGE  `server_run_as`  `server_run_as` VARCHAR( 50 ) NULL DEFAULT NULL,
-CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'as defined:' ) NOT NULL DEFAULT  'named' ;";
+CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'as defined:' ) NOT NULL DEFAULT  'named' ";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -88,7 +88,7 @@ function upgradefmDNS_102($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-b7', '<') ? upgradefmDNS_101($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'root',  'wheel', 'as defined:' ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  'named';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'root',  'wheel', 'as defined:' ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  'named'";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -111,10 +111,10 @@ function upgradefmDNS_103($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_multiple_values` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no',
-ADD  `def_view_support` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE  `def_type`  `def_type` VARCHAR( 200 ) NOT NULL ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` DROP  `def_id` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD UNIQUE (`def_option`);";
+ADD  `def_view_support` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no'";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE  `def_type`  `def_type` VARCHAR( 200 ) NOT NULL ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` DROP  `def_id` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD UNIQUE (`def_option`)";
 	
 	$inserts[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
@@ -210,7 +210,7 @@ VALUES
 ('options',  'use-alt-transfer-source',  '( yes | no )',  'no',  'yes'),
 ('options',  'zone-statistics',  '( yes | no )',  'no',  'yes'),
 ('options',  'key-directory',  '( quoted_string )',  'no',  'yes')
-;";
+";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -239,11 +239,11 @@ function upgradefmDNS_104($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-b11', '<') ? upgradefmDNS_103($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM(  'A',  'AAAA',  'CNAME',  'TXT',  'MX',  'PTR',  'SRV',  'NS' ) NOT NULL DEFAULT  'A' ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ENGINE = INNODB;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ENGINE = INNODB;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds` ENGINE = INNODB;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads` ENGINE = INNODB;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM(  'A',  'AAAA',  'CNAME',  'TXT',  'MX',  'PTR',  'SRV',  'NS' ) NOT NULL DEFAULT  'A' ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ENGINE = INNODB";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ENGINE = INNODB";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds` ENGINE = INNODB";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads` ENGINE = INNODB";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -265,7 +265,7 @@ function upgradefmDNS_105($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-b13', '<') ? upgradefmDNS_104($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE  `domain_name`  `domain_name` VARCHAR( 255 ) NOT NULL DEFAULT  '';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE  `domain_name`  `domain_name` VARCHAR( 255 ) NOT NULL DEFAULT  ''";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -338,12 +338,12 @@ function upgradefmDNS_107($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-rc2', '<') ? upgradefmDNS_106($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_update_port` INT( 5 ) NOT NULL DEFAULT  '0' AFTER  `server_update_method` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_os` VARCHAR( 50 ) DEFAULT NULL AFTER  `server_name` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as`  `server_run_as` VARCHAR( 50 ) NULL ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_update_port` INT( 5 ) NOT NULL DEFAULT  '0' AFTER  `server_update_method` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_os` VARCHAR( 50 ) DEFAULT NULL AFTER  `server_name` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as`  `server_run_as` VARCHAR( 50 ) NULL ";
 
-	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '80' WHERE  `server_update_method` = 'http';";
-	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '443' WHERE  `server_update_method` = 'https';";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '80' WHERE  `server_update_method` = 'http'";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET  `server_update_port` =  '443' WHERE  `server_update_method` = 'https'";
 
 
 	/** Create table schema */
@@ -373,9 +373,9 @@ function upgradefmDNS_108($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-rc3', '<') ? upgradefmDNS_107($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_os`  `server_os_distro` VARCHAR( 50 ) NULL DEFAULT NULL ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_os` VARCHAR( 50 ) NULL DEFAULT NULL AFTER  `server_name` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'as defined:' ) NOT NULL DEFAULT  'named';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_os`  `server_os_distro` VARCHAR( 50 ) NULL DEFAULT NULL ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_os` VARCHAR( 50 ) NULL DEFAULT NULL AFTER  `server_name` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_run_as_predefined`  `server_run_as_predefined` ENUM(  'named',  'bind',  'daemon',  'as defined:' ) NOT NULL DEFAULT  'named'";
 
 
 	/** Create table schema */
@@ -398,13 +398,13 @@ function upgradefmDNS_109($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-rc6', '<') ? upgradefmDNS_108($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_update_method`  `server_update_method` ENUM(  'http',  'https',  'cron',  'ssh' ) NOT NULL DEFAULT  'http';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no'";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_update_method`  `server_update_method` ENUM(  'http',  'https',  'cron',  'ssh' ) NOT NULL DEFAULT  'http'";
 
-	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_option` IN ('match-mapped-addresses','transfer-format','check-names','preferred-glue','dialup','notify','forward');";
-	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_type` =  '( yes | no )';";
-	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_type` =  '( master | slave | response ) ( warn | fail | ignore )' WHERE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`.`def_option` =  'check-names';";
-	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_type` =  '( port )' WHERE  `def_option` =  'port';";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_option` IN ('match-mapped-addresses','transfer-format','check-names','preferred-glue','dialup','notify','forward')";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_dropdown` =  'yes' WHERE  `def_type` =  '( yes | no )'";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_type` =  '( master | slave | response ) ( warn | fail | ignore )' WHERE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`.`def_option` =  'check-names'";
+	$updates[] = "UPDATE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET  `def_type` =  '( port )' WHERE  `def_option` =  'port'";
 
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -434,7 +434,7 @@ function upgradefmDNS_110($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$fmdb->query("SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`");
-	$table[] = ($fmdb->num_rows) ? null : "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no';";
+	$table[] = ($fmdb->num_rows) ? null : "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no'";
 
 	$inserts[] = <<<INSERT
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
@@ -569,13 +569,13 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0.1', '<') ? upgradefmDNS_110($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` ADD  `acl_comment` TEXT NULL AFTER  `acl_addresses` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD  `cfg_comment` TEXT NULL AFTER  `cfg_data` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD  `key_comment` TEXT NULL AFTER  `key_view` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD  `view_comment` TEXT NULL AFTER  `view_name` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE  `domain_type`  `domain_type` ENUM(  'master',  'slave',  'forward',  'stub' ) NOT NULL DEFAULT  'master';";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_update_config`  `server_update_config` ENUM(  'yes',  'no',  'conf' ) NOT NULL DEFAULT  'no';";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` ADD  `acl_comment` TEXT NULL AFTER  `acl_addresses` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD  `cfg_comment` TEXT NULL AFTER  `cfg_data` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD  `key_comment` TEXT NULL AFTER  `key_view` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD  `view_comment` TEXT NULL AFTER  `view_name` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE  `domain_type`  `domain_type` ENUM(  'master',  'slave',  'forward',  'stub' ) NOT NULL DEFAULT  'master'";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE  `server_update_config`  `server_update_config` ENUM(  'yes',  'no',  'conf' ) NOT NULL DEFAULT  'no'";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ";
 
 	$inserts = $updates = null;
 	
@@ -615,15 +615,15 @@ function upgradefmDNS_1201($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.1', '<') ? upgradefmDNS_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A';";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_class`  `record_class` ENUM(  'IN',  'CH',  'HS' ) NOT NULL DEFAULT  'IN';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO' ) NOT NULL DEFAULT  'A'";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_class`  `record_class` ENUM(  'IN',  'CH',  'HS' ) NOT NULL DEFAULT  'IN'";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD  `record_os` VARCHAR( 255 ) NULL AFTER  `record_port`,
 ADD  `record_cert_type` TINYINT NULL AFTER  `record_os` ,
 ADD  `record_key_tag` INT NULL AFTER  `record_cert_type` ,
 ADD  `record_algorithm` TINYINT NULL AFTER  `record_key_tag`,
 ADD  `record_flags` ENUM(  '0',  '256',  '257' ) NULL AFTER  `record_algorithm`,
-ADD  `record_text` VARCHAR( 255 ) NULL AFTER  `record_flags` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_value`  `record_value` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ;";
+ADD  `record_text` VARCHAR( 255 ) NULL AFTER  `record_flags` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_value`  `record_value` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ";
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` (
   `account_id` int(11) NOT NULL,
@@ -789,7 +789,7 @@ function upgradefmDNS_123($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.2-rc1', '<') ? upgradefmDNS_1202($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP PRIMARY KEY;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP PRIMARY KEY";
 
 	$inserts = $updates = null;
 	
@@ -828,7 +828,7 @@ function upgradefmDNS_124($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.2.3', '<') ? upgradefmDNS_123($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD INDEX (  `domain_id` ) ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD INDEX (  `domain_id` ) ";
 
 	$inserts = $updates = null;
 	
@@ -868,23 +868,23 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLE;
 
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO', 'SSHFP' ) NOT NULL DEFAULT  'A';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO', 'SSHFP' ) NOT NULL DEFAULT  'A'";
 
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_name` VARCHAR(255) NULL AFTER `domain_id`;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_chroot_dir` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `server_root_dir`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_name` VARCHAR(255) NULL AFTER `domain_id`";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD  `server_chroot_dir` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `server_root_dir`";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD  `soa_id` INT( 11 ) NOT NULL DEFAULT '0' AFTER  `account_id` ,
-		ADD  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT '0' AFTER  `soa_id` ;";
+		ADD  `soa_serial_no` INT(2) UNSIGNED ZEROFILL NOT NULL DEFAULT '0' AFTER  `soa_id` ";
 
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD  `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `domain_id`;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `cfg_view` `view_id` INT(11) NOT NULL DEFAULT '0';";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `domain_id` INT(11) NOT NULL DEFAULT '0' AFTER `view_id`;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD INDEX(`domain_id`);";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_view_support` `def_clause_support` VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'O';";
-	$table[] = "TRUNCATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD  `soa_template` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `domain_id`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `cfg_view` `view_id` INT(11) NOT NULL DEFAULT '0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `domain_id` INT(11) NOT NULL DEFAULT '0' AFTER `view_id`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD INDEX(`domain_id`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_view_support` `def_clause_support` VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'O'";
+	$table[] = "TRUNCATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`";
 	
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_id`=s.`soa_id`;";
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_serial_no`=s.`soa_serial_no`;";
-	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` DROP `domain_id`, DROP `soa_serial_no`;";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_id`=s.`soa_id`";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_serial_no`=s.`soa_serial_no`";
+	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` DROP `domain_id`, DROP `soa_serial_no`";
 	
 	$inserts[] = <<<INSERT
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
@@ -1093,7 +1093,7 @@ INSERT;
 			if ($results[$x]->$old_key) {
 				$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` 
 					(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']},
-					{$results[$x]->domain_id}, '$new_key', '{$results[$x]->$old_key}');";
+					{$results[$x]->domain_id}, '$new_key', '{$results[$x]->$old_key}')";
 				$fmdb->query($query);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -1104,7 +1104,7 @@ INSERT;
 	foreach ($translate_array as $old_key => $new_key) {
 		$query .= " DROP `$old_key`,";
 	}
-	$query = rtrim($query, ',') . ';';
+	$query = rtrim($query, ',');
 	$fmdb->query($query);
 	if (!$fmdb->result || $fmdb->sql_errors) return false;
 	
@@ -1158,11 +1158,11 @@ function upgradefmDNS_1302($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.3-beta1', '<') ? upgradefmDNS_1301($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ';', ',') WHERE instr(acl_addresses, ';') > 0;";
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ' ', '') WHERE instr(acl_addresses, ' ') > 0;";
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv4_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on';";
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv6_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on-v6';";
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( warn | fail | ignore )', `def_clause_support` = 'Z' WHERE `fm_dns_functions`.`def_option` = 'check-names';";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ';', ',') WHERE instr(acl_addresses, ';') > 0";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = replace(acl_addresses, ' ', '') WHERE instr(acl_addresses, ' ') > 0";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv4_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on'";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '[ port ( ip_port | * ) ] { ( ipv6_address ) }' WHERE `fm_dns_functions`.`def_option` = 'listen-on-v6'";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( warn | fail | ignore )', `def_clause_support` = 'Z' WHERE `fm_dns_functions`.`def_option` = 'check-names'";
 
 	if (count($updates) && $updates[0]) {
 		foreach ($updates as $schema) {
@@ -1183,9 +1183,9 @@ function upgradefmDNS_130($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.3-beta2', '<') ? upgradefmDNS_1302($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP PRIMARY KEY;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD `skip_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD INDEX(`record_id`);";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP PRIMARY KEY";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD `skip_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD INDEX(`record_id`)";
 
 	$inserts = $updates = null;
 	
@@ -1209,8 +1209,8 @@ function upgradefmDNS_131($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.3', '<') ? upgradefmDNS_130($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_default` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `soa_template`;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE  `key_algorithm`  `key_algorithm` ENUM(  'hmac-md5',  'hmac-sha1',  'hmac-sha224',  'hmac-sha256', 'hmac-sha384',  'hmac-sha512' ) NOT NULL DEFAULT  'hmac-md5';";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` ADD `soa_default` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `soa_template`";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE  `key_algorithm`  `key_algorithm` ENUM(  'hmac-md5',  'hmac-sha1',  'hmac-sha224',  'hmac-sha256', 'hmac-sha384',  'hmac-sha512' ) NOT NULL DEFAULT  'hmac-md5'";
 
 	$inserts = $updates = null;
 	
@@ -1234,7 +1234,7 @@ function upgradefmDNS_2001($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.3.1', '<') ? upgradefmDNS_131($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_template` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `account_id`, ADD `domain_default` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_template`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_template` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `account_id`, ADD `domain_default` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_template`";
 
 	$inserts = $updates = null;
 	
@@ -1270,10 +1270,10 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` (
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLE;
 
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_option_type` ENUM('global','ratelimit') NOT NULL DEFAULT 'global' AFTER `def_function`;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_max_parameters` INT(3) NOT NULL DEFAULT '1' ;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_zone_support` VARCHAR(10) NULL DEFAULT NULL AFTER `def_clause_support` ;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_option_type` ENUM('global','ratelimit') NOT NULL DEFAULT 'global' AFTER `def_function`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_max_parameters` INT(3) NOT NULL DEFAULT '1' ";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_zone_support` VARCHAR(10) NULL DEFAULT NULL AFTER `def_clause_support` ";
 	
 	$inserts[] = <<<INSERT
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
@@ -1305,15 +1305,15 @@ VALUES
 ;
 INSERT;
 
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `fm_dns_functions`.`def_clause_support` LIKE '%Z%';";
-	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'F' WHERE `fm_dns_functions`.`def_option` IN ('forward', 'forwarders');";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `fm_dns_functions`.`def_clause_support` LIKE '%Z%'";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'F' WHERE `fm_dns_functions`.`def_option` IN ('forward', 'forwarders')";
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'M' WHERE `fm_dns_functions`.`def_option` IN 
 		('also-notify', 'max-transfer-idle-out', 'max-transfer-out', 'notify-source', 'notify-source-v6', 'provide-ixfr', 'transfer-format',
-		'transfers-out', 'update-policy');";
+		'transfers-out', 'update-policy')";
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'S' WHERE `fm_dns_functions`.`def_option` IN 
 		('allow-notify', 'alt-transfer-source', 'alt-transfer-source-v6', 'masters', 'max-refresh-time', 'max-retry-time', 'max-transfer-idle-in',
 		'max-transfer-time-in', 'min-refresh-time', 'min-retry-time', 'multi-master', 'request-ixfr', 'transfer-source', 'transfer-source-v6',
-		'transfers-in', 'transfers-per-ns');";
+		'transfers-in', 'transfers-per-ns')";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -1366,8 +1366,8 @@ function upgradefmDNS_2003($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0-alpha2', '<') ? upgradefmDNS_2002($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL AFTER `domain_clone_domain_id`;";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_template_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_default`;";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL AFTER `domain_clone_domain_id`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_template_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_default`";
 	
 	$inserts = $updates = null;
 	
@@ -1393,10 +1393,10 @@ function upgradefmDNS_2004($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0-beta1', '<') ? upgradefmDNS_2003($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0';";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` CHANGE `server_serial_no` `server_serial_no` VARCHAR(255) NOT NULL DEFAULT '0'";
 	
 	$inserts = $updates = null;
 	
@@ -1420,10 +1420,13 @@ function upgradefmDNS_200($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0-rc2', '<') ? upgradefmDNS_2004($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
-	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
-	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
-	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_' WHERE `server_serial_no` LIKE 'g%';";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `soa_serial_no` `soa_serial_no` INT(2) NOT NULL DEFAULT  '0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads` DROP `soa_id`";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_') WHERE `server_serial_no` LIKE 'g%'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_') WHERE `server_serial_no` LIKE 'g%'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_') WHERE `server_serial_no` LIKE 'g%'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_') WHERE `server_serial_no` LIKE 'g%'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no` = " . date('Ymd') . '00';
 	
 	$inserts = $updates = null;
 	

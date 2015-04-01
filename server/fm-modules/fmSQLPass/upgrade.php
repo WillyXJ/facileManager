@@ -40,9 +40,9 @@ function upgradefmSQLPassSchema($module_name) {
 function upgradefmSQLPass_01002($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` ADD  `server_port` INT( 5 ) NULL DEFAULT NULL AFTER  `server_type` ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_groups`  `server_groups` TEXT NULL DEFAULT NULL ;";
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_credentials`  `server_credentials` TEXT NULL DEFAULT NULL ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` ADD  `server_port` INT( 5 ) NULL DEFAULT NULL AFTER  `server_type` ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_groups`  `server_groups` TEXT NULL DEFAULT NULL ";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_credentials`  `server_credentials` TEXT NULL DEFAULT NULL ";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -64,7 +64,7 @@ function upgradefmSQLPass_01004($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_01002($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_type`  `server_type` ENUM(  'MySQL',  'PostgreSQL',  'MSSQL' ) NOT NULL ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_type`  `server_type` ENUM(  'MySQL',  'PostgreSQL',  'MSSQL' ) NOT NULL ";
 
 	$inserts = $updates = null;
 

@@ -92,7 +92,7 @@ function fmUpgrade($database) {
 function fmUpgrade_100($database) {
 	global $fmdb;
 	
-	$table[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_ipaddr`  `user_ipaddr` VARCHAR( 255 ) NULL DEFAULT NULL ;";
+	$table[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_ipaddr`  `user_ipaddr` VARCHAR( 255 ) NULL DEFAULT NULL ";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -118,7 +118,7 @@ function fmUpgrade_101($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_force_pwd_change` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_ipaddr` ;";
+		$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_force_pwd_change` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_ipaddr` ";
 		
 		/** Create table schema */
 		if (count($table) && $table[0]) {
@@ -148,8 +148,8 @@ function fmUpgrade_104($database) {
 		
 		/** Schema change */
 		if ($GLOBALS['running_db_version'] < 14) {
-			$table[] = "ALTER TABLE $database. `fm_logs` ENGINE = INNODB;";
-			$table[] = "ALTER TABLE $database. `fm_perms` ADD  `perm_extra` TEXT NULL ;";
+			$table[] = "ALTER TABLE $database. `fm_logs` ENGINE = INNODB";
+			$table[] = "ALTER TABLE $database. `fm_perms` ADD  `perm_extra` TEXT NULL ";
 		}
 		if ($GLOBALS['running_db_version'] < 15) {
 			$inserts[] = <<<INSERT
@@ -181,7 +181,7 @@ INSERT;
 		";
 		}
 		if ($GLOBALS['running_db_version'] < 17) {
-			$table[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_status`  `user_status` ENUM(  'active',  'disabled',  'deleted' ) NOT NULL DEFAULT  'active';";
+			$table[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_status`  `user_status` ENUM(  'active',  'disabled',  'deleted' ) NOT NULL DEFAULT  'active'";
 		}
 		if ($GLOBALS['running_db_version'] < 18) {
 			if ($GLOBALS['running_db_version'] >= 15) {
@@ -241,7 +241,7 @@ INSERT;
 			}
 
 			/** Update timestamp fields with unix epoch seconds */
-			$table[] = "ALTER TABLE  $database.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0';";
+			$table[] = "ALTER TABLE  $database.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM $database.`fm_logs`";
 			$fmdb->get_results($query);
 			$count = $fmdb->num_rows;
@@ -250,9 +250,9 @@ INSERT;
 				$timestamp = strtotime($all_results[$k]->log_timestamp . ' ' . 'America/Denver');
 				$updates[] = "UPDATE $database.`fm_logs` SET log_timestamp='$timestamp' WHERE log_id={$all_results[$k]->log_id}";
 			}
-			$updates[] = "ALTER TABLE  $database.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` INT( 10 ) NOT NULL DEFAULT  '0';";
+			$updates[] = "ALTER TABLE  $database.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` INT( 10 ) NOT NULL DEFAULT  '0'";
 			
-			$table[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_last_login`  `user_last_login` VARCHAR( 20 ) NOT NULL DEFAULT  '0';";
+			$table[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_last_login`  `user_last_login` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM $database.`fm_users`";
 			$fmdb->get_results($query);
 			$count = $fmdb->num_rows;
@@ -261,9 +261,9 @@ INSERT;
 				$timestamp = strtotime($all_results[$k]->user_last_login . ' ' . 'America/Denver');
 				$updates[] = "UPDATE $database.`fm_users` SET user_last_login='$timestamp' WHERE user_id={$all_results[$k]->user_id}";
 			}
-			$updates[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_last_login`  `user_last_login` INT( 10 ) NOT NULL DEFAULT  '0';";
+			$updates[] = "ALTER TABLE  $database.`fm_users` CHANGE  `user_last_login`  `user_last_login` INT( 10 ) NOT NULL DEFAULT  '0'";
 			
-			$table[] = "ALTER TABLE  $database.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0';";
+			$table[] = "ALTER TABLE  $database.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM $database.`fm_pwd_resets`";
 			$fmdb->get_results($query);
 			$count = $fmdb->num_rows;
@@ -272,10 +272,10 @@ INSERT;
 				$timestamp = strtotime($all_results[$k]->pwd_timestamp . ' ' . 'America/Denver');
 				$updates[] = "UPDATE $database.`fm_pwd_resets` SET pwd_timestamp='$timestamp' WHERE pwd_id='{$all_results[$k]->pwd_id}'";
 			}
-			$updates[] = "ALTER TABLE  $database.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` INT( 10 ) NOT NULL DEFAULT  '0';";
+			$updates[] = "ALTER TABLE  $database.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` INT( 10 ) NOT NULL DEFAULT  '0'";
 
-			$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_auth_type` INT( 1 ) NOT NULL DEFAULT  '1' AFTER  `user_email` ;";
-			$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_template_only` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_force_pwd_change` ;";
+			$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_auth_type` INT( 1 ) NOT NULL DEFAULT  '1' AFTER  `user_email` ";
+			$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_template_only` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_force_pwd_change` ";
 		}
 		
 		/** Create table schema */
@@ -352,7 +352,7 @@ function fmUpgrade_106($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_default_module` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `user_email` ;";
+		$table[] = "ALTER TABLE  $database.`fm_users` ADD  `user_default_module` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `user_email` ";
 
 		/** Create table schema */
 		if (count($table) && $table[0]) {
@@ -422,8 +422,8 @@ function fmUpgrade_1201($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table[] = "ALTER TABLE  $database.`fm_options` ADD  `module_name` VARCHAR( 255 ) NULL AFTER  `account_id` ;";
-		$table[] = "ALTER TABLE  `fm_users` ADD  `user_caps` TEXT NULL AFTER  `user_auth_type` ;";
+		$table[] = "ALTER TABLE  $database.`fm_options` ADD  `module_name` VARCHAR( 255 ) NULL AFTER  `account_id` ";
+		$table[] = "ALTER TABLE  `fm_users` ADD  `user_caps` TEXT NULL AFTER  `user_auth_type` ";
 
 		/** Create table schema */
 		if (count($table) && $table[0]) {

@@ -130,12 +130,12 @@ class fm_dns_records {
 			$soa_count = getSOACount($domain_id);
 			$ns_count = getNSCount($domain_id);
 			if (reloadAllowed($domain_id) && $soa_count && $ns_count) {
-				$this->updateSOAReload($domain_id, 'yes');
+				$this->updateSOAReload($child_id, 'yes');
 			}
 
 			if (in_array($record_type, array('SOA', 'NS')) && $soa_count && $ns_count) {
 				/** Update all associated DNS servers */
-				setBuildUpdateConfigFlag(getZoneServers($domain_id), 'yes', 'build');
+				setBuildUpdateConfigFlag(getZoneServers($child_id), 'yes', 'build');
 			}
 		}
 
@@ -206,7 +206,7 @@ class fm_dns_records {
 		foreach ($fm_dns_zones->getZoneTemplateChildren($domain_id) as $child_id) {
 			$domain_id = getParentDomainID($child_id);
 			if (reloadAllowed($domain_id) && getSOACount($domain_id) && getNSCount($domain_id)) {
-				$this->updateSOAReload($domain_id, 'yes');
+				$this->updateSOAReload($child_id, 'yes');
 			}
 		}
 
@@ -601,23 +601,21 @@ HTML;
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND
 				s.soa_id=(SELECT soa_id FROM fm_dns_domains WHERE domain_id={$parent_domain_ids[2]})";
 		} else {
-			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.soa_id=d.soa_id AND d.domain_id IN (" . join(',', $parent_domain_ids) . ')';
+			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND 
+				s.soa_id=d.soa_id AND d.domain_id IN (" . join(',', $parent_domain_ids) . ')';
 		}
 		$result = $fmdb->query($query);
 		if (!$fmdb->num_rows) return false;
 
-		$domain_details = $fmdb->last_result;
-		extract(get_object_vars($domain_details[0]), EXTR_SKIP);
-
 		/** Update the SOA serial number */
-		if ($domain_reload == 'no') {
+		if ($fmdb->last_result[0]->domain_reload == 'no') {
 			if (!isset($fm_dns_zones)) {
 				include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 			}
-			$fm_dns_zones->updateSOASerialNo($domain_id, $soa_serial_no);
+			$fm_dns_zones->updateSOASerialNo($domain_id, getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_serial_no'));
 		}
 
-		reloadZoneSQL($domain_id, $status);
+		reloadZoneSQL($parent_domain_ids[count($parent_domain_ids) - 1], $status);
 	}
 	
 	

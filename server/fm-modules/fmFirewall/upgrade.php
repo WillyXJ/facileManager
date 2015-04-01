@@ -42,7 +42,7 @@ function upgradefmFirewallSchema($module_name) {
 function upgradefmFirewall_01003($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ;";
+	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ";
 	
 	$inserts = $updates = null;
 	

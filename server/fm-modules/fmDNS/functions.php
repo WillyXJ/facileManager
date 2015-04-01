@@ -364,10 +364,13 @@ function moduleCompleteClientInstallation() {
 }
 
 
-function reloadZoneSQL($domain_id, $reload_zone) {
+function reloadZoneSQL($domain_ids, $reload_zone) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone' WHERE `domain_id`='$domain_id' OR `domain_clone_domain_id`='$domain_id'";
+	if (!is_array($domain_ids)) $domain_ids = array($domain_ids);
+	
+	$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone' WHERE `domain_template` = 'no' AND
+			(`domain_id` IN (" . join(',', $domain_ids) . ") OR `domain_clone_domain_id` IN (" . join(',', $domain_ids) . ") OR `domain_template_id` IN (" . join(',', $domain_ids) . '))';
 	$fmdb->query($query);
 }
 
