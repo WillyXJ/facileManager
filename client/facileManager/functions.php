@@ -256,7 +256,11 @@ function installFM($proto, $compress) {
 	}
 
 	/** Server serial number **/
-	$data['server_name'] = php_uname('n');
+	$data['server_name'] = exec("hostname -f", $output, $rc);
+	if($rc > 0 || empty($data['server_name'])) {
+		$data['server_name'] = php_uname('n');
+	}
+
 	$data['server_os'] = PHP_OS;
 	$data['server_os_distro'] = detectOSDistro();
 	echo fM('Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ');
