@@ -50,6 +50,7 @@
 * Both   - [feature] Added ability to define the SSH user to use. (Issue #182)
 * Server - [improvement] Post-upgrade redirect goes to the dashboard instead of
            the modules page.
+* Client - [improvement] Determines FQDN at install time. (Issue #192).
 
 1.3.1 (2014-11-10)
 ==================

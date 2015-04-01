@@ -256,8 +256,8 @@ function installFM($proto, $compress) {
 	}
 
 	/** Server serial number **/
-	$data['server_name'] = exec("hostname -f", $output, $rc);
-	if($rc > 0 || empty($data['server_name'])) {
+	$data['server_name'] = exec('hostname -f', $output, $rc);
+	if ($rc > 0 || empty($data['server_name'])) {
 		$data['server_name'] = php_uname('n');
 	}
 
