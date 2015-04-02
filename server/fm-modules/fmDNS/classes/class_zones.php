@@ -176,7 +176,7 @@ class fm_dns_zones {
 					$sql_values .= "'no',";
 				} elseif ($field == 'domain_clone_dname') {
 					$log_message .= "Use DNAME RRs: {$post['domain_clone_dname']}\n";
-					$sql_values .= "'" . sanitize($post['domain_clone_dname']) . "',";
+					$sql_values .= $post['domain_clone_dname'] ? "'" . sanitize($post['domain_clone_dname']) . "'," : 'NULL,';
 				} else {
 					$sql_values .= strlen(sanitize($value)) ? "'" . sanitize($value) . "'," : 'NULL,';
 				}
