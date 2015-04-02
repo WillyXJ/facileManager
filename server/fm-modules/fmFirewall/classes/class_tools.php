@@ -38,7 +38,7 @@ class fm_module_tools {
 			$ssh_key_loaded = @file_put_contents($temp_ssh_key, $ssh_key);
 			@chmod($temp_ssh_key, 0400);
 		}
-		$ssh_user = getOption('ssh_user');
+		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 
 		/** Get server list */
 		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');

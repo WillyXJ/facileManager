@@ -116,7 +116,7 @@ class fm_shared_module_servers {
 					
 					@chmod($temp_ssh_key, 0400);
 					
-					$ssh_user = getOption('ssh_user');
+					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 					if (!$ssh_user) {
 						return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
 					}

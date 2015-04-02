@@ -1052,7 +1052,7 @@ HTML;
 					
 					@chmod($temp_ssh_key, 0400);
 					
-					$ssh_user = getOption('ssh_user');
+					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 					if (!$ssh_user) {
 						return '<p class="error">' . sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
 					}

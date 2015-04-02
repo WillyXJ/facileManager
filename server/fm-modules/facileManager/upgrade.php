@@ -588,7 +588,7 @@ function fmUpgrade_200($database) {
 	$success = ($GLOBALS['running_db_version'] < 37) ? fmUpgrade_2002($database) : true;
 	
 	if ($success) {
-		if (!setOption('ssh_user', 'fm_user')) return false;
+		if (!setOption('ssh_user', 'fm_user', 'auto', true, $_SESSION['user']['account_id'])) return false;
 	}
 
 	upgradeConfig('fm_db_version', 42, false);
