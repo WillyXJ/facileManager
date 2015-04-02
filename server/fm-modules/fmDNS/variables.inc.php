@@ -104,8 +104,9 @@ $__FM_CONFIG['logging']['options']['severity']			= array('critical', 'error', 'w
 $__FM_CONFIG['logging']['options']['print-category']	= array('', 'yes', 'no');
 $__FM_CONFIG['logging']['options']['print-severity']	= array('', 'yes', 'no');
 $__FM_CONFIG['logging']['options']['print-time']		= array('', 'yes', 'no');
-$__FM_CONFIG['logging']['categories']					= array('default', 'general', 'client', 'config', 'database', 'dnssec', 'lame-servers', 'network', 'notify',
-															'queries', 'resolver', 'security', 'update', 'update-security', 'xfer-in', 'xfer-out');
+$__FM_CONFIG['logging']['categories']					= array('client', 'config', 'database', 'default', 'delegation-only', 'dispatch', 'dnssec', 'general', 
+															'lame-servers', 'network', 'notify', 'queries', 'resolver', 'rpz', 'rate-limit', 'security', 'unmatched',
+															'update', 'update-security', 'xfer-in', 'xfer-out');
 $__FM_CONFIG['logging']['channels']['reserved']			= array('null', 'default_syslog', 'default_debug', 'default_stderr');
 
 
