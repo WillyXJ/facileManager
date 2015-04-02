@@ -100,7 +100,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 			}
 			
 			if (array_key_exists('ssh', $_GET)) {
-				$data = getOption('ssh_' . $_GET['ssh'], $_SESSION['user']['account_id']);
+				$data = getOption('ssh_' . $_GET['ssh'], getAccountID($_POST['AUTHKEY']));
 			}
 		} else {
 			$data = sprintf(_('failed\n\nInstallation aborted. %s is not an active module.'), $_POST['module_name']) . "\n";

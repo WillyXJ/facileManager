@@ -281,7 +281,7 @@ class fm_settings {
 			 $software_update_options_style = 'style="display: block;"';
 		} else $software_update_checked = $software_update_options_style = null;
 
-		$ssh_user = getOption('ssh_user');
+		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 		
 		$return_form = '
 		<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">
@@ -612,7 +612,7 @@ class fm_settings {
 							<p>' . _('The local system user to use for client interaction via SSH.') . '</p>
 						</div>
 						<div class="choices">
-							<input name="ssh_user" id="ssh_user" type="text" value="' . $ssh_user . '" size="40" placeholder="fm_user" />
+							<input name="ssh_user[' . $_SESSION['user']['account_id'] . ']" id="ssh_user" type="text" value="' . $ssh_user . '" size="40" placeholder="fm_user" />
 						</div>
 					</div>
 					<div id="setting-row">
