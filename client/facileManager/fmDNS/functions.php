@@ -101,7 +101,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 function buildConf($url, $data) {
 	global $proto, $debug, $purge;
 	
-	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk).\n\n");
+	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
@@ -172,7 +172,7 @@ function buildConf($url, $data) {
 	installFiles($runas, $chown_files, $files, $data['dryrun']);
 	
 	/** Reload the server */
-	$message = "Reloading the server.\n";
+	$message = "Reloading the server\n";
 	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
 		addLogEntry($message);
@@ -185,12 +185,12 @@ function buildConf($url, $data) {
 				if ($retval) return processReloadFailure($last_line);
 			}
 		} else {
-			$message = "The server is not running. Attempting to start it.\n";
+			$message = "The server is not running - attempting to start it\n";
 			if ($debug) echo fM($message);
 			addLogEntry($message);
 			$named_rc_script = getStartupScript();
 			if ($named_rc_script === false) {
-				$last_line = "Cannot locate the start script.\n";
+				$last_line = "Cannot locate the start script\n";
 				$retval = true;
 			} else {
 				$last_line = system($named_rc_script . ' 2>&1', $retval);
@@ -279,7 +279,7 @@ function moduleAddServer($url, $data) {
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
-		if (!$raw_data) echo "An error occurred.\n";
+		if (!$raw_data) echo "An error occurred\n";
 		else echo $raw_data;
 		exit(1);
 	}
@@ -396,17 +396,17 @@ function manageCache($action, $message) {
 			}
 		}
 		
-		$message = $retval ? $message . ' failed.' : $message . ' completed successfully.';
+		$message = $retval ? $message . ' failed' : $message . ' completed successfully';
 		echo fM($message);
 		addLogEntry($message);
 	} else {
-		$error_msg = "The server is not running.\n";
+		$error_msg = "The server is not running\n";
 		if ($debug) echo fM($error_msg);
 		addLogEntry($error_msg);
 	}
 	if ($retval) {
 		addLogEntry($last_line);
-		$message = "There was an error " . strtolower($message) . ".  Please check the logs for details.\n";
+		$message = "There was an error " . strtolower($message) . " - please check the logs for details\n";
 		if ($debug) echo fM($message);
 		addLogEntry($message);
 		exit(1);
@@ -429,7 +429,7 @@ function manageCache($action, $message) {
 function processReloadFailure($last_line) {
 	if ($debug) echo fM($last_line);
 	addLogEntry($last_line);
-	$message = "There was an error reloading the server.  Please check the logs for details.\n";
+	$message = "There was an error reloading the server - please check the logs for details\n";
 	if ($debug) echo fM($message);
 	addLogEntry($message);
 	return false;

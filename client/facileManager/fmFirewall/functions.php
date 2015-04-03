@@ -98,7 +98,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 function buildConf($url, $data) {
 	global $proto, $debug;
 	
-	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk).\n\n");
+	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
@@ -124,7 +124,7 @@ function buildConf($url, $data) {
 	/** Install the new files */
 	installFiles($runas, $chown_files, $files, $data['dryrun']);
 	
-	$message = "Reloading the server.\n";
+	$message = "Reloading the server\n";
 	if ($debug) echo fM($message);
 	$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
 	$message = "$rc_script\n";
@@ -133,7 +133,7 @@ function buildConf($url, $data) {
 		addLogEntry($message);
 		$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
 		if ($rc_script === false) {
-			$last_line = "Cannot locate the start script.\n";
+			$last_line = "Cannot locate the start script\n";
 			if ($debug) echo fM($last_line);
 			addLogEntry($last_line);
 			$retval = true;
@@ -142,7 +142,7 @@ function buildConf($url, $data) {
 			addLogEntry($last_line);
 		}
 		if ($retval) {
-			$message = "There was an error reloading the firewall.  Please check the logs for details.\n";
+			$message = "There was an error reloading the firewall - please check the logs for details\n";
 			if ($debug) echo fM($message);
 			addLogEntry($message);
 			return false;
@@ -220,7 +220,7 @@ function moduleAddServer($url, $data) {
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
-		if (!$raw_data) echo "An error occurred.\n";
+		if (!$raw_data) echo "An error occurred\n";
 		else echo $raw_data;
 		exit(1);
 	}

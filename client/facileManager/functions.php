@@ -354,19 +354,19 @@ function upgradeFM($url, $data) {
 	downloadfMFile($module_file, true);
 	
 	/** Extract client files */
-	$message = "Extracting client files.\n";
+	$message = "Extracting client files\n";
 	echo fM($message);
 	addLogEntry($message);
 	extractFiles(array(sys_get_temp_dir() . '/' . $core_file, sys_get_temp_dir() . '/' . $module_file));
 	
 	/** Cleanup */
-	$message = "Cleaning up.\n";
+	$message = "Cleaning up\n";
 	echo fM($message);
 	addLogEntry($message);
 	@unlink(sys_get_temp_dir() . '/' . $core_file);
 	@unlink(sys_get_temp_dir() . '/' . $module_file);
 	
-	$message = "Client upgrade complete.\n";
+	$message = "Client upgrade complete\n";
 	echo fM($message);
 	addLogEntry($message);
 	
@@ -939,7 +939,7 @@ function addLogEntry($log_data) {
  * @return boolean
  */
 function installFiles($user, $chown_files, $files, $dryrun) {
-	$message = "Setting directory and file permissions for $user.\n";
+	$message = "Setting directory and file permissions for $user\n";
 	if ($debug) echo $message;
 	if (!$dryrun) {
 		addLogEntry($message);
@@ -952,7 +952,7 @@ function installFiles($user, $chown_files, $files, $dryrun) {
 	/** Process the files */
 	if (count($files)) {
 		foreach($files as $filename => $contents) {
-			$message = "Writing $filename.\n";
+			$message = "Writing $filename\n";
 			if ($debug) echo $message;
 			if (!$dryrun) {
 				addLogEntry($message);
