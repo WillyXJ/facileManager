@@ -614,8 +614,10 @@ HTML;
 			}
 			$fm_dns_zones->updateSOASerialNo($domain_id, getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_serial_no'));
 		}
+		
+		$id = ($clone_id = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_clone_domain_id')) ? $clone_id : $domain_id;
 
-		reloadZoneSQL($parent_domain_ids[count($parent_domain_ids) - 1], $status);
+		reloadZoneSQL($id, $status);
 	}
 	
 	
