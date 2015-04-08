@@ -1379,7 +1379,9 @@ HTML;
 			$post['domain_type'] = getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
 
 			return $post;
-		} else unset($post['domain_template_id']);
+		} else {
+			$post['domain_template_id'] = 0;
+		}
 		
 		/** Format domain_clone_domain_id */
 		if (!$post['domain_clone_domain_id'] && $post['action'] == 'add') $post['domain_clone_domain_id'] = 0;
