@@ -1427,6 +1427,7 @@ function upgradefmDNS_200($__FM_CONFIG, $running_version) {
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_') WHERE `server_serial_no` LIKE 'g%'";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET `server_serial_no` = REPLACE(`server_serial_no`, 'g', 'g_') WHERE `server_serial_no` LIKE 'g%'";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no` = " . date('Ymd') . '00';
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s, `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d SET soa_append='no' WHERE d.domain_mapping='reverse' AND s.soa_template='no' AND d.soa_id=s.soa_id";
 	
 	$inserts = $updates = null;
 	
