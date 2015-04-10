@@ -498,7 +498,7 @@ HTML;
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
 				AND def_option_type='$option_type'";
 			$query .= " AND def_clause_support LIKE '%";
-			if (isset($_POST['cfg_type']) && $_POST['cfg_type'] == 'global' &&
+			if (isset($option_type) && $option_type == 'global' &&
 					isset($_POST['item_id']) && $_POST['item_id'] != 0) {
 				switch ($_POST['item_sub_type']) {
 					case 'view_id':
