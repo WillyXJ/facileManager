@@ -255,32 +255,32 @@ HTML;
 			<input type="hidden" name="time_id" value="%d" />
 			<table class="form-table">
 				<tr>
-					<th width="33%" scope="row"><label for="time_name">%s</label></th>
-					<td width="67%"><input name="time_name" id="time_name" type="text" value="$s" size="40" maxlength="%d" /></td>
+					<th width="33&#37;" scope="row"><label for="time_name">%s</label></th>
+					<td width="67&#37;"><input name="time_name" id="time_name" type="text" value="%s" size="40" maxlength="%d" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_start_date">%s</label></th>
-					<td width="67%"><input name="time_start_date" id="time_start_date" type="date" value="%s" size="40" class="datepicker" /></td>
+					<th width="33&#37;" scope="row"><label for="time_start_date">%s</label></th>
+					<td width="67&#37;"><input name="time_start_date" id="time_start_date" type="date" value="%s" size="40" class="datepicker" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_start_time">%s</label></th>
-					<td width="67%">%s</td>
+					<th width="33&#37;" scope="row"><label for="time_start_time">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_end_date">%s</label></th>
-					<td width="67%"><input name="time_end_date" id="time_end_date" type="date" value="%s" size="40" class="datepicker" /></td>
+					<th width="33&#37;" scope="row"><label for="time_end_date">%s</label></th>
+					<td width="67&#37;"><input name="time_end_date" id="time_end_date" type="date" value="%s" size="40" class="datepicker" /></td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_end_time">%s</label></th>
-					<td width="67%">%s</td>
+					<th width="33&#37;" scope="row"><label for="time_end_time">%s</label></th>
+					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row">%s</th>
-					<td width="67%" style="white-space: nowrap;">%s</td>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;" style="white-space: nowrap;">%s</td>
 				</tr>
 				<tr>
-					<th width="33%" scope="row"><label for="time_comment">%s</label></th>
-					<td width="67%"><textarea id="time_comment" name="time_comment" rows="4" cols="30">%s</textarea></td>
+					<th width="33&#37;" scope="row"><label for="time_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="time_comment" name="time_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
 		%s

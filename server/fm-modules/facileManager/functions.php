@@ -1712,14 +1712,15 @@ function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
 	
 	$class = $class ? 'class="' . $class . '"' : null;
 
-	$return = <<<HTML
-	<div id="configtypesmenu" $class>
-		<form action="{$GLOBALS['basename']}" method="GET">
-		$hidden_inputs
-		$record_count items per page
+	$return = sprintf('<div id="configtypesmenu" %s>
+		<form action="%s" method="GET">
+		%s
+		%s %s
 		</form>
-	</div>
-HTML;
+	</div>',
+			$class, $GLOBALS['basename'], $hidden_inputs,
+			$record_count, _('items per page')
+		);
 
 	return $return;
 }

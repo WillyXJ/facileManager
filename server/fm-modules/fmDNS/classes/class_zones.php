@@ -711,7 +711,7 @@ HTML;
 		}
 		$clone_dname_dropdown = buildSelect('domain_clone_dname', 'domain_clone_dname', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_clone_dname'), $domain_clone_dname);
 		
-		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) ? null : '<tr class="include-with-template"><td></td><td><p><a href="config-options.php?domain_id=' . $domain_id . '">Configure Additional Options</a></p></td></tr>';
+		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) ? null : sprintf('<tr class="include-with-template"><td></td><td><p><a href="config-options.php?domain_id=%d">%s</a></p></td></tr>', $domain_id, __('Configure Additional Options'));
 		
 		$popup_header = buildPopup('header', $ucaction . ' Zone');
 		$popup_footer = buildPopup('footer');

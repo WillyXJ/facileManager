@@ -390,7 +390,7 @@ class fm_settings {
 								<p>' . _('Require user to be a member of a group to authenticate.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="ldap_group_require" id="ldap_group_require" type="checkbox" value="1" ' . $ldap_group_require_checked . ' /><label for="ldap_group_require">Require Group Membership</label>
+								<input name="ldap_group_require" id="ldap_group_require" type="checkbox" value="1" ' . $ldap_group_require_checked . ' /><label for="ldap_group_require">' . _('Require Group Membership') . '</label>
 							</div>
 						</div>
 						<div id="ldap_group_require_options" ' . $ldap_group_require_options_style . '>
@@ -429,7 +429,7 @@ class fm_settings {
 							<p>' . sprintf(_('Allow clients to automatically register with %s.'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" ' . $client_auto_register_checked . ' /><label for="client_auto_register">Allow Automatic Client Registration</label>
+							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" ' . $client_auto_register_checked . ' /><label for="client_auto_register">' . _('Allow Automatic Client Registration') . '</label>
 						</div>
 					</div>
 				</div>
@@ -440,7 +440,7 @@ class fm_settings {
 							<p>' . _('Attempt to auto-detect and redirect the user to https.') . '</p>
 						</div>
 						<div class="choices">
-							<input name="enforce_ssl" id="enforce_ssl" type="checkbox" value="1" ' . $enforce_ssl_checked . ' /><label for="enforce_ssl">Enforce SSL</label>
+							<input name="enforce_ssl" id="enforce_ssl" type="checkbox" value="1" ' . $enforce_ssl_checked . ' /><label for="enforce_ssl">' . _('Enforce SSL') . '</label>
 						</div>
 					</div>
 					<div id="setting-row">
@@ -460,7 +460,7 @@ class fm_settings {
 							<p>' . sprintf(_('If this is unchecked, %s will never send an e-mail (including password reset links).'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="mail_enable" id="mail_enable" type="checkbox" value="1" ' . $mail_enable_checked . ' /><label for="mail_enable">Enable Mailing</label>
+							<input name="mail_enable" id="mail_enable" type="checkbox" value="1" ' . $mail_enable_checked . ' /><label for="mail_enable">' . _('Enable Mailing') . '</label>
 						</div>
 					</div>
 					<div id="fm_mailing_options" ' . $fm_mailing_options_style . '>
@@ -480,7 +480,7 @@ class fm_settings {
 								<p>' . _('Use authentication with your SMTP server.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="mail_smtp_auth" id="mail_smtp_auth" type="checkbox" value="1" ' . $mail_smtp_auth_checked . ' /><label for="mail_smtp_auth">Enable SMTP Authentication</label>
+								<input name="mail_smtp_auth" id="mail_smtp_auth" type="checkbox" value="1" ' . $mail_smtp_auth_checked . ' /><label for="mail_smtp_auth">' . _('Enable SMTP Authentication') . '</label>
 							</div>
 						</div>
 						<div id="mail_smtp_auth_options" ' . $mail_smtp_auth_options_style . '>
@@ -510,7 +510,7 @@ class fm_settings {
 								<p>' . _('Use TLS with your SMTP server connection.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="mail_smtp_tls" id="mail_smtp_tls" type="checkbox" value="1" ' . $mail_smtp_tls_checked . ' /><label for="mail_smtp_tls">Enable TLS</label>
+								<input name="mail_smtp_tls" id="mail_smtp_tls" type="checkbox" value="1" ' . $mail_smtp_tls_checked . ' /><label for="mail_smtp_tls">' . _('Enable TLS') . '</label>
 							</div>
 						</div>
 	
@@ -561,7 +561,7 @@ class fm_settings {
 							<p>' . sprintf(_('If this is checked, %s will display application errors when they occur.'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="show_errors" id="show_errors" type="checkbox" value="1" ' . $show_errors_checked . ' /><label for="show_errors">Show Errors</label>
+							<input name="show_errors" id="show_errors" type="checkbox" value="1" ' . $show_errors_checked . ' /><label for="show_errors">' . _('Show Errors') . '</label>
 						</div>
 					</div>
 					<div id="setting-row">
@@ -581,7 +581,7 @@ class fm_settings {
 							<p>' . sprintf(_('If this is checked, %s will automatically check for updates.'), $fm_name) . '</p>
 						</div>
 						<div class="choices">
-							<input name="software_update" id="software_update" type="checkbox" value="1" ' . $software_update_checked . ' /><label for="software_update">Check for Updates</label>
+							<input name="software_update" id="software_update" type="checkbox" value="1" ' . $software_update_checked . ' /><label for="software_update">' . _('Check for Updates') . '</label>
 						</div>
 					</div>
 					<div id="software_update_options" ' . $software_update_options_style . '>
