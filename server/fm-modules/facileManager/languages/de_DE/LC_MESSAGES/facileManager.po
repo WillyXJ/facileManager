@@ -7,28 +7,28 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-23 12:00-0600\n"
-"PO-Revision-Date: 2015-03-26 09:37+0100\n"
+"POT-Creation-Date: 2015-03-31 14:31-0600\n"
+"PO-Revision-Date: 2015-04-13 10:20+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 1.7.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: de_DE\n"
 
-#: /var/www/html/fM/server/fm-init.php:94
+#: server/fm-init.php:94
 msgid "The specified key is invalid."
 msgstr "Der angegebene Schlüssel ist ungültig."
 
-#: /var/www/html/fM/server/fm-init.php:98
+#: server/fm-init.php:98
 msgid "Your password reset email has been sent to the address on file."
 msgstr ""
 "Die E-Mail zum Zurücksetzen Ihres Passwortes wurde an die Adresse in der "
 "Datei verschickt."
 
-#: /var/www/html/fM/server/fm-init.php:127
+#: server/fm-init.php:127
 #, php-format
 msgid ""
 "The database for %1s and its modules still needs to be upgraded.<br />Please "
@@ -37,33 +37,28 @@ msgstr ""
 "Die Datenbank für %1s und dessen Module müssen aktualisiert werden.<br /"
 ">Bitte kontaktieren Sie den zuständigen Benutzer."
 
-#: /var/www/html/fM/server/fm-install.php:63
-#: /var/www/html/fM/server/fm-install.php:71
-#: /var/www/html/fM/server/fm-install.php:91
-#: /var/www/html/fM/server/fm-install.php:120
-#: /var/www/html/fM/server/fm-install.php:142
-#: /var/www/html/fM/server/fm-install.php:312
+#: server/fm-install.php:63 server/fm-install.php:71 server/fm-install.php:91
+#: server/fm-install.php:120 server/fm-install.php:142
+#: server/fm-install.php:312
 msgid "Installation"
 msgstr "Installation"
 
-#: /var/www/html/fM/server/fm-install.php:82
-#: /var/www/html/fM/server/fm-includes/fm-db.php:39
+#: server/fm-install.php:82 server/fm-includes/fm-db.php:39
 msgid ""
 "The connection to the database has failed. Please check the configuration."
 msgstr ""
 "Die Verbindung zur Datenbank ist fehlgeschlagen. Bitte prüfen Sie die "
 "Konfiguration."
 
-#: /var/www/html/fM/server/fm-install.php:82
-#: /var/www/html/fM/server/fm-includes/fm-db.php:39
-#: /var/www/html/fM/server/fm-includes/init.php:168
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:75
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:146
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:651
+#: server/fm-install.php:82 server/fm-includes/fm-db.php:39
+#: server/fm-includes/init.php:168
+#: server/fm-modules/facileManager/install.php:75
+#: server/fm-modules/facileManager/install.php:146
+#: server/fm-modules/facileManager/upgrade.php:651
 msgid "Try Again"
 msgstr "Erneut versuchen"
 
-#: /var/www/html/fM/server/fm-install.php:87
+#: server/fm-install.php:87
 #, php-format
 msgid ""
 "Your MySQL server (%1$s) is running MySQL version %2$s but %3$s %4$s "
@@ -72,38 +67,34 @@ msgstr ""
 "Ihr MySQL Server (%1$s) läuft mit der Version %2$s, %3$s %4$s benötigt "
 "jedoch mindestens %5$s."
 
-#: /var/www/html/fM/server/fm-install.php:148
-#: /var/www/html/fM/server/fm-install.php:204
-#: /var/www/html/fM/server/fm-install.php:288
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:54
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:55
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:62
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:135
+#: server/fm-install.php:148 server/fm-install.php:204
+#: server/fm-install.php:288 server/fm-modules/facileManager/install.php:54
+#: server/fm-modules/facileManager/install.php:55
+#: server/fm-modules/facileManager/install.php:62
+#: server/fm-modules/facileManager/install.php:135
 #, php-format
 msgid "Install"
 msgstr "Installieren"
 
-#: /var/www/html/fM/server/fm-install.php:149
+#: server/fm-install.php:149
 #, php-format
 msgid "Installation is complete! Click 'Next' to login and start using %s."
 msgstr ""
 "Installation abgeschlossen! Bitte klicken Sie auf 'Weiter', um sich "
 "anzumelden und %s zu verwenden."
 
-#: /var/www/html/fM/server/fm-install.php:150
-#: /var/www/html/fM/server/password_reset.php:169
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:646
+#: server/fm-install.php:150 server/password_reset.php:169
+#: server/fm-modules/facileManager/upgrade.php:646
 #, php-format
 msgid "Next"
 msgstr "Weiter"
 
-#: /var/www/html/fM/server/fm-install.php:168
-#: /var/www/html/fM/server/fm-install.php:249
+#: server/fm-install.php:168 server/fm-install.php:249
 #, php-format
 msgid "ERROR: %s"
 msgstr "FEHLER: %s"
 
-#: /var/www/html/fM/server/fm-install.php:183
+#: server/fm-install.php:183
 #, php-format
 msgid ""
 "Before we can install the backend database, your database credentials are "
@@ -114,57 +105,53 @@ msgstr ""
 "benötigt. (Sie werden ebenfalls dazu benutzt, um die <code>config.inc.php</"
 "code> Datei zu erstellen.)"
 
-#: /var/www/html/fM/server/fm-install.php:186
+#: server/fm-install.php:186
 #, php-format
 msgid "Database Host"
 msgstr "Datenbank Host"
 
-#: /var/www/html/fM/server/fm-install.php:190
+#: server/fm-install.php:190
 #, php-format
 msgid "Database Name"
 msgstr "Datenbank Name"
 
-#: /var/www/html/fM/server/fm-install.php:194
-#: /var/www/html/fM/server/fm-install.php:262
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:67
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:110
+#: server/fm-install.php:194 server/fm-install.php:262
+#: server/fm-modules/facileManager/classes/class_logins.php:67
+#: server/fm-modules/facileManager/classes/class_logins.php:110
 #, php-format
 msgid "Username"
 msgstr "Benutzername"
 
-#: /var/www/html/fM/server/fm-install.php:195
+#: server/fm-install.php:195
 #, php-format
 msgid "username"
 msgstr "benutzername"
 
-#: /var/www/html/fM/server/fm-install.php:198
-#: /var/www/html/fM/server/fm-install.php:270
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:67
+#: server/fm-install.php:198 server/fm-install.php:270
+#: server/fm-modules/facileManager/classes/class_logins.php:67
 #, php-format
 msgid "Password"
 msgstr "Passwort"
 
-#: /var/www/html/fM/server/fm-install.php:199
-#: /var/www/html/fM/server/password_reset.php:85
+#: server/fm-install.php:199 server/password_reset.php:85
 #, php-format
 msgid "password"
 msgstr "password"
 
-#: /var/www/html/fM/server/fm-install.php:202
-#: /var/www/html/fM/server/fm-install.php:286
-#: /var/www/html/fM/server/password_reset.php:101
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:111
+#: server/fm-install.php:202 server/fm-install.php:286
+#: server/password_reset.php:101
+#: server/fm-modules/facileManager/classes/class_logins.php:111
 #, php-format
 msgid "Submit"
 msgstr "Absenden"
 
-#: /var/www/html/fM/server/fm-install.php:219
+#: server/fm-install.php:219
 msgid "Could not connect to MySQL.<br />Please check your credentials."
 msgstr ""
 "Konnte keine Verbindung zu MySQL aufbauen.<br />Bitte prüfen Sie Ihre "
 "Angaben."
 
-#: /var/www/html/fM/server/fm-install.php:229
+#: server/fm-install.php:229
 msgid ""
 "Database already exists and contains one or more tables.<br />Please choose "
 "a different name."
@@ -172,60 +159,56 @@ msgstr ""
 "Datenbank existiert bereits und beinhaltet eine oder mehrere Tabellen.<br /"
 ">Bitte wählen Sie einen anderen Namen."
 
-#: /var/www/html/fM/server/fm-install.php:259
+#: server/fm-install.php:259
 #, php-format
 msgid "Ok, now create your super-admin account"
 msgstr "Okay, erstellen Sie nun Ihr Super-Admin Konto"
 
-#: /var/www/html/fM/server/fm-install.php:266
+#: server/fm-install.php:266
 #, php-format
 msgid "Email"
 msgstr "E-Mail"
 
-#: /var/www/html/fM/server/fm-install.php:274
-#: /var/www/html/fM/server/password_reset.php:88
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:385
+#: server/fm-install.php:274 server/password_reset.php:88
+#: server/fm-modules/facileManager/classes/class_users.php:385
 #, php-format
 msgid "Confirm Password"
 msgstr "Passwort bestätigen"
 
-#: /var/www/html/fM/server/fm-install.php:278
-#: /var/www/html/fM/server/password_reset.php:92
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:389
+#: server/fm-install.php:278 server/password_reset.php:92
+#: server/fm-modules/facileManager/classes/class_users.php:389
 #, php-format
 msgid "Password Validity"
 msgstr "Passwort Überprüfung"
 
-#: /var/www/html/fM/server/fm-install.php:279
-#: /var/www/html/fM/server/password_reset.php:93
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:390
+#: server/fm-install.php:279 server/password_reset.php:93
+#: server/fm-modules/facileManager/classes/class_users.php:390
+#: server/fm-modules/facileManager/js/facileManager.php:937
 #, php-format
 msgid "No Password"
 msgstr "Kein Passwort"
 
-#: /var/www/html/fM/server/fm-install.php:282
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:393
+#: server/fm-install.php:282
+#: server/fm-modules/facileManager/classes/class_users.php:393
 #, php-format
 msgid "Hint"
 msgstr "Hinweis"
 
-#: /var/www/html/fM/server/fm-install.php:313
+#: server/fm-install.php:313
 msgid "Username and password cannot be empty."
 msgstr "Benutzername und Passwort dürfen nicht leer sein."
 
-#: /var/www/html/fM/server/fm-install.php:319
+#: server/fm-install.php:319
 #, php-format
 msgid "Installer created user '%s'"
 msgstr "Benutzer '%s' wurde erstellt."
 
-#: /var/www/html/fM/server/fm-upgrade.php:58
-#: /var/www/html/fM/server/fm-upgrade.php:69
-#: /var/www/html/fM/server/fm-upgrade.php:71
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:49
+#: server/fm-upgrade.php:58 server/fm-upgrade.php:69 server/fm-upgrade.php:71
+#: server/fm-modules/facileManager/upgrade.php:49
 msgid "Upgrade"
 msgstr "Upgrade"
 
-#: /var/www/html/fM/server/fm-upgrade.php:70
+#: server/fm-upgrade.php:70
 #, php-format
 msgid ""
 "I have detected you recently upgraded %s and its modules, but have not "
@@ -234,32 +217,30 @@ msgstr ""
 "Sie haben kürzlich ein Upgrade von %s und dessen Module durchgeführt, jedoch "
 "nicht die Datenbank. Klicken Sie auf 'Upgrade', um den Vorgang zu starten."
 
-#: /var/www/html/fM/server/password_reset.php:48
+#: server/password_reset.php:48
 msgid "The passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: /var/www/html/fM/server/password_reset.php:50
+#: server/password_reset.php:50
 msgid "Your password failed to get updated."
 msgstr "Ihr Passwort konnte nicht aktualisiert werden."
 
-#: /var/www/html/fM/server/password_reset.php:71
-#: /var/www/html/fM/server/password_reset.php:78
-#: /var/www/html/fM/server/password_reset.php:163
-#: /var/www/html/fM/server/password_reset.php:166
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:87
+#: server/password_reset.php:71 server/password_reset.php:78
+#: server/password_reset.php:163 server/password_reset.php:166
+#: server/fm-modules/facileManager/classes/class_logins.php:87
 #, php-format
 msgid "Password Reset"
 msgstr "Passwort Wiederherstellung"
 
-#: /var/www/html/fM/server/password_reset.php:84
+#: server/password_reset.php:84
 msgid "New Password"
 msgstr "Neues Passwort"
 
-#: /var/www/html/fM/server/password_reset.php:89
+#: server/password_reset.php:89
 msgid "password again"
 msgstr "Passwort wiederholen"
 
-#: /var/www/html/fM/server/password_reset.php:168
+#: server/password_reset.php:168
 #, php-format
 msgid ""
 "Your password has been updated! Click 'Next' to login and start using %s."
@@ -267,7 +248,7 @@ msgstr ""
 "Ihr Passwort wurde aktualisiert! Klicken Sie auf 'Weiter', um sich "
 "anzumelden und %s zu verwenden."
 
-#: /var/www/html/fM/server/fm-includes/fm-db.php:44
+#: server/fm-includes/fm-db.php:44
 msgid ""
 "The database is installed; however, the associated application tables are "
 "missing. Click 'Start Setup' to start the installation process."
@@ -275,12 +256,11 @@ msgstr ""
 "Die Datenbank ist installiert, es fehlen jedoch die zugehörigen Tabellen. "
 "Klicken Sie auf 'Setup Starten', um mit der Installation zu beginnen."
 
-#: /var/www/html/fM/server/fm-includes/fm-db.php:44
-#: /var/www/html/fM/server/fm-includes/fm-db.php:61
+#: server/fm-includes/fm-db.php:44 server/fm-includes/fm-db.php:61
 msgid "Start Setup"
 msgstr "Setup Starten"
 
-#: /var/www/html/fM/server/fm-includes/fm-db.php:50
+#: server/fm-includes/fm-db.php:50
 msgid ""
 "The database is installed; however, an administrative account was not "
 "created. Click 'Continue Setup' to continue the installation process."
@@ -288,11 +268,11 @@ msgstr ""
 "Die Datenbank ist installiert, es fehlt jedoch ein Administrator Konto. "
 "Klicken Sie auf 'Setup fortfahren', um mit der Installation weiterzufahren."
 
-#: /var/www/html/fM/server/fm-includes/fm-db.php:50
+#: server/fm-includes/fm-db.php:50
 msgid "Continue Setup"
 msgstr "Setup fortfahren"
 
-#: /var/www/html/fM/server/fm-includes/fm-db.php:61
+#: server/fm-includes/fm-db.php:61
 msgid ""
 "The database is not installed. Click 'Start Setup' to start the installation "
 "process."
@@ -300,15 +280,15 @@ msgstr ""
 "Die Datenbank ist nicht installiert. Klicken Sie auf 'Setup Starten', um mit "
 "der Installation zu beginnen"
 
-#: /var/www/html/fM/server/fm-includes/fm-db.php:132
+#: server/fm-includes/fm-db.php:132
 msgid "Query"
 msgstr "Abfrage"
 
-#: /var/www/html/fM/server/fm-includes/fm-db.php:144
+#: server/fm-includes/fm-db.php:144
 msgid "Database error"
 msgstr "Datenbankfehler"
 
-#: /var/www/html/fM/server/fm-includes/init.php:50
+#: server/fm-includes/init.php:50
 #, php-format
 msgid ""
 "Your server is running PHP version %1$s but %2$s %3$s requires at least %4$s."
@@ -316,7 +296,7 @@ msgstr ""
 "Ihr Server läuft mit der PHP-Version %1$s, %2$s %3$s benötigt jedoch "
 "mindestens %4$s."
 
-#: /var/www/html/fM/server/fm-includes/init.php:65
+#: server/fm-includes/init.php:65
 #, php-format
 msgid ""
 "Your PHP installation appears to be missing the %1s extension which is "
@@ -324,7 +304,7 @@ msgid ""
 msgstr ""
 "%2s benötigt das PHP-Modul %1s, welches anscheinend nicht installiert wurde."
 
-#: /var/www/html/fM/server/fm-includes/init.php:80
+#: server/fm-includes/init.php:80
 #, php-format
 msgid ""
 "Your Apache installation appears to be missing the mod_rewrite module which "
@@ -333,12 +313,11 @@ msgstr ""
 "Das Apache-Modul mod_rewrite wurde nicht erkannt, wird jedoch von %1s "
 "benötigt."
 
-#: /var/www/html/fM/server/fm-includes/init.php:84
-#: /var/www/html/fM/server/fm-includes/init.php:88
+#: server/fm-includes/init.php:84 server/fm-includes/init.php:88
 msgid "Apache mod_rewrite Loaded"
 msgstr "Apache-Modul mod_rewrite geladen"
 
-#: /var/www/html/fM/server/fm-includes/init.php:116
+#: server/fm-includes/init.php:116
 #, php-format
 msgid ""
 "I cannot create the missing %1s.htaccess which is required by %2s so please "
@@ -347,19 +326,11 @@ msgstr ""
 "Datei %1s.htaccess konnte nicht erstellt werden, wird jedoch von %2s "
 "benötigt. Bitte erstellen Sie die Datei mit folgendem Inhalt:"
 
-#: /var/www/html/fM/server/fm-includes/init.php:135
-#: /var/www/html/fM/server/fm-includes/init.php:140
+#: server/fm-includes/init.php:135 server/fm-includes/init.php:140
 msgid ".htaccess File Present"
 msgstr ".htaccess Datei vorhanden"
 
-#: /var/www/html/fM/server/fm-includes/init.php:149
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_accounts.php:33
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_accounts.php:60
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_accounts.php:64
-msgid "Account is not found."
-msgstr "Konto wurde nicht gefunden"
-
-#: /var/www/html/fM/server/fm-includes/init.php:150
+#: server/fm-includes/init.php:150
 #, php-format
 msgid ""
 "The required .htaccess file appears to not work with your Apache "
@@ -368,73 +339,76 @@ msgstr ""
 "Die benötigte .htaccess Datei scheint, nicht mit Ihrer Apache Konfiguration "
 "zu funktionieren, wird jedoch von %1s benötigt."
 
-#: /var/www/html/fM/server/fm-includes/init.php:154
-#: /var/www/html/fM/server/fm-includes/init.php:158
+#: server/fm-includes/init.php:154 server/fm-includes/init.php:158
 msgid "Test Rewrites"
 msgstr "Rewrites Testen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:277
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:56
+#: server/fm-modules/facileManager/functions.php:277
+#: server/fm-modules/facileManager/variables.inc.php:56
 msgid "Edit Profile"
 msgstr "Profil bearbeiten"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:278
+#: server/fm-modules/facileManager/functions.php:278
 msgid "Logout"
 msgstr "Ausloggen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:334
+#: server/fm-modules/facileManager/functions.php:334
 msgid "Help"
 msgstr "Hilfe"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:336
+#: server/fm-modules/facileManager/functions.php:336
 msgid "Process all available updates now"
 msgstr "Alle Aktualisierungen durchführen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:346
+#: server/fm-modules/facileManager/functions.php:346
 msgid "Search this page"
 msgstr "Auf dieser Seite suchen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:846
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:1033
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:1197
+#: server/fm-modules/facileManager/functions.php:726
+msgid "Select an option"
+msgstr "Wählen Sie eine Option"
+
+#: server/fm-modules/facileManager/functions.php:847
+#: server/fm-modules/facileManager/functions.php:1034
+#: server/fm-modules/facileManager/functions.php:1198
 msgid "You have no modules installed."
 msgstr "Sie haben keine Module installiert."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:1502
+#: server/fm-modules/facileManager/functions.php:1503
 msgid "next &rarr;"
 msgstr "nächstes &rarr;"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:1503
+#: server/fm-modules/facileManager/functions.php:1504
 msgid "&larr; previous"
 msgstr "&larr; vorheriges"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:1741
+#: server/fm-modules/facileManager/functions.php:1742
 msgid "Requirement Error"
 msgstr "Abhängigkeitsfehler"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2187
+#: server/fm-modules/facileManager/functions.php:2190
 msgid "Bulk Actions"
 msgstr "Massenverarbeitung"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2188
+#: server/fm-modules/facileManager/functions.php:2191
 msgid "Apply"
 msgstr "Übernehmen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2330
+#: server/fm-modules/facileManager/functions.php:2333
 msgid "An unknown error occurred."
 msgstr "Ein unbekannter Fehler ist aufgetreten."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2335
+#: server/fm-modules/facileManager/functions.php:2338
 msgid "Oops!"
 msgstr "Ups!"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2336
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/404.php:36
+#: server/fm-modules/facileManager/functions.php:2339
+#: server/fm-modules/facileManager/pages/404.php:36
 #, php-format
 msgid "&larr; Back"
 msgstr "&larr; Zurück"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2353
+#: server/fm-modules/facileManager/functions.php:2356
 msgid ""
 "You do not have permission to view this page. Please contact your "
 "administrator for access."
@@ -442,11 +416,11 @@ msgstr ""
 "Sie haben keine Berechtigung, diese Seite zu betrachten. Bitte kontaktieren "
 "Sie den Administrator."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2459
+#: server/fm-modules/facileManager/functions.php:2462
 msgid "Manually reset authentication method."
 msgstr "Authentifizierungsmethode manuell zurücksetzen."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2705
+#: server/fm-modules/facileManager/functions.php:2708
 #, php-format
 msgid ""
 "PHP max_input_vars (%1$d) has been reached and %2$s or more are required. "
@@ -457,30 +431,35 @@ msgstr ""
 "benötigt. Bitte erhöhen Sie das Limit, um diese Anfrage auszuführen. Sie "
 "können folgendes in der %3$s.htaccess Datei setzen:"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2799
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:178
+#: server/fm-modules/facileManager/functions.php:2802
+#: server/fm-modules/facileManager/classes/class_settings.php:176
 msgid "Save"
 msgstr "Speichern"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2865
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_accounts.php:48
+#: server/fm-modules/facileManager/functions.php:2822
+#: server/fm-modules/facileManager/classes/class_users.php:525
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: server/fm-modules/facileManager/functions.php:2868
+#: server/fm-modules/facileManager/classes/class_accounts.php:48
 msgid "Success"
 msgstr "Erfolgreich"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2916
+#: server/fm-modules/facileManager/functions.php:2919
 #, php-format
 msgid "Searched for %s"
 msgstr "Suchen nach %s"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2921
+#: server/fm-modules/facileManager/functions.php:2924
 msgid "Search this page by keyword"
 msgstr "Suchen nach Schlüsselwort"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/functions.php:2980
+#: server/fm-modules/facileManager/functions.php:2983
 msgid "Add New"
 msgstr "Hinzufügen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:51
+#: server/fm-modules/facileManager/install.php:51
 #, php-format
 msgid ""
 "I cannot create %s so please manually create it with the following contents:"
@@ -488,129 +467,132 @@ msgstr ""
 "%s konnte nicht erstellt werden. Bitte erstellen Sie die Datei manuell mit "
 "folgendem Inhalt:"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:53
+#: server/fm-modules/facileManager/install.php:53
 #, php-format
 msgid "Once done, click \"Install.\""
 msgstr ""
 "Klicken Sie auf \"Installieren\", sobald der Vorgang abgeschlossen ist."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:65
+#: server/fm-modules/facileManager/install.php:65
 msgid "Creating Configuration File"
 msgstr "Konfigurationsdatei erstellen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:71
+#: server/fm-modules/facileManager/install.php:71
 msgid "Config file has been created! Now let's create the database schema."
 msgstr "Konfigurationsdatei wurde erstellt! Kommen wir zum Datenbankschema."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:72
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:143
+#: server/fm-modules/facileManager/install.php:72
+#: server/fm-modules/facileManager/install.php:143
 msgid "Continue"
 msgstr "Fortfahren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:74
+#: server/fm-modules/facileManager/install.php:74
 msgid "Config file creation failed. Please try again."
 msgstr ""
 "Erstellen der Konfigurationsdatei fehlgeschlagen. Bitte versuchen Sies es "
 "erneut."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:142
+#: server/fm-modules/facileManager/install.php:142
 msgid ""
 "Database setup is complete! Now let's create your administrative account."
 msgstr ""
 "Datenbankinstallation abgeschlossen! Kommen wir zum Administrator Konto."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:145
+#: server/fm-modules/facileManager/install.php:145
 msgid "Database setup failed. Please try again."
 msgstr "Datenbankinstallation fehlgeschlagen. Bitte versuchen Sie es erneut."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:160
+#: server/fm-modules/facileManager/install.php:160
 msgid "Creating Database"
 msgstr "Datenbank erstellen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:170
-msgid ""
-"The following modules were installed as well:</b><br />(They can always be "
-"uninstalled later.)"
-msgstr ""
-"Die folgenden Module wurden ebenfalls installiert:</b><br />(Können später "
-"wieder deinstalliert werden.)"
+#: server/fm-modules/facileManager/install.php:170
+msgid "The following modules were installed as well:"
+msgstr "Die folgenden Module wurden ebenfalls installiert:"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:182
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:411
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:53
+#: server/fm-modules/facileManager/install.php:171
+msgid "(They can always be uninstalled later.)"
+msgstr "(Diese können später deinstalliert werden.)"
+
+#: server/fm-modules/facileManager/install.php:183
+#: server/fm-modules/facileManager/install.php:412
+#: server/fm-modules/facileManager/classes/class_tools.php:53
 #, php-format
 msgid "%s %s was born."
 msgstr "%s %s wurde geboren."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:395
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:406
-#: /var/www/html/fM/server/fm-modules/facileManager/install.php:413
+#: server/fm-modules/facileManager/install.php:396
+#: server/fm-modules/facileManager/install.php:407
+#: server/fm-modules/facileManager/install.php:414
 #, php-format
 msgid "Creating %s Schema"
 msgstr "Schema %s erstellen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:38
+#: server/fm-modules/facileManager/menu.php:38
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:44
+#: server/fm-modules/facileManager/menu.php:44
 msgid "Admin"
 msgstr "Admin"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:45
+#: server/fm-modules/facileManager/menu.php:45
 msgid "Tools"
 msgstr "Werkzeuge"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:47
+#: server/fm-modules/facileManager/menu.php:47
 msgid "Users"
 msgstr "Benutzer"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:49
+#: server/fm-modules/facileManager/menu.php:49
 msgid "Logs"
 msgstr "Logs"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:51
+#: server/fm-modules/facileManager/menu.php:51
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:51
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:52
+#: server/fm-modules/facileManager/menu.php:51
+#: server/fm-modules/facileManager/menu.php:52
 msgid "General Settings"
 msgstr "Allgemeine Einstellungen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:52
+#: server/fm-modules/facileManager/menu.php:52
+#: server/fm-modules/shared/classes/class_servers.php:106
+#: server/fm-modules/shared/classes/class_servers.php:121
 msgid "General"
 msgstr "Allgemein"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:54
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:78
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:48
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:59
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:47
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:51
+#: server/fm-modules/facileManager/menu.php:54
+#: server/fm-modules/facileManager/ajax/processPost.php:78
+#: server/fm-modules/facileManager/ajax/processTools.php:48
+#: server/fm-modules/facileManager/ajax/processTools.php:59
+#: server/fm-modules/facileManager/pages/admin-modules.php:47
+#: server/fm-modules/facileManager/pages/admin-modules.php:51
+#: server/fm-modules/facileManager/pages/index.php:27
 msgid "Modules"
 msgstr "Module"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/menu.php:54
+#: server/fm-modules/facileManager/menu.php:54
 msgid "Module Configuration"
 msgstr "Modul-Konfiguration"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:61
+#: server/fm-modules/facileManager/upgrade.php:61
 msgid "Upgrading Core Schema"
 msgstr "Core-Schema Upgrade"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:77
+#: server/fm-modules/facileManager/upgrade.php:77
 #, php-format
 msgid "Upgrading %s Schema"
 msgstr "%s Schema Upgrade"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:625
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:97
+#: server/fm-modules/facileManager/upgrade.php:625
+#: server/fm-modules/facileManager/classes/class_tools.php:97
 #, php-format
 msgid "%s was upgraded to %s."
 msgstr "%s wurde aktualisiert auf %s."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:645
+#: server/fm-modules/facileManager/upgrade.php:645
 #, php-format
 msgid ""
 "Database upgrade for %1$s is complete! Click 'Next' to start using %1$s."
@@ -618,102 +600,102 @@ msgstr ""
 "Datenbankupgrade für %1$s ist abgeschlossen! Bitte klicken Sie auf 'Weiter', "
 "um %1$s zu verwenden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/upgrade.php:650
+#: server/fm-modules/facileManager/upgrade.php:650
 msgid "Database upgrade failed. Please try again."
 msgstr "Datenbankupgrade fehlgeschlagen. Bitte versuchen Sie es erneut."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:45
+#: server/fm-modules/facileManager/variables.inc.php:45
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:46
+#: server/fm-modules/facileManager/variables.inc.php:46
 msgid "Caution"
 msgstr "Achtung"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:47
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:64
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:37
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:190
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/formatOutput.php:47
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/functions.php:36
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/functions.php:55
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:115
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:145
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processReload.php:51
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:48
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:59
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:76
+#: server/fm-modules/facileManager/variables.inc.php:47
+#: server/fm-modules/facileManager/variables.inc.php:64
+#: server/fm-modules/shared/classes/class_servers.php:37
+#: server/fm-modules/shared/classes/class_servers.php:190
+#: server/fm-modules/facileManager/ajax/formatOutput.php:47
+#: server/fm-modules/facileManager/ajax/functions.php:36
+#: server/fm-modules/facileManager/ajax/functions.php:55
+#: server/fm-modules/facileManager/ajax/processPost.php:115
+#: server/fm-modules/facileManager/ajax/processPost.php:145
+#: server/fm-modules/facileManager/ajax/processReload.php:51
+#: server/fm-modules/facileManager/ajax/processTools.php:48
+#: server/fm-modules/facileManager/ajax/processTools.php:59
+#: server/fm-modules/facileManager/ajax/processTools.php:76
 msgid "OK"
 msgstr "OK"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:49
+#: server/fm-modules/facileManager/variables.inc.php:49
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:50
+#: server/fm-modules/facileManager/variables.inc.php:50
 msgid "Delete"
 msgstr "Löschen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:51
+#: server/fm-modules/facileManager/variables.inc.php:51
 msgid "Duplicate"
 msgstr "Duplizieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:52
+#: server/fm-modules/facileManager/variables.inc.php:52
 msgid "Enable"
 msgstr "Aktivieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:53
+#: server/fm-modules/facileManager/variables.inc.php:53
 msgid "Disable"
 msgstr "Deaktivieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:54
+#: server/fm-modules/facileManager/variables.inc.php:54
 msgid "Popout"
 msgstr "Fenster öffnen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:55
+#: server/fm-modules/facileManager/variables.inc.php:55
 msgid "Close"
 msgstr "Schliessen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:57
+#: server/fm-modules/facileManager/variables.inc.php:57
 msgid "Send Password Reset Email"
 msgstr "Passwort Wiederherstellung E-Mail senden"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:58
+#: server/fm-modules/facileManager/variables.inc.php:58
 msgid "Account Settings"
 msgstr "Kontoeinstellungen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:59
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:48
+#: server/fm-modules/facileManager/variables.inc.php:59
+#: server/fm-modules/facileManager/classes/class_users.php:48
 msgid "Super Admin"
 msgstr "Super-Admin"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:60
+#: server/fm-modules/facileManager/variables.inc.php:60
 msgid "Template Account"
 msgstr "Template-Konto"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:62
-#: /var/www/html/fM/server/fm-modules/shared/ajax/processTools.php:45
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:35
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:188
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/formatOutput.php:37
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/functions.php:53
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:72
+#: server/fm-modules/facileManager/variables.inc.php:62
+#: server/fm-modules/shared/ajax/processTools.php:45
+#: server/fm-modules/shared/classes/class_servers.php:35
+#: server/fm-modules/shared/classes/class_servers.php:188
+#: server/fm-modules/facileManager/ajax/formatOutput.php:37
+#: server/fm-modules/facileManager/ajax/functions.php:53
+#: server/fm-modules/facileManager/ajax/processTools.php:72
 msgid "Error"
 msgstr "Fehler"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:63
+#: server/fm-modules/facileManager/variables.inc.php:63
 msgid "Information"
 msgstr "Information"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:66
+#: server/fm-modules/facileManager/variables.inc.php:66
 msgid "Preview Config"
 msgstr "Konfiguration anschauen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:67
+#: server/fm-modules/facileManager/variables.inc.php:67
 msgid "Build Config"
 msgstr "Konfiguration erstellen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:74
+#: server/fm-modules/facileManager/variables.inc.php:74
 msgid ""
 "You must choose a password with at least seven (7) characters containing "
 "letters and numbers."
@@ -721,7 +703,7 @@ msgstr ""
 "Sie müssen ein Passwort mit mindestens 7 Zeichen sowie Buchstaben und Zahlen "
 "wählen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:75
+#: server/fm-modules/facileManager/variables.inc.php:75
 msgid ""
 "You must choose a password with at least eight (8) characters containing "
 "uppercase and lowercase letters, numbers, and special characters ('&', '$', "
@@ -730,113 +712,116 @@ msgstr ""
 "Sie müssen ein Passwort mit mindestens 7 Zeichen sowie Grussbuchstaben, "
 "Kleinbuchstaben, Zahlen und Sonderzeichen ('&', '$', '@', etc.) wählen."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:81
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:83
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:711
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:287
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:295
+#: server/fm-modules/facileManager/variables.inc.php:81
+#: server/fm-modules/facileManager/variables.inc.php:83
+#: server/fm-modules/facileManager/classes/class_settings.php:302
+#: server/fm-modules/facileManager/classes/class_settings.php:706
+#: server/fm-modules/facileManager/classes/class_users.php:287
+#: server/fm-modules/facileManager/classes/class_users.php:295
 msgid "None"
 msgstr "Keine"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:81
+#: server/fm-modules/facileManager/variables.inc.php:81
+#: server/fm-modules/facileManager/classes/class_settings.php:303
 msgid "Builtin Authentication"
 msgstr "Eingebaute Authentifizierung"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:82
+#: server/fm-modules/facileManager/variables.inc.php:82
 msgid "Version 2"
 msgstr "Version 2"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:82
+#: server/fm-modules/facileManager/variables.inc.php:82
 msgid "Version 3"
 msgstr "Version 3"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:84
+#: server/fm-modules/facileManager/variables.inc.php:84
 msgid "Disabled"
 msgstr "Deaktiviert"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:84
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:270
+#: server/fm-modules/facileManager/variables.inc.php:84
+#: server/fm-modules/facileManager/classes/class_users.php:270
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:87
+#: server/fm-modules/facileManager/variables.inc.php:87
 msgid "Hourly"
 msgstr "Stündlich"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:87
+#: server/fm-modules/facileManager/variables.inc.php:87
 msgid "Daily"
 msgstr "Täglich"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:87
+#: server/fm-modules/facileManager/variables.inc.php:87
 msgid "Weekly"
 msgstr "Wöchentlich"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:87
+#: server/fm-modules/facileManager/variables.inc.php:87
 msgid "Monthly"
 msgstr "Monatlich"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:88
+#: server/fm-modules/facileManager/variables.inc.php:88
 msgid "Stable"
 msgstr "Stable"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:88
+#: server/fm-modules/facileManager/variables.inc.php:88
 msgid "Release Candidate"
 msgstr "Release Candidate"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:88
+#: server/fm-modules/facileManager/variables.inc.php:88
 msgid "Beta"
 msgstr "Beta"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:88
+#: server/fm-modules/facileManager/variables.inc.php:88
 msgid "Alpha"
 msgstr "Alpha"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/variables.inc.php:90
+#: server/fm-modules/facileManager/variables.inc.php:90
+#: server/fm-modules/facileManager/classes/class_settings.php:304
 msgid "LDAP Authentication"
 msgstr "LDAP Authentifizierung"
 
-#: /var/www/html/fM/server/fm-modules/shared/ajax/processTools.php:35
+#: server/fm-modules/shared/ajax/processTools.php:35
 msgid "Connectivity Test Results"
 msgstr "Verbindungstest Resultate"
 
-#: /var/www/html/fM/server/fm-modules/shared/ajax/processTools.php:46
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:205
+#: server/fm-modules/shared/ajax/processTools.php:46
+#: server/fm-modules/facileManager/classes/class_tools.php:205
 msgid "You are not authorized to run these tools."
 msgstr "Sie sind nicht berechtigt, diese Werkzeuge zu benutzen."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:36
+#: server/fm-modules/shared/classes/class_servers.php:36
 msgid "You do not have permission to manage servers."
 msgstr "Sie sind nicht berechtigt, Server zu verwalten."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:43
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:196
+#: server/fm-modules/shared/classes/class_servers.php:43
+#: server/fm-modules/shared/classes/class_servers.php:196
 #, php-format
 msgid "%d is not a valid serial number."
 msgstr "%d ist keine gültige Seriennummer."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:51
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:204
+#: server/fm-modules/shared/classes/class_servers.php:51
+#: server/fm-modules/shared/classes/class_servers.php:204
 msgid "Failed: Client is not installed."
 msgstr "Fehlgeschlagen: Client ist nicht installiert."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:58
+#: server/fm-modules/shared/classes/class_servers.php:58
 msgid "This server needs to be upgraded manually with the following command:"
 msgstr "Dieser Server muss manuell mit folgendem Kommando aktualisiert werden:"
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:60
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:93
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:134
+#: server/fm-modules/shared/classes/class_servers.php:60
+#: server/fm-modules/shared/classes/class_servers.php:93
+#: server/fm-modules/shared/classes/class_servers.php:134
 #, php-format
 msgid "Upgraded client scripts on %s."
 msgstr "Client Scripts wurden auf %s aktualisiert."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:66
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:99
+#: server/fm-modules/shared/classes/class_servers.php:66
+#: server/fm-modules/shared/classes/class_servers.php:99
 #, php-format
 msgid "Failed: could not access %s using %s (tcp/%d)."
 msgstr "Fehlgeschlagen: Konnte nicht auf %s zugreifen mit %s (tcp/%d)."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:81
+#: server/fm-modules/shared/classes/class_servers.php:81
 #, php-format
 msgid ""
 "It appears %s does not have php configured properly within httpd or httpd is "
@@ -844,273 +829,607 @@ msgid ""
 msgstr ""
 "PHP wurden anscheinend auf %s nicht ordnungsgemäss im Webserver konfiguriert."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:106
+#: server/fm-modules/shared/classes/class_servers.php:106
 #, php-format
 msgid "Failed: SSH key is not %sdefined</a>."
 msgstr "Fehlgeschlagen: SSH Schlüssel ist nicht %sdefiniert</a>."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:113
+#: server/fm-modules/shared/classes/class_servers.php:113
 #, php-format
 msgid "Failed: could not load SSH key into %s."
 msgstr "Fehlgeschlagen: Konnte SSH Schlüssel nicht in %s laden."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:121
+#: server/fm-modules/shared/classes/class_servers.php:121
 #, php-format
 msgid "Failed: SSH user is not <a href=\"%s\">defined</a>."
 msgstr "Fehlgeschlagen: SSH Benutzer ist nicht <a href=\"%s\">definiert</a>."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:130
+#: server/fm-modules/shared/classes/class_servers.php:130
 msgid "Client upgrade failed."
 msgstr "Client Upgrade fehlgeschlagen."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:133
+#: server/fm-modules/shared/classes/class_servers.php:133
 msgid "Config build was successful."
 msgstr "Erstellen der Konfiguration war erfolgreich."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:189
+#: server/fm-modules/shared/classes/class_servers.php:189
 msgid "You do not have permission to build server configs."
 msgstr "Sie sind nicht berechtigt, Serverkonfigurationen zu erstellen."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_servers.php:208
+#: server/fm-modules/shared/classes/class_servers.php:208
 #, php-format
 msgid "Failed: Server is %s."
 msgstr "Fehlgeschlagen: Server ist %s."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_settings.php:30
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/functions.php:51
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:30
+#: server/fm-modules/shared/classes/class_settings.php:30
+#: server/fm-modules/facileManager/ajax/functions.php:51
+#: server/fm-modules/facileManager/classes/class_settings.php:30
 msgid "You do not have permission to make these changes."
 msgstr "Sie sind nicht berechtigt, diese Änderungen vorzunehmen."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_settings.php:34
+#: server/fm-modules/shared/classes/class_settings.php:34
 msgid "Set options to the following:"
 msgstr "Setze Optionen folgendermassen:"
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_settings.php:48
+#: server/fm-modules/shared/classes/class_settings.php:48
 msgid "Empty values are not allowed."
 msgstr "Leere Felder sind nicht erlaubt."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_settings.php:78
+#: server/fm-modules/shared/classes/class_settings.php:78
 msgid "These settings could not be saved because of a database error."
 msgstr ""
 "Die Einstellungen konnten aufgrund eines Datenbankfehlers nicht gespeichert "
 "werden."
 
-#: /var/www/html/fM/server/fm-modules/shared/classes/class_settings.php:123
+#: server/fm-modules/shared/classes/class_settings.php:123
 msgid "There are no settings for this module."
 msgstr "Für dieses Modul gibt es keine Einstellungen."
 
-#: /var/www/html/fM/server/fm-modules/shared/pages/admin-tools.inc.php:36
+#: server/fm-modules/shared/pages/admin-tools.inc.php:36
 msgid "Connection Tests"
 msgstr "Verbindungstests"
 
-#: /var/www/html/fM/server/fm-modules/shared/pages/admin-tools.inc.php:36
+#: server/fm-modules/shared/pages/admin-tools.inc.php:36
 #, php-format
 msgid "Test the connectivity of your %s servers with the %s server."
 msgstr "Die Konnektivität Ihres %s Servers mit dem %s server testen."
 
-#: /var/www/html/fM/server/fm-modules/shared/pages/admin-tools.inc.php:37
+#: server/fm-modules/shared/pages/admin-tools.inc.php:37
 msgid "Run Tests"
 msgstr "Tests durchführen"
 
-#: /var/www/html/fM/server/fm-modules/shared/pages/preview.php:35
+#: server/fm-modules/shared/pages/preview.php:35
 msgid "Invalid account"
 msgstr "Ungültiges Konto"
 
-#: /var/www/html/fM/server/fm-modules/shared/pages/preview.php:65
+#: server/fm-modules/shared/pages/preview.php:65
 msgid "Invalid Server ID."
 msgstr "Ungültige Server-ID"
 
-#: /var/www/html/fM/server/fm-modules/shared/pages/preview.php:68
+#: server/fm-modules/shared/pages/preview.php:68
 msgid "Server Config Preview"
 msgstr "Serverkonfiguration anschauen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/functions.php:32
+#: server/fm-modules/facileManager/ajax/functions.php:32
 msgid "There was a problem with your request."
 msgstr "Es ist ein Problem mit Ihrer Anfrage aufgetreten."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/getData.php:36
+#: server/fm-modules/facileManager/ajax/getData.php:36
 #, php-format
 msgid "<p>Password reset email has been sent to %s.</p>"
 msgstr "<p>Passwort Wiederherstellungs E-Mail wurde an %s versandt.</p>"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:50
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:59
+#: server/fm-modules/facileManager/ajax/processPost.php:50
+#: server/fm-modules/facileManager/ajax/processPost.php:59
 msgid "These settings have been saved."
 msgstr "Die Einstellungen wurden gespeichert."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:90
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:101
+#: server/fm-modules/facileManager/ajax/processPost.php:90
+#: server/fm-modules/facileManager/ajax/processPost.php:101
 msgid "Servers"
 msgstr "Server"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:114
+#: server/fm-modules/facileManager/ajax/processPost.php:114
 msgid "Complete"
 msgstr "Abgeschlossen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:143
+#: server/fm-modules/facileManager/ajax/processPost.php:143
 msgid "All updates have been processed."
 msgstr "Alle Updates wurden verarbeitet."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:145
+#: server/fm-modules/facileManager/ajax/processPost.php:145
 msgid "Updates Results"
 msgstr "Updates Resultate"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:171
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-users.php:64
+#: server/fm-modules/facileManager/ajax/processPost.php:171
+#: server/fm-modules/facileManager/pages/admin-users.php:64
 #, php-format
 msgid "This user could not be set to %s."
 msgstr "Benutzer konnte nicht auf %s gesetzt werden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processPost.php:174
+#: server/fm-modules/facileManager/ajax/processPost.php:174
 #, php-format
 msgid "Set user (%s) status to %s."
 msgstr "Benutzer (%s) Status auf %s setzen."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processReload.php:34
+#: server/fm-modules/facileManager/ajax/processReload.php:34
 msgid "You are not authorized to build server configs."
 msgstr "Sie sind nicht berechtigt, Serverkonfigurationen zu erstellen."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:45
+#: server/fm-modules/facileManager/ajax/processTools.php:45
 msgid "Installing Module"
 msgstr "Modul installieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:56
+#: server/fm-modules/facileManager/ajax/processTools.php:56
 msgid "Upgrading Module"
 msgstr "Modul aktualisieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:66
+#: server/fm-modules/facileManager/ajax/processTools.php:66
 msgid "Database Clean Up Results"
 msgstr "Datenbankbereinigung Resultate"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/ajax/processTools.php:73
+#: server/fm-modules/facileManager/ajax/processTools.php:73
 msgid "You are not authorized to run this tool."
 msgstr "Sie sind nicht berechtigt, dieses Werkzeug zu nutzen."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_accounts.php:45
+#: server/fm-modules/facileManager/classes/class_accounts.php:33
+#: server/fm-modules/facileManager/classes/class_accounts.php:60
+#: server/fm-modules/facileManager/classes/class_accounts.php:64
+msgid "Account is not found."
+msgstr "Konto wurde nicht gefunden"
+
+#: server/fm-modules/facileManager/classes/class_accounts.php:45
 msgid "Server is not found."
 msgstr "Server wurde nicht gefunden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_accounts.php:68
+#: server/fm-modules/facileManager/classes/class_accounts.php:68
 #, php-format
 msgid "Account is %s."
 msgstr "Konto ist %s."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:35
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:67
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:43
+#: server/fm-modules/facileManager/classes/class_logins.php:35
+#: server/fm-modules/facileManager/classes/class_logins.php:67
+#: server/fm-modules/facileManager/classes/class_users.php:43
 msgid "Login"
 msgstr "Login"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:40
+#: server/fm-modules/facileManager/classes/class_logins.php:40
 msgid "Forgot your password?"
 msgstr "Passwort vergessen?"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:110
+#: server/fm-modules/facileManager/classes/class_logins.php:110
 msgid "Reset Password"
 msgstr "Passwort zurücksetzen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:111
+#: server/fm-modules/facileManager/classes/class_logins.php:111
 msgid "Login form"
 msgstr "Login Formular"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:343
+#: server/fm-modules/facileManager/classes/class_logins.php:343
 msgid "There is no valid e-mail address associated with this user."
 msgstr "Es gibt keine gültige E-Mailadresse zu diesem Benutzer."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:347
+#: server/fm-modules/facileManager/classes/class_logins.php:347
 msgid "Unable to send email - PHPMailer class is missing."
 msgstr "E-Mail konnte nicht versendet werden - PHPMailer Klasse fehlt."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:367
+#: server/fm-modules/facileManager/classes/class_logins.php:367
 #, php-format
 msgid "%s Password Reset"
 msgstr "%s Passwort Wiederherstellung"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_logins.php:375
+#: server/fm-modules/facileManager/classes/class_logins.php:375
 #, php-format
 msgid "Mailer Error: %s"
 msgstr "Mailer Fehler: %s"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:36
+#: server/fm-modules/facileManager/classes/class_settings.php:36
 msgid "Set system settings to the following:"
 msgstr "Systemeinstellungen folgendermassen setzen:"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:52
+#: server/fm-modules/facileManager/classes/class_settings.php:52
 #, php-format
 msgid "%s is not a valid e-mail address."
 msgstr "%s ist keine gültige E-Mail Adresse."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:54
+#: server/fm-modules/facileManager/classes/class_settings.php:54
 msgid "Invalid port number specified."
 msgstr "Ungültige Portnummer angegeben."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:76
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:155
+#: server/fm-modules/facileManager/classes/class_settings.php:76
+#: server/fm-modules/facileManager/classes/class_settings.php:155
 msgid "Could not save settings because a database error occurred."
 msgstr ""
 "Einstellungen konnten aufgrund eines Datenbankfehlers nicht gespeichert "
 "werden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:90
+#: server/fm-modules/facileManager/classes/class_settings.php:90
 msgid "Yes"
 msgstr "Ja"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:91
+#: server/fm-modules/facileManager/classes/class_settings.php:91
 msgid "No"
 msgstr "Nein"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:137
+#: server/fm-modules/facileManager/classes/class_settings.php:137
 msgid "SSH key generation failed."
 msgstr "SSH Schlüssel Generierung fehlgeschlagen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:158
+#: server/fm-modules/facileManager/classes/class_settings.php:158
 msgid "Generated system SSH key pair."
 msgstr "SSH Schlüsselpaar generiert."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:179
+#: server/fm-modules/facileManager/classes/class_settings.php:177
 msgid "Generate"
 msgstr "Generieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:183
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:428
+#: server/fm-modules/facileManager/classes/class_settings.php:181
+#: server/fm-modules/facileManager/js/facileManager.php:428
 msgid "SSH key pair is generated."
 msgstr "SSH Schlüsselpaar ist generiert."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_settings.php:201
+#: server/fm-modules/facileManager/classes/class_settings.php:199
 msgid "Required password strength for user accounts."
 msgstr "Benötigte Passwortstärke für Benutzerkonten."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:34
+#: server/fm-modules/facileManager/classes/class_settings.php:301
+#: server/fm-modules/facileManager/classes/class_users.php:370
+msgid "Authentication Method"
+msgstr "Authentifizierungsmethode"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:302
+msgid "Authentication will not be used and all users will have full access."
+msgstr ""
+"Authentifizierung wird nicht benutzt, sodass alle Benutzer vollen Zugriff "
+"haben."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:303
+msgid ""
+"Users are authenticated against $fm_name thus allowing them to have specific "
+"privileges within the application."
+msgstr ""
+
+#: server/fm-modules/facileManager/classes/class_settings.php:304
+msgid ""
+"Allows users to authenticate against a LDAP server. This option only appears "
+"if the PHP LDAP module is loaded."
+msgstr ""
+"Benutzern erlauben, sich mit einem LDAP Server zu authentifizieren. Diese "
+"Option erscheint nur, wenn das PHP LDAP Modul geladen ist."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:313
+msgid "Password Strength"
+msgstr "Passwortstärke"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:324
+msgid "LDAP Server"
+msgstr "LDAP Server"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:325
+msgid "The DNS hostname or IP address of the server."
+msgstr "Der DNS-Name oder die IP Adresse des Servers."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:333
+msgid "Standard Port"
+msgstr "Standard Port"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:334
+msgid "TCP/UDP port for non-SSL communication."
+msgstr "TCP/UDP Port für Non-SSL Kommunikation"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:342
+msgid "SSL Port"
+msgstr "SSL Port"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:343
+msgid "TCP/UDP port for SSL communication."
+msgstr "TCP/UDP Port für SSL Kommunikation"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:351
+msgid "Protocol Version"
+msgstr "Protokoll Version"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:352
+msgid "Protocol version the server supports."
+msgstr "Protokoll-Version, welche der Server unterstützt."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:360
+msgid "Encryption"
+msgstr "Verschlüsselung"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:361
+msgid ""
+"Encryption type the server supports. TLS is only supported by version 3."
+msgstr ""
+"Verschlüsselungstyp, welcher der Server unterstützt. TLS wird nur in Version "
+"3 unterstützt."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:369
+msgid "Referrals"
+msgstr "Referrals"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:370
+msgid "Enable or disable LDAP referrals."
+msgstr "LDAP Referrals aktivieren oder deaktivieren"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:378
+msgid "Distinguished Name (DN)"
+msgstr "Distinguished Name (DN)"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:379
+msgid "Distinguished Name syntax."
+msgstr "Distinguished Name Syntax."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:389
+msgid "Require Group Membership"
+msgstr "Benötigt Gruppenmitgliedschaft"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:390
+msgid "Require user to be a member of a group to authenticate."
+msgstr ""
+"Benutzer muss ein Mitglied einer Gruppe sein, um sich authentifizieren zu "
+"können."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:399
+msgid "Group Distinguished Name (DN)"
+msgstr "Group Distinguished Name (DN)"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:400
+msgid "Distinguished Name of the group the user must have membership of."
+msgstr ""
+"Distinguished Name der Gruppe, welcher der Benutzer Mitglied sein muss."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:408
+msgid "Group Member Attribute"
+msgstr "Gruppen Mitglied Attribut"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:409
+msgid "Name of the attribute that contains the usernames of the group members."
+msgstr ""
+"Name des Attributes, welches den Benutzernamen der Gruppenmitglieder "
+"beinhaltet."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:418
+msgid "User Template"
+msgstr "Benutzer Template"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:419
+#, php-format
+msgid ""
+"The name of the user account that %s will use as a template for new LDAP "
+"users."
+msgstr ""
+"Name des Accounts, welcher %s als Template für neue LDAP Benutzer verwenden "
+"wird."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:428
+msgid "Automatic Client Registration"
+msgstr "Automatische Client Registrierung"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:429
+#, php-format
+msgid "Allow clients to automatically register with %s."
+msgstr "Erlaube Benutzern, sich automatisch mit %s zu registrieren."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:439
+msgid "Enforce SSL"
+msgstr "Erzwinge SSL"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:440
+msgid "Attempt to auto-detect and redirect the user to https."
+msgstr "Versuche Erkennung und Weiterleitung des Benutzers auf HTTPS."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:448
+msgid "HTTPS Port"
+msgstr "HTTPS Port"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:449
+#, php-format
+msgid "The HTTPS TCP port %s runs on."
+msgstr "Der HTTPS TCP Port, auf dem %s läuft."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:459
+msgid "Enable Mailing"
+msgstr "Aktiviere Mailing"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:460
+#, php-format
+msgid ""
+"If this is unchecked, %s will never send an e-mail (including password reset "
+"links)."
+msgstr ""
+"Wenn diese Option nicht aktiviert ist, wird %s keine E-Mails senden (auch "
+"keine Passwort Reset Links)."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:469
+msgid "SMTP Hostnames"
+msgstr "SMTP-Hostnamen"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:470
+msgid "Main and backup SMTP servers to use (semi-colon delimited)."
+msgstr ""
+"Haupt- und Backup SMTP Server, die verwendet werden sollen (durch Semikolon "
+"getrennt)."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:479
+msgid "Enable SMTP Authentication"
+msgstr "SMTP-Authentifizierung aktivieren"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:480
+msgid "Use authentication with your SMTP server."
+msgstr "Externen SMPT Server verwenden"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:489
+msgid "SMTP Username"
+msgstr "SMTP Benutzername"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:490
+msgid "Username your SMTP server requires for authentication."
+msgstr ""
+"Benutzername, der vom SMTP Server für die Authentifizierung benötigt wird."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:498
+msgid "SMTP Password"
+msgstr "SMTP Passwort"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:499
+msgid "Password your SMTP server requires for authentication."
+msgstr "Passwort, das vom SMTP Server für die Authentifizierung benötigt wird."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:509
+msgid "Enable TLS"
+msgstr "TLS aktivieren"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:510
+msgid "Use TLS with your SMTP server connection."
+msgstr "TLS zur Verbindung mit dem SMTP Server verwenden."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:519
+msgid "Mail From"
+msgstr "Mail von"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:520
+#, php-format
+msgid ""
+"E-mails sent by %s should be from this address. This only applies if the "
+"mailing method is enabled."
+msgstr ""
+"Gesendete E-Mails von %s sollten von dieser Adresse sein. Dies trifft nur "
+"zu, wenn die Mailing Methode aktiviert ist."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:531
+msgid "Timezone"
+msgstr "Zeitzone"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:532
+msgid "Choose a city in the same timezone as you."
+msgstr "Wählen Sie eine Stadt in derselben Zeitzone."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:540
+msgid "Date Format"
+msgstr "Datum Format"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:541
+msgid ""
+"The date format all timestamps will be displayed in. This includes all "
+"throughout the UI, log files, and configuration files."
+msgstr ""
+"Datum Format, in dem alle Zeitstempel angezeigt werden. Dies beinhaltet das "
+"komplette UI, Logdateien und Konfigurationsdateien."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:549
+msgid "Time Format"
+msgstr "Zeit Format"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:550
+msgid ""
+"The time format all timestamps will be displayed in. This includes all "
+"throughout the UI, log files, and configuration files."
+msgstr ""
+"Zeit Format, in dem alle Zeitstempel angezeigt werden. Dies beinhaltet das "
+"komplette UI, Logdateien und Konfigurationsdateien."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:560
+msgid "Show Errors"
+msgstr "Fehler anzeigen"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:561
+#, php-format
+msgid "If this is checked, %s will display application errors when they occur."
+msgstr ""
+"Wenn Sie diese Option aktiviert haben wird %s alle Fehler anzeigen, wenn sie "
+"auftreten."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:569
+msgid "Temporary Directory"
+msgstr "Temporärer Ordner"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:570
+#, php-format
+msgid ""
+"Temporary directory on %s to use for scratch files (must be writeable by %s)."
+msgstr ""
+"Temporärer Ordner auf %s, um nach temporäre Programmdaten zu nutzen (muss "
+"von %s beschreibbar sein)."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:580
+msgid "Software Update"
+msgstr "Software Aktualisierung"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:581
+#, php-format
+msgid "If this is checked, %s will automatically check for updates."
+msgstr ""
+"Wenn diese Option aktiviert ist, wird %s automatisch nach Updates suchen."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:590
+msgid "Software Tree"
+msgstr "Software Tree"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:591
+#, php-format
+msgid "The minimum software tree %s should check updates for."
+msgstr ""
+
+#: server/fm-modules/facileManager/classes/class_settings.php:599
+msgid "Update Check Interval"
+msgstr "Update Prüfintervall"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:600
+#, php-format
+msgid "The frequency %s should check for updates."
+msgstr "Zeitintervall, in dem %s nach Updates suchen soll."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:611
+msgid "SSH Username"
+msgstr "SSH Benutzername"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:612
+msgid "The local system user to use for client interaction via SSH."
+msgstr ""
+"Der lokale Systembenutzer, der für die Client Interaktion via SSH benutzt "
+"werden soll."
+
+#: server/fm-modules/facileManager/classes/class_settings.php:620
+msgid "SSH Key Pair"
+msgstr "SSH Schlüsselpaar"
+
+#: server/fm-modules/facileManager/classes/class_settings.php:621
+msgid "If a ssh key pair is generated, clients can be updated over ssh."
+msgstr ""
+"Wenn ein SSH Schlüsselpaar generiert wurde, können Clients über SSH "
+"aktualisiert werden."
+
+#: server/fm-modules/facileManager/classes/class_tools.php:34
 msgid "No module was selected to be installed."
 msgstr "Es wurde kein Modul zum Installieren ausgewählt."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:50
+#: server/fm-modules/facileManager/classes/class_tools.php:50
 #, php-format
 msgid "%s installation failed!"
 msgstr "%s Installation fehlgeschlagen!"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:54
+#: server/fm-modules/facileManager/classes/class_tools.php:54
 #, php-format
 msgid "No installation file found for %s."
 msgstr "Es wurde keine Installationsdatei für %s gefunden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:56
+#: server/fm-modules/facileManager/classes/class_tools.php:56
 #, php-format
 msgid "%s was installed successfully!"
 msgstr "%s wurde erfolgreich installiert!"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:69
+#: server/fm-modules/facileManager/classes/class_tools.php:69
 msgid "No module was selected to be upgraded."
 msgstr "Es wurde kein Modul für das Upgrade ausgewählt."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:86
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:92
+#: server/fm-modules/facileManager/classes/class_tools.php:86
+#: server/fm-modules/facileManager/classes/class_tools.php:92
 #, php-format
 msgid "%s upgrade failed!"
 msgstr "%s Upgrade fehlgeschlagen!"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:100
+#: server/fm-modules/facileManager/classes/class_tools.php:100
 #, php-format
 msgid ""
 "%s was upgraded successfully! Make sure you upgrade your clients with the "
@@ -1119,208 +1438,216 @@ msgstr ""
 "%s wurde erfolgreich aktualisiert! Bitte führen Sie auch ein Upgrade Ihrer "
 "Clients durch (falls nötig)."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:192
+#: server/fm-modules/facileManager/classes/class_tools.php:192
 msgid "Cleaned up the database."
 msgstr "Datenbank bereinigt."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:193
+#: server/fm-modules/facileManager/classes/class_tools.php:193
 #, php-format
 msgid "Total number of records purged from the database: <b>%d</b>"
 msgstr "Anzahl gesäuberter Einträge der Datenbank. <b>%d</b>"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:215
+#: server/fm-modules/facileManager/classes/class_tools.php:215
 #, php-format
 msgid "mysqldump is not found on %s."
 msgstr "mysqldump wurde auf %s nicht gefunden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_tools.php:231
+#: server/fm-modules/facileManager/classes/class_tools.php:231
 msgid "Backed up the database."
 msgstr "Datenbank gesichert."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:34
+#: server/fm-modules/facileManager/classes/class_users.php:34
 msgid "There are no users."
 msgstr "Es gibt keine Benutzer"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:45
+#: server/fm-modules/facileManager/classes/class_users.php:45
 msgid "Last Session Date"
 msgstr "Datum der letzten Session"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:46
+#: server/fm-modules/facileManager/classes/class_users.php:46
 msgid "Last Session Host"
 msgstr "Host der letzten Session"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:47
+#: server/fm-modules/facileManager/classes/class_users.php:47
 msgid "Authenticate With"
 msgstr "Authentifizieren mit"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:49
+#: server/fm-modules/facileManager/classes/class_users.php:49
 msgid "Actions"
 msgstr "Aktionen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:89
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:161
+#: server/fm-modules/facileManager/classes/class_users.php:89
+#: server/fm-modules/facileManager/classes/class_users.php:161
 msgid "No username defined."
 msgstr "Kein Benutzername angegeben"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:93
+#: server/fm-modules/facileManager/classes/class_users.php:93
 msgid "No password defined."
 msgstr "Kein Passwort angegeben"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:94
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:163
+#: server/fm-modules/facileManager/classes/class_users.php:94
+#: server/fm-modules/facileManager/classes/class_users.php:163
 msgid "Passwords do not match."
 msgstr "Passwörter stimmen nicht überein."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:96
+#: server/fm-modules/facileManager/classes/class_users.php:96
 msgid "No e-mail address defined."
 msgstr "Keine E-Mail Adresse angegeben."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:100
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:170
+#: server/fm-modules/facileManager/classes/class_users.php:100
+#: server/fm-modules/facileManager/classes/class_users.php:170
 #, php-format
 msgid "Username is too long (maximum %d characters)."
 msgstr "Benutzername ist zu lang (maximal %d Zeichen)."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:108
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:176
+#: server/fm-modules/facileManager/classes/class_users.php:108
+#: server/fm-modules/facileManager/classes/class_users.php:176
 msgid "This user already exists."
 msgstr "Dieser Benutzer existiert bereits."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:128
+#: server/fm-modules/facileManager/classes/class_users.php:128
 msgid "Could not add the user to the database."
 msgstr "Benutzer konnte nicht in die Datenbank gespeichert werden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:133
+#: server/fm-modules/facileManager/classes/class_users.php:133
 #, php-format
 msgid "Added user '%s'."
 msgstr "Benutzer '%s' hinzugefügt."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:206
+#: server/fm-modules/facileManager/classes/class_users.php:206
 msgid "Could not update the user in the database."
 msgstr "Benutzer konnte nicht in der Datenbank aktualisiert werden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:211
+#: server/fm-modules/facileManager/classes/class_users.php:211
 #, php-format
 msgid "Updated user '%s'."
 msgstr "Benutzer '%s' aktualisiert."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:229
+#: server/fm-modules/facileManager/classes/class_users.php:229
 msgid "This user is the LDAP user template and cannot be deleted at this time."
 msgstr ""
 "Dieser Benutzer ist die LDAP Benutzer Vorlage und kann zurzeit nicht "
 "gelöscht werden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:234
+#: server/fm-modules/facileManager/classes/class_users.php:234
 msgid "This user could not be deleted."
 msgstr "Dieser Benutzer konnte nicht gelöscht werden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:236
+#: server/fm-modules/facileManager/classes/class_users.php:236
 #, php-format
 msgid "Deleted user '%s'."
 msgstr "Benutzer '%s' gelöscht."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:284
+#: server/fm-modules/facileManager/classes/class_users.php:284
 msgid "Never"
 msgstr "Nie"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:348
+#: server/fm-modules/facileManager/classes/class_users.php:348
 msgid "User Login"
 msgstr "Benutzer Login"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:357
+#: server/fm-modules/facileManager/classes/class_users.php:357
 msgid "User Email"
 msgstr "Benutzer E-Mail"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:370
-msgid "Authentication Method"
-msgstr "Authentifizierungsmethode"
-
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:381
+#: server/fm-modules/facileManager/classes/class_users.php:381
 msgid "User Password"
 msgstr "Benutzer Passwort"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:403
+#: server/fm-modules/facileManager/classes/class_users.php:403
 msgid "Default Module"
 msgstr "Standard Modul"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:412
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:423
+#: server/fm-modules/facileManager/classes/class_users.php:412
+#: server/fm-modules/facileManager/classes/class_users.php:423
 msgid "Options"
 msgstr "Optionen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:414
+#: server/fm-modules/facileManager/classes/class_users.php:414
 msgid "Force Password Change at Next Login"
 msgstr "Benutzer auffordern, das Passwort beim nächsten Login zu ändern"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:415
+#: server/fm-modules/facileManager/classes/class_users.php:415
 msgid "Template User"
 msgstr "Template Benutzer"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:424
+#: server/fm-modules/facileManager/classes/class_users.php:424
 msgid "Verbose Output"
 msgstr "Erweiterte Ausgabe"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:506
+#: server/fm-modules/facileManager/classes/class_users.php:506
 msgid "User Permissions"
 msgstr "Benutzer Rechte"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:517
+#: server/fm-modules/facileManager/classes/class_users.php:517
 msgid "User Details"
 msgstr "Benutzer Details"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/classes/class_users.php:525
-msgid "Cancel"
-msgstr "Abbrechen"
-
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:108
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:131
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:566
+#: server/fm-modules/facileManager/js/facileManager.php:108
+#: server/fm-modules/facileManager/js/facileManager.php:131
+#: server/fm-modules/facileManager/js/facileManager.php:566
 msgid "Processing...please wait."
 msgstr "Verarbeite...bitte warten."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:330
+#: server/fm-modules/facileManager/js/facileManager.php:330
 msgid "Are you sure you want to delete this item?"
 msgstr "Wollen Sie dieses Objekt wirklich löschen?"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:488
+#: server/fm-modules/facileManager/js/facileManager.php:488
 msgid "Profile has been updated."
 msgstr "Profil wurde aktualisiert."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:677
+#: server/fm-modules/facileManager/js/facileManager.php:677
 msgid "Are you sure you want to build the config for this server?"
 msgstr "Wollen Sie die Konfiguration für diesen Server erstellen?"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:681
+#: server/fm-modules/facileManager/js/facileManager.php:681
 msgid "Processing Config Build"
 msgstr "Verarbeite Erstellung der Konfiguration"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:770
+#: server/fm-modules/facileManager/js/facileManager.php:770
 msgid "Processing Bulk Action"
 msgstr "Verarbeiten Massenaktion"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:798
+#: server/fm-modules/facileManager/js/facileManager.php:798
 msgid "Are you sure you want to process all updates?"
 msgstr "Wollen Sie alle Aktualisierungen durchführen?"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:803
+#: server/fm-modules/facileManager/js/facileManager.php:803
 msgid "Processing Updates"
 msgstr "Verarbeite Aktualisierung"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:965
+#: server/fm-modules/facileManager/js/facileManager.php:943
+msgid "More Characters"
+msgstr "Mehr Zeichen"
+
+#: server/fm-modules/facileManager/js/facileManager.php:947
+msgid "Strong"
+msgstr "Stark"
+
+#: server/fm-modules/facileManager/js/facileManager.php:951
+msgid "Medium"
+msgstr "Mittel"
+
+#: server/fm-modules/facileManager/js/facileManager.php:959
+msgid "Weak"
+msgstr "Schwach"
+
+#: server/fm-modules/facileManager/js/facileManager.php:965
 msgid "Passwords don't match"
 msgstr "Passwörter stimmen nicht überein."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/js/facileManager.php:971
+#: server/fm-modules/facileManager/js/facileManager.php:971
 msgid "No Username Specified"
 msgstr "Kein Benutzername angegeben"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/404.php:31
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/404.php:33
+#: server/fm-modules/facileManager/pages/404.php:31
+#: server/fm-modules/facileManager/pages/404.php:33
 #, php-format
 msgid "File Not Found"
 msgstr "Datei nicht gefunden"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/404.php:34
+#: server/fm-modules/facileManager/pages/404.php:34
 #, php-format
 msgid ""
 "The file you tried (%s) is not found at this location. The URL or link may "
@@ -1329,7 +1656,7 @@ msgstr ""
 "Die Datei (%s), auf die Sie zugreifen möchten, wurde an diesem Speicherort "
 "nicht gefunden. Die URL ist inkorrekt oder nicht mehr aktuell."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/404.php:35
+#: server/fm-modules/facileManager/pages/404.php:35
 #, php-format
 msgid ""
 "If you typed the URL in the address bar, please make sure the spelling is "
@@ -1338,96 +1665,96 @@ msgstr ""
 "Falls Sie die URL in die Adressleiste eingegeben haben, stellen Sie bitte "
 "sicher, dass keine Fehler passiert sind."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-logs.php:125
+#: server/fm-modules/facileManager/pages/admin-logs.php:125
 msgid "There are no log results."
 msgstr "Es gibt keine Log Resultate."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-logs.php:149
+#: server/fm-modules/facileManager/pages/admin-logs.php:149
 msgid "All Modules"
 msgstr "Alle Module"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-logs.php:166
+#: server/fm-modules/facileManager/pages/admin-logs.php:166
 msgid "All Users"
 msgstr "Alle Benutzer"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:30
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:34
+#: server/fm-modules/facileManager/pages/admin-modules.php:30
+#: server/fm-modules/facileManager/pages/admin-tools.php:34
 msgid "Processing..."
 msgstr "Verarbeite..."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:35
+#: server/fm-modules/facileManager/pages/admin-modules.php:35
 msgid "activated"
 msgstr "aktiviert"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:37
+#: server/fm-modules/facileManager/pages/admin-modules.php:37
 msgid "deactivated"
 msgstr "deaktiviert"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:39
+#: server/fm-modules/facileManager/pages/admin-modules.php:39
 msgid "uninstalled"
 msgstr "deinstaslliert"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:42
+#: server/fm-modules/facileManager/pages/admin-modules.php:42
 #, php-format
 msgid "%s was %s"
 msgstr "%s wurde %s"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:49
+#: server/fm-modules/facileManager/pages/admin-modules.php:49
 #, php-format
 msgid "Could not %s this module."
 msgstr "Konnte dieses Modul nicht %s."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:70
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:105
+#: server/fm-modules/facileManager/pages/admin-modules.php:70
+#: server/fm-modules/facileManager/pages/admin-modules.php:105
 msgid "Activate"
 msgstr "Aktivieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:70
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:100
+#: server/fm-modules/facileManager/pages/admin-modules.php:70
+#: server/fm-modules/facileManager/pages/admin-modules.php:100
 msgid "Deactivate"
 msgstr "Deaktivieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:78
+#: server/fm-modules/facileManager/pages/admin-modules.php:78
 msgid "Module"
 msgstr "Modul"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:79
+#: server/fm-modules/facileManager/pages/admin-modules.php:79
 msgid "Description"
 msgstr "Beschreibung"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:85
+#: server/fm-modules/facileManager/pages/admin-modules.php:85
 msgid "The following modules have been detected:"
 msgstr "Die folgenden Module wurden erkannt:"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:94
+#: server/fm-modules/facileManager/pages/admin-modules.php:94
 msgid "Are you sure you want to delete this module?"
 msgstr "Wollen Sie dieses Modul wirklich löschen?"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:94
+#: server/fm-modules/facileManager/pages/admin-modules.php:94
 msgid "Uninstall"
 msgstr "Deinstallieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:110
+#: server/fm-modules/facileManager/pages/admin-modules.php:110
 msgid "Update Database Now"
 msgstr "Datenbank jetzt aktualisieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:112
+#: server/fm-modules/facileManager/pages/admin-modules.php:112
 #, php-format
 msgid "%s v%s or later is required<br />before this module can be upgraded."
 msgstr ""
 "%s v%s oder neuer wird benötigt,<br /> bevor dieses Modul aktualisiert "
 "werden kann."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:122
+#: server/fm-modules/facileManager/pages/admin-modules.php:122
 msgid "Install Now"
 msgstr "Jetzt installieren"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:124
+#: server/fm-modules/facileManager/pages/admin-modules.php:124
 #, php-format
 msgid "%s v%s or later is required."
 msgstr "%s v%s oder neuer wird benötigt."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:153
+#: server/fm-modules/facileManager/pages/admin-modules.php:153
 #, php-format
 msgid ""
 "<p>There are no modules detected. You must first install the files in %s and "
@@ -1436,7 +1763,7 @@ msgstr ""
 "<p>Es wurden keine Module erkannt. Sie müssen zuerst die Dateien in %s "
 "installieren und dann wieder zurückkehren.</p>"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-modules.php:154
+#: server/fm-modules/facileManager/pages/admin-modules.php:154
 #, php-format
 msgid ""
 "<p>If you don't have any modules, you can download them from the %smodule "
@@ -1445,53 +1772,53 @@ msgstr ""
 "<p>Wenn Sie keine Module haben, können Sie diese vom %sModul Ordner "
 "herunterladen</a>.</p>"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-servers.php:63
+#: server/fm-modules/facileManager/pages/admin-servers.php:63
 msgid "Could not add server to account."
 msgstr "Server konnte nicht zum Konto hinzugefügt werden."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-servers.php:66
+#: server/fm-modules/facileManager/pages/admin-servers.php:66
 msgid "Client automatic registration is not allowed."
 msgstr "Automatische Client Registrierung ist nicht erlaubt."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-servers.php:88
+#: server/fm-modules/facileManager/pages/admin-servers.php:88
 #, php-format
 msgid "Latest version: %s\\nNo upgrade available."
 msgstr "Neueste Version: %s\\nKein Upgrade verfügbar."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-servers.php:90
+#: server/fm-modules/facileManager/pages/admin-servers.php:90
 #, php-format
 msgid "Latest version: %s\\nThis upgrade requires a manual installation."
 msgstr ""
 "Neueste Version: %s\\nDieses Upgrade benötigt eine manuelle Installation."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-servers.php:106
+#: server/fm-modules/facileManager/pages/admin-servers.php:106
 #, php-format
 msgid "failed\\n\\nInstallation aborted. %s is not an active module."
 msgstr ""
 "fehlgeschlagen\\n\\nInstallation abgebrochen. %s ist kein aktives Modul."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:38
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:58
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:60
+#: server/fm-modules/facileManager/pages/admin-tools.php:38
+#: server/fm-modules/facileManager/pages/admin-tools.php:58
+#: server/fm-modules/facileManager/pages/admin-tools.php:60
 msgid "Clean Up Database"
 msgstr "Datenbank bereinigen"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:41
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:51
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:53
+#: server/fm-modules/facileManager/pages/admin-tools.php:41
+#: server/fm-modules/facileManager/pages/admin-tools.php:51
+#: server/fm-modules/facileManager/pages/admin-tools.php:53
 msgid "Backup Database"
 msgstr "Datenbank sichern"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:51
+#: server/fm-modules/facileManager/pages/admin-tools.php:51
 #, php-format
 msgid "<p>The required mysqldump utility is not found on %s.</p>"
 msgstr "<p>Das benötigte mysqldump Werkzeug wurde auf %s nicht gefunden.</p>"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:54
+#: server/fm-modules/facileManager/pages/admin-tools.php:54
 msgid "Run an ad hoc backup of your database."
 msgstr "Ein AdHoc Backup Ihrer Datenbank durchführen."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-tools.php:59
+#: server/fm-modules/facileManager/pages/admin-tools.php:59
 msgid ""
 "You should periodically clean up your database to permanently remove deleted "
 "items. Make sure you backup your database first!"
@@ -1499,11 +1826,18 @@ msgstr ""
 "Sie sollten Ihre Datenbank regelmässig bereinigen, um gelöschte Objekte "
 "dauerhaft zu entfernen. Erstellen Sie zuvor ein Backup Ihrer Datenbank!"
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/admin-users.php:59
+#: server/fm-modules/facileManager/pages/admin-users.php:59
 #, php-format
 msgid "Set user '%s' status to %s."
 msgstr "Status von Benutzer '%s' auf %s setzen."
 
-#: /var/www/html/fM/server/fm-modules/facileManager/pages/help.php:34
+#: server/fm-modules/facileManager/pages/help.php:34
 msgid "You must be logged in to view these files."
 msgstr "Sie müssen angemeldet sein, um diese Dateien anzuschauen."
+
+#~ msgid ""
+#~ "The following modules were installed as well:</b><br />(They can always "
+#~ "be uninstalled later.)"
+#~ msgstr ""
+#~ "Die folgenden Module wurden ebenfalls installiert:</b><br />(Können "
+#~ "später wieder deinstalliert werden.)"
