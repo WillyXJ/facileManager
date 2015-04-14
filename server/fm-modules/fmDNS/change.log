@@ -56,6 +56,7 @@
 * Server - [feature] Zones that need attention can be filtered. (Issue #188)
 * Server - [bug] Fixed zone reloads via cron for cloned zones.
 * Server - [improvement] Stores full SOA serial number in the database.
+* Server - [bug] ACLs can no longer be disabled or deleted if they are used.
 
 1.3.6 (2015-02-09)
 ==================
