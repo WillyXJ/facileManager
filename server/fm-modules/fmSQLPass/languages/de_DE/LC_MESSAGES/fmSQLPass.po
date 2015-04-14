@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-31 14:31-0600\n"
-"PO-Revision-Date: 2015-04-13 10:20+0100\n"
+"POT-Creation-Date: 2015-04-13 10:24-0600\n"
+"PO-Revision-Date: 2015-04-14 07:48+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -28,6 +28,7 @@ msgstr ""
 "\">Klicken Sie hier</a>, um einen oder mehrere zu erstellen.</p>"
 
 #: server/fm-modules/fmSQLPass/functions.php:36
+#: server/fm-modules/fmSQLPass/functions.php:294
 msgid "Servers"
 msgstr "Server"
 
@@ -41,8 +42,33 @@ msgstr ""
 "href=\"%s\">Klicken Sie hier</a>, um eine oder mehrere zu erstellen.</p>"
 
 #: server/fm-modules/fmSQLPass/functions.php:39
+#: server/fm-modules/fmSQLPass/functions.php:295
 msgid "Server Groups"
 msgstr "Server Gruppen"
+
+#: server/fm-modules/fmSQLPass/functions.php:293
+msgid "Config"
+msgstr "Konfiguration"
+
+#: server/fm-modules/fmSQLPass/functions.php:293
+#: server/fm-modules/fmSQLPass/functions.php:294
+msgid "Database Servers"
+msgstr "Datenbankserver"
+
+#: server/fm-modules/fmSQLPass/functions.php:295
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:43
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:388
+msgid "Groups"
+msgstr "Gruppen"
+
+#: server/fm-modules/fmSQLPass/functions.php:296
+msgid "Passwords"
+msgstr "Passwörter"
+
+#: server/fm-modules/fmSQLPass/functions.php:298
+#, php-format
+msgid "%s Settings"
+msgstr "%s Einstellungen"
 
 #: server/fm-modules/fmSQLPass/variables.inc.php:35
 msgid ""
@@ -236,11 +262,6 @@ msgstr "Hostname"
 #: server/fm-modules/fmSQLPass/classes/class_servers.php:43
 msgid "Type"
 msgstr "Typ"
-
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:43
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:388
-msgid "Groups"
-msgstr "Gruppen"
 
 #: server/fm-modules/fmSQLPass/classes/class_servers.php:66
 #: server/fm-modules/fmSQLPass/classes/class_servers.php:150
