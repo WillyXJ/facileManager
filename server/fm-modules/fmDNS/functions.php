@@ -936,4 +936,39 @@ function availableDNSServers($server_id_type = 'serial') {
 	return $server_array;
 }
 
+
+/**
+ * Returns whether the config is in use or not
+ *
+ * @since 2.0
+ * @package fmDNS
+ *
+ * @param integer $id ID to get associations
+ * @param string $type Type of config to search
+ * @return boolean
+ */
+function getConfigAssoc($id, $type) {
+	global $fmdb, $__FM_CONFIG;
+
+	$return = null;
+
+	/** Config options */
+	$query = "SELECT cfg_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND 
+			(cfg_data='{$type}_{$id}' OR cfg_data LIKE '{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id}')";
+	$result = $fmdb->get_results($query);
+	if ($fmdb->num_rows) {
+		return true;
+	}
+
+	/** Controls */
+	$query = "SELECT control_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}controls WHERE account_id='{$_SESSION['user']['account_id']}' AND control_status!='deleted' AND 
+			(control_addresses='{$type}_{$id}' OR control_addresses LIKE '{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id}')";
+	$result = $fmdb->get_results($query);
+	if ($fmdb->num_rows) {
+		return true;
+	}
+
+	return false;
+}
+
 ?>

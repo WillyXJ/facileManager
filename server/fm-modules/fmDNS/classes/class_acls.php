@@ -183,7 +183,7 @@ class fm_dns_acls {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!$this->getAssocACLs($row->acl_id)) {
+			if (!getConfigAssoc($row->acl_id, 'acl')) {
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->acl_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';
@@ -370,38 +370,6 @@ HTML;
 		return implode('; ', $formatted_acls);
 	}
 
-	/**
-	 * Returns whether the ACL is in use or not
-	 *
-	 * @since 2.0
-	 * @package fmDNS
-	 *
-	 * @param integer $acl_id ACL ID to get associations
-	 * @return boolean
-	 */
-	function getAssocACLs($acl_id) {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return = null;
-		
-		/** Config options */
-		$query = "SELECT cfg_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND 
-				(cfg_data='acl_{$acl_id}' OR cfg_data LIKE 'acl_{$acl_id};%' OR cfg_data LIKE '%;acl_{$acl_id};%' OR cfg_data LIKE '%;acl_{$acl_id}')";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			return true;
-		}
-		
-		/** Controls */
-		$query = "SELECT control_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}controls WHERE account_id='{$_SESSION['user']['account_id']}' AND control_status!='deleted' AND 
-				(control_addresses='acl_{$acl_id}' OR control_addresses LIKE 'acl_{$acl_id};%' OR control_addresses LIKE '%;acl_{$acl_id};%' OR control_addresses LIKE '%;acl_{$acl_id}')";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			return true;
-		}
-		
-		return false;
-	}
 }
 
 if (!isset($fm_dns_acls))
