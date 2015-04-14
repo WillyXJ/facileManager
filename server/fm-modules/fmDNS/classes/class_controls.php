@@ -213,7 +213,7 @@ HTML;
 		}
 		
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $control_addresses), ';'));
-		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty'), explode(';', $control_keys), 1, null, true, null, null, 'Select one or more keys');
+		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
 
 		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
 		
@@ -270,7 +270,7 @@ HTML;
 					multiple: true,
 					width: "200px",
 					tokenSeparators: [",", " ", ";"],
-					data: $available_acls
+					data: %s
 				});
 			});
 		</script>',
@@ -281,7 +281,7 @@ HTML;
 				__('Allowed Address List'), __('Define allowed hosts'), $control_addresses,
 				__('Keys'), $control_keys,
 				__('Comment'), $control_comment,
-				$popup_footer
+				$popup_footer, $available_acls
 			);
 
 		return $return_form;

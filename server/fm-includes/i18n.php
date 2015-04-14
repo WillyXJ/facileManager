@@ -39,7 +39,7 @@ if (function_exists('textdomain')) {
 	bindtextdomain($domain, $directory);
 	bind_textdomain_codeset($domain, $encoding);
 	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
-		loadModuleLanguage($encoding);
+		loadModuleLanguage($_SESSION['module'], $encoding);
 	}
 
 	textdomain($domain);
@@ -79,10 +79,11 @@ function getLanguage($directory) {
  * @since 2.0
  * @package facileManager
  *
+ * @param string $module Module language to load
  * @param string $encoding Encoding to set
  * @return string
  */
-function loadModuleLanguage($encoding = 'UTF-8') {
-	bindtextdomain($_SESSION['module'], ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/languages');
-	bind_textdomain_codeset($_SESSION['module'], $encoding);
+function loadModuleLanguage($module, $encoding = 'UTF-8') {
+	bindtextdomain($module, ABSPATH . 'fm-modules/' . $module . '/languages');
+	bind_textdomain_codeset($module, $encoding);
 }
