@@ -693,7 +693,7 @@ HTML;
 	 * @return boolean
 	 */
 	function assignSOA($soa_id, $domain_id) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_dns_zones;
 		
 		$old_soa_id = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_id');
 		
@@ -701,6 +701,17 @@ HTML;
 			/** Delete old custom SOA */
 			if (getNameFromID($old_soa_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}soa", 'soa_', 'soa_id', 'soa_template') == 'no') {
 				updateStatus("fm_{$__FM_CONFIG['fmDNS']['prefix']}soa", $old_soa_id, 'soa_', 'deleted', 'soa_id');
+			}
+
+			if (!isset($fm_dns_zones)) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			}
+			/** Update the SOA serial number */
+			foreach ($fm_dns_zones->getZoneTemplateChildren($domain_id) as $child_id) {
+				$domain_id = getParentDomainID($child_id);
+				if (reloadAllowed($domain_id) && getSOACount($domain_id) && getNSCount($domain_id)) {
+					$this->updateSOAReload($child_id, 'yes');
+				}
 			}
 		}
 	}
