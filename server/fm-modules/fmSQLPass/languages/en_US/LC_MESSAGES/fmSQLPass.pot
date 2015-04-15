@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-13 10:24-0600\n"
+"POT-Creation-Date: 2015-04-15 15:18-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 
 #: server/fm-modules/fmSQLPass/functions.php:295
 #: server/fm-modules/fmSQLPass/classes/class_servers.php:43
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:388
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:389
 msgid "Groups"
 msgstr ""
 
@@ -122,7 +122,7 @@ msgid "There are no server groups."
 msgstr ""
 
 #: server/fm-modules/fmSQLPass/classes/class_groups.php:43
-#: server/fm-modules/fmSQLPass/classes/class_groups.php:207
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:208
 msgid "Group Name"
 msgstr ""
 
@@ -144,20 +144,28 @@ msgstr ""
 msgid "This server group could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_groups.php:207
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:190
+msgid "Add Group"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:190
+msgid "Edit Group"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:208
 msgid "internal"
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_groups.php:219
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:220
 msgid "No group name defined."
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_groups.php:223
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:224
 #, php-format
 msgid "Group name is too long (maximum %d characters)."
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_groups.php:229
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:230
 msgid "This group name already exists."
 msgstr ""
 
@@ -240,7 +248,7 @@ msgid "There are no servers defined."
 msgstr ""
 
 #: server/fm-modules/fmSQLPass/classes/class_servers.php:43
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:385
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:386
 msgid "Hostname"
 msgstr ""
 
@@ -281,19 +289,27 @@ msgstr ""
 msgid "Server Groups need to be defined first."
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:386
-msgid "Server Type"
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:339
+msgid "Add Server"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:339
+msgid "Edit Server"
 msgstr ""
 
 #: server/fm-modules/fmSQLPass/classes/class_servers.php:387
+msgid "Server Type"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:388
 msgid "Server Port"
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:389
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:390
 msgid "Username"
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:390
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:391
 msgid "Password"
 msgstr ""
 
