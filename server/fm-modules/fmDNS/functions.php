@@ -66,11 +66,11 @@ function buildModuleDashboard() {
 		$server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {
 			if ($server_results[$i]->server_installed != 'yes') {
-				$errors .= sprintf(__('<b>%s</b> client is not installed.') . "\n", $server_results[$i]->server_name);
+				$errors .= sprintf('<b>%s</b> - %s' . "\n", $server_results[$i]->server_name, __('Client is not installed.'));
 			} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-				$errors .= sprintf(__('<a href="%s"><b>%s</b></a> client needs to be upgraded.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
+				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name, __('Client needs to be upgraded.'));
 			} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
-				$errors .= sprintf(__('<a href="%s"><b>%s</b></a> needs a new configuration built.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
+				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name, __('Server needs a new configuration built.'));
 			}
 		}
 	}
@@ -85,17 +85,17 @@ function buildModuleDashboard() {
 				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=SOA';
-			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> does not have a SOA defined.' . "\n";
+			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> - ' . __('Zone does not have a SOA defined.') . "\n";
 		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
 				$domain_results[$i]->domain_type == 'master' && 
 				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=NS';
-			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> does not have any NS records defined.' . "\n";
+			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> - ' . __('Zone does not have any NS records defined.') . "\n";
 		} elseif ($domain_results[$i]->domain_reload != 'no' && 
 				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id)) &&
 				currentUserCan('reload_zones', $_SESSION['module'])) {
-			$errors .= '<a href="' . getMenuURL(ucfirst($domain_results[$i]->domain_mapping)) . '"><b>' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</b></a> needs to be reloaded.' . "\n";
+			$errors .= '<a href="' . getMenuURL(ucfirst($domain_results[$i]->domain_mapping)) . '"><b>' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</b></a> - ' . __('Zone needs to be reloaded.') . "\n";
 		}
 	}
 	if ($errors) {

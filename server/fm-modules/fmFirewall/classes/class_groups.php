@@ -235,7 +235,8 @@ HTML;
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name');
 		$group_items = buildSelect('group_items', 'group_items', availableGroupItems($group_type, 'available'), $group_items_assigned, 1, null, true, null, null, 'Select one or more ' . $group_type . 's');
 		
-		$popup_header = buildPopup('header', $ucaction . ' Group');
+		$popup_title = $action == 'add' ? __('Add Group') : __('Edit Group');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('
@@ -269,9 +270,9 @@ HTML;
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>', $popup_header, $action, $group_id, $group_type, _('Group Name'),
+		</script>', $popup_header, $action, $group_id, $group_type, __('Group Name'),
 				$group_name, $group_name_length, $uc_group_type, $group_items,
-				_('Comment'), $group_comment, $popup_footer);
+				__('Comment'), $group_comment, $popup_footer);
 
 		return $return_form;
 	}
@@ -284,7 +285,7 @@ HTML;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name');
-		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(ngettext('Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $post['group_name'], 'group_', 'group_name', "AND group_type='{$post['group_type']}' AND group_id!={$post['group_id']}");

@@ -216,7 +216,8 @@ HTML;
 		/** Get field length */
 		$view_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
 		
-		$popup_header = buildPopup('header', $ucaction . ' View');
+		$popup_title = $action == 'add' ? __('Add View') : __('Edit View');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">

@@ -56,15 +56,14 @@ class fm_module_policies {
 		
 		$server_firewall_type = getNameFromID($_REQUEST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
 		if (array_key_exists($server_firewall_type, $__FM_CONFIG['fw']['notes'])) {
-			$policy_note = <<<NOTE
-			<br />
+			$policy_note = sprintf('<br />
 			<div id="shadow_box" class="fullwidthbox">
 				<div id="shadow_container" class="fullwidthbox note">
-				<p><b>Note:</b><br />{$__FM_CONFIG['fw']['notes'][$server_firewall_type]}</p>
+				<p><b>%s</b><br />%s</p>
 				</div>
-			</div>
-
-NOTE;
+			</div>',
+					__('Note:'), $__FM_CONFIG['fw']['notes'][$server_firewall_type]
+				);
 		} else $policy_note = null;
 		
 		$action_icons = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
@@ -72,7 +71,7 @@ NOTE;
 		
 		foreach ($action_icons as $action) {
 			$action_active[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action']['active']) . "<span>$action</span></td>\n";
-			$action_disabled[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action']['disabled']) . "<span>$action (disabled)</span></td>\n";
+			$action_disabled[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action']['disabled']) . "<span>$action (" . __('disabled') . ")</span></td>\n";
 		}
 		
 		$action_active = implode("\n", $action_active);
@@ -311,19 +310,20 @@ HTML;
 		$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
 
 		$source_items_assigned = getGroupItems($policy_source);
-		$source_items = buildSelect('source_items', 'source_items', availableGroupItems('object', 'available'), $source_items_assigned, 1, null, true, null, null, 'Select one or more objects');
+		$source_items = buildSelect('source_items', 'source_items', availableGroupItems('object', 'available'), $source_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
 		
 		$destination_items_assigned = getGroupItems($policy_destination);
-		$destination_items = buildSelect('destination_items', 'destination_items', availableGroupItems('object', 'available'), $destination_items_assigned, 1, null, true, null, null, 'Select one or more objects');
+		$destination_items = buildSelect('destination_items', 'destination_items', availableGroupItems('object', 'available'), $destination_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
 		
 		$services_items_assigned = getGroupItems($policy_services);
-		$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, 'Select one or more services');
+		$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, __('Select one or more services'));
 		
 		$source_not_check = ($policy_source_not) ? 'checked' : null;
 		$destination_not_check = ($policy_destination_not) ? 'checked' : null;
 		$service_not_check = ($policy_services_not) ? 'checked' : null;
 
-		$popup_header = buildPopup('header', $ucaction . ' Policy');
+		$popup_title = $action == 'add' ? __('Add Policy') : __('Edit Policy');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<FORM

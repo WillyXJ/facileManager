@@ -336,7 +336,8 @@ HTML;
 			unset($server_credentials);
 		}
 		
-		$popup_header = buildPopup('header', $ucaction . ' Server');
+		$popup_title = $action == 'add' ? __('Add Server') : __('Edit Server');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">

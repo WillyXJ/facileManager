@@ -63,7 +63,7 @@ class fm_dns_acls {
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
-		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(ngettext('ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', sanitize($post['acl_name']), 'acl_', 'acl_name');
@@ -112,7 +112,7 @@ class fm_dns_acls {
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
-		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(ngettext('ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', sanitize($post['acl_name']), 'acl_', 'acl_name');
@@ -236,7 +236,8 @@ HTML;
 		/** Get field length */
 		$acl_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
 
-		$popup_header = buildPopup('header', $ucaction . ' ACL');
+		$popup_title = $action == 'add' ? __('Add ACL') : __('Edit ACL');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">

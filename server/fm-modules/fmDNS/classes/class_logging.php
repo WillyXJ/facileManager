@@ -481,8 +481,6 @@ HTML;
 		
 		$cfg_id = 0;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
-		$ucaction = ucfirst($action);
-		$uctype = ucfirst($type);
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$cfg_data = null;
 		
@@ -493,7 +491,12 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
-		$popup_header = buildPopup('header', $ucaction . ' ' . $uctype);
+		if ($action == 'add') {
+			$popup_title = $type == 'channel' ? __('Add Channel') : __('Add Category');
+		} else {
+			$popup_title = $type == 'channel' ? __('Edit Channel') : __('Edit Category');
+		}
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<FORM

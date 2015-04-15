@@ -217,7 +217,8 @@ HTML;
 
 		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
 		
-		$popup_header = buildPopup('header', $ucaction . ' Control');
+		$popup_title = $action == 'add' ? __('Add Control') : __('Edit Control');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">

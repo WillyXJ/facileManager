@@ -616,7 +616,6 @@ HTML;
 	function printForm($data = '', $action = 'create', $map = 'forward', $show = array('popup', 'template_menu', 'create_template')) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
-		$ucaction = ucfirst($action);
 		$domain_id = $domain_view = $domain_name_servers = 0;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
 		$disabled = $action == 'create' ? null : 'disabled';
@@ -713,7 +712,8 @@ HTML;
 		
 		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) || !currentUserCan('manage_servers', $_SESSION['module']) ? null : sprintf('<tr class="include-with-template"><td></td><td><p><a href="config-options.php?domain_id=%d">%s</a></p></td></tr>', $domain_id, __('Configure Additional Options'));
 		
-		$popup_header = buildPopup('header', $ucaction . ' Zone');
+		$popup_title = $action == 'create' ? __('Add Zone') : __('Edit Zone');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		if (array_search('create_template', $show) !== false) {
@@ -1442,7 +1442,7 @@ HTML;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
-		if ($field_length !== false && strlen($post['domain_name']) > $field_length) return sprintf(ngettext('Zone name is too long (maximum %d character).', 'Zone name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['domain_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Zone name is too long (maximum %d character).', 'Zone name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** No need to process more if zone is cloned */
 		if ($post['domain_clone_domain_id']) {

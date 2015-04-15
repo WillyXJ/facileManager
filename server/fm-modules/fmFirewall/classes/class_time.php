@@ -246,7 +246,8 @@ HTML;
 			$weekdays_form .= '/>' . $day . "</label>\n";
 		}
 
-		$popup_header = buildPopup('header', $ucaction . ' Restriction');
+		$popup_title = $action == 'add' ? __('Add Restriction') : __('Edit Restriction');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
@@ -316,7 +317,7 @@ HTML;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name');
-		if ($field_length !== false && strlen($post['time_name']) > $field_length) return sprintf(ngettext('Name is too long (maximum %d character).', 'Name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['time_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Name is too long (maximum %d character).', 'Name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $post['time_name'], 'time_', 'time_name', "AND time_id!={$post['time_id']}");

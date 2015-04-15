@@ -100,7 +100,7 @@ class fm_module_servers {
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(ngettext('Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name');
@@ -184,7 +184,7 @@ class fm_module_servers {
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'groups', 'group_name');
-		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(ngettext('Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $post['group_name'], 'group_', 'group_name');
@@ -269,7 +269,7 @@ class fm_module_servers {
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(ngettext('Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name', "AND server_id!='{$post['server_id']}'");
@@ -337,7 +337,7 @@ class fm_module_servers {
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'groups', 'group_name');
-		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(ngettext('Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $post['group_name'], 'group_', 'group_name', "AND group_id!='{$post['server_id']}'");
@@ -606,8 +606,6 @@ HTML;
 		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$server_chroot_dir = $group_name = null;
-		$ucaction = ucfirst($action);
-		$uctype = ucfirst($type);
 		$server_installed = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -619,7 +617,12 @@ HTML;
 		
 		if ($type == 'groups') $server_id = $group_id;
 
-		$popup_header = buildPopup('header', $ucaction . ' ' . $uctype);
+		if ($action == 'add') {
+			$popup_title = $type == 'servers' ? __('Add Server') : __('Add Group');
+		} else {
+			$popup_title = $type == 'servers' ? __('Edit Server') : __('Edit Group');
+		}
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<FORM

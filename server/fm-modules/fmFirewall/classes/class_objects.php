@@ -211,7 +211,8 @@ HTML;
 		$object_mask_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_mask');
 		$object_type = buildSelect('object_type', 'object_type', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'), $type, 1);
 		
-		$popup_header = buildPopup('header', $ucaction . ' Object');
+		$popup_title = $action == 'add' ? __('Add Object') : __('Edit Object');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
@@ -276,7 +277,7 @@ HTML;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name');
-		if ($field_length !== false && strlen($post['object_name']) > $field_length) return sprintf(ngettext('Object name is too long (maximum %d character).', 'Object name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['object_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Object name is too long (maximum %d character).', 'Object name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $post['object_name'], 'object_', 'object_name', "AND object_type='{$post['object_type']}' AND object_id!={$post['object_id']}");

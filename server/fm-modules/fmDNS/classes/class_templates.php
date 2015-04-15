@@ -141,7 +141,8 @@ HTML;
 	}
 	
 	function printForm($data = '', $action = 'add', $template_type) {
-		$popup_header = buildPopup('header', ucfirst($action) . ' Template');
+		$popup_title = $action == 'add' ? __('Add Template') : __('Edit Template');
+		$popup_header = buildPopup('header', $popup_title);
 		$force_action = $action == 'add' ? 'create' : 'update';
 
 		switch ($template_type) {

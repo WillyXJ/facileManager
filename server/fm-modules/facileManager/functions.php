@@ -1666,7 +1666,7 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
-	$page_links[] = '<span>' . $fmdb->num_rows . ' items</span>';
+	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', $fmdb->num_rows), $fmdb->num_rows));
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {

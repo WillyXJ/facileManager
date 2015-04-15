@@ -334,7 +334,8 @@ HTML;
 			extract(get_object_vars($data[0]));
 			$user_password = null;
 		}
-		$popup_header = buildPopup('header', $ucaction . ' User');
+		$popup_title = $action == 'add' ? __('Add User') : __('Edit User');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		if (in_array('user_login', $form_bits)) {

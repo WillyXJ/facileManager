@@ -67,7 +67,7 @@ class fm_dns_keys {
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
-		if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(ngettext('Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the key already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', sanitize($post['key_name']), 'key_', 'key_name');
@@ -113,7 +113,7 @@ class fm_dns_keys {
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
-		if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(ngettext('Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the key already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', sanitize($post['key_name']), 'key_', 'key_name');
@@ -231,7 +231,8 @@ HTML;
 		$key_algorithm = buildSelect('key_algorithm', 'key_algorithm', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_algorithm'), $key_algorithm, 1);
 		$key_view = buildSelect('key_view', 'key_view', $fm_dns_zones->availableViews(), $key_view);
 		
-		$popup_header = buildPopup('header', $ucaction . ' Key');
+		$popup_title = $action == 'add' ? __('Add Key') : __('Edit Key');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">

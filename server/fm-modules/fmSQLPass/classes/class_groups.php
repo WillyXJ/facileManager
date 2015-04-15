@@ -187,7 +187,8 @@ HTML;
 		/** Check name field length */
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
 
-		$popup_header = buildPopup('header', $ucaction . ' Group');
+		$popup_title = $action == 'add' ? __('Add Group') : __('Edit Group');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">

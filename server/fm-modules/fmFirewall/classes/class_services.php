@@ -258,7 +258,8 @@ HTML;
 			$tcp_flags_settings_form .= "/></td>\n";
 		}
 		
-		$popup_header = buildPopup('header', $ucaction . ' Service');
+		$popup_title = $action == 'add' ? __('Add Service') : __('Edit Service');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
@@ -346,7 +347,7 @@ HTML;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name');
-		if ($field_length !== false && strlen($post['service_name']) > $field_length) return sprintf(ngettext('Service name is too long (maximum %d character).', 'Service name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['service_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Service name is too long (maximum %d character).', 'Service name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $post['service_name'], 'service_', 'service_name', "AND service_type='{$post['service_type']}' AND service_id!={$post['service_id']}");

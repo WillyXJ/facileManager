@@ -320,7 +320,8 @@ HTML;
 		
 		$cfg_data = sanitize($cfg_data);
 
-		$popup_header = buildPopup('header', $ucaction . ' ' . $__FM_CONFIG['options']['avail_types'][$cfg_type] . ' Option');
+		$popup_title = $action == 'add' ? __('Add Option') : __('Edit Option');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$addl_options = null;

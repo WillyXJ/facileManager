@@ -311,10 +311,11 @@ HTML;
 		$server_type = buildSelect('server_type', 'server_type', $available_server_types, $server_type, 1);
 		$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 		
-		$popup_header = buildPopup('header', $ucaction . ' Firewall');
+		$popup_title = $action == 'add' ? __('Add Firewall') : __('Edit Firewall');
+		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? '<p><b>Note:</b> The client installer can automatically generate this entry.</p>' : null;
+		$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name');
 
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
@@ -498,7 +499,7 @@ HTML;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name');
-		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(ngettext('Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', 1), $field_length);
+		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name', "AND server_id!='{$post['server_id']}'");
