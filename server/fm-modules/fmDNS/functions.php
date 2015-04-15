@@ -60,34 +60,41 @@ function buildModuleDashboard() {
 	$dashboard = $errors = null;
 	
 	/** Name server stats */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
-	$server_count = $fmdb->num_rows;
-	$server_results = $fmdb->last_result;
-	for ($i=0; $i<$server_count; $i++) {
-		if ($server_results[$i]->server_installed != 'yes') {
-			$errors .= sprintf(__('<b>%s</b> client is not installed.') . "\n", $server_results[$i]->server_name);
-		} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-			$errors .= sprintf(__('<a href="%s"><b>%s</b></a> client needs to be upgraded.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
-		} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
-			$errors .= sprintf(__('<a href="%s"><b>%s</b></a> needs a new configuration built.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
+	if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
+		$server_count = $fmdb->num_rows;
+		$server_results = $fmdb->last_result;
+		for ($i=0; $i<$server_count; $i++) {
+			if ($server_results[$i]->server_installed != 'yes') {
+				$errors .= sprintf(__('<b>%s</b> client is not installed.') . "\n", $server_results[$i]->server_name);
+			} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
+				$errors .= sprintf(__('<a href="%s"><b>%s</b></a> client needs to be upgraded.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
+			} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
+				$errors .= sprintf(__('<a href="%s"><b>%s</b></a> needs a new configuration built.') . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name);
+			}
 		}
 	}
+	
 	/** Zone stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
 	$domain_count = $fmdb->num_rows;
 	$domain_results = $fmdb->last_result;
 	for ($i=0; $i<$domain_count; $i++) {
 		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-			$domain_results[$i]->domain_type == 'master') {
+				$domain_results[$i]->domain_type == 'master' && 
+				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=SOA';
 			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> does not have a SOA defined.' . "\n";
 		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-			$domain_results[$i]->domain_type == 'master') {
+				$domain_results[$i]->domain_type == 'master' && 
+				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=NS';
 			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> does not have any NS records defined.' . "\n";
-		} elseif ($domain_results[$i]->domain_reload != 'no') {
+		} elseif ($domain_results[$i]->domain_reload != 'no' && 
+				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id)) &&
+				currentUserCan('reload_zones', $_SESSION['module'])) {
 			$errors .= '<a href="' . getMenuURL(ucfirst($domain_results[$i]->domain_mapping)) . '"><b>' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</b></a> needs to be reloaded.' . "\n";
 		}
 	}
