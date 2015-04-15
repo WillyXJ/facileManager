@@ -139,7 +139,7 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 
 /** Get zones based on access */
 $user_capabilities = getUserCapabilities($_SESSION['user']['id']);
-$limited_domain_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
+$limited_domain_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
 
 /** Process domain_view filtering */
 if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
