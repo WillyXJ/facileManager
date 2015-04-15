@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-13 10:24-0600\n"
-"PO-Revision-Date: 2015-04-14 07:47+0100\n"
+"POT-Creation-Date: 2015-04-14 11:12-0600\n"
+"PO-Revision-Date: 2015-04-15 07:39+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -559,6 +559,10 @@ msgstr ""
 #, php-format
 msgid "Control '%s' was deleted."
 msgstr "Control '%s' wurde gelöscht."
+
+#: server/fm-modules/fmDNS/classes/class_controls.php:216
+msgid "Select one or more keys"
+msgstr "Wählen Sie einen oder mehrere Schlüssel aus"
 
 #: server/fm-modules/fmDNS/classes/class_controls.php:281
 msgid "Allowed Address List"
