@@ -69,36 +69,39 @@ $total_pages = ceil($log_count / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $pagination = displayPagination($page, $total_pages);
 
-$log_search_module = isset($log_search_module) ? $log_search_module : 'All Modules';
+$log_search_module = isset($log_search_module) ? $log_search_module : _('All Modules');
 $log_search_user = isset($log_search_user) ? $log_search_user : 0;
 
 $module_list = buildSelect('log_search_module', 1, buildModuleList(), $log_search_module, 4, null, true);
 $user_list = buildSelect('log_search_user', 1, buildUserList(), $log_search_user, 4, null, true);
 
 $table_info = array('class' => 'display_results');
-$title_array = array('Timestamp', 'Module', 'User', array('title' => 'Message', 'style' => 'width: 50%;'));
+$title_array = array(_('Timestamp'), _('Module'), _('User'), array('title' => _('Message'), 'style' => 'width: 50%;'));
 $header = displayTableHeader($table_info, $title_array);
 
 echo printPageHeader($response);
-echo <<<HTML
-		<form class="search-form" id="date-range" action="" method="post">
+printf('<form class="search-form" id="date-range" action="" method="post">
 		<table class="log_search_form" align="center">
 			<tbody>
 				<tr>
-					<td>$module_list</td>
-					<td>$user_list</td>
-					<td><input name="log_search_date_b" value="$log_search_date_b" type="text" class="datepicker" placeholder="Date Begin" /></td>
-					<td><input name="log_search_date_e" value="$log_search_date_e" type="text" class="datepicker" placeholder="Date End" /></td>
-					<td><input type="text" name="log_search_query" value="$log_search_query" placeholder="Search Text" /></td>
-					<td><input value="Search" type="submit" class="button" /></td>
+					<td>%s</td>
+					<td>%s</td>
+					<td><input name="log_search_date_b" value="%s" type="text" class="datepicker" placeholder="%s" /></td>
+					<td><input name="log_search_date_e" value="%s" type="text" class="datepicker" placeholder="%s" /></td>
+					<td><input type="text" name="log_search_query" value="%s" placeholder="%s" /></td>
+					<td><input value="%s" type="submit" class="button" /></td>
 				</tr>
 			</tbody>
 		</table>
 		</form>
-$pagination
-		$header
-
-HTML;
+		%s %s',
+		$module_list, $user_list,
+		$log_search_date_b, _('Date Begin'),
+		$log_search_date_e, _('Date End'),
+		$log_search_query, _('Search Text'),
+		_('Search'),
+		$pagination, $header
+		);
 
 displayLogData($page, $search_sql);
 

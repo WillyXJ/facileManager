@@ -1051,7 +1051,7 @@ function buildHelpFile() {
 	/** facileManager help */
 	$body = <<<HTML
 <div id="issue_tracker">
-	<p>Have an idea for a new feature?  Find a bug?  Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
+	<p>Have an idea for a new feature? Find a bug? Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
 </div>
 <h3>$fm_name</h3>
 <ul>
@@ -1065,26 +1065,22 @@ function buildHelpFile() {
 			<a href="__menu{Modules}">Modules</a>, and then click the 'Install' button next to the module 
 			you wish to install.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
-			<br />
 			<p><b>Activate</b><br />
 			In order for the module to be usable, it needs to be active in the UI.</p>
 			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Activate' link next 
 			to the module you wish to activate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
-			<br />
 			<p><b>Upgrade</b><br />
 			Anytime module files are individually updated in the 'fm-modules' directory on the server host apart from updating $fm_name 
 			as a whole, they will need to be upgraded to ensure full compatibility and functionality.</p>
 			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Upgrade' button next 
 			to the module you wish to upgrade. This will upgrade the database with any required changed.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
-			<br />
 			<p><b>Deactivate</b><br />
 			If you no longer want a module to be usable, it can be deactived in the UI.</p>
 			<p>Go to <a href="__menu{Modules}">Modules</a> and click the 'Deactivate' link next 
 			to the module you wish to deactivate.</p>
 			<p><i>The 'Module Management' or 'Super Admin' permission is required for this action.</i></p>
-			<br />
 			<p><b>Uninstall</b><br />
 			If you no longer want a module to be installed, it can be uninstalled via the UI.</p>
 			<p>Go to <a href="__menu{Modules}">Modules</a>, ensure the module is already 

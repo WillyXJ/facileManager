@@ -560,7 +560,7 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildZoneConfig($post_data) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_servers;
 		
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);
@@ -581,7 +581,18 @@ class fm_module_buildconf {
 				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
 				if ($SERIALNO != -1) {
 					$server_id = getServerID($server_serial_no, $_SESSION['module']);
-					$query .= " AND (`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%')";
+					$query .= " AND (`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%'";
+
+					/** Get the associated server groups */
+					if (!isset($fm_module_servers)) {
+						include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+					}
+					if ($server_group_ids = $fm_module_servers->getServerGroupIDs($server_id)) {
+						foreach ($server_group_ids as $group_id) {
+							$query .= " OR `domain_name_servers`='g_{$group_id}' OR `domain_name_servers` LIKE 'g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id};%'";
+						}
+					}
+					$query .= ')';
 				}
 				$query .= " ORDER BY `domain_clone_domain_id`,`domain_name`";
 				$result = $fmdb->query($query);
@@ -610,7 +621,7 @@ class fm_module_buildconf {
 //							if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
 							
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . "$file_ext"] = $this->buildZoneFile($zone_result[$i]);
+							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 						}
 					}
 					if (isset($data->files)) {
@@ -770,8 +781,6 @@ class fm_module_buildconf {
 	function buildZoneFile($domain, $server_serial_no) {
 		global $__FM_CONFIG;
 		
-		include(ABSPATH . 'fm-includes/version.php');
-		
 		/** Get datetime formatting */
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
@@ -918,8 +927,7 @@ class fm_module_buildconf {
 			AND s.soa_id=d.soa_id AND d.domain_id IN ('{$domain->parent_domain_id}','{$domain->domain_id}','{$domain->domain_template_id}')";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
-			$soa_result = $fmdb->last_result;
-			extract(get_object_vars($soa_result[0]));
+			extract(get_object_vars($fmdb->last_result[0]));
 			
 			$domain_name_trim = trimFullStop($domain->domain_name);
 			

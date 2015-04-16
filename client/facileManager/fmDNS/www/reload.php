@@ -36,8 +36,8 @@ initWebRequest();
 if (isset($_POST['action'])) {
 	switch ($_POST['action']) {
 		case 'buildconf':
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php buildconf' . $_POST['options'] . ' 2>&1', $output, $retval);
-			if ($retval) {
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php buildconf' . $_POST['options'] . ' 2>&1', $output, $rc);
+			if ($rc) {
 				/** Something went wrong */
 				$output[] = 'Config build failed.';
 			} else {
@@ -49,8 +49,8 @@ if (isset($_POST['action'])) {
 				exit(serialize('Zone ID is not found.'));
 			}
 			
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php zones id=' . $_POST['domain_id'] . ' 2>&1', $rawoutput, $retval);
-			if ($retval) {
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php zones id=' . $_POST['domain_id'] . ' 2>&1', $rawoutput, $rc);
+			if ($rc) {
 				/** Something went wrong */
 				$output[] = 'Zone reload failed.';
 				$output[] = $rawoutput;

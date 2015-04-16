@@ -24,6 +24,10 @@ echo '$(document).ready(function() {
 			containerCss: { "min-width": "300px" },
 			minimumResultsForSearch: 10
 		});
+		$(".log_search_form select").select2({
+			containerCss: { "min-width": "165px" },
+			minimumResultsForSearch: 10
+		});
 		$(function() {
 			$( "#manage_item_contents" ).draggable();
 		});
@@ -334,7 +338,7 @@ echo '$(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response == "Success") {
+					if (response == "' . _('Success') . '") {
 						$row_id.css({"background-color":"#D98085"});
 						$row_id.fadeOut("slow", function() {
 							$row_id.remove();

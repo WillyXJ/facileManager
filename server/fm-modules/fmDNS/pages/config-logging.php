@@ -28,7 +28,7 @@ if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) u
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_logging.php');
 
 $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'channel';
-$display_type = ucfirst($__FM_CONFIG['logging']['avail_types'][$type]);
+$display_type = $__FM_CONFIG['logging']['avail_types'][$type];
 $channel_category = ($type == 'channel') ? 'channel' : 'category';
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $response = isset($response) ? $response : null;
@@ -116,7 +116,7 @@ function buildSubMenu($option_type = 'channel', $server_serial_no_uri = null) {
 	
 	foreach ($__FM_CONFIG['logging']['avail_types'] as $general => $type) {
 		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$server_serial_no_uri\">" . ucfirst($type) . "</a></span>\n";
+		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$server_serial_no_uri\">$type</a></span>\n";
 	}
 	
 	return '<div id="configtypesmenu">' . $menu_selects . '</div>';

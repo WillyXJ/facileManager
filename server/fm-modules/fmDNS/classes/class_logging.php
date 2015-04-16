@@ -29,7 +29,7 @@ class fm_module_logging {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(__('There are no %s defined.'), $__FM_CONFIG['logging']['avail_types'][$channel_category]));
+			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(__('There are no %s defined.'), strtolower($__FM_CONFIG['logging']['avail_types'][$channel_category])));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;

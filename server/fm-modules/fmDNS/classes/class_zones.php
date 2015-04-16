@@ -1485,6 +1485,8 @@ HTML;
 	function IDs2Name ($ids, $type) {
 		global $__FM_CONFIG;
 		
+		$all_text = $type == 'view' ? __('All Views') : __('All Servers');
+		
 		if ($ids) {
 			if ($ids == -1) return sprintf('<i>%s</i>', __('inherited'));
 			
@@ -1493,7 +1495,7 @@ HTML;
 			/** Process multiple IDs */
 			if (strpos($ids, ';')) {
 				$ids_array = explode(';', rtrim($ids, ';'));
-				if (in_array('0', $ids_array)) $name = 'All ' . ucfirst($type) . 's';
+				if (in_array('0', $ids_array)) $name = $all_text;
 				else {
 					$name = null;
 					foreach ($ids_array as $id) {
@@ -1512,7 +1514,7 @@ HTML;
 				}
 				$name = getNameFromID(preg_replace('/\D/', null, $ids), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table . 's', $type . '_', $type . '_id', $type . '_name');
 			}
-		} else $name = 'All ' . ucfirst($type) . 's';
+		} else $name = $all_text;
 		
 		return $name;
 	}
