@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-04-15 15:18-0600\n"
-"PO-Revision-Date: 2015-04-16 07:43+0100\n"
+"PO-Revision-Date: 2015-04-16 08:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -1099,6 +1099,8 @@ msgid ""
 "Users are authenticated against $fm_name thus allowing them to have specific "
 "privileges within the application."
 msgstr ""
+"Benutzer werden mit $fm_name authentifiziert und haben festgelegte Rechte "
+"innerhalb der Applikation."
 
 #: server/fm-modules/facileManager/classes/class_settings.php:304
 msgid ""
@@ -1221,7 +1223,7 @@ msgstr "Automatische Client Registrierung"
 #: server/fm-modules/facileManager/classes/class_settings.php:429
 #, php-format
 msgid "Allow clients to automatically register with %s."
-msgstr "Erlaube Benutzern, sich automatisch mit %s zu registrieren."
+msgstr "Erlaube Clients, sich automatisch mit %s zu registrieren."
 
 #: server/fm-modules/facileManager/classes/class_settings.php:432
 msgid "Allow Automatic Client Registration"
@@ -1389,7 +1391,7 @@ msgstr "Nach Updates suchen"
 
 #: server/fm-modules/facileManager/classes/class_settings.php:590
 msgid "Software Tree"
-msgstr "Software Tree"
+msgstr "Softwarekanal"
 
 #: server/fm-modules/facileManager/classes/class_settings.php:591
 #, php-format
@@ -1491,7 +1493,7 @@ msgstr "Datum der letzten Session"
 
 #: server/fm-modules/facileManager/classes/class_users.php:46
 msgid "Last Session Host"
-msgstr "Host der letzten Session"
+msgstr "IP der letzten Session"
 
 #: server/fm-modules/facileManager/classes/class_users.php:47
 msgid "Authenticate With"
@@ -1590,7 +1592,7 @@ msgstr "Optionen"
 
 #: server/fm-modules/facileManager/classes/class_users.php:415
 msgid "Force Password Change at Next Login"
-msgstr "Benutzer auffordern, das Passwort beim nächsten Login zu ändern"
+msgstr "Password muss beim nächsten Login geändert werden."
 
 #: server/fm-modules/facileManager/classes/class_users.php:416
 msgid "Template User"
