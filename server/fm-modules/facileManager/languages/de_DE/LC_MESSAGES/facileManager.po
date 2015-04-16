@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-13 10:24-0600\n"
-"PO-Revision-Date: 2015-04-14 07:46+0100\n"
+"POT-Creation-Date: 2015-04-15 15:18-0600\n"
+"PO-Revision-Date: 2015-04-16 08:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -170,26 +170,26 @@ msgid "Email"
 msgstr "E-Mail"
 
 #: server/fm-install.php:274 server/password_reset.php:88
-#: server/fm-modules/facileManager/classes/class_users.php:385
+#: server/fm-modules/facileManager/classes/class_users.php:386
 #, php-format
 msgid "Confirm Password"
 msgstr "Passwort bestätigen"
 
 #: server/fm-install.php:278 server/password_reset.php:92
-#: server/fm-modules/facileManager/classes/class_users.php:389
+#: server/fm-modules/facileManager/classes/class_users.php:390
 #, php-format
 msgid "Password Validity"
 msgstr "Passwort Überprüfung"
 
 #: server/fm-install.php:279 server/password_reset.php:93
-#: server/fm-modules/facileManager/classes/class_users.php:390
+#: server/fm-modules/facileManager/classes/class_users.php:391
 #: server/fm-modules/facileManager/js/facileManager.php:937
 #, php-format
 msgid "No Password"
 msgstr "Kein Passwort"
 
 #: server/fm-install.php:282
-#: server/fm-modules/facileManager/classes/class_users.php:393
+#: server/fm-modules/facileManager/classes/class_users.php:394
 #, php-format
 msgid "Hint"
 msgstr "Hinweis"
@@ -382,6 +382,13 @@ msgstr "nächstes &rarr;"
 msgid "&larr; previous"
 msgstr "&larr; vorheriges"
 
+#: server/fm-modules/facileManager/functions.php:1669
+#, php-format
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] "%d Objekt"
+msgstr[1] "%d Objekte"
+
 #: server/fm-modules/facileManager/functions.php:1722
 msgid "items per page"
 msgstr "Objekte pro Seite"
@@ -441,7 +448,7 @@ msgid "Save"
 msgstr "Speichern"
 
 #: server/fm-modules/facileManager/functions.php:2823
-#: server/fm-modules/facileManager/classes/class_users.php:525
+#: server/fm-modules/facileManager/classes/class_users.php:526
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -1077,7 +1084,7 @@ msgid "Required password strength for user accounts."
 msgstr "Benötigte Passwortstärke für Benutzerkonten."
 
 #: server/fm-modules/facileManager/classes/class_settings.php:301
-#: server/fm-modules/facileManager/classes/class_users.php:370
+#: server/fm-modules/facileManager/classes/class_users.php:371
 msgid "Authentication Method"
 msgstr "Authentifizierungsmethode"
 
@@ -1092,6 +1099,8 @@ msgid ""
 "Users are authenticated against $fm_name thus allowing them to have specific "
 "privileges within the application."
 msgstr ""
+"Benutzer werden mit $fm_name authentifiziert und haben festgelegte Rechte "
+"innerhalb der Applikation."
 
 #: server/fm-modules/facileManager/classes/class_settings.php:304
 msgid ""
@@ -1214,7 +1223,7 @@ msgstr "Automatische Client Registrierung"
 #: server/fm-modules/facileManager/classes/class_settings.php:429
 #, php-format
 msgid "Allow clients to automatically register with %s."
-msgstr "Erlaube Benutzern, sich automatisch mit %s zu registrieren."
+msgstr "Erlaube Clients, sich automatisch mit %s zu registrieren."
 
 #: server/fm-modules/facileManager/classes/class_settings.php:432
 msgid "Allow Automatic Client Registration"
@@ -1382,12 +1391,12 @@ msgstr "Nach Updates suchen"
 
 #: server/fm-modules/facileManager/classes/class_settings.php:590
 msgid "Software Tree"
-msgstr "Software Tree"
+msgstr "Softwarekanal"
 
 #: server/fm-modules/facileManager/classes/class_settings.php:591
 #, php-format
 msgid "The minimum software tree %s should check updates for."
-msgstr ""
+msgstr "Der tiefste Softwarekanal, für den %s nach Updates suchen soll."
 
 #: server/fm-modules/facileManager/classes/class_settings.php:599
 msgid "Update Check Interval"
@@ -1484,7 +1493,7 @@ msgstr "Datum der letzten Session"
 
 #: server/fm-modules/facileManager/classes/class_users.php:46
 msgid "Last Session Host"
-msgstr "Host der letzten Session"
+msgstr "IP der letzten Session"
 
 #: server/fm-modules/facileManager/classes/class_users.php:47
 msgid "Authenticate With"
@@ -1560,44 +1569,44 @@ msgstr "Benutzer '%s' gelöscht."
 msgid "Never"
 msgstr "Nie"
 
-#: server/fm-modules/facileManager/classes/class_users.php:348
+#: server/fm-modules/facileManager/classes/class_users.php:349
 msgid "User Login"
 msgstr "Benutzer Login"
 
-#: server/fm-modules/facileManager/classes/class_users.php:357
+#: server/fm-modules/facileManager/classes/class_users.php:358
 msgid "User Email"
 msgstr "Benutzer E-Mail"
 
-#: server/fm-modules/facileManager/classes/class_users.php:381
+#: server/fm-modules/facileManager/classes/class_users.php:382
 msgid "User Password"
 msgstr "Benutzer Passwort"
 
-#: server/fm-modules/facileManager/classes/class_users.php:403
+#: server/fm-modules/facileManager/classes/class_users.php:404
 msgid "Default Module"
 msgstr "Standard Modul"
 
-#: server/fm-modules/facileManager/classes/class_users.php:412
-#: server/fm-modules/facileManager/classes/class_users.php:423
+#: server/fm-modules/facileManager/classes/class_users.php:413
+#: server/fm-modules/facileManager/classes/class_users.php:424
 msgid "Options"
 msgstr "Optionen"
 
-#: server/fm-modules/facileManager/classes/class_users.php:414
-msgid "Force Password Change at Next Login"
-msgstr "Benutzer auffordern, das Passwort beim nächsten Login zu ändern"
-
 #: server/fm-modules/facileManager/classes/class_users.php:415
+msgid "Force Password Change at Next Login"
+msgstr "Password muss beim nächsten Login geändert werden."
+
+#: server/fm-modules/facileManager/classes/class_users.php:416
 msgid "Template User"
 msgstr "Template Benutzer"
 
-#: server/fm-modules/facileManager/classes/class_users.php:424
+#: server/fm-modules/facileManager/classes/class_users.php:425
 msgid "Verbose Output"
 msgstr "Erweiterte Ausgabe"
 
-#: server/fm-modules/facileManager/classes/class_users.php:506
+#: server/fm-modules/facileManager/classes/class_users.php:507
 msgid "User Permissions"
 msgstr "Benutzer Rechte"
 
-#: server/fm-modules/facileManager/classes/class_users.php:517
+#: server/fm-modules/facileManager/classes/class_users.php:518
 msgid "User Details"
 msgstr "Benutzer Details"
 
