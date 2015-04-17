@@ -40,8 +40,13 @@ $__FM_CONFIG['fmSQLPass'] = array(
 /** Default values */
 $pwd_strength_desc = null;
 if (isset($__FM_CONFIG['password_hint'])) {
-	foreach ($__FM_CONFIG['password_hint'] as $strength => $desc) {
-		$pwd_strength_desc .= '<i>' . $strength . '</i> - ' . str_replace('You must choose a password with a', 'A', $__FM_CONFIG['password_hint'][$strength]) . "<br /><br />\n";
+	$i=0;
+	foreach ($__FM_CONFIG['password_hint'] as $strength => $hint) {
+		list($ucstrength, $description) = $hint;
+		$auth_fm_pw_strength_opt[$i][] = $ucstrength;
+		$auth_fm_pw_strength_opt[$i][] = $strength;
+		$pwd_strength_desc .= '<i>' . $ucstrength . '</i> - ' . $__FM_CONFIG['password_hint'][$strength][1] . "<br /><br />\n";
+		$i++;
 	}
 }
 $__FM_CONFIG['fmSQLPass']['default']['options'] = @array(
@@ -49,7 +54,7 @@ $__FM_CONFIG['fmSQLPass']['default']['options'] = @array(
 				'description' => array(__('Minimum Password Strength'), rtrim($pwd_strength_desc, "<br /><br />\n")),
 				'default_value' => $GLOBALS['PWD_STRENGTH'],
 				'type' => 'select',
-				'options' => array_keys($__FM_CONFIG['password_hint'])),
+				'options' => $auth_fm_pw_strength_opt),
 		'admin_username' => array(
 				'description' => array(__('Default Username'), __('Default MySQL user to login as. This will be overridden if the user is defined at the server level.')),
 				'default_value' => null,

@@ -188,18 +188,19 @@ class fm_settings {
 		$auth_method_list = buildSelect('auth_method', 'auth_method', $__FM_CONFIG['options']['auth_method'], $auth_method);
 		
 		/** fM Auth Section */
+		$i=0;
+		$password_strength_descriptions = sprintf("<p>%s</p>\n", _('Required password strength for user accounts.'));
 		foreach ($__FM_CONFIG['password_hint'] as $strength => $hint) {
-			$auth_fm_pw_strength_opt[] = $strength;
+			list($ucstrength, $description) = $hint;
+			$auth_fm_pw_strength_opt[$i][] = $ucstrength;
+			$auth_fm_pw_strength_opt[$i][] = $strength;
+			$password_strength_descriptions .= sprintf("<p><i>%s</i> - %s</p>\n", $ucstrength, $description);
+			$i++;
 		}
 		$auth_fm_pw_strength_list = buildSelect('auth_fm_pw_strength', 'auth_fm_pw_strength', $auth_fm_pw_strength_opt, $GLOBALS['PWD_STRENGTH']);
 		if ($auth_method == 1) {
 			 $auth_fm_options_style = 'style="display: block;"';
 		} else $auth_fm_options_style = null;
-		
-		$password_strength_descriptions = sprintf("<p>%s</p>\n", _('Required password strength for user accounts.'));
-		foreach ($__FM_CONFIG['password_hint'] as $strength => $description) {
-			$password_strength_descriptions .= sprintf("<p><i>%s</i> - %s</p>\n", $strength, $description);
-		}
 		
 		/** LDAP Section */
 		if ($auth_method == 2) {
