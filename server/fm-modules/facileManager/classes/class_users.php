@@ -392,7 +392,7 @@ HTML;
 				</tr>
 				<tr class="pwdhint user_password">
 					<th width="33%" scope="row">' . _('Hint') . '</th>
-					<td width="67%">' . $__FM_CONFIG['password_hint'][$strength] . '</td>
+					<td width="67%">' . $__FM_CONFIG['password_hint'][$strength][1] . '</td>
 				</tr>';
 		}
 		
