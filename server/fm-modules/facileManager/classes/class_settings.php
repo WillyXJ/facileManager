@@ -198,7 +198,7 @@ class fm_settings {
 		
 		$password_strength_descriptions = sprintf("<p>%s</p>\n", _('Required password strength for user accounts.'));
 		foreach ($__FM_CONFIG['password_hint'] as $strength => $description) {
-			$password_strength_descriptions .= sprintf("<p><i>%s</i> - %s</p>\n", ucfirst($strength), ucfirst(substr($description, 32)));
+			$password_strength_descriptions .= sprintf("<p><i>%s</i> - %s</p>\n", $strength, $description);
 		}
 		
 		/** LDAP Section */

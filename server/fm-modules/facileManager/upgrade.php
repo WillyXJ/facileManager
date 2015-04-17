@@ -589,6 +589,9 @@ function fmUpgrade_200($database) {
 	
 	if ($success) {
 		if (!setOption('ssh_user', 'fm_user', 'auto', true, $_SESSION['user']['account_id'])) return false;
+		if ($pw_strength = getOption('auth_fm_pw_strength')) {
+			if (!setOption('auth_fm_pw_strength', ucfirst($pw_strength))) return false;
+		}
 	}
 
 	upgradeConfig('fm_db_version', 42, false);
