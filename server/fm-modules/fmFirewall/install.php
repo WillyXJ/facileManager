@@ -405,37 +405,6 @@ WHERE NOT EXISTS
 INSERT;
 	}
 
-	/** Update user capabilities */
-	$fm_user_caps = null;
-	if ($link) {
-		$fm_user_caps_query = "SELECT option_value FROM $database.`fm_options` WHERE option_name='fm_user_caps'";
-		$result = mysql_query($fm_user_caps_query, $link);
-		if ($result) {
-			$row = mysql_fetch_array($result, MYSQL_NUM);
-			$fm_user_caps = isSerialized($row[0]) ? unserialize($row[0]) : $row[0];
-		}
-	} else {
-		$fm_user_caps = getOption('fm_user_caps');
-	}
-	$insert = ($fm_user_caps === null) ? true : false;
-	
-	$fm_user_caps[$module] = array(
-			'view_all'				=> 'View All',
-			'manage_servers'		=> 'Server Management',
-			'build_server_configs'	=> 'Build Server Configs',
-			'manage_policies'		=> 'Policy Management',
-			'manage_objects'		=> 'Object Management',
-			'manage_services'		=> 'Service Management',
-			'manage_time'			=> 'Time Management'
-		);
-	$fm_user_caps = serialize($fm_user_caps);
-	
-	if ($insert) {
-		$inserts[] = "INSERT INTO $database.`fm_options` (option_name, option_value) VALUES ('fm_user_caps', '$fm_user_caps')";
-	} else {
-		$inserts[] = "UPDATE $database.`fm_options` SET option_value='$fm_user_caps' WHERE option_name='fm_user_caps'";
-	}
-
 
 	/** Create table schema */
 	foreach ($table as $schema) {

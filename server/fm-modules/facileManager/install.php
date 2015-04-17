@@ -362,32 +362,6 @@ WHERE NOT EXISTS
 	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'ssh_user');
 INSERT;
 
-/** Update user capabilities */
-if ($link) {
-	$fm_user_caps_query = "SELECT option_value FROM $database.`fm_options` WHERE option_name='fm_user_caps'";
-	$result = mysql_query($fm_user_caps_query, $link);
-	if ($result) {
-		$row = mysql_fetch_array($result, MYSQL_NUM);
-		$fm_user_caps = isSerialized($row[0]) ? unserialize($row[0]) : $row[0];
-	}
-} else {
-	$fm_user_caps = getOption('fm_user_caps');
-}
-$fm_user_caps[$fm_name] = array(
-		'do_everything'		=> '<b>Super Admin</b>',
-		'manage_modules'	=> 'Module Management',
-		'manage_users'		=> 'User Management',
-		'run_tools'			=> 'Run Tools',
-		'manage_settings'	=> 'Manage Settings'
-	);
-$fm_user_caps = serialize($fm_user_caps);
-$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value) 
-	SELECT 'fm_user_caps', '$fm_user_caps' FROM DUAL
-WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'fm_user_caps');
-INSERT;
-
 
 	/** Create table schema */
 	foreach ($table as $schema) {

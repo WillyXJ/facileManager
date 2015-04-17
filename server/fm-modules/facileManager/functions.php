@@ -1426,11 +1426,6 @@ REMOVE;
 	$query = "DELETE FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `module_name`='{$module}'";
 	$fmdb->query($query);
 	
-	/** Delete capability entries from fm_options */
-	$fm_user_caps = getOption('fm_user_caps');
-	unset($fm_user_caps[$module]);
-	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
-	
 	/** Delete capability entries from fm_users */
 	$query = "SELECT * FROM `{$__FM_CONFIG['db']['name']}`.`fm_users`";
 	$fmdb->query($query);
@@ -3036,5 +3031,33 @@ function __($text, $domain = null) {
 	
 	return $text;
 }
+
+
+/**
+ * Gets all available user capabilities
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @return array
+ */
+function getAvailableUserCapabilities() {
+	global $fm_name;
+	
+	$fm_user_caps = null;
+	
+	if (file_exists(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'extra' . DIRECTORY_SEPARATOR . 'capabilities.inc.php')) {
+		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'extra' . DIRECTORY_SEPARATOR . 'capabilities.inc.php');
+	}
+	
+	foreach (getActiveModules() as $module) {
+		if (file_exists(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'extra' . DIRECTORY_SEPARATOR . 'capabilities.inc.php')) {
+			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'extra' . DIRECTORY_SEPARATOR . 'capabilities.inc.php');
+		}
+	}
+	
+	return $fm_user_caps;
+}
+
 
 ?>

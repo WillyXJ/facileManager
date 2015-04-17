@@ -434,13 +434,14 @@ HTML;
 			
 			$fm_perm_boxes = $perm_boxes = null;
 			$i = 1;
-			$fm_user_caps = getOption('fm_user_caps');
+			$fm_user_caps = getAvailableUserCapabilities();
 			foreach ($fm_user_caps[$fm_name] as $key => $title) {
 				if ($key != 'do_everything' && $user_is_super_admin) {
 					$checked = null;
 				} else {
 					$checked = (userCan($user_id, $key)) ? 'checked' : null;
 				}
+				if ($key == 'do_everything') $title = "<b>$title</b>";
 				$fm_perm_boxes .= ' <input name="user_caps[' . $fm_name . '][' . $key . ']" id="fm_perm_' . $key . '" type="checkbox" value="1" ' . $checked . '/> <label for="fm_perm_' . $key . '">' . $title . '</label>' . "\n";
 				/** Display checkboxes three per row */
 				if ($i == 3) {

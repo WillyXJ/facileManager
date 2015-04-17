@@ -592,6 +592,16 @@ function fmUpgrade_200($database) {
 		if ($pw_strength = getOption('auth_fm_pw_strength')) {
 			if (!setOption('auth_fm_pw_strength', ucfirst($pw_strength))) return false;
 		}
+		
+		$table[] = "DELETE FROM $database.`fm_options` WHERE option_name='fm_user_caps'";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
 	}
 
 	upgradeConfig('fm_db_version', 42, false);

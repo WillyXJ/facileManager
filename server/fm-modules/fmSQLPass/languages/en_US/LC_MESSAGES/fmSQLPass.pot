@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-17 11:33-0600\n"
+"POT-Creation-Date: 2015-04-17 15:02-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -325,6 +325,22 @@ msgstr ""
 #: server/fm-modules/fmSQLPass/classes/class_tools.php:46
 #: server/fm-modules/fmSQLPass/classes/class_tools.php:54
 msgid "success"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:24
+msgid "View All"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:25
+msgid "Server Management"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:26
+msgid "Password Management"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:27
+msgid "Manage Settings"
 msgstr ""
 
 #: server/fm-modules/fmSQLPass/js/module.php:10

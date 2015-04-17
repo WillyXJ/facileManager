@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-17 11:33-0600\n"
+"POT-Creation-Date: 2015-04-17 15:02-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1780,6 +1780,34 @@ msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_zones.php:1563
 msgid "Filter"
+msgstr ""
+
+#: server/fm-modules/fmDNS/extra/capabilities.inc.php:24
+msgid "View All"
+msgstr ""
+
+#: server/fm-modules/fmDNS/extra/capabilities.inc.php:25
+msgid "Server Management"
+msgstr ""
+
+#: server/fm-modules/fmDNS/extra/capabilities.inc.php:26
+msgid "Build Server Configs"
+msgstr ""
+
+#: server/fm-modules/fmDNS/extra/capabilities.inc.php:27
+msgid "Zone Management"
+msgstr ""
+
+#: server/fm-modules/fmDNS/extra/capabilities.inc.php:28
+msgid "Record Management"
+msgstr ""
+
+#: server/fm-modules/fmDNS/extra/capabilities.inc.php:29
+msgid "Reload Zones"
+msgstr ""
+
+#: server/fm-modules/fmDNS/extra/capabilities.inc.php:30
+msgid "Manage Settings"
 msgstr ""
 
 #: server/fm-modules/fmDNS/js/module.php:31
