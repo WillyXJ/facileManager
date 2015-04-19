@@ -34,6 +34,40 @@ if (!function_exists('_')) {
 	}
 }
 
+/**
+ * Dummy function in case gettext is not installed
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $single_text Singular text to translate
+ * @param string $plural_text Plural text to translate
+ * @param integer $number Number to determine if its singular or plural
+ * @return string $text
+ */
+if (!function_exists('ngettext')) {
+	function ngettext($single_text, $plural_text, $number) {
+		return $number == 1 ? $single_text : $plural_text;
+	}
+}
+
+/**
+ * Dummy function in case gettext is not installed
+ *
+ * @since 2.0
+ * @package facileManager
+ *
+ * @param string $single_text Singular text to translate
+ * @param string $plural_text Plural text to translate
+ * @param integer $number Number to determine if its singular or plural
+ * @return string $text
+ */
+if (!function_exists('dngettext')) {
+	function dngettext($module, $single_text, $plural_text, $number) {
+		return ngettext($single_text, $plural_text, $number);
+	}
+}
+
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 
 /** Include shared classes */

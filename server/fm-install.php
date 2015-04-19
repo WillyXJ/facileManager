@@ -285,7 +285,7 @@ function displayAccountSetup($error = null) {
 	</table>
 	<p class="step"><input id="createaccount" name="submit" type="submit" value="' . _('Submit') . '" class="button" disabled /></p>
 	</div>
-</form>', $branding_logo, _('Install'), $error, $GLOBALS['PWD_STRENGTH'], $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]);
+</form>', $branding_logo, _('Install'), $error, $GLOBALS['PWD_STRENGTH'], $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']][1]);
 }
 
 /**
