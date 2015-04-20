@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-15 15:18-0600\n"
-"PO-Revision-Date: 2015-04-16 07:49+0100\n"
+"POT-Creation-Date: 2015-04-17 15:02-0600\n"
+"PO-Revision-Date: 2015-04-20 07:53+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.7.6\n"
 
 #: server/fm-modules/fmFirewall/functions.php:58
 #, php-format
@@ -960,6 +960,34 @@ msgstr "http Seite:"
 #: server/fm-modules/fmFirewall/classes/class_tools.php:90
 msgid "skipping (host updates via cron)"
 msgstr "überspringe (Updates via cron)"
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:24
+msgid "View All"
+msgstr "Alle ansehen"
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:25
+msgid "Server Management"
+msgstr "Serververwaltung"
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:26
+msgid "Build Server Configs"
+msgstr "Serverkonfiguration erstellen"
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:27
+msgid "Policy Management"
+msgstr "Policy Management"
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:28
+msgid "Object Management"
+msgstr "Objekt Management"
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:29
+msgid "Service Management"
+msgstr "Service Management"
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:30
+msgid "Time Management"
+msgstr "Zeit Management"
 
 #: server/fm-modules/fmFirewall/js/module.php:156
 msgid "Sort Order Results"
