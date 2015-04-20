@@ -244,7 +244,7 @@ HTML;
 		%s
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="acl_id" value="%d" />
-			<input type="hidden" name="server_serial_no" value="%d" />
+			<input type="hidden" name="server_serial_no" value="%s" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="acl_name">%s</label></th>

@@ -225,7 +225,7 @@ HTML;
 		%s
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="control_id" value="%d" />
-			<input type="hidden" name="server_serial_no" value="%d" />
+			<input type="hidden" name="server_serial_no" value="%s" />
 			<input type="hidden" name="control_keys" value="" />
 			<table class="form-table">
 				<tr>

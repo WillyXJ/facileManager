@@ -225,7 +225,7 @@ HTML;
 			<input type="hidden" name="page" id="page" value="views" />
 			<input type="hidden" name="action" id="action" value="%s" />
 			<input type="hidden" name="view_id" id="view_id" value="%d" />
-			<input type="hidden" name="server_serial_no" value="%d" />
+			<input type="hidden" name="server_serial_no" value="%s" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="view_name">%s</label></th>
