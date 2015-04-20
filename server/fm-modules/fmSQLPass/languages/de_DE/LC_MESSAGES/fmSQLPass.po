@@ -5,17 +5,17 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: FacileManager 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-15 15:18-0600\n"
-"PO-Revision-Date: 2015-04-16 07:49+0100\n"
+"POT-Creation-Date: 2015-04-17 15:02-0600\n"
+"PO-Revision-Date: 2015-04-20 07:57+0100\n"
 "Last-Translator: \n"
-"Language-Team: \n"
+"Language-Team: Vincent Jancsó\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.7.6\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: server/fm-modules/fmSQLPass/functions.php:36
@@ -81,15 +81,15 @@ msgstr ""
 "ist zwingend, damit sichere Passwörter benutzt werden. Zurzeit unterstützte "
 "Datenbankserver beinhaltet auch MySQL."
 
-#: server/fm-modules/fmSQLPass/variables.inc.php:49
+#: server/fm-modules/fmSQLPass/variables.inc.php:54
 msgid "Minimum Password Strength"
 msgstr "Minimale Passwortstärke"
 
-#: server/fm-modules/fmSQLPass/variables.inc.php:54
+#: server/fm-modules/fmSQLPass/variables.inc.php:59
 msgid "Default Username"
 msgstr "Standard Benutzername"
 
-#: server/fm-modules/fmSQLPass/variables.inc.php:54
+#: server/fm-modules/fmSQLPass/variables.inc.php:59
 msgid ""
 "Default MySQL user to login as. This will be overridden if the user is "
 "defined at the server level."
@@ -97,11 +97,11 @@ msgstr ""
 "Standard MySQL Benutzer für den Login. Diese Einstellung wird ignoriert, "
 "falls der Benutzer auf Server-Ebene definiert wurde."
 
-#: server/fm-modules/fmSQLPass/variables.inc.php:58
+#: server/fm-modules/fmSQLPass/variables.inc.php:63
 msgid "Default Password"
 msgstr "Standard Passwort"
 
-#: server/fm-modules/fmSQLPass/variables.inc.php:58
+#: server/fm-modules/fmSQLPass/variables.inc.php:63
 msgid ""
 "Default MySQL user password to login with. This will be overridden if the "
 "password is defined at the server level."
@@ -342,6 +342,22 @@ msgstr "Ping:"
 #: server/fm-modules/fmSQLPass/classes/class_tools.php:54
 msgid "success"
 msgstr "erfolgreich"
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:24
+msgid "View All"
+msgstr "Alle ansehen"
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:25
+msgid "Server Management"
+msgstr "Serververwaltung"
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:26
+msgid "Password Management"
+msgstr "Passwort Management"
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:27
+msgid "Manage Settings"
+msgstr "Einstellungen verwalten"
 
 #: server/fm-modules/fmSQLPass/js/module.php:10
 #: server/fm-modules/fmSQLPass/js/module.php:22
