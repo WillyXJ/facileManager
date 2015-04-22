@@ -61,6 +61,8 @@
 * Server - [bug] Changing SOA templates would not enforce a zone reload. (Issue #202)
 * Server - [bug] Removed zones and servers that need attention from unprivileged
            users. (Issue #204)
+* Server - [improvement] ACLs and predefined address_match_elements can now be
+           referenced in the negated format.
 
 1.3.6 (2015-02-09)
 ==================

@@ -296,9 +296,14 @@ HTML;
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_status='active'");
 		if ($fmdb->num_rows) {
 			$last_result = $fmdb->last_result;
+			$j=0;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$acl_list[$i]['id'] = 'acl_' . $last_result[$i]->acl_id;
-				$acl_list[$i]['text'] = $last_result[$i]->acl_name;
+				$acl_list[$j]['id'] = 'acl_' . $last_result[$i]->acl_id;
+				$acl_list[$j]['text'] = $last_result[$i]->acl_name;
+				$j++;
+				$acl_list[$j]['id'] = '!acl_' . $last_result[$i]->acl_id;
+				$acl_list[$j]['text'] = '!'.$last_result[$i]->acl_name;
+				$j++;
 			}
 		}
 		
@@ -307,6 +312,11 @@ HTML;
 				$acl_list[$i]['id'] = $predefined;
 				$acl_list[$i]['text'] = $predefined;
 				$i++;
+				if ($predefined != 'none') {
+					$acl_list[$i]['id'] = '!' . $predefined;
+					$acl_list[$i]['text'] = '!' . $predefined;
+					$i++;
+				}
 			}
 			/** Keys */
 			$view_id = (isset($_POST['view_id']) && is_numeric(sanitize($_POST['view_id']))) ? sanitize($_POST['view_id']) : 0;
@@ -359,7 +369,13 @@ HTML;
 				$formatted_acls[] = 'key "' . $fm_dns_keys->parseKey($address, '') . '"';
 			} elseif (strpos($address, 'acl_') !== false) {
 				$acl_id = str_replace('acl_', '', $address);
-				$formatted_acls[] = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+				if ($acl_id[0] == '!') {
+					$acl_id = str_replace('!', '', $acl_id);
+					$negate = '!';
+				} else {
+					$negate = null;
+				}
+				$formatted_acls[] = $negate . getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
 			} elseif (strpos($address, 'domain_') !== false) {
 				$domain_id = str_replace('domain_', '', $address);
 				$formatted_acls[] = getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active');
