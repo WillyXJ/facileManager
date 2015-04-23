@@ -296,14 +296,13 @@ HTML;
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_status='active'");
 		if ($fmdb->num_rows) {
 			$last_result = $fmdb->last_result;
-			$j=0;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$acl_list[$j]['id'] = 'acl_' . $last_result[$i]->acl_id;
-				$acl_list[$j]['text'] = $last_result[$i]->acl_name;
-				$j++;
-				$acl_list[$j]['id'] = '!acl_' . $last_result[$i]->acl_id;
-				$acl_list[$j]['text'] = '!'.$last_result[$i]->acl_name;
-				$j++;
+			for ($j=0; $j<$fmdb->num_rows; $j++) {
+				$acl_list[$i]['id'] = 'acl_' . $last_result[$j]->acl_id;
+				$acl_list[$i]['text'] = $last_result[$j]->acl_name;
+				$i++;
+				$acl_list[$i]['id'] = '!acl_' . $last_result[$j]->acl_id;
+				$acl_list[$i]['text'] = '!' . $last_result[$j]->acl_name;
+				$i++;
 			}
 		}
 		

@@ -961,7 +961,8 @@ function getConfigAssoc($id, $type) {
 
 	/** Config options */
 	$query = "SELECT cfg_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND 
-			(cfg_data='{$type}_{$id}' OR cfg_data LIKE '{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id}')";
+			(cfg_data='{$type}_{$id}' OR cfg_data LIKE '{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id}' OR
+			cfg_data='!{$type}_{$id}' OR cfg_data LIKE '!{$type}_{$id};%' OR cfg_data LIKE '%;!{$type}_{$id};%' OR cfg_data LIKE '%;!{$type}_{$id}')";
 	$result = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		return true;
