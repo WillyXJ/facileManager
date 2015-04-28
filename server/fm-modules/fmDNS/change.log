@@ -1,5 +1,5 @@
-2.0-?? (2015-??-??)
-====================
+2.0 (2015-04-27)
+================
 * Server - [feature] Added the ability to use clones in a split-view environment.
            (Issue #165)
 * Server - [feature] Added support for keys in address_match_elements. (Issue #157)
