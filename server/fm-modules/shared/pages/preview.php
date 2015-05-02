@@ -52,6 +52,10 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	
 	if (!isset($config)) $config = 'server';
 	
+	if ($config == 'server' && !currentUserCan(array('build_server_configs', 'view_all'), $_SESSION['module'])) {
+		unAuth();
+	}
+	
 	$function = 'build' . ucfirst($config) . 'Config';
 
 	list($raw_data, $message) = $fm_module_buildconf->$function($data);

@@ -85,7 +85,7 @@ class fm_module_buildconf {
 		$message = null;
 		extract($post_data);
 		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
-		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($SERIALNO, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
+		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
 
 		$GLOBALS['built_domain_ids'] = null;
 		
@@ -560,16 +560,24 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildZoneConfig($post_data) {
-		global $fmdb, $__FM_CONFIG, $fm_module_servers;
+		global $fmdb, $__FM_CONFIG, $fm_module_servers, $fm_login;
 		
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);
 		
+		if (!isset($fm_login)) {
+			require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
+		}
+		if ($fm_login->isLoggedIn()) {
+			if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) {
+				unAuth();
+			}
+		}
+		
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows || $SERIALNO == -1) {
 			if ($SERIALNO != -1) {
-				$result = $fmdb->last_result;
-				$data = $result[0];
+				$data = $fmdb->last_result[0];
 				extract(get_object_vars($data), EXTR_SKIP);
 			}
 			

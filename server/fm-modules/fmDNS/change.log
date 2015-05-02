@@ -1,3 +1,8 @@
+2.0.1 (2015-05-??)
+==================
+* Server - [security] Unauthorized users can no longer see the zone config
+           via the preview button. (Issue #210)
+
 2.0 (2015-04-27)
 ================
 * Server - [feature] Added the ability to use clones in a split-view environment.
