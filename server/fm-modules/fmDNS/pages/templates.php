@@ -23,7 +23,12 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
+if (!isset($template_type)) header('Location: ' . $GLOBALS['RELPATH']);
+
+$tpl_perms = array('manage_zones', 'view_all');
+if (isset($tpl_extra_perm)) $tpl_perms[] = $tpl_extra_perm;
+
+if (!currentUserCan($tpl_perms, $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/fmDNS/classes/class_templates.php');
 

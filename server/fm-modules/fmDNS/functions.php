@@ -758,9 +758,9 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', __('Logging'), __('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
 		addSubmenuPage('config-servers.php', __('Controls'), __('Controls'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
 	
-	addObjectPage(__('Templates'), __('Zones'), array('manage_zones', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
-		addSubmenuPage('templates-soa.php', __('SOA'), __('SOA Templates'), array('manage_zones', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-soa.php');
-		addSubmenuPage('templates-soa.php', __('Zones'), __('Zone Templates'), array('manage_zones', 'build_server_configs', 'view_all'), $_SESSION['module'], 'templates-zones.php');
+	addObjectPage(__('Templates'), __('Zones'), array('manage_zones', 'view_all'), $_SESSION['module'], 'templates-soa.php');
+		addSubmenuPage('templates-soa.php', __('SOA'), __('SOA Templates'), array('manage_zones', 'view_all'), $_SESSION['module'], 'templates-soa.php');
+		addSubmenuPage('templates-soa.php', __('Zones'), __('Zone Templates'), array('manage_zones', 'manage_records', 'view_all'), $_SESSION['module'], 'templates-zones.php');
 
 	addSettingsPage($_SESSION['module'], sprintf(__('%s Settings'), $_SESSION['module']), array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }
