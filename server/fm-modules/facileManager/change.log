@@ -1,4 +1,4 @@
-2.0.1 (2015-05-??)
+2.0.1 (2015-05-03)
 ==================
 * Server - [security] Unauthorized users can no longer see the server config
            via the preview button. (Issue #210)
