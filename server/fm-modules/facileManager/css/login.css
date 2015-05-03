@@ -148,12 +148,15 @@ strong {
 }
 
 
+#forgotton_link {
+	margin: 1em 0 0;
+}
 #forgotton_link a {
 	font-size: 8pt;
 }
 
 #message p {
-	margin: 0 0 -.5em 0;
+	margin: 1em 0 -.5em 0;
 	text-align: center;
 }
 

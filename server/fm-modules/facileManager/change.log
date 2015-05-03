@@ -4,6 +4,7 @@
            via the preview button. (Issue #210)
 * Server - [bug] Fixed client installation output formatting.
 * Client - [bug] Sets correct file mode for sudoers files.
+* Server - [bug] Fixed CSS at login screen.
 
 2.0 (2015-04-27)
 ================
