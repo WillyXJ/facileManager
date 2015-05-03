@@ -1176,4 +1176,37 @@ function createDir($dir, $user) {
 	return true;
 }
 
+
+/**
+ * Deletes specified file and directory contents
+ *
+ * @since 2.0.1
+ * @package facileManager
+ *
+ * @param string $file Filename to delete
+ * @param boolean $debug Debug mode or not
+ * @param boolean $dryrun Whether it's a dry-run or not
+ * @return boolean
+ */
+function deleteFile($file, $debug = false, $dryrun = false) {
+	if (is_dir($file)) {
+		if ($file == '/') return false;
+		
+		foreach (scandir($file) as $item) {
+			if (in_array($item, array('.', '..'))) continue;
+			$full_path_file = $file . DIRECTORY_SEPARATOR . $item;
+			deleteFile($full_path_file, $debug, $dryrun);
+		}
+	} else {
+		$message = "Deleting $file.\n";
+		if ($debug) echo fM($message);
+		if (!$dryrun) {
+			addLogEntry($message);
+			unlink($file);
+		}
+	}
+	
+	return true;
+}
+
 ?>

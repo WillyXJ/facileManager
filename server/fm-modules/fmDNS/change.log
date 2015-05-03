@@ -4,6 +4,7 @@
            via the preview button. (Issue #210)
 * Server - [bug] Fixed template menus and page access.
 * Server - [bug] Fixed an issue where zones based on templates could not be reloaded.
+* Client - [bug] Fixed an issue where zone files do not get purged.
 
 2.0 (2015-04-27)
 ================

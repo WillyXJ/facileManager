@@ -145,27 +145,11 @@ function buildConf($url, $data) {
 		$config_file_pattern = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $path_parts['filename'] . '.*';
 		exec('ls ' . $config_file_pattern, $config_file_match);
 		foreach ($config_file_match as $config_file) {
-			$message = "Deleting $config_file.\n";
-			if ($debug) echo fM($message);
-			if 	(!$data['dryrun']) {
-				addLogEntry($message);
-				unlink($config_file);
-			}
+			deleteFile($config_file, $debug, $data['dryrun']);
 		}
 		
 		/** Zone files */
-		foreach (scandir($server_zones_dir) as $item) {
-			if (in_array($item, array('.', '..'))) continue;
-			$full_path_file = $server_zones_dir . DIRECTORY_SEPARATOR . $item;
-			if (is_file($full_path_file)) {
-				$message = "Deleting $full_path_file.\n";
-				if ($debug) echo fM($message);
-				if (!$data['dryrun']) {
-					addLogEntry($message);
-					unlink($full_path_file);
-				}
-			}
-		}
+		deleteFile($server_zones_dir, $debug, $data['dryrun']);
 	}
 	
 	/** Install the new files */
