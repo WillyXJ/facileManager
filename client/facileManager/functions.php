@@ -1149,6 +1149,8 @@ function addSudoersConfig($module_name, $sudoers_line, $user) {
 
 			if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
 			else echo fM("  --> The sudoers entry has been added.\n");
+			
+			@chmod($sudoers_file, 0440);
 		} else echo fM("  --> The sudoers entry already exists...skipping\n");
 	}
 }
