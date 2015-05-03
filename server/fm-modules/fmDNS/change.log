@@ -3,6 +3,7 @@
 * Server - [security] Unauthorized users can no longer see the zone config
            via the preview button. (Issue #210)
 * Server - [bug] Fixed template menus and page access.
+* Server - [bug] Fixed an issue where zones based on templates could not be reloaded.
 
 2.0 (2015-04-27)
 ================

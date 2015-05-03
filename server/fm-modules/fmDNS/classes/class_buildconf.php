@@ -540,8 +540,8 @@ class fm_module_buildconf {
 
 			/** Set variable containing all loaded domain_ids */
 			if (!$dryrun) {
-				$this->setBuiltDomainIDs($server_serial_no, array_unique($GLOBALS['built_domain_ids']));
 				$data->built_domain_ids = array_unique($GLOBALS['built_domain_ids']);
+				$this->setBuiltDomainIDs($server_serial_no, $data->built_domain_ids);
 			}
 			
 			return array(get_object_vars($data), $message);
@@ -713,6 +713,7 @@ class fm_module_buildconf {
 						if ($domain_server_id[0] == 's') {
 							if (!$domain_server_id || 's_' . $server_id == $domain_server_id) $skip = false;
 						} else {
+							if (!$server_group_ids) $skip = false;
 							foreach ($server_group_ids as $group_id) {
 								if (!$domain_server_id || 'g_' . $group_id == $domain_server_id) $skip = false;
 							}
