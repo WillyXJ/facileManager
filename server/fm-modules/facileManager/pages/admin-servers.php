@@ -85,9 +85,9 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				}
 				$current_module_version = getOption('client_version', 0, $_POST['module_name']);
 				if ($_POST['server_client_version'] == $current_module_version) {
-					$data = sprintf(_('Latest version: %s\nNo upgrade available.'), $current_module_version) . "\n";
+					$data = sprintf(_("Latest version: %s\nNo upgrade available."), $current_module_version) . "\n";
 				} elseif (version_compare($_POST['server_client_version'], $__FM_CONFIG[$_POST['module_name']]['min_client_auto_upgrade_version'], '<')) {
-					$data = sprintf(_('Latest version: %s\nThis upgrade requires a manual installation.'), $current_module_version) . "\n";
+					$data = sprintf(_("Latest version: %s\nThis upgrade requires a manual installation."), $current_module_version) . "\n";
 				} else {
 					$data = array(
 								'latest_core_version' => $fm_version,
@@ -103,7 +103,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				$data = getOption('ssh_' . $_GET['ssh'], getAccountID($_POST['AUTHKEY']));
 			}
 		} else {
-			$data = sprintf(_('failed\n\nInstallation aborted. %s is not an active module.'), $_POST['module_name']) . "\n";
+			$data = sprintf(_("failed\n\nInstallation aborted. %s is not an active module."), $_POST['module_name']) . "\n";
 		}
 	}
 	

@@ -2,6 +2,7 @@
 ==================
 * Server - [security] Unauthorized users can no longer see the server config
            via the preview button. (Issue #210)
+* Server - [bug] Fixed client installation output formatting.
 
 2.0 (2015-04-27)
 ================
