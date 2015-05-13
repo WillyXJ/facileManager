@@ -1,6 +1,7 @@
 2.0.2 (2015-05-??)
 ==================
 * Both   - [bug] Fixed BIND version compare at client install time. (Issue #212)
+* Server - [bug] Included missing translation text.
 
 2.0.1 (2015-05-03)
 ==================

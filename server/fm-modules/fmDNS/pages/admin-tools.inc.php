@@ -91,7 +91,7 @@ if (currentUserCan('run_tools') && currentUserCan('manage_servers', $_SESSION['m
 			. '<input id="clear-cache" name="submit" type="submit" value="%s" class="button" /></p>', __('Dump Cache'), __('Clear Cache'));
 }
 
-$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableDNSServers('id'), 0, 5, null, true, null, null, 'Select one or more servers');
+$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableDNSServers('id'), 0, 5, null, true, null, null, __('Select one or more servers'));
 
 $tools_option[] = sprintf('<div id="admin-tools-select">
 			<h2>%s</h2>
