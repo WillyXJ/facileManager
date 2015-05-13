@@ -93,8 +93,8 @@ function printPasswordResetForm($message = null) {
 				<td><div id="passwd_check">' . _('No Password') . '</div></td>
 			</tr>
 			<tr class="pwdhint">
-				<th width="33%" scope="row">' . ('Hint') . '</th>
-				<td width="67%">' . $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']]. '
+				<th width="33%" scope="row">' . _('Hint') . '</th>
+				<td width="67%">' . $__FM_CONFIG['password_hint'][$GLOBALS['PWD_STRENGTH']][1]. '
 				</td>
 			</tr>
 		</table>
