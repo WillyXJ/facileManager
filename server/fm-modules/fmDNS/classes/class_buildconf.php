@@ -1243,7 +1243,10 @@ class fm_module_buildconf {
 			$required_version = $__FM_CONFIG['fmDNS']['required_dns_version'];
 		}
 		
-		if (version_compare($server_version, $required_version, '<')) {
+		/** Get only the version number */
+		$server_version = preg_split('/\s+/', $server_version);
+		
+		if (version_compare($server_version[0], $required_version, '<')) {
 			return false;
 		}
 		

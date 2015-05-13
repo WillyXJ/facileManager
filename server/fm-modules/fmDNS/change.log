@@ -1,3 +1,7 @@
+2.0.2 (2015-05-??)
+==================
+* Both   - [bug] Fixed BIND version compare at client install time. (Issue #212)
+
 2.0.1 (2015-05-03)
 ==================
 * Server - [security] Unauthorized users can no longer see the zone config
