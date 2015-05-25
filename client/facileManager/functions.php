@@ -745,7 +745,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 				unset($minopt);
 			} else $minutes = '*/5';
 			
-			$cmd = "echo '" . $minutes . ' * * * * ' . findProgram('php') . ' ' . $argv[0] . " cron' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
+			$cmd = "echo '" . $minutes . ' * * * * ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/' . basename($argv[0]) . " cron' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
 			$cron_update = system($cmd, $retval);
 			unlink($tmpfile);
 			
