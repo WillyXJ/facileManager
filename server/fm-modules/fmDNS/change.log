@@ -4,6 +4,7 @@
 * Server - [bug] Included missing translation text.
 * Server - [improvement] Added support for systemd in client rc scripts.
            (Issues #212 #215)
+* Server - [bug] Dashboard summary now excludes template zones and records. (Issue #212)
 
 2.0.1 (2015-05-03)
 ==================

@@ -76,7 +76,7 @@ function buildModuleDashboard() {
 	}
 	
 	/** Zone stats */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_');
+	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'no', 'domain_', 'domain_template');
 	$domain_count = $fmdb->num_rows;
 	$domain_results = $fmdb->last_result;
 	for ($i=0; $i<$domain_count; $i++) {
@@ -104,8 +104,11 @@ function buildModuleDashboard() {
 	} else $error_display = null;
 
 	/** Record stats */
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', 'record_id', 'record_');
-	$record_count = $fmdb->num_rows;
+	$query = 'SELECT COUNT(*) record_count FROM fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records WHERE record_status!="deleted" AND account_id=' . $_SESSION['user']['account_id'] .
+			' AND domain_id NOT IN (SELECT domain_id FROM fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains WHERE domain_status!="deleted" AND account_id=' . $_SESSION['user']['account_id'] .
+			' AND domain_template="yes")';
+	$fmdb->get_results($query);
+	$record_count = $fmdb->last_result[0]->record_count;
 
 	$dashboard = sprintf('<div>
 	<div id="shadow_box">
