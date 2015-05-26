@@ -288,7 +288,7 @@ function detectDaemonVersion($return_array = false) {
 
 
 function versionCheck($app_version, $serverhost, $compress) {
-	$url = $serverhost . '/buildconf.php';
+	$url = str_replace('//', '/', $serverhost . '/buildconf.php');
 	$data['action'] = 'version_check';
 	$server_type = detectServerType();
 	$data['server_type'] = $server_type['type'];
