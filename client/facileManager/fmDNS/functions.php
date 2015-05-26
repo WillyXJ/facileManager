@@ -304,27 +304,36 @@ function versionCheck($app_version, $serverhost, $compress) {
 
 function getStartupScript() {
 	$distros = array(
-		'Arch'      => '/etc/rc.d/named start',
-		'Debian'    => '/etc/init.d/bind9 start',
-		'Ubuntu'    => '/etc/init.d/bind9 start',
-		'Fubuntu'   => '/etc/init.d/bind9 start',
-		'Fedora'    => '/etc/init.d/named start',
-		'Redhat'    => '/etc/init.d/named start',
-		'CentOS'    => '/etc/init.d/named start',
-		'ClearOS'   => '/etc/init.d/named start',
-		'Oracle'    => '/etc/init.d/named start',
-		'SUSE'      => '/etc/init.d/named start',
-		'Gentoo'    => '/etc/init.d/named start',
-		'Slackware' => '/etc/rc.d/rc.bind start',
-		'FreeBSD'   => '/etc/rc.d/named start',
-		'OpenBSD'   => '/etc/rc.d/named start',
+		'Arch'      => array('/etc/rc.d/named start', findProgram('systemctl') . ' start named.service'),
+		'Debian'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
+		'Ubuntu'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
+		'Fubuntu'   => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
+		'Fedora'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'Redhat'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'CentOS'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'ClearOS'   => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'Oracle'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'SUSE'      => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'Gentoo'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'Slackware' => array('/etc/rc.d/rc.bind start', findProgram('systemctl') . ' start bind.service'),
+		'FreeBSD'   => array('/usr/local/etc/rc.d/named start' , '/etc/rc.d/named start'),
+		'OpenBSD'   => array('/usr/local/etc/rc.d/named start' , '/etc/rc.d/named start'),
 		'Apple'     => findProgram('launchctl') . ' start org.isc.named'
 		);
 	
 	$os = detectOSDistro();
 	
 	if (array_key_exists($os, $distros)) {
-		return $distros[$os];
+		if (is_array($distros[$os])) {
+			foreach ($distros[$os] as $rcscript) {
+				$script = preg_split('/\s+/', $rcscript);
+				if (file_exists($script)) {
+					return $rcscript;
+				}
+			}
+		} else {
+			return $distros[$os];
+		}
 	}
 	
 	return false;
