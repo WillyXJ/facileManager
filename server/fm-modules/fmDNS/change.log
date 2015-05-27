@@ -6,6 +6,7 @@
            (Issues #212 #215)
 * Server - [bug] Dashboard summary now excludes template zones and records. (Issue #212)
 * Server - [bug] Fixed server override capabilities for server options.
+* Server - [bug] Fixed some PHP errors.
 
 2.0.1 (2015-05-03)
 ==================

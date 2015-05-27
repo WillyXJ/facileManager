@@ -229,7 +229,11 @@ class fm_module_buildconf {
 
 
 			/** Build logging config */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in ("0", "' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '")');
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in ("0", "' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '")');
+			} else {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name` DESC,`cfg_data`,`cfg_id', 'cfg_', 'AND cfg_type="logging" AND cfg_isparent="yes" AND cfg_status="active" AND server_serial_no in ("0", "' . $server_serial_no . '")');
+			}
 			if ($fmdb->num_rows) {
 				$logging_result = $fmdb->last_result;
 				$count = $fmdb->num_rows;
@@ -349,7 +353,11 @@ class fm_module_buildconf {
 			
 			
 			/** Build controls configs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
+			} else {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
+			}
 			if ($fmdb->num_rows) {
 				$control_result = $fmdb->last_result;
 				$control_config_count = $fmdb->num_rows;
@@ -685,13 +693,14 @@ class fm_module_buildconf {
 		}
 
 		/** Build zones */
-		$server_group_ids = $fm_module_servers->getServerGroupIDs($server_id);
 		$group_sql = null;
-		foreach ($server_group_ids as $group_id) {
-			$group_sql .= " OR (`domain_name_servers`='0' OR `domain_name_servers`='g_{$group_id}' OR `domain_name_servers` LIKE 'g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id}')";
-		}
-		if ($group_sql) {
-			$group_sql = ' OR ' . ltrim($group_sql, ' OR ');
+		if ($server_group_ids = $fm_module_servers->getServerGroupIDs($server_id)) {
+			foreach ($server_group_ids as $group_id) {
+				$group_sql .= " OR (`domain_name_servers`='0' OR `domain_name_servers`='g_{$group_id}' OR `domain_name_servers` LIKE 'g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id}')";
+			}
+			if ($group_sql) {
+				$group_sql = ' OR ' . ltrim($group_sql, ' OR ');
+			}
 		}
 		$view_sql = "AND (`domain_view`<=0 OR `domain_view`=$view_id OR `domain_view` LIKE '$view_id;%' OR `domain_view` LIKE '%;$view_id' OR `domain_view` LIKE '%;$view_id;%')";
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND `domain_template`='no' AND 
@@ -714,8 +723,10 @@ class fm_module_buildconf {
 							if (!$domain_server_id || 's_' . $server_id == $domain_server_id) $skip = false;
 						} else {
 							if (!$server_group_ids) $skip = false;
-							foreach ($server_group_ids as $group_id) {
-								if (!$domain_server_id || 'g_' . $group_id == $domain_server_id) $skip = false;
+							else {
+								foreach ($server_group_ids as $group_id) {
+									if (!$domain_server_id || 'g_' . $group_id == $domain_server_id) $skip = false;
+								}
 							}
 						}
 					}
