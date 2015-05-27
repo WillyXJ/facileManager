@@ -327,8 +327,8 @@ function getStartupScript() {
 		if (is_array($distros[$os])) {
 			foreach ($distros[$os] as $rcscript) {
 				$script = preg_split('/\s+/', $rcscript);
-				if (file_exists($script)) {
-					return $rcscript;
+				if (file_exists($script[0])) {
+					return $script[0];
 				}
 			}
 		} else {
