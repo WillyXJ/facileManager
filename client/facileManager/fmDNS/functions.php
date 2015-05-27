@@ -328,7 +328,7 @@ function getStartupScript() {
 			foreach ($distros[$os] as $rcscript) {
 				$script = preg_split('/\s+/', $rcscript);
 				if (file_exists($script[0])) {
-					return $script[0];
+					return $rcscript;
 				}
 			}
 		} else {
