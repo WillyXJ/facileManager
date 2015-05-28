@@ -1,4 +1,4 @@
-2.0.2 (2015-05-??)
+2.0.2 (2015-05-27)
 ==================
 * Server - [bug] Fixed password reset hint text. (Issue #212)
 * Client - [bug] Cron entries are now entered with full path when installer is
