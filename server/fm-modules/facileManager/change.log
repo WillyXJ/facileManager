@@ -3,6 +3,7 @@
 * Server - [bug] Fixed password reset hint text. (Issue #212)
 * Client - [bug] Cron entries are now entered with full path when installer is
            invoked with a relative path. (Issue #216)
+* Server - [bug] Fixed user creation when php-ldap is not installed. (Issue #212)
 
 2.0.1 (2015-05-03)
 ==================

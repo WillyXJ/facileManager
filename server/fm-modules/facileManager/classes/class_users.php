@@ -83,7 +83,7 @@ class fm_users {
 		} else {
 			$user_template_only = 'no';
 			$user_status = 'active';
-			$user_auth_type = sanitize($user_auth_type);
+			$user_auth_type = isset($user_auth_type) ? sanitize($user_auth_type) : 1;
 		}
 
 		if (empty($user_login)) return _('No username defined.');
