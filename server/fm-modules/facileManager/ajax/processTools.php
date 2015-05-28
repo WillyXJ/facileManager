@@ -66,6 +66,10 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$response = buildPopup('header', _('Database Clean Up Results'));
 				$response .= '<p>' . $fm_tools->cleanupDatabase() . '</p>';
 				break;
+			case 'purge-logs':
+				$response = buildPopup('header', _('Log Purge Results'));
+				$response .= '<p>' . $fm_tools->purgeLogs() . '</p>';
+				break;
 		}
 	}
 } else {

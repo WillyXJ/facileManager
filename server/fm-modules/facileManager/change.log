@@ -1,3 +1,7 @@
+2.1 (2015-??-??)
+================
+* Server - [feature] Added ability to purge logs. (Issue #212)
+
 2.0.2 (2015-05-27)
 ==================
 * Server - [bug] Fixed password reset hint text. (Issue #212)

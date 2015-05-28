@@ -556,7 +556,7 @@ echo '$(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply\"), #module_install, #module_upgrade",
+    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply, .double-click\"), #module_install, #module_upgrade",
     "click tap",function(e){
         var $this 	= $(this);
         task		= $this.attr("id");
@@ -581,6 +581,19 @@ echo '$(document).ready(function() {
 		
 		return false;
     });
+	
+	$(".double-click").click(function(e) {
+		e.preventDefault();
+		if ($(this).hasClass("alert")) {
+			$(this).hide();
+			return;
+		} else {
+			$(this).addClass("alert");
+			$(this).removeClass("double-click");
+			$(this).prop("value", "' . _('Click to confirm') . '");
+			return false;
+		}
+	});
 
 	$("#topheadpartright .help_link").click(function() {
 		var body_right		= $("#body_container").css("right");
