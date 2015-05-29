@@ -118,6 +118,7 @@ function autoCreatePTR($domain_id, $record_type, $data) {
 
 			$subnet_ips = null;
 			for ($i=2; $i<$domain_parts; $i++) {
+				if (strpos($domain_pieces[$i], '-')) break;
 				$subnet_ips .= $domain_pieces[$i] . '.';
 			}
 			$record_octets = array_reverse(explode('.', str_replace($subnet_ips, '', $data['record_value'])));
@@ -128,7 +129,7 @@ function autoCreatePTR($domain_id, $record_type, $data) {
 			$data['record_value'] = rtrim($temp_record_value, '.');
 		} else {
 			/** IPv6 not yet supported */
-			break;
+			return;
 		}
 
 		$array = array(

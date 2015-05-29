@@ -439,19 +439,46 @@ function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = f
 function checkPTRZone($ip, $domain_id) {
 	global $fmdb, $__FM_CONFIG;
 
-	list($ip1, $ip2, $ip3, $ip4) = explode('.' , $ip);
-	$zone = "'$ip3.$ip2.$ip1.in-addr.arpa', '$ip2.$ip1.in-addr.arpa', '$ip1.in-addr.arpa'";
+	$octet = explode('.', $ip);
+	$zone = "'{$octet[2]}.{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[0]}.in-addr.arpa'";
 
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_status!='deleted'");
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
 		return array($result[0]->domain_id, null);
 	} else {
-		if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
-			return autoCreatePTRZone($zone, $domain_id);
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='reverse' AND domain_name LIKE '%-%-%'");
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$domain_name = $fmdb->last_result[$i]->domain_name;
+				$range = array();
+				foreach (array_reverse(explode('.', $domain_name)) as $key => $tmp_octect) {
+					if (in_array($key, array(0, 1))) continue;
+					
+					if (strpos($tmp_octect, '-') !== false) {
+						list($start, $end) = explode('-', $tmp_octect);
+						$range['start'][] = $start;
+						$range['end'][] = $end;
+					} else {
+						$range['start'][] = $tmp_octect;
+						$range['end'][] = $tmp_octect;
+					}
+				}
+				$range['start'] = array_pad($range['start'], 4, 0);
+				$range['end'] = array_pad($range['end'], 4, 255);
+
+				if (ip2long(join('.', $range['start'])) <= ip2long($ip) && ip2long(join('.', $range['end'])) >= ip2long($ip)) {
+					return array($fmdb->last_result[$i]->domain_id, null);
+				}
+			}
 		}
-		return array(null, __('Reverse zone does not exist.'));
 	}
+	
+	/** No match so auto create if allowed */
+	if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+		return autoCreatePTRZone($zone, $domain_id);
+	}
+	return array(null, __('Reverse zone does not exist.'));
 }
 
 function autoCreatePTRZone($new_zones, $fwd_domain_id) {
