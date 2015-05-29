@@ -1667,7 +1667,7 @@ pre {
 	margin-left: 3px;
 }
 
-.no-left-pad td:first-child, th:first-child {
+.no-left-pad td:first-child, .no-left-pad th:first-child {
 	padding-left: 0;
 }
 

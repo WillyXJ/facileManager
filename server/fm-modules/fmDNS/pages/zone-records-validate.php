@@ -400,7 +400,8 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 	if (!$allow_null && !strlen($record_name)) return false;
 	
 	/** Ensure singleton RR type */
-	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} AND record_type!='$record_type'", null, false, 'ASC', true);
+	$sql = $record_type != 'CNAME' ? " AND record_type='CNAME'" : null;
+	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql", null, false, 'ASC', true);
 	if ($fmdb->last_result[0]->count) return false;
 	
 	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
