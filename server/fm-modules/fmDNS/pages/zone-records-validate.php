@@ -408,7 +408,7 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 	} elseif (preg_match('/^[a-z0-9_\-.]+$/i', $record_name) == true
 			&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $record_name) == true) {
 		return true;
-	} elseif ($record_name == '@') {
+	} elseif ($record_name == '@' && $record_type != 'CNAME') {
 		return true;
 	}
 	

@@ -1,3 +1,8 @@
+2.1 (2015-??-??)
+================
+* Server - [improvement] Record validation no longer allows a CNAME RR at the
+           zone level.
+
 2.0.2 (2015-05-27)
 ==================
 * Both   - [bug] Fixed BIND version compare at client install time. (Issue #212)
