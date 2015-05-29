@@ -54,7 +54,7 @@ if (isset($_POST['update'])) {
 	$_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update']);
 }
 
-$table_info = array('class' => 'display_results');
+$table_info = array('class' => 'display_results no-left-pad');
 $header_array = $fm_dns_records->getHeader(strtoupper($record_type));
 $header = displayTableHeader($table_info, $header_array);
 
@@ -72,13 +72,7 @@ printf('<div id="body_container">
 	<input type="hidden" name="domain_id" value="%d">
 	<input type="hidden" name="record_type" value="%s">
 	<input type="hidden" name="map" value="%s">
-	<table class="display_results">
-		<thead>
-			<tr>
 				%s
-			</tr>
-		</thead>
-		<tbody>
 			%s
 		</tbody>
 	</table>
@@ -139,7 +133,8 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 		} else {
 			$img = $__FM_CONFIG['icons']['ok'];
 		}
-		$html .= "<tr><td>{$array['action']}</td>";
+		$html .= '<tr><td class="center">' . $img . '</td>';
+		$html .= "<td>{$array['action']}</td>";
 		foreach ($header_array as $head_id => $head_array) {
 			if (!is_array($head_array) || !array_key_exists('rel', $head_array)) {
 				continue;
@@ -165,7 +160,6 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 			}
 			$html .= '</td>';
 		}
-		$html .= '<td class="center">' . $img . '</td>';
 		$html .= "</tr>\n";
 	}
 	
@@ -401,7 +395,13 @@ function compareValues($data_array, $sql_records) {
 }
 
 function verifyName($record_name, $allow_null = true, $record_type = null) {
+	global $fmdb, $__FM_CONFIG;
+	
 	if (!$allow_null && !strlen($record_name)) return false;
+	
+	/** Ensure singleton RR type */
+	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} AND record_type!='$record_type'", null, false, 'ASC', true);
+	if ($fmdb->last_result[0]->count) return false;
 	
 	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
 		return true;

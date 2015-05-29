@@ -1667,6 +1667,10 @@ pre {
 	margin-left: 3px;
 }
 
+.no-left-pad td:first-child, th:first-child {
+	padding-left: 0;
+}
+
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
 	#pagination_container {

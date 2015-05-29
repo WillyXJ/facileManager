@@ -2,6 +2,7 @@
 ================
 * Server - [improvement] Record validation no longer allows a CNAME RR at the
            zone level.
+* Server - [feature] Record validation now ensures singleton type RR. (Issue #208)
 
 2.0.2 (2015-05-27)
 ==================
