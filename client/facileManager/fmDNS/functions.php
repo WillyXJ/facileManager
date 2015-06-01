@@ -78,6 +78,11 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	
 	echo fM("\n  --> Tests complete.  Continuing installation.\n\n");
 	
+	/* Set update method if specified in config.inc.php */
+	if(defined("FMDNS_UPDATE_METHOD")) {
+		$update_method = FMDNS_UPDATE_METHOD;
+	}
+	
 	/** Update via cron or http/s? */
 	$update_choices = array('c', 's', 'h');
 	while (!isset($update_method)) {
@@ -93,6 +98,8 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	
+	$data['config'][] = array('FMDNS_UPDATE_METHOD', 'fmDNS update method', $update_method);
 	
 	return $data;
 }
