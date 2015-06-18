@@ -1,3 +1,7 @@
+2.1 (2015-??-??)
+================
+* Server - [improvement] Updated default SOA values to RFC1912 recommendations.
+
 2.0.2 (2015-05-27)
 ==================
 * Both   - [bug] Fixed BIND version compare at client install time. (Issue #212)

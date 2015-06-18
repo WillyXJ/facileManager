@@ -81,10 +81,10 @@ $__FM_CONFIG['logging']['avail_types'] = array('channel' => __('Channels'), 'cat
 /** SOA Default Values */
 $__FM_CONFIG['soa']['soa_master_server']	= '';
 $__FM_CONFIG['soa']['soa_email_address']	= '';
-$__FM_CONFIG['soa']['soa_ttl']				= '5m';
-$__FM_CONFIG['soa']['soa_refresh']			= '15m';
+$__FM_CONFIG['soa']['soa_ttl']				= '1d';
+$__FM_CONFIG['soa']['soa_refresh']			= '2h';
 $__FM_CONFIG['soa']['soa_retry']			= '1h';
-$__FM_CONFIG['soa']['soa_expire']			= '1w';
+$__FM_CONFIG['soa']['soa_expire']			= '2w';
 
 /** Name Server Default Values */
 $__FM_CONFIG['ns']['named_root_dir']		= '/var/named';
