@@ -38,9 +38,10 @@ if (strpos(php_sapi_name(), 'cgi') !== false) {
 
 /** Check for options */
 if (in_array('-h', $argv) || in_array('help', $argv)) printHelp();
-$debug = (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
-$proto = (in_array('-s', $argv) || in_array('no-ssl', $argv)) ? 'http' : 'https';
-$purge = (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
+$debug		= (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
+$proto		= (in_array('-s', $argv) || in_array('no-ssl', $argv)) ? 'http' : 'https';
+$purge		= (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
+$no_sudoers	= (in_array('no-sudoers', $argv)) ? true : false;
 
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
@@ -152,6 +153,7 @@ php {$argv[0]} [options]
   -d|debug       Enter debug mode for more output
   -p|purge       Delete old configuration files before writing
   -s|no-ssl      Do not use SSL to retrieve the configs
+     no-sudoers  Do not create/update the sudoers file at install time
 
 HELP;
 
@@ -1124,6 +1126,12 @@ function getParameterValue($param, $file, $delimiter = '=') {
  * @param string $user User with permissions
  */
 function addSudoersConfig($module_name, $sudoers_line, $user) {
+	global $no_sudoers;
+	
+	if ($no_sudoers) {
+		echo fM("  --> no-sudoers parameter is specified...skipping\n");
+		return;
+	}
 	$sudoers_file = findFile('sudoers');
 	$sudoers_options[] = "Defaults:$user  !requiretty";
 	$sudoers_options[] = "Defaults:$user  !env_reset";

@@ -54,7 +54,7 @@ if (isset($_POST['update'])) {
 	$_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update']);
 }
 
-$table_info = array('class' => 'display_results');
+$table_info = array('class' => 'display_results no-left-pad');
 $header_array = $fm_dns_records->getHeader(strtoupper($record_type));
 $header = displayTableHeader($table_info, $header_array);
 
@@ -72,13 +72,7 @@ printf('<div id="body_container">
 	<input type="hidden" name="domain_id" value="%d">
 	<input type="hidden" name="record_type" value="%s">
 	<input type="hidden" name="map" value="%s">
-	<table class="display_results">
-		<thead>
-			<tr>
 				%s
-			</tr>
-		</thead>
-		<tbody>
 			%s
 		</tbody>
 	</table>
@@ -139,7 +133,8 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 		} else {
 			$img = $__FM_CONFIG['icons']['ok'];
 		}
-		$html .= "<tr><td>{$array['action']}</td>";
+		$html .= '<tr><td class="center">' . $img . '</td>';
+		$html .= "<td>{$array['action']}</td>";
 		foreach ($header_array as $head_id => $head_array) {
 			if (!is_array($head_array) || !array_key_exists('rel', $head_array)) {
 				continue;
@@ -165,7 +160,6 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 			}
 			$html .= '</td>';
 		}
-		$html .= '<td class="center">' . $img . '</td>';
 		$html .= "</tr>\n";
 	}
 	
@@ -401,14 +395,21 @@ function compareValues($data_array, $sql_records) {
 }
 
 function verifyName($record_name, $allow_null = true, $record_type = null) {
+	global $fmdb, $__FM_CONFIG;
+	
 	if (!$allow_null && !strlen($record_name)) return false;
+	
+	/** Ensure singleton RR type */
+	$sql = $record_type != 'CNAME' ? " AND record_type='CNAME'" : null;
+	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql", null, false, 'ASC', true);
+	if ($fmdb->last_result[0]->count) return false;
 	
 	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
 		return true;
 	} elseif (preg_match('/^[a-z0-9_\-.]+$/i', $record_name) == true
 			&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $record_name) == true) {
 		return true;
-	} elseif ($record_name == '@') {
+	} elseif ($record_name == '@' && $record_type != 'CNAME') {
 		return true;
 	}
 	
@@ -438,19 +439,46 @@ function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = f
 function checkPTRZone($ip, $domain_id) {
 	global $fmdb, $__FM_CONFIG;
 
-	list($ip1, $ip2, $ip3, $ip4) = explode('.' , $ip);
-	$zone = "'$ip3.$ip2.$ip1.in-addr.arpa', '$ip2.$ip1.in-addr.arpa', '$ip1.in-addr.arpa'";
+	$octet = explode('.', $ip);
+	$zone = "'{$octet[2]}.{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[0]}.in-addr.arpa'";
 
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_status!='deleted'");
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
 		return array($result[0]->domain_id, null);
 	} else {
-		if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
-			return autoCreatePTRZone($zone, $domain_id);
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='reverse' AND domain_name LIKE '%-%-%'");
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$domain_name = $fmdb->last_result[$i]->domain_name;
+				$range = array();
+				foreach (array_reverse(explode('.', $domain_name)) as $key => $tmp_octect) {
+					if (in_array($key, array(0, 1))) continue;
+					
+					if (strpos($tmp_octect, '-') !== false) {
+						list($start, $end) = explode('-', $tmp_octect);
+						$range['start'][] = $start;
+						$range['end'][] = $end;
+					} else {
+						$range['start'][] = $tmp_octect;
+						$range['end'][] = $tmp_octect;
+					}
+				}
+				$range['start'] = array_pad($range['start'], 4, 0);
+				$range['end'] = array_pad($range['end'], 4, 255);
+
+				if (ip2long(join('.', $range['start'])) <= ip2long($ip) && ip2long(join('.', $range['end'])) >= ip2long($ip)) {
+					return array($fmdb->last_result[$i]->domain_id, null);
+				}
+			}
 		}
-		return array(null, __('Reverse zone does not exist.'));
 	}
+	
+	/** No match so auto create if allowed */
+	if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+		return autoCreatePTRZone($zone, $domain_id);
+	}
+	return array(null, __('Reverse zone does not exist.'));
 }
 
 function autoCreatePTRZone($new_zones, $fwd_domain_id) {

@@ -1,5 +1,10 @@
 2.1 (2015-??-??)
 ================
+* Server - [improvement] Record validation no longer allows a CNAME RR at the
+           zone level.
+* Server - [feature] Record validation now ensures singleton type RR. (Issue #208)
+* Server - [feature] Added support for automatically creating PTR records in
+           reverse subnet maps. (Issue #195)
 * Server - [improvement] Updated default SOA values to RFC1912 recommendations.
 
 2.0.2 (2015-05-27)

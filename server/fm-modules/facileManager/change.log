@@ -1,6 +1,7 @@
 2.1 (2015-??-??)
 ================
 * Server - [feature] Added ability to purge logs. (Issue #212)
+* Client - [feature] Added no-sudoers client option. (Issue #221)
 * Server - [bug] Fixed Modules badge counts.
 
 2.0.2 (2015-05-27)

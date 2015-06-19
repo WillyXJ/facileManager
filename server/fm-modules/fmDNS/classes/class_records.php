@@ -309,8 +309,8 @@ class fm_dns_records {
 		if (empty($_POST) || $type == 'DOMAIN') {
 			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		} else {
-			$title_array[] = array('title' => __('Valid'), 'style' => 'text-align: center;');
 			array_unshift($title_array, __('Action'));
+			array_unshift($title_array, array('title' => __('Valid'), 'style' => 'text-align: center;'));
 		}
 		
 		return $title_array;
