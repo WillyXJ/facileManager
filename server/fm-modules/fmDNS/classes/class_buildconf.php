@@ -281,7 +281,7 @@ class fm_module_buildconf {
 			/** Build global configs */
 			$config .= "options {\n";
 			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0 AND server_serial_no="0" AND cfg_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0 AND server_serial_no="0" AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
@@ -293,7 +293,7 @@ class fm_module_buildconf {
 			$server_config = array();
 			/** Override with group-specific configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
 				if ($fmdb->num_rows) {
 					$server_config_result = $fmdb->last_result;
 					$global_config_count = $fmdb->num_rows;
@@ -304,7 +304,7 @@ class fm_module_buildconf {
 			}
 
 			/** Override with server-specific configs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
@@ -346,6 +346,9 @@ class fm_module_buildconf {
 				unset($cfg_info);
 				if ($cfg_comment) $config .= "\n";
 			}
+			/** Build includes */
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids);
+			
 			/** Build rate limits */
 			$config .= $this->getRateLimits(0, $server_serial_no);
 			
@@ -408,7 +411,7 @@ class fm_module_buildconf {
 					$config .= 'view "' . $view_result[$i]->view_name . "\" {\n";
 
 					/** Get cooresponding config records */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no='0' AND view_id='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no='0' AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -420,7 +423,7 @@ class fm_module_buildconf {
 					$server_view_config = array();
 					/** Override with group-specific configs */
 					if (is_array($server_group_ids)) {
-						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no IN ('g_" . implode("','g_", $server_group_ids) . "') AND view_id='" . $view_result[$i]->view_id . "'");
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no IN ('g_" . implode("','g_", $server_group_ids) . "') AND view_id='" . $view_result[$i]->view_id . "'");
 						if ($fmdb->num_rows) {
 							$server_config_result = $fmdb->last_result;
 							$view_config_count = $fmdb->num_rows;
@@ -431,7 +434,7 @@ class fm_module_buildconf {
 					}
 
 					/** Override with server-specific configs */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no='$server_serial_no' AND view_id='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no='$server_serial_no' AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$server_config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -471,6 +474,9 @@ class fm_module_buildconf {
 						if ($cfg_comment) $config .= "\n";
 						unset($cfg_info);
 					}
+
+					/** Build includes */
+					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids);
 
 					/** Build rate limits */
 					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
@@ -1671,9 +1677,10 @@ HTML;
 	 * @param string $cfg_name Config option name
 	 * @param string $cfg_info Config option values
 	 * @param string $cfg_comment Config option comment
+	 * @param string $tab How the tab should look
 	 * @return string
 	 */
-	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment) {
+	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $tab = "\t\t") {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		$config = null;
@@ -1687,10 +1694,10 @@ HTML;
 		}
 		if ($cfg_comment) {
 			$comment = wordwrap($cfg_comment, 50, "\n");
-			$config .= "\n\t\t// " . str_replace("\n", "\n\t\t// ", $comment) . "\n";
+			$config .= "\n$tab// " . str_replace("\n", "\n$tab// ", $comment) . "\n";
 			unset($comment);
 		}
-		$config .= "\t\t" . $cfg_name . ' ';
+		$config .= $tab . $cfg_name . ' ';
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
 		$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
 		$config .= trim(rtrim(trim($cfg_info), ';'));
@@ -1785,6 +1792,45 @@ HTML;
 	 */
 	function characterSplit($text, $limit = 255) {
 		return explode("\n", wordwrap($text, $limit, "\n", true));
+	}
+	
+	/**
+	 * Attempts to resolve the master servers for the group
+	 *
+	 * @since 2.1
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @param array   $server_group_ids The array containing server group IDs for overrides
+	 * @return array
+	 */
+	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (is_array($server_group_ids)) {
+			$server_group_ids = 'g_' . implode('","g_', $server_group_ids);
+		}
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include" AND view_id=' . $view_id . ' AND domain_id=0 AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			$config_result = $fmdb->last_result;
+			for ($i=0; $i < $fmdb->num_rows; $i++) {
+				$include_config['include'][] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+			}
+		} else $include_config = null;
+
+		if (is_array($include_config)) {
+			$include_files = null;
+			foreach ($include_config as $cfg_name => $value_array) {
+				foreach ($value_array as $domain_name => $cfg_data) {
+					list($cfg_info, $cfg_comment) = $cfg_data;
+					$include_files .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment, "\t");
+				}
+			}
+			return $include_files;
+		} else {
+			return null;
+		}
 	}
 }
 

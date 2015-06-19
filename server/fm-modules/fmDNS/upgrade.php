@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.0', '<') ? upgradefmDNS_200($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.1', '<') ? upgradefmDNS_210($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1440,6 +1440,42 @@ function upgradefmDNS_200($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '2.0', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 2.1 */
+function upgradefmDNS_210($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.0', '<') ? upgradefmDNS_200($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`,
+`def_max_parameters`
+)
+VALUES 
+('options', 'global', 'include', '( quoted_string )', 'no', 'OV', 'no', '-1')
+;
+INSERT;
+	
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.1', 'auto', false, 0, $module_name);
 	
 	return true;
 }
