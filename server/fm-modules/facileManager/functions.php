@@ -2189,6 +2189,8 @@ function getBadgeCounts($type) {
 						$badge_count++;
 						continue;
 					}
+				} else {
+					$module_version = $__FM_CONFIG[$module_name]['version'];
 				}
 				
 				/** New versions available */
