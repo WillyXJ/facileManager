@@ -7,6 +7,7 @@
            reverse subnet maps. (Issue #195)
 * Server - [improvement] Updated default SOA values to RFC1912 recommendations.
 * Server - [improvement] Updated default named.root file.
+* Server - [improvement] Minor UI edits.
 
 2.0.2 (2015-05-27)
 ==================

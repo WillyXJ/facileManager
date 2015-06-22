@@ -1043,6 +1043,23 @@ a {
 	margin-top: 8px;
 }
 
+.popup-wait {
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	background-color: #fff;
+	opacity: 0.75;
+	z-index: 1010;
+	width: 100%;
+	position: absolute;
+	display: block;
+}
+.popup-wait i {
+	position: absolute;
+	top: 45%;
+	left: 50%;
+}
+
 .popup-contents {
 	max-height: 480px;
 	overflow-y: auto;

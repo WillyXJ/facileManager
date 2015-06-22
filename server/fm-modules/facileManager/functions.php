@@ -2835,6 +2835,7 @@ function buildPopup($section, $text = null, $buttons = array('submit', 'cancel_b
 			{$__FM_CONFIG['icons']['close']}
 			<h3>$text</h3>
 		</div>
+		<div class="popup-wait"><i class="fa fa-2x fa-spinner fa-spin"></i></div>
 		<div class="popup-contents">
 
 HTML;
