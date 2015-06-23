@@ -4,6 +4,8 @@
 * Client - [feature] Added no-sudoers client option. (Issue #221)
 * Server - [bug] Fixed Modules badge counts.
 * Server - [improvement] Minor UI edits.
+* Server - [improvement] The default Super Admin account can login even if LDAP
+           is configured.
 
 2.0.2 (2015-05-27)
 ==================
