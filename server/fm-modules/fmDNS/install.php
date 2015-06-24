@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}config
   `cfg_comment` text,
   `cfg_status` enum('hidden','active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`cfg_id`),
-  KEY `domain_id` (`domain_id`)
+  KEY `idx_domain_id` (`domain_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 TABLE;
 
@@ -90,7 +90,8 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}domain
   `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL,
   `domain_reload` enum('yes','no') NOT NULL DEFAULT 'no',
   `domain_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
-  PRIMARY KEY (`domain_id`)
+  PRIMARY KEY (`domain_id`),
+  KEY `idx_domain_status` (`domain_status`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
 TABLE;
 
@@ -107,7 +108,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}functi
   `def_dropdown` enum('yes','no') NOT NULL DEFAULT 'no',
   `def_max_parameters` int(3) NOT NULL DEFAULT '1',
   PRIMARY KEY (`def_id`),
-  KEY `def_option` (`def_option`)
+  KEY `idx_def_option` (`def_option`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 TABLE;
 
@@ -150,7 +151,9 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}record
   `record_append` enum('yes','no') NOT NULL DEFAULT 'yes',
   `record_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`record_id`),
-  KEY `domain_id` (`domain_id`)
+  KEY `idx_domain_id` (`domain_id`),
+  KEY `idx_record_status` (`record_status`),
+  KEY `idx_record_account_id` (`account_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
 TABLE;
 
@@ -162,7 +165,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}record
   `record_id` int(11) NOT NULL,
   `record_status` enum('active','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`skip_id`),
-  KEY `record_id` (`record_id`)
+  KEY `idx_record_id` (`record_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 TABLE;
 
@@ -191,7 +194,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
   `server_client_version` varchar(150) DEFAULT NULL,
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
   PRIMARY KEY (`server_id`),
-  UNIQUE KEY `server_serial_no` (`server_serial_no`)
+  UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
 ) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
 TABLE;
 

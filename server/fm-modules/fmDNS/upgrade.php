@@ -1451,6 +1451,15 @@ function upgradefmDNS_210($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0', '<') ? upgradefmDNS_200($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` DROP INDEX domain_id, ADD INDEX `idx_domain_id` (`domain_id`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD INDEX `idx_domain_status` (`domain_status`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` DROP INDEX def_option, ADD INDEX `idx_def_option` (`def_option`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` DROP INDEX domain_id, ADD INDEX `idx_domain_id` (`domain_id`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD INDEX `idx_record_status` (`record_status`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD INDEX `idx_record_account_id` (`account_id`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP INDEX record_id, ADD INDEX `idx_record_id` (`record_id`)";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` DROP INDEX server_serial_no, ADD UNIQUE `idx_server_serial_no` (`server_serial_no`)";
+	
 	$inserts[] = <<<INSERT
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
@@ -1467,6 +1476,14 @@ VALUES
 ;
 INSERT;
 	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
 	/** Run queries */
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {
