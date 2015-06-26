@@ -1052,7 +1052,7 @@ a {
 	z-index: 1010;
 	width: 100%;
 	position: absolute;
-	display: block;
+	display: none;
 }
 .popup-wait i {
 	position: absolute;
