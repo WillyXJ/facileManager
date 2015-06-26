@@ -567,7 +567,7 @@ INSERT IGNORE INTO  $database.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 )
 VALUES 
 ('options', 'ratelimit', 'responses-per-second', '( [size integer] [ratio fixedpoint] integer )', 'no', 'OV', 'no', '5'),
-('options', 'global', 'include', '( quoted_string )', 'no', 'OV', 'no', '-1')
+('options', 'global', 'include', '( quoted_string )', 'no', 'OVZ', 'no', '-1')
 ;
 INSERT;
 

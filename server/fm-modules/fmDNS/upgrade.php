@@ -1471,7 +1471,7 @@ INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_max_parameters`
 )
 VALUES 
-('options', 'global', 'include', '( quoted_string )', 'no', 'OV', 'no', '-1')
+('options', 'global', 'include', '( quoted_string )', 'no', 'OVZ', 'no', '-1')
 ;
 INSERT;
 	
