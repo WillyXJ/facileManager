@@ -1183,7 +1183,6 @@ function upgradefmDNS_130($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.3-beta2', '<') ? upgradefmDNS_1302($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP PRIMARY KEY";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD `skip_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` ADD INDEX(`record_id`)";
 
