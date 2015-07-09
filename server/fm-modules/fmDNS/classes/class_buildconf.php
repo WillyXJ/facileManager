@@ -1316,13 +1316,8 @@ class fm_module_buildconf {
 		
 		$uname = php_uname('n');
 		if (!$named_checkconf) {
-			return <<<INFO
-			<div id="named_check" class="info">
-				<p>The named utilities (specifically named-checkconf and named-checkzone) cannot be found on $uname. If they were installed,
-				these configs and zones could be checked for syntax.</p>
-			</div>
-
-INFO;
+			return sprintf('<div id="named_check" class="info"><p>%s</p></div>', 
+					sprintf(__('The named utilities (specifically named-checkconf and named-checkzone) cannot be found on %s. If they were installed, these configs and zones could be checked for syntax.'), $uname));
 		}
 		
 		$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
@@ -1335,7 +1330,7 @@ INFO;
 			if (!is_dir(dirname($tmp_dir . $file))) {
 				if (!@mkdir(dirname($tmp_dir . $file), 0777, true)) {
 					$class = 'class="info"';
-					$message = $fm_temp_directory . ' is not writeable by ' . $__FM_CONFIG['webserver']['user_info']['name'] . ' so the named checks cannot be performed.';
+					$message = sprintf(__('%s is not writeable by %s so the named checks cannot be performed.'), $fm_temp_directory, $__FM_CONFIG['webserver']['user_info']['name']);
 					$die = true;
 					break;
 				}
@@ -1384,14 +1379,15 @@ INFO;
 				$named_checkconf_results = implode("\n", $named_checkconf_results);
 				if (strpos($named_checkconf_results, 'sudo') !== false) {
 					$class = 'class="info"';
-					$message = 'The webserver user (' . $__FM_CONFIG['webserver']['user_info']['name'] . ') on ' . $uname . ' does not have permission to run 
-								the following command:<br /><pre>' . $named_checkconf_cmd . '</pre><p>The following error ocurred:<pre>' .
-								$named_checkconf_results . '</pre>';
+					$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
+							$__FM_CONFIG['webserver']['user_info']['name'], $uname,
+							'<br /><pre>' . $named_checkconf_cmd . '</pre><p>',
+							'<pre>' . $named_checkconf_results . '</pre>');
 				} else {
-					$message = 'Your named configuration contains one or more errors:<br /><pre>' . $named_checkconf_results . '</pre>';
+					$message = __('Your named configuration contains one or more errors:') . '<br /><pre>' . $named_checkconf_results . '</pre>';
 				}
 				
-			/** Run named-checkconf */
+			/** Run named-checkzone */
 			} else {
 				$named_checkzone_results = null;
 				if (array($zone_files)) {
@@ -1404,9 +1400,10 @@ INFO;
 								$named_checkzone_results .= implode("\n", $results);
 								if (strpos($named_checkzone_results, 'sudo') !== false) {
 									$class = 'class="info"';
-									$message = 'The webserver user (' . $__FM_CONFIG['webserver']['user_info']['name'] . ') on ' . $uname . ' does not have permission to run 
-												the following command:<br /><pre>' . $named_checkzone_cmd . '</pre><p>The following error ocurred:<pre>' .
-												$named_checkzone_results . '</pre>';
+									$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
+											$__FM_CONFIG['webserver']['user_info']['name'], $uname,
+											'<br /><pre>' . $named_checkzone_cmd . '</pre><p>',
+											'<pre>' . $named_checkzone_results . '</pre>');
 									break 2;
 								}
 							}
@@ -1415,10 +1412,10 @@ INFO;
 				}
 				
 				if ($named_checkzone_results) {
-					if (empty($message)) $message = 'Your zone configuration files contain one or more errors:<br /><pre>' . $named_checkzone_results . '</pre>';
+					if (empty($message)) $message = __('Your zone configuration files contain one or more errors:') . '<br /><pre>' . $named_checkzone_results . '</pre>';
 				} else {
 					$class = null;
-					$message = 'Your named configuration and zone files are loadable.';
+					$message = __('Your named configuration and zone files are loadable.');
 				}
 			}
 		}
@@ -1497,12 +1494,9 @@ HTML;
 			if (is_writeable($local_hint_zone)) {
 				file_put_contents($local_hint_zone, fopen($remote_hint_zone, 'r'));
 			} else {
-				return <<<HTML
-			<div id="named_check" class="info">
-				<p>The root servers have been recently updated, but the webserver user ({$__FM_CONFIG['webserver']['user_info']['name']}) cannot write to $local_hint_zone to update the hint zone.</p>
-				<p>A local copy will be used instead.</p>
-			</div>
-HTML;
+				return sprintf('<div id="named_check" class="info"><p>%s</p><p>%s</p></div>',
+						sprintf(__('The root servers have been recently updated, but the webserver user (%s) cannot write to %s to update the hint zone.'), $__FM_CONFIG['webserver']['user_info']['name'], $local_hint_zone),
+						__('A local copy will be used instead.'));
 			}
 		}
 		

@@ -10,6 +10,7 @@
 * Server - [improvement] Minor UI edits.
 * Server - [improvement] Improved performance.
 * Server - [bug] Fixed upgrade routine from v1.2.3. (Issue #230)
+* Server - [bug] Included missing translation text.
 
 2.0.2 (2015-05-27)
 ==================
