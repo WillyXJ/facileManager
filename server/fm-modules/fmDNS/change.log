@@ -13,6 +13,7 @@
 * Server - [bug] Included missing translation text.
 * Server - [improvement] Zone import tool no longer compares record comment to
            determine if the record is a duplicate.
+* Server - [bug] Fixed read-only SRV and TXT record display.
 
 2.0.2 (2015-05-27)
 ==================
