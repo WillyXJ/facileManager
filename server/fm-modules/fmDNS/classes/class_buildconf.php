@@ -323,28 +323,8 @@ class fm_module_buildconf {
 
 				/** Include hint zone (root servers) */
 				if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
-
-				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-				$fmdb->get_results($query);
-				if (!$fmdb->num_rows) $def_multiple_values = 'no';
-				else {
-					$result = $fmdb->last_result[0];
-					$def_multiple_values = $result->def_multiple_values;
-				}
-				if ($cfg_comment) {
-					$comment = wordwrap($cfg_comment, 50, "\n");
-					$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-					unset($comment);
-				}
-				$config .= "\t" . $cfg_name . ' ';
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-				$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
-				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
-				$config .= ";\n";
 				
-				unset($cfg_info);
-				if ($cfg_comment) $config .= "\n";
+				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
 			}
 			/** Build includes */
 			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids);
@@ -449,30 +429,7 @@ class fm_module_buildconf {
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
-						/** Include hint zone (root servers) */
-						if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
-
-						$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-						$fmdb->get_results($query);
-						if (!$fmdb->num_rows) $def_multiple_values = 'no';
-						else {
-							$result = $fmdb->last_result[0];
-							$def_multiple_values = $result->def_multiple_values;
-						}
-						if ($cfg_comment) {
-							$comment = wordwrap($cfg_comment, 50, "\n");
-							$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-							unset($comment);
-						}
-						$config .= "\t" . $cfg_name . ' ';
-						if ($def_multiple_values == 'yes') $config .= '{ ';
-						$cfg_info = $fm_dns_acls->parseACL($cfg_info);
-						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-						if ($def_multiple_values == 'yes') $config .= '; }';
-						$config .= ";\n";
-						
-						if ($cfg_comment) $config .= "\n";
-						unset($cfg_info);
+						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
 					}
 
 					/** Build includes */
@@ -1558,32 +1515,9 @@ HTML;
 		$config_array = array_merge($global_config, $server_config);
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
-			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'";
-			$fmdb->get_results($query);
-			if (!$fmdb->num_rows) {
-				continue;
-			} else {
-				$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
-			}
 			list($cfg_info, $cfg_comment) = $cfg_data;
-			
-			if ($cfg_comment) {
-				$comment = wordwrap($cfg_comment, 50, "\n");
-				$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-				unset($comment);
-			}
-			$config .= "\t" . $cfg_name . ' ';
-			if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-			
-			/** Parse address_match_element configs */
-			$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
 
-			$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-			if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
-			$config .= ";\n";
-
-			unset($cfg_info);
-			if ($cfg_comment) $config .= "\n";
+			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
 		}
 
 		return $config;
@@ -1644,13 +1578,13 @@ HTML;
 			foreach ($value_array as $domain_name => $cfg_data) {
 				if ($cfg_name != 'domain') {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$ratelimits .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment);
+					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
 				} else {
 					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
 						$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
 						foreach ($domain_cfg_data as $domain_cfg_data2) {
 							list($cfg_param, $cfg_comment) = $domain_cfg_data2;
-							$ratelimits_domains .= $this->formatConfigOption ($domain_cfg_name, $cfg_param, $cfg_comment);
+							$ratelimits_domains .= $this->formatConfigOption($domain_cfg_name, $cfg_param, $cfg_comment);
 						}
 					}
 				}
@@ -1671,18 +1605,19 @@ HTML;
 	 * @param string $tab How the tab should look
 	 * @return string
 	 */
-	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $tab = "\t\t") {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $tab = "\t\t", $sql = null) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$config = null;
 		
-		$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+		$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' $sql";
 		$fmdb->get_results($query);
-		if (!$fmdb->num_rows) $def_multiple_values = 'no';
-		else {
-			$result = $fmdb->last_result[0];
-			$def_multiple_values = $result->def_multiple_values;
+		if (!$fmdb->num_rows) {
+			return;
+		} else {
+			$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
 		}
+
 		if ($cfg_comment) {
 			$comment = wordwrap($cfg_comment, 50, "\n");
 			$config .= "\n$tab// " . str_replace("\n", "\n$tab// ", $comment) . "\n";
@@ -1690,14 +1625,20 @@ HTML;
 		}
 		$config .= $tab . $cfg_name . ' ';
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-		$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
-		$config .= trim(rtrim(trim($cfg_info), ';'));
+
+		/** Parse address_match_element configs */
+		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
+
+		$server_root_dir = getNameFromID(intval($_GET['server_serial_no']), "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
+		
+		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
 		$config .= ";\n";
 
 		unset($cfg_info);
 		if ($cfg_comment) $config .= "\n";
-		
+
 		return $config;
 	}
 	
@@ -1815,7 +1756,7 @@ HTML;
 			foreach ($include_config as $cfg_name => $value_array) {
 				foreach ($value_array as $domain_name => $cfg_data) {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$include_files .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment, "\t");
+					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
 				}
 			}
 			return $include_files;
