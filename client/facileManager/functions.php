@@ -270,7 +270,7 @@ function installFM($proto, $compress) {
 		$serialno = $data['server_serial_no'] = SERIALNO;
 		echo SERIALNO . "\n";
 	} else {
-		$serialno = trim(fgets(STDIN));
+		$serialno = intval(trim(fgets(STDIN)));
 	}
 	
 	$url = "${proto}://${hostname}/${path}admin-servers.php?genserial";

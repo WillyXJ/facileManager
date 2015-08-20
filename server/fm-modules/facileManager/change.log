@@ -6,6 +6,7 @@
 * Server - [improvement] Minor UI edits.
 * Server - [improvement] The default Super Admin account can login even if LDAP
            is configured.
+* Client - [bug] Ensure serial number is an integer at install. (Issue #232)
 
 2.0.2 (2015-05-27)
 ==================
