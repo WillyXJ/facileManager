@@ -14,6 +14,7 @@
 * Server - [improvement] Zone import tool no longer compares record comment to
            determine if the record is a duplicate.
 * Server - [bug] Fixed read-only SRV and TXT record display.
+* Server - [feature] Added missing response-policy config option. (Issue #229)
 
 2.0.2 (2015-05-27)
 ==================

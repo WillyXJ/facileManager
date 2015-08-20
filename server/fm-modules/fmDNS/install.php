@@ -486,6 +486,7 @@ VALUES
 ('options', 'request-ixfr', '( yes | no )', 'no', 'OVZ', 'S', 'yes'),
 ('options', 'request-nsid', '( yes | no )', 'no', 'OV', NULL, 'yes'),
 ('options', 'reserved-sockets', '( integer )', 'no', 'O', NULL, 'no'),
+('options', 'response-policy', '( string )', 'no', 'O', NULL, 'no'),
 ('options', 'search', '( quoted_string )', 'yes', 'R', NULL, 'no'),
 ('options', 'secroots-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
 ('options', 'serial-query-rate', '( integer )', 'no', 'O', NULL, 'no'),
