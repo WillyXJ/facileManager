@@ -87,6 +87,8 @@ if (file_exists($fm_client_functions)) {
 $data['server_os'] = PHP_OS;
 $data['server_os_distro'] = detectOSDistro();
 
+$data['update_from_client']	= (in_array('no-update', $argv)) ? false : true;
+
 /** Run the installer */
 if (in_array('install', $argv)) {
 	if (file_exists($config_file)) {
@@ -154,6 +156,7 @@ php {$argv[0]} [options]
   -p|purge       Delete old configuration files before writing
   -s|no-ssl      Do not use SSL to retrieve the configs
      no-sudoers  Do not create/update the sudoers file at install time
+     no-update   Do not update the server configuration from the client
 
 HELP;
 
@@ -731,6 +734,16 @@ function initWebRequest() {
  */
 function processUpdateMethod($module_name, $update_method, $data, $url) {
 	global $argv;
+	
+	/** Update via cron or http/s? */
+	$update_choices = array('c', 's', 'h');
+	while (!isset($update_method)) {
+		echo fM('Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ');
+		$update_method = trim(strtolower(fgets(STDIN)));
+		
+		/** Must be a valid option */
+		if (!in_array($update_method, $update_choices)) unset($update_method);
+	}
 	
 	switch($update_method) {
 		/** cron */

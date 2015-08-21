@@ -6,6 +6,7 @@
 * Server - [improvement] Minor UI edits.
 * Server - [improvement] The default Super Admin account can login even if LDAP
            is configured.
+* Both   - [feature] Added no-update client installer parameter. (Issue #223)
 
 2.0.2 (2015-05-27)
 ==================
