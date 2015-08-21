@@ -15,6 +15,7 @@
            determine if the record is a duplicate.
 * Server - [bug] Fixed read-only SRV and TXT record display.
 * Server - [bug] Fixed address_match_element parsing. (Issue #237)
+* Server - [feature] Added missing response-policy config option. (Issue #229)
 
 2.0.2 (2015-05-27)
 ==================
