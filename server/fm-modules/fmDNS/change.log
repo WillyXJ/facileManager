@@ -9,13 +9,13 @@
 * Server - [improvement] Updated default named.root file.
 * Server - [improvement] Minor UI edits.
 * Server - [improvement] Improved performance.
-* Server - [bug] Fixed upgrade routine from v1.2.3. (Issue #230)
 * Server - [bug] Included missing translation text.
 * Server - [improvement] Zone import tool no longer compares record comment to
            determine if the record is a duplicate.
 * Server - [bug] Fixed read-only SRV and TXT record display.
 * Server - [bug] Fixed address_match_element parsing. (Issue #237)
 * Server - [feature] Added missing response-policy config option. (Issue #229)
+* Server - [feature] Added support for include statements. (Issue #123)
 
 2.0.2 (2015-05-27)
 ==================
