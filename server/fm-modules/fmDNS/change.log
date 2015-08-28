@@ -16,6 +16,8 @@
 * Server - [bug] Fixed address_match_element parsing. (Issue #237)
 * Server - [feature] Added missing response-policy config option. (Issue #229)
 * Server - [feature] Added support for include statements. (Issue #123)
+* Server - [improvement] Read-only zone record display now stretches to the bottom
+           of the browser window.
 
 2.0.2 (2015-05-27)
 ==================

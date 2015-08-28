@@ -141,17 +141,18 @@ if ($record_type == 'SOA') {
 	$pagination = displayPagination($page, $total_pages);
 	$body .= $pagination . '<div class="overflow-container">' . $form;
 	
-	$body .= '<div class="existing-container">';
-
-	$body .= $fm_dns_records->rows($result, $record_type, $domain_id, $page);
+	$record_rows = $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+		$body .= '<div class="existing-container">' . $record_rows;
 		$body .= sprintf('</div><div class="new-container">
 	<a name="#manage"></a>
 	<h2>%s</h2>
 	%s
 	<p><input type="submit" name="submit" value="%s" class="button" /></p>
 </form></div>' . "\n", __('Add Record'), $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id), __('Validate'));
+	} else {
+		$body .= '<div class="existing-container no-bottom-margin">' . $record_rows;
 	}
 }
 
