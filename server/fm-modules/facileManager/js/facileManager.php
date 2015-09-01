@@ -524,6 +524,15 @@ echo '$(document).ready(function() {
 		}
 	});
 
+	/* Account group association changes */
+	$("#manage_item_contents").delegate("#user_group", "change", function(e) {
+		if ($(this).val() == 0) {
+			$("tr.user_permissions").show();
+		} else {
+			$("tr.user_permissions").hide();
+		}
+	});
+
 	/* Account password reset */
     $(".reset_password").click(function() {
         var $this 		= $(this);

@@ -207,6 +207,18 @@ CREATE TABLE IF NOT EXISTS $database.`fm_accounts` (
 TABLE;
 
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS $database.`fm_groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `group_name` varchar(128) NOT NULL,
+  `group_caps` text,
+  `group_comment` text,
+  `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`group_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+TABLE;
+
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS $database.`fm_logs` (
   `log_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL DEFAULT '0',
@@ -245,6 +257,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_users` (
   `user_login` varchar(128) NOT NULL,
   `user_password` varchar(255) NOT NULL,
   `user_email` varchar(255) NOT NULL,
+  `user_group` INT(11) NOT NULL,
   `user_default_module` varchar(255) DEFAULT NULL,
   `user_auth_type` int(1) NOT NULL DEFAULT '1',
   `user_caps` text,

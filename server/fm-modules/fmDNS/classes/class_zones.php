@@ -1173,7 +1173,7 @@ HTML;
 		/** Get restricted zones only */
 		$restricted_sql = null;
 		if ($restricted && !currentUserCan('do_everything')) {
-			$user_capabilities = getUserCapabilities($_SESSION['user']['id']);
+			$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
 			if (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']])) {
 				if (!in_array(0, $user_capabilities[$_SESSION['module']]['access_specific_zones'])) {
 					$restricted_sql = "AND domain_id IN ('" . implode("','", $user_capabilities[$_SESSION['module']]['access_specific_zones']) . "')";

@@ -73,6 +73,7 @@ $__FM_CONFIG['clean']['days']		= 7;
 /** Text string variables */
 $__FM_CONFIG['password_hint']['medium']		= array(_('Medium'), _('The password must be at least seven (7) characters long containing letters and numbers.'));
 $__FM_CONFIG['password_hint']['strong']		= array(_('Strong'), _('The password must be at least eight (8) characters long containing uppercase and lowercase letters, numbers, and special characters (\'&\', \'$\', \'@\', etc.).'));
+$__FM_CONFIG['users']['avail_types']        = array('users' => _('Users'), 'groups' => _('Groups'));
 
 /** Limits */
 $__FM_CONFIG['limit']['records']	= array(20, 35, 50, 75, 100, 200);

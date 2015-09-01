@@ -8,6 +8,7 @@
            is configured.
 * Client - [bug] Ensure serial number is an integer at install. (Issue #232)
 * Both   - [feature] Added no-update client installer parameter. (Issue #223)
+* Server - [feature] Added user group support. (Issue #211)
 
 2.0.2 (2015-05-27)
 ==================

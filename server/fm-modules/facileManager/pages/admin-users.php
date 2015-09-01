@@ -34,30 +34,33 @@ $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 $form_data = null;
 $response = isset($response) ? $response : null;
 
+$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['servers']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'users';
+$display_type = $__FM_CONFIG['users']['avail_types'][$type];
+
 switch ($action) {
 case 'add':
 	if (!empty($_POST)) {
-		$response = $fm_users->add($_POST);
+		$response = ($_POST['type'] == 'users') ? $fm_users->addUser($_POST) : $fm_users->addGroup($_POST);
 		if ($response !== true) {
 			$form_data = $_POST;
-		} else header('Location: ' . $GLOBALS['basename']);
+		} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
 	}
 	break;
 case 'edit':
 	if (!empty($_POST)) {
-		$response = $fm_users->update($_POST);
+		$response = ($_POST['type'] == 'users') ? $fm_users->updateUser($_POST) : $fm_users->updateGroup($_POST);
 		if ($response !== true) {
 			$form_data = $_POST;
-		} else header('Location: ' . $GLOBALS['basename']);
+		} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
 	}
-	if (isset($_GET['status'])) {
+	if (isset($_GET['status']) && $_POST['type'] == 'users') {
 		if ($_GET['id'] == 1) $_GET['id'] = 0;
 		$user_info = getUserInfo($_GET['id']);
 		if ($user_info) {
 			if ($user_info['user_template_only'] == 'no') {
 				if (updateStatus('fm_users', $_GET['id'], 'user_', $_GET['status'], 'user_id')) {
 					addLogEntry(sprintf(_("Set user '%s' status to %s."), $user_info['user_login'], $_GET['status']), $fm_name);
-					header('Location: ' . $GLOBALS['basename']);
+					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
 				}
 			}
 		}
@@ -68,18 +71,48 @@ case 'edit':
 printHeader();
 @printMenu();
 
-echo printPageHeader($response, null, currentUserCan('manage_users'));
+$avail_types = buildSubMenu($type);
+echo printPageHeader($response, $display_type, currentUserCan('manage_users'), $type);
 
-$sort_field = 'user_login';
+$sort_field = ($type == 'users') ? 'user_login' : 'group_name';
 $sort_direction = null;
 
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-$result = basicGetList('fm_users', $sort_field, 'user_', null, null, false, $sort_direction);
-$fm_users->rows($result);
+echo <<<HTML
+<div id="pagination_container" class="submenus">
+	<div>
+	<div class="stretch"></div>
+	$avail_types
+	</div>
+</div>
+
+HTML;
+
+$result = ($type == 'users') ? basicGetList('fm_users', $sort_field, 'user_', null, null, false, $sort_direction) : basicGetList('fm_groups', $sort_field, 'group_', null, null, false, $sort_direction);
+$fm_users->rows($result, $type);
 
 printFooter();
+
+
+function buildSubMenu($option_type = 'users') {
+	global $__FM_CONFIG;
+	
+	$menu_selects = $uri_params = null;
+	
+	foreach ($GLOBALS['URI'] as $param => $val) {
+		if (in_array($param, array('type', 'action', 'id', 'status'))) continue;
+		$uri_params .= "&$param=$val";
+	}
+	
+	foreach ($__FM_CONFIG['users']['avail_types'] as $general => $type) {
+		$select = ($option_type == $general) ? ' class="selected"' : '';
+		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
+	}
+	
+	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+}
 
 ?>

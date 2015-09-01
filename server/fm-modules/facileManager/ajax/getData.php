@@ -55,7 +55,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	if (!$fmdb->num_rows) returnError();
 	
 	$edit_form_data[] = $results[0];
-	$edit_form .= $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits, 'Save', 'update_user_profile', null, false);
+	$edit_form .= $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits, 'users', 'Save', 'update_user_profile', null, false);
 
 	exit($edit_form);
 }
@@ -76,7 +76,11 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
 	if ($add_new) {
-		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_auth_method', 'user_password', 'user_options', 'user_perms', 'user_module') : array('user_password');
+		if (currentUserCan('manage_users')) {
+			$form_bits = ($_POST['item_sub_type'] == 'users') ? array('user_login', 'user_email', 'user_auth_method', 'user_password', 'user_options', 'user_perms', 'user_module', 'user_groups') : array('group_name', 'comment', 'group_users', 'user_perms');
+		} else {
+			$form_bits = array('user_password');
+		}
 
 		$form_data = null;
 		if ($id) {
@@ -88,17 +92,29 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 			$form_data[0]->user_login = null;
 			$form_data[0]->user_template_only = false;
 		}
-		$edit_form = $fm_users->printUsersForm($form_data, 'add', $form_bits);
+		$edit_form = $fm_users->printUsersForm($form_data, 'add', $form_bits, $_POST['item_sub_type']);
 	} else {
-		$form_bits = (currentUserCan('manage_users')) ? array('user_login', 'user_email', 'user_options', 'user_perms', 'user_module') : array('user_password');
+		if ($_POST['item_sub_type'] == 'users') {
+			if (currentUserCan('manage_users')) {
+				$form_bits = ($edit_form_data[0]->user_auth_type == 2) ? array('user_login', 'user_email', 'user_perms', 'user_module', 'user_groups') : array('user_login', 'user_email', 'user_options', 'user_perms', 'user_module', 'user_groups');
+			} else {
+				$form_bits = array('user_password');
+			}
+			basicGet('fm_users', $id, 'user_', 'user_id');
+		} elseif ($_POST['item_sub_type'] == 'groups') {
+			if (currentUserCan('manage_users')) {
+				$form_bits = array('group_name', 'comment', 'group_users', 'user_perms');
+				basicGet('fm_groups', $id, 'group_', 'group_id');
+			} else {
+				return returnUnAuth();
+			}
+		}
 
-		basicGet('fm_users', $id, 'user_', 'user_id');
 		$results = $fmdb->last_result;
 		if (!$fmdb->num_rows) returnError();
 		
 		$edit_form_data[] = $results[0];
-		if (currentUserCan('manage_users') && $edit_form_data[0]->user_auth_type == 2) $form_bits = array('user_login', 'user_email', 'user_perms', 'user_module');
-		$edit_form = $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits);
+		$edit_form = $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits, $_POST['item_sub_type']);
 	}
 	
 	echo $edit_form;

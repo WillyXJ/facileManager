@@ -692,6 +692,10 @@ tbody {
 	top: -6px;
 }
 
+.form-table td.form-break {
+	padding-top: 3em;
+}
+
 .form-table textarea, .form-table select[multiple] {
 	border: 1px solid #dfdfdf;
 	-webkit-border-radius: 3px;
