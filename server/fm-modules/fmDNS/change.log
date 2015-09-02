@@ -19,6 +19,7 @@
 * Server - [improvement] Read-only zone record display now stretches to the bottom
            of the browser window.
 * Server - [feature] Added user group support. (Issue #211)
+* Server - [bug] Slave zone directory now gets created if required. (Issue #241)
 
 2.0.2 (2015-05-27)
 ==================

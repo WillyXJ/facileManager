@@ -723,9 +723,9 @@ class fm_module_buildconf {
 							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type). (string) $auto_zone_options;
 							/** Build zone file */
-							if ($domain_type == 'master') {
-								$files[$server_zones_dir . '/master/db.' . $domain_name_file . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
-							}
+							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
+							$files[$server_zones_dir . '/' . $domain_type . '/db.' . $domain_name_file . $file_ext] = $zone_file_contents;
+							unset($zone_file_contents);
 							break;
 						case 'stub':
 							$zones .= "\tfile \"$server_zones_dir/stub/db." . $domain_name . "$file_ext\";\n";
