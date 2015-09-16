@@ -249,7 +249,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version" rel="stylesheet" type="text/css">
 		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
@@ -2987,7 +2987,7 @@ function countArrayDimensions($array) {
  * @param string $style Use an image or font
  * @return string
  */
-function displayAddNew($name = null, $rel = null, $title = null, $style = 'image') {
+function displayAddNew($name = null, $rel = null, $title = null, $style = 'fa-plus-square-o') {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = _('Add New');
@@ -2995,11 +2995,7 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'image
 	if ($name) $name = ' name="' . $name . '"';
 	if ($rel) $rel = ' rel="' . $rel . '"';
 	
-	if ($style == 'image') {
-		$image = str_replace('_TITLE_', $title, $__FM_CONFIG['icons']['add']);
-	} else {
-		$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
-	}
+	$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
 	
 	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
 }

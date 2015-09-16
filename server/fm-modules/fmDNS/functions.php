@@ -194,7 +194,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Zones</a>
 		<div>
 			<p>Zones (aka domains) can be managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
-			there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), delete 
+			there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), delete 
 			({$__FM_CONFIG['icons']['delete']}), and reload ({$__FM_CONFIG['icons']['reload']}) zones depending on your user permissions.</p>
 			<p>You can define a zone as a clone of another previously defined master zone.  The cloned zone will contain all of the same records
 			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
@@ -248,7 +248,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Servers</a>
 		<div>
 			<p>All aspects of server configuration takes place in the Config menu 
-			item. From there you can add ({$__FM_CONFIG['icons']['add']}), edit ({$__FM_CONFIG['icons']['edit']}), 
+			item. From there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), 
 			delete ({$__FM_CONFIG['icons']['delete']}) servers and options depending on your user permissions.</p>
 			
 			<p><b>Servers</b><br />

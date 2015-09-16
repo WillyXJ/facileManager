@@ -427,6 +427,10 @@ h2 {
 	border-bottom: 1px solid #cfcfcf;
 }
 
+h2 > a {
+	font-size: 18px;
+}
+
 h4 {
 	color: #333;
 	font-weight: 600;
@@ -1690,6 +1694,10 @@ pre {
 
 .no-left-pad td:first-child, .no-left-pad th:first-child {
 	padding-left: 0;
+}
+
+.template-icon {
+	color: #c0c0c0;
 }
 
 /** Firefox hacks :( */

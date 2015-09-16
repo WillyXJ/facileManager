@@ -533,7 +533,7 @@ class fm_dns_zones {
 		if ($row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) {
 			global $map;
 			
-			$add_new = displayAddNew($map, $row->domain_id, __('Clone this zone'), 'fa-plus-square-o');
+			$add_new = displayAddNew($map, $row->domain_id, __('Clone this zone'), 'fa-clone');
 		}
 		
 		$clones = $this->cloneDomainsList($row->domain_id);
