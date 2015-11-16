@@ -78,16 +78,6 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	
 	echo fM("\n  --> Tests complete.  Continuing installation.\n\n");
 	
-	/** Update via cron or http/s? */
-	$update_choices = array('c', 's', 'h');
-	while (!isset($update_method)) {
-		echo fM('Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ');
-		$update_method = trim(strtolower(fgets(STDIN)));
-		
-		/** Must be a valid option */
-		if (!in_array($update_method, $update_choices)) unset($update_method);
-	}
-	
 	/** Handle the update method */
 	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
 

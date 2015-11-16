@@ -54,7 +54,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				if ($fmdb->num_rows) {
 					$server_array = $fmdb->last_result;
 					$_POST['server_id'] = $server_array[0]->server_id;
-					$update_server = moduleAddServer('update');
+					if ($_POST['update_from_client'] === true) $update_server = moduleAddServer('update');
 				} else {
 					if (getOption('client_auto_register')) {
 						/** Add new server */

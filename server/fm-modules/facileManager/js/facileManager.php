@@ -153,6 +153,7 @@ echo '$(document).ready(function() {
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
+		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$this.parent().parent().removeClass("response");
 
@@ -178,6 +179,7 @@ echo '$(document).ready(function() {
 				}
 				$(".datepicker").datepicker();
 				$(".form-table input:text, .form-table select").first().focus();
+				$(".popup-wait").hide();
 			}
 		});
 
@@ -202,6 +204,7 @@ echo '$(document).ready(function() {
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
+		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$row_id.parent().parent().parent().removeClass("response");
 		
@@ -232,6 +235,7 @@ echo '$(document).ready(function() {
 				}
 				$(".datepicker").datepicker();
 				$(".form-table input, .form-table select").first().focus();
+				$(".popup-wait").hide();
 			}
 		});
 		
@@ -520,6 +524,15 @@ echo '$(document).ready(function() {
 		}
 	});
 
+	/* Account group association changes */
+	$("#manage_item_contents").delegate("#user_group", "change", function(e) {
+		if ($(this).val() == 0) {
+			$("tr.user_permissions").show();
+		} else {
+			$("tr.user_permissions").hide();
+		}
+	});
+
 	/* Account password reset */
     $(".reset_password").click(function() {
         var $this 		= $(this);
@@ -556,7 +569,7 @@ echo '$(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply\"), #module_install, #module_upgrade",
+    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply, .double-click\"), #module_install, #module_upgrade",
     "click tap",function(e){
         var $this 	= $(this);
         task		= $this.attr("id");
@@ -581,6 +594,19 @@ echo '$(document).ready(function() {
 		
 		return false;
     });
+	
+	$(".double-click").click(function(e) {
+		e.preventDefault();
+		if ($(this).hasClass("alert")) {
+			$(this).hide();
+			return;
+		} else {
+			$(this).addClass("alert");
+			$(this).removeClass("double-click");
+			$(this).prop("value", "' . _('Click to confirm') . '");
+			return false;
+		}
+	});
 
 	$("#topheadpartright .help_link").click(function() {
 		var body_right		= $("#body_container").css("right");

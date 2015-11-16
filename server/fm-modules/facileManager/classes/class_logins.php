@@ -242,6 +242,12 @@ class fm_login {
 		/** Built-in authentication */
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : true;
 		if ($auth_method) {
+			/** Default Super Admin? */
+			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_auth_type`=1 ORDER BY user_id ASC LIMIT 1");
+			if ($fmdb->last_result[0]->user_login == $user_login) {
+				$auth_method = 1;
+			}
+
 			/** Builtin Authentication */
 			if ($auth_method == 1) {
 				$pwd_query = ($encrypted) ? "'$pass'" : $pwd_query = "password('$pass')";

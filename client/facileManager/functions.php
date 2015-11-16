@@ -38,9 +38,10 @@ if (strpos(php_sapi_name(), 'cgi') !== false) {
 
 /** Check for options */
 if (in_array('-h', $argv) || in_array('help', $argv)) printHelp();
-$debug = (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
-$proto = (in_array('-s', $argv) || in_array('no-ssl', $argv)) ? 'http' : 'https';
-$purge = (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
+$debug		= (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
+$proto		= (in_array('-s', $argv) || in_array('no-ssl', $argv)) ? 'http' : 'https';
+$purge		= (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
+$no_sudoers	= (in_array('no-sudoers', $argv)) ? true : false;
 
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
@@ -85,6 +86,8 @@ if (file_exists($fm_client_functions)) {
 /** Detect OS */
 $data['server_os'] = PHP_OS;
 $data['server_os_distro'] = detectOSDistro();
+
+$data['update_from_client']	= (in_array('no-update', $argv)) ? false : true;
 
 /** Run the installer */
 if (in_array('install', $argv)) {
@@ -152,6 +155,8 @@ php {$argv[0]} [options]
   -d|debug       Enter debug mode for more output
   -p|purge       Delete old configuration files before writing
   -s|no-ssl      Do not use SSL to retrieve the configs
+     no-sudoers  Do not create/update the sudoers file at install time
+     no-update   Do not update the server configuration from the client
 
 HELP;
 
@@ -256,7 +261,7 @@ function installFM($proto, $compress) {
 	}
 
 	/** Server serial number **/
-	$data['server_name'] = exec('hostname -f', $output, $rc);
+	$data['server_name'] = exec(findProgram('hostname') . ' -f', $output, $rc);
 	if ($rc > 0 || empty($data['server_name'])) {
 		$data['server_name'] = php_uname('n');
 	}
@@ -268,7 +273,7 @@ function installFM($proto, $compress) {
 		$serialno = $data['server_serial_no'] = SERIALNO;
 		echo SERIALNO . "\n";
 	} else {
-		$serialno = trim(fgets(STDIN));
+		$serialno = intval(trim(fgets(STDIN)));
 	}
 	
 	$url = "${proto}://${hostname}/${path}admin-servers.php?genserial";
@@ -730,6 +735,16 @@ function initWebRequest() {
 function processUpdateMethod($module_name, $update_method, $data, $url) {
 	global $argv;
 	
+	/** Update via cron or http/s? */
+	$update_choices = array('c', 's', 'h');
+	while (!isset($update_method)) {
+		echo fM('Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ');
+		$update_method = trim(strtolower(fgets(STDIN)));
+		
+		/** Must be a valid option */
+		if (!in_array($update_method, $update_choices)) unset($update_method);
+	}
+	
 	switch($update_method) {
 		/** cron */
 		case 'c':
@@ -1124,6 +1139,12 @@ function getParameterValue($param, $file, $delimiter = '=') {
  * @param string $user User with permissions
  */
 function addSudoersConfig($module_name, $sudoers_line, $user) {
+	global $no_sudoers;
+	
+	if ($no_sudoers) {
+		echo fM("  --> no-sudoers parameter is specified...skipping\n");
+		return;
+	}
 	$sudoers_file = findFile('sudoers');
 	$sudoers_options[] = "Defaults:$user  !requiretty";
 	$sudoers_options[] = "Defaults:$user  !env_reset";

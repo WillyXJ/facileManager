@@ -1,3 +1,8 @@
+1.2-beta1 (2015-0?-??)
+================
+* Server - [improvement] Improved performance.
+* Server - [improvement] Replaced Add New image with Font Awesome icon.
+
 1.1 (2015-04-27)
 ================
 * Server - [feature] Added ability to update all servers with a single click on

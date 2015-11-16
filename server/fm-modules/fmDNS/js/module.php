@@ -101,6 +101,7 @@ $(document).ready(function() {
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
+		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$this.parent().parent().removeClass("response");
 
@@ -126,6 +127,7 @@ $(document).ready(function() {
 				}
 				$(".datepicker").datepicker();
 				$(".form-table input:text, .form-table select").first().focus();
+				$(".popup-wait").hide();
 			}
 		});
 
@@ -216,6 +218,7 @@ $(document).ready(function() {
 
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
+		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$("#body_container").removeClass("response");
 
@@ -238,6 +241,7 @@ $(document).ready(function() {
 				}
 				$(".datepicker").datepicker();
 				$(".form-table input, .form-table select").first().focus();
+				$(".popup-wait").hide();
 			}
 		});
 

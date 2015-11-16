@@ -341,10 +341,9 @@ BODY;
 		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE record_status!='deleted' AND domain_id IN (" . join(',', getZoneParentID($domain_id)) . ") AND ";
 		
 		foreach ($array as $key => $data) {
-			if ($key == 'record_comment' && $data == 'none') {
-				$data = null;
+			if ($key != 'record_comment') {
+				$sql_select .= "$key='" . mysql_real_escape_string($data) . "' AND ";
 			}
-			$sql_select .= "$key='" . mysql_real_escape_string($data) . "' AND ";
 		}
 		$sql_select = rtrim($sql_select, ' AND ');
 		

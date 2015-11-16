@@ -309,8 +309,8 @@ class fm_dns_records {
 		if (empty($_POST) || $type == 'DOMAIN') {
 			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		} else {
-			$title_array[] = array('title' => __('Valid'), 'style' => 'text-align: center;');
 			array_unshift($title_array, __('Action'));
+			array_unshift($title_array, array('title' => __('Valid'), 'style' => 'text-align: center;'));
 		}
 		
 		return $title_array;
@@ -439,7 +439,6 @@ class fm_dns_records {
 			$field_values['data']['TTL'] = '>' . $record_ttl;
 			$field_values['data']['Class'] = '>' . $record_class;
 			if ($show_value) $field_values['data']['Value'] = '>' . $record_value;
-			$field_values['data']['Comment'] = '>' . $record_comment;
 			
 			if (in_array($type, $priority)) $field_values['data']['Priority'] = '>' . $record_priority;
 			
@@ -448,6 +447,8 @@ class fm_dns_records {
 				$field_values['data']['Port'] = '>' . $record_port;
 			}
 		
+			$field_values['data']['Comment'] = '>' . $record_comment;
+			
 			if (in_array($type, $append)) $field_values['data']['Append Domain'] = ' style="text-align: center;">' . $record_append;
 		
 			$field_values['data']['Status'] = '>' . $record_status;

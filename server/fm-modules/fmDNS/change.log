@@ -1,3 +1,31 @@
+2.1-beta1 (2015-??-??)
+================
+* Server - [improvement] Record validation no longer allows a CNAME RR at the
+           zone level.
+* Server - [feature] Record validation now ensures singleton type RR. (Issue #208)
+* Server - [feature] Added support for automatically creating PTR records in
+           reverse subnet maps. (Issue #195)
+* Server - [improvement] Updated default SOA values to RFC1912 recommendations.
+* Server - [improvement] Updated default named.root file.
+* Server - [improvement] Minor UI edits.
+* Server - [improvement] Improved performance.
+* Server - [bug] Included missing translation text.
+* Server - [improvement] Zone import tool no longer compares record comment to
+           determine if the record is a duplicate.
+* Server - [bug] Fixed read-only SRV and TXT record display.
+* Server - [bug] Fixed address_match_element parsing. (Issue #237)
+* Server - [feature] Added missing response-policy config option. (Issue #229)
+* Server - [feature] Added support for include statements. (Issue #123)
+* Server - [improvement] Read-only zone record display now stretches to the bottom
+           of the browser window.
+* Server - [feature] Added user group support. (Issue #211)
+* Server - [bug] Slave zone directory now gets created if required. (Issue #241)
+* Server - [improvement] Replaced Add New image with Font Awesome icon.
+* Server - [improvement] Hostnames can no longer contain an underscore (_) or 
+           start with a hyphen (-). (Issue #254)
+* Server - [bug] Fixed RR updates as record append option would default to 'no'.
+* Server - [improvement] Minor performance improvements. (Issue #224)
+
 2.0.3 (2015-06-29)
 ==================
 * Server - [bug] Fixed upgrade routine from v1.2.3. (Issue #230)

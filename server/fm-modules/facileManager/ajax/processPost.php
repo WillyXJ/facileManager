@@ -30,7 +30,7 @@ include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPA
 /** Handle user password change */
 if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
-	$update_status = $fm_users->update($_POST);
+	$update_status = $fm_users->updateUser($_POST);
 	if ($update_status !== true) {
 		echo $update_status;
 	} else {
@@ -157,7 +157,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	switch ($_POST['action']) {
 		case 'delete':
 			if (isset($id)) {
-				$delete_status = $fm_users->delete(sanitize($id));
+				$delete_status = $fm_users->delete(sanitize($id), substr(sanitize($_POST['item_sub_type']), 0, -1));
 				if ($delete_status !== true) {
 					echo $delete_status;
 				} else {

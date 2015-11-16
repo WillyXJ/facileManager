@@ -45,7 +45,7 @@ class fmdb {
 		}
 		
 		/** Check if there is an admin account */
-		$this->query("SELECT * FROM `fm_users` ORDER BY user_id LIMIT 1");
+		$this->query("SELECT * FROM `fm_users` WHERE user_auth_type=1 ORDER BY user_id ASC LIMIT 1");
 		if (!$this->num_rows) {
 			bailOut(_('The database is installed; however, an administrative account was not created. Click \'Continue Setup\' to continue the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">' . _('Continue Setup') . '</a></p>');
 		}
@@ -68,6 +68,7 @@ class fmdb {
 	function query($query) {
 		$this->sql_errors = false;
 		$this->last_error = null;
+		$this->last_query = $query;
 		
 		$this->result = @mysql_query($query, $this->dbh);
 		

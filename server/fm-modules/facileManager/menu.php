@@ -44,7 +44,7 @@ $menu[45] = array(null, null, null, null, null, 'separator');
 $menu[50] = array(_('Admin'), null, 'run_tools', $fm_name, 'admin-tools.php');
 	$submenu['admin-tools.php'][5] = array(_('Tools'), _('Tools'), 'run_tools', $fm_name, 'admin-tools.php');
 	if (getOption('auth_method')) {
-		$submenu['admin-tools.php'][10] = array(_('Users'), _('Users'), 'manage_users', $fm_name, 'admin-users.php');
+		$submenu['admin-tools.php'][10] = array(_('Users & Groups'), _('Users & Groups'), 'manage_users', $fm_name, 'admin-users.php');
 	}
 	$submenu['admin-tools.php'][15] = array(_('Logs'), _('Logs'), 'view_logs', $fm_name, 'admin-logs.php');
 

@@ -31,12 +31,12 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
-		'version'							=> '2.0.3',
+		'version'							=> '2.1-beta1',
 		'client_version'					=> '2.0.2',
 		'description'						=> __('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.', 'fmDNS'),
 		'prefix'							=> 'dns_',
 		'required_dns_version'				=> '9.3',
-		'required_fm_version'				=> '2.0.3',
+		'required_fm_version'				=> '2.1-beta1',
 		'min_client_auto_upgrade_version'	=> '1.2.5'
 	);
 
@@ -81,10 +81,10 @@ $__FM_CONFIG['logging']['avail_types'] = array('channel' => __('Channels'), 'cat
 /** SOA Default Values */
 $__FM_CONFIG['soa']['soa_master_server']	= '';
 $__FM_CONFIG['soa']['soa_email_address']	= '';
-$__FM_CONFIG['soa']['soa_ttl']				= '5m';
-$__FM_CONFIG['soa']['soa_refresh']			= '15m';
+$__FM_CONFIG['soa']['soa_ttl']				= '1d';
+$__FM_CONFIG['soa']['soa_refresh']			= '2h';
 $__FM_CONFIG['soa']['soa_retry']			= '1h';
-$__FM_CONFIG['soa']['soa_expire']			= '1w';
+$__FM_CONFIG['soa']['soa_expire']			= '2w';
 
 /** Name Server Default Values */
 $__FM_CONFIG['ns']['named_root_dir']		= '/var/named';

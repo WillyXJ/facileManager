@@ -281,7 +281,7 @@ class fm_module_buildconf {
 			/** Build global configs */
 			$config .= "options {\n";
 			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0 AND server_serial_no="0" AND cfg_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0 AND server_serial_no="0" AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
@@ -293,7 +293,7 @@ class fm_module_buildconf {
 			$server_config = array();
 			/** Override with group-specific configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
 				if ($fmdb->num_rows) {
 					$server_config_result = $fmdb->last_result;
 					$global_config_count = $fmdb->num_rows;
@@ -304,7 +304,7 @@ class fm_module_buildconf {
 			}
 
 			/** Override with server-specific configs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND view_id=0 AND domain_id=0  AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
@@ -323,29 +323,12 @@ class fm_module_buildconf {
 
 				/** Include hint zone (root servers) */
 				if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
-
-				$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-				$fmdb->get_results($query);
-				if (!$fmdb->num_rows) $def_multiple_values = 'no';
-				else {
-					$result = $fmdb->last_result[0];
-					$def_multiple_values = $result->def_multiple_values;
-				}
-				if ($cfg_comment) {
-					$comment = wordwrap($cfg_comment, 50, "\n");
-					$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-					unset($comment);
-				}
-				$config .= "\t" . $cfg_name . ' ';
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-				$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
-				$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-				if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
-				$config .= ";\n";
 				
-				unset($cfg_info);
-				if ($cfg_comment) $config .= "\n";
+				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
 			}
+			/** Build includes */
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids);
+			
 			/** Build rate limits */
 			$config .= $this->getRateLimits(0, $server_serial_no);
 			
@@ -408,7 +391,7 @@ class fm_module_buildconf {
 					$config .= 'view "' . $view_result[$i]->view_name . "\" {\n";
 
 					/** Get cooresponding config records */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no='0' AND view_id='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no='0' AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -420,7 +403,7 @@ class fm_module_buildconf {
 					$server_view_config = array();
 					/** Override with group-specific configs */
 					if (is_array($server_group_ids)) {
-						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no IN ('g_" . implode("','g_", $server_group_ids) . "') AND view_id='" . $view_result[$i]->view_id . "'");
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no IN ('g_" . implode("','g_", $server_group_ids) . "') AND view_id='" . $view_result[$i]->view_id . "'");
 						if ($fmdb->num_rows) {
 							$server_config_result = $fmdb->last_result;
 							$view_config_count = $fmdb->num_rows;
@@ -431,7 +414,7 @@ class fm_module_buildconf {
 					}
 
 					/** Override with server-specific configs */
-					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_type='global' AND server_serial_no='$server_serial_no' AND view_id='" . $view_result[$i]->view_id . "'");
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no='$server_serial_no' AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$server_config_result = $fmdb->last_result;
 						$view_config_count = $fmdb->num_rows;
@@ -446,31 +429,11 @@ class fm_module_buildconf {
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
-						/** Include hint zone (root servers) */
-						if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
-
-						$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
-						$fmdb->get_results($query);
-						if (!$fmdb->num_rows) $def_multiple_values = 'no';
-						else {
-							$result = $fmdb->last_result[0];
-							$def_multiple_values = $result->def_multiple_values;
-						}
-						if ($cfg_comment) {
-							$comment = wordwrap($cfg_comment, 50, "\n");
-							$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-							unset($comment);
-						}
-						$config .= "\t" . $cfg_name . ' ';
-						if ($def_multiple_values == 'yes') $config .= '{ ';
-						$cfg_info = $fm_dns_acls->parseACL($cfg_info);
-						$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-						if ($def_multiple_values == 'yes') $config .= '; }';
-						$config .= ";\n";
-						
-						if ($cfg_comment) $config .= "\n";
-						unset($cfg_info);
+						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
 					}
+
+					/** Build includes */
+					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids);
 
 					/** Build rate limits */
 					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
@@ -760,9 +723,9 @@ class fm_module_buildconf {
 							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type). (string) $auto_zone_options;
 							/** Build zone file */
-							if ($domain_type == 'master') {
-								$files[$server_zones_dir . '/master/db.' . $domain_name_file . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
-							}
+							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
+							$files[$server_zones_dir . '/' . $domain_type . '/db.' . $domain_name_file . $file_ext] = $zone_file_contents;
+							unset($zone_file_contents);
 							break;
 						case 'stub':
 							$zones .= "\tfile \"$server_zones_dir/stub/db." . $domain_name . "$file_ext\";\n";
@@ -1310,13 +1273,8 @@ class fm_module_buildconf {
 		
 		$uname = php_uname('n');
 		if (!$named_checkconf) {
-			return <<<INFO
-			<div id="named_check" class="info">
-				<p>The named utilities (specifically named-checkconf and named-checkzone) cannot be found on $uname. If they were installed,
-				these configs and zones could be checked for syntax.</p>
-			</div>
-
-INFO;
+			return sprintf('<div id="named_check" class="info"><p>%s</p></div>', 
+					sprintf(__('The named utilities (specifically named-checkconf and named-checkzone) cannot be found on %s. If they were installed, these configs and zones could be checked for syntax.'), $uname));
 		}
 		
 		$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
@@ -1329,7 +1287,7 @@ INFO;
 			if (!is_dir(dirname($tmp_dir . $file))) {
 				if (!@mkdir(dirname($tmp_dir . $file), 0777, true)) {
 					$class = 'class="info"';
-					$message = $fm_temp_directory . ' is not writeable by ' . $__FM_CONFIG['webserver']['user_info']['name'] . ' so the named checks cannot be performed.';
+					$message = sprintf(__('%s is not writeable by %s so the named checks cannot be performed.'), $fm_temp_directory, $__FM_CONFIG['webserver']['user_info']['name']);
 					$die = true;
 					break;
 				}
@@ -1378,14 +1336,15 @@ INFO;
 				$named_checkconf_results = implode("\n", $named_checkconf_results);
 				if (strpos($named_checkconf_results, 'sudo') !== false) {
 					$class = 'class="info"';
-					$message = 'The webserver user (' . $__FM_CONFIG['webserver']['user_info']['name'] . ') on ' . $uname . ' does not have permission to run 
-								the following command:<br /><pre>' . $named_checkconf_cmd . '</pre><p>The following error ocurred:<pre>' .
-								$named_checkconf_results . '</pre>';
+					$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
+							$__FM_CONFIG['webserver']['user_info']['name'], $uname,
+							'<br /><pre>' . $named_checkconf_cmd . '</pre><p>',
+							'<pre>' . $named_checkconf_results . '</pre>');
 				} else {
-					$message = 'Your named configuration contains one or more errors:<br /><pre>' . $named_checkconf_results . '</pre>';
+					$message = __('Your named configuration contains one or more errors:') . '<br /><pre>' . $named_checkconf_results . '</pre>';
 				}
 				
-			/** Run named-checkconf */
+			/** Run named-checkzone */
 			} else {
 				$named_checkzone_results = null;
 				if (array($zone_files)) {
@@ -1398,9 +1357,10 @@ INFO;
 								$named_checkzone_results .= implode("\n", $results);
 								if (strpos($named_checkzone_results, 'sudo') !== false) {
 									$class = 'class="info"';
-									$message = 'The webserver user (' . $__FM_CONFIG['webserver']['user_info']['name'] . ') on ' . $uname . ' does not have permission to run 
-												the following command:<br /><pre>' . $named_checkzone_cmd . '</pre><p>The following error ocurred:<pre>' .
-												$named_checkzone_results . '</pre>';
+									$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
+											$__FM_CONFIG['webserver']['user_info']['name'], $uname,
+											'<br /><pre>' . $named_checkzone_cmd . '</pre><p>',
+											'<pre>' . $named_checkzone_results . '</pre>');
 									break 2;
 								}
 							}
@@ -1409,10 +1369,10 @@ INFO;
 				}
 				
 				if ($named_checkzone_results) {
-					if (empty($message)) $message = 'Your zone configuration files contain one or more errors:<br /><pre>' . $named_checkzone_results . '</pre>';
+					if (empty($message)) $message = __('Your zone configuration files contain one or more errors:') . '<br /><pre>' . $named_checkzone_results . '</pre>';
 				} else {
 					$class = null;
-					$message = 'Your named configuration and zone files are loadable.';
+					$message = __('Your named configuration and zone files are loadable.');
 				}
 			}
 		}
@@ -1491,12 +1451,9 @@ HTML;
 			if (is_writeable($local_hint_zone)) {
 				file_put_contents($local_hint_zone, fopen($remote_hint_zone, 'r'));
 			} else {
-				return <<<HTML
-			<div id="named_check" class="info">
-				<p>The root servers have been recently updated, but the webserver user ({$__FM_CONFIG['webserver']['user_info']['name']}) cannot write to $local_hint_zone to update the hint zone.</p>
-				<p>A local copy will be used instead.</p>
-			</div>
-HTML;
+				return sprintf('<div id="named_check" class="info"><p>%s</p><p>%s</p></div>',
+						sprintf(__('The root servers have been recently updated, but the webserver user (%s) cannot write to %s to update the hint zone.'), $__FM_CONFIG['webserver']['user_info']['name'], $local_hint_zone),
+						__('A local copy will be used instead.'));
 			}
 		}
 		
@@ -1558,32 +1515,9 @@ HTML;
 		$config_array = array_merge($global_config, $server_config);
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
-			$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'";
-			$fmdb->get_results($query);
-			if (!$fmdb->num_rows) {
-				continue;
-			} else {
-				$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
-			}
 			list($cfg_info, $cfg_comment) = $cfg_data;
-			
-			if ($cfg_comment) {
-				$comment = wordwrap($cfg_comment, 50, "\n");
-				$config .= "\n\t// " . str_replace("\n", "\n\t// ", $comment) . "\n";
-				unset($comment);
-			}
-			$config .= "\t" . $cfg_name . ' ';
-			if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-			
-			/** Parse address_match_element configs */
-			$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
 
-			$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-			if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
-			$config .= ";\n";
-
-			unset($cfg_info);
-			if ($cfg_comment) $config .= "\n";
+			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
 		}
 
 		return $config;
@@ -1601,6 +1535,12 @@ HTML;
 	 */
 	function getRateLimits($view_id, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		/** Check if rrl is supported by server_version */
+		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
+		if (version_compare($server_version, '9.9.4', '<')) {
+			return "\t//\n\t// BIND 9.9.4 or greater is required for Response Rate Limiting.\n\t//\n\n";
+		}
 		
 		$ratelimits = $ratelimits_domains = $rate_config_array = null;
 		
@@ -1634,26 +1574,17 @@ HTML;
 		/** Merge arrays */
 		$rate_config_array = array_merge((array)$rate_config_array, $server_config);
 		
-		
-		/** Check if rrl is supported by server_version */
-		if (count($rate_config_array)) {
-			list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
-			if (version_compare($server_version, '9.9.4', '<')) {
-				return "\t//\n\t// BIND 9.9.4 or greater is required for Response Rate Limiting.\n\t//\n\n";
-			}
-		}
-		
 		foreach ($rate_config_array as $cfg_name => $value_array) {
 			foreach ($value_array as $domain_name => $cfg_data) {
 				if ($cfg_name != 'domain') {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$ratelimits .= $this->formatConfigOption ($cfg_name, $cfg_info, $cfg_comment);
+					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
 				} else {
 					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
 						$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
 						foreach ($domain_cfg_data as $domain_cfg_data2) {
 							list($cfg_param, $cfg_comment) = $domain_cfg_data2;
-							$ratelimits_domains .= $this->formatConfigOption ($domain_cfg_name, $cfg_param, $cfg_comment);
+							$ratelimits_domains .= $this->formatConfigOption($domain_cfg_name, $cfg_param, $cfg_comment);
 						}
 					}
 				}
@@ -1671,35 +1602,43 @@ HTML;
 	 * @param string $cfg_name Config option name
 	 * @param string $cfg_info Config option values
 	 * @param string $cfg_comment Config option comment
+	 * @param string $tab How the tab should look
 	 * @return string
 	 */
-	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $tab = "\t\t", $sql = null) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$config = null;
 		
-		$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
+		$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' $sql";
 		$fmdb->get_results($query);
-		if (!$fmdb->num_rows) $def_multiple_values = 'no';
-		else {
-			$result = $fmdb->last_result[0];
-			$def_multiple_values = $result->def_multiple_values;
+		if (!$fmdb->num_rows) {
+			return;
+		} else {
+			$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
 		}
+
 		if ($cfg_comment) {
 			$comment = wordwrap($cfg_comment, 50, "\n");
-			$config .= "\n\t\t// " . str_replace("\n", "\n\t\t// ", $comment) . "\n";
+			$config .= "\n$tab// " . str_replace("\n", "\n$tab// ", $comment) . "\n";
 			unset($comment);
 		}
-		$config .= "\t\t" . $cfg_name . ' ';
+		$config .= $tab . $cfg_name . ' ';
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '{') === false) $config .= '{ ';
-		$cfg_info = strpos($cfg_info, 'acl_') !== false ? $fm_dns_acls->parseACL($cfg_info) : $cfg_info;
-		$config .= trim(rtrim(trim($cfg_info), ';'));
+
+		/** Parse address_match_element configs */
+		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
+
+		$server_root_dir = getNameFromID(intval($_GET['server_serial_no']), "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
+		
+		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
 		$config .= ";\n";
 
 		unset($cfg_info);
 		if ($cfg_comment) $config .= "\n";
-		
+
 		return $config;
 	}
 	
@@ -1785,6 +1724,45 @@ HTML;
 	 */
 	function characterSplit($text, $limit = 255) {
 		return explode("\n", wordwrap($text, $limit, "\n", true));
+	}
+	
+	/**
+	 * Attempts to resolve the master servers for the group
+	 *
+	 * @since 2.1
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @param array   $server_group_ids The array containing server group IDs for overrides
+	 * @return array
+	 */
+	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (is_array($server_group_ids)) {
+			$server_group_ids = 'g_' . implode('","g_', $server_group_ids);
+		}
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include" AND view_id=' . $view_id . ' AND domain_id=0 AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			$config_result = $fmdb->last_result;
+			for ($i=0; $i < $fmdb->num_rows; $i++) {
+				$include_config['include'][] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+			}
+		} else $include_config = null;
+
+		if (is_array($include_config)) {
+			$include_files = null;
+			foreach ($include_config as $cfg_name => $value_array) {
+				foreach ($value_array as $domain_name => $cfg_data) {
+					list($cfg_info, $cfg_comment) = $cfg_data;
+					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
+				}
+			}
+			return $include_files;
+		} else {
+			return null;
+		}
 	}
 }
 

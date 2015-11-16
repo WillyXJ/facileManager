@@ -60,7 +60,7 @@ class fm_sqlpass_passwords {
 				<input type="hidden" name="item_type" value="set_mysql_password" />
 				<h2>%s</h2>', __('Set User Password'));
 			if (!$pwd_strength = getOption('minimum_pwd_strength', $_SESSION['user']['account_id'], $_SESSION['module'])) $pwd_strength = $GLOBALS['PWD_STRENGTH'];
-			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), __('Set Password'), 'set_sql_password', 'config-passwords', false, 'embed');
+			echo $fm_users->printUsersForm(null, 'add', array('user_login', 'user_password' => $pwd_strength, 'verbose'), 'users', __('Set Password'), 'set_sql_password', 'config-passwords', false, 'embed');
 			printf('<div><input type="submit" id="set_sql_password" name="submit" value="%s" class="button primary" disabled /></div>', __('Set Password'));
 			echo '</form>';
 		}

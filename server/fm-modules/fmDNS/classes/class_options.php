@@ -74,7 +74,7 @@ class fm_module_options {
 			$num_same_config = $fmdb->num_rows;
 			$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
 			$fmdb->get_results($query);
-			if ($num_same_config >= $fmdb->last_result[0]->def_max_parameters) {
+			if ($fmdb->last_result[0]->def_max_parameters >= 0 && $num_same_config >= $fmdb->last_result[0]->def_max_parameters) {
 				return __('This record already exists.');
 			}
 		}
@@ -373,7 +373,7 @@ HTML;
 					});
 					</script>
 				</tr>',
-					__('Domain'), $domain_id, $available_zones
+					__('Zone'), $domain_id, $available_zones
 				);
 		}
 		
@@ -528,7 +528,8 @@ HTML;
 			for ($i=0; $i<$def_avail_result_count; $i++) {
 				$array_count_values = @array_count_values($temp_array);
 				if ((is_array($temp_array) && array_search($def_avail_result[$i]->def_option, $temp_array) === false) ||
-						!isset($temp_array) || $array_count_values[$def_avail_result[$i]->def_option] < $def_avail_result[$i]->def_max_parameters) {
+						!isset($temp_array) || $array_count_values[$def_avail_result[$i]->def_option] < $def_avail_result[$i]->def_max_parameters || 
+						$def_avail_result[$i]->def_max_parameters < 0) {
 					$return[$j] = $def_avail_result[$i]->def_option;
 					$j++;
 				}

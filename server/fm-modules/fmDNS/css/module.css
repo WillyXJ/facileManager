@@ -175,6 +175,9 @@ p.soa_import span {
 	max-height: 326px;
 	overflow: auto;
 }
+.no-bottom-margin {
+	bottom: 10em;
+}
 
 .display_results > tbody > tr > td > span {
 	font-style: italic;
@@ -190,10 +193,6 @@ p.soa_import span {
 
 #clone_override p {
 	margin: 5px 0;
-}
-
-.template-icon {
-	color: #c0c0c0;
 }
 
 td > .template-icon {

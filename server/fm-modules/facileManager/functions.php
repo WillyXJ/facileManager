@@ -248,11 +248,11 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<title>$title</title>
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
-		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version" rel="stylesheet" type="text/css">
-		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
-		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui-1.10.2.min.css" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<link href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" rel="stylesheet" type="text/css">
+		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-1.9.1.min.js"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-ui-1.10.2.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.css?ver=$fm_version" type="text/css" />
 		$module_css
@@ -1412,7 +1412,7 @@ function getActiveModules($allowed_modules = false) {
 			return $modules;
 		}
 		
-		$user_capabilities = getUserCapabilities($_SESSION['user']['id']);
+		$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
 		$excluded_modules = array();
 		foreach ($modules as $module_name) {
 			if (!array_key_exists($module_name, $user_capabilities) && !currentUserCan('do_everything')) $excluded_modules[] = $module_name;
@@ -2416,45 +2416,20 @@ function currentUserCan($capability, $module = 'facileManager', $extra_perm = nu
 function userCan($user_id, $capability, $module = 'facileManager', $extra_perm = null) {
 	global $fm_name;
 	
-	$user_capabilities = getUserCapabilities($user_id);
+	/** If no capability defined then return true */
+	if ($capability === null) return true;
 	
-	/** Check if super admin */
-	if (@array_key_exists('do_everything', $user_capabilities[$fm_name])) return true;
-		
 	/** If no authentication then return full access */
 	if (!getOption('auth_method')) return true;
 	
-	/** Handle multiple capabilities */
-	if (is_array($capability)) {
-		foreach ($capability as $cap) {
-			if (userCan($user_id, $cap, $module, $extra_perm)) return true;
-		}
-		return false;
+	/** Return true if group can */
+	if ($group_id = getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_group')) {
+		if (groupCan($group_id, $capability, $module, $extra_perm)) return true;
 	}
 	
-	/** Check user capability */
-	if (@array_key_exists($capability, $user_capabilities[$module])) {
-		if (is_array($user_capabilities[$module][$capability])) {
-			if (is_array($extra_perm)) {
-				$found = false;
-				
-				foreach ($extra_perm as $needle) {
-					if (in_array($needle, $user_capabilities[$module][$capability]))
-						$found = true;
-				}
-				
-				return $found;
-			} else {
-				return in_array($extra_perm, $user_capabilities[$module][$capability]);
-			}
-		}
-		
-		return true;
-	}
+	$user_capabilities = getUserCapabilities($user_id);
 	
-	if ($capability === null) return true;
-	
-	return false;
+	return userGroupCan($user_id, $capability, $module, $extra_perm, $user_capabilities);
 }
 
 
@@ -2465,10 +2440,16 @@ function userCan($user_id, $capability, $module = 'facileManager', $extra_perm =
  * @package facileManager
  *
  * @param integer $user_id User ID to retrieve.
+ * @param string $type User, group, or all
  * @return array
  */
-function getUserCapabilities($user_id) {
-	$user_capabilities = getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_caps');
+function getUserCapabilities($user_id, $type = 'user') {
+	if ($type == 'all') {
+		if ($group_id = getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_group')) {
+			return getUserCapabilities($group_id, 'group');
+		}
+	}
+	$user_capabilities = getNameFromID($user_id, 'fm_' . $type . 's', $type . '_', $type . '_id', $type . '_caps');
 	if (isSerialized($user_capabilities)) $user_capabilities = unserialize($user_capabilities);
 	
 	return $user_capabilities;
@@ -2835,6 +2816,7 @@ function buildPopup($section, $text = null, $buttons = array('submit', 'cancel_b
 			{$__FM_CONFIG['icons']['close']}
 			<h3>$text</h3>
 		</div>
+		<div class="popup-wait"><i class="fa fa-2x fa-spinner fa-spin"></i></div>
 		<div class="popup-contents">
 
 HTML;
@@ -3005,7 +2987,7 @@ function countArrayDimensions($array) {
  * @param string $style Use an image or font
  * @return string
  */
-function displayAddNew($name = null, $rel = null, $title = null, $style = 'image') {
+function displayAddNew($name = null, $rel = null, $title = null, $style = 'fa-plus-square-o') {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = _('Add New');
@@ -3013,11 +2995,7 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'image
 	if ($name) $name = ' name="' . $name . '"';
 	if ($rel) $rel = ' rel="' . $rel . '"';
 	
-	if ($style == 'image') {
-		$image = str_replace('_TITLE_', $title, $__FM_CONFIG['icons']['add']);
-	} else {
-		$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
-	}
+	$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
 	
 	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
 }
@@ -3093,6 +3071,78 @@ function getAvailableUserCapabilities() {
 	}
 	
 	return $fm_user_caps;
+}
+
+
+/**
+ * Whether a group has capability
+ *
+ * @since 2.1
+ * @package facileManager
+ *
+ * @param integer $group_id Group ID to check.
+ * @param string|array $capability Capability name.
+ * @param string $module Module name to check capability for
+ * @param string $extra_perm Extra capability to check
+ * @return boolean
+ */
+function groupCan($group_id, $capability, $module = 'facileManager', $extra_perm = null) {
+	global $fm_name;
+	
+	$group_capabilities = getUserCapabilities($group_id, 'group');
+	
+	return userGroupCan($group_id, $capability, $module, $extra_perm, $group_capabilities);
+}
+
+
+/**
+ * Whether a group has capability
+ *
+ * @since 2.1
+ * @package facileManager
+ *
+ * @param integer $group_id Group ID to check.
+ * @param string|array $capability Capability name.
+ * @param string $module Module name to check capability for
+ * @param string $extra_perm Extra capability to check
+ * @param array $allowed_capabilities Capabilities granted to the user or group
+ * @return boolean
+ */
+function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm = null, $allowed_capabilities = array()) {
+	global $fm_name;
+	
+	/** Check if super admin */
+	if (@array_key_exists('do_everything', $allowed_capabilities[$fm_name])) return true;
+		
+	/** Handle multiple capabilities */
+	if (is_array($capability)) {
+		foreach ($capability as $cap) {
+			if (userCan($id, $cap, $module, $extra_perm)) return true;
+		}
+		return false;
+	}
+	
+	/** Check capability */
+	if (@array_key_exists($capability, $allowed_capabilities[$module])) {
+		if (is_array($allowed_capabilities[$module][$capability])) {
+			if (is_array($extra_perm)) {
+				$found = false;
+				
+				foreach ($extra_perm as $needle) {
+					if (in_array($needle, $allowed_capabilities[$module][$capability]))
+						$found = true;
+				}
+				
+				return $found;
+			} else {
+				return in_array($extra_perm, $allowed_capabilities[$module][$capability]);
+			}
+		}
+		
+		return true;
+	}
+	
+	return false;
 }
 
 

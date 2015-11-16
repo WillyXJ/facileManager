@@ -55,9 +55,10 @@ $tools_option[] = '<h2>' . _('Backup Database') . '</h2>
 			$backup_button
 			<br />";
 
+$purge_logs = currentUserCan('do_everything') ? ' <input id="purge-logs" name="submit" type="submit" value="' . _('Purge Logs') . '" class="button double-click" />' : null;
 $tools_option[] = '<h2>' . _('Clean Up Database') . '</h2>
 			<p>' . _('You should periodically clean up your database to permanently remove deleted items. Make sure you backup your database first!') . '</p>
-			<p class="step"><input id="db-cleanup" name="submit" type="submit" value="' . _('Clean Up Database') . '" class="button" /></p>
+			<p class="step"><input id="db-cleanup" name="submit" type="submit" value="' . _('Clean Up Database') . '" class="button" />' . $purge_logs . '</p>
 			<br />';
 
 /** Get available module tools */

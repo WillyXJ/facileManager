@@ -59,7 +59,7 @@ class fm_accounts {
 		
 		if (!isset($AUTHKEY)) return _('Account is not found.') . "\n";
 
-		$query = "select * from fm_accounts where account_key='" . sanitize($AUTHKEY) . "'";
+		$query = "SELECT * FROM fm_accounts WHERE account_key='" . sanitize($AUTHKEY) . "'";
 		$result = $fmdb->get_results($query);
 		if (!$fmdb->num_rows) return _('Account is not found.') . "\n";
 		

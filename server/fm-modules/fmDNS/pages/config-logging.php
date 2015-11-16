@@ -44,24 +44,13 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			if ($_POST['sub_type'] == 'channel') {
-				$result = $fm_module_logging->addChannel($_POST);
-				if ($result !== true) {
-					$response = $result;
-					$form_data = $_POST;
-				} else {
-					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-					header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
-				}
-			} elseif ($_POST['sub_type'] == 'category') {
-				$result = $fm_module_logging->addCategory($_POST);
-				if ($result !== true) {
-					$response = $result;
-					$form_data = $_POST;
-				} else {
-					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-					header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
-				}
+			$result = ($_POST['sub_type'] == 'channel') ? $fm_module_logging->addChannel($_POST) : $fm_module_logging->addCategory($_POST);
+			if ($result !== true) {
+				$response = $result;
+				$form_data = $_POST;
+			} else {
+				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+				header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
 			}
 		}
 		break;

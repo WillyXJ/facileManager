@@ -232,6 +232,31 @@ class fm_tools {
 
 		sendFileToBrowser($sql_file . '.gz');
 	}
+	
+	/**
+	 * Purges the fM logs table
+	 *
+	 * @since 2.1
+	 * @package facileManager
+	 *
+	 * @return string
+	 */
+	function purgeLogs() {
+		global $fmdb, $fm_name;
+		
+		if (!currentUserCan('do_everything')) return sprintf('<p class="error">%s</p>', _('You are not authorized to run these tools.'));
+		
+		$query = "TRUNCATE fm_logs";
+		$fmdb->query($query);
+		
+		if ($fmdb->sql_errors) {
+			return $fmdb->last_error;
+		}
+
+		addLogEntry(_('Purged all logs from the database.'), $fm_name);
+		return _('Purged all logs from the database.');
+	}
+
 
 }
 

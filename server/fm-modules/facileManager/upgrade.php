@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 42) ? fmUpgrade_200($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 43) ? fmUpgrade_2101($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -605,6 +605,42 @@ function fmUpgrade_200($database) {
 	}
 
 	upgradeConfig('fm_db_version', 42, false);
+	
+	return $success;
+}
+
+
+/** fM v2.1-beta1 **/
+function fmUpgrade_2101($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 42) ? fmUpgrade_200($database) : true;
+	
+	if ($success) {
+		$table[] = "CREATE TABLE IF NOT EXISTS $database.`fm_groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `group_name` varchar(128) NOT NULL,
+  `group_caps` text,
+  `group_comment` text,
+  `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`group_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8";
+		$table[] = "ALTER TABLE $database.`fm_users` ADD `user_group` INT(11) NOT NULL AFTER `user_email`";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 43, false);
 	
 	return $success;
 }
