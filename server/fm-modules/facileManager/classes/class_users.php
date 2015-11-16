@@ -152,7 +152,6 @@ class fm_users {
 		global $fmdb, $fm_name, $fm_login;
 		
 		extract($data, EXTR_SKIP);
-//		print_r($data);exit;
 		
 		$group_name = sanitize($group_name);
 		$group_comment = sanitize($group_comment);

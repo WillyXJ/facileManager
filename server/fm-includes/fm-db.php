@@ -69,7 +69,6 @@ class fmdb {
 		$this->sql_errors = false;
 		$this->last_error = null;
 		$this->last_query = $query;
-//		file_put_contents('/tmp/php.log', $this->last_query . "\n", FILE_APPEND);
 		
 		$this->result = @mysql_query($query, $this->dbh);
 		
