@@ -20,7 +20,7 @@
            of the browser window.
 * Server - [feature] Added user group support. (Issue #211)
 * Server - [bug] Slave zone directory now gets created if required. (Issue #241)
-* Server - [improvment] Replaced Add New image with Font Awesome icon.
+* Server - [improvement] Replaced Add New image with Font Awesome icon.
 * Server - [improvement] Hostnames can no longer contain an underscore (_) or 
            start with a hyphen (-). (Issue #254)
 * Server - [bug] Fixed RR updates as record append option would default to 'no'.
