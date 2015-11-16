@@ -454,6 +454,8 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 	
 	$addresses = explode(',', $data);
 	foreach ($addresses as $ip_address) {
+		$cidr = null;
+
 		$ip_address = rtrim(trim($ip_address), '.');
 		if (!strlen($ip_address)) continue;
 		
@@ -462,20 +464,25 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 			$ip_address = substr($ip_address, 1);
 		}
 		
+		if (strpos($ip_address, '/') !== false && $subnets_allowed == 'subnets-allowed') {
+			$cidr_array = explode('/', $ip_address);
+			list($ip_address, $cidr) = $cidr_array;
+		}
+		
 		/** IPv4 checks */
 		if (strpos($ip_address, ':') === false) {
-			if (strpos($ip_address, '/') !== false && $subnets_allowed == 'subnets-allowed') {
-				$cidr_array = explode('/', $ip_address);
-				list($ip_address, $cidr) = $cidr_array;
-				/** Valid CIDR? */
-				if (!verifyNumber($cidr, 0, 32)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
-			}
+			/** Valid CIDR? */
+			if ($cidr && !checkCIDR($cidr, 32)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
+			
 			/** Create full IP */
 			$ip_octets = explode('.', $ip_address);
 			if (count($ip_octets) < 4) {
 				$ip_octets = array_merge($ip_octets, array_fill(count($ip_octets), 4 - count($ip_octets), 0));
 			}
 			$ip_address = implode('.', $ip_octets);
+		} else {
+			/** IPv6 checks */
+			if ($cidr && !checkCIDR($cidr, 128)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
 		}
 		
 		if (verifyIPAddress($ip_address) === false) return sprintf(__('%s is not valid.'), $ip_address);
@@ -978,6 +985,21 @@ function getConfigAssoc($id, $type) {
 	}
 
 	return false;
+}
+
+
+/**
+ * Returns whether the CIDR is valid or not
+ *
+ * @since 2.1
+ * @package fmDNS
+ *
+ * @param string $cidr CIDR to check
+ * @param integer $max_bits Maximum valid bits
+ * @return boolean
+ */
+function checkCIDR($cidr, $max_bits) {
+	return verifyNumber($cidr, 0, $max_bits);
 }
 
 ?>

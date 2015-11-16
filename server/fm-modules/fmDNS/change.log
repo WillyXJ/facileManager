@@ -25,6 +25,7 @@
            start with a hyphen (-). (Issue #254)
 * Server - [bug] Fixed RR updates as record append option would default to 'no'.
 * Server - [improvement] Minor performance improvements. (Issue #224)
+* Server - [feature] Added support for IPv6 CIDR notation. (Issue #252)
 
 2.0.3 (2015-06-29)
 ==================
