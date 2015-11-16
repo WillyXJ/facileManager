@@ -304,7 +304,7 @@ function buildInputReturn($action, $id, $key, $val) {
 }
 
 function buildUpdateArray($domain_id, $record_type, $data_array) {
-	$exclude_keys = array('record_skipped', 'record_append');
+	$exclude_keys = array('record_skipped');
 	$sql_records = buildSQLRecords($record_type, $domain_id);
 	if (!count($sql_records) && $record_type == 'SOA') {
 		return $data_array;
