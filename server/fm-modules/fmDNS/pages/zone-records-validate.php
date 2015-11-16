@@ -184,7 +184,7 @@ function validateEntry($action, $id, $data, $record_type) {
 					$val = '@';
 					$data[$key] = $val;
 				}
-				if (!verifyName($val, true, $record_type)) {
+				if (!verifyName($val, $id, true, $record_type)) {
 					$messages['errors'][$key] = __('Invalid');
 				}
 			}
@@ -232,7 +232,7 @@ function validateEntry($action, $id, $data, $record_type) {
 				if ($key == 'record_value') {
 					$val = $data['record_append'] == 'yes' || $val == '@' ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
-					if (!verifyCNAME($data['record_append'], $val)) {
+					if (!verifyCNAME($data['record_append'], $val) || ($record_type == 'NS' && !validateHostname($val))) {
 						$messages['errors'][$key] = __('Invalid value');
 					}
 				}
@@ -276,12 +276,12 @@ function validateEntry($action, $id, $data, $record_type) {
 				if (in_array($key, array('soa_master_server', 'soa_email_address'))) {
 					$val = $data['soa_append'] == 'yes' ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
-					if (!verifyCNAME($data['soa_append'], $val, false)) {
+					if (!verifyCNAME($data['soa_append'], $val, false) || ($key == 'soa_master_server' && !validateHostname($val))) {
 						$messages['errors'][$key] = __('Invalid');
 					}
 				} else {
 					if (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
-						if (!verifyNAME($val, false)) {
+						if (!verifyNAME($val, $id, false)) {
 							$messages['errors'][$key] = __('Invalid');
 						}
 					}
@@ -394,13 +394,13 @@ function compareValues($data_array, $sql_records) {
 	return $changes;
 }
 
-function verifyName($record_name, $allow_null = true, $record_type = null) {
+function verifyName($record_name, $id, $allow_null = true, $record_type = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	if (!$allow_null && !strlen($record_name)) return false;
 	
 	/** Ensure singleton RR type */
-	$sql = $record_type != 'CNAME' ? " AND record_type='CNAME'" : null;
+	$sql = $record_type != 'CNAME' ? " AND record_type='CNAME'" : " AND record_id!=$id";
 	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql", null, false, 'ASC', true);
 	if ($fmdb->last_result[0]->count) return false;
 	
@@ -408,6 +408,9 @@ function verifyName($record_name, $allow_null = true, $record_type = null) {
 		return true;
 	} elseif (preg_match('/^[a-z0-9_\-.]+$/i', $record_name) == true
 			&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $record_name) == true) {
+		if (in_array($record_type, array('A', 'MX'))) {
+			return validateHostname($record_name);
+		}
 		return true;
 	} elseif ($record_name == '@' && $record_type != 'CNAME') {
 		return true;
@@ -512,4 +515,22 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 
 	return array(null, __('Forward domain not found.'));
 }
+
+/**
+ * Returns whether record hostname is valid or not
+ *
+ * @since 2.1
+ * @package fmDNS
+ *
+ * @param string $hostname Hostname to check
+ * @return boolean
+ */
+function validateHostname($hostname) {
+	if ($hostname[0] == '-' || strpos($hostname, '_') !== false) {
+		return false;
+	}
+	
+	return true;
+}
+
 ?>
