@@ -1,4 +1,4 @@
-2.1 (2015-??-??)
+2.1-beta1 (2015-??-??)
 ================
 * Server - [improvement] Record validation no longer allows a CNAME RR at the
            zone level.
