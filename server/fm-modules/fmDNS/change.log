@@ -24,6 +24,7 @@
 * Server - [improvement] Hostnames can no longer contain an underscore (_) or 
            start with a hyphen (-). (Issue #254)
 * Server - [bug] Fixed RR updates as record append option would default to 'no'.
+* Server - [improvement] Minor performance improvements. (Issue #224)
 
 2.0.2 (2015-05-27)
 ==================

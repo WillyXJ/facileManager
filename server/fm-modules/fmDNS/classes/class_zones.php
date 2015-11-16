@@ -83,7 +83,7 @@ class fm_dns_zones {
 				if ($y == $_SESSION['user']['record_count']) break;
 				if (array_key_exists('attention', $_GET)) {
 					if (!$results[$x]->domain_clone_domain_id && $results[$x]->domain_type == 'master' && $results[$x]->domain_template == 'no' &&
-						(!getSOACount($results[$x]->domain_id) || !getNSCount($results[$x]->domain_id) || $results[$x]->domain_reload != 'no')) {
+						(!getSOACount($results[$x]->domain_id) || !getNSCount($results[$x]->domain_id) || $results[$x]->domain_reload == 'yes')) {
 							$this->displayRow($results[$x], $map, $reload_allowed);
 							$y++;
 					}
@@ -506,7 +506,7 @@ class fm_dns_zones {
 	}
 	
 	
-	function displayRow($row, $map, $reload_allowed) {
+	function displayRow($row, $map, $server_reload_allowed) {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $row->domain_id))) return;
@@ -520,7 +520,7 @@ class fm_dns_zones {
 		
 		$soa_count = getSOACount($row->domain_id);
 		$ns_count = getNSCount($row->domain_id);
-		$reload_allowed = reloadAllowed($row->domain_id);
+		$reload_allowed = $server_reload_allowed ? reloadAllowed($row->domain_id) : false;
 		if (!$soa_count && $row->domain_type == 'master') {
 			$response = __('The SOA record still needs to be created for this zone');
 			$classes[] = 'attention';
@@ -562,15 +562,6 @@ class fm_dns_zones {
 		} else $reload_zone = null;
 		if ($reload_zone) $classes[] = 'build';
 		
-/*
-		$edit_status = <<<FORM
-<form method="post" action="{$GLOBALS['basename']}?map={$map}">
-	<input type="hidden" name="action" value="download" />
-	<input type="hidden" name="domain_id" value="{$row->domain_id}" />
-	{$__FM_CONFIG['icons']['export']}
-	</form>
-FORM;
-*/
 		$edit_status = null;
 		
 		if (!$soa_count && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';

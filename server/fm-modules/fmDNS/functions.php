@@ -399,12 +399,12 @@ function getSOACount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
 	if (version_compare(getOption('version', 0, 'fmDNS'), '1.3-beta1', '<')) {
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE (`domain_id`='$domain_id' OR
+		$query = "SELECT soa_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE (`domain_id`='$domain_id' OR
 			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 				`domain_id`='$domain_id')
 		) AND `soa_status`!='deleted'";
 	} else {
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `soa_id`= (SELECT DISTINCT(`soa_id`) FROM 
+		$query = "SELECT soa_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `soa_id`= (SELECT DISTINCT(`soa_id`) FROM 
 			`fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `soa_id`!=0 AND (`domain_id`='$domain_id' OR
 				`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 					`domain_id`='$domain_id') OR
@@ -422,7 +422,7 @@ function getSOACount($domain_id) {
 function getNSCount($domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE (`domain_id`='$domain_id' OR
+	$query = "SELECT record_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE (`domain_id`='$domain_id' OR
 			`domain_id` = (SELECT `domain_clone_domain_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
 				`domain_id`='$domain_id') OR
 			`domain_id` = (SELECT `domain_template_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE
@@ -451,13 +451,11 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 	$data = str_replace(array("\n", ';', ' ', ','), ',', $data);
 	$data = str_replace(',,', ',', $data);
 	$data = trim($data, ',');
-//	if (!empty($data)) $data .= ',';
 	
 	$addresses = explode(',', $data);
 	foreach ($addresses as $ip_address) {
 		$ip_address = rtrim(trim($ip_address), '.');
 		if (!strlen($ip_address)) continue;
-//		if ($allow_acl && preg_match("/^acl__(\d).*/", $ip_address)) continue;
 		
 		/** Handle negated addresses */
 		if (strpos($ip_address, '!') === 0) {
@@ -569,7 +567,7 @@ function reloadAllowed($domain_id = null) {
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'active', 'server_', 'server_status');
 	if ($fmdb->num_rows) {
 		if ($domain_id) {
-			$query = 'SELECT * FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id;
+			$query = 'SELECT domain_id FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id . ' LIMIT 1';
 			$result = $fmdb->get_results($query);
 			$reload_allowed = ($fmdb->num_rows) ? true : false;
 		} else $reload_allowed = true;
@@ -586,7 +584,7 @@ function reloadAllowed($domain_id = null) {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @return boolean
+ * @return integer
  */
 function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
