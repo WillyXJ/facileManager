@@ -486,15 +486,16 @@ To reset your password, click the following link:
 		global $fmdb;
 
 		/** Get LDAP variables */
-		if (empty($ldap_server))		$ldap_server		= getOption('ldap_server');
-		if (empty($ldap_port))			$ldap_port			= getOption('ldap_port');
-		if (empty($ldap_port_ssl))		$ldap_port_ssl		= getOption('ldap_port_ssl');
-		if (empty($ldap_version))		$ldap_version		= getOption('ldap_version');
-		if (empty($ldap_encryption))	$ldap_encryption	= getOption('ldap_encryption');
-		if (empty($ldap_referrals))		$ldap_referrals		= getOption('ldap_referrals');
-		if (empty($ldap_dn))			$ldap_dn			= getOption('ldap_dn');
-		if (empty($ldap_group_require))	$ldap_group_require	= getOption('ldap_group_require');
-		if (empty($ldap_group_dn))		$ldap_group_dn		= getOption('ldap_group_dn');
+		if (empty($ldap_server))          $ldap_server          = getOption('ldap_server');
+		if (empty($ldap_port))            $ldap_port            = getOption('ldap_port');
+		if (empty($ldap_port_ssl))        $ldap_port_ssl        = getOption('ldap_port_ssl');
+		if (empty($ldap_version))         $ldap_version         = getOption('ldap_version');
+		if (empty($ldap_encryption))      $ldap_encryption      = getOption('ldap_encryption');
+		if (empty($ldap_referrals))       $ldap_referrals       = getOption('ldap_referrals');
+		if (empty($ldap_dn))              $ldap_dn              = getOption('ldap_dn');
+		if (empty($ldap_group_require))   $ldap_group_require   = getOption('ldap_group_require');
+		if (empty($ldap_group_dn))        $ldap_group_dn        = getOption('ldap_group_dn');
+		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
 		
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 

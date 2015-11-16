@@ -12,6 +12,11 @@
 * Server - [improvement] Upgraded to Font Awesome 4.4.0 and changed some icons.
 * Server - [improvement] Third-party resources now load locally. (Issue #244)
 
+2.0.3 (2015-06-29)
+==================
+* Server - [bug] Fixed LDAP Group Attribute support. (Issue #226)
+* Server - [bug] Fixed module badge counts.
+
 2.0.2 (2015-05-27)
 ==================
 * Server - [bug] Fixed password reset hint text. (Issue #212)

@@ -26,6 +26,10 @@
 * Server - [bug] Fixed RR updates as record append option would default to 'no'.
 * Server - [improvement] Minor performance improvements. (Issue #224)
 
+2.0.3 (2015-06-29)
+==================
+* Server - [bug] Fixed upgrade routine from v1.2.3. (Issue #230)
+
 2.0.2 (2015-05-27)
 ==================
 * Both   - [bug] Fixed BIND version compare at client install time. (Issue #212)
