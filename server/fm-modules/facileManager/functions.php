@@ -248,11 +248,11 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<title>$title</title>
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
-		<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,600,300&ver=$fm_version" rel="stylesheet" type="text/css">
-		<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
-		<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui-1.10.2.min.css" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<link href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" rel="stylesheet" type="text/css">
+		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-1.9.1.min.js"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-ui-1.10.2.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.css?ver=$fm_version" type="text/css" />
 		$module_css

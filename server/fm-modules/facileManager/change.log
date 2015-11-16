@@ -9,7 +9,8 @@
 * Client - [bug] Ensure serial number is an integer at install. (Issue #232)
 * Both   - [feature] Added no-update client installer parameter. (Issue #223)
 * Server - [feature] Added user group support. (Issue #211)
-* Server - [improvment] Upgraded to Font Awesome 4.4.0 and changed some icons.
+* Server - [improvement] Upgraded to Font Awesome 4.4.0 and changed some icons.
+* Server - [improvement] Third-party resources now load locally. (Issue #244)
 
 2.0.2 (2015-05-27)
 ==================
