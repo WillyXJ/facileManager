@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}polici
   `policy_options` int(3) NOT NULL DEFAULT '0',
   `policy_comment` text,
   `policy_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
-  PRIMARY KEY (`policy_id`)
+  PRIMARY KEY (`policy_id`),
   KEY `idx_policy_account_id` (`account_id`),
   KEY `idx_policy_status` (`policy_status`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;

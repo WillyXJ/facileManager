@@ -1471,10 +1471,10 @@ INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_max_parameters`
 )
 VALUES 
-('options', 'global', 'include', '( quoted_string )', 'no', 'OVZ', 'no', '-1')
+('options', 'global', 'include', '( quoted_string )', 'no', 'OVZ', 'no', '-1'),
+('options', 'response-policy', '( string )', 'no', 'O', NULL, 'no', '1')
 ;
 INSERT;
-	$inserts[] = "INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` VALUES ('options', 'response-policy', '( string )', 'no', 'O', NULL, 'no');";
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {

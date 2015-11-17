@@ -34,7 +34,7 @@ $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 $form_data = null;
 $response = isset($response) ? $response : null;
 
-$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['servers']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'users';
+$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['users']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'users';
 $display_type = $__FM_CONFIG['users']['avail_types'][$type];
 
 switch ($action) {

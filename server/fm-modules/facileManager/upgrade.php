@@ -629,7 +629,7 @@ function fmUpgrade_2101($database) {
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8";
-		$table[] = "ALTER TABLE $database.`fm_users` ADD `user_group` INT(11) NOT NULL AFTER `user_email`";
+		$table[] = "ALTER TABLE $database.`fm_users` ADD `user_group` INT(11) DEFAULT NULL AFTER `user_email`";
 
 		/** Create table schema */
 		if (count($table) && $table[0]) {

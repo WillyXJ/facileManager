@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_users` (
   `user_login` varchar(128) NOT NULL,
   `user_password` varchar(255) NOT NULL,
   `user_email` varchar(255) NOT NULL,
-  `user_group` INT(11) NOT NULL,
+  `user_group` INT(11) DEFAULT NULL,
   `user_default_module` varchar(255) DEFAULT NULL,
   `user_auth_type` int(1) NOT NULL DEFAULT '1',
   `user_caps` text,
