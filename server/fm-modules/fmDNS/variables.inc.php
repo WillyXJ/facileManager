@@ -73,6 +73,8 @@ $__FM_CONFIG['records']['sshfp_algorithms'] = array(
 											array('RSA', 1),
 											array('DSA', 2)
 											);
+$__FM_CONFIG['records']['naptr_flags']	= array('U', 'S', 'A', 'P', '');
+$__FM_CONFIG['records']['flags']		= array('0', '256', '257');
 
 $__FM_CONFIG['servers']['avail_types'] = array('servers' => __('Servers'), 'groups' => __('Groups'));
 $__FM_CONFIG['options']['avail_types'] = array('global' => __('Global'), 'ratelimit' => __('Rate Limit'));

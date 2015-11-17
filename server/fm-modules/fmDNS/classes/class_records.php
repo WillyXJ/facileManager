@@ -283,13 +283,23 @@ class fm_dns_records {
 			$title_array[] = array('title' => __('Algorithm'), 'rel' => 'record_algorithm');
 		}
 		
+		if ($type == 'NAPTR') {
+			$show_value = false;
+			$title_array[] = array('title' => __('Order'), 'rel' => 'record_weight');
+			$title_array[] = array('title' => __('Pref'), 'rel' => 'record_priority');
+			$title_array[] = array('title' => __('Flags'), 'rel' => 'record_flags');
+			$title_array[] = array('title' => __('Params'), 'rel' => 'record_params');
+			$title_array[] = array('title' => __('Regex'), 'rel' => 'record_regex');
+			$title_array[] = array('title' => __('Replace'), 'rel' => 'record_value');
+		}
+		
 		if ($show_value) $title_array[] = array('title' => __('Value'), 'rel' => 'record_value');
 				
 		if ($type == 'RP' ) {
 			$title_array[] = array('title' => __('Text'), 'rel' => 'record_text');
 		}
 		
-		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
+		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
 		$priority = array('MX', 'SRV', 'KX');
 		
 		if (in_array($type, $priority)) $title_array[] = array('title' => __('Priority'), 'rel' => 'record_priority');
@@ -326,7 +336,7 @@ class fm_dns_records {
 		$show_value = true;
 		$value_textarea = false;
 		
-		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
+		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
 		$priority = array('MX', 'SRV', 'KX');
 
 		if ($results) {
@@ -387,7 +397,7 @@ class fm_dns_records {
 			}
 			
 			if (in_array($type, array('DNSKEY', 'KEY'))) {
-				$flags = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_flags');
+				$flags = $__FM_CONFIG['records']['flags'];
 				$algorithms = $__FM_CONFIG['records']['cert_algorithms'];
 				$value_textarea = true;
 				
@@ -400,6 +410,16 @@ class fm_dns_records {
 				
 				$field_values['data']['Flags'] = '>' . buildSelect($action . '[_NUM_][record_flags]', '_NUM_', $flags, $record_flags);
 				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $algorithms, $record_algorithm);
+			}
+			
+			if ($type == 'NAPTR') {
+				$field_values['data']['Order'] = '><input maxlength="5" style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_weight]" value="' . $record_weight . '" onkeydown="return validateNumber(event)" />';
+				$field_values['data']['Pref'] = '><input maxlength="5" style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_priority]" value="' . $record_priority . '" onkeydown="return validateNumber(event)" />';
+				$field_values['data']['Flags'] = '>' . buildSelect($action . '[_NUM_][record_flags]', '_NUM_', $__FM_CONFIG['records']['naptr_flags'], $record_flags);
+				$field_values['data']['Params'] = '><input maxlength="255" style="width: 100px;" type="text" name="' . $action . '[_NUM_][record_params]" value="' . $record_params . '" />';
+				$field_values['data']['Regex'] = '><input maxlength="255" style="width: 100px;" type="text" name="' . $action . '[_NUM_][record_regex]" value="' . $record_regex . '" />';
+				$field_values['data']['Replace'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
+				$show_value = false;
 			}
 			
 			if ($show_value) {
@@ -438,6 +458,15 @@ class fm_dns_records {
 			$field_values['data']['Record'] = '>' . $record_name . '<span class="grey">.' . $domain . '</span>';
 			$field_values['data']['TTL'] = '>' . $record_ttl;
 			$field_values['data']['Class'] = '>' . $record_class;
+			
+			if ($type == 'NAPTR') {
+				$field_values['data']['Order'] = '>' . $record_weight;
+				$field_values['data']['Pref'] = '>' . $record_priority;
+				$field_values['data']['Flags'] = '>' . $record_flags;
+				$field_values['data']['Params'] = '>' . $record_params;
+				$field_values['data']['Regex'] = '>' . $record_regex;
+			}
+			
 			if ($show_value) $field_values['data']['Value'] = '>' . $record_value;
 			
 			if (in_array($type, $priority)) $field_values['data']['Priority'] = '>' . $record_priority;

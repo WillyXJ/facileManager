@@ -169,7 +169,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 function validateEntry($action, $id, $data, $record_type) {
 	$messages = null;
 	$html = null;
-	$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP');
+	$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
 	
 	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';
@@ -179,6 +179,8 @@ function validateEntry($action, $id, $data, $record_type) {
 	if (!empty($data['record_value'])) {
 		$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);
 		foreach ($data as $key => $val) {
+			$data[$key] = trim($val, '"\'');
+			
 			if ($key == 'record_name' && $record_type != 'PTR') {
 				if (!$val) {
 					$val = '@';
@@ -227,7 +229,7 @@ function validateEntry($action, $id, $data, $record_type) {
 				}
 			}
 			
-			if ((in_array($record_type, array('CNAME', 'DNAME', 'MX', 'NS', 'SRV'))) || 
+			if ((in_array($record_type, array('CNAME', 'DNAME', 'MX', 'NS', 'SRV', 'NAPTR'))) || 
 					$record_type == 'PTR' && $key == 'record_value') {
 				if ($key == 'record_value') {
 					$val = $data['record_append'] == 'yes' || $val == '@' ? trim($val, '.') : trim($val, '.') . '.';
@@ -361,7 +363,8 @@ function buildSQLRecords($record_type, $domain_id) {
 					'record_value', 'record_comment', 'record_status');
 				$optional_array = array('record_priority', 'record_weight', 'record_port',
 					'record_os', 'record_cert_type', 'record_key_tag', 'record_algorithm',
-					'record_flags', 'record_text', 'record_append');
+					'record_flags', 'record_text', 'record_params', 'record_regex',
+					'record_append');
 				
 				foreach ($static_array as $field) {
 					$sql_results[$results[$i]->record_id][$field] = $results[$i]->$field;

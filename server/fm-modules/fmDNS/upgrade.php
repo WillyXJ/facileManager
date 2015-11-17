@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.1-beta1', '<') ? upgradefmDNS_2101($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.1-rc1', '<') ? upgradefmDNS_2102($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1126,26 +1126,6 @@ INSERT;
 		if (!$fmdb->result || $fmdb->sql_errors) return false;
 	}
 	
-	/**
-	$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains`";
-	$fmdb->query($query);
-	$num_rows = $fmdb->num_rows;
-	$results = $fmdb->last_result;
-	for ($x=0; $x<$num_rows; $x++) {
-		if ($results[$x]->domain_name_servers == 0) continue;
-		
-		$name_server_ids = explode(';', $results[$x]->domain_name_servers);
-		$server_serial_nos = null;
-		foreach ($name_server_ids as $server_id) {
-			$server_serial_nos[] = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
-		}
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_name_servers='" . implode(';', $server_serial_nos) . "' "
-				. "WHERE domain_id=" . $results[$x]->domain_id;
-		$fmdb->query($query);
-		if (!$fmdb->result || $fmdb->sql_errors) return false;
-	}
-	*/
-
 	setOption('version', '1.3-beta1', 'auto', false, 0, $module_name);
 	
 	return true;
@@ -1493,6 +1473,38 @@ INSERT;
 	}
 
 	setOption('version', '2.1-beta1', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 2.1-rc1 */
+function upgradefmDNS_2102($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.1-beta1', '<') ? upgradefmDNS_2101($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A','AAAA','CERT','CNAME','DNAME','DNSKEY','KEY','KX','MX','NS','PTR','RP','SRV','TXT','HINFO','SSHFP','NAPTR' ) NOT NULL DEFAULT  'A'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD `record_params` VARCHAR(255) NULL AFTER `record_port`, ADD `record_regex` VARCHAR(255) NULL AFTER `record_params`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE `record_flags` `record_flags` ENUM('0','256','257','', 'U', 'S', 'A', 'P') NULL DEFAULT NULL";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.1-rc1', 'auto', false, 0, $module_name);
 	
 	return true;
 }

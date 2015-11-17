@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-16 15:10-0700\n"
+"POT-Creation-Date: 2015-11-17 16:51-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,26 +152,26 @@ msgid "Email"
 msgstr ""
 
 #: server/fm-install.php:272 server/password_reset.php:88
-#: server/fm-modules/facileManager/classes/class_users.php:542
+#: server/fm-modules/facileManager/classes/class_users.php:541
 #, php-format
 msgid "Confirm Password"
 msgstr ""
 
 #: server/fm-install.php:276 server/password_reset.php:92
-#: server/fm-modules/facileManager/classes/class_users.php:546
+#: server/fm-modules/facileManager/classes/class_users.php:545
 #, php-format
 msgid "Password Validity"
 msgstr ""
 
 #: server/fm-install.php:277 server/password_reset.php:93
-#: server/fm-modules/facileManager/classes/class_users.php:547
+#: server/fm-modules/facileManager/classes/class_users.php:546
 #: server/fm-modules/facileManager/js/facileManager.php:967
 #, php-format
 msgid "No Password"
 msgstr ""
 
 #: server/fm-install.php:280 server/password_reset.php:96
-#: server/fm-modules/facileManager/classes/class_users.php:550
+#: server/fm-modules/facileManager/classes/class_users.php:549
 #, php-format
 msgid "Hint"
 msgstr ""
@@ -252,11 +252,11 @@ msgid ""
 "process."
 msgstr ""
 
-#: server/fm-includes/fm-db.php:134
+#: server/fm-includes/fm-db.php:133
 msgid "Query"
 msgstr ""
 
-#: server/fm-includes/fm-db.php:146
+#: server/fm-includes/fm-db.php:145
 msgid "Database error"
 msgstr ""
 
@@ -407,7 +407,7 @@ msgid "Save"
 msgstr ""
 
 #: server/fm-modules/facileManager/functions.php:2832
-#: server/fm-modules/facileManager/classes/class_users.php:726
+#: server/fm-modules/facileManager/classes/class_users.php:725
 msgid "Cancel"
 msgstr ""
 
@@ -693,8 +693,8 @@ msgstr ""
 #: server/fm-modules/facileManager/variables.inc.php:83
 #: server/fm-modules/facileManager/classes/class_settings.php:303
 #: server/fm-modules/facileManager/classes/class_settings.php:707
-#: server/fm-modules/facileManager/classes/class_users.php:425
-#: server/fm-modules/facileManager/classes/class_users.php:433
+#: server/fm-modules/facileManager/classes/class_users.php:424
+#: server/fm-modules/facileManager/classes/class_users.php:432
 msgid "None"
 msgstr ""
 
@@ -716,7 +716,7 @@ msgid "Disabled"
 msgstr ""
 
 #: server/fm-modules/facileManager/variables.inc.php:84
-#: server/fm-modules/facileManager/classes/class_users.php:408
+#: server/fm-modules/facileManager/classes/class_users.php:407
 msgid "Enabled"
 msgstr ""
 
@@ -1050,7 +1050,7 @@ msgid "Required password strength for user accounts."
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_settings.php:302
-#: server/fm-modules/facileManager/classes/class_users.php:527
+#: server/fm-modules/facileManager/classes/class_users.php:526
 msgid "Authentication Method"
 msgstr ""
 
@@ -1439,12 +1439,12 @@ msgid "Authenticate With"
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_users.php:52
-#: server/fm-modules/facileManager/classes/class_users.php:592
+#: server/fm-modules/facileManager/classes/class_users.php:591
 msgid "Group Name"
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_users.php:53
-#: server/fm-modules/facileManager/classes/class_users.php:599
+#: server/fm-modules/facileManager/classes/class_users.php:598
 msgid "Comment"
 msgstr ""
 
@@ -1453,7 +1453,7 @@ msgid "Actions"
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_users.php:95
-#: server/fm-modules/facileManager/classes/class_users.php:224
+#: server/fm-modules/facileManager/classes/class_users.php:223
 msgid "No username defined."
 msgstr ""
 
@@ -1462,7 +1462,7 @@ msgid "No password defined."
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_users.php:100
-#: server/fm-modules/facileManager/classes/class_users.php:226
+#: server/fm-modules/facileManager/classes/class_users.php:225
 msgid "Passwords do not match."
 msgstr ""
 
@@ -1471,13 +1471,13 @@ msgid "No e-mail address defined."
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_users.php:106
-#: server/fm-modules/facileManager/classes/class_users.php:233
+#: server/fm-modules/facileManager/classes/class_users.php:232
 #, php-format
 msgid "Username is too long (maximum %d characters)."
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_users.php:114
-#: server/fm-modules/facileManager/classes/class_users.php:239
+#: server/fm-modules/facileManager/classes/class_users.php:238
 msgid "This user already exists."
 msgstr ""
 
@@ -1490,130 +1490,130 @@ msgstr ""
 msgid "Added user '%s'."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:160
-#: server/fm-modules/facileManager/classes/class_users.php:290
+#: server/fm-modules/facileManager/classes/class_users.php:159
+#: server/fm-modules/facileManager/classes/class_users.php:289
 msgid "No group name defined."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:164
-#: server/fm-modules/facileManager/classes/class_users.php:294
+#: server/fm-modules/facileManager/classes/class_users.php:163
+#: server/fm-modules/facileManager/classes/class_users.php:293
 #, php-format
 msgid "Group name is too long (maximum %d characters)."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:169
-#: server/fm-modules/facileManager/classes/class_users.php:299
+#: server/fm-modules/facileManager/classes/class_users.php:168
+#: server/fm-modules/facileManager/classes/class_users.php:298
 msgid "This group already exists."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:189
+#: server/fm-modules/facileManager/classes/class_users.php:188
 msgid "Could not add the group to the database."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:193
-#: server/fm-modules/facileManager/classes/class_users.php:335
+#: server/fm-modules/facileManager/classes/class_users.php:192
+#: server/fm-modules/facileManager/classes/class_users.php:334
 msgid "Could not associate the users with the group."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:196
+#: server/fm-modules/facileManager/classes/class_users.php:195
 #, php-format
 msgid "Added group '%s'."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:269
+#: server/fm-modules/facileManager/classes/class_users.php:268
 msgid "Could not update the user in the database."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:274
+#: server/fm-modules/facileManager/classes/class_users.php:273
 #, php-format
 msgid "Updated user '%s'."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:289
+#: server/fm-modules/facileManager/classes/class_users.php:288
 msgid "This is a malformed request."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:328
+#: server/fm-modules/facileManager/classes/class_users.php:327
 msgid "Could not update the group in the database."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:339
+#: server/fm-modules/facileManager/classes/class_users.php:338
 #, php-format
 msgid "Updated group '%s'."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:358
+#: server/fm-modules/facileManager/classes/class_users.php:357
 msgid "This user is the LDAP user template and cannot be deleted at this time."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:364
+#: server/fm-modules/facileManager/classes/class_users.php:363
 msgid "This group could not be removed from the associated users."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:370
+#: server/fm-modules/facileManager/classes/class_users.php:369
 #, php-format
 msgid "This %s could not be deleted."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:372
+#: server/fm-modules/facileManager/classes/class_users.php:371
 #, php-format
 msgid "Deleted %s '%s'."
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:422
+#: server/fm-modules/facileManager/classes/class_users.php:421
 msgid "Never"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:505
+#: server/fm-modules/facileManager/classes/class_users.php:504
 msgid "User Login"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:514
+#: server/fm-modules/facileManager/classes/class_users.php:513
 msgid "User Email"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:538
+#: server/fm-modules/facileManager/classes/class_users.php:537
 msgid "User Password"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:558
+#: server/fm-modules/facileManager/classes/class_users.php:557
 msgid "Associated Group"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:568
+#: server/fm-modules/facileManager/classes/class_users.php:567
 msgid "Default Module"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:577
-#: server/fm-modules/facileManager/classes/class_users.php:615
+#: server/fm-modules/facileManager/classes/class_users.php:576
+#: server/fm-modules/facileManager/classes/class_users.php:614
 msgid "Options"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:579
+#: server/fm-modules/facileManager/classes/class_users.php:578
 msgid "Force Password Change at Next Login"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:580
+#: server/fm-modules/facileManager/classes/class_users.php:579
 msgid "Template User"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:605
+#: server/fm-modules/facileManager/classes/class_users.php:604
 msgid "Select one or more users"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:607
+#: server/fm-modules/facileManager/classes/class_users.php:606
 msgid "Associated Users"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:616
+#: server/fm-modules/facileManager/classes/class_users.php:615
 msgid "Verbose Output"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:707
+#: server/fm-modules/facileManager/classes/class_users.php:706
 msgid "Permissions"
 msgstr ""
 
-#: server/fm-modules/facileManager/classes/class_users.php:718
+#: server/fm-modules/facileManager/classes/class_users.php:717
 msgid "Details"
 msgstr ""
 
