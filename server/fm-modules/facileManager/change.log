@@ -1,3 +1,7 @@
+2.1-rc1 (2015-??-??)
+================
+* Server - [improvement] fM upgrades now give the option to backup the database.
+
 2.1-beta1 (2015-??-??)
 ================
 * Server - [feature] Added ability to purge logs. (Issue #212)

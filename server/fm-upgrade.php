@@ -53,6 +53,14 @@ if ($app_compat) {
 
 $step = isset($_GET['step']) ? $_GET['step'] : 0;
 
+if (array_key_exists('backup', $_GET)) {
+	if (!class_exists('fm_tools')) {
+		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
+	}
+	$fm_tools->backupDatabase();
+	header('Location: ' . $GLOBALS['basename']);
+}
+
 $branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
 printHeader(_('Upgrade'), 'install');
@@ -67,8 +75,9 @@ switch ($step) {
 		<img src="%s" /><span>%s</span>
 	</div>
 	<div id="window"><p>', $branding_logo, _('Upgrade'));
+		$backup_button = findProgram('mysqldump') ? sprintf('<a href="?backup" class="button">%s</a>', _('Backup Database')) : null;
 		printf(_("I have detected you recently upgraded %s and its modules, but have not upgraded the database. Click 'Upgrade' to start the upgrade process."), $fm_name);
-		printf('</p><p class="step"><a href="?step=2" class="button click_once">%s</a></p></div>', _('Upgrade'));
+		printf('</p><p class="step"><a href="?step=2" class="button click_once">%s</a> %s</p></div>', _('Upgrade'), $backup_button);
 		break;
 	case 2:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
