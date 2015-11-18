@@ -104,8 +104,6 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	$output = null;
 	if (is_array($_POST['item_id'])) {
 		foreach ($_POST['item_id'] as $id) {
-//			if (!is_numeric($id)) continue;
-			
 			$result = $bulk_class->$bulk_function($id, $_POST['bulk_action']);
 			if (!is_int($result)) $output .= $result . "\n";
 		}

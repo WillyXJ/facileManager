@@ -1,6 +1,7 @@
 2.1-rc1 (2015-??-??)
 ================
 * Server - [improvement] fM upgrades now give the option to backup the database.
+* Server - [bug] Fixed server group bulk actions. (Issue #256)
 
 2.1-beta1 (2015-??-??)
 ================

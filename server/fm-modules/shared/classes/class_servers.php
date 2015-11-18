@@ -38,6 +38,19 @@ class fm_shared_module_servers {
 			exit;
 		}
 		
+		/** Process server group */
+		if ($serial_no[0] == 'g') {
+			$group_servers = $this->getGroupServers(substr($serial_no, 1));
+			
+			if (!is_array($group_servers)) return $group_servers;
+			
+			$response = null;
+			foreach ($group_servers as $serial_no) {
+				if (is_numeric($serial_no)) $response .= $this->doClientUpgrade($serial_no) . "\n";
+			}
+			return $response;
+		}
+		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
 		if (!$fmdb->num_rows) return sprintf(_('%d is not a valid serial number.'), $serial_no);
@@ -192,6 +205,19 @@ class fm_shared_module_servers {
 			exit;
 		}
 		
+		/** Process server group */
+		if ($server_serial_no[0] == 'g') {
+			$group_servers = $this->getGroupServers(substr($server_serial_no, 1));
+			
+			if (!is_array($group_servers)) return $group_servers;
+			
+			$response = null;
+			foreach ($group_servers as $serial_no) {
+				if (is_numeric($serial_no)) $response .= $this->doClientUpgrade($serial_no) . "\n";
+			}
+			return $response;
+		}
+		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($server_serial_no), 'server_', 'server_serial_no');
 		if (!$fmdb->num_rows) return sprintf(_('%d is not a valid serial number.'), $server_serial_no);
@@ -222,7 +248,32 @@ class fm_shared_module_servers {
 		
 		return implode("\n", $response);
 	}
+
 	
+	/**
+	 * Gets all servers in a group
+	 *
+	 * @since 2.1
+	 * @package facileManager
+	 */
+	function getGroupServers($id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', sanitize($id), 'group_', 'group_id');
+		if (!$fmdb->num_rows) return sprintf(_('%d is not a valid group number.'), $id);
+
+		$group_details = $fmdb->last_result[0];
+		$group_masters = (isset($group_details->group_masters)) ? explode(';', $group_details->group_masters) : null;
+		$group_slaves  = (isset($group_details->group_slaves)) ? explode(';', $group_details->group_slaves) : null;
+
+		$group_servers = array_merge($group_masters, $group_slaves);
+		
+		foreach ($group_servers as $key => $id) {
+			$server_serial_nos[] = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
+		}
+		
+		return (array) $server_serial_nos;
+	}
 }
 
 if (!isset($fm_shared_module_servers))
