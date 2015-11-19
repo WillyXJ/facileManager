@@ -1,6 +1,8 @@
 2.1-rc1 (2015-??-??)
 ================
 * Server - [feature] Added support for the NAPTR RR. (Issue #248)
+* Server - [bug] When specifying a server or group override for a config parameter
+           the appropriate servers would not be flagged for a config build. (Issue #257)
 
 2.1-beta1 (2015-11-16)
 ================

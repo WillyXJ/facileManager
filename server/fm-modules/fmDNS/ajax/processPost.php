@@ -92,6 +92,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				$prefix = 'group_';
 				$object = __('server group');
 			}
+			$server_serial_no = $type;
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
@@ -137,7 +138,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'delete':
 			if (isset($id)) {
-				exit(parseAjaxOutput($post_class->delete(sanitize($id), $type, $server_serial_no)));
+				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
 			}
 			break;
 		case 'edit':

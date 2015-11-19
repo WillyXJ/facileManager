@@ -2125,6 +2125,19 @@ function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM
 	if (!$__FM_CONFIG) global $__FM_CONFIG;
 	
 	$serial_no = sanitize($serial_no);
+	/** Process server group */
+	if ($serial_no[0] == 'g') {
+		global $fm_shared_module_servers;
+		
+		$group_servers = $fm_shared_module_servers->getGroupServers(substr($serial_no, 2));
+
+		if (!is_array($group_servers)) return false;
+
+		setBuildUpdateConfigFlag(implode(',', $group_servers), $flag, $build_update, $__FM_CONFIG);
+
+		return true;
+	}
+
 	if ($serial_no) {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_serial_no` IN (" . $serial_no . ") AND `server_installed`='yes'";
 	} else {

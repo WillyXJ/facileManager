@@ -397,7 +397,7 @@ class fm_module_logging {
 	/**
 	 * Deletes the selected logging channel/category
 	 */
-	function delete($id, $type, $server_serial_no = 0) {
+	function delete($id, $server_serial_no = 0, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Check if channel is currently associated with category */
