@@ -481,7 +481,7 @@ HTML;
 		
 		$cfg_id = 0;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
-		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$cfg_data = null;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {

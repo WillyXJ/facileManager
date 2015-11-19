@@ -3,6 +3,8 @@
 * Server - [feature] Added support for the NAPTR RR. (Issue #248)
 * Server - [bug] When specifying a server or group override for a config parameter
            the appropriate servers would not be flagged for a config build. (Issue #257)
+* Server - [bug] Logging channels and categories would always be defined for all
+           servers regardless of server/group selection.
 
 2.1-beta1 (2015-11-16)
 ================
