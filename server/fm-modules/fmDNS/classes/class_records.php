@@ -122,22 +122,8 @@ class fm_dns_records {
 			$this->assignSOA($fmdb->insert_id, $domain_id);
 		}
 
-		if (!$fm_dns_zones) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-
 		/** Update the SOA serial number */
-		foreach ($fm_dns_zones->getZoneTemplateChildren($domain_id) as $child_id) {
-			$domain_id = getParentDomainID($child_id);
-			$soa_count = getSOACount($domain_id);
-			$ns_count = getNSCount($domain_id);
-			if (reloadAllowed($domain_id) && $soa_count && $ns_count) {
-				$this->updateSOAReload($child_id, 'yes');
-			}
-
-			if (in_array($record_type, array('SOA', 'NS')) && $soa_count && $ns_count) {
-				/** Update all associated DNS servers */
-				setBuildUpdateConfigFlag(getZoneServers($child_id), 'yes', 'build');
-			}
-		}
+		$this->processSOAUpdates($domain_id, $record_type, 'add');
 
 		addLogEntry($log_message);
 		return true;
@@ -200,14 +186,20 @@ class fm_dns_records {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		if (!$fm_dns_zones) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-
-		/** Update the SOA serial number */
-		foreach ($fm_dns_zones->getZoneTemplateChildren($domain_id) as $child_id) {
-			$domain_id = getParentDomainID($child_id);
-			if (reloadAllowed($domain_id) && getSOACount($domain_id) && getNSCount($domain_id)) {
-				$this->updateSOAReload($child_id, 'yes');
+		$domain_id_array = array($domain_id);
+		if ($record_type == 'SOA' && !$domain_id) {
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', "AND soa_id='$id'");
+			if ($fmdb->num_rows) {
+				unset($domain_id_array);
+				for ($i=0; $i < $fmdb->num_rows; $i++) {
+					$domain_id_array[] = $fmdb->last_result[$i]->domain_id;
+				}
 			}
+		}
+		
+		/** Update the SOA serial number */
+		foreach ($domain_id_array as $domain_id) {
+			$this->processSOAUpdates($domain_id, $record_type, 'update');
 		}
 
 		addLogEntry($log_message);
@@ -769,6 +761,40 @@ HTML;
 		return false;
 	}
 	
+	
+	/**
+	 * Sets SOA serials and reload flags per domain_id
+	 *
+	 * @since 2.1
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $domain_id domain_id to set
+	 * @param id $record_type Record type to check
+	 * @param id $action Add or update
+	 * @return null
+	 */
+	function processSOAUpdates($domain_id, $record_type, $action) {
+		global $fm_dns_zones;
+		
+		if (!$fm_dns_zones) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+
+		foreach ($fm_dns_zones->getZoneTemplateChildren($domain_id) as $child_id) {
+			$domain_id = getParentDomainID($child_id);
+			$soa_count = getSOACount($domain_id);
+			$ns_count = getNSCount($domain_id);
+			if (reloadAllowed($domain_id) && $soa_count && $ns_count) {
+				$this->updateSOAReload($child_id, 'yes');
+			}
+
+			if ($action == 'add') {
+				if (in_array($record_type, array('SOA', 'NS')) && $soa_count && $ns_count) {
+					/** Update all associated DNS servers */
+					setBuildUpdateConfigFlag(getZoneServers($child_id), 'yes', 'build');
+				}
+			}
+		}
+	}
 	
 }
 

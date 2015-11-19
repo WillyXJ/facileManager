@@ -5,6 +5,8 @@
            the appropriate servers would not be flagged for a config build. (Issue #257)
 * Server - [bug] Logging channels and categories would always be defined for all
            servers regardless of server/group selection.
+* Server - [bug] Updating SOA templates did not set the reload flag for the
+           associated zones. (Issue #259)
 
 2.1-beta1 (2015-11-16)
 ================
