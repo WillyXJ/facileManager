@@ -1,4 +1,4 @@
-2.1-rc1 (2015-??-??)
+2.1-rc1 (2015-11-20)
 ================
 * Server - [feature] Added support for the NAPTR RR. (Issue #248)
 * Server - [bug] When specifying a server or group override for a config parameter
