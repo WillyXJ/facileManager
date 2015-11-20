@@ -2,6 +2,7 @@
 ================
 * Server - [improvement] fM upgrades now give the option to backup the database.
 * Server - [bug] Fixed server group bulk actions. (Issue #256)
+* Server - [bug] Fixed intermittent login issues. (Issue #258)
 
 2.1-beta1 (2015-??-??)
 ================

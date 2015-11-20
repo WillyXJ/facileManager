@@ -171,8 +171,7 @@ class fm_login {
 		/** No auth_method defined */
 		if (getOption('fm_db_version') >= 18) {
 			if (!getOption('auth_method')) {
-				if (!isset($_COOKIE['myid'])) {
-					session_set_cookie_params(strtotime('+1 week'));
+				if (!isset($_COOKIE['fmid'])) {
 					@session_start();
 	
 					$_SESSION['user']['logged_in'] = true;
@@ -184,12 +183,12 @@ class fm_login {
 						$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
 					}
 	
-					setcookie('myid', session_id(), strtotime('+1 week'));
+					setcookie('fmid', session_id(), strtotime('+1 year'));
 				}
 				
-				session_set_cookie_params(strtotime('+1 week'));
-				if (!empty($_COOKIE['myid'])) {
-					@session_id($_COOKIE['myid']);
+				session_set_cookie_params(strtotime('+1 year'));
+				if (!empty($_COOKIE['fmid'])) {
+					@session_id($_COOKIE['fmid']);
 					@session_start();
 				}
 	
@@ -198,12 +197,13 @@ class fm_login {
 		}
 
 		/** Auth method defined so let's validate */
-		if (isset($_COOKIE['myid'])) {
-			$myid = $_COOKIE['myid'];
+		file_put_contents('/tmp/php.log', "cookie: {$_COOKIE['fmid']}\n", FILE_APPEND);
+		if (isset($_COOKIE['fmid'])) {
+			$fmid = $_COOKIE['fmid'];
 				
 			/** Init the session. */
 			session_set_cookie_params(strtotime('+1 week'));
-			session_id($myid);
+			session_id($fmid);
 			@session_start();
 				
 			/** Check if they're logged in. */
@@ -317,18 +317,18 @@ class fm_login {
 	 * @return null
 	 */
 	function logout() {
-		if (isset($_COOKIE['myid'])) {
-			$myid = $_COOKIE['myid'];
+		if (isset($_COOKIE['fmid'])) {
+			$fmid = $_COOKIE['fmid'];
 			
 			// Init the session.
 			session_set_cookie_params(strtotime('+1 week'));
-			session_id($myid);
+			session_id($fmid);
 			@session_start();
 			$this->updateSessionDB($_SESSION['user']['name']);
 			@session_unset($_SESSION['user']);
-			setcookie('myid', '');
+			setcookie('fmid', '');
 			@session_destroy();
-			unset($_COOKIE['myid']);
+			unset($_COOKIE['fmid']);
 		}
 	}
 	
@@ -457,6 +457,7 @@ To reset your password, click the following link:
 		
 		session_set_cookie_params(strtotime('+1 week'));
 		@session_start();
+		session_regenerate_id(true);
 		$_SESSION['user']['logged_in'] = true;
 		$_SESSION['user']['id'] = $user->user_id;
 		$_SESSION['user']['name'] = $user->user_login;
@@ -468,7 +469,7 @@ To reset your password, click the following link:
 		if (getOption('fm_db_version') < 32) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
 		setUserModule($user->user_default_module);
-		setcookie('myid', session_id(), strtotime('+1 week'));
+		setcookie('fmid', session_id(), strtotime('+1 week'));
 	}
 	
 	
