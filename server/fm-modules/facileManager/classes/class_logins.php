@@ -321,7 +321,6 @@ class fm_login {
 			$fmid = $_COOKIE['fmid'];
 			
 			// Init the session.
-			session_set_cookie_params(strtotime('+1 week'));
 			session_id($fmid);
 			@session_start();
 			$this->updateSessionDB($_SESSION['user']['name']);
@@ -455,7 +454,6 @@ To reset your password, click the following link:
 	function setSession($user) {
 		global $fm_name;
 		
-		session_set_cookie_params(strtotime('+1 week'));
 		@session_start();
 		session_regenerate_id(true);
 		$_SESSION['user']['logged_in'] = true;
