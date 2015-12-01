@@ -96,7 +96,8 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	} else {
 		if ($_POST['item_sub_type'] == 'users') {
 			if (currentUserCan('manage_users')) {
-				$form_bits = ($edit_form_data[0]->user_auth_type == 2) ? array('user_login', 'user_email', 'user_perms', 'user_module', 'user_groups') : array('user_login', 'user_email', 'user_options', 'user_perms', 'user_module', 'user_groups');
+				basicGet('fm_users', $id, 'user_', 'user_id');
+				$form_bits = ($fmdb->last_result[0]->user_auth_type == 2) ? array('user_login', 'user_email', 'user_perms', 'user_module', 'user_groups') : array('user_login', 'user_email', 'user_options', 'user_perms', 'user_module', 'user_groups');
 			} else {
 				$form_bits = array('user_password');
 			}

@@ -197,7 +197,6 @@ class fm_login {
 		}
 
 		/** Auth method defined so let's validate */
-		file_put_contents('/tmp/php.log', "cookie: {$_COOKIE['fmid']}\n", FILE_APPEND);
 		if (isset($_COOKIE['fmid'])) {
 			$fmid = $_COOKIE['fmid'];
 				

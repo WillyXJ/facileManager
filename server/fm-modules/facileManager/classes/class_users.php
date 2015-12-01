@@ -475,6 +475,7 @@ HTML;
 		$user_email = $user_default_module = null;
 		$hidden = $user_perm_form = $return_form_rows = null;
 		$user_force_pwd_change = $user_template_only = null;
+		$group_name = $group_comment = $user_group = null;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))

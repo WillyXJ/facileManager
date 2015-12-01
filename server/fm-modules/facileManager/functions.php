@@ -2461,6 +2461,7 @@ function getUserCapabilities($user_id, $type = 'user') {
 		if ($group_id = getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_group')) {
 			return getUserCapabilities($group_id, 'group');
 		}
+		$type = 'user';
 	}
 	$user_capabilities = getNameFromID($user_id, 'fm_' . $type . 's', $type . '_', $type . '_id', $type . '_caps');
 	if (isSerialized($user_capabilities)) $user_capabilities = unserialize($user_capabilities);

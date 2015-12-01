@@ -116,7 +116,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			$user_pass  = sanitize($_POST['password']);
 			
 			$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
-			if ($_POST['is_ajax']) {
+			if (array_key_exists('is_ajax', $_POST) && $_POST['is_ajax']) {
 				if (!$logged_in) {
 					echo 'failed';
 				} elseif (isUpgradeAvailable()) {
