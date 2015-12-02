@@ -326,13 +326,12 @@ class fm_users {
 		
 		if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not update the group in the database.');
 		
-		if (isset($post['group_users']) && is_array($post['group_users'])) {
-			$queries[] = "UPDATE `fm_users` SET `user_group`='0', `user_caps`=NULL WHERE `user_group`='{$post['group_id']}'";
-			$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $post['group_users']) . "')";
-			foreach ($queries as $query) {
-				$fmdb->query($query);
-				if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not associate the users with the group.');
-			}
+		/* Associated users with group */
+		$queries[] = "UPDATE `fm_users` SET `user_group`='0', `user_caps`=NULL WHERE `user_group`='{$post['group_id']}'";
+		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $post['group_users']) . "')";
+		foreach ($queries as $query) {
+			$fmdb->query($query);
+			if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not associate the users with the group.');
 		}
 
 		addLogEntry(sprintf(_("Updated group '%s'."), $post['group_name']));
@@ -552,7 +551,7 @@ HTML;
 				</tr>';
 		}
 		
-		if (in_array('user_groups', $form_bits)) {
+		if (in_array('user_groups', $form_bits) && !userCan($user_id, 'do_everything')) {
 			$user_group_options = buildSelect('user_group', 'user_group', $this->getGroups(), $user_group);
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row">' . _('Associated Group') . '</th>
@@ -759,7 +758,7 @@ PERM;
 		$user_list = null;
 		
 		if ($group_id == null) {
-			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no'");
+			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND user_caps NOT LIKE '%do_everything%'");
 		} else {
 			$query = "SELECT user_id FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} AND user_status!='deleted' AND user_template_only='no' AND user_group=$group_id";
 			$fmdb->get_results($query);
