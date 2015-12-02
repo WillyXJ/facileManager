@@ -923,6 +923,12 @@ HTML;
 		
 		$domain_id_sql = (!empty($domain_id)) ? "AND domain_id!=$domain_id" : null;
 		
+		/** Get zones based on access */
+		if (!currentUserCan('do_everything')) {
+			$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
+			$domain_id_sql .= (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
+		}
+		
 		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE domain_clone_domain_id=0 AND domain_mapping='$map' AND domain_type='master' AND domain_status='active' AND domain_template='no' $domain_id_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {

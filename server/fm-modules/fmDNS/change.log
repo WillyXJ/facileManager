@@ -1,3 +1,8 @@
+2.1 (2015-??-??)
+================
+* Server - [security] Users restricted to specific zones can no longer clone
+           zones they do not have access to.
+
 2.1-rc1 (2015-11-20)
 ================
 * Server - [feature] Added support for the NAPTR RR. (Issue #248)
