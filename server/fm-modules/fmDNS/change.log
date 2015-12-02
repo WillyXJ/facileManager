@@ -1,19 +1,4 @@
-2.1 (2015-??-??)
-================
-* Server - [security] Users restricted to specific zones can no longer clone
-           zones they do not have access to.
-
-2.1-rc1 (2015-11-20)
-================
-* Server - [feature] Added support for the NAPTR RR. (Issue #248)
-* Server - [bug] When specifying a server or group override for a config parameter
-           the appropriate servers would not be flagged for a config build. (Issue #257)
-* Server - [bug] Logging channels and categories would always be defined for all
-           servers regardless of server/group selection.
-* Server - [bug] Updating SOA templates did not set the reload flag for the
-           associated zones. (Issue #259)
-
-2.1-beta1 (2015-11-16)
+2.1 (2015-12-02)
 ================
 * Server - [improvement] Record validation no longer allows a CNAME RR at the
            zone level.
@@ -41,6 +26,15 @@
 * Server - [bug] Fixed RR updates as record append option would default to 'no'.
 * Server - [improvement] Minor performance improvements. (Issue #224)
 * Server - [feature] Added support for IPv6 CIDR notation. (Issue #252)
+* Server - [feature] Added support for the NAPTR RR. (Issue #248)
+* Server - [bug] When specifying a server or group override for a config parameter
+           the appropriate servers would not be flagged for a config build. (Issue #257)
+* Server - [bug] Logging channels and categories would always be defined for all
+           servers regardless of server/group selection.
+* Server - [bug] Updating SOA templates did not set the reload flag for the
+           associated zones. (Issue #259)
+* Server - [security] Users restricted to specific zones can no longer clone
+           zones they do not have access to.
 
 2.0.3 (2015-06-29)
 ==================

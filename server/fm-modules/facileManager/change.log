@@ -1,10 +1,4 @@
-2.1-rc1 (2015-11-20)
-================
-* Server - [improvement] fM upgrades now give the option to backup the database.
-* Server - [bug] Fixed server group bulk actions. (Issue #256)
-* Server - [bug] Fixed intermittent login issues. (Issue #258)
-
-2.1-beta1 (2015-11-16)
+2.1 (2015-12-02)
 ================
 * Server - [feature] Added ability to purge logs. (Issue #212)
 * Client - [feature] Added no-sudoers client option. (Issue #221)
@@ -17,6 +11,9 @@
 * Server - [feature] Added user group support. (Issue #211)
 * Server - [improvement] Upgraded to Font Awesome 4.4.0 and changed some icons.
 * Server - [improvement] Third-party resources now load locally. (Issue #244)
+* Server - [improvement] fM upgrades now give the option to backup the database.
+* Server - [bug] Fixed server group bulk actions. (Issue #256)
+* Server - [bug] Fixed intermittent login issues. (Issue #258)
 
 2.0.3 (2015-06-29)
 ==================
