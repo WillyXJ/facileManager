@@ -3105,7 +3105,7 @@ function groupCan($group_id, $capability, $module = 'facileManager', $extra_perm
 	
 	$group_capabilities = getUserCapabilities($group_id, 'group');
 	
-	return userGroupCan($group_id, $capability, $module, $extra_perm, $group_capabilities);
+	return userGroupCan($group_id, $capability, $module, $extra_perm, $group_capabilities, 'group');
 }
 
 
@@ -3120,9 +3120,10 @@ function groupCan($group_id, $capability, $module = 'facileManager', $extra_perm
  * @param string $module Module name to check capability for
  * @param string $extra_perm Extra capability to check
  * @param array $allowed_capabilities Capabilities granted to the user or group
+ * @param string $type User or Group
  * @return boolean
  */
-function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm = null, $allowed_capabilities = array()) {
+function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm = null, $allowed_capabilities = array(), $type = 'user') {
 	global $fm_name;
 	
 	/** Check if super admin */
@@ -3131,7 +3132,11 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 	/** Handle multiple capabilities */
 	if (is_array($capability)) {
 		foreach ($capability as $cap) {
-			if (userCan($id, $cap, $module, $extra_perm)) return true;
+			if ($type == 'user') {
+				if (userCan($id, $cap, $module, $extra_perm)) return true;
+			} else {
+				if (groupCan($id, $cap, $module, $extra_perm)) return true;
+			}
 		}
 		return false;
 	}

@@ -756,6 +756,8 @@ PERM;
 	function getGroupUsers($group_id = null, $ids = null) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$user_list = null;
+		
 		if ($group_id == null) {
 			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no'");
 		} else {
@@ -772,7 +774,7 @@ PERM;
 			}
 		}
 		
-		return (array) $user_list;
+		return $user_list;
 	}
 
 	
