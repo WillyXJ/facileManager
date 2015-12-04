@@ -2329,9 +2329,11 @@ function handleSortOrder() {
 		} else {
 			$sort_direction = 'DESC';
 		}
+		@session_start();
 		$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']] = array(
 				'sort_field' => $_GET['sort_by'], 'sort_direction' => $swap_direction[$sort_direction]
 			);
+		session_write_close();
 	}
 	
 	$temp_uri = str_replace(array('?sort_by=' . $_GET['sort_by'], '&sort_by=' . $_GET['sort_by']), '', $_SERVER['REQUEST_URI']);

@@ -139,7 +139,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	}
 	
 	$result .= "</pre>\n<p class=\"complete\">" . _('All updates have been processed.') . "</p>\n";
+	session_start();
 	unset($_SESSION['display-rebuild-all']);
+	session_write_close();
 	echo buildPopup('header', _('Updates Results')) . $result . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 
 /** Handle users */

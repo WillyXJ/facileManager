@@ -30,7 +30,9 @@ $directory = ABSPATH . 'fm-modules/' . $fm_name . '/languages';
 $domain = $fm_name;
 $encoding = 'UTF-8';
 
+session_start();
 $_SESSION['language'] = getLanguage($directory);
+session_write_close();
 
 putenv('LANG=' . $_SESSION['language']); 
 setlocale(LC_ALL, $_SESSION['language']);
@@ -56,9 +58,7 @@ if (function_exists('textdomain')) {
  * @return string
  */
 function getLanguage($directory) {
-	session_start();
-
-	if (isset($_SESSION['language'])) $_SESSION['language'];
+	if (@isset($_SESSION['language'])) return $_SESSION['language'];
 	
 	$supported_languages = scandir($directory);
 	$languages = @explode(',', str_replace('-', '_', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
