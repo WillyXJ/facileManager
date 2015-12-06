@@ -148,7 +148,7 @@ class fm_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type', 'update_from_client');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
