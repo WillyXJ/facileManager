@@ -1,3 +1,7 @@
+1.2.1 (2015-12-??)
+==================
+* Server - [bug] fM defined temporary directory was not always used.
+
 1.2 (2015-12-02)
 ================
 * Server - [improvement] Improved performance.

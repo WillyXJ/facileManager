@@ -123,15 +123,17 @@ class fm_settings {
 	function generateSSHKeyPair() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		$tmp = sys_get_temp_dir();
+		if (! $fm_temp_directory = getOption('fm_temp_directory')) {
+			$fm_temp_directory = sys_get_temp_dir();
+		}
 		
 		/** Create the ssh key pair */
-		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f $tmp/fm_id_rsa -N ''", $exec_array, $retval);
-		$array['ssh_key_priv'] = @file_get_contents($tmp . '/fm_id_rsa');
-		$array['ssh_key_pub'] = @file_get_contents($tmp . '/fm_id_rsa.pub');
+		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f $fm_temp_directory/fm_id_rsa -N ''", $exec_array, $retval);
+		$array['ssh_key_priv'] = @file_get_contents($fm_temp_directory . '/fm_id_rsa');
+		$array['ssh_key_pub'] = @file_get_contents($fm_temp_directory . '/fm_id_rsa.pub');
 		
-		@unlink($tmp . '/fm_id_rsa');
-		@unlink($tmp . '/fm_id_rsa.pub');
+		@unlink($fm_temp_directory . '/fm_id_rsa');
+		@unlink($fm_temp_directory . '/fm_id_rsa.pub');
 		
 		if ($retval) {
 			return _('SSH key generation failed.');

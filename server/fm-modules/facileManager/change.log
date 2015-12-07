@@ -4,6 +4,7 @@
 * Server - [bug] Clients would not update the database during installation
            (result of adding #223).
 * Client - [bug] Installer would create the SSH key incorrectly. (Issue #236 #260)
+* Server - [bug] fM defined temporary directory was not always used.
 
 2.1 (2015-12-02)
 ================
