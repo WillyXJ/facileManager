@@ -1,3 +1,7 @@
+2.1.1 (2015-12-??)
+================
+* Server - [bug] Fixed PHP error when changing the server status. (Issue #267)
+
 2.1 (2015-12-02)
 ================
 * Server - [feature] Added ability to purge logs. (Issue #212)
