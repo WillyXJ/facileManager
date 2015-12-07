@@ -3,6 +3,9 @@
 * Server - [bug] Clients would not update the database during installation
            (result of adding #223).
 * Server - [bug] fM defined temporary directory was not always used.
+* Server - [bug] Fixed PHP errors with server configuration builds. (Issue #268)
+* Server - [bug] Configuration options containing $ROOT would not be stored
+           properly on the clients.
 
 2.1.1 (2015-12-05)
 ==================
