@@ -191,6 +191,7 @@ class fm_login {
 					@session_id($_COOKIE['fmid']);
 					@session_start();
 				}
+				session_write_close();
 	
 				return true;
 			}
@@ -215,9 +216,11 @@ class fm_login {
 				
 				/** Should the user be logged in? */
 				if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_status') != 'active') header('Location: ' . $GLOBALS['RELPATH'] . '?logout');
+				session_write_close();
 				
 				return true;
 			}
+			session_write_close();
 		}
 		return false;
 	}
@@ -467,6 +470,7 @@ To reset your password, click the following link:
 
 		setUserModule($user->user_default_module);
 		setcookie('fmid', session_id(), strtotime('+1 week'));
+		session_write_close();
 	}
 	
 	

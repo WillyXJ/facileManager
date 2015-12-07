@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}record
   PRIMARY KEY (`record_id`),
   KEY `idx_domain_id` (`domain_id`),
   KEY `idx_record_status` (`record_status`),
-  KEY `idx_record_account_id` (`account_id`)
+  KEY `idx_record_type` (`record_type`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
 TABLE;
 

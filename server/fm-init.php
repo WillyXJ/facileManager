@@ -78,7 +78,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 		
-		if (!$fm_login->isLoggedIn()) {
+		if (!$is_logged_in = $fm_login->isLoggedIn()) {
 			require_once(ABSPATH . 'fm-includes/init.php');
 			checkAppVersions();
 		}
@@ -90,7 +90,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 		
 		/** Process password resets */
-		if (!$fm_login->isLoggedIn() && array_key_exists('forgot_password', $_GET)) {
+		if (!$is_logged_in && array_key_exists('forgot_password', $_GET)) {
 			$message = array_key_exists('keyInvalid', $_GET) ? sprintf('<p class="failed">%s</p>', _('The specified key is invalid.')) : null;
 			if (count($_POST)) {
 				$result = $fm_login->processUserPwdResetForm($_POST['user_login']);
@@ -111,7 +111,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 		
 		/** Process authentication */
-		if (!$fm_login->isLoggedIn() && is_array($_POST) && count($_POST)) {
+		if (!$is_logged_in && is_array($_POST) && count($_POST)) {
 			$user_login = sanitize($_POST['username']);
 			$user_pass  = sanitize($_POST['password']);
 			
@@ -139,7 +139,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 	
 		/** Enforce authentication */
-		if (!$fm_login->isLoggedIn()) $fm_login->printLoginForm();
+		if (!$is_logged_in) $fm_login->printLoginForm();
 		
 		/** Show/Hide errors */
 		if (getOption('show_errors')) {
@@ -163,14 +163,16 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		/** Ensure selected module is indeed active */
 		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name && !in_array($_SESSION['module'], getActiveModules())) {
+			session_start();
 			$_SESSION['module'] = $fm_name;
+			session_write_close();
 			header('Location: ' . $GLOBALS['RELPATH'] . 'admin-modules.php');
 			exit;
 		}
 		
 		if (!defined('UPGRADE')) {
 			/** Once logged in process the menuing */
-			if ($fm_login->isLoggedIn()) {
+			if ($is_logged_in) {
 				if (isUpgradeAvailable()) {
 					$fm_login->logout();
 					header('Location: ' . $GLOBALS['RELPATH']);
@@ -186,10 +188,15 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		/** Handle pagination record counts */
 		if (array_key_exists('rc', $_GET)) {
+			session_start();
 			$_SESSION['user']['record_count'] = in_array($_GET['rc'], $__FM_CONFIG['limit']['records']) ? $_GET['rc'] : $__FM_CONFIG['limit']['records'][0];
 		} else {
-			$_SESSION['user']['record_count'] = isset($_SESSION['user']['record_count']) ? $_SESSION['user']['record_count'] : $__FM_CONFIG['limit']['records'][0];
+			if (!isset($_SESSION['user']['record_count'])) {
+				session_start();
+				$_SESSION['user']['record_count'] = $__FM_CONFIG['limit']['records'][0];
+			}
 		}
+		session_write_close();
 		
 		/** Debug mode */
 		if (array_key_exists('debug', $_GET)) {

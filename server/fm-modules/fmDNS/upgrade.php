@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.1-rc1', '<') ? upgradefmDNS_2102($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.1.2', '<') ? upgradefmDNS_212($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -660,10 +660,12 @@ TABLE;
 	
 	/** Force rebuild of server configs for Issue #75 */
 	$current_module = $_SESSION['module'];
+	@session_start();
 	$_SESSION['module'] = 'fmDNS';
 	setBuildUpdateConfigFlag(null, 'yes', 'build', $__FM_CONFIG);
 	$_SESSION['module'] = $current_module;
 	unset($current_module);
+	session_write_close();
 	
 	/** Move module options */
 	$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}options`");
@@ -1505,6 +1507,37 @@ function upgradefmDNS_2102($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '2.1-rc1', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 2.1.2 */
+function upgradefmDNS_212($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.1-rc1', '<') ? upgradefmDNS_2102($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` DROP INDEX idx_record_account_id";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD KEY `idx_record_type` (`record_type`)";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.1.2', 'auto', false, 0, $module_name);
 	
 	return true;
 }

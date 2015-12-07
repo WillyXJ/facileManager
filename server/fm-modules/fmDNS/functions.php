@@ -605,20 +605,14 @@ function getModuleBadgeCounts($type) {
 		$domain_count = $fmdb->num_rows;
 		if ($domain_count) $domain_results = $fmdb->last_result;
 		for ($i=0; $i<$domain_count; $i++) {
-			if ($domain_results[$i]->domain_template == 'no') {
-				if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
+			if ($domain_results[$i]->domain_template == 'no' && !$domain_results[$i]->domain_clone_domain_id && 
 					$domain_results[$i]->domain_type == 'master') {
-					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
+				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
+					if (!getSOACount($domain_results[$i]->domain_id)) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
-					}
-				} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-					$domain_results[$i]->domain_type == 'master') {
-					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
+					} elseif (!getNSCount($domain_results[$i]->domain_id)) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
-					}
-				} elseif ($domain_results[$i]->domain_reload != 'no' && !$domain_results[$i]->domain_clone_domain_id && 
-					$domain_results[$i]->domain_type == 'master') {
-					if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
+					} elseif ($domain_results[$i]->domain_reload != 'no') {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
 					}
 				}

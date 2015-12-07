@@ -67,7 +67,9 @@ class fm_accounts {
 		/** Ensure account is active */
 		if ($acct_results[0]->account_status != 'active') return printf(_('Account is %s.') . "\n", $acct_results[0]->account_status);
 		
+		session_start();
 		$_SESSION['user']['account_id'] = $acct_results[0]->account_id;
+		session_write_close();
 		
 		return true;
 	}

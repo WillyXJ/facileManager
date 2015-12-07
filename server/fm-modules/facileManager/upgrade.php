@@ -666,6 +666,7 @@ function upgradeConfig($field, $value, $logit = true) {
 	session_id($_COOKIE['myid']);
 	@session_start();
 	unset($_SESSION['user']['fm_perms']);
+	session_write_close();
 	
 	if ($logit) {
 		include(ABSPATH . 'fm-includes/version.php');
