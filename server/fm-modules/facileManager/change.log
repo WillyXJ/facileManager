@@ -3,6 +3,7 @@
 * Server - [bug] Fixed PHP error when changing the server status. (Issue #267)
 * Server - [bug] Clients would not update the database during installation
            (result of adding #223).
+* Client - [bug] Installer would create the SSH key incorrectly. (Issue #236 #260)
 
 2.1 (2015-12-02)
 ================
