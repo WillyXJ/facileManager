@@ -1,5 +1,10 @@
+2.1.2 (2015-12-??)
+==================
+* Server - [bug] Clients would not update the database during installation
+           (result of adding #223).
+
 2.1.1 (2015-12-05)
-================
+==================
 * Server - [bug] Fixed client installations. (Issue #265)
 
 2.1 (2015-12-02)
