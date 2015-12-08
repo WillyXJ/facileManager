@@ -42,6 +42,9 @@ $domain_info['map']         = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fm
 $domain_info['clone_of']    = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
 $domain_info['template_id'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
 
+/* RR types that allow record append */
+$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
+
 if (isset($_POST['update'])) {
 	if ($_POST['update']['soa_template_chosen']) {
 		global $fm_dns_records;
@@ -51,7 +54,7 @@ if (isset($_POST['update'])) {
 		header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $domain_id . '&record_type=SOA');
 	}
 	
-	$_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update']);
+	$_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update'], $append);
 }
 
 $table_info = array('class' => 'display_results no-left-pad');
@@ -60,7 +63,7 @@ $header = displayTableHeader($table_info, $header_array);
 
 $body = null;
 foreach($_POST as $name => $array) {
-	if (in_array($name, array('create', 'update'))) $body .= createOutput($domain_info, $record_type, $array, $name, $header_array);
+	if (in_array($name, array('create', 'update'))) $body .= createOutput($domain_info, $record_type, $array, $name, $header_array, $append);
 }
 
 printHeader();
@@ -86,7 +89,7 @@ printf('<div id="body_container">
 printFooter();
 
 
-function createOutput($domain_info, $record_type, $data_array, $type, $header_array) {
+function createOutput($domain_info, $record_type, $data_array, $type, $header_array, $append) {
 	global $__FM_CONFIG;
 	
 	$html = null;
@@ -113,7 +116,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 			$value[$id] = $data;
 		} else {
 			$action = ucfirst($type);
-			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type);
+			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type, $append);
 			if (!isset($input_error[$id])) unset($input_error[$id]);
 			$html .= $valid_html;
 			if (is_array($valid_data)) {
@@ -166,10 +169,9 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	return $html;
 }
 
-function validateEntry($action, $id, $data, $record_type) {
+function validateEntry($action, $id, $data, $record_type, $append) {
 	$messages = null;
 	$html = null;
-	$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
 	
 	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';
@@ -305,8 +307,12 @@ function buildInputReturn($action, $id, $key, $val) {
 	return '<input type="hidden" name="' . $action . "[$id][$key]" . '" value="' . $val . "\">\n";
 }
 
-function buildUpdateArray($domain_id, $record_type, $data_array) {
+function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
 	$exclude_keys = array('record_skipped');
+	if (!in_array($record_type, $append)) {
+		$exclude_keys[] = 'record_append';
+	}
+	
 	$sql_records = buildSQLRecords($record_type, $domain_id);
 	if (!count($sql_records) && $record_type == 'SOA') {
 		return $data_array;
