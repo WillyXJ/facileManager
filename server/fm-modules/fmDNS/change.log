@@ -1,4 +1,4 @@
-2.1.2 (2015-12-??)
+2.1.2 (2015-12-07)
 ==================
 * Server - [bug] Clients would not update the database during installation
            (result of adding #223).
@@ -6,7 +6,7 @@
 * Server - [bug] Fixed PHP errors with server configuration builds. (Issue #268)
 * Server - [bug] Configuration options containing $ROOT would not be stored
            properly on the clients.
-* Server - [improvement] Improved performance by up to 80%. (Issue #224)
+* Server - [improvement] Overall performance improvements. (Issue #224)
 
 2.1.1 (2015-12-05)
 ==================

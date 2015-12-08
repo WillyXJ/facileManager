@@ -1,4 +1,4 @@
-1.2.1 (2015-12-??)
+1.2.1 (2015-12-07)
 ==================
 * Server - [bug] fM defined temporary directory was not always used.
 
