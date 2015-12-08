@@ -1,3 +1,7 @@
+2.1.2 (2015-12-08)
+==================
+* Server - [bug] Fixed server config builds. (Issue #269)
+
 2.1.1 (2015-12-07)
 ==================
 * Server - [bug] Fixed PHP error when changing the server status. (Issue #267)

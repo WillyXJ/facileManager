@@ -1,3 +1,7 @@
+1.2.2 (2015-12-08)
+==================
+* Client - [bug] Fixed client upgrade loop.
+
 1.2.1 (2015-12-07)
 ==================
 * Server - [bug] fM defined temporary directory was not always used.
