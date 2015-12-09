@@ -75,6 +75,13 @@ if (!function_exists('curl_init')) {
 	exit(1);
 }
 
+/** Define sys_get_temp_dir function */
+if (!function_exists('sys_get_temp_dir')) {
+	function sys_get_temp_dir() {
+		return '/tmp';
+	}
+}
+
 $config_file = dirname(__FILE__) . '/config.inc.php';
 
 /** Include module functions */
