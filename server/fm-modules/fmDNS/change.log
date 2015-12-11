@@ -1,3 +1,7 @@
+2.1.5 (2015-12-??)
+==================
+* Server - [bug] Editing quoted_string options would not show current value.
+
 2.1.4 (2015-12-10)
 ==================
 * Server - [bug] Fixed include statement within zone clause. (Issue #270)
