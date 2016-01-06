@@ -1,6 +1,8 @@
 2.1.5 (2015-12-??)
 ==================
 * Server - [bug] Editing quoted_string options would not show current value.
+* Server - [bug] Record validation regarding singleton RR types now considers
+           record status. (Issue #274)
 
 2.1.4 (2015-12-10)
 ==================
