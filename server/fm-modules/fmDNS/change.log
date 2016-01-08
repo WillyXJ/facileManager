@@ -1,3 +1,7 @@
+2.1.6 (2016-01-??)
+==================
+* Server - [bug] ACL names that contain spaces are now quoted. (Issue #281)
+
 2.1.5 (2016-01-08)
 ==================
 * Server - [bug] Editing quoted_string options would not show current value.
