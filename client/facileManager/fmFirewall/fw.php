@@ -33,7 +33,7 @@ error_reporting(0);
 $module_name = basename(dirname(__FILE__));
 
 /** Client version */
-$data['server_client_version'] = '1.2';
+$data['server_client_version'] = '1.2.2';
 
 $whoami = 'root';
 $url = null;

@@ -575,10 +575,10 @@ HTML;
 						if (!verifyNumber($post['cfg_data'], 0, 65535)) return $post['cfg_data'] . ' is an invalid port number.';
 						break;
 					case 'quoted_string':
-						$post['cfg_data'] = '"' . trim($post['cfg_data'], '"') . '"';
+						$post['cfg_data'] = '"' . str_replace(array('"', "'"), '', $post['cfg_data']) . '"';
 						break;
 					case 'quoted_string | none':
-						$post['cfg_data'] = '"' . trim($post['cfg_data'], '"') . '"';
+						$post['cfg_data'] = '"' . str_replace(array('"', "'"), '', $post['cfg_data']) . '"';
 						if ($post['cfg_data'] == '"none"') $post['cfg_data'] = 'none';
 						break;
 					case 'address_match_element':

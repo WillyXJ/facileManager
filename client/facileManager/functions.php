@@ -75,6 +75,13 @@ if (!function_exists('curl_init')) {
 	exit(1);
 }
 
+/** Define sys_get_temp_dir function */
+if (!function_exists('sys_get_temp_dir')) {
+	function sys_get_temp_dir() {
+		return '/tmp';
+	}
+}
+
 $config_file = dirname(__FILE__) . '/config.inc.php';
 
 /** Include module functions */
@@ -796,9 +803,10 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			$raw_data = getPostData(str_replace('genserial', 'ssh=key_pub', $url), $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if (strpos($raw_data, 'ssh-rsa') !== false) {
-				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys2'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys2', $raw_data, FILE_APPEND) : true;
+				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys2'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys2', trim($raw_data) . "\n", FILE_APPEND) : true;
 				@chown($ssh_dir . '/authorized_keys2', $user);
-				@chmod($ssh_dir . '/authorized_keys2', 0600);
+				@chmod($ssh_dir . '/authorized_keys2', 0644);
+				@chmod($ssh_dir, 0700);
 				if ($result !== false) $result = 'ok';
 			} else {
 				$result = 'failed';
@@ -908,7 +916,7 @@ function addUser($user_info, $passwd_users) {
 	}
 	
 	if (!$retval) {
-		$ssh_dir = shell_exec("grep $user_name /etc/passwd | awk -F: '{print $6}'");
+		$ssh_dir = trim(shell_exec("grep $user_name /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
 		if ($ssh_dir && $ssh_dir != '/') {
 			createDir($ssh_dir, $user_name);
 			return $ssh_dir;

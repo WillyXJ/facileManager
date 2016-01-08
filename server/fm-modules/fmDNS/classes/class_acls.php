@@ -374,7 +374,11 @@ HTML;
 				} else {
 					$negate = null;
 				}
-				$formatted_acls[] = $negate . getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+				$acl_name = getNameFromID($acl_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls", 'acl_', 'acl_id', 'acl_name', null, 'active');
+				if (strpos($acl_name, ' ') !== false) {
+					$acl_name = "\"$acl_name\"";
+				}
+				$formatted_acls[] = $negate . $acl_name;
 			} elseif (strpos($address, 'domain_') !== false) {
 				$domain_id = str_replace('domain_', '', $address);
 				$formatted_acls[] = getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active');

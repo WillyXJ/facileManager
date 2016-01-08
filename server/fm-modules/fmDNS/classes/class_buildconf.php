@@ -324,10 +324,10 @@ class fm_module_buildconf {
 				/** Include hint zone (root servers) */
 				if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
 				
-				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
+				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 			}
 			/** Build includes */
-			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids);
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir);
 			
 			/** Build rate limits */
 			$config .= $this->getRateLimits(0, $server_serial_no);
@@ -429,11 +429,11 @@ class fm_module_buildconf {
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
-						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
+						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 					}
 
 					/** Build includes */
-					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids);
+					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids, $server_root_dir);
 
 					/** Build rate limits */
 					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
@@ -721,7 +721,7 @@ class fm_module_buildconf {
 						case 'master':
 						case 'slave':
 							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
-							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type). (string) $auto_zone_options;
+							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
 							$files[$server_zones_dir . '/' . $domain_type . '/db.' . $domain_name_file . $file_ext] = $zone_file_contents;
@@ -733,7 +733,7 @@ class fm_module_buildconf {
 							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type). (string) $auto_zone_options;
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
 					}
 					$zones .= "};\n";
 	
@@ -1478,9 +1478,10 @@ HTML;
 	 * @param array $domain_ids The domain_ids of the zone
 	 * @param integer $server_serial_no The server serial number
 	 * @param string $domain_type Type of zone (master, slave, etc.)
+	 * @param array $server_group_ids Server IDs of the server group
 	 * @return string
 	 */
-	function getZoneOptions($domain_ids, $server_serial_no, $domain_type) {
+	function getZoneOptions($domain_ids, $server_serial_no, $domain_type, $server_group_ids) {
 		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		/** Ensure $domain_ids is an array) */
@@ -1525,8 +1526,11 @@ HTML;
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			list($cfg_info, $cfg_comment) = $cfg_data;
 
-			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
+			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
 		}
+
+		/** Build includes */
+		$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, $domain_ids);
 
 		return $config;
 	}
@@ -1610,10 +1614,12 @@ HTML;
 	 * @param string $cfg_name Config option name
 	 * @param string $cfg_info Config option values
 	 * @param string $cfg_comment Config option comment
+	 * @param string $server_root_dir Server root directory
 	 * @param string $tab How the tab should look
+	 * @param string $sql Additional SQL statement
 	 * @return string
 	 */
-	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $tab = "\t\t", $sql = null) {
+	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir = null, $tab = "\t\t", $sql = null) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$config = null;
@@ -1637,8 +1643,6 @@ HTML;
 		/** Parse address_match_element configs */
 		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
-
-		$server_root_dir = getNameFromID(intval($_GET['server_serial_no']), "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
 		
 		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
@@ -1743,15 +1747,18 @@ HTML;
 	 * @param integer $view_id The view_id of the zone
 	 * @param integer $server_serial_no The server serial number for overrides
 	 * @param array   $server_group_ids The array containing server group IDs for overrides
+	 * @param string  $server_root_dir Server root directory
+	 * @param integer $domain_id The ID of the zone
 	 * @return array
 	 */
-	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null) {
+	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0) {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (is_array($server_group_ids)) {
 			$server_group_ids = 'g_' . implode('","g_', $server_group_ids);
 		}
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include" AND view_id=' . $view_id . ' AND domain_id=0 AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
+		$domain_id_sql = is_array($domain_id) ? "domain_id IN ('" . join("','", $domain_id) . "')" : 'domain_id=' . $domain_id;
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include" AND view_id=' . $view_id . ' AND ' . $domain_id_sql . ' AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
 		if ($fmdb->num_rows) {
 			$config_result = $fmdb->last_result;
 			for ($i=0; $i < $fmdb->num_rows; $i++) {
@@ -1764,7 +1771,7 @@ HTML;
 			foreach ($include_config as $cfg_name => $value_array) {
 				foreach ($value_array as $domain_name => $cfg_data) {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, "\t");
+					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 				}
 			}
 			return $include_files;

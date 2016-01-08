@@ -2126,7 +2126,7 @@ function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM
 	
 	$serial_no = sanitize($serial_no);
 	/** Process server group */
-	if ($serial_no[0] == 'g') {
+	if (!empty($serial_no) && $serial_no[0] == 'g') {
 		global $fm_shared_module_servers;
 		
 		$group_servers = $fm_shared_module_servers->getGroupServers(substr($serial_no, 2));
