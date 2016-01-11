@@ -1,4 +1,4 @@
-2.1.6 (2016-01-??)
+2.1.6 (2016-01-10)
 ==================
 * Server - [bug] ACL names that contain spaces are now quoted. (Issue #281)
 
