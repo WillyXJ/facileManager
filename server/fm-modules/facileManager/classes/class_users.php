@@ -389,7 +389,7 @@ class fm_users {
 			if (currentUserCan('manage_users') && $_SESSION['user']['id'] != $row->user_id) {
 				$edit_status = null;
 				if ($row->user_template_only == 'yes') {
-					$edit_status .= '<a class="copy_form_link" href="#">' . $__FM_CONFIG['icons']['copy'] . '</a>';
+					$edit_status .= '<a class="copy_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['copy'] . '</a>';
 				}
 				$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				if ($row->user_template_only == 'no') {
