@@ -629,7 +629,7 @@ HTML;
 	
 
 	/**
-	 * Parses for address_match_element and formats
+	 * Creates a drop down based on the def type options
 	 *
 	 * @since 1.3.5
 	 * @package fmDNS
