@@ -997,4 +997,71 @@ function checkCIDR($cidr, $max_bits) {
 	return verifyNumber($cidr, 0, $max_bits);
 }
 
+
+/**
+ * Builds the view listing in a dropdown menu
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param integer $view_id View ID to select
+ * $param string $class Class name to apply to the div
+ * @return string
+ */
+function buildViewSubMenu($view_id = 0, $server_serial_no = 0, $class = null) {
+	$server_list = buildSelect('view_id', 'view_id', availableViews(), $view_id, 1, null, false, 'this.form.submit()');
+	
+	$hidden_inputs = null;
+	foreach ($GLOBALS['URI'] as $param => $value) {
+		if ($param == 'view_id') continue;
+		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
+	}
+	
+	$class = $class ? 'class="' . $class . '"' : null;
+
+	$return = <<<HTML
+	<div id="configtypesmenu" $class>
+		<form action="{$GLOBALS['basename']}" method="GET">
+		$hidden_inputs
+		$server_list
+		</form>
+	</div>
+HTML;
+
+	return $return;
+}
+
+
+/**
+ * Returns an array of views
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @return array
+ */
+function availableViews() {
+	global $fmdb, $__FM_CONFIG;
+	
+	$array[0][] = __('All Views');
+	$array[0][] = '0';
+	
+	$j = 0;
+	/** Views */
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name', 'view_');
+	if ($fmdb->num_rows) {
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$array[$j+1][] = $results[$i]->view_name;
+			$array[$j+1][] = $results[$i]->view_id;
+			$j++;
+		}
+	}
+	
+	return $array;
+}
+
+
 ?>

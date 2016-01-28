@@ -36,7 +36,10 @@ $response = isset($response) ? $response : null;
 /* Configure options for a view */
 if (array_key_exists('view_id', $_GET)) {
 	$view_id = (isset($_GET['view_id'])) ? sanitize($_GET['view_id']) : null;
-	if (!$view_id) header('Location: ' . $GLOBALS['basename']);
+	if (!$view_id) {
+		header('Location: ' . $GLOBALS['basename']);
+		exit;
+	}
 	
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_id, 'view_', 'view_id');
 	if (!$fmdb->num_rows) header('Location: config-views.php');
@@ -108,6 +111,7 @@ printHeader();
 
 $avail_types = buildSubMenu(strtolower($option_type));
 $avail_servers = buildServerSubMenu($server_serial_no);
+$avail_views = buildViewSubMenu($view_id);
 
 $sort_direction = null;
 $sort_field = 'cfg_name';
@@ -121,6 +125,7 @@ echo <<<HTML
 	<div>
 	<div class="stretch"></div>
 	$avail_types
+	$avail_views
 	$avail_servers
 	</div>
 </div>
