@@ -756,7 +756,7 @@ tbody {
 	position: relative;
 	font-size: 14px;
 }
-#configtypesmenu:nth-child(3) {
+#configtypesmenu:nth-child(n+3) {
 	top: -3px;
 }
 
