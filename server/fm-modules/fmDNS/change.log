@@ -1,6 +1,7 @@
 3.0 (2016-?-?)
 ==================
 * Server - [improvement] Updated help file.
+* Server - [bug] Fixed audit logging of zone edits.
 
 2.1.6 (2016-01-24)
 ==================

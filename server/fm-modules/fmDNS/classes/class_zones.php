@@ -398,7 +398,7 @@ class fm_dns_zones {
 		if ($fmdb->sql_errors) return __('Could not update zone because a database error occurred.') . ' ' . $fmdb->last_error;
 		
 		/** Return if there are no changes */
-		if ($rows_affected + $fmdb->rows_affected = 0) return true;
+		if ($rows_affected + $fmdb->rows_affected == 0) return true;
 
 		/** Set the server_build_config flag for new servers */
 		if (getSOACount($domain_id) && getNSCount($domain_id)) {
