@@ -414,21 +414,9 @@ class fm_module_servers {
 			$server_serial_no = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 			if ($fmdb->num_rows) {
-
-				/** Update all associated domains */
-				$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers`='s_{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
-				$fmdb->query($query);
-				if ($fmdb->num_rows) {
-					$result = $this->updateNameServerAssignments($fmdb->last_result, $fmdb->num_rows, 's_' . $server_id);
-					if ($result !== true) {
-						return $result;
-					}
-				}
-
 				/** Delete associated config options */
-				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
-					return __('The associated server configs could not be deleted because a database error occurred.');
-				}
+				$delete_status = $this->deleteServerSpecificConfigs($server_serial_no, 's_' . $server_id);
+				if ($delete_status !== true) return $delete_status;
 
 				/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
 				if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false) === false) {
@@ -447,16 +435,9 @@ class fm_module_servers {
 		} else {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $server_id, 'group_', 'group_id');
 			if ($fmdb->num_rows) {
-
-				/** Update all associated domains */
-				$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;g_{$server_id};%' OR `domain_name_servers` LIKE '%;g_{$server_id}' OR `domain_name_servers` LIKE 'g_{$server_id};%' OR `domain_name_servers`='g_{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
-				$fmdb->query($query);
-				if ($fmdb->num_rows) {
-					$result = $this->updateNameServerAssignments($fmdb->last_result, $fmdb->num_rows, 'g_' . $server_id);
-					if ($result !== true) {
-						return $result;
-					}
-				}
+				/** Delete associated config options */
+				$delete_status = $this->deleteServerSpecificConfigs('g_' . $server_id, 'g_' . $server_id);
+				if ($delete_status !== true) return $delete_status;
 
 				/** Delete group */
 				$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
@@ -1075,6 +1056,53 @@ FORM;
 		}
 		
 		return false;
+	}
+
+	/**
+	 * Deletes associated configs during server/group deletion
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param integer $server_serial_no Server serial number to query by
+	 * @param string $server_id Server/Group ID to query by
+	 * @return array
+	 */
+	function deleteServerSpecificConfigs($server_serial_no, $server_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Update all associated domains */
+		$query = "SELECT domain_id,domain_name_servers FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE (`domain_name_servers` LIKE '%;{$server_id};%' OR `domain_name_servers` LIKE '%;{$server_id}' OR `domain_name_servers` LIKE '{$server_id};%' OR `domain_name_servers`='{$server_id}') AND `account_id`='{$_SESSION['user']['account_id']}'";
+		$fmdb->query($query);
+		if ($fmdb->num_rows) {
+			$result = $this->updateNameServerAssignments($fmdb->last_result, $fmdb->num_rows, $server_id);
+			if ($result !== true) {
+				return $result;
+			}
+		}
+
+		/** Delete associated config options */
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
+			return __('The associated server configs could not be deleted because a database error occurred.');
+		}
+
+		/** Delete associated views */
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $server_serial_no, 'view_', 'deleted', 'server_serial_no') === false) {
+			return __('The associated views could not be deleted because a database error occurred.');
+		}
+
+		/** Delete associated ACLs */
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $server_serial_no, 'acl_', 'deleted', 'server_serial_no') === false) {
+			return __('The associated ACLs could not be deleted because a database error occurred.');
+		}
+		
+		/** Delete associated controls */
+		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', $server_serial_no, 'control_', 'deleted', 'server_serial_no') === false) {
+			return __('The associated controls could not be deleted because a database error occurred.');
+		}
+		
+		return true;
 	}
 }
 

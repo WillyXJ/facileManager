@@ -1542,4 +1542,25 @@ function upgradefmDNS_212($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+	/** Remove stale entries from server/group deletes */
+	$servers[] = 0;
+	$query = "SELECT server_serial_no FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` WHERE server_status!='deleted'";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		for($i=0; $i<$fmdb->num_rows; $i++) {
+			$servers[] = $fmdb->last_result[$i]->server_serial_no;
+		}
+	}
+	$query = "SELECT group_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` WHERE group_status!='deleted'";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		for($i=0; $i<$fmdb->num_rows; $i++) {
+			$servers[] = 'g_' . $fmdb->last_result[$i]->group_id;
+		}
+	}
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET control_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET view_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+
 ?>
