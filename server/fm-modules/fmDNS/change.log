@@ -5,6 +5,8 @@
 * Server - [feature] Added views menu to config options page. (Issue #262)
 * Server - [bug] When deleting servers or server groups, associated configs
            were not being deleted.
+* Server - [feature] Reworked the ACL configuration page to support additional
+           comments on each ACL element. (Issue #206)
 
 2.1.6 (2016-01-24)
 ==================

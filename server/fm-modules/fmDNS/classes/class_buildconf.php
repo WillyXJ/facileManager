@@ -153,61 +153,46 @@ class fm_module_buildconf {
 			
 			
 			/** Build ACLs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="0"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=0 AND acl_status="active" AND server_serial_no="0"');
 			if ($fmdb->num_rows) {
 				$acl_result = $fmdb->last_result;
 				for ($i=0; $i < $fmdb->num_rows; $i++) {
-					if ($acl_result[$i]->acl_predefined != 'as defined:') {
-						$global_acl_array[$acl_result[$i]->acl_name] = array($acl_result[$i]->acl_predefined, $acl_result[$i]->acl_comment);
-					} else {
-						$addresses = explode(',', $acl_result[$i]->acl_addresses);
-						$global_acl_array[$acl_result[$i]->acl_name] = null;
-						foreach($addresses as $address) {
-							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
-						}
-						$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
+					$global_acl_array[$acl_result[$i]->acl_name] = null;
+					foreach(explode(',', $acl_result[$i]->acl_addresses) as $address) {
+						if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
 					}
+					$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
 				}
 			} else $global_acl_array = array();
 
 			$server_acl_array = array();
 			/** Override with group-specific configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=0 AND acl_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
 				if ($fmdb->num_rows) {
 					$server_acl_result = $fmdb->last_result;
 					$acl_config_count = $fmdb->num_rows;
 					for ($j=0; $j < $acl_config_count; $j++) {
-						if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
-						} else {
-							$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
-							$server_acl_addresses = null;
-							foreach($addresses as $address) {
-								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
-							}
-							$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+						$server_acl_addresses = null;
+						foreach(explode(',', $server_acl_result[$j]->acl_addresses) as $address) {
+							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
 						}
+						$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 					}
 				}
 			}
 
 			/** Override with server-specific ACLs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="' . $server_serial_no . '"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=0 AND acl_status="active" AND server_serial_no="' . $server_serial_no . '"');
 			if ($fmdb->num_rows) {
 				$server_acl_result = $fmdb->last_result;
 				$acl_config_count = $fmdb->num_rows;
 				for ($j=0; $j < $acl_config_count; $j++) {
-					if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-						$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
-					} else {
-						$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
-						$server_acl_addresses = null;
-						foreach($addresses as $address) {
-							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
-						}
-						$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+					$server_acl_addresses = null;
+					foreach(explode(',', $server_acl_result[$j]->acl_addresses) as $address) {
+						if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
 					}
+					$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 				}
 			}
 

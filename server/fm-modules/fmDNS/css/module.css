@@ -20,34 +20,34 @@ tr.import_swap select {
 	white-space: nowrap;
 }
 
-.clones td p {
+.subelements td p {
 	margin: 0 0 0 .5em;
 }
 
-.clones p span.record-additions {
+.subelements p span.record-additions {
 	color: green;
 	font-size: 8pt;
 }
-.clones p span.record-additions:before {
+.subelements p span.record-additions:before {
 	content: '+';
 }
 
-.clones p span.record-subtractions {
+.subelements p span.record-subtractions {
 	color: red;
 	font-size: 8pt;
 }
-.clones p span.record-subtractions:before {
+.subelements p span.record-subtractions:before {
 	content: '-';
 }
 
-img.clone_remove,
-a.clone_edit img {
+img.subelement_remove,
+a.subelement_edit img {
 	position: relative;
 	top: 2px;
 	cursor: pointer;
 	width: 12px;
 }
-a.clone_edit {
+a.subelement_edit {
 	margin-left: 7px;
 }
 p.soa_import {
@@ -199,7 +199,7 @@ td > .template-icon {
 	margin-left: 7px;
 }
 
-#table_edits > tbody > tr.clones > td {
+#table_edits > tbody > tr.subelements > td {
 	vertical-align: top;
 }
 
