@@ -227,8 +227,8 @@ class fm_dns_acls {
 		$element_names = $element_comment = null;
 		foreach ($edit_addresses as $element_id => $element_array) {
 			$comment = $element_array['element_comment'] ? $element_array['element_comment'] : '&nbsp;';
-			$element_names .= '<p class="subelement' . $element_id . '">' . $element_array['element_addresses'] . 
-					$element_array['element_edit'] . $element_array['element_delete'] . "</p>\n";
+			$element_names .= '<p class="subelement' . $element_id . '"><span>' . $element_array['element_addresses'] . 
+					'</span>' . $element_array['element_edit'] . $element_array['element_delete'] . "</p>\n";
 			$element_comment .= '<p class="subelement' . $element_id . '">' . $comment . '</p>' . "\n";
 		}
 		if ($element_names) $classes[] = 'subelements';

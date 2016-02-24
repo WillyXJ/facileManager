@@ -20,36 +20,6 @@ tr.import_swap select {
 	white-space: nowrap;
 }
 
-.subelements td p {
-	margin: 0 0 0 .5em;
-}
-
-.subelements p span.record-additions {
-	color: green;
-	font-size: 8pt;
-}
-.subelements p span.record-additions:before {
-	content: '+';
-}
-
-.subelements p span.record-subtractions {
-	color: red;
-	font-size: 8pt;
-}
-.subelements p span.record-subtractions:before {
-	content: '-';
-}
-
-img.subelement_remove,
-a.subelement_edit img {
-	position: relative;
-	top: 2px;
-	cursor: pointer;
-	width: 12px;
-}
-a.subelement_edit {
-	margin-left: 7px;
-}
 p.soa_import {
 	width: 100%;
 	font-size: 11px;
