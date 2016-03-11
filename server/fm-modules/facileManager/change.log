@@ -1,3 +1,7 @@
+2.1.5 (2016-03-11)
+==================
+* Server - [bug] Fixed module changes. (Issue #292)
+
 2.1.4 (2016-01-24)
 ==================
 * Server - [bug] Fixed duplicating template user (result of adding #211).
