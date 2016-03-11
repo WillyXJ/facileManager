@@ -156,7 +156,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 
 		/** Handle module change request */
 		if (isset($_REQUEST['module']) && !isset($_REQUEST['action'])) {
+			session_start();
 			setUserModule($_REQUEST['module']);
+			session_write_close();
 			header('Location: ' . $GLOBALS['RELPATH']);
 			exit;
 		}

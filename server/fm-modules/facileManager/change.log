@@ -1,7 +1,11 @@
-2.1.5 (2016-?-?)
+2.1.x (2016-?-?)
 ==================
 * Server - [improvement] Updated help file.
 * Server - [improvement] CSS tweaks.
+
+2.1.5 (2016-03-11)
+==================
+* Server - [bug] Fixed module changes. (Issue #292)
 
 2.1.4 (2016-01-24)
 ==================
