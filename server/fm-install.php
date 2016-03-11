@@ -221,7 +221,7 @@ function processSetup() {
 			exit(displaySetup(mysql_error()));
 		}
 		if ($db_selected) {
-			$tables = @mysql_query(sanitize('SHOW TABLES FROM ' . $dbname . ';'), $link);
+			$tables = @mysql_query(sanitize('SHOW TABLES FROM `' . $dbname . '`;'), $link);
 			@mysql_close($link);
 			if (@mysql_num_rows($tables)) {
 				exit(displaySetup(_('Database already exists and contains one or more tables.<br />Please choose a different name.')));
@@ -311,7 +311,7 @@ function processAccountSetup($link, $database) {
 		exit(displayAccountSetup(_('Username and password cannot be empty.')));
 	}
 	
-	$query = "INSERT INTO $database.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
+	$query = "INSERT INTO `$database`.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
 	$result = mysql_query($query, $link) or die(mysql_error());
 	
 	addLogEntry(sprintf(_("Installer created user '%s'"), $user), $fm_name, $link);
@@ -325,7 +325,7 @@ function processAccountSetup($link, $database) {
  * @subpackage Installer
  */
 function checkAccountCreation($link, $database) {
-	$query = "SELECT user_id FROM $database.fm_users WHERE user_id='1'";
+	$query = "SELECT user_id FROM `$database`.fm_users WHERE user_id='1'";
 	$result = mysql_query($query, $link);
 	
 	return ($result === false || ($result && @mysql_num_rows($result))) ? true : false;

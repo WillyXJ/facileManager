@@ -1,6 +1,10 @@
-1.2.3 (2016-?-?)
+1.2.4 (2016-??-??)
 ==================
 * Server - [improvement] Updated help file.
+
+1.2.3 (2016-03-11)
+==================
+* Server - [bug] Enclosed database references in backticks in SQL statements. (Issue #290)
 
 1.2.2 (2015-12-08)
 ==================
