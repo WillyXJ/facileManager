@@ -27,7 +27,7 @@ function installfmFirewallSchema($link = null, $database, $module, $noisy = 'noi
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `group_type` enum('object','service') NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (
   `object_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `object_type` enum('host','network') NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}object
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}policies` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}policies` (
   `policy_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` int(10) NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}polici
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}servers` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` int(10) NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}server
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (
   `service_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `service_type` enum('icmp','tcp','udp') NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}servic
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}time` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}time` (
   `time_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `time_name` varchar(255) NOT NULL,
@@ -138,25 +138,25 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG[$module]['prefix']}time` 
 TABLE;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'version'
+	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'version'
 		AND module_name='$module');
 INSERT;
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'client_version'
+	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'client_version'
 		AND module_name='$module');
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
 	SELECT '1', 'host', '$fm_name', '{$_SERVER['SERVER_ADDR']}', '255.255.255.255', '$fm_name Server' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
 	object_type = 'host' AND object_name = '$fm_name' AND account_id = '1'
 	);
 INSERT;
@@ -164,37 +164,37 @@ INSERT;
 
 	/** Default networks */
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
 	SELECT '1', 'network', 'net-10.0.0.0', '10.0.0.0', '255.0.0.0', '10.0.0.0/8 - This block is reserved for use in private networks and should not appear on the public Internet. Its intended use is documented in RFC1918.' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
 	object_type = 'network' AND object_name = 'net-10.0.0.0' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
 	SELECT '1', 'network', 'net-172.16.0.0', '172.16.0.0', '255.240.0.0', '172.16.0.0/12 - This block is reserved for use in private networks and should not appear on the public Internet. Its intended use is documented in RFC1918.' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
 	object_type = 'network' AND object_name = 'net-172.16.0.0' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
 	SELECT '1', 'network', 'net-192.168.0.0', '192.168.0.0', '255.255.0.0', '192.168.0.0/16 - This block is reserved for use in private networks and should not appear on the public Internet. Its intended use is documented in RFC1918.' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
 	object_type = 'network' AND object_name = 'net-192.168.0.0' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` (account_id, object_type, object_name, object_address, object_mask, object_comment) 
 	SELECT '1', 'network', 'All Multicasts', '224.0.0.0', '240.0.0.0', '224.0.0.0/4 - This block, formerly known as the Class D address space, is allocated for use in IPv4 multicast address assignments. The IANA guidelines for assignments from this space are described in RFC3171.' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}objects` WHERE 
 	object_type = 'network' AND object_name = 'All Multicasts' AND account_id = '1'
 	);
 INSERT;
@@ -210,64 +210,64 @@ INSERT;
 
 	/** Default ICMP Services */
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
 	SELECT '1', 'icmp', 'Any ICMP', '-1', '-1' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = 'icmp' AND service_name = 'Any ICMP' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
 	SELECT '1', 'icmp', 'Ping Reply', '0', '0' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = 'icmp' AND service_name = 'Ping Reply' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
 	SELECT '1', 'icmp', 'Ping Request', '8', '0' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = 'icmp' AND service_name = 'Ping Request' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
 	SELECT '1', 'icmp', 'Ping Unreachable', '3', '3' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = 'icmp' AND service_name = 'Ping Unreachable' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
 	SELECT '1', 'icmp', 'Host Unreachable', '3', '1' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = 'icmp' AND service_name = 'Host Unreachable' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code, service_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code, service_comment) 
 	SELECT '1', 'icmp', 'Time Exceeded', '11', '0', 'Traceroute requires this type of ICMP messages.' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = 'icmp' AND service_name = 'Time Exceeded' AND account_id = '1'
 	);
 INSERT;
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_icmp_type, service_icmp_code) 
 	SELECT '1', 'icmp', 'Time Exceeded in Transit', '11', '1' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = 'icmp' AND service_name = 'Time Exceeded in Transit' AND account_id = '1'
 	);
 INSERT;
@@ -398,10 +398,10 @@ INSERT;
 		list($protocol, $name, $src_port, $dest_port, $tcp_flags, $comment) = $array;
 		
 		$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_src_ports, service_dest_ports, service_tcp_flags, service_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` (account_id, service_type, service_name, service_src_ports, service_dest_ports, service_tcp_flags, service_comment) 
 	SELECT '1', '$protocol', '$name', '$src_port', '$dest_port', '$tcp_flags', '$comment' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}services` WHERE 
 	service_type = '$protocol' AND service_name = '$name' AND account_id = '1'
 	);
 INSERT;
@@ -447,7 +447,7 @@ INSERT;
 			list($protocol, $name) = explode('|', $item);
 			if ($protocol == 'group') {
 				if ($link) {
-					$query = "SELECT * FROM $database.fm_{$__FM_CONFIG[$module]['prefix']}groups WHERE group_status!='deleted'
+					$query = "SELECT * FROM `$database`.fm_{$__FM_CONFIG[$module]['prefix']}groups WHERE group_status!='deleted'
 								AND account_id=1 AND group_name='$name' LIMIT 1";
 					$result = mysql_query($query, $link);
 					$temp_result = mysql_fetch_object($result);
@@ -459,7 +459,7 @@ INSERT;
 				$prefix = 'g';
 			} else {
 				if ($link) {
-					$query = "SELECT * FROM $database.fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s WHERE {$group_type}_status!='deleted'
+					$query = "SELECT * FROM `$database`.fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s WHERE {$group_type}_status!='deleted'
 								AND account_id=1 AND {$group_type}_name='$name' AND {$group_type}_type = '$protocol' LIMIT 1";
 					$result = mysql_query($query, $link);
 					$temp_result = mysql_fetch_object($result);
@@ -475,10 +475,10 @@ INSERT;
 
 		$group_items = implode(';', $group_ids);
 		$group_inserts[] = <<<INSERT
-INSERT INTO $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups` (account_id, group_type, group_name, group_items, group_comment) 
+INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}groups` (account_id, group_type, group_name, group_items, group_comment) 
 	SELECT '1', '$group_type', '$group_name', '$group_items', '$comment' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT * FROM $database.`fm_{$__FM_CONFIG[$module]['prefix']}groups` WHERE 
+	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}groups` WHERE 
 	group_type = '$group_type' AND group_name = '$group_name' AND account_id = '1'
 	);
 INSERT;
