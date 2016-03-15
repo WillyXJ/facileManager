@@ -4,6 +4,7 @@
 * Server - [bug] Fixed server configuration builds.
 * Client - [bug] Fixed client interface detection.
 * Server - [bug] Included missing upgrade function to define proper indexes.
+* Server - [bug] Fixed module badge counts.
 
 1.2.3 (2016-03-11)
 ==================
