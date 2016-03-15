@@ -87,7 +87,7 @@ class fm_module_objects {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the object because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not add the object because a database error occurred.');
 
 		addLogEntry("Added object:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
 				"Address: {$post['object_address']} / {$post['object_mask']}\nComment: {$post['object_comment']}");
@@ -120,7 +120,7 @@ class fm_module_objects {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}objects` SET $sql WHERE `object_id`={$post['object_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the object because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not update the object because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;

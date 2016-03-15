@@ -90,7 +90,7 @@ class fm_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
@@ -106,7 +106,7 @@ class fm_module_servers {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not add the server because a database error occurred.');
 		
 		/** Add default fM interaction rules */
 		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
@@ -117,9 +117,9 @@ class fm_module_servers {
 		$default_rules[] = array(
 								'account_id' => $account_id,
 								'server_serial_no' => $post['server_serial_no'],
-								'source_items' => 'o' . $fm_host_id,
+								'source_items' => array('o' . $fm_host_id),
 								'destination_items' => '',
-								'services_items' => implode(';', $fm_service_id),
+								'services_items' => $fm_service_id,
 								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
 							);
 		$default_rules[] = array(
@@ -127,8 +127,8 @@ class fm_module_servers {
 								'server_serial_no' => $post['server_serial_no'],
 								'policy_direction' => 'out',
 								'source_items' => '',
-								'destination_items' => 'o' . $fm_host_id,
-								'services_items' => implode(';', $fm_service_id),
+								'destination_items' => array('o' . $fm_host_id),
+								'services_items' => $fm_service_id,
 								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
 							);
 
@@ -151,7 +151,7 @@ class fm_module_servers {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client');
 
 		$sql_edit = null;
 		
@@ -167,7 +167,7 @@ class fm_module_servers {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the server because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not update the server because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -362,7 +362,7 @@ HTML;
 		return $return_form;
 	}
 	
-	function buildServerConfig($serial_no) {
+	function buildServerConfig($serial_no, $action = 'buildconf', $friendly_action = 'Configuration Build') {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Check serial number */
@@ -371,8 +371,7 @@ HTML;
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
-		
-		$response = null;
+		$options[] = $response = null;
 		
 		switch($server_update_method) {
 			case 'cron':

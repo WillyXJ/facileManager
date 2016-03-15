@@ -27,12 +27,12 @@
 if (array_key_exists('action', $_POST)) {
 	/** Process building of the server config */
 	if ($_POST['action'] == 'buildconf') {
-		$data = $fm_module_buildconf->buildServerConfig($_POST);
+		list($data, $message) = $fm_module_buildconf->buildServerConfig($_POST);
 	}
 	
 	/** Process building of whatever is required */
 	if ($_POST['action'] == 'cron') {
-		$data = $fm_module_buildconf->buildCronConfigs($_POST);
+		list($data, $message) = $fm_module_buildconf->buildCronConfigs($_POST);
 	}
 	
 	/** Process updating the tables */

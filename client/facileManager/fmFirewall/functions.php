@@ -220,7 +220,13 @@ function moduleAddServer($url, $data) {
 
 
 function versionCheck($app_version, $serverhost, $compress) {
-	$url = $serverhost . '/buildconf';
+	/*
+	 * return true until this function is actually required
+	 * currently there are no features that are version-dependent
+	 */
+	return true;
+	
+	$url = $serverhost . '/buildconf.php';
 	$data['action'] = 'version_check';
 	$server_type = detectFirewallType();
 	$data['server_type'] = $server_type['type'];
@@ -279,7 +285,7 @@ function getInterfaceNames($os) {
 	
 	switch(PHP_OS) {
 		case 'Linux':
-			$command = findProgram('ifconfig') . ' | grep Link';
+			$command = findProgram('ifconfig') . ' | grep "Link "';
 			break;
 		case 'Darwin':
 		case 'FreeBSD':

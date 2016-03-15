@@ -86,7 +86,7 @@ class fm_module_time {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the time because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not add the time because a database error occurred.');
 
 		/** Format weekdays */
 		$weekdays = $this->formatDays($post['time_weekdays']);
@@ -124,7 +124,7 @@ class fm_module_time {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time` SET $sql WHERE `time_id`={$post['time_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the time because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not update the time because a database error occurred.');
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
