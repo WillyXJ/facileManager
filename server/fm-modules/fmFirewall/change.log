@@ -1,6 +1,14 @@
-1.2.4 (2016-??-??)
+1.2.5 (2016-??-??)
 ==================
 * Server - [improvement] Updated help file.
+
+1.2.4 (2016-03-15)
+==================
+* Server - [bug] Fixed client installations. (Issue #293)
+* Server - [bug] Fixed server configuration builds.
+* Client - [bug] Fixed client interface detection.
+* Server - [bug] Included missing upgrade function to define proper indexes.
+* Server - [bug] Fixed module badge counts.
 
 1.2.3 (2016-03-11)
 ==================

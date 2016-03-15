@@ -30,7 +30,7 @@ function upgradefmFirewallSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-rc1', '<') ? upgradefmFirewall_01006($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.1.1', '<') ? upgradefmFirewall_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
@@ -196,7 +196,7 @@ function upgradefmFirewall_01006($__FM_CONFIG, $running_version) {
 }
 
 /** 1.1.1 */
-function upgradefmFirewall_0111($__FM_CONFIG, $running_version) {
+function upgradefmFirewall_111($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
 	$success = version_compare($running_version, '1.0-rc1', '<') ? upgradefmFirewall_01006($__FM_CONFIG, $running_version) : true;
@@ -236,6 +236,5 @@ function upgradefmFirewall_0111($__FM_CONFIG, $running_version) {
 	
 	return true;
 }
-
 
 ?>
