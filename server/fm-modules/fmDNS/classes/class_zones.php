@@ -354,12 +354,15 @@ class fm_dns_zones {
 
 		/** Update the child zones */
 		if ($post['domain_template'] == 'yes') {
-			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_view='{$post['domain_view']}' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
-			$result = $fmdb->query($query);
+			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_view='{$post['domain_view']}' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
+			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET domain_name_servers='{$post['domain_name_servers']}' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
+			foreach ($query_arr as $query) {
+				$result = $fmdb->query($query);
 
-			if ($fmdb->sql_errors) return __('Could not update the child zones because a database error occurred.');
+				if ($fmdb->sql_errors) return __('Could not update the child zones because a database error occurred.');
 
-			$rows_affected += $fmdb->rows_affected;
+				$rows_affected += $fmdb->rows_affected;
+			}
 		}
 
 		/** Add mandatory config options */
@@ -1400,8 +1403,9 @@ HTML;
 			}
 			$post = $new_post;
 			unset($new_post, $post['domain_template']);
-			$post['domain_type'] = getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
-			$post['domain_view'] = getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+			$post['domain_type'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+			$post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+			$post['domain_name_servers'] = explode(';', getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
 
 			return $post;
 		} else {

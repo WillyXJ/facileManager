@@ -1542,6 +1542,30 @@ function upgradefmDNS_212($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 2.1.8 */
+function upgradefmDNS_218($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.1.2', '<') ? upgradefmDNS_212($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` AS d1, `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` AS d2
+		SET d1.domain_name_servers=d2.domain_name_servers
+		WHERE d1.domain_template_id=d2.domain_id";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.1.8', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
 /** 3.0-alpha1 */
 function upgradefmDNS_3001($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;

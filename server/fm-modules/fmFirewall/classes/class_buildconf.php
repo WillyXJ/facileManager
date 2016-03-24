@@ -148,8 +148,7 @@ class fm_module_buildconf {
 			}
 			
 			/** process server config build */
-			$config = $this->buildServerConfig($post_data);
-			return array($config, null);
+			return $this->buildServerConfig($post_data);
 			
 		}
 		
