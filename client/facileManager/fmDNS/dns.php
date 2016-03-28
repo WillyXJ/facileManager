@@ -28,21 +28,15 @@
  *
  */
 
+/** Client version */
+$data['server_client_version'] = '2.1.4';
+
 error_reporting(0);
 
 $module_name = basename(dirname(__FILE__));
 
-/** Client version */
-$data['server_client_version'] = '2.1.4';
-
-$whoami = 'root';
-$url = null;
-
 /** Check for options */
-$dryrun = (in_array('-n', $argv) || in_array('dryrun', $argv)) ? true : false;
-$buildconf = (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : false;
 $zones = (in_array('-z', $argv) || in_array('zones', $argv)) ? true : false;
-$cron = (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 $dump_cache = in_array('dump-cache', $argv) ? true : false;
 $clear_cache = in_array('clear-cache', $argv) ? true : false;
 
@@ -62,24 +56,8 @@ for ($i=0; $i < count($argv); $i++) {
 	}
 }
 
-/** Check running user */
-if (exec(findProgram('whoami')) != $whoami && !$dryrun) {
-	echo fM("This script must run as $whoami.\n");
-	exit(1);
-}
-
 /** Check if running supported version */
 $data['server_version'] = detectDaemonVersion();
-
-/** Build everything required via cron */
-if ($cron) {
-	$data['action'] = 'cron';
-}
-
-/** Build the server config */
-if ($buildconf) {
-	$data['action'] = 'buildconf';
-}
 
 /** Build the zone files */
 if ($zones) {
@@ -95,10 +73,6 @@ if ($dump_cache) {
 if ($clear_cache) {
 	manageCache('flush', 'Clearing cache');
 }
-
-/** Set variables to pass */
-$url = $proto . '://' . FMHOST . 'buildconf.php';
-$data['dryrun'] = $dryrun;
 
 /** Build the configs provided by $url */
 $retval = buildConf($url, $data);

@@ -29,26 +29,6 @@
  */
 
 
-/**
- * Prints the module help file
- *
- * @since 1.0
- * @package fmFirewall
- *
- * @return null
- */
-function printModuleHelp () {
-	global $argv;
-	
-	echo <<<HELP
-  -n|dryrun      Do not save - just output what will happen
-  -b|buildconf   Build named config and zone files
-  -c|cron        Run in cron mode
-  
-HELP;
-}
-
-
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
 	global $argv;
 	
@@ -87,8 +67,6 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 
 function buildConf($url, $data) {
 	global $proto, $debug;
-	
-	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
@@ -178,28 +156,6 @@ function detectFWVersion($return_array = false) {
 	}
 	
 	return null;
-}
-
-
-function moduleAddServer($url, $data) {
-	/** Add the server to the account */
-	$app = detectFWVersion(true);
-	if ($app === null) {
-		echo "failed\n\n";
-		echo fM("Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n");
-		exit(1);
-	}
-	$data['server_type'] = $app['server']['type'];
-	$data['server_version'] = $app['app_version'];
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	if (!is_array($raw_data)) {
-		if (!$raw_data) echo "An error occurred\n";
-		else echo $raw_data;
-		exit(1);
-	}
-	
-	return array('data' => $data, 'add_result' => "Success\n");
 }
 
 

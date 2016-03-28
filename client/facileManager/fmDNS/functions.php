@@ -41,10 +41,7 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-  -n|dryrun      Do not save - just output what will happen
-  -b|buildconf   Build named config and zone files
   -z|zones       Build all associated zone files
-  -c|cron        Run in cron mode
      dump-cache  Dump the DNS cache
      clear-cache Clear the DNS cache
      id=XX       Specify the individual DomainID to build and reload
@@ -90,8 +87,6 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 
 function buildConf($url, $data) {
 	global $proto, $debug, $purge;
-	
-	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
@@ -201,7 +196,7 @@ function detectServerType() {
 }
 
 
-function moduleAddServer($url, $data) {
+function moduleAddServer() {
 	/** Attempt to determine default variables */
 	$named_conf = findFile('named.conf', array('/etc/named', '/etc/namedb', '/etc/bind'));
 	$data['server_run_as_predefined'] = 'named';
@@ -225,24 +220,7 @@ function moduleAddServer($url, $data) {
 	}
 	$data['server_chroot_dir'] = detectChrootDir();
 	
-	/** Add the server to the account */
-	$app = detectDaemonVersion(true);
-	if ($app === null) {
-		echo "failed\n\n";
-		echo fM("Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n");
-		exit(1);
-	}
-	$data['server_type'] = $app['server']['type'];
-	$data['server_version'] = $app['app_version'];
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	if (!is_array($raw_data)) {
-		if (!$raw_data) echo "An error occurred\n";
-		else echo $raw_data;
-		exit(1);
-	}
-	
-	return array('data' => $data, 'add_result' => "Success\n");
+	return $data;
 }
 
 

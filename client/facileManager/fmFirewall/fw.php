@@ -28,20 +28,12 @@
  *
  */
 
-error_reporting(0);
-
-$module_name = basename(dirname(__FILE__));
-
 /** Client version */
 $data['server_client_version'] = '1.2.4';
 
-$whoami = 'root';
-$url = null;
+error_reporting(0);
 
-/** Check for options */
-$dryrun = (in_array('-n', $argv) || in_array('dryrun', $argv)) ? true : false;
-$buildconf = (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : false;
-$cron = (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
+$module_name = basename(dirname(__FILE__));
 
 /** Include shared client functions */
 $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
@@ -52,33 +44,8 @@ if (file_exists($fm_client_functions)) {
 	exit(1);
 }
 
-/** Check running user */
-if (exec(findProgram('whoami')) != $whoami && !$dryrun) {
-	echo fM("This script must run as $whoami.\n");
-	exit(1);
-}
-
 /** Check if running supported version */
 $data['server_version'] = detectFWVersion();
-
-/** Build everything required via cron */
-if ($cron) {
-	$data['action'] = 'cron';
-}
-
-/** Build the server config */
-if ($buildconf) {
-	$data['action'] = 'buildconf';
-}
-
-/** Build the zone files */
-if ($zones) {
-	$data['action'] = 'zones';
-}
-
-/** Set variables to pass */
-$url = $proto . '://' . FMHOST . 'buildconf.php';
-$data['dryrun'] = $dryrun;
 
 /** Build the configs provided by $url */
 $retval = buildConf($url, $data);

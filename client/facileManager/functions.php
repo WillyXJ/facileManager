@@ -29,6 +29,8 @@
 
 error_reporting(0);
 $compress = true;
+$whoami = 'root';
+$url = null;
 
 /** Check if PHP is CGI */
 if (strpos(php_sapi_name(), 'cgi') !== false) {
@@ -42,6 +44,9 @@ $debug		= (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
 $proto		= (in_array('-s', $argv) || in_array('no-ssl', $argv)) ? 'http' : 'https';
 $purge		= (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
 $no_sudoers	= (in_array('no-sudoers', $argv)) ? true : false;
+$dryrun		= (in_array('-n', $argv) || in_array('dryrun', $argv)) ? true : false;
+$buildconf	= (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : false;
+$cron		= (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
@@ -81,6 +86,24 @@ if (!function_exists('sys_get_temp_dir')) {
 		return '/tmp';
 	}
 }
+
+/** Check running user */
+if (exec(findProgram('whoami')) != $whoami && !$dryrun) {
+	echo fM("This script must run as $whoami.\n");
+	exit(1);
+}
+
+/** Build everything required via cron */
+if ($cron) {
+	$data['action'] = 'cron';
+}
+
+/** Build the server config */
+if ($buildconf) {
+	$data['action'] = 'buildconf';
+}
+
+$data['dryrun'] = $dryrun;
 
 $config_file = dirname(__FILE__) . '/config.inc.php';
 
@@ -143,11 +166,16 @@ if (!socketTest($server_path['hostname'], $port, 20)) {
 	}
 }
 
+/** Set variables to pass */
+$url = $proto . '://' . FMHOST . 'buildconf.php';
+
 /** Run the upgrader */
 if (in_array('upgrade', $argv)) {
 	upgradeFM($proto . '://' . FMHOST . 'admin-servers.php?upgrade', $data);
 }
 
+/** Display dry-run messaging */
+if ($dryrun && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 
 
 /** ============================================================================================= */
@@ -157,11 +185,14 @@ function printHelp () {
 	
 	echo <<<HELP
 php {$argv[0]} [options]
-  -h|help        Display this help
-  -v|version     Display the client version
+  -b|buildconf   Build server configuration and associated files
+  -c|cron        Run in cron mode
   -d|debug       Enter debug mode for more output
+  -h|help        Display this help
+  -n|dryrun      Do not save any files - just output what will happen
   -p|purge       Delete old configuration files before writing
   -s|no-ssl      Do not use SSL to retrieve the configs
+  -v|version     Display the client version
      no-sudoers  Do not create/update the sudoers file at install time
      no-update   Do not update the server configuration from the client
 
@@ -295,7 +326,7 @@ function installFM($proto, $compress) {
 
 	/** Add new server */
 	echo fM('  --> Adding ' . $data['server_name'] . ' to the database...');
-	$add_server_result = moduleAddServer($url, $data);
+	$add_server_result = addServer($url, $data);
 	extract($add_server_result, EXTR_OVERWRITE);
 	echo fM($add_result);
 
@@ -1266,6 +1297,52 @@ function findFile($file, $addl_path = null) {
 	}
 
 	return false;
+}
+
+
+/**
+ * Adds the server to the database
+ *
+ * @since 2.2
+ * @package facileManager
+ *
+ * @param string $url URL to post data to
+ * @param array $data Data to post
+ * @return array
+ */
+function addServer($url, $data) {
+	$app = array(null, null);
+	
+	/** Get module-specific data */
+	if (function_exists('moduleAddServer')) {
+		$module_data = moduleAddServer();
+		if (is_array($module_data)) {
+			$data = array_merge($data, $module_data);
+		}
+	}
+	
+	/** Detect the app version of the module to manage */
+	if (function_exists('detectAppVersion')) {
+		$app = detectAppVersion(true);
+	}
+	if ($app === null) {
+		echo "failed\n\n";
+		echo fM("Cannot find a supported application to manage - please check the README document for supported applications.  Aborting.\n");
+		exit(1);
+	}
+	$data['server_type'] = $app['server']['type'];
+	$data['server_version'] = $app['app_version'];
+
+	/** Add the server to the account */
+	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	if (!is_array($raw_data)) {
+		if (!$raw_data) echo "An error occurred\n";
+		else echo $raw_data;
+		exit(1);
+	}
+	
+	return array('data' => $data, 'add_result' => "Success\n");
 }
 
 ?>
