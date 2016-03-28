@@ -1076,6 +1076,30 @@ FORM;
 		
 		return false;
 	}
+
+	/**
+	 * Builds an array of all servers in a group
+	 *
+	 * @since 2.2
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param integer $group_id Group ID to lookup
+	 * @return array
+	 */
+	function getGroupServerIDs($group_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$query = "SELECT group_masters, group_slaves FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` WHERE 
+			`account_id`='{$_SESSION['user']['account_id']}' AND `group_status`='active' AND `group_id`=$group_id";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$servers = array_merge((array) @explode(';', $fmdb->last_result[0]->group_masters), (array) @explode(';', $fmdb->last_result[0]->group_slaves));
+			return array_unique($servers);
+		}
+		
+		return false;
+	}
 }
 
 if (!isset($fm_module_servers))

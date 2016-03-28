@@ -1,3 +1,7 @@
+2.2 (2016-0?-??)
+==================
+* Server - [bug] Dump and clear cache tools now honor the server selection.
+
 2.1.8 (2016-03-24)
 ==================
 * Server - [bug] Zones based on a template were not honoring the DNS server
