@@ -1,6 +1,7 @@
 2.2 (2016-0?-??)
 ==================
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
+* Client - [feature] Added the client 'reinstall' option.
 
 2.1.5 (2016-03-11)
 ==================

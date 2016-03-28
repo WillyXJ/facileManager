@@ -120,8 +120,8 @@ $data['server_os_distro'] = detectOSDistro();
 $data['update_from_client']	= (in_array('no-update', $argv)) ? false : true;
 
 /** Run the installer */
-if (in_array('install', $argv)) {
-	if (file_exists($config_file)) {
+if (in_array(array('install', 'reinstall'), $argv)) {
+	if (file_exists($config_file) && in_array('reinstall', $argv)) {
 		require ($config_file);
 		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO')) {
 			$proto = (socketTest(FMHOST, 443)) ? 'https' : 'http';
@@ -212,6 +212,7 @@ HELP;
   
      install     Install the client components
      upgrade     Upgrade the client components
+     reinstall   Reinstall the client components
 
 HELP;
 	exit;
