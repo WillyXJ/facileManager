@@ -265,14 +265,6 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#manage_item_contents").delegate("#server_update_method", "change", function(e) {
-		if ($(this).val() == "cron") {
-			$("#server_update_port_option").slideUp();
-		} else {
-			$("#server_update_port_option").show("slow");
-		}
-	});
-
 	$("#manage_item_contents").delegate("#cfg_destination", "change", function(e) {
 		if ($(this).val() == "file") {
 			$("#syslog_options").slideUp();

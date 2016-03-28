@@ -16,35 +16,11 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | http://www.facilemanager.com/modules/fmfirewall/                             |
  +-------------------------------------------------------------------------+
 */
 
 class fm_module_buildconf {
-	
-	/**
-	 * Processes the server configs
-	 *
-	 * @since 1.0
-	 * @package fmFirewall
-	 *
-	 * @param array $files_array Array containing named files and contents
-	 * @return string
-	 */
-	function processConfigs($raw_data) {
-		$preview = null;
-		
-		$check_status = null;
-		
-		foreach ($raw_data['files'] as $filename => $contents) {
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $filename . ":\n";
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $contents . "\n\n";
-		}
-
-		return array($preview, $check_status);
-	}
 	
 	/**
 	 * Generates the server config and updates the firewall server

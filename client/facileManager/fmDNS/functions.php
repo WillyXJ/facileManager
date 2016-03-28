@@ -190,22 +190,6 @@ function buildConf($url, $data) {
 }
 
 
-function findFile($file) {
-	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2', '/usr/local/etc/apache22',
-				'/etc', '/usr/local/etc', '/etc/apache2', '/etc', '/etc/named', '/etc/namedb', '/etc/bind'
-				);
-
-	while ($this_path = current($path)) {
-		if (is_file("$this_path/$file")) {
-			return "$this_path/$file";
-		}
-		next($path);
-	}
-
-	return false;
-}
-
-
 function detectServerType() {
 	$supported_servers = array('bind9'=>'named');
 	
@@ -219,7 +203,7 @@ function detectServerType() {
 
 function moduleAddServer($url, $data) {
 	/** Attempt to determine default variables */
-	$named_conf = findFile('named.conf');
+	$named_conf = findFile('named.conf', array('/etc/named', '/etc/namedb', '/etc/bind'));
 	$data['server_run_as_predefined'] = 'named';
 	if ($named_conf) {
 		if (function_exists('posix_getgrgid')) {

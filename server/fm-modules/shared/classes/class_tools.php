@@ -20,13 +20,18 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_tools {
+class fm_shared_module_tools {
 	
 	/**
-	 * Tests server connectivity
+	 * Tests client connectivity
+	 *
+	 * @since 2.2
+	 * @package facileManager
+	 *
+	 * @return string
 	 */
 	function connectTests() {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_tools;
 		
 		$return = null;
 		
@@ -88,15 +93,27 @@ class fm_module_tools {
 					
 				} else $return .=  __('failed') . ' (tcp/' . $results[$x]->server_update_port . ')';
 			} else $return .= __('skipping (host updates via cron)');
-			$return .=  "\n\n";
+			$return .=  "\n";
+			
+			/** Module-specific connection tests */
+			$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
+			if (file_exists($module_tools_file)) {
+				if (!class_exists('fm_module_tools')) include($module_tools_file);
+				
+				$return .= $fm_module_tools->connectTests($results[$x]);
+			}
+			
+			$return .=  "\n";
 		}
+		
+		@unlink($temp_ssh_key);
 		
 		return $return;
 	}
 	
 }
 
-if (!isset($fm_module_tools))
-	$fm_module_tools = new fm_module_tools();
+if (!isset($fm_shared_module_tools))
+	$fm_shared_module_tools = new fm_shared_module_tools();
 
 ?>

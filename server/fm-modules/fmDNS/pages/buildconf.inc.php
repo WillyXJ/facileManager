@@ -22,35 +22,11 @@
  +-------------------------------------------------------------------------+
 */
 
-/** Process action */
 if (array_key_exists('action', $_POST)) {
-	/** Process building of the server config */
-	if ($_POST['action'] == 'buildconf') {
-		list($data, $message) = $fm_module_buildconf->buildServerConfig($_POST);
-	}
-	
 	/** Process building of zone files */
 	if ($_POST['action'] == 'zones') {
 		list($data, $message) = $fm_module_buildconf->buildZoneConfig($_POST);
 	}
-	
-	/** Process building of whatever is required */
-	if ($_POST['action'] == 'cron') {
-		$data = $fm_module_buildconf->buildCronConfigs($_POST);
-	}
-	
-	/** Process updating the tables */
-	if ($_POST['action'] == 'update') {
-		$data = $fm_module_buildconf->updateReloadFlags($_POST);
-	}
-	
-	/** Output $data */
-	if (!empty($data)) {
-		if ($_POST['compress']) echo gzcompress(serialize($data));
-		else echo serialize($data);
-	}
-	
-	$fm_module_buildconf->updateServerVersion();
 }
 
 ?>

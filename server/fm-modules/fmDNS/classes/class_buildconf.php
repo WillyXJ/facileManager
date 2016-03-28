@@ -21,46 +21,6 @@
 */
 
 class fm_module_buildconf {
-
-	/**
-	 * Processes the server configs
-	 *
-	 * @since 1.0
-	 * @package fmDNS
-	 *
-	 * @param array $files_array Array containing named files and contents
-	 * @return string
-	 */
-	function processConfigs($raw_data) {
-		$preview = null;
-		
-		$check_status = @$this->namedSyntaxChecks($raw_data);
-		foreach ($raw_data['files'] as $filename => $contents) {
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $filename . ":\n";
-			$preview .= str_repeat('=', 75) . "\n";
-			if (strpos($check_status, 'error') !== false) {
-				$i = 1;
-				$contents_array = explode("\n", $contents);
-				foreach ($contents_array as $line) {
-					$preview .= '<font color="#ccc">' . str_pad($i, strlen(count($contents_array)), ' ', STR_PAD_LEFT) . '</font> ';
-					if (strpos($check_status, "$filename:$i:") !== false) {
-						$preview .= sprintf('<font color="red">%s</font>', $line);
-					} else {
-						$preview .= $line;
-					}
-					$preview .= "\n";
-					$i++;
-				}
-				$preview .= "\n";
-			} else {
-				$preview .= "$contents\n\n";
-			}
-		}
-		
-		return array($preview, $check_status);
-	}
-	
 	
 	/**
 	 * Generates the server config and updates the DNS server
@@ -836,16 +796,14 @@ class fm_module_buildconf {
 							$file_ext = ($zone_result->domain_mapping == 'forward') ? 'hosts' : 'rev';
 
 							/** Are there multiple zones with the same name? */
-					if (isset($zone_result->parent_domain_id)) {
-						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->parent_domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result->parent_domain_id . ".$file_ext";
-					} else {
-						$zone_result->parent_domain_id = $zone_result->domain_id;
-						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
-					}
-//							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result->domain_id);
-//							if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
+							if (isset($zone_result->parent_domain_id)) {
+								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->parent_domain_id);
+								if ($fmdb->num_rows) $file_ext = $zone_result->parent_domain_id . ".$file_ext";
+							} else {
+								$zone_result->parent_domain_id = $zone_result->domain_id;
+								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->domain_id);
+								if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
+							}
 							
 							/** Build zone file */
 							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result);
@@ -855,14 +813,14 @@ class fm_module_buildconf {
 						}
 					}
 				}
-				if (is_array($data->files)) return get_object_vars($data);
+				if (is_array($data->files)) return array(get_object_vars($data), null);
 			} else {
 				/** process server config build */
 				list($config, $message) = $this->buildServerConfig($post_data);
 				$config['server_build_all'] = true;
 				$config['purge_config_files'] = $data->purge_config_files;
 				
-				return $config;
+				return array($config, $message);
 			}
 			
 		}
@@ -1132,40 +1090,6 @@ class fm_module_buildconf {
 	
 	
 	/**
-	 * Updates tables to reset flags
-	 *
-	 * @since 1.0
-	 * @package fmDNS
-	 */
-	function updateReloadFlags($post_data) {
-		global $fmdb, $__FM_CONFIG;
-		
-		$server_serial_no = sanitize($post_data['SERIALNO']);
-		extract($post_data);
-		
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			$data = $result[0];
-			extract(get_object_vars($data), EXTR_SKIP);
-
-			$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') || !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
-			$msg = "Success.\n";
-			if (isset($built_domain_ids)) {
-				$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
-			}
-			if (isset($reload_domain_ids)) {
-				$query = "DELETE FROM `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "track_reloads` WHERE `server_serial_no`='" . sanitize($server_serial_no) . "' AND domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
-				$fmdb->query($query);
-			}
-		} else $msg = "DNS server is not found.\n";
-		
-		if ($compress) echo gzcompress(serialize($msg));
-		else echo serialize($msg);
-	}
-	
-	
-	/**
 	 * Sets cloned details to that of the parent domain
 	 *
 	 * @since 1.0
@@ -1193,21 +1117,6 @@ class fm_module_buildconf {
 		}
 		
 		return false;
-	}
-	
-	
-	/**
-	 * Updates the daemon version number in the database
-	 *
-	 * @since 1.0
-	 * @package fmDNS
-	 */
-	function updateServerVersion() {
-		global $fmdb, $__FM_CONFIG;
-		
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_version`='" . $_POST['server_version'] . "', `server_os`='" . $_POST['server_os'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
-			(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
-		$fmdb->query($query);
 	}
 	
 	
@@ -1777,6 +1686,44 @@ HTML;
 			return $include_files;
 		} else {
 			return null;
+		}
+	}
+	
+	/**
+	 * Processes the server config checks
+	 *
+	 * @since 2.2
+	 * @package fmDNS
+	 *
+	 * @param array $raw_data Array containing named files and contents
+	 * @return string
+	 */
+	function processConfigsChecks($raw_data) {
+		return @$this->namedSyntaxChecks($raw_data);
+	}
+	
+	
+	/**
+	 * Updates tables to reset flags
+	 *
+	 * @since 2.2
+	 * @package fmDNS
+	 *
+	 * @param integer $server_serial_no Server serial number
+	 * @param array $post_data Array containing data sent by the client
+	 * @return null
+	 */
+	function moduleUpdateReloadFlags($server_serial_no, $post_data) {
+		global $fmdb, $__FM_CONFIG;
+		
+		extract($post_data);
+		
+		if (isset($built_domain_ids)) {
+			$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
+		}
+		if (isset($reload_domain_ids)) {
+			$query = "DELETE FROM `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "track_reloads` WHERE `server_serial_no`='" . sanitize($server_serial_no) . "' AND domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
+			$fmdb->query($query);
 		}
 	}
 }

@@ -25,7 +25,10 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_tools.php');
+$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
+if (file_exists($module_tools_file)) {
+	include($module_tools_file);
+}
 
 $response = null;
 if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
@@ -34,7 +37,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 			case 'connect-test':
 				$response = buildPopup('header', _('Connectivity Test Results'));
 				$response .= '<pre>' . "\n";
-				$response .= $fm_module_tools->connectTests();
+				$response .= $fm_shared_module_tools->connectTests();
 				$response .= '</pre>' . "\n";
 				break;
 		}

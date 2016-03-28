@@ -1238,4 +1238,34 @@ function deleteFile($file, $debug = false, $dryrun = false) {
 	return true;
 }
 
+
+/**
+ * Finds specified file
+ *
+ * @since 2.2
+ * @package facileManager
+ *
+ * @param string $file Filename to find
+ * @param array $addl_path Additional paths to search
+ * @return string or boolean
+ */
+function findFile($file, $addl_path = null) {
+	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2',
+				'/usr/local/etc/apache22', '/etc/apache2', '/etc', '/usr/local/etc',
+				'/etc');
+	
+	if (is_array($addl_path)) {
+		$path = array_unique(array_merge($path, $addl_path));
+	}
+
+	while ($this_path = current($path)) {
+		if (is_file("$this_path/$file")) {
+			return "$this_path/$file";
+		}
+		next($path);
+	}
+
+	return false;
+}
+
 ?>

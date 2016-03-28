@@ -357,84 +357,17 @@ BODY;
 	/**
 	 * Tests server connectivity
 	 */
-	function connectTests() {
+	function connectTests($server_data) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		/** dns tests */
+		$connect_test = "\t" . str_pad(__('DNS:'), 15);
+		$port = 53;
+		if (socketTest($server_data->server_name, $port, 10)) $connect_test .=  __('success') . ' (tcp/' . $port . ')';
+		else $connect_test .=  __('failed') . ' (tcp/' . $port . ')';
+		$connect_test .=  "\n";
 		
-		/** Load ssh key for use */
-		$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-		$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
-		if ($ssh_key) {
-			if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-			$ssh_key_loaded = @file_put_contents($temp_ssh_key, $ssh_key);
-			@chmod($temp_ssh_key, 0400);
-		}
-		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-
-		/** Get server list */
-		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
-		
-		/** Process server list */
-		$num_rows = $fmdb->num_rows;
-		$results = $fmdb->last_result;
-		for ($x=0; $x<$num_rows; $x++) {
-			$return .= sprintf(__("Running tests for %s\n"), $results[$x]->server_name);
-			
-			/** ping tests */
-			$return .= "\t" . str_pad(__('Ping:'), 15);
-			if (pingTest($results[$x]->server_name)) $return .=  __('success');
-			else $return .=  __('failed');
-			$return .=  "\n";
-
-			/** remote port tests */
-			$return .= "\t" . str_pad(__('Remote Port:'), 15);
-			if ($results[$x]->server_update_method != 'cron') {
-				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
-					$return .= __('success') . ' (tcp/' . $results[$x]->server_update_port . ")\n";
-					
-					if ($results[$x]->server_update_method == 'ssh') {
-						$return .= "\t" . str_pad(__('SSH Login:'), 15);
-						if (!$ssh_key) {
-							$return .= __('no SSH key defined');
-						} elseif ($ssh_key_loaded === false) {
-							$return .= sprintf(__('could not load SSH key into %s'), $temp_ssh_key);
-						} elseif (!$ssh_user) {
-							$return .= __('no SSH user defined');
-						} else {
-							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} uptime", $post_result, $retval);
-							if ($retval) {
-								$return .= __('ssh key login failed');
-							} else {
-								$return .= __('success');
-							}
-						}
-					} else {
-						/** php tests */
-						$return .= "\t" . str_pad(__('http page:'), 15);
-						$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
-									$_SESSION['module'] . '/reload.php', null);
-						if ($php_result == 'Incorrect parameters defined.') $return .= __('success');
-						else $return .= __('failed');
-					}
-					
-				} else $return .=  __('failed') . ' (tcp/' . $results[$x]->server_update_port . ')';
-			} else $return .= __('skipping (host updates via cron)');
-			$return .=  "\n";
-			
-			/** dns tests */
-			$return .= "\t" . str_pad(__('DNS:'), 15);
-			$port = 53;
-			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  __('success') . ' (tcp/' . $port . ')';
-			else $return .=  __('failed') . ' (tcp/' . $port . ')';
-			$return .=  "\n";
-
-			$return .=  "\n";
-		}
-		
-		@unlink($temp_ssh_key);
-		
-		return $return;
+		return $connect_test;
 	}
 	
 	
