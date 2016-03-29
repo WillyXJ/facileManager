@@ -120,6 +120,7 @@ class fm_module_servers {
 								'source_items' => array('o' . $fm_host_id),
 								'destination_items' => '',
 								'services_items' => $fm_service_id,
+								'policy_options' => $__FM_CONFIG['fw']['policy_options']['established']['bit'],
 								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
 							);
 		$default_rules[] = array(
@@ -129,6 +130,7 @@ class fm_module_servers {
 								'source_items' => '',
 								'destination_items' => array('o' . $fm_host_id),
 								'services_items' => $fm_service_id,
+								'policy_options' => $__FM_CONFIG['fw']['policy_options']['established']['bit'],
 								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
 							);
 

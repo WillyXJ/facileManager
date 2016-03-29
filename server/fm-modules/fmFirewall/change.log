@@ -3,6 +3,8 @@
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
 * Client - [improvement] Client app is renamed to client.php to standardize
            all module client apps.
+* Server - [improvement] When the "Established connection packet" box is checked
+           on a policy, the RELATED state is appended. (Issue #295)
 
 1.2.5 (2016-03-16)
 ==================

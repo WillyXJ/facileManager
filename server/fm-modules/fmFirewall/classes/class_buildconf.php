@@ -213,7 +213,7 @@ class fm_module_buildconf {
 			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' -m state --state NEW' : null;
 
 			/** Handle established option */
-			$keep_state .= ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? ',ESTABLISHED' : null;
+			$keep_state .= ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? ',ESTABLISHED,RELATED' : null;
 
 			/** Handle frags */
 			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? ' -f' : null;
