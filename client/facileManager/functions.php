@@ -32,8 +32,8 @@ $compress = true;
 $whoami = 'root';
 $url = null;
 
-/** Check if PHP is CGI */
-if (strpos(php_sapi_name(), 'cgi') !== false) {
+/** Check if PHP is CGI for CLI operations */
+if (strpos(php_sapi_name(), 'cgi') !== false && count($argv)) {
 	echo fM("Your server is running a CGI version of PHP and the CLI version is required.\n\n");
 	exit(1);
 }
@@ -121,7 +121,7 @@ $data['update_from_client']	= (in_array('no-update', $argv)) ? false : true;
 
 /** Run the installer */
 if (in_array(array('install', 'reinstall'), $argv)) {
-	if (file_exists($config_file) && in_array('reinstall', $argv)) {
+	if (file_exists($config_file) && in_array('install', $argv)) {
 		require ($config_file);
 		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO')) {
 			$proto = (socketTest(FMHOST, 443)) ? 'https' : 'http';
@@ -348,15 +348,6 @@ function installFM($proto, $compress) {
 	
 	echo fM("Installation is complete. Please login to the UI to ensure the server settings are correct.\n");
 	
-	/** chmod and prepend php to this file */
-	chmod($argv[0], 0755);
-	$contents = file_get_contents($argv[0]);
-	$bin = '#!' . findProgram('php');
-	if (strpos($contents, $bin) === false) {
-		$contents = $bin . "\n" . $contents;
-		file_put_contents($argv[0], $contents);
-	}
-	
 	exit;
 }
 
@@ -388,12 +379,10 @@ function upgradeFM($url, $data) {
 	echo fM('Latest version: ' . $latest_module_version . "\n");
 	
 	/** Download latest core files */
-	echo fM("Downloading ");
 	$core_file = 'facilemanager-core-' . $latest_core_version . '.tar.gz';
 	downloadfMFile($core_file);
 	
 	/** Download latest module files */
-	echo fM("Downloading ");
 	$module_file = strtolower($module_name) . '-' . $latest_module_version . '.tar.gz';
 	downloadfMFile($module_file, true);
 	
@@ -758,6 +747,31 @@ function initWebRequest() {
 	if ($serial_no != SERIALNO) {
 		exit(serialize(fM('The serial numbers do not match for ' . php_uname('n') . '.')));
 	}
+	
+	/** Process action request */
+	if (isset($_POST['action'])) {
+		switch ($_POST['action']) {
+			case 'buildconf':
+				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/client.php buildconf' . $_POST['options'] . ' 2>&1', $output, $rc);
+				if ($rc) {
+					/** Something went wrong */
+					$output[] = 'Config build failed.';
+				} else {
+					$output[] = 'Config build was successful.';
+				}
+				break;
+			case 'upgrade':
+				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/client.php upgrade 2>&1', $output);
+				break;
+		}
+		
+		/** Process module-specific requests */
+		if (function_exists('moduleInitWebRequest')) {
+			$output = moduleInitWebRequest();
+		}
+	}
+
+	echo serialize($output);
 }
 
 
@@ -769,9 +783,11 @@ function initWebRequest() {
  *
  * @param string $module_name Module currently being used
  * @param string $update_method User entered update method
+ * @param array $data Data array containing client information
+ * @param string $url URL to post data to
  * @return string
  */
-function processUpdateMethod($module_name, $update_method, $data, $url) {
+function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 	global $argv;
 	
 	/** Update via cron or http/s? */
@@ -788,7 +804,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 		/** cron */
 		case 'c':
 			$tmpfile = sys_get_temp_dir() . '/crontab.facileManager';
-			$dump = shell_exec('crontab -l | grep -v ' . $argv[0] . '> ' . $tmpfile . ' 2>/dev/null');
+			$dump = shell_exec('crontab -l | grep -v ' . $module_name . '> ' . $tmpfile . ' 2>/dev/null');
 			
 			/** Handle special cases */
 			if (PHP_OS == 'SunOS') {
@@ -799,7 +815,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 				unset($minopt);
 			} else $minutes = '*/5';
 			
-			$cmd = "echo '" . $minutes . ' * * * * ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/' . basename($argv[0]) . " cron' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
+			$cmd = "echo '" . $minutes . ' * * * * ' . findProgram('php') . ' ' . $argv[0] . " cron' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
 			$cron_update = system($cmd, $retval);
 			unlink($tmpfile);
 			
@@ -888,12 +904,12 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 				echo fM("  --> $docroot does not exist.  Aborting.\n");
 				exit(1);
 			}
-			$link_name = $docroot . DIRECTORY_SEPARATOR . $module_name;
+			$link_name = $docroot . DIRECTORY_SEPARATOR . 'fM';
 			
 			echo fM("  --> Creating $link_name link.\n");
 			
 			if (!is_link($link_name)) {
-				symlink(dirname(__FILE__) . '/' . $module_name . '/www', $link_name);
+				symlink(dirname(__FILE__) . '/www', $link_name);
 			} else echo fM("      --> $link_name already exists...skipping\n");
 			
 			/** Add an entry to sudoers */
@@ -1059,8 +1075,9 @@ function downloadfMFile($file, $module = false) {
 	if ($module) $base_url .= 'module/';
 	$base_url .= $file;
 	
-	echo fM($base_url . "\n");
-	addLogEntry("Downloading $base_url\n");
+	$message = "Downloading $base_url\n";
+	echo fM($message);
+	addLogEntry($message);
 	
 	$local_file = sys_get_temp_dir() . '/' . $file;
 	@unlink($local_file);
@@ -1286,8 +1303,7 @@ function deleteFile($file, $debug = false, $dryrun = false) {
  */
 function findFile($file, $addl_path = null) {
 	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2',
-				'/usr/local/etc/apache22', '/etc/apache2', '/etc', '/usr/local/etc',
-				'/etc');
+				'/usr/local/etc/apache22', '/etc/apache2', '/etc', '/usr/local/etc');
 	
 	if (is_array($addl_path)) {
 		$path = array_unique(array_merge($path, $addl_path));

@@ -365,8 +365,7 @@ function manageCache($action, $message) {
  * Logs and outputs error messages
  *
  * @since 2.0
- * @package facileManager
- * @subpackage fmDNS
+ * @package fmDNS
  *
  * @param string $last_line Output from previously run command
  * @return boolean
@@ -379,5 +378,38 @@ function processReloadFailure($last_line) {
 	addLogEntry($message);
 	return false;
 }
+
+
+/**
+ * Processes module-specific web action requests
+ *
+ * @since 2.2
+ * @package fmDNS
+ *
+ * @return array
+ */
+function moduleInitWebRequest() {
+	$output = null;
+	
+	switch ($_POST['action']) {
+		case 'reload':
+			if (!isset($_POST['domain_id']) || !is_numeric($_POST['domain_id'])) {
+				exit(serialize('Zone ID is not found.'));
+			}
+
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/client.php zones id=' . $_POST['domain_id'] . ' 2>&1', $rawoutput, $rc);
+			if ($rc) {
+				/** Something went wrong */
+				$output[] = 'Zone reload failed.';
+				$output[] = $rawoutput;
+			} else {
+				$output[] = 'Zone reload was successful.';
+			}
+			break;
+	}
+	
+	return $output;
+}
+
 
 ?>

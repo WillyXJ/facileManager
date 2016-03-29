@@ -33,7 +33,6 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 $__FM_CONFIG['fmFirewall'] = array(
 		'version'							=> '1.2.5',
 		'client_version'					=> '1.2.4',
-		'client_app'						=> 'fw.php',
 		'description'						=> __('Managing software firewalls should not be difficult. Manage one or more software firewall servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files individually.', 'fmFirewall'),
 		'prefix'							=> 'fw_',
 		'required_fm_version'				=> '2.1.2',

@@ -14,42 +14,23 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
 /**
- * fmFirewall Client Utility HTTPD Handler
+ * Client Utility HTTPD Handler
  *
- * @package fmFirewall
+ * @package facileManager
  * @subpackage Client
  *
  */
 
-require_once(dirname(dirname(dirname(__FILE__))) . '/functions.php');
+$argv = array();
+
+require_once(dirname(dirname(__FILE__)) . '/functions.php');
 
 initWebRequest();
-
-/** Process $_POST for buildconf or zone reload */
-if (isset($_POST['action'])) {
-	switch ($_POST['action']) {
-		case 'buildconf':
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/fw.php buildconf 2>&1', $output, $retval);
-			if ($retval) {
-				/** Something went wrong */
-				$output[] = 'Config build failed.';
-			} else {
-				$output[] = 'Config build was successful.';
-			}
-			break;
-		case 'upgrade':
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php upgrade 2>&1', $output);
-			break;
-	}
-}
-
-echo serialize($output);
 
 ?>

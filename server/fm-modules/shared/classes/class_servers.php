@@ -410,7 +410,7 @@ class fm_shared_module_servers {
 				}
 		
 				/** Test SSH authentication */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/{$__FM_CONFIG[$_SESSION['module']]['client_app']}'", $post_result, $retval);
+				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $post_result, $retval);
 				if ($retval) {
 					/** Something went wrong */
 					@unlink($temp_ssh_key);
@@ -419,7 +419,7 @@ class fm_shared_module_servers {
 				unset($post_result);
 				
 				/** Run build */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/{$__FM_CONFIG[$_SESSION['module']]['client_app']} $action " . implode(' ', $options) . "'", $post_result, $retval);
+				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php $action " . implode(' ', $options) . "'", $post_result, $retval);
 				
 				@unlink($temp_ssh_key);
 				
