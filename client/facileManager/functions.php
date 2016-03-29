@@ -1038,7 +1038,10 @@ function installFiles($user, $chown_files, $files, $dryrun) {
  * @return string
  */
 function fM($message) {
-	return wordwrap($message, 90, "\n");
+	if (!$columns = getenv('COLUMNS')) {
+		$columns = 90;
+	}
+	return wordwrap($message, $columns, "\n");
 }
 
 
