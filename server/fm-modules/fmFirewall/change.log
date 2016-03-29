@@ -1,6 +1,8 @@
 1.3 (2016-0?-??)
 ==================
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
+* Client - [improvement] Client app is renamed to client.php to standardize
+           all module client apps.
 
 1.2.5 (2016-03-16)
 ==================
