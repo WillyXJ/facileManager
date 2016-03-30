@@ -86,7 +86,7 @@ class fm_shared_module_tools {
 						/** php tests */
 						$return .= "\t" . str_pad(__('http page:'), 15);
 						$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
-									$_SESSION['module'] . '/reload.php', null);
+									'fM/reload.php', null);
 						if ($php_result == 'Incorrect parameters defined.') $return .= __('success');
 						else $return .= __('failed');
 					}

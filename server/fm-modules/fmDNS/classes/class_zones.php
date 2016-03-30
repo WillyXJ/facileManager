@@ -1014,10 +1014,13 @@ HTML;
 					}
 					
 					/** Remote URL to use */
-					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_name . ':' . $name_servers[$i]->server_update_port . '/' . $_SESSION['module'] . '/reload.php';
+					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_name . ':' . $name_servers[$i]->server_update_port . '/fM/reload.php';
 					
 					/** Data to post to $url */
-					$post_data = array('action'=>'reload', 'serial_no'=>$name_servers[$i]->server_serial_no, 'domain_id'=>$domain_id);
+					$post_data = array('action' => 'reload',
+						'serial_no' => $name_servers[$i]->server_serial_no,
+						'domain_id' => $domain_id,
+						'module' => $_SESSION['module']);
 					
 					$post_result = unserialize(getPostData($url, $post_data));
 					

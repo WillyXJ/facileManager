@@ -81,10 +81,12 @@ class fm_shared_module_servers {
 					}
 					
 					/** Remote URL to use */
-					$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
+					$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
 					
 					/** Data to post to $url */
-					$post_data = array('action'=>'upgrade', 'serial_no'=>$server_serial_no);
+					$post_data = array('action' => 'upgrade',
+						'serial_no' => $server_serial_no,
+						'module' => $_SESSION['module']);
 					
 					$post_result = @unserialize(getPostData($url, $post_data));
 					
@@ -356,10 +358,13 @@ class fm_shared_module_servers {
 				}
 				
 				/** Remote URL to use */
-				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
+				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
 				
 				/** Data to post to $url */
-				$post_data = array('action'=>$action, 'serial_no'=>$server_serial_no, 'options'=>implode(' ', $options));
+				$post_data = array('action' => $action,
+					'serial_no' => $server_serial_no,
+					'options' => implode(' ', $options),
+					'module' => $_SESSION['module']);
 				
 				$post_result = @unserialize(getPostData($url, $post_data));
 				

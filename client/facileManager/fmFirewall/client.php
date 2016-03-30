@@ -40,7 +40,7 @@ $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
 if (file_exists($fm_client_functions)) {
 	include_once($fm_client_functions);
 } else {
-	echo fM("The facileManager client scripts are not installed.\n");
+	echo "The facileManager client scripts are not installed.\n";
 	exit(1);
 }
 

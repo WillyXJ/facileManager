@@ -88,7 +88,7 @@ if (!function_exists('sys_get_temp_dir')) {
 }
 
 /** Check running user */
-if (exec(findProgram('whoami')) != $whoami && !$dryrun) {
+if (exec(findProgram('whoami')) != $whoami && !$dryrun && count($argv)) {
 	echo fM("This script must run as $whoami.\n");
 	exit(1);
 }
@@ -120,10 +120,10 @@ $data['server_os_distro'] = detectOSDistro();
 $data['update_from_client']	= (in_array('no-update', $argv)) ? false : true;
 
 /** Run the installer */
-if (in_array(array('install', 'reinstall'), $argv)) {
-	if (file_exists($config_file) && in_array('install', $argv)) {
+if (in_array('install', $argv) || in_array('reinstall', $argv)) {
+	if (file_exists($config_file)) {
 		require ($config_file);
-		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO')) {
+		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO') && in_array('install', $argv)) {
 			$proto = (socketTest(FMHOST, 443)) ? 'https' : 'http';
 			$url = "${proto}://" . FMHOST . "admin-accounts.php?verify";
 			$data['compress'] = $compress;
@@ -752,7 +752,7 @@ function initWebRequest() {
 	if (isset($_POST['action'])) {
 		switch ($_POST['action']) {
 			case 'buildconf':
-				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/client.php buildconf' . $_POST['options'] . ' 2>&1', $output, $rc);
+				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $_POST['module'] .  '/client.php buildconf' . $_POST['options'] . ' 2>&1', $output, $rc);
 				if ($rc) {
 					/** Something went wrong */
 					$output[] = 'Config build failed.';
@@ -761,7 +761,7 @@ function initWebRequest() {
 				}
 				break;
 			case 'upgrade':
-				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/client.php upgrade 2>&1', $output);
+				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $_POST['module'] . '/client.php upgrade 2>&1', $output);
 				break;
 		}
 		
@@ -1054,7 +1054,7 @@ function installFiles($user, $chown_files, $files, $dryrun) {
  * @return string
  */
 function fM($message) {
-	if (!$columns = getenv('COLUMNS')) {
+	if (!$columns = shell_exec(findProgram('tput') . ' cols 2>/dev/null')) {
 		$columns = 90;
 	}
 	return wordwrap($message, $columns, "\n");
