@@ -401,7 +401,7 @@ class fm_dns_zones {
 		if ($fmdb->sql_errors) return __('Could not update zone because a database error occurred.') . ' ' . $fmdb->last_error;
 		
 		/** Return if there are no changes */
-		if ($rows_affected + $fmdb->rows_affected = 0) return true;
+		if ($rows_affected + $fmdb->rows_affected == 0) return true;
 
 		/** Set the server_build_config flag for new servers */
 		if (getSOACount($domain_id) && getNSCount($domain_id)) {
@@ -542,18 +542,18 @@ class fm_dns_zones {
 		$clones = $this->cloneDomainsList($row->domain_id);
 		$clone_names = $clone_types = $clone_views = $clone_counts = null;
 		foreach ($clones as $clone_id => $clone_array) {
-			$clone_names .= '<p class="clone' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
+			$clone_names .= '<p class="subelement' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
 					'</a>' . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
-			$clone_types .= '<p class="clone' . $clone_id . '">' . __('clone') . '</p>' . "\n";
-			$clone_views .= '<p class="clone' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
+			$clone_types .= '<p class="subelement' . $clone_id . '">' . __('clone') . '</p>' . "\n";
+			$clone_views .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 			$clone_counts_array = explode('|', $clone_array['clone_count']);
-			$clone_counts .= '<p class="clone' . $clone_id . '" title="' . __('Differences from parent zone') . '">';
+			$clone_counts .= '<p class="subelement' . $clone_id . '" title="' . __('Differences from parent zone') . '">';
 			if ($clone_counts_array[0]) $clone_counts .= '<span class="record-additions">' . $clone_counts_array[0] . '</span>&nbsp;';
 			if ($clone_counts_array[1]) $clone_counts .= '&nbsp;<span class="record-subtractions">' . $clone_counts_array[1] . '</span> ';
 			if (!array_sum($clone_counts_array)) $clone_counts .= '-';
 			$clone_counts .= "</p>\n";
 		}
-		if ($clone_names) $classes[] = 'clones';
+		if ($clone_names) $classes[] = 'subelements';
 		
 		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
 			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {
@@ -895,7 +895,7 @@ HTML;
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
 					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) {
-					$return[$clone_id]['clone_edit'] = '<a class="clone_edit" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+					$return[$clone_id]['clone_edit'] = '<a class="subelement_edit" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 					$return[$clone_id]['clone_delete'] = ' ' . str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				} else {
 					$return[$clone_id]['clone_delete'] = $return[$clone_id]['clone_edit'] = null;

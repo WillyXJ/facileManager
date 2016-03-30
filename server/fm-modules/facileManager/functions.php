@@ -688,7 +688,7 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 function updateStatus($table, $id, $prefix, $status, $field = 'id') {
 	global $fmdb;
 	
-	$query = "UPDATE `$table` SET `{$prefix}status`='" . sanitize($status) . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `$field`=" . sanitize($id);
+	$query = "UPDATE `$table` SET `{$prefix}status`='" . sanitize($status) . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `$field`='" . sanitize($id) . "'";
 
 	return $fmdb->query($query);
 }

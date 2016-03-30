@@ -5,6 +5,7 @@
            all module client apps.
 * Server - [improvement] When the "Established connection packet" box is checked
            on a policy, the RELATED state is appended. (Issue #295)
+* Server - [improvement] Updated help file.
 
 1.2.5 (2016-03-16)
 ==================

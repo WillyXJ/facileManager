@@ -7,6 +7,9 @@
 * Server - [bug] Fixed server group config build process.
 * Server - [improvement] SSH login failure messages differentiate between login
            failure and missing client script.
+* Server - [improvement] Updated help file.
+* Server - [improvement] CSS tweaks.
+* Client - [improvement] Silenced client install grep commands.
 
 2.1.5 (2016-03-11)
 ==================

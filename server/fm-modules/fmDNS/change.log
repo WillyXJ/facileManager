@@ -4,6 +4,13 @@
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
 * Client - [improvement] Client app is renamed to client.php to standardize
            all module client apps.
+* Server - [improvement] Updated help file.
+* Server - [bug] Fixed audit logging of zone edits.
+* Server - [feature] Added views menu to config options page. (Issue #262)
+* Server - [bug] When deleting servers or server groups, associated configs
+           were not being deleted.
+* Server - [feature] Reworked the ACL configuration page to support additional
+           comments on each ACL element. (Issue #206)
 
 2.1.8 (2016-03-24)
 ==================
