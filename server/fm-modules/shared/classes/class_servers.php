@@ -414,7 +414,9 @@ class fm_shared_module_servers {
 				if ($retval) {
 					/** Something went wrong */
 					@unlink($temp_ssh_key);
-					return sprintf('<p class="error">%s</p>'. "\n", __('Failed: Could not login via SSH.'));
+					
+					/** Handle error codes */
+					return ($retval == 255) ? sprintf('<p class="error">%s</p>'. "\n", __('Failed: Could not login via SSH.')) : sprintf('<p class="error">%s</p>'. "\n", __('Failed: Client file is not present.'));
 				}
 				unset($post_result);
 				

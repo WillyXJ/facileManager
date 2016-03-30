@@ -5,6 +5,8 @@
 * Client - [improvement] Output now wordwraps based on the number of columns
            in the shell (based on $COLUMNS environment variable).
 * Server - [bug] Fixed server group config build process.
+* Server - [improvement] SSH login failure messages differentiate between login
+           failure and missing client script.
 
 2.1.5 (2016-03-11)
 ==================
