@@ -204,9 +204,6 @@ function buildModuleHelpFile() {
 			completely manage them from <a href="__menu{Zone Templates}">Templates</a>. All zones based on a template will be shown with the
 			<i class="template-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
 			with them.</p>
-			<p>Zones can support dynamic updates only if the checkbox is ticked while creating or editing individual zones. This will cause 
-			{$_SESSION['module']} to compare the zone file from the DNS server with that in the database and make any necessary changes. This option
-			will increase processing time while reloading zones.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa). You can also

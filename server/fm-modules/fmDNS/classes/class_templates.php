@@ -103,8 +103,7 @@ HTML;
 		$row = get_object_vars($row);
 		
 		$excluded_fields = array($prefix . '_id', 'account_id', $prefix . '_template', $prefix . '_default',
-				$prefix . '_name', $prefix . '_status', $prefix . '_template_id', $prefix . '_dynamic',
-				'soa_serial_no_previous');
+				$prefix . '_name', $prefix . '_status', $prefix . '_template_id');
 		
 		if ($prefix == 'soa') {
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));

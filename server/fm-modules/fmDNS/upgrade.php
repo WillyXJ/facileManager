@@ -1573,8 +1573,6 @@ function upgradefmDNS_3001($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.1.2', '<') ? upgradefmDNS_212($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_clone_dname`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `soa_serial_no_previous` INT(2) NOT NULL DEFAULT '0' AFTER `soa_serial_no`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` ADD `acl_parent_id` INT NOT NULL DEFAULT '0' AFTER `server_serial_no`";
 	
 	/** Run queries */
