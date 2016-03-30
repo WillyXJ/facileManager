@@ -11,6 +11,7 @@
            were not being deleted.
 * Server - [feature] Reworked the ACL configuration page to support additional
            comments on each ACL element. (Issue #206)
+* Server - [bug] Empty ACLs would break named.conf syntax.
 
 2.1.8 (2016-03-24)
 ==================

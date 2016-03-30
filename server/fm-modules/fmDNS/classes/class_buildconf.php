@@ -168,8 +168,9 @@ class fm_module_buildconf {
 					unset($comment);
 				}
 				$config .= 'acl "' . $acl_name . "\" {\n";
-				$config .= "\t" . $acl_item . ";\n";
-				$config .= "};\n\n";
+				$config .= "\t" . $acl_item;
+				if ($acl_item) $config .= ';';
+				$config .= "\n};\n\n";
 			}
 
 
