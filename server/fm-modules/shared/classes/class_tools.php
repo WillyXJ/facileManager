@@ -31,7 +31,7 @@ class fm_shared_module_tools {
 	 * @return string
 	 */
 	function connectTests() {
-		global $fmdb, $__FM_CONFIG, $fm_module_tools;
+		global $fmdb, $__FM_CONFIG, $fm_name, $fm_module_tools;
 		
 		$return = null;
 		
@@ -75,9 +75,9 @@ class fm_shared_module_tools {
 						} elseif (!$ssh_user) {
 							$return .= __('no SSH user defined');
 						} else {
-							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} uptime", $post_result, $retval);
+							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $post_result, $retval);
 							if ($retval) {
-								$return .= __('ssh key login failed');
+								$return .= ($retval == 255) ? __('ssh key login failed') : __('client file is not present');
 							} else {
 								$return .= __('success');
 							}
