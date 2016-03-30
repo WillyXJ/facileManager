@@ -228,7 +228,7 @@ class fm_shared_module_servers {
 			
 			$response = null;
 			foreach ($group_servers as $serial_no) {
-				if (is_numeric($serial_no)) $response .= $this->doClientUpgrade($serial_no) . "\n";
+				if (is_numeric($serial_no)) $response .= $this->doBulkServerBuild($serial_no) . "\n";
 			}
 			return $response;
 		}
