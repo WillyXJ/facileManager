@@ -56,12 +56,14 @@ class fm_module_buildconf {
 			extract(get_object_vars($data), EXTR_SKIP);
 			
 			/** Disabled DNS server */
-			if ($server_status != 'active') {
-				$error = "DNS server is $server_status.\n";
-				if ($compress) echo gzcompress(serialize($error));
-				else echo serialize($error);
-				
-				exit;
+			if ($GLOBALS['basename'] != 'preview.php') {
+				if ($server_status != 'active') {
+					$error = "DNS server is $server_status.\n";
+					if ($compress) echo gzcompress(serialize($error));
+					else echo serialize($error);
+
+					exit;
+				}
 			}
 			
 			include(ABSPATH . 'fm-includes/version.php');

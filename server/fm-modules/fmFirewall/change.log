@@ -7,6 +7,8 @@
            on a policy, the RELATED state is appended. (Issue #295)
 * Server - [improvement] Updated help file.
 * Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+* Server - [improvement] Server configuration previews are now available with
+           disabled servers.
 
 1.2.5 (2016-03-16)
 ==================
