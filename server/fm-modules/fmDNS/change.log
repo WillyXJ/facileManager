@@ -16,6 +16,8 @@
 * Server - [improvement] Server configuration previews are now available with
            disabled servers.
 * Server - [bug] Zone templates can now be deleted. (Issue #300)
+* Server - [improvement] Forward zones no longer enforce forward servers being
+           specified since empty forwarders are valid. (Issue #299)
 
 2.1.8 (2016-03-24)
 ==================

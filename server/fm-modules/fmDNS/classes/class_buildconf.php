@@ -1542,7 +1542,9 @@ HTML;
 		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
 		
 		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) {
+			$config .= $cfg_info ? '; }' : ' }';
+		}
 		$config .= ";\n";
 
 		unset($cfg_info);

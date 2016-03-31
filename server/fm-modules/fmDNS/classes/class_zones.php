@@ -1472,12 +1472,6 @@ HTML;
 			if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
 		}
 
-		/** Forward zones require forward servers */
-		if ($post['domain_type'] == 'forward') {
-			if (empty($post['domain_required_servers']['forwarders'])) return __('No forward servers defined.');
-			$post['domain_required_servers'] = $post['domain_required_servers']['forwarders'];
-		}
-
 		/** Slave and stub zones require master servers */
 		if (in_array($post['domain_type'], array('slave', 'stub'))) {
 			if (empty($post['domain_required_servers']['masters'])) return __('No master servers defined.');
