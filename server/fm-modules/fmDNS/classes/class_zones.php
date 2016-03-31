@@ -1220,9 +1220,6 @@ HTML;
 			
 			/** IPv4 checks */
 			if ($domain_pieces[$domain_parts - 2] == 'in-addr') {
-				/** The first digit of a reverse zone must be numeric */
-				if (!is_numeric(substr($domain_name, 0, 1))) return false;
-				
 				/** Reverse zones with arpa must have at least three octets */
 				if ($domain_parts < 3) return false;
 				
@@ -1241,6 +1238,18 @@ HTML;
 							foreach ($octet_range as $octet) {
 								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
 							}
+							continue;
+						} elseif (preg_match("/^(\d{1,3})\/(\d{1,2})$/", $domain_pieces[$i])) {
+							/** Validate octet range */
+							$octet_range = explode('/', $domain_pieces[$i]);
+							
+							if ($octet_range[1] > 32) return false;
+							
+							foreach ($octet_range as $octet) {
+								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
+							}
+							continue;
+						} elseif (preg_match("/^(*[a-z\d](-*[a-z\d])*)*$/i", $domain_pieces[$i])) {
 							continue;
 						}
 					}
@@ -1270,7 +1279,7 @@ HTML;
 			/** Forward zones should only contain letters, numbers, periods, and hyphens */
 			return (preg_match("/^(_*[a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $domain_name) // valid chars check
 					&& preg_match("/^.{1,253}$/", $domain_name) // overall length check
-					&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)   ); // length of each label
+					&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)); // length of each label
 		}
 		
 		return true;
