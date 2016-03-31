@@ -15,6 +15,7 @@
 * Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
 * Server - [improvement] Server configuration previews are now available with
            disabled servers.
+* Server - [bug] Zone templates can now be deleted. (Issue #300)
 
 2.1.8 (2016-03-24)
 ==================
