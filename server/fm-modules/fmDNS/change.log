@@ -4,6 +4,27 @@
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
 * Client - [improvement] Client app is renamed to client.php to standardize
            all module client apps.
+* Server - [improvement] Updated help file.
+* Server - [bug] Fixed audit logging of zone edits.
+* Server - [feature] Added views menu to config options page. (Issue #262)
+* Server - [bug] When deleting servers or server groups, associated configs
+           were not being deleted.
+* Server - [feature] Reworked the ACL configuration page to support additional
+           comments on each ACL element. (Issue #206)
+* Server - [bug] Empty ACLs would break named.conf syntax.
+* Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+* Server - [improvement] Server configuration previews are now available with
+           disabled servers.
+* Server - [bug] Zone templates can now be deleted. (Issue #300)
+* Server - [improvement] Forward zones no longer enforce forward servers being
+           specified since empty forwarders are valid. (Issue #299)
+* Server - [improvement] Zone file import checks for singleton RR and will
+           tick the 'Skip Import' box. (Issue #280)
+* Server - [feature] User permissions can now be granular on cloned zones. (Issue #272)
+* Server - [improvement] Reverse zone creation now supports RFC2317 and RFC2181
+           names. (Issue #284)
+* Server - [improvement] Added support for include statements to be in named.conf
+           outside of a clause. (Issue #301)
 
 2.1.8 (2016-03-24)
 ==================

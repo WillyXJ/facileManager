@@ -194,19 +194,20 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Zones</a>
 		<div>
 			<p>Zones (aka domains) can be managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
-			there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), delete 
-			({$__FM_CONFIG['icons']['delete']}), and reload ({$__FM_CONFIG['icons']['reload']}) zones depending on your user permissions.</p>
-			<p>You can define a zone as a clone of another previously defined master zone.  The cloned zone will contain all of the same records
+			there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, delete 
+			{$__FM_CONFIG['icons']['delete']}, and reload {$__FM_CONFIG['icons']['reload']} zones depending on your user permissions.</p>
+			<p>You can define a zone as a clone <i class="template-icon fa fa-clone"></i> of another previously defined master zone.  The cloned zone will contain all of the same records
 			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
 			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
 			<p>Zones can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
 			management if you have several zones with a similar framework. You can create a zone template when creating a new zone or you can 
 			completely manage them from <a href="__menu{Zone Templates}">Templates</a>. All zones based on a template will be shown with the
-			<i class="fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
+			<i class="template-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
 			with them.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
-			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa).</p>
+			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa). You can also
+			delegate reverse zones by specifying the classless IP range in the zone name (1-128.168.192.in-addr.arpa).</p>
 			<p>Zones that are missing SOA and NS records will be highlighted with a red background and will not be built or reloaded until the 
 			records exists.</p>
 			<br />
@@ -248,8 +249,8 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Servers</a>
 		<div>
 			<p>All aspects of server configuration takes place in the Config menu 
-			item. From there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), 
-			delete ({$__FM_CONFIG['icons']['delete']}) servers and options depending on your user permissions.</p>
+			item. From there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, 
+			delete {$__FM_CONFIG['icons']['delete']} servers and options depending on your user permissions.</p>
 			
 			<p><b>Servers</b><br />
 			DNS servers can be defined at Config &rarr; <a href="__menu{Servers}">Servers</a>. In the add/edit server 
@@ -264,7 +265,7 @@ function buildModuleHelpFile() {
 			<p>In order for the server to be enabled, the client app needs to be installed on the DNS server.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
 			<p>Once a server is added or modified, the configuration files for the server will need to be built before zone reloads will be available. 
-			Before building the configuration ({$__FM_CONFIG['icons']['build']}) you can preview ({$__FM_CONFIG['icons']['preview']}) the configs to 
+			Before building the configuration {$__FM_CONFIG['icons']['build']} you can preview {$__FM_CONFIG['icons']['preview']} the configs to 
 			ensure they are how you desire them. Both the preview and the build will check the configuration files with named-checkconf and named-checkzone
 			if enabled in the <a href="__menu{{$_SESSION['module']} Settings}">Settings</a>.</p>
 			<p><i>The 'Build Server Configs' or 'Super Admin' permission is required to build the DNS server configurations.</i></p>
@@ -995,5 +996,72 @@ function getConfigAssoc($id, $type) {
 function checkCIDR($cidr, $max_bits) {
 	return verifyNumber($cidr, 0, $max_bits);
 }
+
+
+/**
+ * Builds the view listing in a dropdown menu
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param integer $view_id View ID to select
+ * $param string $class Class name to apply to the div
+ * @return string
+ */
+function buildViewSubMenu($view_id = 0, $server_serial_no = 0, $class = null) {
+	$server_list = buildSelect('view_id', 'view_id', availableViews(), $view_id, 1, null, false, 'this.form.submit()');
+	
+	$hidden_inputs = null;
+	foreach ($GLOBALS['URI'] as $param => $value) {
+		if ($param == 'view_id') continue;
+		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
+	}
+	
+	$class = $class ? 'class="' . $class . '"' : null;
+
+	$return = <<<HTML
+	<div id="configtypesmenu" $class>
+		<form action="{$GLOBALS['basename']}" method="GET">
+		$hidden_inputs
+		$server_list
+		</form>
+	</div>
+HTML;
+
+	return $return;
+}
+
+
+/**
+ * Returns an array of views
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @return array
+ */
+function availableViews() {
+	global $fmdb, $__FM_CONFIG;
+	
+	$array[0][] = __('All Views');
+	$array[0][] = '0';
+	
+	$j = 0;
+	/** Views */
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name', 'view_');
+	if ($fmdb->num_rows) {
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$array[$j+1][] = $results[$i]->view_name;
+			$array[$j+1][] = $results[$i]->view_id;
+			$j++;
+		}
+	}
+	
+	return $array;
+}
+
 
 ?>

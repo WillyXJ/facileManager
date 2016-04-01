@@ -99,7 +99,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Servers</a>
 		<div>
 			<p>Database servers can be managed from the Config &rarr; <a href="__menu{Servers}">Servers</a> menu item. From 
-			there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
+			there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, and delete {$__FM_CONFIG['icons']['delete']} 
 			servers depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
 			<p>Select the database server type from the list and associate the server with a group. You can also override the user credentials 
@@ -115,8 +115,8 @@ function buildModuleHelpFile() {
 			each run). An example would be to create a group for each data center hosting your servers so you can change the password for all database
 			servers within that data center.</p>
 			<p>Database server groups can be managed from the Config &rarr; <a href="__menu{Server Groups}">Server Groups</a> 
-			menu item. From there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), and delete 
-			({$__FM_CONFIG['icons']['delete']}) servers depending on your user permissions.</p>
+			menu item. From there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, and delete 
+			{$__FM_CONFIG['icons']['delete']} servers depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete server groups.</i></p>
 			<br />
 		</div>

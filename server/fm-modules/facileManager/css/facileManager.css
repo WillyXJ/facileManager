@@ -756,7 +756,7 @@ tbody {
 	position: relative;
 	font-size: 14px;
 }
-#configtypesmenu:nth-child(3) {
+#configtypesmenu:nth-child(n+3) {
 	top: -3px;
 }
 
@@ -1699,6 +1699,39 @@ pre {
 .template-icon {
 	color: #c0c0c0;
 }
+
+/** Sub elements */
+.subelements td p {
+	margin: 0 0 0 .5em;
+}
+
+.subelements p span.record-additions {
+	color: green;
+	font-size: 8pt;
+}
+.subelements p span.record-additions:before {
+	content: '+';
+}
+
+.subelements p span.record-subtractions {
+	color: red;
+	font-size: 8pt;
+}
+.subelements p span.record-subtractions:before {
+	content: '-';
+}
+p[class^=subelement] span:first-child {
+	margin-right: 7px;
+}
+
+img.subelement_remove,
+a.subelement_edit img {
+	position: relative;
+	top: 2px;
+	cursor: pointer;
+	width: 12px;
+}
+
 
 /** Firefox hacks :( */
 @-moz-document url-prefix() {

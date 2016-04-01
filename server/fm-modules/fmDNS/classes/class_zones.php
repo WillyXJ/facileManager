@@ -401,7 +401,7 @@ class fm_dns_zones {
 		if ($fmdb->sql_errors) return __('Could not update zone because a database error occurred.') . ' ' . $fmdb->last_error;
 		
 		/** Return if there are no changes */
-		if ($rows_affected + $fmdb->rows_affected = 0) return true;
+		if ($rows_affected + $fmdb->rows_affected == 0) return true;
 
 		/** Set the server_build_config flag for new servers */
 		if (getSOACount($domain_id) && getNSCount($domain_id)) {
@@ -542,18 +542,18 @@ class fm_dns_zones {
 		$clones = $this->cloneDomainsList($row->domain_id);
 		$clone_names = $clone_types = $clone_views = $clone_counts = null;
 		foreach ($clones as $clone_id => $clone_array) {
-			$clone_names .= '<p class="clone' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
+			$clone_names .= '<p class="subelement' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
 					'</a>' . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
-			$clone_types .= '<p class="clone' . $clone_id . '">' . __('clone') . '</p>' . "\n";
-			$clone_views .= '<p class="clone' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
+			$clone_types .= '<p class="subelement' . $clone_id . '">' . __('clone') . '</p>' . "\n";
+			$clone_views .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 			$clone_counts_array = explode('|', $clone_array['clone_count']);
-			$clone_counts .= '<p class="clone' . $clone_id . '" title="' . __('Differences from parent zone') . '">';
+			$clone_counts .= '<p class="subelement' . $clone_id . '" title="' . __('Differences from parent zone') . '">';
 			if ($clone_counts_array[0]) $clone_counts .= '<span class="record-additions">' . $clone_counts_array[0] . '</span>&nbsp;';
 			if ($clone_counts_array[1]) $clone_counts .= '&nbsp;<span class="record-subtractions">' . $clone_counts_array[1] . '</span> ';
 			if (!array_sum($clone_counts_array)) $clone_counts .= '-';
 			$clone_counts .= "</p>\n";
 		}
-		if ($clone_names) $classes[] = 'clones';
+		if ($clone_names) $classes[] = 'subelements';
 		
 		if ($soa_count && $row->domain_reload == 'yes' && $reload_allowed) {
 			if (currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) {
@@ -895,7 +895,7 @@ HTML;
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
 					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) {
-					$return[$clone_id]['clone_edit'] = '<a class="clone_edit" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+					$return[$clone_id]['clone_edit'] = '<a class="subelement_edit" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 					$return[$clone_id]['clone_delete'] = ' ' . str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				} else {
 					$return[$clone_id]['clone_delete'] = $return[$clone_id]['clone_edit'] = null;
@@ -1220,9 +1220,6 @@ HTML;
 			
 			/** IPv4 checks */
 			if ($domain_pieces[$domain_parts - 2] == 'in-addr') {
-				/** The first digit of a reverse zone must be numeric */
-				if (!is_numeric(substr($domain_name, 0, 1))) return false;
-				
 				/** Reverse zones with arpa must have at least three octets */
 				if ($domain_parts < 3) return false;
 				
@@ -1241,6 +1238,18 @@ HTML;
 							foreach ($octet_range as $octet) {
 								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
 							}
+							continue;
+						} elseif (preg_match("/^(\d{1,3})\/(\d{1,2})$/", $domain_pieces[$i])) {
+							/** Validate octet range */
+							$octet_range = explode('/', $domain_pieces[$i]);
+							
+							if ($octet_range[1] > 32) return false;
+							
+							foreach ($octet_range as $octet) {
+								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
+							}
+							continue;
+						} elseif (preg_match("/^(*[a-z\d](-*[a-z\d])*)*$/i", $domain_pieces[$i])) {
 							continue;
 						}
 					}
@@ -1270,7 +1279,7 @@ HTML;
 			/** Forward zones should only contain letters, numbers, periods, and hyphens */
 			return (preg_match("/^(_*[a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $domain_name) // valid chars check
 					&& preg_match("/^.{1,253}$/", $domain_name) // overall length check
-					&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)   ); // length of each label
+					&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)); // length of each label
 		}
 		
 		return true;
@@ -1470,12 +1479,6 @@ HTML;
 		foreach ($clean_fields as $val) {
 			$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
 			if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
-		}
-
-		/** Forward zones require forward servers */
-		if ($post['domain_type'] == 'forward') {
-			if (empty($post['domain_required_servers']['forwarders'])) return __('No forward servers defined.');
-			$post['domain_required_servers'] = $post['domain_required_servers']['forwarders'];
 		}
 
 		/** Slave and stub zones require master servers */

@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.1.8', '<') ? upgradefmDNS_218($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.2', '<') ? upgradefmDNS_220($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1562,6 +1562,75 @@ function upgradefmDNS_218($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '2.1.8', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 3.0-alpha1 */
+function upgradefmDNS_220($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.1.8', '<') ? upgradefmDNS_218($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` ADD `acl_parent_id` INT NOT NULL DEFAULT '0' AFTER `server_serial_no`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `cfg_in_clause` ENUM('yes','no') NOT NULL DEFAULT 'yes' AFTER `cfg_data`";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Remove stale entries from server/group deletes */
+	$servers[] = 0;
+	$query = "SELECT server_serial_no FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` WHERE server_status!='deleted'";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		for($i=0; $i<$fmdb->num_rows; $i++) {
+			$servers[] = $fmdb->last_result[$i]->server_serial_no;
+		}
+	}
+	$query = "SELECT group_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` WHERE group_status!='deleted'";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		for($i=0; $i<$fmdb->num_rows; $i++) {
+			$servers[] = 'g_' . $fmdb->last_result[$i]->group_id;
+		}
+	}
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET control_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET view_status='deleted' WHERE server_serial_no NOT IN ('" . join($servers, "','") . "')";
+
+	/** Rework ACL table */
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls`";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		for($i=0; $i<$fmdb->num_rows; $i++) {
+			foreach (explode(',', $fmdb->last_result[$i]->acl_addresses) as $acl_address) {
+				if ($acl_address) {
+					$inserts[] = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` (account_id, server_serial_no, acl_parent_id, acl_addresses, acl_status)
+						VALUES ({$fmdb->last_result[$i]->account_id}, {$fmdb->last_result[$i]->server_serial_no}, {$fmdb->last_result[$i]->acl_id}, '$acl_address', '{$fmdb->last_result[$i]->acl_status}')";
+				}
+			}
+		}
+	}
+	
+	/** Drop fields */
+	$inserts[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` DROP `acl_predefined`";
+	
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.2', 'auto', false, 0, $module_name);
 	
 	return true;
 }

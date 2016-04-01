@@ -1174,7 +1174,7 @@ function extractFiles($files = array()) {
  * @return string
  */
 function getParameterValue($param, $file, $delimiter = '=') {
-	$raw_line = shell_exec('grep ' . $param . ' ' . $file);
+	$raw_line = shell_exec('grep ' . $param . ' ' . $file . ' 2>/dev/null');
 	if (!$raw_line) {
 		return false;
 	}

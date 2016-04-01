@@ -2,6 +2,8 @@
 if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
+header("Content-Type: text/javascript");
+
 echo '
 $(document).ready(function() {
 	
@@ -87,8 +89,8 @@ $(document).ready(function() {
 		return false;
 	});
 
-	/* Add clone */
-	$("#zones").delegate("#plus", "click tap", function(e) {
+	/* Add clone or acl element */
+	$("#zones,#acls").delegate("#plus", "click tap", function(e) {
 		var $this 		= $(this);
 		item_type		= $("#table_edits").attr("name");
 		item_sub_type	= $this.attr("name");
@@ -110,6 +112,7 @@ $(document).ready(function() {
 			item_type: item_type,
 			item_sub_type: item_sub_type,
 			domain_clone_domain_id: domain_clone_id,
+			acl_parent_id: domain_clone_id,
 			no_template: true,
 			request_uri: queryParameters,
 			is_ajax: 1
@@ -162,10 +165,10 @@ $(document).ready(function() {
 		return false;
 	});
 
-	/* Zone clone deletes */
-	$("#table_edits").delegate("img.clone_remove", "click tap", function(e) {
+	/* Zone subelement deletes */
+	$("#table_edits").delegate("img.subelement_remove", "click tap", function(e) {
 		var $this 		= $(this);
-		var $clone		= $this.parent().attr("class");
+		var $subelement		= $this.parent().attr("class");
 		item_type		= $("#table_edits").attr("name");
 		item_id			= $this.attr("id");
 
@@ -184,9 +187,9 @@ $(document).ready(function() {
 				success: function(response)
 				{
 					if (response == "' . __('Success') . '") {
-						$("."+$clone).css({"background-color":"#D98085"});
-						$("."+$clone).fadeOut("slow", function() {
-							$("."+$clone).remove();
+						$("."+$subelement).css({"background-color":"#D98085"});
+						$("."+$subelement).fadeOut("slow", function() {
+							$("."+$subelement).remove();
 						});
 					} else {
 						$("#response").html("<p class=\"error\">"+response+"</p>");
@@ -210,7 +213,7 @@ $(document).ready(function() {
 	});
 
 	/* Zone clone edits */
-	$("#table_edits").delegate("a.clone_edit", "click tap", function(e) {
+	$("#table_edits").delegate("a.subelement_edit", "click tap", function(e) {
 		var $this 		= $(this);
 		item_id			= $this.attr("id");
 		item_type		= $("#table_edits").attr("name");
@@ -367,6 +370,8 @@ function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById("cfg_name").value;
 	var server_serial_no	= getUrlVars()["server_serial_no"];
 	var view_id = getUrlVars()["view_id"];
+	var cfg_type = document.getElementsByName("cfg_type")[0].value;
+	var cfg_id = document.getElementsByName("cfg_id")[0].value;
 
 	var form_data = {
 		get_option_placeholder: true,
@@ -374,6 +379,8 @@ function displayOptionPlaceholder(option_value) {
 		option_value: option_value,
 		server_serial_no: server_serial_no,
 		view_id: view_id,
+		cfg_type: cfg_type,
+		cfg_id: cfg_id,
 		is_ajax: 1
 	};
 

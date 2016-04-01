@@ -117,7 +117,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'domain':
 			$post_class = $fm_module_templates;
-			$server_serial_no = 'domain';
+			$server_serial_no = $_POST['item_type'];
 			$type = sanitize($_POST['item_type']) . 's';
 			break;
 		default:

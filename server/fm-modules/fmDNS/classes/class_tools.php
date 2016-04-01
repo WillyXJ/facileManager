@@ -272,8 +272,11 @@ HTML;
 			/** Set current_name to check for blanks on next run */
 			$current_name = $array['record_name'];
 			
+			$all_records[] = $array;
+			
 			/** Automatically skip duplicates */
-			$checked = $this->checkDuplicates($array, $_POST['domain_id']);
+			$checked = $this->checkDuplicates($array, $_POST['domain_id'], $all_records);
+			unset($all_records);
 			
 			$rows .= <<<ROW
 					<tr class="import_swap">
@@ -335,14 +338,16 @@ BODY;
 	/**
 	 * Checks for duplicate entries during import process
 	 */
-	function checkDuplicates($array, $domain_id) {
+	function checkDuplicates($array, $domain_id, $all_records) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE record_status!='deleted' AND domain_id IN (" . join(',', getZoneParentID($domain_id)) . ") AND ";
+		$domain_ids = join(',', getZoneParentID($domain_id));
+		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE `record_status`!='deleted' AND `domain_id` IN ($domain_ids) AND ";
 		
 		foreach ($array as $key => $data) {
 			if ($key != 'record_comment') {
-				$sql_select .= "$key='" . mysql_real_escape_string($data) . "' AND ";
+				$data = mysql_real_escape_string($data);
+				$sql_select .= ($data) ? "$key='" . mysql_real_escape_string($data) . "' AND " : "($key='' OR $key IS NULL) AND ";
 			}
 		}
 		$sql_select = rtrim($sql_select, ' AND ');
@@ -350,6 +355,33 @@ BODY;
 		$result = $fmdb->query($sql_select);
 		
 		if ($fmdb->num_rows) return 'checked';
+		
+		/** Check for duplicate RR in database */
+		$query = "SELECT DISTINCT `record_type` FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE `record_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND `domain_id` IN ($domain_ids) AND `record_name`='{$array['record_name']}'";
+		$fmdb->query($query);
+		
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<=$fmdb->num_rows; $i++) {
+				$types[] = $fmdb->last_result[$i]->record_type;
+			}
+			/** Duplicate RR in the database already */
+			if (in_array('CNAME', $types)) return 'checked disabled';
+		}
+		
+		unset($types);
+		
+		/** Duplicate RR in the imported zone file */
+		foreach ($all_records as $tmp_array) {
+			foreach ($tmp_array as $key => $val) {
+				if ($key == 'record_type' && $tmp_array['record_name'] == $array['record_name']) {
+					$types[] = $val;
+				}
+			}
+		}
+		if (count($types)) {
+			array_unique($types);
+			if (count($types) > 1 && in_array('CNAME', $types)) return 'checked disabled';
+		}
 		
 		return null;
 	}

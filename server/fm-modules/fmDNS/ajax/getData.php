@@ -58,9 +58,14 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 					});
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif ($result[0]->def_dropdown == 'no') {
+			$checkbox = null;
+			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !$_POST['view_id']) {
+				$checked = getNameFromID($_POST['cfg_id'], "fm_{$__FM_CONFIG['fmDNS']['prefix']}config", 'cfg_', 'cfg_id', 'cfg_in_clause') == 'no' ? 'checked' : null;
+				$checkbox = sprintf('<br /><input name="cfg_in_clause" id="cfg_in_clause" type="checkbox" value="no" %s /><label for="cfg_in_clause">%s</label>', $checked, __('Define outside of global options clause'));
+			}
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
-					%s</td>', __('Option Value'), str_replace(array('"', "'"), '', $cfg_data), $result[0]->def_type);
+					%s %s</td>', __('Option Value'), str_replace(array('"', "'"), '', $cfg_data), $result[0]->def_type, $checkbox);
 		} else {
 			/** Build array of possible values */
 			$dropdown = $fm_module_options->populateDefTypeDropdown($result[0]->def_type, $cfg_data);

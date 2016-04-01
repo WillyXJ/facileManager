@@ -112,27 +112,41 @@ class fm_module_servers {
 		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
 		include_once(ABSPATH . 'fm-modules/' . $module . '/classes/class_policies.php');
 		$fm_host_id = getNameFromID($fm_name, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'objects', 'object_', 'object_name', 'object_id', $account_id);
-		$fm_service_id[] = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
-		if ($post['server_type'] == 'iptables') $fm_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+		
+		/** Get server->client interaction services */
+		$web_service_id = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
+		$fm_out_service_id[] = $web_service_id;
+		switch ($post['server_update_method']) {
+			case 'http':
+			case 'https':
+				$fm_in_service_id[] = $web_service_id;
+				break;
+			case 'ssh':
+				$fm_in_service_id[] = 's' . getNameFromID('ssh', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+				break;
+		}
+		if ($post['server_type'] == 'iptables') $fm_out_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+		if (is_array($fm_in_service_id)) {
+			$default_rules[] = array(
+				'account_id' => $account_id,
+				'server_serial_no' => $post['server_serial_no'],
+				'source_items' => array('o' . $fm_host_id),
+				'destination_items' => '',
+				'services_items' => $fm_in_service_id,
+				'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
+				'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
+			);
+		}
 		$default_rules[] = array(
-								'account_id' => $account_id,
-								'server_serial_no' => $post['server_serial_no'],
-								'source_items' => array('o' . $fm_host_id),
-								'destination_items' => '',
-								'services_items' => $fm_service_id,
-								'policy_options' => $__FM_CONFIG['fw']['policy_options']['established']['bit'],
-								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
-							);
-		$default_rules[] = array(
-								'account_id' => $account_id,
-								'server_serial_no' => $post['server_serial_no'],
-								'policy_direction' => 'out',
-								'source_items' => '',
-								'destination_items' => array('o' . $fm_host_id),
-								'services_items' => $fm_service_id,
-								'policy_options' => $__FM_CONFIG['fw']['policy_options']['established']['bit'],
-								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
-							);
+			'account_id' => $account_id,
+			'server_serial_no' => $post['server_serial_no'],
+			'policy_direction' => 'out',
+			'source_items' => '',
+			'destination_items' => array('o' . $fm_host_id),
+			'services_items' => $fm_out_service_id,
+			'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
+			'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
+		);
 
 		foreach ($default_rules as $rule) {
 			$fm_module_policies->add($rule);
@@ -216,7 +230,7 @@ class fm_module_servers {
 		$os_image = setOSIcon($row->server_os_distro);
 		
 		$edit_status = $edit_actions = null;
-		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+		$edit_actions = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		

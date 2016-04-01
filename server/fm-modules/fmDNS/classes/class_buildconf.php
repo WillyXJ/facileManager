@@ -56,12 +56,14 @@ class fm_module_buildconf {
 			extract(get_object_vars($data), EXTR_SKIP);
 			
 			/** Disabled DNS server */
-			if ($server_status != 'active') {
-				$error = "DNS server is $server_status.\n";
-				if ($compress) echo gzcompress(serialize($error));
-				else echo serialize($error);
-				
-				exit;
+			if ($GLOBALS['basename'] != 'preview.php') {
+				if ($server_status != 'active') {
+					$error = "DNS server is $server_status.\n";
+					if ($compress) echo gzcompress(serialize($error));
+					else echo serialize($error);
+
+					exit;
+				}
 			}
 			
 			include(ABSPATH . 'fm-includes/version.php');
@@ -113,61 +115,46 @@ class fm_module_buildconf {
 			
 			
 			/** Build ACLs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="0"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=0 AND acl_status="active" AND server_serial_no="0"');
 			if ($fmdb->num_rows) {
 				$acl_result = $fmdb->last_result;
 				for ($i=0; $i < $fmdb->num_rows; $i++) {
-					if ($acl_result[$i]->acl_predefined != 'as defined:') {
-						$global_acl_array[$acl_result[$i]->acl_name] = array($acl_result[$i]->acl_predefined, $acl_result[$i]->acl_comment);
-					} else {
-						$addresses = explode(',', $acl_result[$i]->acl_addresses);
-						$global_acl_array[$acl_result[$i]->acl_name] = null;
-						foreach($addresses as $address) {
-							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
-						}
-						$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
+					$global_acl_array[$acl_result[$i]->acl_name] = null;
+					foreach(explode(',', $acl_result[$i]->acl_addresses) as $address) {
+						if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
 					}
+					$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
 				}
 			} else $global_acl_array = array();
 
 			$server_acl_array = array();
 			/** Override with group-specific configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=0 AND acl_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
 				if ($fmdb->num_rows) {
 					$server_acl_result = $fmdb->last_result;
 					$acl_config_count = $fmdb->num_rows;
 					for ($j=0; $j < $acl_config_count; $j++) {
-						if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-							$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
-						} else {
-							$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
-							$server_acl_addresses = null;
-							foreach($addresses as $address) {
-								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
-							}
-							$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+						$server_acl_addresses = null;
+						foreach(explode(',', $server_acl_result[$j]->acl_addresses) as $address) {
+							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
 						}
+						$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 					}
 				}
 			}
 
 			/** Override with server-specific ACLs */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active" AND server_serial_no="' . $server_serial_no . '"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=0 AND acl_status="active" AND server_serial_no="' . $server_serial_no . '"');
 			if ($fmdb->num_rows) {
 				$server_acl_result = $fmdb->last_result;
 				$acl_config_count = $fmdb->num_rows;
 				for ($j=0; $j < $acl_config_count; $j++) {
-					if ($server_acl_result[$j]->acl_predefined != 'as defined:') {
-						$server_acl_array[$server_acl_result[$j]->acl_name] = array($server_acl_result[$j]->acl_predefined, $server_acl_result[$j]->acl_comment);
-					} else {
-						$addresses = explode(',', $server_acl_result[$j]->acl_addresses);
-						$server_acl_addresses = null;
-						foreach($addresses as $address) {
-							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
-						}
-						$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+					$server_acl_addresses = null;
+					foreach(explode(',', $server_acl_result[$j]->acl_addresses) as $address) {
+						if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
 					}
+					$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
 				}
 			}
 
@@ -183,8 +170,9 @@ class fm_module_buildconf {
 					unset($comment);
 				}
 				$config .= 'acl "' . $acl_name . "\" {\n";
-				$config .= "\t" . $acl_item . ";\n";
-				$config .= "};\n\n";
+				$config .= "\t" . $acl_item;
+				if ($acl_item) $config .= ';';
+				$config .= "\n};\n\n";
 			}
 
 
@@ -286,7 +274,7 @@ class fm_module_buildconf {
 				
 				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 			}
-			/** Build includes */
+			/** Build global option includes */
 			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir);
 			
 			/** Build rate limits */
@@ -323,6 +311,9 @@ class fm_module_buildconf {
 			$config .= $control_config;
 			unset($control_config);
 
+			/** Build extra includes */
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, 0, 'outside');
+			
 			
 			/** Debian-based requires named.conf.options */
 			if (isDebianSystem($server_os_distro)) {
@@ -1554,7 +1545,9 @@ HTML;
 		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
 		
 		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) {
+			$config .= $cfg_info ? '; }' : ' }';
+		}
 		$config .= ";\n";
 
 		unset($cfg_info);
@@ -1658,16 +1651,24 @@ HTML;
 	 * @param array   $server_group_ids The array containing server group IDs for overrides
 	 * @param string  $server_root_dir Server root directory
 	 * @param integer $domain_id The ID of the zone
+	 * @param string  $clause Whether includes are inside or outside of clauses
 	 * @return array
 	 */
-	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0) {
+	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0, $clause = 'inside') {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (is_array($server_group_ids)) {
 			$server_group_ids = 'g_' . implode('","g_', $server_group_ids);
 		}
 		$domain_id_sql = is_array($domain_id) ? "domain_id IN ('" . join("','", $domain_id) . "')" : 'domain_id=' . $domain_id;
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include" AND view_id=' . $view_id . ' AND ' . $domain_id_sql . ' AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
+		if ($clause == 'inside') {
+			$clause_sql = ' AND cfg_in_clause="yes"';
+			$tab = "\t";
+		} else {
+			$clause_sql = ' AND cfg_in_clause="no"';
+			$tab = null;
+		}
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include"' . $clause_sql . ' AND view_id=' . $view_id . ' AND ' . $domain_id_sql . ' AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
 		if ($fmdb->num_rows) {
 			$config_result = $fmdb->last_result;
 			for ($i=0; $i < $fmdb->num_rows; $i++) {
@@ -1680,7 +1681,7 @@ HTML;
 			foreach ($include_config as $cfg_name => $value_array) {
 				foreach ($value_array as $domain_name => $cfg_data) {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
+					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, $tab);
 				}
 			}
 			return $include_files;

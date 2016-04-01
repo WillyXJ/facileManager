@@ -173,7 +173,7 @@ HTML;
 	/**
 	 * Deletes the selected template
 	 */
-	function delete($id, $table, $prefix) {
+	function delete($id, $prefix, $table) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $prefix . '_', $prefix . '_id', $prefix . '_name');

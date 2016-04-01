@@ -5,6 +5,12 @@
            all module client apps.
 * Server - [improvement] When the "Established connection packet" box is checked
            on a policy, the RELATED state is appended. (Issue #295)
+* Server - [improvement] Updated help file.
+* Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+* Server - [improvement] Server configuration previews are now available with
+           disabled servers.
+* Server - [improvement] Default fM interaction policies are more accurate for
+           new servers based on their update method.
 
 1.2.5 (2016-03-16)
 ==================
