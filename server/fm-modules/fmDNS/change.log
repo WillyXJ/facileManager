@@ -23,6 +23,8 @@
 * Server - [feature] User permissions can now be granular on cloned zones. (Issue #272)
 * Server - [improvement] Reverse zone creation now supports RFC2317 and RFC2181
            names. (Issue #284)
+* Server - [improvement] Added support for include statements to be in named.conf
+           outside of a clause. (Issue #301)
 
 2.1.8 (2016-03-24)
 ==================

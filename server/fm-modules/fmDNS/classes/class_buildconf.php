@@ -274,7 +274,7 @@ class fm_module_buildconf {
 				
 				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 			}
-			/** Build includes */
+			/** Build global option includes */
 			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir);
 			
 			/** Build rate limits */
@@ -311,6 +311,9 @@ class fm_module_buildconf {
 			$config .= $control_config;
 			unset($control_config);
 
+			/** Build extra includes */
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, 0, 'outside');
+			
 			
 			/** Debian-based requires named.conf.options */
 			if (isDebianSystem($server_os_distro)) {
@@ -1648,16 +1651,24 @@ HTML;
 	 * @param array   $server_group_ids The array containing server group IDs for overrides
 	 * @param string  $server_root_dir Server root directory
 	 * @param integer $domain_id The ID of the zone
+	 * @param string  $clause Whether includes are inside or outside of clauses
 	 * @return array
 	 */
-	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0) {
+	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0, $clause = 'inside') {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (is_array($server_group_ids)) {
 			$server_group_ids = 'g_' . implode('","g_', $server_group_ids);
 		}
 		$domain_id_sql = is_array($domain_id) ? "domain_id IN ('" . join("','", $domain_id) . "')" : 'domain_id=' . $domain_id;
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include" AND view_id=' . $view_id . ' AND ' . $domain_id_sql . ' AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
+		if ($clause == 'inside') {
+			$clause_sql = ' AND cfg_in_clause="yes"';
+			$tab = "\t";
+		} else {
+			$clause_sql = ' AND cfg_in_clause="no"';
+			$tab = null;
+		}
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include"' . $clause_sql . ' AND view_id=' . $view_id . ' AND ' . $domain_id_sql . ' AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
 		if ($fmdb->num_rows) {
 			$config_result = $fmdb->last_result;
 			for ($i=0; $i < $fmdb->num_rows; $i++) {
@@ -1670,7 +1681,7 @@ HTML;
 			foreach ($include_config as $cfg_name => $value_array) {
 				foreach ($value_array as $domain_name => $cfg_data) {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
+					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, $tab);
 				}
 			}
 			return $include_files;

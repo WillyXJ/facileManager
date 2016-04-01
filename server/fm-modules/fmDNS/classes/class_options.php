@@ -137,7 +137,7 @@ class fm_module_options {
 				$num_same_config = $fmdb->num_rows;
 				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
 				$fmdb->get_results($query);
-				if ($num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
+				if ($fmdb->last_result[0]->def_max_parameters >= 0 && $num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
 					return __('This record already exists.');
 				}
 			}
@@ -556,6 +556,7 @@ HTML;
 		
 		if (!isset($post['view_id'])) $post['view_id'] = 0;
 		if (!isset($post['domain_id'])) $post['domain_id'] = 0;
+		if (!isset($post['cfg_in_clause'])) $post['cfg_in_clause'] = 'yes';
 		
 		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
 		$fmdb->get_results($query);

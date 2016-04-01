@@ -370,6 +370,8 @@ function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById("cfg_name").value;
 	var server_serial_no	= getUrlVars()["server_serial_no"];
 	var view_id = getUrlVars()["view_id"];
+	var cfg_type = document.getElementsByName("cfg_type")[0].value;
+	var cfg_id = document.getElementsByName("cfg_id")[0].value;
 
 	var form_data = {
 		get_option_placeholder: true,
@@ -377,6 +379,8 @@ function displayOptionPlaceholder(option_value) {
 		option_value: option_value,
 		server_serial_no: server_serial_no,
 		view_id: view_id,
+		cfg_type: cfg_type,
+		cfg_id: cfg_id,
 		is_ajax: 1
 	};
 
