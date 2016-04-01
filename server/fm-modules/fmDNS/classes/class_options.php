@@ -232,11 +232,12 @@ class fm_module_options {
 			$zone_row = '<td>' . $domain_name . '</td>';
 			unset($domain_name);
 		}
+		$cfg_name = ($row->cfg_in_clause == 'yes') ? $row->cfg_name : '<b>' . $row->cfg_name . '</b>';
 
 		echo <<<HTML
 		<tr id="$row->cfg_id"$disabled_class>
 			$zone_row
-			<td>$row->cfg_name</td>
+			<td>$cfg_name</td>
 			<td>$cfg_data</td>
 			<td>$comments</td>
 			$edit_status
