@@ -11,6 +11,8 @@
 * Server - [improvement] CSS tweaks.
 * Client - [improvement] Silenced client install grep commands.
 * Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+* Client - [improvement] SSH public keys are now stored in authorized_keys
+           instead of the deprecated authorized_keys2. (Issue #303)
 
 2.1.5 (2016-03-11)
 ==================

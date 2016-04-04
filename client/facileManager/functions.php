@@ -851,9 +851,9 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			$raw_data = getPostData(str_replace('genserial', 'ssh=key_pub', $url), $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if (strpos($raw_data, 'ssh-rsa') !== false) {
-				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys2'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys2', trim($raw_data) . "\n", FILE_APPEND) : true;
-				@chown($ssh_dir . '/authorized_keys2', $user);
-				@chmod($ssh_dir . '/authorized_keys2', 0644);
+				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys', trim($raw_data) . "\n", FILE_APPEND) : true;
+				@chown($ssh_dir . '/authorized_keys', $user);
+				@chmod($ssh_dir . '/authorized_keys', 0644);
 				@chmod($ssh_dir, 0700);
 				if ($result !== false) $result = 'ok';
 			} else {
