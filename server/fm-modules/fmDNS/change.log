@@ -1,3 +1,7 @@
+3.0 (2016-0?-??)
+==================
+* Server - [feature] Added support for dynamic zones. (Issue #90)
+
 2.2 (2016-0?-??)
 ==================
 * Server - [bug] Dump and clear cache tools now honor the server selection.

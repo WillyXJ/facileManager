@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.2', '<') ? upgradefmDNS_220($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '3.0-alpha1', '<') ? upgradefmDNS_3001($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1566,7 +1566,7 @@ function upgradefmDNS_218($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 3.0-alpha1 */
+/** 2.2 */
 function upgradefmDNS_220($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
@@ -1631,6 +1631,37 @@ function upgradefmDNS_220($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '2.2', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 3.0-alpha1 */
+function upgradefmDNS_3001($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.2', '<') ? upgradefmDNS_220($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_clone_dname`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `soa_serial_no_previous` INT(2) NOT NULL DEFAULT '0' AFTER `soa_serial_no`";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.0-alpha1', 'auto', false, 0, $module_name);
 	
 	return true;
 }

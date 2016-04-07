@@ -542,8 +542,8 @@ class fm_dns_zones {
 		$clones = $this->cloneDomainsList($row->domain_id);
 		$clone_names = $clone_types = $clone_views = $clone_counts = null;
 		foreach ($clones as $clone_id => $clone_array) {
-			$clone_names .= '<p class="subelement' . $clone_id . '"><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
-					'</a>' . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
+			$clone_names .= '<p class="subelement' . $clone_id . '"><span><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
+					'</a></span>' . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
 			$clone_types .= '<p class="subelement' . $clone_id . '">' . __('clone') . '</p>' . "\n";
 			$clone_views .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 			$clone_counts_array = explode('|', $clone_array['clone_count']);
@@ -592,13 +592,14 @@ class fm_dns_zones {
 			$record_count = $fmdb->last_result[0]->record_count;
 		}
 		
+		$dynamic_icon = (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates')) : null;
 		$template_icon = ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))) : null;
 		
 		echo <<<HTML
 		<tr title="$response" id="$row->domain_id" $class>
 			$checkbox
 			<td>$row->domain_id</td>
-			<td><b>$edit_name</b> $template_icon $add_new $clone_names</td>
+			<td><b>$edit_name</b> $dynamic_icon $template_icon $add_new $clone_names</td>
 			<td>$row->domain_type
 				$clone_types</td>
 			<td>$domain_view
@@ -622,6 +623,7 @@ HTML;
 		
 		$domain_id = $domain_view = $domain_name_servers = 0;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
+		$dynamic_zone = $domain_dynamic = $domain_template = null;
 		$disabled = $action == 'create' ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -755,8 +757,14 @@ HTML;
 			<td><input type="checkbox" id="domain_default" name="domain_default" value="yes" %s /><label for="domain_default"> %s</label></td>
 			<input type="hidden" id="domain_create_template" name="domain_template" value="yes" />
 		</tr>', $template_name_show_hide, $default_checked, __('Make Default Template'));
+		} else {
+			$dynamic_checked = ($domain_dynamic == 'yes') ? 'checked' : null;
+			$dynamic_zone = sprintf('<tr class="include-with-template" id="dynamic_updates">
+			<th>%s</th>
+			<td><input type="checkbox" id="domain_dynamic" name="domain_dynamic" value="yes" %s /><label for="domain_dynamic"> %s</label></td>
+		</tr>', __('Support Dynamic Updates'), $dynamic_checked, __('yes'));
 		}
-	
+		
 		$return_form = (array_search('popup', $show) !== false) ? '<form name="manage" id="manage" method="post" action="">' . $popup_header : null;
 		
 		$return_form .= sprintf('<input type="hidden" name="action" value="%s" />
@@ -819,7 +827,7 @@ HTML;
 				__('Clone Of (optional)'), $clone, $clone_override_show, $clone_dname_checked,
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show, $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
-				$soa_templates . $additional_config_link . $create_template . $template_name
+				$soa_templates . $dynamic_zone . $additional_config_link . $create_template . $template_name
 				);
 
 		$return_form .= (array_search('popup', $show) !== false) ? $popup_footer . '</form>' : null;
@@ -910,6 +918,9 @@ HTML;
 				
 				/** Clone views */
 				$return[$clone_id]['clone_views'] = $clone_results[$i]->domain_view;
+				
+				/** Dynamic updates support */
+				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i> ', __('Zone supports dynamic updates')) : null;
 			}
 		}
 		return $return;
@@ -1391,9 +1402,14 @@ HTML;
 			if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return __('Invalid zone name.');
 		}
 		
+		/** Dynamic updates */
+		if ($post['domain_dynamic'] != 'yes') {
+			$post['domain_dynamic'] = 'no';
+		}
+		
 		/** Is this based on a template? */
 		if ($post['domain_template_id']) {
-			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping');
+			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 'domain_dynamic');
 			foreach ($include as $key) {
 				$new_post[$key] = $post[$key];
 			}
