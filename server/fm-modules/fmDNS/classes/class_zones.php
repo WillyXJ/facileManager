@@ -992,6 +992,7 @@ HTML;
 		$response = '<textarea rows="12" cols="85">';
 		$failures = false;
 		for ($i=0; $i<$name_server_count; $i++) {
+			unset($post_result);
 			switch($name_servers[$i]->server_update_method) {
 				case 'cron':
 					/** Add records to fm_{$__FM_CONFIG['fmDNS']['prefix']}track_reloads */
@@ -999,10 +1000,7 @@ HTML;
 						$this->addZoneReload($name_servers[$i]->server_serial_no, $child_id);
 					}
 					
-					/** Set the server_update_config flag */
-					setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'update');
-					
-					$response .= '[' . $name_servers[$i]->server_name . '] ' . __('This zone will be updated on the next cron run.') . "\n";
+					$post_result[] = __('This zone will be updated on the next cron run.');
 					break;
 				case 'http':
 				case 'https':
@@ -1023,24 +1021,6 @@ HTML;
 						'module' => $_SESSION['module']);
 					
 					$post_result = unserialize(getPostData($url, $post_data));
-					
-					if (!is_array($post_result)) {
-						/** Something went wrong */
-						return '<div class="error"><p>' . $post_result . '</p></div>'. "\n";
-					} else {
-						if (count($post_result) > 1) {
-							/** Loop through and format the output */
-							foreach ($post_result as $line) {
-								$response .= '[' . $name_servers[$i]->server_name . "] $line\n";
-								if (strpos(strtolower($line), 'fail')) $failures = true;
-							}
-						} else {
-							$response .= "[{$name_servers[$i]->server_name}] " . $post_result[0] . "\n";
-							if (strpos(strtolower($post_result[0]), 'fail')) $failures = true;
-						}
-					}
-					/** Set the server_update_config flag */
-					setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'update');
 					
 					break;
 				case 'ssh':
@@ -1070,35 +1050,38 @@ HTML;
 						return '<p class="error">' . sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
 					}
 		
-					unset($post_result);
 					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$name_servers[$i]->server_update_port} -l $ssh_user {$name_servers[$i]->server_name} 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php zones id=$domain_id'", $post_result, $retval);
 					
-					if ($retval) $failures = true;
+					if ($retval) {
+						$failures = true;
+					} else {
+						$post_result = array();
+					}
 					
 					@unlink($temp_ssh_key);
 					
-					if (!is_array($post_result)) {
-						/** Something went wrong */
-						return sprintf('<p class="error">%s</p>'. "\n", $post_result);
-					} else {
-						if (!count($post_result)) $post_result[] = __('Zone reload was successful.');
-						
-						if (count($post_result) > 1) {
-							/** Loop through and format the output */
-							foreach ($post_result as $line) {
-								$response .= '[' . $name_servers[$i]->server_name . "] $line\n";
-								if (strpos(strtolower($line), 'fail')) $failures = true;
-							}
-						} else {
-							$response .= "[{$name_servers[$i]->server_name}] " . $post_result[0] . "\n";
-							if (strpos(strtolower($post_result[0]), 'fail')) $failures = true;
-						}
-					}
-					/** Set the server_update_config flag */
-					setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'update');
-					
 					break;
 			}
+
+			if (!is_array($post_result)) {
+				/** Something went wrong */
+				return sprintf('<p class="error">%s</p>'. "\n", $post_result);
+			} else {
+				if (!count($post_result)) $post_result[] = __('Zone reload was successful.');
+
+				if (count($post_result) > 1) {
+					/** Loop through and format the output */
+					foreach ($post_result as $line) {
+						$response .= '[' . $name_servers[$i]->server_name . "] $line\n";
+						if (strpos(strtolower($line), 'fail')) $failures = true;
+					}
+				} else {
+					$response .= "[{$name_servers[$i]->server_name}] " . $post_result[0] . "\n";
+					if (strpos(strtolower($post_result[0]), 'fail')) $failures = true;
+				}
+			}
+			/** Set the server_update_config flag */
+			setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'update');
 		}
 		$response .= "</textarea>\n";
 		
