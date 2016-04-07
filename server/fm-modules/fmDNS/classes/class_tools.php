@@ -272,8 +272,11 @@ HTML;
 			/** Set current_name to check for blanks on next run */
 			$current_name = $array['record_name'];
 			
+			$all_records[] = $array;
+			
 			/** Automatically skip duplicates */
-			$checked = $this->checkDuplicates($array, $_POST['domain_id']);
+			$checked = $this->checkDuplicates($array, $_POST['domain_id'], $all_records);
+			unset($all_records);
 			
 			$rows .= <<<ROW
 					<tr class="import_swap">
@@ -335,14 +338,16 @@ BODY;
 	/**
 	 * Checks for duplicate entries during import process
 	 */
-	function checkDuplicates($array, $domain_id) {
+	function checkDuplicates($array, $domain_id, $all_records) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE record_status!='deleted' AND domain_id IN (" . join(',', getZoneParentID($domain_id)) . ") AND ";
+		$domain_ids = join(',', getZoneParentID($domain_id));
+		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE `record_status`!='deleted' AND `domain_id` IN ($domain_ids) AND ";
 		
 		foreach ($array as $key => $data) {
 			if ($key != 'record_comment') {
-				$sql_select .= "$key='" . mysql_real_escape_string($data) . "' AND ";
+				$data = mysql_real_escape_string($data);
+				$sql_select .= ($data) ? "$key='" . mysql_real_escape_string($data) . "' AND " : "($key='' OR $key IS NULL) AND ";
 			}
 		}
 		$sql_select = rtrim($sql_select, ' AND ');
@@ -351,90 +356,50 @@ BODY;
 		
 		if ($fmdb->num_rows) return 'checked';
 		
+		/** Check for duplicate RR in database */
+		$query = "SELECT DISTINCT `record_type` FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE `record_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND `domain_id` IN ($domain_ids) AND `record_name`='{$array['record_name']}'";
+		$fmdb->query($query);
+		
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<=$fmdb->num_rows; $i++) {
+				$types[] = $fmdb->last_result[$i]->record_type;
+			}
+			/** Duplicate RR in the database already */
+			if (in_array('CNAME', $types)) return 'checked disabled';
+		}
+		
+		unset($types);
+		
+		/** Duplicate RR in the imported zone file */
+		foreach ($all_records as $tmp_array) {
+			foreach ($tmp_array as $key => $val) {
+				if ($key == 'record_type' && $tmp_array['record_name'] == $array['record_name']) {
+					$types[] = $val;
+				}
+			}
+		}
+		if (count($types)) {
+			array_unique($types);
+			if (count($types) > 1 && in_array('CNAME', $types)) return 'checked disabled';
+		}
+		
 		return null;
 	}
 
 	/**
 	 * Tests server connectivity
 	 */
-	function connectTests() {
+	function connectTests($server_data) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		/** dns tests */
+		$connect_test = "\t" . str_pad(__('DNS:'), 15);
+		$port = 53;
+		if (socketTest($server_data->server_name, $port, 10)) $connect_test .=  __('success') . ' (tcp/' . $port . ')';
+		else $connect_test .=  __('failed') . ' (tcp/' . $port . ')';
+		$connect_test .=  "\n";
 		
-		/** Load ssh key for use */
-		$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-		$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
-		if ($ssh_key) {
-			if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-			$ssh_key_loaded = @file_put_contents($temp_ssh_key, $ssh_key);
-			@chmod($temp_ssh_key, 0400);
-		}
-		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-
-		/** Get server list */
-		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
-		
-		/** Process server list */
-		$num_rows = $fmdb->num_rows;
-		$results = $fmdb->last_result;
-		for ($x=0; $x<$num_rows; $x++) {
-			$return .= sprintf(__("Running tests for %s\n"), $results[$x]->server_name);
-			
-			/** ping tests */
-			$return .= "\t" . str_pad(__('Ping:'), 15);
-			if (pingTest($results[$x]->server_name)) $return .=  __('success');
-			else $return .=  __('failed');
-			$return .=  "\n";
-
-			/** remote port tests */
-			$return .= "\t" . str_pad(__('Remote Port:'), 15);
-			if ($results[$x]->server_update_method != 'cron') {
-				if (socketTest($results[$x]->server_name, $results[$x]->server_update_port, 10)) {
-					$return .= __('success') . ' (tcp/' . $results[$x]->server_update_port . ")\n";
-					
-					if ($results[$x]->server_update_method == 'ssh') {
-						$return .= "\t" . str_pad(__('SSH Login:'), 15);
-						if (!$ssh_key) {
-							$return .= __('no SSH key defined');
-						} elseif ($ssh_key_loaded === false) {
-							$return .= sprintf(__('could not load SSH key into %s'), $temp_ssh_key);
-						} elseif (!$ssh_user) {
-							$return .= __('no SSH user defined');
-						} else {
-							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} uptime", $post_result, $retval);
-							if ($retval) {
-								$return .= __('ssh key login failed');
-							} else {
-								$return .= __('success');
-							}
-						}
-					} else {
-						/** php tests */
-						$return .= "\t" . str_pad(__('http page:'), 15);
-						$php_result = getPostData($results[$x]->server_update_method . '://' . $results[$x]->server_name . '/' .
-									$_SESSION['module'] . '/reload.php', null);
-						if ($php_result == 'Incorrect parameters defined.') $return .= __('success');
-						else $return .= __('failed');
-					}
-					
-				} else $return .=  __('failed') . ' (tcp/' . $results[$x]->server_update_port . ')';
-			} else $return .= __('skipping (host updates via cron)');
-			$return .=  "\n";
-			
-			/** dns tests */
-			$return .= "\t" . str_pad(__('DNS:'), 15);
-			$port = 53;
-			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  __('success') . ' (tcp/' . $port . ')';
-			else $return .=  __('failed') . ' (tcp/' . $port . ')';
-			$return .=  "\n";
-
-			$return .=  "\n";
-		}
-		
-		@unlink($temp_ssh_key);
-		
-		return $return;
+		return $connect_test;
 	}
 	
 	

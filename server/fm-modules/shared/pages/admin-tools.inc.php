@@ -23,12 +23,7 @@
 */
 
 if ($_SESSION['module'] != $fm_name) {
-	$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
-	if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
-		include($module_tools_file);
-	}
-
-	if (method_exists($fm_module_tools, 'connectTests')) {
+	if (array_key_exists('client_version', $__FM_CONFIG[$_SESSION['module']])) {
 		$tools_option[] = sprintf('
 			<h2>%s</h2>
 			<p>%s</p>

@@ -21,35 +21,35 @@
 */
 
 /**
- * fmFirewall Client Utility HTTPD Handler
+ * fmFirewall Client Utility
  *
  * @package fmFirewall
  * @subpackage Client
  *
  */
 
-require_once(dirname(dirname(dirname(__FILE__))) . '/functions.php');
+/** Client version */
+$data['server_client_version'] = '1.3';
 
-initWebRequest();
+error_reporting(0);
 
-/** Process $_POST for buildconf or zone reload */
-if (isset($_POST['action'])) {
-	switch ($_POST['action']) {
-		case 'buildconf':
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/fw.php buildconf 2>&1', $output, $retval);
-			if ($retval) {
-				/** Something went wrong */
-				$output[] = 'Config build failed.';
-			} else {
-				$output[] = 'Config build was successful.';
-			}
-			break;
-		case 'upgrade':
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/dns.php upgrade 2>&1', $output);
-			break;
-	}
+$module_name = basename(dirname(__FILE__));
+
+/** Include shared client functions */
+$fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
+if (file_exists($fm_client_functions)) {
+	include_once($fm_client_functions);
+} else {
+	echo "The facileManager client scripts are not installed.\n";
+	exit(1);
 }
 
-echo serialize($output);
+/** Check if running supported version */
+$data['server_version'] = detectFWVersion();
+
+/** Build the configs provided by $url */
+$retval = buildConf($url, $data);
+
+if (!$retval) exit(1);
 
 ?>

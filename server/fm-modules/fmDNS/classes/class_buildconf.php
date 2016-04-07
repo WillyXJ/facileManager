@@ -21,46 +21,6 @@
 */
 
 class fm_module_buildconf {
-
-	/**
-	 * Processes the server configs
-	 *
-	 * @since 1.0
-	 * @package fmDNS
-	 *
-	 * @param array $files_array Array containing named files and contents
-	 * @return string
-	 */
-	function processConfigs($raw_data) {
-		$preview = null;
-		
-		$check_status = @$this->namedSyntaxChecks($raw_data);
-		foreach ($raw_data['files'] as $filename => $contents) {
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $filename . ":\n";
-			$preview .= str_repeat('=', 75) . "\n";
-			if (strpos($check_status, 'error') !== false) {
-				$i = 1;
-				$contents_array = explode("\n", $contents);
-				foreach ($contents_array as $line) {
-					$preview .= '<font color="#ccc">' . str_pad($i, strlen(count($contents_array)), ' ', STR_PAD_LEFT) . '</font> ';
-					if (strpos($check_status, "$filename:$i:") !== false) {
-						$preview .= sprintf('<font color="red">%s</font>', $line);
-					} else {
-						$preview .= $line;
-					}
-					$preview .= "\n";
-					$i++;
-				}
-				$preview .= "\n";
-			} else {
-				$preview .= "$contents\n\n";
-			}
-		}
-		
-		return array($preview, $check_status);
-	}
-	
 	
 	/**
 	 * Generates the server config and updates the DNS server
@@ -96,12 +56,14 @@ class fm_module_buildconf {
 			extract(get_object_vars($data), EXTR_SKIP);
 			
 			/** Disabled DNS server */
-			if ($server_status != 'active') {
-				$error = "DNS server is $server_status.\n";
-				if ($compress) echo gzcompress(serialize($error));
-				else echo serialize($error);
-				
-				exit;
+			if ($GLOBALS['basename'] != 'preview.php') {
+				if ($server_status != 'active') {
+					$error = "DNS server is $server_status.\n";
+					if ($compress) echo gzcompress(serialize($error));
+					else echo serialize($error);
+
+					exit;
+				}
 			}
 			
 			include(ABSPATH . 'fm-includes/version.php');
@@ -208,8 +170,9 @@ class fm_module_buildconf {
 					unset($comment);
 				}
 				$config .= 'acl "' . $acl_name . "\" {\n";
-				$config .= "\t" . $acl_item . ";\n";
-				$config .= "};\n\n";
+				$config .= "\t" . $acl_item;
+				if ($acl_item) $config .= ';';
+				$config .= "\n};\n\n";
 			}
 
 
@@ -311,7 +274,7 @@ class fm_module_buildconf {
 				
 				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 			}
-			/** Build includes */
+			/** Build global option includes */
 			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir);
 			
 			/** Build rate limits */
@@ -348,6 +311,9 @@ class fm_module_buildconf {
 			$config .= $control_config;
 			unset($control_config);
 
+			/** Build extra includes */
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, 0, 'outside');
+			
 			
 			/** Debian-based requires named.conf.options */
 			if (isDebianSystem($server_os_distro)) {
@@ -821,16 +787,14 @@ class fm_module_buildconf {
 							$file_ext = ($zone_result->domain_mapping == 'forward') ? 'hosts' : 'rev';
 
 							/** Are there multiple zones with the same name? */
-					if (isset($zone_result->parent_domain_id)) {
-						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->parent_domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result->parent_domain_id . ".$file_ext";
-					} else {
-						$zone_result->parent_domain_id = $zone_result->domain_id;
-						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
-					}
-//							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result->domain_id);
-//							if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
+							if (isset($zone_result->parent_domain_id)) {
+								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->parent_domain_id);
+								if ($fmdb->num_rows) $file_ext = $zone_result->parent_domain_id . ".$file_ext";
+							} else {
+								$zone_result->parent_domain_id = $zone_result->domain_id;
+								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->domain_id);
+								if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
+							}
 							
 							/** Build zone file */
 							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result);
@@ -840,14 +804,14 @@ class fm_module_buildconf {
 						}
 					}
 				}
-				if (is_array($data->files)) return get_object_vars($data);
+				if (is_array($data->files)) return array(get_object_vars($data), null);
 			} else {
 				/** process server config build */
 				list($config, $message) = $this->buildServerConfig($post_data);
 				$config['server_build_all'] = true;
 				$config['purge_config_files'] = $data->purge_config_files;
 				
-				return $config;
+				return array($config, $message);
 			}
 			
 		}
@@ -1117,40 +1081,6 @@ class fm_module_buildconf {
 	
 	
 	/**
-	 * Updates tables to reset flags
-	 *
-	 * @since 1.0
-	 * @package fmDNS
-	 */
-	function updateReloadFlags($post_data) {
-		global $fmdb, $__FM_CONFIG;
-		
-		$server_serial_no = sanitize($post_data['SERIALNO']);
-		extract($post_data);
-		
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			$data = $result[0];
-			extract(get_object_vars($data), EXTR_SKIP);
-
-			$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') || !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
-			$msg = "Success.\n";
-			if (isset($built_domain_ids)) {
-				$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
-			}
-			if (isset($reload_domain_ids)) {
-				$query = "DELETE FROM `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "track_reloads` WHERE `server_serial_no`='" . sanitize($server_serial_no) . "' AND domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
-				$fmdb->query($query);
-			}
-		} else $msg = "DNS server is not found.\n";
-		
-		if ($compress) echo gzcompress(serialize($msg));
-		else echo serialize($msg);
-	}
-	
-	
-	/**
 	 * Sets cloned details to that of the parent domain
 	 *
 	 * @since 1.0
@@ -1178,21 +1108,6 @@ class fm_module_buildconf {
 		}
 		
 		return false;
-	}
-	
-	
-	/**
-	 * Updates the daemon version number in the database
-	 *
-	 * @since 1.0
-	 * @package fmDNS
-	 */
-	function updateServerVersion() {
-		global $fmdb, $__FM_CONFIG;
-		
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_version`='" . $_POST['server_version'] . "', `server_os`='" . $_POST['server_os'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
-			(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
-		$fmdb->query($query);
 	}
 	
 	
@@ -1630,7 +1545,9 @@ HTML;
 		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
 		
 		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
-		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) $config .= '; }';
+		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) {
+			$config .= $cfg_info ? '; }' : ' }';
+		}
 		$config .= ";\n";
 
 		unset($cfg_info);
@@ -1734,16 +1651,24 @@ HTML;
 	 * @param array   $server_group_ids The array containing server group IDs for overrides
 	 * @param string  $server_root_dir Server root directory
 	 * @param integer $domain_id The ID of the zone
+	 * @param string  $clause Whether includes are inside or outside of clauses
 	 * @return array
 	 */
-	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0) {
+	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0, $clause = 'inside') {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (is_array($server_group_ids)) {
 			$server_group_ids = 'g_' . implode('","g_', $server_group_ids);
 		}
 		$domain_id_sql = is_array($domain_id) ? "domain_id IN ('" . join("','", $domain_id) . "')" : 'domain_id=' . $domain_id;
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include" AND view_id=' . $view_id . ' AND ' . $domain_id_sql . ' AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
+		if ($clause == 'inside') {
+			$clause_sql = ' AND cfg_in_clause="yes"';
+			$tab = "\t";
+		} else {
+			$clause_sql = ' AND cfg_in_clause="no"';
+			$tab = null;
+		}
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name="include"' . $clause_sql . ' AND view_id=' . $view_id . ' AND ' . $domain_id_sql . ' AND server_serial_no IN ("0", "' . $server_serial_no . '", "' . $server_group_ids . '") AND cfg_status="active"');
 		if ($fmdb->num_rows) {
 			$config_result = $fmdb->last_result;
 			for ($i=0; $i < $fmdb->num_rows; $i++) {
@@ -1756,12 +1681,50 @@ HTML;
 			foreach ($include_config as $cfg_name => $value_array) {
 				foreach ($value_array as $domain_name => $cfg_data) {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
+					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, $tab);
 				}
 			}
 			return $include_files;
 		} else {
 			return null;
+		}
+	}
+	
+	/**
+	 * Processes the server config checks
+	 *
+	 * @since 2.2
+	 * @package fmDNS
+	 *
+	 * @param array $raw_data Array containing named files and contents
+	 * @return string
+	 */
+	function processConfigsChecks($raw_data) {
+		return @$this->namedSyntaxChecks($raw_data);
+	}
+	
+	
+	/**
+	 * Updates tables to reset flags
+	 *
+	 * @since 2.2
+	 * @package fmDNS
+	 *
+	 * @param integer $server_serial_no Server serial number
+	 * @param array $post_data Array containing data sent by the client
+	 * @return null
+	 */
+	function moduleUpdateReloadFlags($server_serial_no, $post_data) {
+		global $fmdb, $__FM_CONFIG;
+		
+		extract($post_data);
+		
+		if (isset($built_domain_ids)) {
+			$this->setBuiltDomainIDs($server_serial_no, $built_domain_ids);
+		}
+		if (isset($reload_domain_ids)) {
+			$query = "DELETE FROM `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "track_reloads` WHERE `server_serial_no`='" . sanitize($server_serial_no) . "' AND domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
+			$fmdb->query($query);
 		}
 	}
 }

@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}conf
   `cfg_parent` int(11) NOT NULL DEFAULT '0',
   `cfg_name` varchar(50) NOT NULL,
   `cfg_data` text NOT NULL,
+  `cfg_in_clause` enum('yes','no') NOT NULL DEFAULT 'yes',
   `cfg_comment` text,
   `cfg_status` enum('hidden','active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`cfg_id`),

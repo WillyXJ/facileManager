@@ -2,6 +2,8 @@
 if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
+header("Content-Type: text/javascript");
+
 echo '$(document).ready(function() {
 	
 	var KEYCODE_ENTER = 13;
@@ -377,6 +379,15 @@ echo '$(document).ready(function() {
 		
 		return false;
     });
+
+	/* Change the server update method */
+	$("#manage_item_contents").delegate("#server_update_method", "change", function(e) {
+		if ($(this).val() == "cron") {
+			$("#server_update_port_option").slideUp();
+		} else {
+			$("#server_update_port_option").show("slow");
+		}
+	});
 
     /* Cancel button */
     $("#manage_item_contents").delegate("#cancel_button, .close", "click tap", function(e) {

@@ -1,0 +1,272 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-04-01 16:15-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: server/fm-modules/fmModule/functions.php:38
+#, php-format
+msgid ""
+"moduleFunctionalCheck() failed. User message goes here. <a href=\"%s\">Click "
+"here</a> to define a linked page."
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:38
+#: server/fm-modules/fmModule/functions.php:200
+msgid "Menu Title 2"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:59
+#, php-format
+msgid "%s has no dashboard content yet."
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:80
+msgid "Firewall"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:193
+msgid "Config"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:193
+#: server/fm-modules/fmModule/functions.php:194
+msgid "Servers"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:196
+msgid "Menu Title 1"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:196
+msgid "Page Title 1"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:197
+msgid "Submenu Title 1"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:197
+#: server/fm-modules/fmModule/functions.php:198
+msgid "Submenu Page Title 1"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:198
+msgid "Submenu Title 2"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:200
+msgid "Page Title 2"
+msgstr ""
+
+#: server/fm-modules/fmModule/functions.php:202
+#, php-format
+msgid "%s Settings"
+msgstr ""
+
+#: server/fm-modules/fmModule/variables.inc.php:36
+msgid "This description appears on the modules page."
+msgstr ""
+
+#: server/fm-modules/fmModule/variables.inc.php:44
+msgid "disabled"
+msgstr ""
+
+#: server/fm-modules/fmModule/variables.inc.php:56
+msgid "Setting 1 Title"
+msgstr ""
+
+#: server/fm-modules/fmModule/variables.inc.php:56
+msgid "Setting 1 description goes here."
+msgstr ""
+
+#: server/fm-modules/fmModule/variables.inc.php:60
+msgid "Setting 2 Title"
+msgstr ""
+
+#: server/fm-modules/fmModule/variables.inc.php:60
+msgid "Setting 2 description goes here."
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processPost.php:37
+msgid "You do not have sufficient privileges."
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processPost.php:63
+msgid "server"
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processPost.php:87
+#, php-format
+msgid "This item could not be set to %s."
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processPost.php:91
+#, php-format
+msgid "Set %s (%s) status to %s."
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processTools.php:35
+#: server/fm-modules/fmModule/pages/admin-tools.inc.php:31
+msgid "Button 1"
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processTools.php:36
+msgid "Button 1 was clicked."
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processTools.php:39
+msgid "Error"
+msgstr ""
+
+#: server/fm-modules/fmModule/ajax/processTools.php:40
+msgid "Button 2 generates an error."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:42
+msgid "Upgrade"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:42
+msgid "Build Config"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:52
+msgid "There are no servers."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:63
+msgid "Hostname"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:63
+msgid "Method"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:63
+msgid "Version"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:65
+msgid "Actions"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:112
+#: server/fm-modules/fmModule/classes/class_servers.php:390
+msgid "No server name defined."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:125
+msgid "Could not add the server because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:167
+msgid "Could not update the server because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:200
+msgid ""
+"The associated table records could not be removed because a database error "
+"occurred."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:207
+#, php-format
+msgid "Server '%s' (%s) was deleted"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:212
+msgid "This server could not be deleted."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:258
+msgid "Client Upgrade Available"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:262
+msgid "Client Install Required"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:336
+msgid "Add Server"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:336
+msgid "Edit Server"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:340
+msgid "Note:"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:340
+msgid "The client installer can automatically generate this entry."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:369
+msgid "Server Name"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:370
+msgid "Update Method"
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:394
+#, php-format
+msgid "Server name is too long (maximum %d character)."
+msgid_plural "Server name is too long (maximum %d characters)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:398
+msgid "This server name already exists."
+msgstr ""
+
+#: server/fm-modules/fmModule/classes/class_servers.php:419
+msgid "Server update port must be a valid TCP port."
+msgstr ""
+
+#: server/fm-modules/fmModule/extra/capabilities.inc.php:26
+msgid "View All"
+msgstr ""
+
+#: server/fm-modules/fmModule/extra/capabilities.inc.php:27
+msgid "Server Management"
+msgstr ""
+
+#: server/fm-modules/fmModule/extra/capabilities.inc.php:28
+msgid "Build Server Configs"
+msgstr ""
+
+#: server/fm-modules/fmModule/extra/capabilities.inc.php:29
+msgid "User Capability Title"
+msgstr ""
+
+#: server/fm-modules/fmModule/extra/capabilities.inc.php:30
+msgid "Manage Settings"
+msgstr ""
+
+#: server/fm-modules/fmModule/pages/admin-tools.inc.php:31
+msgid "Button 2"
+msgstr ""
+
+#: server/fm-modules/fmModule/pages/admin-tools.inc.php:39
+msgid "Module Tool Title"
+msgstr ""
+
+#: server/fm-modules/fmModule/pages/admin-tools.inc.php:39
+msgid "Tool description."
+msgstr ""

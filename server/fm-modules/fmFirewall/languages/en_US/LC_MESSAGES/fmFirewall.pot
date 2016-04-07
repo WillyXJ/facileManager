@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-17 16:51-0700\n"
+"POT-Creation-Date: 2016-04-01 16:15-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -413,7 +413,7 @@ msgid "Direction"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_policies.php:65
-#: server/fm-modules/fmFirewall/classes/class_servers.php:318
+#: server/fm-modules/fmFirewall/classes/class_servers.php:334
 msgid "Note:"
 msgstr ""
 
@@ -499,7 +499,7 @@ msgid "Method"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_servers.php:56
-#: server/fm-modules/fmFirewall/classes/class_servers.php:356
+#: server/fm-modules/fmFirewall/classes/class_servers.php:372
 msgid "Firewall Type"
 msgstr ""
 
@@ -508,12 +508,12 @@ msgid "Version"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_servers.php:56
-#: server/fm-modules/fmFirewall/classes/class_servers.php:358
+#: server/fm-modules/fmFirewall/classes/class_servers.php:374
 msgid "Config File"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_servers.php:97
-#: server/fm-modules/fmFirewall/classes/class_servers.php:498
+#: server/fm-modules/fmFirewall/classes/class_servers.php:384
 msgid "No server name defined."
 msgstr ""
 
@@ -521,121 +521,71 @@ msgstr ""
 msgid "Could not add the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:123
-#: server/fm-modules/fmFirewall/classes/class_servers.php:132
+#: server/fm-modules/fmFirewall/classes/class_servers.php:137
+#: server/fm-modules/fmFirewall/classes/class_servers.php:148
 #, php-format
 msgid "Required for %s client interaction."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:170
+#: server/fm-modules/fmFirewall/classes/class_servers.php:186
 msgid "Could not update the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:194
+#: server/fm-modules/fmFirewall/classes/class_servers.php:210
 msgid ""
 "The associated policies could not be removed because a database error "
 "occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:200
+#: server/fm-modules/fmFirewall/classes/class_servers.php:216
 #, php-format
 msgid "Server '%s' (%s) was deleted"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:205
+#: server/fm-modules/fmFirewall/classes/class_servers.php:221
 msgid "This server could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:241
+#: server/fm-modules/fmFirewall/classes/class_servers.php:257
 msgid "Client Upgrade Available"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:245
+#: server/fm-modules/fmFirewall/classes/class_servers.php:261
 msgid "Client Install Required"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:314
+#: server/fm-modules/fmFirewall/classes/class_servers.php:330
 msgid "Add Firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:314
+#: server/fm-modules/fmFirewall/classes/class_servers.php:330
 msgid "Edit Firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:318
+#: server/fm-modules/fmFirewall/classes/class_servers.php:334
 msgid "The client installer can automatically generate this entry."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:355
+#: server/fm-modules/fmFirewall/classes/class_servers.php:371
 msgid "Server Name"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:357
+#: server/fm-modules/fmFirewall/classes/class_servers.php:373
 msgid "Update Method"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:370
-msgid "This server is not found."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:382
-msgid "This server will be updated on the next cron run."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:384
-msgid ""
-"This server receives updates via cron - please manage the server manually."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:391
-#: server/fm-modules/fmFirewall/classes/class_servers.php:426
-#, php-format
-msgid "Failed: could not access %s using %s (tcp/%d)."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:405
-#, php-format
-msgid ""
-"It appears %s does not have php configured properly within httpd or httpd is "
-"not running."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:432
-#, php-format
-msgid "Failed: SSH key is not <a href=\"%s\">defined</a>."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:432
-#: server/fm-modules/fmFirewall/classes/class_servers.php:445
-msgid "General"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:438
-#, php-format
-msgid "Failed: could not load SSH key into %s."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:445
-#, php-format
-msgid "Failed: SSH user is not <a href=\"%s\">defined</a>."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:453
-msgid "Could not login via SSH."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:502
+#: server/fm-modules/fmFirewall/classes/class_servers.php:388
 #, php-format
 msgid "Server name is too long (maximum %d character)."
 msgid_plural "Server name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:506
+#: server/fm-modules/fmFirewall/classes/class_servers.php:392
 msgid "This server name already exists."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:527
+#: server/fm-modules/fmFirewall/classes/class_servers.php:413
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
@@ -867,61 +817,6 @@ msgstr ""
 msgid "Infinity"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_tools.php:50
-#, php-format
-msgid "Running tests for %s\n"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:53
-msgid "Ping:"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:54
-#: server/fm-modules/fmFirewall/classes/class_tools.php:62
-#: server/fm-modules/fmFirewall/classes/class_tools.php:77
-#: server/fm-modules/fmFirewall/classes/class_tools.php:85
-msgid "success"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:55
-#: server/fm-modules/fmFirewall/classes/class_tools.php:86
-#: server/fm-modules/fmFirewall/classes/class_tools.php:89
-msgid "failed"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:59
-msgid "Remote Port:"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:65
-msgid "SSH Login:"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:67
-msgid "no SSH key defined"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:69
-#, php-format
-msgid "could not load SSH key into %s"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:71
-msgid "no SSH user defined"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:75
-msgid "ssh key login failed"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:82
-msgid "http page:"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_tools.php:90
-msgid "skipping (host updates via cron)"
-msgstr ""
-
 #: server/fm-modules/fmFirewall/extra/capabilities.inc.php:24
 msgid "View All"
 msgstr ""
@@ -950,10 +845,10 @@ msgstr ""
 msgid "Time Management"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/js/module.php:156
+#: server/fm-modules/fmFirewall/js/module.php:150
 msgid "Sort Order Results"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/js/module.php:156
+#: server/fm-modules/fmFirewall/js/module.php:150
 msgid "OK"
 msgstr ""

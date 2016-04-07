@@ -1014,10 +1014,13 @@ HTML;
 					}
 					
 					/** Remote URL to use */
-					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_name . ':' . $name_servers[$i]->server_update_port . '/' . $_SESSION['module'] . '/reload.php';
+					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_name . ':' . $name_servers[$i]->server_update_port . '/fM/reload.php';
 					
 					/** Data to post to $url */
-					$post_data = array('action'=>'reload', 'serial_no'=>$name_servers[$i]->server_serial_no, 'domain_id'=>$domain_id);
+					$post_data = array('action' => 'reload',
+						'serial_no' => $name_servers[$i]->server_serial_no,
+						'domain_id' => $domain_id,
+						'module' => $_SESSION['module']);
 					
 					$post_result = unserialize(getPostData($url, $post_data));
 					
@@ -1217,9 +1220,6 @@ HTML;
 			
 			/** IPv4 checks */
 			if ($domain_pieces[$domain_parts - 2] == 'in-addr') {
-				/** The first digit of a reverse zone must be numeric */
-				if (!is_numeric(substr($domain_name, 0, 1))) return false;
-				
 				/** Reverse zones with arpa must have at least three octets */
 				if ($domain_parts < 3) return false;
 				
@@ -1238,6 +1238,18 @@ HTML;
 							foreach ($octet_range as $octet) {
 								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
 							}
+							continue;
+						} elseif (preg_match("/^(\d{1,3})\/(\d{1,2})$/", $domain_pieces[$i])) {
+							/** Validate octet range */
+							$octet_range = explode('/', $domain_pieces[$i]);
+							
+							if ($octet_range[1] > 32) return false;
+							
+							foreach ($octet_range as $octet) {
+								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
+							}
+							continue;
+						} elseif (preg_match("/^(*[a-z\d](-*[a-z\d])*)*$/i", $domain_pieces[$i])) {
 							continue;
 						}
 					}
@@ -1267,7 +1279,7 @@ HTML;
 			/** Forward zones should only contain letters, numbers, periods, and hyphens */
 			return (preg_match("/^(_*[a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $domain_name) // valid chars check
 					&& preg_match("/^.{1,253}$/", $domain_name) // overall length check
-					&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)   ); // length of each label
+					&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)); // length of each label
 		}
 		
 		return true;
@@ -1467,12 +1479,6 @@ HTML;
 		foreach ($clean_fields as $val) {
 			$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
 			if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
-		}
-
-		/** Forward zones require forward servers */
-		if ($post['domain_type'] == 'forward') {
-			if (empty($post['domain_required_servers']['forwarders'])) return __('No forward servers defined.');
-			$post['domain_required_servers'] = $post['domain_required_servers']['forwarders'];
 		}
 
 		/** Slave and stub zones require master servers */

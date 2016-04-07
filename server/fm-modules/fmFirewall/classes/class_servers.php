@@ -112,25 +112,41 @@ class fm_module_servers {
 		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
 		include_once(ABSPATH . 'fm-modules/' . $module . '/classes/class_policies.php');
 		$fm_host_id = getNameFromID($fm_name, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'objects', 'object_', 'object_name', 'object_id', $account_id);
-		$fm_service_id[] = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
-		if ($post['server_type'] == 'iptables') $fm_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+		
+		/** Get server->client interaction services */
+		$web_service_id = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
+		$fm_out_service_id[] = $web_service_id;
+		switch ($post['server_update_method']) {
+			case 'http':
+			case 'https':
+				$fm_in_service_id[] = $web_service_id;
+				break;
+			case 'ssh':
+				$fm_in_service_id[] = 's' . getNameFromID('ssh', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+				break;
+		}
+		if ($post['server_type'] == 'iptables') $fm_out_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+		if (is_array($fm_in_service_id)) {
+			$default_rules[] = array(
+				'account_id' => $account_id,
+				'server_serial_no' => $post['server_serial_no'],
+				'source_items' => array('o' . $fm_host_id),
+				'destination_items' => '',
+				'services_items' => $fm_in_service_id,
+				'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
+				'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
+			);
+		}
 		$default_rules[] = array(
-								'account_id' => $account_id,
-								'server_serial_no' => $post['server_serial_no'],
-								'source_items' => array('o' . $fm_host_id),
-								'destination_items' => '',
-								'services_items' => $fm_service_id,
-								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
-							);
-		$default_rules[] = array(
-								'account_id' => $account_id,
-								'server_serial_no' => $post['server_serial_no'],
-								'policy_direction' => 'out',
-								'source_items' => '',
-								'destination_items' => array('o' . $fm_host_id),
-								'services_items' => $fm_service_id,
-								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
-							);
+			'account_id' => $account_id,
+			'server_serial_no' => $post['server_serial_no'],
+			'policy_direction' => 'out',
+			'source_items' => '',
+			'destination_items' => array('o' . $fm_host_id),
+			'services_items' => $fm_out_service_id,
+			'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
+			'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
+		);
 
 		foreach ($default_rules as $rule) {
 			$fm_module_policies->add($rule);
@@ -214,7 +230,7 @@ class fm_module_servers {
 		$os_image = setOSIcon($row->server_os_distro);
 		
 		$edit_status = $edit_actions = null;
-		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+		$edit_actions = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		
@@ -360,135 +376,6 @@ HTML;
 			);
 
 		return $return_form;
-	}
-	
-	function buildServerConfig($serial_no, $action = 'buildconf', $friendly_action = 'Configuration Build') {
-		global $fmdb, $__FM_CONFIG, $fm_name;
-		
-		/** Check serial number */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>', __('This server is not found.'));
-
-		$server_details = $fmdb->last_result;
-		extract(get_object_vars($server_details[0]), EXTR_SKIP);
-		$options[] = $response = null;
-		
-		switch($server_update_method) {
-			case 'cron':
-				if ($action == 'buildconf') {
-					/* set the server_update_config flag */
-					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
-					$response = sprintf('<p>%s</p>'. "\n", __('This server will be updated on the next cron run.'));
-				} else {
-					$response = sprintf('<p>%s</p>'. "\n", __('This server receives updates via cron - please manage the server manually.'));
-				}
-				break;
-			case 'http':
-			case 'https':
-				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
-				}
-				
-				/** Remote URL to use */
-				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
-				
-				/** Data to post to $url */
-				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no);
-				
-				$post_result = @unserialize(getPostData($url, $post_data));
-				
-				if (!is_array($post_result)) {
-					/** Something went wrong */
-					if (empty($post_result)) {
-						return sprintf('<p class="error">%s</p>', sprintf(__('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
-					}
-					return $response . '<p class="error">' . $post_result . '</p>'. "\n";
-				} else {
-					if (count($post_result) > 1) {
-						$response .= '<textarea rows="7" cols="100">';
-						
-						/** Loop through and format the output */
-						foreach ($post_result as $line) {
-							$response .= "[$server_name] $line\n";
-						}
-						
-						$response .= "</textarea>\n";
-					} else {
-						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
-					}
-				}
-				break;
-			case 'ssh':
-				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
-				}
-				
-				/** Get SSH key */
-				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-				if (!$ssh_key) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-				}
-				
-				$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
-				if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
-				}
-				
-				@chmod($temp_ssh_key, 0400);
-				
-				$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-				if (!$ssh_user) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-				}
-		
-				/** Test SSH authentication */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/fw.php'", $post_result, $retval);
-				if ($retval) {
-					/** Something went wrong */
-					@unlink($temp_ssh_key);
-					return sprintf('<p class="error">%s</p>'. "\n", __('Could not login via SSH.'));
-				}
-				unset($post_result);
-				
-				/** Run build */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/fw.php $action " . implode(' ', $options) . "'", $post_result, $retval);
-				
-				@unlink($temp_ssh_key);
-				
-				if ($retval) {
-					/** Something went wrong */
-					return '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
-				} else {
-				if (!count($post_result)) $post_result[] = ucfirst($friendly_action) . ' was successful.';
-					
-					if (count($post_result) > 1) {
-						$response .= '<textarea rows="4" cols="100">';
-						
-						/** Loop through and format the output */
-						foreach ($post_result as $line) {
-							$response .= "[$server_name] $line\n";
-						}
-						
-						$response .= "</textarea>\n";
-					} else {
-						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
-					}
-				}
-				break;
-		}
-		
-		/* reset the server_build_config flag */
-		if (!strpos($response, strtolower('failed'))) {
-			setBuildUpdateConfigFlag($serial_no, 'no', 'build');
-		}
-
-		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-		addLogEntry(ucfirst($friendly_action) . " was performed on server '$tmp_name'.");
-
-		return $response;
 	}
 	
 	function validatePost($post) {

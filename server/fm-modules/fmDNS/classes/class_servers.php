@@ -464,7 +464,7 @@ class fm_module_servers {
 		if ($type == 'servers') {
 			$os_image = setOSIcon($row->server_os_distro);
 
-			$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+			$edit_actions = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 
 			$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 
@@ -782,169 +782,8 @@ FORM;
 		return $return;
 	}
 
-	function buildServerConfig($serial_no, $action = 'buildconf', $friendly_action = 'Configuration Build') {
-		global $fmdb, $__FM_CONFIG, $fm_name;
-		
-		/** Check serial number */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>', __('This server is not found.'));
-
-		$server_details = $fmdb->last_result;
-		extract(get_object_vars($server_details[0]), EXTR_SKIP);
-		$options[] = $response = null;
-		
-		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
-		
-		if ($action == 'buildconf') {
-			if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
-				global $fm_module_buildconf;
-				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
-
-				$data['SERIALNO'] = $server_serial_no;
-				$data['compress'] = 0;
-				$data['dryrun'] = true;
-
-				basicGet('fm_accounts', $_SESSION['user']['account_id'], 'account_', 'account_id');
-				$account_result = $fmdb->last_result;
-				$data['AUTHKEY'] = $account_result[0]->account_key;
-
-				list($raw_data, $response) = $fm_module_buildconf->buildServerConfig($data);
-
-				$response .= @$fm_module_buildconf->namedSyntaxChecks($raw_data);
-				if (strpos($response, 'error') !== false) return buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
-			}
-
-			if (getOption('purge_config_files', $_SESSION['user']['account_id'], 'fmDNS') == 'yes') {
-				$options[] = 'purge';
-			}
-		}
-		
-		switch($server_update_method) {
-			case 'cron':
-				if ($action == 'buildconf') {
-					/* set the server_update_config flag */
-					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
-					$response = sprintf('<p>%s</p>'. "\n", __('This server will be updated on the next cron run.'));
-				} else {
-					$response = sprintf('<p>%s</p>'. "\n", __('This server receives updates via cron - please manage the server manually.'));
-				}
-				break;
-			case 'http':
-			case 'https':
-				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
-				}
-				
-				/** Remote URL to use */
-				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
-				
-				/** Data to post to $url */
-				$post_data = array('action'=>$action, 'serial_no'=>$server_serial_no, 'options'=>implode(' ', $options));
-				
-				$post_result = @unserialize(getPostData($url, $post_data));
-				
-				if (!is_array($post_result)) {
-					/** Something went wrong */
-					if (empty($post_result)) {
-						return sprintf('<p class="error">%s</p>', sprintf(__('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
-					}
-					return '<p class="error">' . $post_result . '</p>';
-				} else {
-					if (count($post_result) > 1) {
-						$response .= "<pre>\n";
-						
-						/** Loop through and format the output */
-						foreach ($post_result as $line) {
-							$response .= "[$server_name] $line\n";
-						}
-						
-						$response .= "</pre>\n";
-					} else {
-						$response = "<p>[$server_name] " . $post_result[0] . '</p>';
-					}
-				}
-				break;
-			case 'ssh':
-				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
-				}
-				
-				/** Get SSH key */
-				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-				if (!$ssh_key) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(__('General'))));
-				}
-				
-				$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
-				if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
-				}
-				
-				@chmod($temp_ssh_key, 0400);
-				
-				$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-				if (!$ssh_user) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(__('General'))));
-				}
-		
-				/** Test SSH authentication */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/dns.php'", $post_result, $retval);
-				if ($retval) {
-					/** Something went wrong */
-					@unlink($temp_ssh_key);
-					return sprintf('<p class="error">%s</p>'. "\n", __('Failed: Could not login via SSH.'));
-				}
-				unset($post_result);
-				
-				/** Run build */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/dns.php $action " . implode(' ', $options) . "'", $post_result, $retval);
-				
-				@unlink($temp_ssh_key);
-				
-				if ($retval) {
-					/** Something went wrong */
-					return '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
-				}
-				
-				if (!count($post_result)) $post_result[] = ucfirst($friendly_action) . ' was successful.';
-
-				if (count($post_result) > 1) {
-					$response = "<pre>\n";
-
-					/** Loop through and format the output */
-					foreach ($post_result as $line) {
-						$response .= "[$server_name] $line\n";
-					}
-
-					$response .= "</pre>\n";
-				} else {
-					$response = "<p>[$server_name] " . $post_result[0] . '</p>';
-				}
-
-				break;
-		}
-		
-		if ($action == 'buildconf') {
-			/* reset the server_build_config flag */
-			if (!strpos($response, strtolower('failed'))) {
-				setBuildUpdateConfigFlag($serial_no, 'no', 'build');
-			}
-		}
-
-		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-		addLogEntry(ucfirst($friendly_action) . " was performed on server '$tmp_name'.");
-
-		if (strpos($response, '<pre>') !== false) {
-			$response = buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
-		}
-		return $response;
-	}
-	
 	function manageCache($server_id, $action) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_shared_module_servers;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($server_id), 'server_', 'server_id');
@@ -963,7 +802,7 @@ FORM;
 		}
 		
 		if (count($response) == 1) {
-			foreach (makePlainText($this->buildServerConfig($server_serial_no, $action, ucfirst(str_replace('-', ' ', $action))), true) as $line) {
+			foreach (makePlainText($fm_shared_module_servers->buildServerConfig($server_serial_no, $action, ucfirst(str_replace('-', ' ', $action))), true) as $line) {
 				$response[] = ' --> ' . $line;
 			}
 		}
@@ -1059,9 +898,33 @@ FORM;
 	}
 
 	/**
+	 * Builds an array of all servers in a group
+	 *
+	 * @since 2.2
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param integer $group_id Group ID to lookup
+	 * @return array
+	 */
+	function getGroupServerIDs($group_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$query = "SELECT group_masters, group_slaves FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` WHERE 
+			`account_id`='{$_SESSION['user']['account_id']}' AND `group_status`='active' AND `group_id`=$group_id";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$servers = array_merge((array) @explode(';', $fmdb->last_result[0]->group_masters), (array) @explode(';', $fmdb->last_result[0]->group_slaves));
+			return array_unique($servers);
+		}
+		
+		return false;
+	}
+
+	/**
 	 * Deletes associated configs during server/group deletion
 	 *
-	 * @since 3.0
+	 * @since 2.2
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *

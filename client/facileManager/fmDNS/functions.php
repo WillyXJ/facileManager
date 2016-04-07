@@ -41,10 +41,7 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-  -n|dryrun      Do not save - just output what will happen
-  -b|buildconf   Build named config and zone files
   -z|zones       Build all associated zone files
-  -c|cron        Run in cron mode
      dump-cache  Dump the DNS cache
      clear-cache Clear the DNS cache
      id=XX       Specify the individual DomainID to build and reload
@@ -90,8 +87,6 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 
 function buildConf($url, $data) {
 	global $proto, $debug, $purge;
-	
-	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
@@ -190,22 +185,6 @@ function buildConf($url, $data) {
 }
 
 
-function findFile($file) {
-	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2', '/usr/local/etc/apache22',
-				'/etc', '/usr/local/etc', '/etc/apache2', '/etc', '/etc/named', '/etc/namedb', '/etc/bind'
-				);
-
-	while ($this_path = current($path)) {
-		if (is_file("$this_path/$file")) {
-			return "$this_path/$file";
-		}
-		next($path);
-	}
-
-	return false;
-}
-
-
 function detectServerType() {
 	$supported_servers = array('bind9'=>'named');
 	
@@ -217,9 +196,9 @@ function detectServerType() {
 }
 
 
-function moduleAddServer($url, $data) {
+function moduleAddServer() {
 	/** Attempt to determine default variables */
-	$named_conf = findFile('named.conf');
+	$named_conf = findFile('named.conf', array('/etc/named', '/etc/namedb', '/etc/bind'));
 	$data['server_run_as_predefined'] = 'named';
 	if ($named_conf) {
 		if (function_exists('posix_getgrgid')) {
@@ -241,24 +220,7 @@ function moduleAddServer($url, $data) {
 	}
 	$data['server_chroot_dir'] = detectChrootDir();
 	
-	/** Add the server to the account */
-	$app = detectDaemonVersion(true);
-	if ($app === null) {
-		echo "failed\n\n";
-		echo fM("Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n");
-		exit(1);
-	}
-	$data['server_type'] = $app['server']['type'];
-	$data['server_version'] = $app['app_version'];
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	if (!is_array($raw_data)) {
-		if (!$raw_data) echo "An error occurred\n";
-		else echo $raw_data;
-		exit(1);
-	}
-	
-	return array('data' => $data, 'add_result' => "Success\n");
+	return $data;
 }
 
 
@@ -403,8 +365,7 @@ function manageCache($action, $message) {
  * Logs and outputs error messages
  *
  * @since 2.0
- * @package facileManager
- * @subpackage fmDNS
+ * @package fmDNS
  *
  * @param string $last_line Output from previously run command
  * @return boolean
@@ -417,5 +378,38 @@ function processReloadFailure($last_line) {
 	addLogEntry($message);
 	return false;
 }
+
+
+/**
+ * Processes module-specific web action requests
+ *
+ * @since 2.2
+ * @package fmDNS
+ *
+ * @return array
+ */
+function moduleInitWebRequest() {
+	$output = null;
+	
+	switch ($_POST['action']) {
+		case 'reload':
+			if (!isset($_POST['domain_id']) || !is_numeric($_POST['domain_id'])) {
+				exit(serialize('Zone ID is not found.'));
+			}
+
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/client.php zones id=' . $_POST['domain_id'] . ' 2>&1', $rawoutput, $rc);
+			if ($rc) {
+				/** Something went wrong */
+				$output[] = 'Zone reload failed.';
+				$output[] = $rawoutput;
+			} else {
+				$output[] = 'Zone reload was successful.';
+			}
+			break;
+	}
+	
+	return $output;
+}
+
 
 ?>

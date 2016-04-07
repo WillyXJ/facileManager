@@ -1,6 +1,7 @@
 1.2.2 (2016-??-??)
 ==================
 * Server - [improvement] Updated help file.
+* Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
 
 1.2.1 (2016-03-11)
 ==================

@@ -2,6 +2,8 @@
 if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
+header("Content-Type: text/javascript");
+
 echo '
 $(document).ready(function() {
 	
@@ -266,14 +268,6 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#manage_item_contents").delegate("#server_update_method", "change", function(e) {
-		if ($(this).val() == "cron") {
-			$("#server_update_port_option").slideUp();
-		} else {
-			$("#server_update_port_option").show("slow");
-		}
-	});
-
 	$("#manage_item_contents").delegate("#cfg_destination", "change", function(e) {
 		if ($(this).val() == "file") {
 			$("#syslog_options").slideUp();
@@ -376,6 +370,8 @@ function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById("cfg_name").value;
 	var server_serial_no	= getUrlVars()["server_serial_no"];
 	var view_id = getUrlVars()["view_id"];
+	var cfg_type = document.getElementsByName("cfg_type")[0].value;
+	var cfg_id = document.getElementsByName("cfg_id")[0].value;
 
 	var form_data = {
 		get_option_placeholder: true,
@@ -383,6 +379,8 @@ function displayOptionPlaceholder(option_value) {
 		option_value: option_value,
 		server_serial_no: server_serial_no,
 		view_id: view_id,
+		cfg_type: cfg_type,
+		cfg_id: cfg_id,
 		is_ajax: 1
 	};
 

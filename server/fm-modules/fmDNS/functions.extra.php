@@ -48,7 +48,7 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 	$available_zones[0][] = 'All Zones';
 	$available_zones[0][] = '0';
 	
-	basicGetList('fm_' . $__FM_CONFIG[$module_name]['prefix'] .'domains', 'domain_mapping`,`domain_name', 'domain_', 'AND domain_clone_domain_id=0');
+	basicGetList('fm_' . $__FM_CONFIG[$module_name]['prefix'] .'domains', 'domain_mapping`,`domain_name', 'domain_');
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {

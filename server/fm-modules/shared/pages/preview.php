@@ -63,7 +63,7 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	if (!is_array($raw_data)) {
 		$preview = unserialize($raw_data);
 	} else {
-		list($preview, $check_status) = $fm_module_buildconf->processConfigs($raw_data);
+		list($preview, $check_status) = $fm_shared_module_buildconf->processConfigs($raw_data);
 	}
 } else {
 	$preview = _('Invalid Server ID.');

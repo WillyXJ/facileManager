@@ -2,16 +2,10 @@
 if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
+header("Content-Type: text/javascript");
+
 echo '
 $(document).ready(function() {
-	
-	$("#manage_item_contents").delegate("#server_update_method", "change", function(e) {
-		if ($(this).val() == "cron") {
-			$("#server_update_port_option").slideUp();
-		} else {
-			$("#server_update_port_option").show("slow");
-		}
-	});
 	
 	$("#manage_item_contents").delegate("#service_type", "change", function(e) {
 		if ($(this).val() == "icmp") {

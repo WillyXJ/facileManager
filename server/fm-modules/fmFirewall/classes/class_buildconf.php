@@ -16,35 +16,11 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | http://www.facilemanager.com/modules/fmfirewall/                             |
  +-------------------------------------------------------------------------+
 */
 
 class fm_module_buildconf {
-	
-	/**
-	 * Processes the server configs
-	 *
-	 * @since 1.0
-	 * @package fmFirewall
-	 *
-	 * @param array $files_array Array containing named files and contents
-	 * @return string
-	 */
-	function processConfigs($raw_data) {
-		$preview = null;
-		
-		$check_status = null;
-		
-		foreach ($raw_data['files'] as $filename => $contents) {
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $filename . ":\n";
-			$preview .= str_repeat('=', 75) . "\n";
-			$preview .= $contents . "\n\n";
-		}
-
-		return array($preview, $check_status);
-	}
 	
 	/**
 	 * Generates the server config and updates the firewall server
@@ -74,12 +50,14 @@ class fm_module_buildconf {
 			extract(get_object_vars($data), EXTR_SKIP);
 			
 			/** Disabled server */
-			if ($server_status != 'active') {
-				$error = "Server is $server_status.\n";
-				if ($compress) echo gzcompress(serialize($error));
-				else echo serialize($error);
-				
-				exit;
+			if ($GLOBALS['basename'] != 'preview.php') {
+				if ($server_status != 'active') {
+					$error = "Server is $server_status.\n";
+					if ($compress) echo gzcompress(serialize($error));
+					else echo serialize($error);
+
+					exit;
+				}
 			}
 			
 			include(ABSPATH . 'fm-includes/version.php');
@@ -237,7 +215,7 @@ class fm_module_buildconf {
 			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' -m state --state NEW' : null;
 
 			/** Handle established option */
-			$keep_state .= ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? ',ESTABLISHED' : null;
+			$keep_state .= ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? ',ESTABLISHED,RELATED' : null;
 
 			/** Handle frags */
 			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? ' -f' : null;
