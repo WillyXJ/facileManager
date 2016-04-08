@@ -32,6 +32,8 @@ $compress = true;
 $whoami = 'root';
 $url = null;
 
+if (!isset($module_name) && isset($_POST['module'])) $module_name = $_POST['module'];
+
 /** Check if PHP is CGI for CLI operations */
 if (strpos(php_sapi_name(), 'cgi') !== false && count($argv)) {
 	echo fM("Your server is running a CGI version of PHP and the CLI version is required.\n\n");
@@ -122,7 +124,7 @@ $data['update_from_client']	= (in_array('no-update', $argv)) ? false : true;
 /** Run the installer */
 if (in_array('install', $argv) || in_array('reinstall', $argv)) {
 	if (file_exists($config_file)) {
-		require ($config_file);
+		require($config_file);
 		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO') && in_array('install', $argv)) {
 			$proto = (socketTest(FMHOST, 443)) ? 'https' : 'http';
 			$url = "${proto}://" . FMHOST . "admin-accounts.php?verify";
@@ -143,7 +145,7 @@ if (in_array('install', $argv) || in_array('reinstall', $argv)) {
 if (!file_exists($config_file)) {
 	echo fM("The $module_name client is not installed. Please install it with the following:\nphp {$argv[0]} install\n");
 	exit(1);
-} else require($config_file);
+} else require_once($config_file);
 
 $data['AUTHKEY'] = AUTHKEY;
 $data['SERIALNO'] = SERIALNO;
@@ -756,18 +758,16 @@ function initWebRequest() {
 				if ($rc) {
 					/** Something went wrong */
 					$output[] = 'Config build failed.';
-				} else {
-					$output[] = 'Config build was successful.';
 				}
 				break;
 			case 'upgrade':
 				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $_POST['module'] . '/client.php upgrade 2>&1', $output);
 				break;
-		}
-		
-		/** Process module-specific requests */
-		if (function_exists('moduleInitWebRequest')) {
-			$output = moduleInitWebRequest();
+			default:
+				/** Process module-specific requests */
+				if (function_exists('moduleInitWebRequest')) {
+					$output = moduleInitWebRequest();
+				}
 		}
 	}
 
