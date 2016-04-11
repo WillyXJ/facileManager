@@ -71,7 +71,7 @@ Client Installation
    `sudo mv facileManager/client/facileManager /usr/local/`
 2. For each module you wish to use, run the following to complete the client
    installation.
-   `sudo php /usr/local/facileManager/*module_name*/client.php install`
+   `sudo php /usr/local/facileManager/<module_name>/client.php install`
 	
 
 
@@ -109,7 +109,7 @@ Client Upgrade
 Alternatively, since v1.1, you can update the clients through the UI (servers
 page) or by running the following on the clients:
 
-`sudo php /usr/local/facileManager/*module_name*/client.php upgrade`
+`sudo php /usr/local/facileManager/<module_name>/client.php upgrade`
 
 
 Important Upgrade Notes
@@ -135,11 +135,11 @@ You MUST also update the following based on your client's update method.
 
           For example:  
 
-          sudo rm /var/www/html/*module_name*  
+          sudo rm /var/www/html/<module_name>  
           sudo ln -sf /usr/local/facileManager/www /var/www/html/fM  
 
 Alternatively, you can run the reinstall script which will ensure the proper
 files and configs will be in place, but it will not remove the old sudoers entries
 and document root symlinks.
 
-`sudo php /usr/local/facileManager/*module_name*/client.php reinstall`
+`sudo php /usr/local/facileManager/<module_name>/client.php reinstall`
