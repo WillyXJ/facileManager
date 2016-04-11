@@ -29,7 +29,7 @@ facileManager (server) requires the following:
 
 * PHP 5.2.0 or later with MySQL support
 * MySQL 5.0 or later
-** Required MySQL user privileges on the database include 
+  * Required MySQL user privileges on the database include 
    `SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, LOCK TABLES`
 * A working webserver (httpd) with mod_rewrite.so enabled
 * facileManager-core
@@ -40,8 +40,8 @@ fM client requires the following:
 * ISC BIND 9.3 or later (for the fmDNS module only)
 * PHP 5.0 or later
 * A running web server if using http(s) update methods
-** The install script supports the following web servers:
-*** httpd
+  * The install script supports the following web servers:
+    * httpd
 
 
 Server Installation
@@ -54,7 +54,7 @@ Server Installation
 3. Follow the installation wizard to setup your database.
 
 Additional Steps (OS-based)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 Debian-based/Ubuntu - 
 > Edit /etc/apache2/sites-enabled/default and change 'AllowOverride 
@@ -71,7 +71,7 @@ Client Installation
    `sudo mv facileManager/client/facileManager /usr/local/`
 2. For each module you wish to use, run the following to complete the client
    installation.
-   `sudo php /usr/local/facileManager/<module_name>/client.php install`
+   `sudo php /usr/local/facileManager/*module_name*/client.php install`
 	
 
 
@@ -109,7 +109,7 @@ Client Upgrade
 Alternatively, since v1.1, you can update the clients through the UI (servers
 page) or by running the following on the clients:
 
-`sudo php /usr/local/facileManager/<module_name>/client.php upgrade`
+`sudo php /usr/local/facileManager/*module_name*/client.php upgrade`
 
 
 Important Upgrade Notes
@@ -129,16 +129,17 @@ You MUST also update the following based on your client's update method.
 1. Cron - update root's crontab to use client.php instead of dns.php or fw.php
 2. SSH  - update your sudoers file to use client.php instead of dns.php or fw.php
 3. HTTP - update your sudoers file to use client.php instead of dns.php or fw.php
-          and update the module symlink in your document root to use the www
-          directory from the core files instead of the module directory.
 
-          For example:
+          and update the module symlink in your document root to use the www  
+          directory from the core files instead of the module directory.  
 
-          sudo rm /var/www/html/<module_name>
-          sudo ln -sf /usr/local/facileManager/www /var/www/html/fM
+          For example:  
+
+          sudo rm /var/www/html/*module_name*  
+          sudo ln -sf /usr/local/facileManager/www /var/www/html/fM  
 
 Alternatively, you can run the reinstall script which will ensure the proper
 files and configs will be in place, but it will not remove the old sudoers entries
 and document root symlinks.
 
-`sudo php /usr/local/facileManager/<module_name>/client.php reinstall`
+`sudo php /usr/local/facileManager/*module_name*/client.php reinstall`
