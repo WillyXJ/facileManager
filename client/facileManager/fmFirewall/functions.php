@@ -108,6 +108,9 @@ function buildConf($url, $data) {
 		} else {
 			$last_line = system($rc_script . ' 2>&1', $retval);
 			addLogEntry($last_line);
+			if (array_key_exists('/etc/network/if-pre-up.d/fmFirewall', $files)) {
+				@chmod('/etc/network/if-pre-up.d/fmFirewall', 0755);
+			}
 		}
 		if ($retval) {
 			$message = "There was an error reloading the firewall - please check the logs for details\n";

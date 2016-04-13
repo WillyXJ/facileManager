@@ -13,6 +13,8 @@
            new servers based on their update method.
 * Client - [bug] Now pulls network interface names from ip maddr when ifconfig
            is not available.
+* Client - [improvement] Rules are now applied at system boot on debian-based
+           systems. (Issue #309)
 
 1.2.5 (2016-03-16)
 ==================
