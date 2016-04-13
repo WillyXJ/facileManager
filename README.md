@@ -56,9 +56,17 @@ Server Installation
 Additional Steps (OS-based)
 ---------------------------
 
-Debian-based/Ubuntu - 
+The following steps need to be performed on vanilla installations of certain 
+Operating Systems to allow .htaccess files to be used.
+
+### Debian-based/Ubuntu - 
 > Edit /etc/apache2/sites-enabled/default and change 'AllowOverride 
 > None' to 'AllowOverride All' under <directory /var/www/> and reload 
+> apache.
+
+### RHEL7/CentOS7 - 
+> Edit /etc/httpd/conf/httpd.conf and change 'AllowOverride 
+> None' to 'AllowOverride All' under <Directory /var/www/html> and reload 
 > apache.
 
 

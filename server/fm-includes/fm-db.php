@@ -29,25 +29,27 @@ class fmdb {
 	 * @param string $dbhost
 	 */
 	function fmdb($dbuser, $dbpassword, $dbname, $dbhost) {
-		return $this->connect($dbuser, $dbpassword, $dbname, $dbhost);
+		if (extension_loaded('mysqli')) {
+			return $this->connect($dbuser, $dbpassword, $dbname, $dbhost);
+		}
 	}
 
 	function connect($dbuser, $dbpassword, $dbname, $dbhost) {
 		global $__FM_CONFIG;
 		$this->dbh = @mysql_connect($dbhost, $dbuser, $dbpassword);
 		if (!$this->dbh) {
-			bailOut(_('The connection to the database has failed. Please check the configuration.') . '<p class="step"><a href="' . $_SERVER['PHP_SELF'] . '" class="button">' . _('Try Again') . '</a></p>');
+			bailOut(_('The connection to the database has failed. Please check the configuration.'), 'try again', _('Database Connection'));
 		}
 
 		$this->select($dbname);
 		if (!@mysql_query("SELECT * FROM `fm_options`", $this->dbh)) {
-			bailOut(_('The database is installed; however, the associated application tables are missing. Click \'Start Setup\' to start the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>');
+			bailOut(_('The database is installed; however, the associated application tables are missing. Click \'Start Setup\' to start the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php" class="button click_once">' . _('Start Setup') . '</a></p>', 'no button');
 		}
 		
 		/** Check if there is an admin account */
 		$this->query("SELECT * FROM `fm_users` WHERE user_auth_type=1 ORDER BY user_id ASC LIMIT 1");
 		if (!$this->num_rows) {
-			bailOut(_('The database is installed; however, an administrative account was not created. Click \'Continue Setup\' to continue the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">' . _('Continue Setup') . '</a></p>');
+			bailOut(_('The database is installed; however, an administrative account was not created. Click \'Continue Setup\' to continue the installation process.') . '<p class="step"><a href="' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4" class="button">' . _('Continue Setup') . '</a></p>', 'no button');
 		}
 	}
 

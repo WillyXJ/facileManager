@@ -1722,7 +1722,6 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
  *
  * @since 1.0
  * @package facileManager
- * @subpackage fmDNS
  */
 function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
 	global $fmdb, $__FM_CONFIG;
@@ -1758,19 +1757,33 @@ function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
  * @package facileManager
  *
  * @param string $message Message to display
+ * @param string $tryagain Include the Try Again button
+ * @param string $title Error message title to display
  * @return null
  */
-function bailOut($message, $title = null) {
+function bailOut($message, $tryagain = 'try again', $title = null) {
 	global $fm_name;
 	
 	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
 	if (!$title) $title = _('Requirement Error');
+	
+	if (strpos($message, '<') != 0) {
+		$message = "<p>$message</p>";
+	}
+	
+	if ($tryagain == 'try again') {
+		$tryagain = sprintf('<p class="step"><a href="%s" class="button">%s</a></p>',
+			$_SERVER['PHP_SELF'], _('Try Again'));
+	} else {
+		$tryagain = null;
+	}
+	
 	printHeader($title, 'install');
 	printf('<div id="fm-branding">
 		<img src="%s" /><span>%s</span>
 	</div>
-	<div id="window"><p>%s</p></div>', $branding_logo, $title, $message);
+	<div id="window">%s%s</div>', $branding_logo, $title, $message, $tryagain);
 	exit(printFooter());
 }
 
@@ -1784,6 +1797,7 @@ function bailOut($message, $title = null) {
  * @param string $step Step message
  * @param string $result Result of step
  * @param boolean $noisy Whether the result should be echoed
+ * @param string $error Message to display as the tooltip
  * @return string
  */
 function displayProgress($step, $result, $process = 'noisy', $error = null) {
