@@ -11,6 +11,8 @@
            disabled servers.
 * Server - [improvement] Default fM interaction policies are more accurate for
            new servers based on their update method.
+* Client - [bug] Now pulls network interface names from ip maddr when ifconfig
+           is not available.
 
 1.2.5 (2016-03-16)
 ==================

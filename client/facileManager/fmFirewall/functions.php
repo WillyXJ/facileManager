@@ -225,7 +225,11 @@ function getInterfaceNames($os) {
 	
 	switch(PHP_OS) {
 		case 'Linux':
-			$command = findProgram('ifconfig') . ' | grep "Link "';
+			if ($ifcfg = findProgram('ifconfig')) {
+				$command = $ifcfg . ' | grep "Link "';
+			} elseif ($ifcfg = findProgram('ip')) {
+				$command = $ifcfg . ' maddr | grep "^[0-9]*:" | awk \'{print $2}\'';
+			}
 			break;
 		case 'Darwin':
 		case 'FreeBSD':
