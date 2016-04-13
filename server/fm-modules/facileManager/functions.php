@@ -3181,4 +3181,18 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 }
 
 
+/**
+ * Returns if the OS is debian-based or not
+ *
+ * @since 2.2
+ * @package facileManager
+ *
+ * @param string $os OS to check
+ * @return boolean
+ */
+function isDebianSystem($os) {
+	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu'));
+}
+
+
 ?>
