@@ -58,7 +58,7 @@ if (function_exists('textdomain')) {
  * @return string
  */
 function getLanguage($directory) {
-	if (@isset($_SESSION['language'])) return $_SESSION['language'];
+	if (@isset($_SESSION['language']) && isset($_SESSION['user']['logged_in'])) return $_SESSION['language'];
 	
 	$supported_languages = scandir($directory);
 	$languages = @explode(',', str_replace('-', '_', $_SERVER['HTTP_ACCEPT_LANGUAGE']));

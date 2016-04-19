@@ -326,7 +326,7 @@ class fm_login {
 			session_id($fmid);
 			@session_start();
 			$this->updateSessionDB($_SESSION['user']['name']);
-			@session_unset($_SESSION['user']);
+			@session_unset();
 			setcookie('fmid', '');
 			@session_destroy();
 			unset($_COOKIE['fmid']);
