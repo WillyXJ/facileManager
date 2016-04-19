@@ -16,6 +16,7 @@
 * Server - [improvement] Improved installation checks and added more messaging.
 * Server - [bug] Installation checks no longer throw a PHP fatal error when the
            .htaccess file is missing. (Issue #306 #308)
+* Server - [improvement] Added French translation.
 
 2.1.5 (2016-03-11)
 ==================

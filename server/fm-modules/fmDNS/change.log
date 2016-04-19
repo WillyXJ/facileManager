@@ -26,6 +26,7 @@
 * Server - [improvement] Added support for include statements to be in named.conf
            outside of a clause. (Issue #301)
 * Server - [bug] Creating non-master zones triggers server config builds. (Issue #310)
+* Server - [improvement] Added French translation.
 
 2.1.8 (2016-03-24)
 ==================
