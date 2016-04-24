@@ -1,5 +1,5 @@
-2.2 (2016-0?-??)
-==================
+2.2 (2016-04-24)
+================
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
 * Client - [feature] Added the client 'reinstall' option.
 * Client - [improvement] Output now wordwraps based on the number of columns

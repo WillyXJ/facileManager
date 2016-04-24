@@ -1,5 +1,5 @@
-2.2 (2016-0?-??)
-==================
+2.2 (2016-04-24)
+================
 * Server - [bug] Dump and clear cache tools now honor the server selection.
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
 * Client - [improvement] Client app is renamed to client.php to standardize
