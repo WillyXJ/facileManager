@@ -73,7 +73,7 @@ include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTO
 /** Include shared classes */
 $shared_classes_dir = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'classes';
 foreach (scandir($shared_classes_dir) as $file) {
-	if (is_file($shared_classes_dir . DIRECTORY_SEPARATOR . $file)) {
+	if (is_file($shared_classes_dir . DIRECTORY_SEPARATOR . $file) && $file[0] != '.') {
 		include_once($shared_classes_dir . DIRECTORY_SEPARATOR . $file);
 	}
 }

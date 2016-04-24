@@ -17,6 +17,7 @@
 * Server - [bug] Installation checks no longer throw a PHP fatal error when the
            .htaccess file is missing. (Issue #306 #308)
 * Server - [improvement] Added French translation.
+* Server - [bug] No longer attempts to load hidden files.
 
 2.1.5 (2016-03-11)
 ==================
