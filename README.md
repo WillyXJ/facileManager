@@ -125,7 +125,9 @@ Important Upgrade Notes
 
 The client files have been consolidated and standardized starting with versions
 2.2 and 1.3 of fmDNS and fmFirewall respectively which cleans up some files and
-a lot of code to put the project in a better position going forward.
+a lot of code to put the project in a better position going forward. However,
+this does require a manual upgrade of the client using the normal steps above
+and these additional steps.
 
 When upgrading from fmDNS <= 2.1.x or fmFirewall <= 1.2.x, remove the old client
 files with the following:
