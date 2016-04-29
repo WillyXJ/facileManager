@@ -1,3 +1,7 @@
+2.2.1 (2016-04-??)
+==================
+* Server - [bug] ACLs were not properly upgraded to the new schema. (Issue #313)
+* Server - [bug] New ACLs could not be created.
 2.2 (2016-04-24)
 ================
 * Client - Upgrading requires a manual installation using the steps in README.md.
