@@ -5,6 +5,7 @@
 * Server - [improvement] CSS fix on ACL table.
 * Server - [bug] Zone file import would incorrectly handle semi-colons in the
            record value as comments. (Issue #311)
+* Server - [bug] New ACL entries would not be included in the server config.
 
 2.2 (2016-04-24)
 ================

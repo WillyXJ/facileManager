@@ -118,10 +118,15 @@ class fm_module_buildconf {
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=0 AND acl_status="active" AND server_serial_no="0"');
 			if ($fmdb->num_rows) {
 				$acl_result = $fmdb->last_result;
-				for ($i=0; $i < $fmdb->num_rows; $i++) {
+				$count = $fmdb->num_rows;
+				for ($i=0; $i < $count; $i++) {
 					$global_acl_array[$acl_result[$i]->acl_name] = null;
-					foreach(explode(',', $acl_result[$i]->acl_addresses) as $address) {
-						if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $acl_result[$i]->acl_id . ' AND acl_status="active" AND server_serial_no="0"');
+					$acl_child_result = $fmdb->last_result;
+					for ($j=0; $j < $fmdb->num_rows; $j++) {
+						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
+							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
+						}
 					}
 					$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
 				}
@@ -134,12 +139,16 @@ class fm_module_buildconf {
 				if ($fmdb->num_rows) {
 					$server_acl_result = $fmdb->last_result;
 					$acl_config_count = $fmdb->num_rows;
-					for ($j=0; $j < $acl_config_count; $j++) {
+					for ($i=0; $i < $acl_config_count; $i++) {
 						$server_acl_addresses = null;
-						foreach(explode(',', $server_acl_result[$j]->acl_addresses) as $address) {
-							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $server_acl_result[$i]->acl_id . ' AND acl_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
+						$acl_child_result = $fmdb->last_result;
+						for ($j=0; $j < $fmdb->num_rows; $j++) {
+							foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
+								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+							}
 						}
-						$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+						$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
 					}
 				}
 			}
@@ -149,12 +158,16 @@ class fm_module_buildconf {
 			if ($fmdb->num_rows) {
 				$server_acl_result = $fmdb->last_result;
 				$acl_config_count = $fmdb->num_rows;
-				for ($j=0; $j < $acl_config_count; $j++) {
+				for ($i=0; $i < $acl_config_count; $i++) {
 					$server_acl_addresses = null;
-					foreach(explode(',', $server_acl_result[$j]->acl_addresses) as $address) {
-						if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $server_acl_result[$i]->acl_id . ' AND acl_status="active"');
+					$acl_child_result = $fmdb->last_result;
+					for ($j=0; $j < $fmdb->num_rows; $j++) {
+						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
+							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+						}
 					}
-					$server_acl_array[$server_acl_result[$j]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$j]->acl_comment);
+					$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
 				}
 			}
 
