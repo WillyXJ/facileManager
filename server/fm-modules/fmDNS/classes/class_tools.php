@@ -135,6 +135,16 @@ HTML;
 			/** Break up the line for comments */
 			if ($hash) {
 				$comment_parts = preg_split("/{$hash}+/", $line);
+				
+				/** Handle semi-colons in record value */
+				if ($hash == ';' && strpos($line, '"') !== false) {
+					if (strrpos($line, $hash) < strrpos($line, '"')) {
+						$comment_parts = array($line, '');
+					} else {
+						$comment_parts = array(substr($line, 0, strrpos($line, $hash)), substr($line, strrpos($line, $hash) + 1));
+					}
+				}
+				
 				$array['record_comment'] = trim($comment_parts[1]) ? trim($comment_parts[1]) : 'none';
 			} else {
 				$comment_parts[0] = $line;

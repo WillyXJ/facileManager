@@ -3,6 +3,8 @@
 * Server - [bug] ACLs were not properly upgraded to the new schema. (Issue #313)
 * Server - [bug] New ACLs could not be created.
 * Server - [improvement] CSS fix on ACL table.
+* Server - [bug] Zone file import would incorrectly handle semi-colons in the
+           record value as comments. (Issue #311)
 
 2.2 (2016-04-24)
 ================
