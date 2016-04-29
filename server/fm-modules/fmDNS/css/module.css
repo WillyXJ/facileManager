@@ -173,10 +173,6 @@ td > .template-icon {
 	vertical-align: top;
 }
 
-#table_edits > tbody > tr.subelements > td > p:first-child {
-	margin-top: 1.5em;
-}
-
 #define_template p {
 	font-size: 8pt;
 }

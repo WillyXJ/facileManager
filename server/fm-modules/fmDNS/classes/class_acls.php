@@ -233,7 +233,7 @@ class fm_dns_acls {
 		}
 		if ($element_names) $classes[] = 'subelements';
 		
-		$comments = nl2br($row->acl_comment);
+		$comments = nl2br($row->acl_comment) . '&nbsp;';
 
 		$class = 'class="' . implode(' ', $classes) . '"';
 
