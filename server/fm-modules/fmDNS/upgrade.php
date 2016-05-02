@@ -1575,6 +1575,8 @@ function upgradefmDNS_220($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` ADD `acl_parent_id` INT NOT NULL DEFAULT '0' AFTER `server_serial_no`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `cfg_in_clause` ENUM('yes','no') NOT NULL DEFAULT 'yes' AFTER `cfg_data`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` CHANGE `acl_name` `acl_name` VARCHAR(255) NULL DEFAULT NULL";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` CHANGE `acl_addresses` `acl_addresses` TEXT NULL DEFAULT NULL";
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {
@@ -1610,6 +1612,9 @@ function upgradefmDNS_220($__FM_CONFIG, $running_version) {
 	$fmdb->query($query);
 	if ($fmdb->num_rows) {
 		for($i=0; $i<$fmdb->num_rows; $i++) {
+			if ($fmdb->last_result[$i]->acl_predefined != 'as defined:') {
+				$fmdb->last_result[$i]->acl_addresses = $fmdb->last_result[$i]->acl_predefined;
+			}
 			foreach (explode(',', $fmdb->last_result[$i]->acl_addresses) as $acl_address) {
 				if ($acl_address) {
 					$inserts[] = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` (account_id, server_serial_no, acl_parent_id, acl_addresses, acl_status)
@@ -1635,11 +1640,43 @@ function upgradefmDNS_220($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 2.2.1 */
+function upgradefmDNS_221($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.2', '<') ? upgradefmDNS_220($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` CHANGE `acl_name` `acl_name` VARCHAR(255) NULL DEFAULT NULL";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` CHANGE `acl_addresses` `acl_addresses` TEXT NULL DEFAULT NULL";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET acl_addresses = NULL WHERE acl_parent_id=0";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '2.2.1', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
 /** 3.0-alpha1 */
 function upgradefmDNS_3001($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
-	$success = version_compare($running_version, '2.2', '<') ? upgradefmDNS_220($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.2.1', '<') ? upgradefmDNS_221($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_clone_dname`";

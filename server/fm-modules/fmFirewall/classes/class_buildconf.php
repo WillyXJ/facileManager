@@ -62,8 +62,9 @@ class fm_module_buildconf {
 			
 			include(ABSPATH . 'fm-includes/version.php');
 			
-			$config = '# This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
-
+			$config_head = '# This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
+			$config = $config_head;
+			
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_status='active'");
 			if ($fmdb->num_rows) {
 				$policy_count = $fmdb->num_rows;
@@ -73,10 +74,12 @@ class fm_module_buildconf {
 				$config .= $this->$function($policy_result, $policy_count);
 			}
 
-
-
-
 			$data->files[$server_config_file] = $config;
+			
+			/** Debian-based systems */
+			if (isDebianSystem($server_os_distro)) {
+				$data->files['/etc/network/if-pre-up.d/fmFirewall'] = "#!/bin/sh\n{$config_head}iptables-restore < $server_config_file\nexit0";
+			}
 			if (is_array($files)) {
 				$data->files = array_merge($data->files, $files);
 			}

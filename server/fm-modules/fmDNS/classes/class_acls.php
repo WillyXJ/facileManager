@@ -100,7 +100,7 @@ class fm_dns_acls {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the ACL because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not add the ACL because a database error occurred.');
 
 		$log_message = sprintf(__("Added ACL:\nName: %s\nComment: %s"), $post['acl_name'], $post['acl_comment']);
 		if (isset($post['acl_parent_id'])) {
@@ -157,7 +157,7 @@ class fm_dns_acls {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET $sql WHERE `acl_id`={$post['acl_id']}";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the ACL because a database error occurred.');
+		if ($fmdb->sql_errors) return __('Could not update the ACL because a database error occurred.');
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -233,7 +233,7 @@ class fm_dns_acls {
 		}
 		if ($element_names) $classes[] = 'subelements';
 		
-		$comments = nl2br($row->acl_comment);
+		$comments = nl2br($row->acl_comment) . '&nbsp;';
 
 		$class = 'class="' . implode(' ', $classes) . '"';
 

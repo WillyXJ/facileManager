@@ -45,9 +45,7 @@ if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('
 /** Ensure we meet the requirements */
 require_once(ABSPATH . 'fm-includes/init.php');
 require_once(ABSPATH . 'fm-includes/version.php');
-$app_compat = checkAppVersions(false);
-
-if ($app_compat) {
+if ($app_compat = checkAppVersions(false)) {
 	bailOut($app_compat);
 }
 

@@ -260,10 +260,10 @@ class fm_dns_zones {
 		addLogEntry($log_message);
 		
 		/* Set the server_build_config flag for servers */
-		if ($post['domain_clone_domain_id'] || $post['domain_template_id']) {
-			if (getSOACount($insert_id) && getNSCount($insert_id)) {
+		if ((($post['domain_clone_domain_id'] || $post['domain_template_id']) &&
+			getSOACount($insert_id) && getNSCount($insert_id)) ||
+			$post['domain_type'] != 'master'){
 				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('masters', 'slaves')), 'yes', 'build');
-			}
 		}
 		return $insert_id;
 	}
@@ -340,7 +340,7 @@ class fm_dns_zones {
 		$sql_edit .= "domain_reload='no'";
 		
 		/** Set the server_build_config flag for existing servers */
-		if (getSOACount($domain_id) && getNSCount($domain_id)) {
+		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'master') {
 			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 		}
 
@@ -404,7 +404,7 @@ class fm_dns_zones {
 		if ($rows_affected + $fmdb->rows_affected == 0) return true;
 
 		/** Set the server_build_config flag for new servers */
-		if (getSOACount($domain_id) && getNSCount($domain_id)) {
+		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'master') {
 			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 		}
 

@@ -548,21 +548,6 @@ function buildFullIPAddress($partial_ip, $domain) {
 
 
 /**
- * Returns if the OS is debian-based or not
- *
- * @since 1.0
- * @package facileManager
- * @subpackage fmDNS
- *
- * @param string $os OS to check
- * @return boolean
- */
-function isDebianSystem($os) {
-	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu'));
-}
-
-
-/**
  * Returns if a zone reload is allowed or not
  *
  * @since 1.0

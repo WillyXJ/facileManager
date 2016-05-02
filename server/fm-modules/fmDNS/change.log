@@ -2,8 +2,18 @@
 ==================
 * Server - [feature] Added support for dynamic zones. (Issue #90)
 
-2.2 (2016-0?-??)
+2.2.1 (2016-04-29)
 ==================
+* Server - [bug] ACLs were not properly upgraded to the new schema. (Issue #313)
+* Server - [bug] New ACLs could not be created.
+* Server - [improvement] CSS fix on ACL table.
+* Server - [bug] Zone file import would incorrectly handle semi-colons in the
+           record value as comments. (Issue #311)
+* Server - [bug] New ACL entries would not be included in the server config.
+
+2.2 (2016-04-24)
+================
+* Client - Upgrading requires a manual installation using the steps in README.md.
 * Server - [bug] Dump and clear cache tools now honor the server selection.
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
 * Client - [improvement] Client app is renamed to client.php to standardize
@@ -29,6 +39,8 @@
            names. (Issue #284)
 * Server - [improvement] Added support for include statements to be in named.conf
            outside of a clause. (Issue #301)
+* Server - [bug] Creating non-master zones triggers server config builds. (Issue #310)
+* Server - [improvement] Added French translation.
 
 2.1.8 (2016-03-24)
 ==================
