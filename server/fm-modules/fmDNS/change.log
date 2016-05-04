@@ -1,3 +1,10 @@
+2.2.2 (2016-05-04)
+==================
+* Client - [bug] Zone reloads via HTTP(s) would not increment the SOA serial
+           number. (Issue #315)
+* Server - [bug] Zones would not proper reload when multiple servers were selected
+           to host the zone. (Issue #315)
+
 2.2.1 (2016-04-29)
 ==================
 * Server - [bug] ACLs were not properly upgraded to the new schema. (Issue #313)
