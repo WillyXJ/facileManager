@@ -1,4 +1,4 @@
-2.2.2 (2016-05-04)
+2.2.2 (2016-05-05)
 ==================
 * Client - [bug] Zone reloads via HTTP(s) would not increment the SOA serial
            number. (Issue #315)
