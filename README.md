@@ -29,8 +29,10 @@ facileManager (server) requires the following:
 
 * PHP 5.2.0 or later with MySQL support
 * MySQL 5.0 or later
-  * Required MySQL user privileges on the database include 
+  * Required MySQL user privileges on the database include
+
    `SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, LOCK TABLES`
+
 * A working webserver (httpd) with mod_rewrite.so enabled
 * facileManager-core
 * JavaScript enabled in your web browser
@@ -76,9 +78,12 @@ Client Installation
 1. Move the contents of the client directory to /usr/local/ on your client
    servers to manage. (Note: client files from the core (or complete) package
    are also required.)
+
    `sudo mv facileManager/client/facileManager /usr/local/`
+
 2. For each module you wish to use, run the following to complete the client
    installation.
+
    `sudo php /usr/local/facileManager/<module_name>/client.php install`
 	
 
@@ -109,10 +114,17 @@ Client Upgrade
 --------------
 
 1. Make a backup of your config.inc.php file.
+
+   `cp /usr/local/facileManager/config.inc.php .`
+
 2. Move the contents of the client directory to /usr/local/ on your client
    servers to manage.
+
    `sudo mv facileManager/client/facileManager /usr/local/`
+
 3. Restore your backup of config.inc.php to /usr/local/facileManager.
+
+   `sudo mv config.inc.php /usr/local/facileManager`
 
 Alternatively, since v1.1, you can update the clients through the UI (servers
 page) or by running the following on the clients:
