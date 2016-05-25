@@ -161,7 +161,23 @@ You MUST also update the following based on your client's update method.
           sudo ln -sf /usr/local/facileManager/www /var/www/html/fM  
 
 Alternatively, you can run the reinstall script which will ensure the proper
-files and configs will be in place, but it will not remove the old sudoers entries
+files and configs will be in place, but it will **_not_** remove the old sudoers entries
 and document root symlinks.
 
 `sudo php /usr/local/facileManager/<module_name>/client.php reinstall`
+
+
+For a simple copy/paste manual client upgrade process, follow these steps:
+
+```
+cd ~
+cp /usr/local/facileManager/config.inc.php .
+sudo rm -rf /usr/local/facileManager
+wget http://www.facilemanager.com/download/facilemanager-core-2.2.tar.gz http://www.facilemanager.com/download/module/fmdns-2.2.2.tar.gz
+tar zxf facilemanager-core-2.2.tar.gz
+tar zxf fmdns-2.2.2.tar.gz
+sudo mv facileManager/client/facileManager /usr/local
+rm -rf facile* fmdns*
+sudo mv config.inc.php /usr/local/facileManager
+sudo php /usr/local/facileManager/fmDNS/client.php reinstall
+```
