@@ -167,7 +167,8 @@ and document root symlinks.
 `sudo php /usr/local/facileManager/<module_name>/client.php reinstall`
 
 
-For a simple copy/paste manual client upgrade process, follow these steps:
+For a simple copy/paste manual fmDNS client upgrade process, follow these steps
+(these can be modified for other fM modules):
 
 ```
 cd ~
