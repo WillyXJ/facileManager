@@ -29,7 +29,7 @@ facileManager (server) requires the following:
 
 * PHP 5.2.0 or later with MySQL support
 * MySQL 5.0 or later
-** Required MySQL user privileges on the database include 
+  * Required MySQL user privileges on the database include 
    `SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, LOCK TABLES`
 * A working webserver (httpd) with mod_rewrite.so enabled
 * facileManager-core
@@ -40,8 +40,8 @@ fM client requires the following:
 * ISC BIND 9.3 or later (for the fmDNS module only)
 * PHP 5.0 or later
 * A running web server if using http(s) update methods
-** The install script supports the following web servers:
-*** httpd
+  * The install script supports the following web servers:
+    * httpd
 
 
 Server Installation
@@ -54,11 +54,19 @@ Server Installation
 3. Follow the installation wizard to setup your database.
 
 Additional Steps (OS-based)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
-Debian-based/Ubuntu - 
+The following steps need to be performed on vanilla installations of certain 
+Operating Systems to allow .htaccess files to be used.
+
+### Debian-based/Ubuntu - 
 > Edit /etc/apache2/sites-enabled/default and change 'AllowOverride 
 > None' to 'AllowOverride All' under <directory /var/www/> and reload 
+> apache.
+
+### RHEL7/CentOS7 - 
+> Edit /etc/httpd/conf/httpd.conf and change 'AllowOverride 
+> None' to 'AllowOverride All' under <Directory /var/www/html> and reload 
 > apache.
 
 
@@ -117,7 +125,9 @@ Important Upgrade Notes
 
 The client files have been consolidated and standardized starting with versions
 2.2 and 1.3 of fmDNS and fmFirewall respectively which cleans up some files and
-a lot of code to put the project in a better position going forward.
+a lot of code to put the project in a better position going forward. However,
+this does require a manual upgrade of the client using the normal steps above
+and these additional steps.
 
 When upgrading from fmDNS <= 2.1.x or fmFirewall <= 1.2.x, remove the old client
 files with the following:
@@ -129,13 +139,14 @@ You MUST also update the following based on your client's update method.
 1. Cron - update root's crontab to use client.php instead of dns.php or fw.php
 2. SSH  - update your sudoers file to use client.php instead of dns.php or fw.php
 3. HTTP - update your sudoers file to use client.php instead of dns.php or fw.php
-          and update the module symlink in your document root to use the www
-          directory from the core files instead of the module directory.
 
-          For example:
+          and update the module symlink in your document root to use the www  
+          directory from the core files instead of the module directory.  
 
-          sudo rm /var/www/html/<module_name>
-          sudo ln -sf /usr/local/facileManager/www /var/www/html/fM
+          For example:  
+
+          sudo rm /var/www/html/<module_name>  
+          sudo ln -sf /usr/local/facileManager/www /var/www/html/fM  
 
 Alternatively, you can run the reinstall script which will ensure the proper
 files and configs will be in place, but it will not remove the old sudoers entries

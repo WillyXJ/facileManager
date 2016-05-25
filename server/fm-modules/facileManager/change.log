@@ -1,5 +1,6 @@
-2.2 (2016-0?-??)
-==================
+2.2 (2016-04-24)
+================
+* Client - Upgrading requires a manual installation using the steps in README.md.
 * Both   - [improvement] Cleaned up duplicate functions to simplify code.
 * Client - [feature] Added the client 'reinstall' option.
 * Client - [improvement] Output now wordwraps based on the number of columns
@@ -11,6 +12,13 @@
 * Server - [improvement] CSS tweaks.
 * Client - [improvement] Silenced client install grep commands.
 * Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+* Client - [improvement] SSH public keys are now stored in authorized_keys
+           instead of the deprecated authorized_keys2. (Issue #303)
+* Server - [improvement] Improved installation checks and added more messaging.
+* Server - [bug] Installation checks no longer throw a PHP fatal error when the
+           .htaccess file is missing. (Issue #306 #308)
+* Server - [improvement] Added French translation.
+* Server - [bug] No longer attempts to load hidden files.
 
 2.1.5 (2016-03-11)
 ==================

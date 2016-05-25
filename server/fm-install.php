@@ -77,7 +77,7 @@ switch ($step) {
 		$link = @mysql_connect($__FM_CONFIG['db']['host'], $__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass']);
 		
 		if (!$link) {
-			bailOut(_('The connection to the database has failed. Please check the configuration.') . '<p class="step"><a href="" class="button">' . _('Try Again') . '</a></p>');
+			bailOut(_('The connection to the database has failed. Please check the configuration.'), 'try again', _('Database Connection'));
 			break;
 		}
 		

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-30 10:24-0600\n"
+"POT-Creation-Date: 2016-04-01 16:15-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -413,7 +413,7 @@ msgid "Direction"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_policies.php:65
-#: server/fm-modules/fmFirewall/classes/class_servers.php:320
+#: server/fm-modules/fmFirewall/classes/class_servers.php:334
 msgid "Note:"
 msgstr ""
 
@@ -499,7 +499,7 @@ msgid "Method"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_servers.php:56
-#: server/fm-modules/fmFirewall/classes/class_servers.php:358
+#: server/fm-modules/fmFirewall/classes/class_servers.php:372
 msgid "Firewall Type"
 msgstr ""
 
@@ -508,12 +508,12 @@ msgid "Version"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_servers.php:56
-#: server/fm-modules/fmFirewall/classes/class_servers.php:360
+#: server/fm-modules/fmFirewall/classes/class_servers.php:374
 msgid "Config File"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_servers.php:97
-#: server/fm-modules/fmFirewall/classes/class_servers.php:370
+#: server/fm-modules/fmFirewall/classes/class_servers.php:384
 msgid "No server name defined."
 msgstr ""
 
@@ -521,71 +521,71 @@ msgstr ""
 msgid "Could not add the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:124
-#: server/fm-modules/fmFirewall/classes/class_servers.php:134
+#: server/fm-modules/fmFirewall/classes/class_servers.php:137
+#: server/fm-modules/fmFirewall/classes/class_servers.php:148
 #, php-format
 msgid "Required for %s client interaction."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:172
+#: server/fm-modules/fmFirewall/classes/class_servers.php:186
 msgid "Could not update the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:196
+#: server/fm-modules/fmFirewall/classes/class_servers.php:210
 msgid ""
 "The associated policies could not be removed because a database error "
 "occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:202
+#: server/fm-modules/fmFirewall/classes/class_servers.php:216
 #, php-format
 msgid "Server '%s' (%s) was deleted"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:207
+#: server/fm-modules/fmFirewall/classes/class_servers.php:221
 msgid "This server could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:243
+#: server/fm-modules/fmFirewall/classes/class_servers.php:257
 msgid "Client Upgrade Available"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:247
+#: server/fm-modules/fmFirewall/classes/class_servers.php:261
 msgid "Client Install Required"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:316
+#: server/fm-modules/fmFirewall/classes/class_servers.php:330
 msgid "Add Firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:316
+#: server/fm-modules/fmFirewall/classes/class_servers.php:330
 msgid "Edit Firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:320
+#: server/fm-modules/fmFirewall/classes/class_servers.php:334
 msgid "The client installer can automatically generate this entry."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:357
+#: server/fm-modules/fmFirewall/classes/class_servers.php:371
 msgid "Server Name"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:359
+#: server/fm-modules/fmFirewall/classes/class_servers.php:373
 msgid "Update Method"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:374
+#: server/fm-modules/fmFirewall/classes/class_servers.php:388
 #, php-format
 msgid "Server name is too long (maximum %d character)."
 msgid_plural "Server name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:378
+#: server/fm-modules/fmFirewall/classes/class_servers.php:392
 msgid "This server name already exists."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:399
+#: server/fm-modules/fmFirewall/classes/class_servers.php:413
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
@@ -845,10 +845,10 @@ msgstr ""
 msgid "Time Management"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/js/module.php:148
+#: server/fm-modules/fmFirewall/js/module.php:150
 msgid "Sort Order Results"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/js/module.php:148
+#: server/fm-modules/fmFirewall/js/module.php:150
 msgid "OK"
 msgstr ""

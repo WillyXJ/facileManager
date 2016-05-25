@@ -389,7 +389,7 @@ function processReloadFailure($last_line) {
  * @return array
  */
 function moduleInitWebRequest() {
-	$output = null;
+	$output = array();
 	
 	switch ($_POST['action']) {
 		case 'reload':
@@ -397,13 +397,11 @@ function moduleInitWebRequest() {
 				exit(serialize('Zone ID is not found.'));
 			}
 
-			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(dirname(__FILE__)) . '/client.php zones id=' . $_POST['domain_id'] . ' 2>&1', $rawoutput, $rc);
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/client.php zones id=' . $_POST['domain_id'] . ' 2>&1', $rawoutput, $rc);
 			if ($rc) {
 				/** Something went wrong */
 				$output[] = 'Zone reload failed.';
-				$output[] = $rawoutput;
-			} else {
-				$output[] = 'Zone reload was successful.';
+				$output = array_merge($output, $rawoutput);
 			}
 			break;
 	}

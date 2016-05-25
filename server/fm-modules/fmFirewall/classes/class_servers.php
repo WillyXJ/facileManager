@@ -90,7 +90,8 @@ class fm_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
+			'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
@@ -167,7 +168,9 @@ class fm_module_servers {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
+			'module_name', 'module_type', 'config', 'SERIALNO',
+			'update_from_client', 'dryrun');
 
 		$sql_edit = null;
 		

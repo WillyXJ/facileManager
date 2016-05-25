@@ -292,6 +292,10 @@ input[type=checkbox].modules {
 	border-top: none;
 }
 
+#subitems ul li a {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 
 #mainitems{ display:block; padding:0; margin: 0; }
 #mainitems > ul {list-style:inside none; padding:0; margin:0;}
@@ -478,6 +482,7 @@ h4 {
 
 .display_results td:first-child, th:first-child {
 	padding-left: 2em;
+	white-space: nowrap;
 }
 
 .display_results tbody tr:nth-child(even) {

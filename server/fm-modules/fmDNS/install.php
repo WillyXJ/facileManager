@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}acls
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `acl_parent_id` INT NOT NULL DEFAULT '0',
-  `acl_name` VARCHAR(255) NOT NULL ,
-  `acl_addresses` TEXT NOT NULL ,
+  `acl_name` VARCHAR(255) NULL DEFAULT NULL,
+  `acl_addresses` TEXT NULL DEFAULT NULL,
   `acl_comment` text,
   `acl_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active',
   PRIMARY KEY (`acl_id`)
