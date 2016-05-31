@@ -129,8 +129,8 @@ class fm_users {
 			}
 		}
 		
-		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_email`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
-				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
+		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_email`, `user_group`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
+				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', $user_group, '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
 		$result = $fmdb->query($query);
 		
 		if (!$result || $fmdb->sql_errors) return _('Could not add the user to the database.');
@@ -758,7 +758,7 @@ PERM;
 		$user_list = null;
 		
 		if ($group_id == null) {
-			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND user_caps NOT LIKE '%do_everything%'");
+			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND (user_caps IS NULL OR user_caps NOT LIKE '%do_everything%')");
 		} else {
 			$query = "SELECT user_id FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} AND user_status!='deleted' AND user_template_only='no' AND user_group=$group_id";
 			$fmdb->get_results($query);
