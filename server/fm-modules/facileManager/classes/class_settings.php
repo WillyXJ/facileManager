@@ -643,14 +643,11 @@ class fm_settings {
 	 * @package facileManager
 	 */
 	function buildTimezoneList($selected_zone = null) {
-		$continents = array('Africa', 'America', 'Antarctica', 'Arctic', 'Asia', 'Atlantic', 'Australia', 'Europe', 'Indian', 'Pacific');
-		
 		$structure[] = '<select name="timezone[' . $_SESSION['user']['account_id'] . ']" id="timezone">';
 
 		$i = 0;
 		foreach (timezone_identifiers_list() as $zone) {
 			$zone = explode('/', $zone);
-			if (!in_array($zone[0], $continents)) continue;
 			
 			$zonen[$i]['continent'] = isset($zone[0]) ? $zone[0] : '';
 			$zonen[$i]['city'] = isset($zone[1]) ? $zone[1] : '';

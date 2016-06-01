@@ -2182,7 +2182,7 @@ function setTimezone() {
 		if (ini_get('date.timezone')) {
 			date_default_timezone_set(ini_get('date.timezone'));
 		} else {
-			date_default_timezone_set('Europe/London');
+			date_default_timezone_set('UTC');
 		}
 	}
 }
