@@ -203,7 +203,7 @@ function buildModuleHelpFile() {
 			management if you have several zones with a similar framework. You can create a zone template when creating a new zone or you can 
 			completely manage them from <a href="__menu{Zone Templates}">Templates</a>. All zones based on a template will be shown with the
 			<i class="template-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
-			with them.</p>
+			with them. In addition, clones of a zone based on a template cannot be shortened to a DNAME RR.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa). You can also
