@@ -210,7 +210,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		$page = isset($_GET['p']) && intval($_GET['p']) > 0 ? intval($_GET['p']) : 1;
 		
 		/** Build the user menu */
-		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
+		if (!defined('AJAX')) {
+			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
+		}
 	} elseif (defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 	}
