@@ -210,7 +210,7 @@ function sanitize($data, $replace = null) {
  * @since 1.0
  * @package facileManager
  */
-function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, $menu = true) {
+function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-help', $menu = 'menu') {
 	global $fm_name, $__FM_CONFIG;
 	
 	include(ABSPATH . 'fm-includes/version.php');
@@ -225,7 +225,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 	$head = $logo = null;
 	
 	if ($css == 'facileManager') {
-		$head = $menu ? getTopHeader($help) : null;
+		$head = ($menu == 'menu') ? getTopHeader($help) : null;
 	} else {
 		$logo = '<h1 class="center"><img alt="' . $fm_name . '" src="' . $GLOBALS['RELPATH'] . 'fm-includes/images/logo.png" /></h1>' . "\n";
 	}
@@ -303,7 +303,7 @@ function getTopHeader($help) {
 	
 	$module_toolbar = $fm_new_version_available = $account_menu = $user_account_menu = $module_menu = null;
 	
-	if (!$help) {
+	if ($help != 'help-file') {
 		$auth_method = getOption('auth_method');
 		if ($auth_method) {
 			if ($_SESSION['user']['account_id'] != 1) {
@@ -2397,7 +2397,7 @@ function fMDie($message = null, $link_display = 'show') {
 
 	if (!$message) $message = _('An unknown error occurred.');
 	
-	printHeader('Error', 'install', false, false);
+	printHeader('Error', 'install', 'no-help', 'no-menu');
 	
 	printf('<div id="fm-branding"><img src="%s" /><span>%s</span></div>
 		<div id="window"><p>%s</p>', $branding_logo, _('Oops!'), $message);
