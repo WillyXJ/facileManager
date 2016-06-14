@@ -912,15 +912,19 @@ class fm_module_buildconf {
 		
 		/** Is this a cloned zone */
 		if (isset($domain->parent_domain_id)) {
-			$full_zone_clone = (getOption('clones_use_dnames', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') ? true : false;
-			if ($domain->domain_clone_dname) {
-				$full_zone_clone = ($domain->domain_clone_dname == 'yes') ? true : false;
-			}
+			if ($domain->domain_template == 'no' && !$domain->domain_template_id) {
+				$full_zone_clone = (getOption('clones_use_dnames', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') ? true : false;
+				if ($domain->domain_clone_dname) {
+					$full_zone_clone = ($domain->domain_clone_dname == 'yes') ? true : false;
+				}
+			} else $full_zone_clone = false;
 			
 			/** Are there any additional records? */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->parent_domain_id, 'record_', 'domain_id', "AND `record_status`='active'");
-			if ($fmdb->num_rows) {
-				$full_zone_clone = false;
+			if ($full_zone_clone) {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->parent_domain_id, 'record_', 'domain_id', "AND `record_status`='active'");
+				if ($fmdb->num_rows) {
+					$full_zone_clone = false;
+				}
 			}
 			
 			/** Are there any skipped records? */

@@ -1,3 +1,8 @@
+2.2.3 (2016-0?-??)
+==================
+* Server - [bug] Fixed incorrect use of DNAME with zone templates. (Issue #321)
+* Server - [bug] Fixed forwarder IP entries for forward zones. (Issue #324)
+
 2.2.2 (2016-05-05)
 ==================
 * Client - [bug] Zone reloads via HTTP(s) would not increment the SOA serial
