@@ -1,4 +1,4 @@
-2.2.3 (2016-0?-??)
+2.2.3 (2016-06-14)
 ==================
 * Server - [bug] Fixed incorrect use of DNAME with zone templates. (Issue #321)
 * Server - [bug] Fixed forwarder IP entries for forward zones. (Issue #324)

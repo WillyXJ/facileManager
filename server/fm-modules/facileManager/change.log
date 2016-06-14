@@ -1,4 +1,4 @@
-2.2.1 (2016-06-??)
+2.2.1 (2016-06-14)
 ==================
 * Server - [bug] Fixed issue with adding users to groups. (Issue #319)
 * Server - [improvement] UTC is now an available timezone. (Issue #318)
