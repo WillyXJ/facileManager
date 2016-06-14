@@ -1,3 +1,8 @@
+2.2.2 (2016-0?-??)
+==================
+* Server - [improvement] Added support to load any additional js files in the
+           module directory (fm-modules/(module)/js/).
+
 2.2.1 (2016-06-14)
 ==================
 * Server - [bug] Fixed issue with adding users to groups. (Issue #319)

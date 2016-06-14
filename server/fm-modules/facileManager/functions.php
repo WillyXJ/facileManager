@@ -234,8 +234,16 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 	if (isset($_SESSION['module'])) {
 		$module_css_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'module.css';
 		$module_css = (file_exists(ABSPATH . $module_css_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/css" />' : null;
-		$module_js_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'module.php';
+		$module_js_dir = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR;
+		$module_js_file = $module_js_dir . 'module.php';
 		$module_js = (file_exists(ABSPATH . $module_js_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/javascript" charset="utf-8"></script>' : null;
+		
+		/** Include any .js files */
+		foreach (scandir($module_js_dir) as $module_js_file) {
+			if (in_array($module_js_file, array('.', '..', 'module.php'))) continue;
+			$module_js_file = $module_js_dir . $module_js_file;
+			$module_js .= (file_exists(ABSPATH . $module_js_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? "\n\t\t" . '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '" type="text/javascript" charset="utf-8"></script>' : null;
+		}
 	} else {
 		$module_css = $module_js = null;
 	}
