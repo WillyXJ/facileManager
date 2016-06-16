@@ -803,7 +803,7 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 		}
 	} else {
 		for ($i = 0; $i < count($options); $i++) {
-			$selected = ($option_select == $options[$i]) ? ' selected' : '';
+			$selected = ($option_select == $options[$i] || @in_array($options[$i], $option_select)) ? ' selected' : '';
 			$type_options.="<option$selected>$options[$i]</option>\n";
 		}
 	}

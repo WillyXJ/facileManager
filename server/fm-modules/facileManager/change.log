@@ -3,6 +3,7 @@
 * Server - [improvement] Added support to load any additional js files in the
            module directory (fm-modules/(module)/js/).
 * Server - [improvement] Removed boolean params for printHeader().
+* Server - [improvement] Updated buildSelect() to allow an array of single options.
 
 2.2.1 (2016-06-14)
 ==================
