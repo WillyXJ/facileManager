@@ -153,6 +153,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		/** Include module variables */
 		include(ABSPATH . 'fm-modules/' . $fm_name . '/variables.inc.php');
 		if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
+		foreach (array('ajax', 'classes', 'css', 'extra', 'images', 'js') as $dir) {
+			$__FM_CONFIG['module']['path'][$dir]   = sprintf('fm-modules/%s/%s', $_SESSION['module'], $dir);
+		}
 
 		/** Handle module change request */
 		if (isset($_REQUEST['module']) && !isset($_REQUEST['action'])) {

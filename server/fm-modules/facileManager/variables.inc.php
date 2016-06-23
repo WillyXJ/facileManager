@@ -62,9 +62,9 @@ $__FM_CONFIG['icons']['shield_error']	= sprintf('<img src="fm-modules/%1$s/image
 $__FM_CONFIG['icons']['shield_info']	= sprintf('<img src="fm-modules/%1$s/images/yellowshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Information'));
 $__FM_CONFIG['icons']['shield_ok']		= sprintf('<img src="fm-modules/%1$s/images/greenshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));
 
+/** Module variables */
 $__FM_CONFIG['module']['icons']['preview'] = sprintf('<img src="fm-modules/%1$s/images/preview24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Preview Config'));
 $__FM_CONFIG['module']['icons']['build']   = sprintf('<input type="image" id="build" src="fm-modules/%1$s/images/build24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Build Config'));
-$__FM_CONFIG['module']['images']           = sprintf('fm-modules/%s/images', $_SESSION['module']);
 
 /** Cleanup options */
 $__FM_CONFIG['clean']['prefixes']	= array('fm_accounts'=>'account', 'fm_users'=>'user');
