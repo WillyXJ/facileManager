@@ -3076,7 +3076,7 @@ function createSearchSQL($fields = array(), $prefix = null) {
  * @return string
  */
 function __($text, $domain = null) {
-	if (function_exists('dgettext')) {
+	if (function_exists('dgettext') && isset($_SESSION['module'])) {
 		if (!$domain) $domain = $_SESSION['module'];
 
 		return dgettext($domain, $text);
