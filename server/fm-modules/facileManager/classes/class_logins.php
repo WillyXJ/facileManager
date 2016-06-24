@@ -470,6 +470,7 @@ To reset your password, click the following link:
 
 		setUserModule($user->user_default_module);
 		setcookie('fmid', session_id(), strtotime('+1 week'));
+		$this->updateSessionDB($_SESSION['user']['name']);
 		session_write_close();
 	}
 	
