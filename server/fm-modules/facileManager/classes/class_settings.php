@@ -189,6 +189,8 @@ class fm_settings {
 		$auth_method = getOption('auth_method');
 		$auth_method_list = buildSelect('auth_method', 'auth_method', $__FM_CONFIG['options']['auth_method'], $auth_method);
 		
+		$login_message = getOption('login_message');
+		
 		/** fM Auth Section */
 		$i=0;
 		$password_strength_descriptions = sprintf("<p>%s</p>\n", _('Required password strength for user accounts.'));
@@ -203,6 +205,8 @@ class fm_settings {
 		if ($auth_method == 1) {
 			 $auth_fm_options_style = 'style="display: block;"';
 		} else $auth_fm_options_style = null;
+		
+		$auth_message_option_style = ($auth_method) ? 'style="display: block;"' : null;
 		
 		/** LDAP Section */
 		if ($auth_method == 2) {
@@ -423,6 +427,17 @@ class fm_settings {
 							</div>
 							<div class="choices">
 								' . $ldap_user_template_list . '
+							</div>
+						</div>
+					</div>
+					<div id="auth_message_option" ' . $auth_message_option_style . '>
+						<div id="setting-row">
+							<div class="description">
+								<label for="login_message">' . _('Login Message') . '</label>
+								<p>' . _('An additional message to display on the login page.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="login_message" id="login_message" type="text" value="' . $login_message . '" size="40" />
 							</div>
 						</div>
 					</div>

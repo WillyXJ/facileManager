@@ -40,6 +40,11 @@ class fm_login {
 		$forgot_link = ($mail_enable && $auth_method == 1) ? sprintf('<p id="forgotton_link"><a href="?forgot_password">%s</a></p>', _('Forgot your password?')) : null;
 		
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+		
+		$login_message = getOption('login_message');
+		if ($login_message) {
+			$login_message = '<p class="success">' . $login_message . '</p>';
+		}
 
 		printf('<form id="loginform" action="%1$s" method="post">
 		<div id="fm-branding">
@@ -62,9 +67,10 @@ class fm_login {
 			</tr>
 		</table>
 		%6$s
-		<div id="message"></div>
+		<div id="message">%7$s</div>
 		</form>
-		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'), _('Password'), $forgot_link);
+		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'),
+				_('Password'), $forgot_link, $login_message);
 		
 		exit(printFooter());
 	}

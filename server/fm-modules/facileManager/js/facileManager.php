@@ -656,12 +656,15 @@ echo '$(document).ready(function() {
 		if ($(this).val() == 1) {
 			$("#auth_fm_options").show("slow");
 			$("#auth_ldap_options").slideUp();
+			$("#auth_message_option").show("slow");
 		} else if ($(this).val() == 2) {
 			$("#auth_ldap_options").show("slow");
 			$("#auth_fm_options").slideUp();
+			$("#auth_message_option").show("slow");
 		} else {
 			$("#auth_ldap_options").slideUp();
 			$("#auth_fm_options").slideUp();
+			$("#auth_message_option").slideUp();
 		}
 	});
 	
