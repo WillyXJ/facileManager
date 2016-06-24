@@ -41,8 +41,10 @@ $__FM_CONFIG['fmDNS'] = array(
 	);
 
 /** Images */
-$__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';
-$__FM_CONFIG['module']['icons']['reload']		= '<input type="image" src="fm-modules/' . $_SESSION['module'] . '/images/reload256.png" border="0" alt="Reload Zone" title="Reload Zone" width="20" />';
+if (isset($__FM_CONFIG['module']['path'])) {
+	$__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="' . $__FM_CONFIG['module']['path']['images'] . '/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';
+	$__FM_CONFIG['module']['icons']['reload']		= '<input type="image" src="' . $__FM_CONFIG['module']['path']['images'] . '/reload256.png" border="0" alt="Reload Zone" title="Reload Zone" width="20" />';
+}
 if (isset($fm_name)) {
 	$__FM_CONFIG['module']['icons']['sub_delete']	= '<img class="subelement_remove" id="__ID__" src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Delete" title="Delete" width="12" />';
 }

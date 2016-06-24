@@ -231,7 +231,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 	}
 	
 	/** Module css and js includes */
-	if (isset($_SESSION['module'])) {
+	if (isset($_SESSION['module']) && isset($__FM_CONFIG['module']['path'])) {
 		$module_css_file = $__FM_CONFIG['module']['path']['css'] . DIRECTORY_SEPARATOR . 'module.css';
 		$module_css = (file_exists(ABSPATH . $module_css_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/css" />' : null;
 		$module_js_dir = $__FM_CONFIG['module']['path']['js'] . DIRECTORY_SEPARATOR;
