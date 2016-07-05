@@ -434,7 +434,7 @@ class fm_settings {
 						<div id="setting-row">
 							<div class="description">
 								<label for="login_message">' . _('Login Message') . '</label>
-								<p>' . _('An additional message to display on the login page.') . '</p>
+								<p>' . _('An optional message to display on the login page.') . '</p>
 							</div>
 							<div class="choices">
 								<input name="login_message" id="login_message" type="text" value="' . $login_message . '" size="40" />
