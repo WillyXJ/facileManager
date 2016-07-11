@@ -11,6 +11,7 @@
 * Server - [bug] Fixed PHP errors during authentication which prevented successful
            session creation.
 * Server - [feature] Added setting to define custom login message.
+* Server - [bug] Removed an unnecessary button during installation.
 
 2.2.1 (2016-06-14)
 ==================
