@@ -1,3 +1,8 @@
+2.2.4 (2016-0?-??)
+==================
+* Server - [bug] Fixed an issue where address_match_element options would not
+           accept any input. (Issue #329)
+
 2.2.3 (2016-06-14)
 ==================
 * Server - [bug] Fixed incorrect use of DNAME with zone templates. (Issue #321)

@@ -374,7 +374,7 @@ HTML;
 		
 		if ($include == 'none') return array();
 		
-		$acl_list = null;
+		$acl_list = array();
 		$i = 0;
 		$serial_sql = $server_serial_no ? "AND server_serial_no IN ('0','$server_serial_no')" : "AND server_serial_no='0'";
 		
