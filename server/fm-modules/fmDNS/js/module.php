@@ -43,6 +43,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 
 				if (response.toLowerCase().indexOf("' . __('failed') . '") == -1 && response.toLowerCase().indexOf("' . __('you are not authorized') . '") == -1) {
@@ -76,6 +79,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 
 				if (response.toLowerCase().indexOf("' . __('failed') . '") == -1 && response.toLowerCase().indexOf("' . __('you are not authorized') . '") == -1) {
@@ -124,6 +130,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
 					$("#manage_item_contents").addClass("wide");
@@ -186,7 +195,9 @@ $(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response == "' . __('Success') . '") {
+					if (response.indexOf("force_logout") >= 0) {
+						doLogout();
+					} else if (response == "' . __('Success') . '") {
 						$("."+$subelement).css({"background-color":"#D98085"});
 						$("."+$subelement).fadeOut("slow", function() {
 							$("."+$subelement).remove();
@@ -238,6 +249,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
 					$("#manage_item_contents").addClass("wide");
@@ -390,6 +404,9 @@ function displayOptionPlaceholder(option_value) {
 		data: form_data,
 		success: function(response)
 		{
+			if (response.indexOf("force_logout") >= 0) {
+				doLogout();
+			}
 			$(".value_placeholder").html(response);
 			if (response.toLowerCase().indexOf("address_match_element") == -1) {
 				$("#manage #cfg_data").select2({

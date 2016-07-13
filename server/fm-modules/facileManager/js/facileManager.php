@@ -175,6 +175,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
 					$("#manage_item_contents").addClass("wide");
@@ -231,6 +234,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
 					$("#manage_item_contents").addClass("wide");
@@ -270,7 +276,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response == "Success") {
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				} else if (response == "Success") {
 					$row_id.removeClass("active disabled build");
 					$row_id.addClass(item_status);
 					if (item_status == "disabled") {
@@ -344,7 +352,9 @@ echo '$(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response == "' . _('Success') . '") {
+					if (response.indexOf("force_logout") >= 0) {
+						doLogout();
+					} else if (response == "' . _('Success') . '") {
 						$row_id.css({"background-color":"#D98085"});
 						$row_id.fadeOut("slow", function() {
 							$row_id.remove();
@@ -409,8 +419,8 @@ echo '$(document).ready(function() {
 			data: $("#manage").serialize(),
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >=0) {
-					window.location = "?logout";
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
 				} else {
 					$("#response").removeClass("static").html(response);
 					$("#response")
@@ -443,7 +453,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response == "Success") {
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				} else if (response == "Success") {
 					$("#gen_ssh_action").html("<p>' . _('SSH key pair is generated.') . '</p>");
 				} else {
 					$("#response").html(response);
@@ -485,6 +497,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 				$(".form-table input").first().focus();
 			}
@@ -503,7 +518,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response == "Success") {
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				} else if (response == "Success") {
 					$("#popup_response").html("<p>' . _('Profile has been updated.') . '</p>");
 				} else {
 					$("#popup_response").html("<p>" + response + "</p>");
@@ -561,6 +578,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#response").html(response);
 				$("#response")
 					.css("opacity", 0)
@@ -599,6 +619,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				$("#manage_item_contents").html(response);
 			}
 		});
@@ -745,6 +768,9 @@ echo '$(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
+						if (response.indexOf("force_logout") >= 0) {
+							doLogout();
+						}
 						var eachLine = response.split("\n");
 						if (eachLine.length <= 2) {
 							var myDelay = 6000;
@@ -827,6 +853,9 @@ echo '$(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
+						if (response.indexOf("force_logout") >= 0) {
+							doLogout();
+						}
 						$("#manage_item_contents").html(response);
 						if ($("#manage_item_contents").width() >= 700) {
 							$("#manage_item_contents").addClass("wide");
@@ -857,6 +886,9 @@ echo '$(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
+					if (response.indexOf("force_logout") >= 0) {
+						doLogout();
+					}
 					$this.find("i").removeClass("fa-spin");
 					$("#manage_item_contents").html(response);
 					if ($("#manage_item_contents").width() >= 700) {
@@ -1078,6 +1110,10 @@ function toggle(source, element_id) {
 function onPage(name) {
 	var path = window.location.pathname;
 	return name == path.substring(path.lastIndexOf("/") + 1);
+}
+
+function doLogout() {
+	window.location = "?logout";
 }
 ';
 ?>

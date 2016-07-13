@@ -12,6 +12,8 @@
            session creation.
 * Server - [feature] Added setting to define custom login message.
 * Server - [bug] Removed an unnecessary button during installation.
+* Server - [improvement] AJAX now redirects to login page when fM and module
+           database updates are required.
 
 2.2.1 (2016-06-14)
 ==================

@@ -176,6 +176,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			/** Once logged in process the menuing */
 			if ($is_logged_in) {
 				if (isUpgradeAvailable()) {
+					if (defined('AJAX')) {
+						exit('<div class="hidden">force_logout</div>');
+					}
 					$fm_login->logout();
 					header('Location: ' . $GLOBALS['RELPATH']);
 					exit;

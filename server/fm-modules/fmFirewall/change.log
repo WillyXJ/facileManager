@@ -1,3 +1,8 @@
+1.3.1 (2016-0?-??)
+==================
+* Server - [improvement] AJAX now redirects to login page when fM and module
+           database updates are required.
+
 1.3 (2016-04-24)
 ================
 * Client - Upgrading requires a manual installation using the steps in README.md.

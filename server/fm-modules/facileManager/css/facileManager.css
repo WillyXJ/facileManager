@@ -1202,7 +1202,8 @@ p#table_edits {
 #help, #fm_mailing_options,
 #mail_smtp_auth_options, #auth_ldap_options, #ldap_group_require_options,
 #auth_fm_options, #software_update_options,
-#help_file_container ul li div {
+#help_file_container ul li div,
+.hidden {
 	display: none;
 }
 
