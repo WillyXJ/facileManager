@@ -4,6 +4,8 @@
            accept any input. (Issue #329)
 * Server - [improvement] AJAX now redirects to login page when fM and module
            database updates are required.
+* Server - [bug] Fixed an issue where SOA serial numbers were not incrementing
+           for cloned zones. (Issue #330)
 
 2.2.3 (2016-06-14)
 ==================

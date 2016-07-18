@@ -1095,7 +1095,7 @@ HTML;
 		if (!$failures) {
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
-			$fm_dns_records->updateSOAReload($domain_id, 'no');
+			$fm_dns_records->updateSOAReload($domain_id, 'no', 'all');
 		}
 
 		addLogEntry(sprintf(__("Reloaded zone '%s'."), displayFriendlyDomainName($domain_name)));
@@ -1157,7 +1157,7 @@ HTML;
 		/** Increment serial */
 		$soa_serial_no = (strpos($soa_serial_no, $current_date) === false) ? $current_date . '00' : $soa_serial_no + 1;
 		
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=$soa_serial_no WHERE `domain_id`=$domain_id";
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=$soa_serial_no WHERE `domain_template`='no' AND `domain_id`=$domain_id";
 		$result = $fmdb->query($query);
 	}
 	
