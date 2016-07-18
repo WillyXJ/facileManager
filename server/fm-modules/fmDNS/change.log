@@ -6,6 +6,7 @@
            database updates are required.
 * Server - [bug] Fixed an issue where SOA serial numbers were not incrementing
            for cloned zones. (Issue #330)
+* Server - [bug] Fixed error messaging during zone configuration builds.
 
 2.2.3 (2016-06-14)
 ==================
