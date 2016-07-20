@@ -40,8 +40,10 @@ $__FM_CONFIG['fmFirewall'] = array(
 	);
 
 /** Images */
-$__FM_CONFIG['module']['icons']['action']['active']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
-$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action___d.png" border="0" alt="__Action__ (' . __('disabled') . ')" title="__Action__ (' . __('disabled') . ')" width="12" />';
+if (isset($__FM_CONFIG['module']['path'])) {
+	$__FM_CONFIG['module']['icons']['action']['active']		= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
+	$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action___d.png" border="0" alt="__Action__ (' . __('disabled') . ')" title="__Action__ (' . __('disabled') . ')" width="12" />';
+}
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 

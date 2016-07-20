@@ -210,7 +210,7 @@ function sanitize($data, $replace = null) {
  * @since 1.0
  * @package facileManager
  */
-function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, $menu = true) {
+function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-help', $menu = 'menu') {
 	global $fm_name, $__FM_CONFIG;
 	
 	include(ABSPATH . 'fm-includes/version.php');
@@ -225,17 +225,25 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 	$head = $logo = null;
 	
 	if ($css == 'facileManager') {
-		$head = $menu ? getTopHeader($help) : null;
+		$head = ($menu == 'menu') ? getTopHeader($help) : null;
 	} else {
 		$logo = '<h1 class="center"><img alt="' . $fm_name . '" src="' . $GLOBALS['RELPATH'] . 'fm-includes/images/logo.png" /></h1>' . "\n";
 	}
 	
 	/** Module css and js includes */
-	if (isset($_SESSION['module'])) {
-		$module_css_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'module.css';
+	if (isset($_SESSION['module']) && isset($__FM_CONFIG['module']['path'])) {
+		$module_css_file = $__FM_CONFIG['module']['path']['css'] . DIRECTORY_SEPARATOR . 'module.css';
 		$module_css = (file_exists(ABSPATH . $module_css_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<link rel="stylesheet" href="' . $GLOBALS['RELPATH'] . $module_css_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/css" />' : null;
-		$module_js_file = 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'module.php';
+		$module_js_dir = $__FM_CONFIG['module']['path']['js'] . DIRECTORY_SEPARATOR;
+		$module_js_file = $module_js_dir . 'module.php';
 		$module_js = (file_exists(ABSPATH . $module_js_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '?ver=' . $__FM_CONFIG[$_SESSION['module']]['version'] . '" type="text/javascript" charset="utf-8"></script>' : null;
+		
+		/** Include any .js files */
+		foreach (scandir($module_js_dir) as $module_js_file) {
+			if (in_array($module_js_file, array('.', '..', 'module.php'))) continue;
+			$module_js_file = $module_js_dir . $module_js_file;
+			$module_js .= (file_exists(ABSPATH . $module_js_file) && array_key_exists($_SESSION['module'], $__FM_CONFIG)) ? "\n\t\t" . '<script src="' . $GLOBALS['RELPATH'] . $module_js_file . '" type="text/javascript" charset="utf-8"></script>' : null;
+		}
 	} else {
 		$module_css = $module_js = null;
 	}
@@ -250,7 +258,8 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = false, 
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui-1.10.2.min.css" />
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-		<link href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css">
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/tooltip.css" type="text/css">
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-1.9.1.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-ui-1.10.2.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
@@ -295,7 +304,7 @@ function getTopHeader($help) {
 	
 	$module_toolbar = $fm_new_version_available = $account_menu = $user_account_menu = $module_menu = null;
 	
-	if (!$help) {
+	if ($help != 'help-file') {
 		$auth_method = getOption('auth_method');
 		if ($auth_method) {
 			if ($_SESSION['user']['account_id'] != 1) {
@@ -795,7 +804,7 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 		}
 	} else {
 		for ($i = 0; $i < count($options); $i++) {
-			$selected = ($option_select == $options[$i]) ? ' selected' : '';
+			$selected = ($option_select == $options[$i] || @in_array($options[$i], $option_select)) ? ' selected' : '';
 			$type_options.="<option$selected>$options[$i]</option>\n";
 		}
 	}
@@ -2389,7 +2398,7 @@ function fMDie($message = null, $link_display = 'show') {
 
 	if (!$message) $message = _('An unknown error occurred.');
 	
-	printHeader('Error', 'install', false, false);
+	printHeader('Error', 'install', 'no-help', 'no-menu');
 	
 	printf('<div id="fm-branding"><img src="%s" /><span>%s</span></div>
 		<div id="window"><p>%s</p>', $branding_logo, _('Oops!'), $message);
@@ -3067,7 +3076,7 @@ function createSearchSQL($fields = array(), $prefix = null) {
  * @return string
  */
 function __($text, $domain = null) {
-	if (function_exists('dgettext')) {
+	if (function_exists('dgettext') && isset($_SESSION['module'])) {
 		if (!$domain) $domain = $_SESSION['module'];
 
 		return dgettext($domain, $text);

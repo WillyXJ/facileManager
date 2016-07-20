@@ -30,6 +30,9 @@ $(document).ready(function() {
 			data: $("#manage").serialize(),
 			success: function(response)
 			{
+				if (response.indexOf("force_logout") >= 0) {
+					doLogout();
+				}
 				if ($("#verbose").is(":checked") == false) {
 					$("#response").html(response);
 					$("#response").delay(3000).fadeTo(200, 0.00, function() {

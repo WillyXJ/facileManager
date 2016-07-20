@@ -614,32 +614,35 @@ HTML;
 	}
 	
 	
-	function updateSOAReload($domain_id, $status = 'yes') {
+	function updateSOAReload($domain_id, $status = 'yes', $associated = 'single') {
 		global $fmdb, $fm_dns_zones, $__FM_CONFIG;
 		
 		/** Check domain_id and soa */
 		$parent_domain_ids = getZoneParentID($domain_id);
 		if (isset($parent_domain_ids[2])) {
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND
-				s.soa_id=(SELECT soa_id FROM fm_dns_domains WHERE domain_id={$parent_domain_ids[2]})";
+				s.soa_id=(SELECT soa_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE domain_id={$parent_domain_ids[2]})";
 		} else {
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND 
 				s.soa_id=d.soa_id AND d.domain_id IN (" . join(',', $parent_domain_ids) . ')';
 		}
 		$result = $fmdb->query($query);
 		if (!$fmdb->num_rows) return false;
+		
+		$domain_reload = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_reload');
+
+		if (!$domain_reload) return false;
 
 		/** Update the SOA serial number */
-		if ($fmdb->last_result[0]->domain_reload == 'no') {
+		if ($domain_reload == 'no') {
 			if (!isset($fm_dns_zones)) {
 				include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
 			}
 			$fm_dns_zones->updateSOASerialNo($domain_id, getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_serial_no'));
 		}
-		
-		$id = ($clone_id = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_clone_domain_id')) ? $clone_id : $domain_id;
 
-		reloadZoneSQL($id, $status);
+		$id = ($domain_clone_domain_id = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_clone_domain_id')) ? $domain_clone_domain_id : $domain_id;
+		reloadZoneSQL($id, $status, $associated);
 	}
 	
 	
@@ -778,8 +781,16 @@ HTML;
 		global $fm_dns_zones;
 		
 		if (!$fm_dns_zones) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+		
+		$possible_domain_ids = $fm_dns_zones->getZoneTemplateChildren($domain_id);
+		if (count($possible_domain_ids)) {
+			foreach($possible_domain_ids as $parent_id) {
+				$possible_domain_ids = array_merge($possible_domain_ids, $fm_dns_zones->getZoneCloneChildren($parent_id));
+			}
+		}
+		$possible_domain_ids = array_unique(array_merge($possible_domain_ids, $fm_dns_zones->getZoneCloneChildren($domain_id)));
 
-		foreach ($fm_dns_zones->getZoneTemplateChildren($domain_id) as $child_id) {
+		foreach ($possible_domain_ids as $child_id) {
 			$domain_id = getParentDomainID($child_id);
 			$soa_count = getSOACount($domain_id);
 			$ns_count = getNSCount($domain_id);
