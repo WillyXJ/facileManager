@@ -173,6 +173,6 @@ td > .template-icon {
 	vertical-align: top;
 }
 
-#define_template p {
+#define_template p, #clone_override p {
 	font-size: 8pt;
 }

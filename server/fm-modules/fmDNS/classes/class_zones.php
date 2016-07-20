@@ -710,6 +710,10 @@ HTML;
 				$domain_template_id = 0;
 				$zone_show = 'block';
 			}
+			if (getNameFromID($domain_clone_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
+				$clone_override_show = $clone_dname_options_show = 'none';
+				$clone_dname_checked = null;
+			}
 		} else {
 			$clone_override_show = $clone_dname_options_show = 'none';
 			$clone_dname_checked = null;
@@ -805,6 +809,7 @@ HTML;
 						<div id="clone_override" style="display: %s">
 							<p><input type="checkbox" id="domain_clone_dname_override" name="domain_clone_dname_override" value="yes" %s /><label for="domain_clone_dname_override"> %s</label></p>
 							<div id="clone_dname_options" style="display: %s">
+								<p>%s</p>
 								%s
 							</div>
 						</div>
@@ -825,7 +830,8 @@ HTML;
 				$forwarders_show, $forward_dropdown, __('Define forwarders'), $domain_forward_servers,
 				$masters_show, __('Define masters'), $domain_master_servers,
 				__('Clone Of (optional)'), $clone, $clone_override_show, $clone_dname_checked,
-				__('Override DNAME Resource Record Setting'), $clone_dname_options_show, $clone_dname_dropdown,
+				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
+				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
 				$soa_templates . $dynamic_zone . $additional_config_link . $create_template . $template_name
 				);
@@ -1482,6 +1488,11 @@ HTML;
 			if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
 		}
 
+		/** Forward servers */
+		if (!empty($post['domain_required_servers']['forwarders'])) {
+			$post['domain_required_servers'] = $post['domain_required_servers']['forwarders'];
+		}
+		
 		/** Slave and stub zones require master servers */
 		if (in_array($post['domain_type'], array('slave', 'stub'))) {
 			if (empty($post['domain_required_servers']['masters'])) return __('No master servers defined.');

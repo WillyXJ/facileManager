@@ -524,7 +524,7 @@ class fm_module_buildconf {
 				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
 				if ($SERIALNO != -1) {
 					$server_id = getServerID($server_serial_no, $_SESSION['module']);
-					$query .= " AND (`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%'";
+					$query .= " AND (`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}'";
 
 					/** Get the associated server groups */
 					if (!isset($fm_module_servers)) {
@@ -532,7 +532,7 @@ class fm_module_buildconf {
 					}
 					if ($server_group_ids = $fm_module_servers->getServerGroupIDs($server_id)) {
 						foreach ($server_group_ids as $group_id) {
-							$query .= " OR `domain_name_servers`='g_{$group_id}' OR `domain_name_servers` LIKE 'g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id};%'";
+							$query .= " OR `domain_name_servers`='g_{$group_id}' OR `domain_name_servers` LIKE 'g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id}'";
 						}
 					}
 					$query .= ')';
@@ -912,15 +912,19 @@ class fm_module_buildconf {
 		
 		/** Is this a cloned zone */
 		if (isset($domain->parent_domain_id)) {
-			$full_zone_clone = (getOption('clones_use_dnames', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') ? true : false;
-			if ($domain->domain_clone_dname) {
-				$full_zone_clone = ($domain->domain_clone_dname == 'yes') ? true : false;
-			}
+			if ($domain->domain_template == 'no' && !$domain->domain_template_id) {
+				$full_zone_clone = (getOption('clones_use_dnames', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') ? true : false;
+				if ($domain->domain_clone_dname) {
+					$full_zone_clone = ($domain->domain_clone_dname == 'yes') ? true : false;
+				}
+			} else $full_zone_clone = false;
 			
 			/** Are there any additional records? */
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->parent_domain_id, 'record_', 'domain_id', "AND `record_status`='active'");
-			if ($fmdb->num_rows) {
-				$full_zone_clone = false;
+			if ($full_zone_clone) {
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain->parent_domain_id, 'record_', 'domain_id', "AND `record_status`='active'");
+				if ($fmdb->num_rows) {
+					$full_zone_clone = false;
+				}
 			}
 			
 			/** Are there any skipped records? */

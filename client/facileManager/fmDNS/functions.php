@@ -389,7 +389,7 @@ function processReloadFailure($last_line) {
  * @return array
  */
 function moduleInitWebRequest() {
-	$output = null;
+	$output = array();
 	
 	switch ($_POST['action']) {
 		case 'reload':

@@ -1,3 +1,8 @@
+2.2.1 (2016-06-14)
+==================
+* Server - [bug] Fixed issue with adding users to groups. (Issue #319)
+* Server - [improvement] UTC is now an available timezone. (Issue #318)
+
 2.2 (2016-04-24)
 ================
 * Client - Upgrading requires a manual installation using the steps in README.md.

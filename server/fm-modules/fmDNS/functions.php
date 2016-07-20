@@ -203,7 +203,7 @@ function buildModuleHelpFile() {
 			management if you have several zones with a similar framework. You can create a zone template when creating a new zone or you can 
 			completely manage them from <a href="__menu{Zone Templates}">Templates</a>. All zones based on a template will be shown with the
 			<i class="template-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
-			with them.</p>
+			with them. In addition, clones of a zone based on a template cannot be shortened to a DNAME RR.</p>
 			<p>Zones can support dynamic updates only if the checkbox is ticked while creating or editing individual zones. This will cause 
 			{$_SESSION['module']} to compare the zone file from the DNS server with that in the database and make any necessary changes. This option
 			will increase processing time while reloading zones.</p>
