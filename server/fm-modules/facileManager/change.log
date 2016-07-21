@@ -15,6 +15,8 @@
 * Server - [improvement] AJAX now redirects to login page when fM and module
            database updates are required.
 * Server - [bug] Fixed an issue where i18n requirement checks may fail.
+* Both   - [security] Improved permission support for files installed by the
+           client. (Issue #320)
 
 2.2.1 (2016-06-14)
 ==================

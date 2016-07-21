@@ -86,11 +86,8 @@ function buildConf($url, $data) {
 	
 	extract($raw_data, EXTR_SKIP);
 	
-	$runas = 'root';
-	$chown_files = array($server_root_dir);
-	
 	/** Install the new files */
-	installFiles($runas, $chown_files, $files, $data['dryrun']);
+	installFiles($files, $data['dryrun'], array($server_root_dir));
 	
 	$message = "Reloading the server\n";
 	if ($debug) echo fM($message);
