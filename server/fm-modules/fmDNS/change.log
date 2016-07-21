@@ -7,6 +7,8 @@
 * Server - [bug] Fixed an issue where SOA serial numbers were not incrementing
            for cloned zones. (Issue #330)
 * Server - [bug] Fixed error messaging during zone configuration builds.
+* Both   - [security] Improved permission support for files installed by the
+           client. (Issue #320)
 
 2.2.3 (2016-06-14)
 ==================

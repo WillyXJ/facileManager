@@ -109,7 +109,12 @@ function buildConf($url, $data) {
 	}
 	
 	if ($debug) {
-		foreach ($files as $filename => $contents) {
+		foreach ($files as $filename => $fileinfo) {
+			if (is_array($fileinfo)) {
+				extract($fileinfo, EXTR_OVERWRITE);
+			} else {
+				$contents = $fileinfo;
+			}
 			echo str_repeat('=', 50) . "\n";
 			echo $filename . ":\n";
 			echo str_repeat('=', 50) . "\n";
@@ -118,7 +123,7 @@ function buildConf($url, $data) {
 	}
 	
 	$runas = ($server_run_as_predefined == 'as defined:') ? $server_run_as : $server_run_as_predefined;
-	$chown_files = array($server_root_dir, $server_zones_dir);
+	$chown_dirs = array($server_zones_dir);
 		
 	/** Remove previous files so there are no stale files */
 	if ($purge || ($purge_config_files == 'yes' && $server_update_config == 'conf')) {
@@ -138,7 +143,7 @@ function buildConf($url, $data) {
 	}
 	
 	/** Install the new files */
-	installFiles($runas, $chown_files, $files, $data['dryrun']);
+	installFiles($files, $data['dryrun'], $chown_dirs, $runas);
 	
 	/** Reload the server */
 	$message = "Reloading the server\n";

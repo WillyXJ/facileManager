@@ -2,6 +2,8 @@
 ==================
 * Server - [improvement] AJAX now redirects to login page when fM and module
            database updates are required.
+* Client - [security] Improved permission support for files installed by the
+           client. (Issue #320)
 
 1.3 (2016-04-24)
 ================
