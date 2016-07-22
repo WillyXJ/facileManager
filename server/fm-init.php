@@ -176,6 +176,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			/** Once logged in process the menuing */
 			if ($is_logged_in) {
 				if (isUpgradeAvailable()) {
+					if (defined('AJAX')) {
+						exit('<div class="hidden">force_logout</div>');
+					}
 					$fm_login->logout();
 					header('Location: ' . $GLOBALS['RELPATH']);
 					exit;
@@ -210,7 +213,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		$page = isset($_GET['p']) && intval($_GET['p']) > 0 ? intval($_GET['p']) : 1;
 		
 		/** Build the user menu */
-		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
+		if (!defined('AJAX')) {
+			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
+		}
 	} elseif (defined('CLIENT')) {
 		require_once(ABSPATH . 'fm-includes/fm-db.php');
 	}

@@ -108,7 +108,7 @@ class fm_module_buildconf {
 			$config .= $servers;
 
 			if ($keys) {
-				$data->files[dirname($server_config_file) . '/named.conf.keys'] = $key_config;
+				$data->files[dirname($server_config_file) . '/named.conf.keys'] = array('contents' => $key_config, 'mode' => 0400);
 			
 				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
 			}
@@ -330,9 +330,9 @@ class fm_module_buildconf {
 			
 			/** Debian-based requires named.conf.options */
 			if (isDebianSystem($server_os_distro)) {
-				$data->files[dirname($server_config_file) . '/named.conf.options'] = $config;
+				$data->files[dirname($server_config_file) . '/named.conf.options'] = array('contents' => $config, 'mode' => 0444, 'chown' => 'root');
 				$config = $zones . "include \"" . dirname($server_config_file) . "/named.conf.options\";\n\n";
-				$data->files[$server_config_file] = $config;
+				$data->files[$server_config_file] = array('contents' => $config, 'mode' => 0444, 'chown' => 'root');
 				$config = $zones;
 			}
 			
@@ -431,7 +431,7 @@ class fm_module_buildconf {
 								}
 							}
 						}
-						$data->files[$server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys'] = $key_config;
+						$data->files[$server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys'] = array('contents' => $key_config, 'mode' => 0400);
 					}
 					
 					/** Generate zone file */
@@ -464,11 +464,11 @@ class fm_module_buildconf {
 
 			/** Debian-based requires named.conf.local */
 			if (isDebianSystem($server_os_distro)) {
-				$data->files[dirname($server_config_file) . '/named.conf.local'] = $config;
-				$config = $data->files[$server_config_file] . "include \"" . dirname($server_config_file) . "/named.conf.local\";\n\n";
+				$data->files[dirname($server_config_file) . '/named.conf.local'] = array('contents' => $config, 'mode' => 0444, 'chown' => 'root');
+				$config = $data->files[$server_config_file]['contents'] . "include \"" . dirname($server_config_file) . "/named.conf.local\";\n\n";
 			}
 
-			$data->files[$server_config_file] = $config;
+			$data->files[$server_config_file] = array('contents' => $config, 'mode' => 0444, 'chown' => 'root');
 			if (is_array($files)) {
 				$data->files = array_merge($data->files, $files);
 			}

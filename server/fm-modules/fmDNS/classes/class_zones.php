@@ -1012,7 +1012,8 @@ HTML;
 				case 'https':
 					/** Test the port first */
 					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
-						$response .= '[' . $name_servers[$i]->server_name . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
+						$post_result = '[' . $name_servers[$i]->server_name . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
+						$response .= $post_result;
 						$failures = true;
 						break;
 					}
@@ -1032,7 +1033,8 @@ HTML;
 				case 'ssh':
 					/** Test the port first */
 					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
-						$response .= '[' . $name_servers[$i]->server_name . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
+						$post_result = '[' . $name_servers[$i]->server_name . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
+						$response .= $post_result;
 						$failures = true;
 						break;
 					}
@@ -1095,7 +1097,7 @@ HTML;
 		if (!$failures) {
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
-			$fm_dns_records->updateSOAReload($domain_id, 'no');
+			$fm_dns_records->updateSOAReload($domain_id, 'no', 'all');
 		}
 
 		addLogEntry(sprintf(__("Reloaded zone '%s'."), displayFriendlyDomainName($domain_name)));
@@ -1157,7 +1159,7 @@ HTML;
 		/** Increment serial */
 		$soa_serial_no = (strpos($soa_serial_no, $current_date) === false) ? $current_date . '00' : $soa_serial_no + 1;
 		
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=$soa_serial_no WHERE `domain_id`=$domain_id";
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=$soa_serial_no WHERE `domain_template`='no' AND `domain_id`=$domain_id";
 		$result = $fmdb->query($query);
 	}
 	

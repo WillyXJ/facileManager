@@ -38,7 +38,12 @@ class fm_shared_module_buildconf {
 		if (method_exists($fm_module_buildconf, 'processConfigsChecks')) {
 			$check_status = $fm_module_buildconf->processConfigsChecks($raw_data);
 		}
-		foreach ($raw_data['files'] as $filename => $contents) {
+		foreach ($raw_data['files'] as $filename => $fileinfo) {
+			if (is_array($fileinfo)) {
+				extract($fileinfo, EXTR_OVERWRITE);
+			} else {
+				$contents = $fileinfo;
+			}
 			$preview .= str_repeat('=', 75) . "\n";
 			$preview .= $filename . ":\n";
 			$preview .= str_repeat('=', 75) . "\n";

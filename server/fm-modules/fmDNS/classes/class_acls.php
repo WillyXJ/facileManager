@@ -374,11 +374,11 @@ HTML;
 		
 		if ($include == 'none') return array();
 		
-		$acl_list = null;
+		$acl_list = array();
 		$i = 0;
 		$serial_sql = $server_serial_no ? "AND server_serial_no IN ('0','$server_serial_no')" : "AND server_serial_no='0'";
 		
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_status='active'");
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_parent_id=0 AND acl_status='active'");
 		if ($fmdb->num_rows) {
 			$last_result = $fmdb->last_result;
 			for ($j=0; $j<$fmdb->num_rows; $j++) {

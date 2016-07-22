@@ -1,3 +1,15 @@
+2.2.4 (2016-07-21)
+==================
+* Server - [bug] Fixed an issue where address_match_element options would not
+           accept any input. (Issue #329)
+* Server - [improvement] AJAX now redirects to login page when fM and module
+           database updates are required.
+* Server - [bug] Fixed an issue where SOA serial numbers were not incrementing
+           for cloned zones. (Issue #330)
+* Server - [bug] Fixed error messaging during zone configuration builds.
+* Both   - [security] Improved permission support for files installed by the
+           client. (Issue #320)
+
 2.2.3 (2016-06-14)
 ==================
 * Server - [bug] Fixed incorrect use of DNAME with zone templates. (Issue #321)

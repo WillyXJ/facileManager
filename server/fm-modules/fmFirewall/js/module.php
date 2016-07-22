@@ -129,7 +129,9 @@ $(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response != "Success") {
+					if (response.indexOf("force_logout") >= 0) {
+						doLogout();
+					} else if (response != "Success") {
 						var eachLine = response.split("\n");
 						if (eachLine.length <= 2) {
 							$("#response").html("<p class=\"error\">"+response+"</p>");

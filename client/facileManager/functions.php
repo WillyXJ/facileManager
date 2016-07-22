@@ -1003,34 +1003,51 @@ function addLogEntry($log_data) {
  * @since 1.1
  * @package facileManager
  *
- * @param string $user User dirs/files should be chowned as
- * @param array $chown_files dirs/files that should be chowned prior to writing
  * @param array $files Files and contents to write
  * @param boolean $dryrun Whether or not files should be written
+ * @param array $chown_dirs dirs that should be chowned prior to writing
+ * @param string $user User dirs/files should be chowned as
  * @return boolean
  */
-function installFiles($user, $chown_files, $files, $dryrun) {
-	$message = "Setting directory and file permissions for $user\n";
-	if ($debug) echo $message;
-	if (!$dryrun) {
-		addLogEntry($message);
-		/** chown the files/dirs */
-		foreach($chown_files as $file) {
-			@chown($file, $user);
-		}
-	}
-		
+function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), $user = 'root') {
 	/** Process the files */
 	if (count($files)) {
-		foreach($files as $filename => $contents) {
+		foreach($files as $filename => $fileinfo) {
+			if (is_array($fileinfo)) {
+				extract($fileinfo, EXTR_OVERWRITE);
+			} else {
+				$contents = $fileinfo;
+			}
 			$message = "Writing $filename\n";
 			if ($debug) echo $message;
 			if (!$dryrun) {
 				addLogEntry($message);
-				@mkdir(dirname($filename), 0755, true);
-				@chown(dirname($filename), $user);
+				
+				$directory = dirname($filename);
+				@mkdir($directory, 0755, true);
+				chown($directory, $user);
 				file_put_contents($filename, $contents);
-				@chown($filename, $user);
+				
+				/** chown and chmod if applicable */
+				$runas = (isset($chown)) ? $chown : $user;
+				chown($filename, $runas);
+				unset($chown);
+				if (isset($mode)) {
+					chmod($filename, intval($mode));
+					unset($mode);
+				}
+			}
+		}
+		
+		/** chown the dirs */
+		if (count($chown_dirs)) {
+			foreach($chown_dirs as $dir) {
+				$message = "Setting directory permissions on $dir\n";
+				if ($debug) echo $message;
+				if (!$dryrun) {
+					addLogEntry($message);
+					chown($dir, $user);
+				}
 			}
 		}
 	} else {
