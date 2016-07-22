@@ -1,5 +1,5 @@
-2.2.2 (2016-0?-??)
-==================
+2.3 (2016-07-21)
+================
 * Server - [improvement] Added support to load any additional js files in the
            module directory (fm-modules/(module)/js/).
 * Server - [improvement] Removed boolean params for printHeader().
