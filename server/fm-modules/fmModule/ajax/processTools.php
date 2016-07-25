@@ -36,7 +36,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$response .= sprintf('<p>%s</p>', __('Button 1 was clicked.'));
 				break;
 			case 'button-2':
-				$response = buildPopup('header', __('Error'));
+				$response = buildPopup('header', _('Error'));
 				$response .= sprintf('<p>%s</p>', __('Button 2 generates an error.'));
 				break;
 		}

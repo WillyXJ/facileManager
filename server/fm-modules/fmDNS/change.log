@@ -1,7 +1,7 @@
 3.0 (2016-0?-??)
 ==================
 * Server - [feature] Added support for dynamic zones. (Issue #90)
-* Server - [bug] Added missing translation text.
+* Server - [bug] Added missing translation text and removed duplicates.
 
 2.2.4 (2016-0?-??)
 ==================

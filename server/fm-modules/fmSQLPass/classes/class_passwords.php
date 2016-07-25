@@ -136,7 +136,7 @@ HTML;
 		}
 		
 		if (!$verbose) {
-			$return = strpos($verbose_output, sprintf('[%s] -', __('failed'))) ? sprintf('<p class="error">%s</p>', __('One or more errors occurred during the password change.')) : sprintf('<p>%s</p>', __('Password has been changed.'));
+			$return = strpos($verbose_output, sprintf('[%s] -', _('failed'))) ? sprintf('<p class="error">%s</p>', __('One or more errors occurred during the password change.')) : sprintf('<p>%s</p>', __('Password has been changed.'));
 		} else {
 			$return = $verbose_output;
 		}

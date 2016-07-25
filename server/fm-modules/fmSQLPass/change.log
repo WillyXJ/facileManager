@@ -1,3 +1,7 @@
+? (2016-0?-??)
+==================
+* Server - [bug] Added missing translation text and removed duplicates.
+
 1.2.3 (2016-0?-??)
 ==================
 * Server - [improvement] AJAX now redirects to login page when fM and module

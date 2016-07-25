@@ -41,7 +41,7 @@ if (is_array($_POST) && count($_POST)) {
 		
 		echo $response . "<br />\n";
 	} else {
-		echo buildPopup('header', __('Error'));
+		echo buildPopup('header', _('Error'));
 		printf('<p>%s</p>' . "\n", __('You are not authorized to reload this zone.'));
 	}
 }

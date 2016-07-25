@@ -405,8 +405,8 @@ BODY;
 		/** dns tests */
 		$connect_test = "\t" . str_pad(__('DNS:'), 15);
 		$port = 53;
-		if (socketTest($server_data->server_name, $port, 10)) $connect_test .=  __('success') . ' (tcp/' . $port . ')';
-		else $connect_test .=  __('failed') . ' (tcp/' . $port . ')';
+		if (socketTest($server_data->server_name, $port, 10)) $connect_test .=  _('success') . ' (tcp/' . $port . ')';
+		else $connect_test .=  _('failed') . ' (tcp/' . $port . ')';
 		$connect_test .=  "\n";
 		
 		return $connect_test;

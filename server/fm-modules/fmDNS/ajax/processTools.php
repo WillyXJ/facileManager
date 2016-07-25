@@ -91,7 +91,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 					}
 					$response = trim($response, "\n"). '</pre>';
 				} else {
-					$response = buildPopup('header', __('Error'));
+					$response = buildPopup('header', _('Error'));
 					$response .= sprintf('<p>%s</p>', __('Please specify at least one server.'));
 				}
 				break;
