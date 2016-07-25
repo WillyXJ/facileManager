@@ -1,3 +1,7 @@
+? (2016-0?-??)
+==================
+* Server - [bug] Added missing translation text.
+
 2.2.2 (2016-0?-??)
 ==================
 * Server - [improvement] Added support to load any additional js files in the

@@ -41,7 +41,7 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	
 	$popup_footer = buildPopup('footer', __('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
 
-	echo buildPopup('header', 'Reload Results') . '<pre>';
+	echo buildPopup('header', __('Reload Results')) . '<pre>';
 	echo processBulkDomainIDs($_POST['item_id']);
 	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.</pre>' . $popup_footer;
 	

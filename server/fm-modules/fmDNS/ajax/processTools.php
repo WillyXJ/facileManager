@@ -61,7 +61,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 						} else {
 							global $menu;
 							
-							$response = buildPopup('header', 'Error');
+							$response = buildPopup('header', _('Error'));
 							$response .= sprintf(__('<p>You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), $menu[getParentMenuKey(__('Servers'))][4]);
 							break;
 						}

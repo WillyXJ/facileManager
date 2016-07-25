@@ -31,7 +31,7 @@
 function returnError($window = true) {
 	$msg = _('There was a problem with your request.'); 
 	if ($window) {
-		echo buildPopup('header', 'Error');
+		echo buildPopup('header', _('Error'));
 		echo "<p>$msg</p>\n";
 		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	} else {
