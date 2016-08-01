@@ -3,7 +3,11 @@
 * Server - [feature] Added support for dynamic zones. (Issue #90)
 * Server - [bug] Added missing translation text and removed duplicates.
 
-2.2.4 (2016-0?-??)
+2.2.5 (2016-08-??)
+==================
+* Server - [bug] Fixed named configuration and zone file checks. (Issue #333)
+
+2.2.4 (2016-07-21)
 ==================
 * Server - [bug] Fixed an issue where address_match_element options would not
            accept any input. (Issue #329)
