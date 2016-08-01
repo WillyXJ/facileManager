@@ -1206,9 +1206,10 @@ class fm_module_buildconf {
 		$tmp_dir = rtrim($fm_temp_directory, '/') . '/' . $_SESSION['module'] . '_' . date("YmdHis") . '/';
 		system('rm -rf ' . $tmp_dir);
 		$debian_system = isDebianSystem($files_array['server_os_distro']);
-		$named_conf_contents = null;
+		
 		/** Create temporary directory structure */
-		foreach ($files_array['files'] as $file => $contents) {
+		foreach ($files_array['files'] as $file => $file_properties) {
+			$contents = is_array($file_properties) ? $file_properties['contents'] : $file_properties;
 			if (!is_dir(dirname($tmp_dir . $file))) {
 				if (!@mkdir(dirname($tmp_dir . $file), 0777, true)) {
 					$class = 'class="info"';
@@ -1218,18 +1219,7 @@ class fm_module_buildconf {
 				}
 			}
 			file_put_contents($tmp_dir . $file, $contents);
-			if ($debian_system && (strpos($file, 'named.conf.options') || strpos($file, 'named.conf.local'))) $named_conf_contents .= $contents;
 
-			/** Create temporary directory from named.conf's 'directory' line */
-			if (strpos($contents, 'directory')) {
-				preg_match('/directory(.+?)+/', $contents, $directory_line);
-				if (count($directory_line)) {
-					$line_array = explode('"', $directory_line[0]);
-					@mkdir($tmp_dir . $line_array[1], 0777, true);
-					$named_conf = $file;
-				}
-			}
-			
 			/** Build array of zone files to check */
 			if (preg_match('/\/zones\.conf\.(.+?)/', $file)) {
 				$view = preg_replace('/(.+?)zones\.conf\.+/', '', $file);
@@ -1250,11 +1240,14 @@ class fm_module_buildconf {
 			}
 		}
 		
-		if ($debian_system) file_put_contents($tmp_dir . $named_conf, $named_conf_contents);
+		/** Create temporary server root directory */
+		if (!is_dir($tmp_dir . $files_array['server_root_dir'])) {
+			@mkdir($tmp_dir . $files_array['server_root_dir'], 0777, true);
+		}
 		
 		if (!$die) {
 			/** Run named-checkconf */
-			$named_checkconf_cmd = findProgram('sudo') . ' ' . findProgram('named-checkconf') . ' -t ' . $tmp_dir . ' ' . $named_conf . ' 2>&1';
+			$named_checkconf_cmd = findProgram('sudo') . ' ' . findProgram('named-checkconf') . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
 			exec($named_checkconf_cmd, $named_checkconf_results, $retval);
 			if ($retval) {
 				$class = 'class="error"';
