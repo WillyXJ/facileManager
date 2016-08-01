@@ -41,8 +41,11 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-  -z|zones       Build all associated zone files
+   -D            Name of zone to dump (required by dump-zone)
+   -f            Filename hosting the zone data (required by dump-zone)
+   -z|zones      Build all associated zone files
      dump-cache  Dump the DNS cache
+     dump-zone   Dump the specified zone data to STDOUT
      clear-cache Clear the DNS cache
      id=XX       Specify the individual DomainID to build and reload
   
@@ -412,6 +415,23 @@ function moduleInitWebRequest() {
 	}
 	
 	return $output;
+}
+
+
+/**
+ * Dumps the specified zone data to STDOUT
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @param string $domain Domain name
+ * @param string $zonefile Filename of zone file
+ * @return boolean
+ */
+function dumpZone($domain, $zonefile) {
+	passthru(findProgram('named-checkzone') . " -j -D $domain $zonefile");
+	
+	exit;
 }
 
 

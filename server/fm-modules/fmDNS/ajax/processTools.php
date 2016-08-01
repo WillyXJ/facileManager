@@ -33,7 +33,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$response = buildPopup('header', __('Zone Import Wizard'));
 				if (!empty($_FILES['import-file']['tmp_name'])) {
 					$block_style = 'style="display: block;"';
-					$response = $fm_module_tools->zoneImportWizard();
+					$response = $fm_module_tools->zoneImportWizard(sanitize($_POST['domain_id']));
 					if (strpos($output, 'You do not have permission') === false) {
 						$classes = 'wide';
 					}

@@ -39,6 +39,7 @@ $module_name = basename(dirname(__FILE__));
 $zones = (in_array('-z', $argv) || in_array('zones', $argv)) ? true : false;
 $dump_cache = in_array('dump-cache', $argv) ? true : false;
 $clear_cache = in_array('clear-cache', $argv) ? true : false;
+$dump_zone = in_array('dump-zone', $argv) ? true : false;
 
 /** Include shared client functions */
 $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
@@ -53,6 +54,14 @@ if (file_exists($fm_client_functions)) {
 for ($i=0; $i < count($argv); $i++) {
 	if (strncmp(strtolower($argv[$i]), 'id=', 3) == 0) {
 		$data['domain_id'] = substr($argv[$i], 3);
+	}
+	if ($argv[$i] == '-D') {
+		$domain = $argv[$i+1];
+		$i++;
+	}
+	if ($argv[$i] == '-f') {
+		$zonefile = $argv[$i+1];
+		$i++;
 	}
 }
 
@@ -72,6 +81,14 @@ if ($dump_cache) {
 /** Clear the cache */
 if ($clear_cache) {
 	manageCache('flush', 'Clearing cache');
+}
+
+/** Dump the zone data */
+if ($dump_zone) {
+	if (!isset($domain) || !isset($zonefile)) {
+		printHelp();
+	}
+	dumpZone($domain, $zonefile);
 }
 
 /** Build the configs provided by $url */

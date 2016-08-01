@@ -735,10 +735,11 @@ class fm_module_buildconf {
 		$zone_file = '; This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 		
 		/** get the SOA */
-		$zone_file .= $this->buildSOA($domain);
+		list($soa, $soa_ttl) = $this->buildSOA($domain);
+		$zone_file .= $soa;
 		
 		/** get the records */
-		$zone_file .= $this->buildRecords($domain, $server_serial_no);
+		$zone_file .= $this->buildRecords($domain, $server_serial_no, $soa_ttl);
 		
 		return $zone_file;
 	}
@@ -893,7 +894,7 @@ class fm_module_buildconf {
 			$zone_file .= "\t\t$soa_ttl )\t\t; Negative caching of TTL\n\n";
 		}
 		
-		return $zone_file;
+		return array($zone_file, $this->getSOASeconds($soa_ttl));
 	}
 
 
@@ -903,7 +904,7 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildRecords($domain, $server_serial_no) {
+	function buildRecords($domain, $server_serial_no, $default_ttl) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$zone_file = $skipped_records = null;
@@ -967,7 +968,11 @@ class fm_module_buildconf {
 					$record_name = $domain_name;
 				}
 				
-				$record_start = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
+				$record_ttl = $record_result[$i]->record_ttl;
+				if ($domain->domain_dynamic == 'yes') {
+					$record_ttl = ($record_ttl > 0) ? $record_ttl : $default_ttl;
+				}
+				$record_start = str_pad($record_name, 25) . $separator . $record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
 				
 				switch($record_result[$i]->record_type) {
 					case 'A':
@@ -1743,6 +1748,27 @@ HTML;
 			$query = "DELETE FROM `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "track_reloads` WHERE `server_serial_no`='" . sanitize($server_serial_no) . "' AND domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
 			$fmdb->query($query);
 		}
+	}
+	
+	
+	/**
+	 * Converts a SOA value to seconds
+	 *
+	 * @since 3.0
+	 * @package fmDNS
+	 *
+	 * @param string $soa SOA value
+	 * @return integer
+	 */
+	function getSOASeconds($soa) {
+		if (!preg_match('/\d[a-zA-Z]/', $soa)) {
+			return $soa;
+		}
+		
+		$search = array('S', 'M', 'H', 'D', 'W');
+		$replace = array(' seconds ', ' minutes ', ' hours ', ' days ', ' weeks ');
+		
+		return strtotime('+' . str_replace($search, $replace, strtoupper($soa))) - time();
 	}
 }
 

@@ -3204,4 +3204,74 @@ function isDebianSystem($os) {
 }
 
 
+/**
+ * Run command on remote machines via SSH
+ * 
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $host_array Hostname of remote machine
+ * @param string $command Command to run on $host
+ * @param string $format Be silent or verbose with output
+ * @param integer $port Remote port to connect to
+ * @return boolean
+ */
+function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22) {
+	$failures = false;
+	
+	/** Convert $host to an array */
+	if (!is_array($host_array)) {
+		$host_array = array($host_array);
+	}
+	
+	/** Get SSH key */
+	$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
+	if (!$ssh_key) {
+		return '<p class="error">' . sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+	}
+
+	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
+	if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
+	if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
+		return '<p class="error">' . sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key) . '</p>'. "\n";
+	}
+
+	@chmod($temp_ssh_key, 0400);
+
+	/** Get SSH user */
+	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
+	if (!$ssh_user) {
+		return '<p class="error">' . sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+	}
+
+	/** Run remote command */
+	foreach ($host_array as $host) {
+		/** Test the port first */
+		if (!socketTest($host, $port, 10)) {
+			return '[' . $host . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $port, $port) . "\n";
+			$failures = true;
+			break;
+		}
+
+		exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $port -l $ssh_user $host \"$command\"", $output, $rc);
+	
+		if ($rc) {
+			$failures = true;
+		} elseif ($format == 'silent') {
+			$output = array();
+		}
+
+		if ($format == 'verbose') {
+			if (isset($output)) {
+				echo "<p><b>$host</b><br />" . join('<br />', $output) . '</p>';
+			}
+		}
+	}
+
+	@unlink($temp_ssh_key);
+	
+	return array('failures' => $failures, 'output' => $output);
+}
+
+
 ?>

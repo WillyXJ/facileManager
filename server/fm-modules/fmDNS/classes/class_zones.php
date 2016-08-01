@@ -579,6 +579,11 @@ class fm_dns_zones {
 			$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="delete" href="#">' . $__FM_CONFIG['icons']['delete'] . '</a>' . "\n";
 		}
+		
+		$dynamic_zone = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic');
+		if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed && $dynamic_zone == 'yes') {
+			$type .= '&load=zone';
+		}
 		$domain_name = displayFriendlyDomainName($row->domain_name);
 		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . "\">$domain_name</a>" : $domain_name;
 		$domain_view = $this->IDs2Name($row->domain_view, 'view');
@@ -592,7 +597,7 @@ class fm_dns_zones {
 			$record_count = $fmdb->last_result[0]->record_count;
 		}
 		
-		$dynamic_icon = (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates')) : null;
+		$dynamic_icon = ($dynamic_zone == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates')) : null;
 		$template_icon = ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))) : null;
 		
 		echo <<<HTML
@@ -1159,7 +1164,7 @@ HTML;
 	}
 	
 	
-	function updateSOASerialNo($domain_id, $soa_serial_no) {
+	function updateSOASerialNo($domain_id, $soa_serial_no, $increment = 'increment') {
 		global $fmdb, $__FM_CONFIG;
 		
 		$current_date = date('Ymd');
@@ -1168,7 +1173,9 @@ HTML;
 		$soa_serial_no = (int) $soa_serial_no;
 		
 		/** Increment serial */
-		$soa_serial_no = (strpos($soa_serial_no, $current_date) === false) ? $current_date . '00' : $soa_serial_no + 1;
+		if ($increment == 'increment') {
+			$soa_serial_no = (strpos($soa_serial_no, $current_date) === false) ? $current_date . '00' : $soa_serial_no + 1;
+		}
 		
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `soa_serial_no`=$soa_serial_no WHERE `domain_template`='no' AND `domain_id`=$domain_id";
 		$result = $fmdb->query($query);

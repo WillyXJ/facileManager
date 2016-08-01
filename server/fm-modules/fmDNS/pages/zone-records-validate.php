@@ -102,7 +102,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	foreach ($data_array as $id => $data) {
 		if (!is_array($data)) continue;
 		if (isset($data['Delete'])) {
-			$action = __('Delete');
+			$action = _('Delete');
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');
 			$value[$id] = $data;
 		} elseif (array_key_exists('record_skipped', $data) && $skips_allowed) {
@@ -332,74 +332,6 @@ function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
 	}
 	unset($sql_records, $raw_changes);
 	
-	return $changes;
-}
-
-function buildSQLRecords($record_type, $domain_id) {
-	global $fmdb, $__FM_CONFIG;
-	
-	if ($record_type == 'SOA') {
-		$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
-			`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
-			`soa_template`='no' AND `soa_status`='active'";
-		$fmdb->get_results($soa_query);
-		if ($fmdb->num_rows) $result = $fmdb->last_result;
-		else return null;
-		
-		foreach (get_object_vars($result[0]) as $key => $val) {
-			$sql_results[$result[0]->soa_id][$key] = $val;
-		}
-		array_shift($sql_results[$result[0]->soa_id]);
-		array_shift($sql_results[$result[0]->soa_id]);
-		return $sql_results;
-	} else {
-		$valid_domain_ids = 'IN (' . join(',', getZoneParentID($domain_id)) . ')';
-		
-		if (in_array($record_type, array('A', 'AAAA'))) {
-			$record_sql = "AND domain_id $valid_domain_ids AND record_type IN ('A', 'AAAA')";
-		} else {
-			$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
-		}
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_name', 'record_', $record_sql);
-		if ($result) {
-			$results = $fmdb->last_result;
-
-			for ($i=0; $i<$result; $i++) {
-				$static_array = array('record_name', 'record_ttl', 'record_class',
-					'record_value', 'record_comment', 'record_status');
-				$optional_array = array('record_priority', 'record_weight', 'record_port',
-					'record_os', 'record_cert_type', 'record_key_tag', 'record_algorithm',
-					'record_flags', 'record_text', 'record_params', 'record_regex',
-					'record_append');
-				
-				foreach ($static_array as $field) {
-					$sql_results[$results[$i]->record_id][$field] = $results[$i]->$field;
-				}
-				foreach ($optional_array as $field) {
-					if ($results[$i]->$field != null) {
-						$sql_results[$results[$i]->record_id][$field] = $results[$i]->$field;
-					}
-				}
-				
-				/** Skipped record? */
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $results[$i]->record_id, 'record_', 'record_id', "AND domain_id=$domain_id");
-				$sql_results[$results[$i]->record_id]['record_skipped'] = ($fmdb->num_rows) ? 'on' : 'off';
-			}
-		}
-		return $sql_results;
-	}
-
-}
-
-function compareValues($data_array, $sql_records) {
-	$changes = array();
-	foreach ($data_array as $key => $val) {
-		$diff = array_diff_assoc($data_array[$key], $sql_records[$key]);
-		if ($diff) {
-			$changes[$key] = $diff;
-		}
-	}
-
 	return $changes;
 }
 

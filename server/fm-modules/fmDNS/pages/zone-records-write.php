@@ -41,6 +41,15 @@ if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !c
 
 if (isset($update) && is_array($update)) {
 	foreach ($update as $id => $data) {
+		if (isset($data['soa_serial_no'])) {
+			if (!class_exists('fm_dns_zones')) {
+				include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+			}
+			$fm_dns_zones->updateSOASerialNo($domain_id, $data['soa_serial_no'], 'no-increment');
+
+			continue;
+		}
+		
 		/** Auto-detect IPv4 vs IPv6 A records */
 		if ($record_type == 'A' && strrpos($data['record_value'], ':')) $record_type = 'AAAA';
 		elseif ($record_type == 'AAAA' && !strrpos($data['record_value'], ':')) $record_type = 'A';

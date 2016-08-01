@@ -9,9 +9,15 @@ $(document).ready(function() {
 	
 	more_clicks = 0;
 
-	/* Add body class */
 	if (onPage("zone-records.php")) {
+		/* Add body class */
 		$("body").addClass("fm-noscroll");
+		
+		/* Dynamic zone compare routine */
+		var loadzone = getUrlVars()["load"];
+		if (loadzone == "zone") {
+			loadDynamicZone();
+		}
 	}
 
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
@@ -264,7 +270,7 @@ $(document).ready(function() {
 
 		return false;
 	});
-
+	
 	$(".existing-container .display_results").delegate("input:not([id^=\'record_delete_\']), select", "change", function(e) {
 		if ($(this).attr("type") == "checkbox") {
 			$(this).parent().parent().parent().addClass("build");
@@ -416,6 +422,43 @@ function displayOptionPlaceholder(option_value) {
 			}
 		}
 	});
+}
+
+function loadDynamicZone() {
+	$("#manage_item").fadeIn(200);
+	$("#manage_item_contents").fadeIn(200);
+	$("#manage_item_contents").html("<p>' . __('Pulling the latest zone data from the server') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
+
+	var form_data = {
+		get_dynamic_zone_data: true,
+		domain_id: getUrlVars()["domain_id"],
+		is_ajax: 1
+	};
+
+	$.ajax({
+		type: "POST",
+		url: "fm-modules/facileManager/ajax/getData.php",
+		data: form_data,
+		success: function(response)
+		{
+			if (response.indexOf("force_logout") >= 0) {
+				doLogout();
+			}
+
+			if (response.toLowerCase().indexOf("no records") > -1) {
+				$("#manage_item").fadeOut(200);
+				$("#manage_item_contents").fadeOut(200);
+				return;
+			}
+			
+			$("#manage_item_contents").html(response);
+			if ($("#manage_item_contents").width() >= 700) {
+				$("#manage_item_contents").addClass("wide");
+			}
+		}
+	});
+
+	return false;
 }
 ';
 ?>

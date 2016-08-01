@@ -24,12 +24,20 @@ class fm_module_tools {
 	
 	/**
 	 * Imports records from a zone file and presents a confirmation
+	 *
+	 * @since 1.0
+	 * @package fmDNS
+	 *
+	 * @param integer $domain_id Domain ID to import records into
+	 * @return string
 	 */
-	function zoneImportWizard() {
+	function zoneImportWizard($domain_id) {
 		global $__FM_CONFIG, $fm_name;
 		
 		if (!currentUserCan('manage_records', $_SESSION['module'])) return $this->unAuth('zone');
-		if (!zoneAccessIsAllowed(array($_POST['domain_id']))) return $this->unAuth('zone');
+		if (!zoneAccessIsAllowed(array($domain_id))) return $this->unAuth('zone');
+		
+		$get_dynamic_zone_data = array_key_exists('get_dynamic_zone_data', $_POST);
 		
 		$raw_contents = file_get_contents($_FILES['import-file']['tmp_name']);
 		/** Strip commented lines */
@@ -40,6 +48,8 @@ class fm_module_tools {
 		$clean_contents = preg_replace('/^\$GENERATE.*\n?/m', '', $clean_contents, -1, $generate_count);
 		/** Strip $ORIGIN lines */
 		$clean_contents = preg_replace('/^\$ORIGIN.*\n?/m', '', $clean_contents, -1, $origin_count);
+		/** Change tabs into spaces */
+		$clean_contents = str_replace("\t", ' ', $clean_contents);
 		
 		/** Handle unsupported message */
 		if ($generate_count || $origin_count) {
@@ -48,21 +58,18 @@ class fm_module_tools {
 			$unsupported = implode("\n", $unsupported);
 		} else $unsupported = null;
 		
-		$domain_name = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
-		$domain_map = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+		$domain_name = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		$domain_map = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
 
 		$count = 1;
 
 		/** Detect SOA */
-		if ((!getSOACount($_POST['domain_id']) && strpos($clean_contents, ' SOA ') !== false) &&
+		if (((!getSOACount($domain_id) || $get_dynamic_zone_data) && strpos($clean_contents, ' SOA ') !== false) &&
 			(in_array('SOA', $__FM_CONFIG['records']['require_zone_rights']) && currentUserCan('manage_zones', $_SESSION['module']))) {
 			
 			$raw_soa = preg_replace("/SOA(.+?)\)/esim", "str_replace(PHP_EOL, ' ', '\\1')", $clean_contents);
-			preg_match("/SOA(.+?)\)/esim", $clean_contents, $raw_soa);
+			preg_match("/SOA(.+?)(\)|\n)/esim", $clean_contents, $raw_soa);
 			preg_match("/TTL(.+?)$/esim", $clean_contents, $raw_ttl);
-			if (is_array($raw_ttl)) {
-				$soa_array['soa_ttl'] = trim(preg_replace('/;(.+?)+/', '', $raw_ttl[1]));
-			}
 			if (is_array($raw_soa)) {
 				$raw_soa = preg_replace('/;(.+?)+/', '', $raw_soa[1]);
 				$soa = str_replace(array("\n", "\t", '(', ')', '  '), ' ', preg_replace('/\s\s+/', ' ', $raw_soa));
@@ -78,15 +85,25 @@ class fm_module_tools {
 					$soa_array['soa_append'] = 'yes';
 				} else $soa_array['soa_append'] = 'no';
 			}
+			$soa_array['soa_ttl'] = (count($raw_ttl)) ? trim(preg_replace('/;(.+?)+/', '', $raw_ttl[1])) : $tmp_neg_cache;
 			
-			$soa_row = '<h4>SOA:</h4><p class="soa_import">' . trimFullStop($domain_name) . '. IN SOA ' . $soa_array['soa_master_server'];
-			if ($soa_array['soa_append'] == 'yes') $soa_row .= '.' . trimFullStop($domain_name) . '.';
-			$soa_row .= ' ' . $soa_array['soa_email_address'];
-			if ($soa_array['soa_append'] == 'yes') $soa_row .= '.' . trimFullStop($domain_name) . '.';
-			$soa_row .= ' ( &lt;autogen_serial&gt; ' . $soa_array['soa_refresh'] . ' ' . $soa_array['soa_retry'] . ' ' . 
-					$soa_array['soa_expire'] . ' ' . $soa_array['soa_ttl'] . ' )';
+			$soa_row = '<h4>SOA:</h4><p class="soa_import">';
 			
-			$soa_row = <<<HTML
+			if ($get_dynamic_zone_data) {
+				if ($tmp_serial <= getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no')) {
+					$soa_row = null;
+				} else {
+					$soa_row .= "<input type=\"hidden\" name=\"update[$count][soa_serial_no]\" value=\"$tmp_serial\" />" . sprintf('%s: %d', __('Updated serial number'), $tmp_serial);
+				}
+			} else {
+				$soa_row .= trimFullStop($domain_name) . '. IN SOA ' . $soa_array['soa_master_server'];
+				if ($soa_array['soa_append'] == 'yes') $soa_row .= '.' . trimFullStop($domain_name) . '.';
+				$soa_row .= ' ' . $soa_array['soa_email_address'];
+				if ($soa_array['soa_append'] == 'yes') $soa_row .= '.' . trimFullStop($domain_name) . '.';
+				$soa_row .= ' ( &lt;autogen_serial&gt; ' . $soa_array['soa_refresh'] . ' ' . $soa_array['soa_retry'] . ' ' . 
+						$soa_array['soa_expire'] . ' ' . $soa_array['soa_ttl'] . ' )';
+
+				$soa_row = <<<HTML
 						<input type="hidden" name="create[$count][soa_master_server]" value="{$soa_array['soa_master_server']}" />
 						<input type="hidden" name="create[$count][soa_email_address]" value="{$soa_array['soa_email_address']}" />
 						<input type="hidden" name="create[$count][soa_refresh]" value="{$soa_array['soa_refresh']}" />
@@ -97,13 +114,19 @@ class fm_module_tools {
 						<input type="hidden" name="create[$count][soa_append]" value="{$soa_array['soa_append']}" />
 						$soa_row
 						<span><label><input type="checkbox" name="create[$count][record_skip]" />Skip Import</label></span>
+HTML;
+			}
+			
+			if ($soa_row) {
+				$soa_row .= <<<HTML
 						</p>
 						
 						<h4>Records:</h4>
 
 HTML;
 
-			$count++;
+				$count++;
+			}
 		} else $soa_row = null;
 
 		$clean_contents = str_replace('.' . trimFullStop($domain_name) . '.', '', $clean_contents);
@@ -118,6 +141,8 @@ HTML;
 		$rows = null;
 		$valid_hashes = array(';', '//', '#');
 		foreach ($lines as $line) {
+			$record_action = __('Add');
+			
 			$null_keys = array('record_ttl', 'record_priority', 'record_weight', 'record_port');
 			foreach ($null_keys as $key) {
 				$array[$key] = null;
@@ -125,7 +150,7 @@ HTML;
 			if (!strlen(trim($line))) continue;
 			
 			foreach ($valid_hashes as $tmp_hash) {
-				if (strpos($line, $tmp_hash)) {
+				if (strpos($line, $tmp_hash) !== false) {
 					$hash = $tmp_hash;
 					break;
 				} else $hash = null;
@@ -285,26 +310,37 @@ HTML;
 			$all_records[] = $array;
 			
 			/** Automatically skip duplicates */
-			$checked = $this->checkDuplicates($array, $_POST['domain_id'], $all_records);
-			unset($all_records);
+			$checked = $this->checkDuplicates($array, $domain_id, $all_records);
+//			unset($all_records);
 			
-			$rows .= <<<ROW
-					<tr class="import_swap">
-						<td><span id="name{$count}" onclick="exchange(this);">{$array['record_name']}</span><input onblur="exchange(this);" type="text" id="name{$count}b" name="create[$count][record_name]" value="{$array['record_name']}" /></td>
-						<td><span id="ttl{$count}" onclick="exchange(this);">{$array['record_ttl']}</span><input onblur="exchange(this);" type="number" id="ttl{$count}b" name="create[$count][record_ttl]" value="{$array['record_ttl']}" /></td>
-						<td><input type="hidden" name="create[$count][record_class]" value="{$array['record_class']}" />{$array['record_class']}</td>
-						<td><input type="hidden" name="create[$count][record_type]" value="{$array['record_type']}" />{$array['record_type']}</td>
-						<td><span id="priority{$count}" onclick="exchange(this);">{$array['record_priority']}</span><input onblur="exchange(this);" type="number" id="priority{$count}b" name="create[$count][record_priority]" value="{$array['record_priority']}" /></td>
-						<td><span id="value{$count}" onclick="exchange(this);">{$array['record_value']}</span><input onblur="exchange(this);" type="text" id="value{$count}b" name="create[$count][record_value]" value="{$array['record_value']}" /></td>
-						<td><span id="weight{$count}" onclick="exchange(this);">{$array['record_weight']}</span><input onblur="exchange(this);" type="number" id="weight{$count}b" name="create[$count][record_weight]" value="{$array['record_weight']}" /></td>
-						<td><span id="port{$count}" onclick="exchange(this);">{$array['record_port']}</span><input onblur="exchange(this);" type="number" id="port{$count}b" name="create[$count][record_port]" value="{$array['record_port']}" /></td>
-						<td><span id="comment{$count}" onclick="exchange(this);">{$array['record_comment']}</span><input onblur="exchange(this);" type="text" id="comment{$count}b" name="create[$count][record_comment]" value="{$array['record_comment']}" /></td>
-						<td style="text-align: center;" nowrap><input type="hidden" name="create[$count][record_append]" value="{$array['record_append']}" />{$array['record_append']}</td>
-						<td style="text-align: center;"><label><input type="checkbox" name="create[$count][record_skip]" $checked />Skip Import</label></td>
-					</tr>
-
-ROW;
-			$count++;
+			if (!$get_dynamic_zone_data || ($get_dynamic_zone_data && !$checked)) {
+				$rows .= $this->displayImportRow($array, $record_action, $count, $checked);
+				$count++;
+			}
+		}
+		
+		/** Are there any dynamically deleted records? */
+		if ($get_dynamic_zone_data) {
+			$sql_records = buildSQLRecords('all', $domain_id);
+			
+			$delete_array = array();
+			foreach ($sql_records as $id => $db_record) {
+				$found = false;
+				foreach ($all_records as $server_record) {
+					if ($db_record['record_name'] == $server_record['record_name'] &&
+							$db_record['record_type'] == $server_record['record_type']) {
+						$found = true;
+						break;
+					}
+				}
+				if (!$found) {
+					$delete_array[$id] = $db_record;
+				}
+			}
+			
+			foreach ($delete_array as $key => $delete_record) {
+				$rows .= $this->displayImportRow($delete_record, _('Delete'), $key, null);
+			}
 		}
 		
 		$table_info = array(
@@ -313,7 +349,7 @@ ROW;
 						'name' => 'views'
 					);
 
-		$title_array = array(__('Record'), __('TTL'), __('Class'), __('Type'), __('Priority'), __('Value'), __('Weight'), __('Port'), __('Comment'));
+		$title_array = array(__('Action'), __('Record'), __('TTL'), __('Class'), __('Type'), __('Priority'), __('Value'), __('Weight'), __('Port'), __('Comment'));
 		$title_array[] = array('title' => __('Append Domain'), 'style' => 'text-align: center;', 'nowrap' => null);
 		$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 		
@@ -322,11 +358,12 @@ ROW;
 		$popup_header = buildPopup('header', __('Import Verification'));
 		$popup_footer = buildPopup('footer', __('Import'), array('import' => 'submit', 'cancel_button' => 'cancel'));
 		
-		$body = <<<BODY
+		if ($rows) {
+			$body = <<<BODY
 		<form method="post" action="zone-records-write.php">
 		$popup_header
 			<p>Domain: $domain_name</p>
-			<input type="hidden" name="domain_id" value="{$_POST['domain_id']}">
+			<input type="hidden" name="domain_id" value="{$domain_id}">
 			<input type="hidden" name="map" value="$domain_map">
 			<input type="hidden" name="import_records" value="true">
 			<input type="hidden" name="import_file" value="{$_FILES['import-file']['name']}">
@@ -340,6 +377,9 @@ ROW;
 		$popup_footer
 		</form>
 BODY;
+		} else {
+			$body = sprintf('%s<p>%s</p>%s', $popup_header, __('There are no records found.'), buildPopup('footer', _('OK'), array('cancel_button' => 'cancel')));
+		}
 
 		return $body;
 		
@@ -355,7 +395,7 @@ BODY;
 		$sql_select = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` WHERE `record_status`!='deleted' AND `domain_id` IN ($domain_ids) AND ";
 		
 		foreach ($array as $key => $data) {
-			if ($key != 'record_comment') {
+			if (!in_array($key, array('record_comment', 'record_ttl'))) {
 				$data = mysql_real_escape_string($data);
 				$sql_select .= ($data) ? "$key='" . mysql_real_escape_string($data) . "' AND " : "($key='' OR $key IS NULL) AND ";
 			}
@@ -371,7 +411,7 @@ BODY;
 		$fmdb->query($query);
 		
 		if ($fmdb->num_rows) {
-			for ($i=0; $i<=$fmdb->num_rows; $i++) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$types[] = $fmdb->last_result[$i]->record_type;
 			}
 			/** Duplicate RR in the database already */
@@ -417,6 +457,57 @@ BODY;
 		$response = buildPopup('header', _('Error'));
 		$response .= sprintf('<p>%s</p>', sprintf(__('You do not have permission to access this %s.'), $message));
 		return $response . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+	}
+	
+	
+	/**
+	 * Displays the import record rows
+	 * 
+	 * @since 3.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $array Record details
+	 * @param string $action Action to take on the record
+	 * @param integer $id Unique ID
+	 * @param string $checked Check the tickbox
+	 * @return boolean
+	 */
+	function displayImportRow($array, $action, $id, $checked = null) {
+		$editable = ($action == _('Delete')) ? false : true;
+		$db_action = ($action == __('Add')) ? 'create' : 'update';
+		
+		$row = '<tr class="import_swap">' . "\n";
+		$row .= "<td>$action</td>\n<td>";
+		$row .= $editable ? '<span id="name' . $id . '" onclick="exchange(this);">' . $array['record_name'] . '</span><input onblur="exchange(this);" type="text" id="name' . $id . 'b" name="' . $db_action . '[' . $id . '][record_name]" value="' . $array['record_name'] . '" />' : $array['record_name'];
+		$row .= "</td>\n<td>";
+		$row .= $editable ? '<span id="ttl' . $id . '" onclick="exchange(this);">' . $array['record_ttl'] . '</span><input onblur="exchange(this);" type="text" id="ttl' . $id . 'b" name="' . $db_action . '[' . $id . '][record_ttl]" value="' . $array['record_ttl'] . '" />' : $array['record_ttl'];
+		$row .= "</td>\n";
+		$row .= '<td><input type="hidden" name="' . $db_action . '[' . $id . '][record_class]" value="' . $array['record_class'] . '" />' . $array['record_class'] . '</td>' . "\n";
+		$row .= '<td><input type="hidden" name="' . $db_action . '[' . $id . '][record_type]" value="' . $array['record_type'] . '" />' . $array['record_type'] . "</td>\n";
+		$row .= '<td>';
+		if (array_key_exists('record_weight', $array)) {
+			$row .= $editable ? '<span id="priority' . $id . '" onclick="exchange(this);">' . $array['record_priority'] . '</span><input onblur="exchange(this);" type="text" id="priority' . $id . 'b" name="' . $db_action . '[' . $id . '][record_priority]" value="' . $array['record_priority'] . '" />' : $array['record_priority'];
+		}
+		$row .= "</td>\n<td>";
+		$row .= $editable ? '<span id="value' . $id . '" onclick="exchange(this);">' . $array['record_value'] . '</span><input onblur="exchange(this);" type="text" id="value' . $id . 'b" name="' . $db_action . '[' . $id . '][record_value]" value="' . $array['record_value'] . '" />' : $array['record_value'];
+		$row .= "</td>\n<td>";
+		if (array_key_exists('record_weight', $array)) {
+			$row .= $editable ? '<span id="weight' . $id . '" onclick="exchange(this);">' . $array['record_weight'] . '</span><input onblur="exchange(this);" type="text" id="weight' . $id . 'b" name="' . $db_action . '[' . $id . '][record_weight]" value="' . $array['record_weight'] . '" />' : $array['record_weight'];
+		}
+		$row .= "</td>\n<td>";
+		if (array_key_exists('record_weight', $array)) {
+			$row .= $editable ? '<span id="port' . $id . '" onclick="exchange(this);">' . $array['record_port'] . '</span><input onblur="exchange(this);" type="text" id="port' . $id . 'b" name="' . $db_action . '[' . $id . '][record_port]" value="' . $array['record_port'] . '" />' : $array['record_port'];
+		}
+		$row .= "</td>\n<td>";
+		$row .= $editable ? '<span id="comment' . $id . '" onclick="exchange(this);">' . $array['record_comment'] . '</span><input onblur="exchange(this);" type="text" id="comment' . $id . 'b" name="' . $db_action . '[' . $id . '][record_comment]" value="' . $array['record_comment'] . '" />' : $array['record_comment'];
+		$row .= ($action == _('Delete')) ? '<input type="hidden" name="update[' . $id . '][record_status]" value="deleted" />' : null;
+		$row .= "</td>\n";
+		$row .= '<td style="text-align: center;" nowrap><input type="hidden" name="' . $db_action . '[' . $id . '][record_append]" value="' . $array['record_append'] . '" />' . $array['record_append'] . "</td>\n";
+		$row .= '<td style="text-align: center;"><label><input type="checkbox" name="' . $db_action . '[' . $id . '][record_skip]" ' . $checked . ' />' . __('Skip Import') . "</label></td>\n";
+		$row .= "</tr>\n";
+
+		return $row;
 	}
 	
 }

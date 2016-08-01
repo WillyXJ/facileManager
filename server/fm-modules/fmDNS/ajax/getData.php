@@ -84,6 +84,16 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 	$avail_options_array = $fm_module_options->availableOptions('add', $server_serial_no, $cfg_type);
 	echo buildSelect('cfg_name', 'cfg_name', $avail_options_array, sanitize($_POST['cfg_name']), 1, null, false, 'displayOptionPlaceholder()');
 	exit;
+} elseif (is_array($_POST) && array_key_exists('get_dynamic_zone_data', $_POST) && currentUserCan('manage_records', $_SESSION['module']) && zoneAccessIsAllowed(array($_POST['domain_id']))) {
+	include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+	$server_zone_data = $fm_dns_records->getServerZoneData(sanitize($_POST['domain_id']));
+	
+	/** Add popup header and footer if missing */
+	if (strpos($server_zone_data, 'popup-header') === false) {
+		$server_zone_data = buildPopup('header', _('Error')) . $server_zone_data . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+	}
+	
+	exit($server_zone_data);
 }
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {

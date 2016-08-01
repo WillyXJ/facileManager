@@ -443,7 +443,7 @@ class fm_dns_records {
 				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . __('Create PTR') . '</label>' : null;
 			} else {
 				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . __('Create PTR') . '</label><br />' : ' align="center">';
-				$field_values['data']['Actions'] .= '<label><input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" />' . __('Delete') . '</label>';
+				$field_values['data']['Actions'] .= '<label><input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" />' . _('Delete') . '</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
@@ -805,6 +805,76 @@ HTML;
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * Gets the zone data from the servers
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $domain_id domain_id to get
+	 * @return null
+	 */
+	function getServerZoneData($domain_id) {
+		global $__FM_CONFIG, $fmdb;
+		
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
+		if (!$fmdb->num_rows) {
+			return sprintf('<p>%s</p>', __('An error occured retrieving the zone from the database.'));
+		}
+		extract(get_object_vars($fmdb->last_result[0]));
+		
+		/** Ensure this zone is setup for dynamic support */
+		if ($domain_dynamic != 'yes') {
+			return sprintf('<p>%s</p>', __('This zone does not support dynamic updates.'));
+		}
+		
+		/** Get zone data from server */
+		foreach (explode(',', getZoneServers($domain_id)) as $server_serial_no) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
+			if (!$fmdb->num_rows) {
+				return sprintf('<p>%s</p>', __('An error occured retrieving the associated servers from the database.'));
+			}
+			extract(get_object_vars($fmdb->last_result[0]));
+			
+			if (version_compare($server_client_version, '3.0-alpha1', '<')) continue;
+			
+			/** Get zone data via ssh */
+			if ($server_update_method == 'ssh') {
+				$server_gather_zone = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_zones_dir . '/master/db.' . $domain_name . '.hosts', 'return', $server_update_port);
+
+				if (is_array($server_gather_zone)) {
+					if ($server_gather_zone['failures']) {
+						return join("\n", $server_gather_zone['output']);
+					}
+				} else {
+					return '<pre>' . $server_gather_zone . '</pre>';
+				}
+			} elseif (in_array($server_update_method, array('http', 'https'))) {
+				/** Get zone data via http(s) */
+				
+				
+				
+			}
+		}
+		
+		/** Return if the zone did not get dumped from the server */
+		if (!isset($server_gather_zone)) {
+			return sprintf('<p>%s</p>', __('The zone could not be retrieved from the DNS servers.'));
+		}
+		
+		$_FILES['import-file']['tmp_name'] = $_FILES['import-file']['name'] = '/tmp/db.' . $domain_name;
+		file_put_contents($_FILES['import-file']['tmp_name'], join("\n", $server_gather_zone['output']));
+
+		$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
+		if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
+			include($module_tools_file);
+		}
+		
+		return $fm_module_tools->zoneImportWizard($domain_id);
 	}
 	
 }
