@@ -127,6 +127,12 @@ function buildConf($url, $data) {
 	
 	$runas = ($server_run_as_predefined == 'as defined:') ? $server_run_as : $server_run_as_predefined;
 	$chown_dirs = array($server_zones_dir);
+	
+	/** Freeze zones */
+	if (isNamedRunning()) {
+		/** Handle dynamic zones to support reloading */
+		runRndcActions('freeze');
+	}
 		
 	/** Remove previous files so there are no stale files */
 	if ($purge || ($purge_config_files == 'yes' && $server_update_config == 'conf')) {
@@ -153,14 +159,11 @@ function buildConf($url, $data) {
 	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
 		addLogEntry($message);
-		if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
-			$rndc_actions = array('freeze', 'reload', 'thaw');
+		if (isNamedRunning()) {
+			$rndc_actions = array('reload', 'thaw');
 			
 			/** Handle dynamic zones to support reloading */
-			foreach ($rndc_actions as $action) {
-				$last_line = system(findProgram('rndc') . " $action 2>&1", $retval);
-				if ($retval) return processReloadFailure($last_line);
-			}
+			runRndcActions($rndc_actions);
 		} else {
 			$message = "The server is not running - attempting to start it\n";
 			if ($debug) echo fM($message);
@@ -432,6 +435,44 @@ function dumpZone($domain, $zonefile) {
 	passthru(findProgram('named-checkzone') . " -j -D $domain $zonefile");
 	
 	exit;
+}
+
+
+/**
+ * Returns whether named is running or not
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @return boolean
+ */
+function isNamedRunning() {
+	return shell_exec('ps -A | grep named | grep -vc grep');
+}
+
+
+/**
+ * Returns whether named is running or not
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @param array $rndc_actions rndc actions to run
+ * @return boolean
+ */
+function runRndcActions($rndc_actions = array()) {
+	if (!is_array($rndc_actions)) $rndc_actions = array($rndc_actions);
+	
+	$rndc = findProgram('rndc');
+	
+	foreach ($rndc_actions as $action) {
+		$last_line = system("$rndc $action 2>&1", $retval);
+		if ($retval) {
+			return processReloadFailure($last_line);
+		}
+	}
+	
+	return false;
 }
 
 

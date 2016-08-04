@@ -90,7 +90,8 @@ class fm_module_tools {
 			$soa_row = '<h4>SOA:</h4><p class="soa_import">';
 			
 			if ($get_dynamic_zone_data) {
-				if ($tmp_serial <= getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no')) {
+				$soa_serial_no = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no');
+				if ($tmp_serial <= $soa_serial_no) {
 					$soa_row = null;
 				} else {
 					$soa_row .= "<input type=\"hidden\" name=\"update[$count][soa_serial_no]\" value=\"$tmp_serial\" />" . sprintf('%s: %d', __('Updated serial number'), $tmp_serial);
@@ -328,6 +329,7 @@ HTML;
 				$found = false;
 				foreach ($all_records as $server_record) {
 					if ($db_record['record_name'] == $server_record['record_name'] &&
+							$db_record['record_value'] == $server_record['record_value'] &&
 							$db_record['record_type'] == $server_record['record_type']) {
 						$found = true;
 						break;

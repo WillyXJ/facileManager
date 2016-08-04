@@ -844,9 +844,14 @@ HTML;
 			
 			/** Get zone data via ssh */
 			if ($server_update_method == 'ssh') {
-				$server_gather_zone = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_zones_dir . '/master/db.' . $domain_name . '.hosts', 'return', $server_update_port);
+				$server_gather_zone = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.hosts', 'return', $server_update_port);
 
 				if (is_array($server_gather_zone)) {
+					if (array_key_exists('output', $server_gather_zone) && !count($server_gather_zone['output'])) {
+						unset($server_gather_zone);
+						continue;
+					}
+
 					if ($server_gather_zone['failures']) {
 						return join("\n", $server_gather_zone['output']);
 					}
