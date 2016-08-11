@@ -1,3 +1,7 @@
+2.3.1 (2016-0?-?)
+==================
+* Server - [bug] Fixed an issue where i18n requirement checks may fail. (Issue #335)
+
 2.3 (2016-07-21)
 ================
 * Server - [improvement] Added support to load any additional js files in the
