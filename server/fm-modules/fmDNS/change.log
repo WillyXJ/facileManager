@@ -1,3 +1,8 @@
+2.2.5 (2016-08-23)
+==================
+* Server - [bug] Fixed named configuration and zone file checks. (Issue #333)
+* Client - [bug] Fixed versioning issue during upgrades.
+
 2.2.4 (2016-07-21)
 ==================
 * Server - [bug] Fixed an issue where address_match_element options would not

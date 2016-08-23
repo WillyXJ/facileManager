@@ -1,3 +1,8 @@
+2.3.1 (2016-08-23)
+==================
+* Server - [bug] Fixed an issue where i18n requirement checks may fail. (Issue #335)
+* Client - [bug] Fixed a PHP error in the installer.
+
 2.3 (2016-07-21)
 ================
 * Server - [improvement] Added support to load any additional js files in the
