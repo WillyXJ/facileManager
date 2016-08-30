@@ -4,6 +4,8 @@
 * Server - [bug] Added missing translation text and removed duplicates.
 * Server - [feature] Added support to import a BIND-compatible zone dump file
            to make migrations to fmDNS easier. (Issue #96)
+* Server - [improvement] Zone previews now show all available RRs regardless
+           of DNS server version hosting the zone.
 
 2.2.5 (2016-08-??)
 ==================

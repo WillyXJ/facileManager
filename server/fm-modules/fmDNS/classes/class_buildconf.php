@@ -910,6 +910,9 @@ class fm_module_buildconf {
 		$zone_file = $skipped_records = null;
 		$domain_name_trim = trimFullStop($domain->domain_name);
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
+		if (!$server_version) {
+			$server_version = '10.0';
+		}
 		
 		/** Is this a cloned zone */
 		if (isset($domain->parent_domain_id)) {
