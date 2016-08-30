@@ -24,7 +24,8 @@ echo '$(document).ready(function() {
 		});
 		$("#admin-tools-select select").select2({
 			containerCss: { "min-width": "300px" },
-			minimumResultsForSearch: 10
+			minimumResultsForSearch: 10,
+			allowClear: true
 		});
 		$(".log_search_form select").select2({
 			containerCss: { "min-width": "165px" },

@@ -213,6 +213,9 @@ function buildModuleHelpFile() {
 			delegate reverse zones by specifying the classless IP range in the zone name (1-128.168.192.in-addr.arpa).</p>
 			<p>Zones that are missing SOA and NS records will be highlighted with a red background and will not be built or reloaded until the 
 			records exists.</p>
+			<p>You can also import BIND-compatible zone dump files instead of adding records individually. Go to Admin &rarr; 
+			<a href="__menu{Tools}">Tools</a> and use the Import Zone Files utility. Select your dump file and click 'Import Zones'
+			which will import any views, zones, and records listed in the file.</p>
 			<br />
 		</div>
 	</li>
@@ -715,7 +718,7 @@ function setDefaultOverrideOptions() {
 
 
 /**
- * Sets default override configuration options based on OS distro
+ * Returns if a RR should be allowed or not
  *
  * @since 1.2
  * @package facileManager

@@ -452,7 +452,7 @@ function isNamedRunning() {
 
 
 /**
- * Returns whether named is running or not
+ * Runs a rndc action
  *
  * @since 3.0
  * @package fmDNS

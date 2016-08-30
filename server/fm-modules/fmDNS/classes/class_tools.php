@@ -512,6 +512,205 @@ BODY;
 		return $row;
 	}
 	
+	/**
+	 * Imports zones and records from a BIND-compatible dump file
+	 *
+	 * @since 3.0
+	 * @package fmDNS
+	 *
+	 * @return boolean
+	 */
+	function bulkZoneImportWizard() {
+		global $__FM_CONFIG, $fmdb, $fm_name, $fm_dns_views, $fm_dns_zones, $fm_dns_records;
+		
+		if (!currentUserCan(array('manage_zones', 'manage_records'), $_SESSION['module'])) return $this->unAuth('zone');
+		
+		$popup_header = buildPopup('header', __('Bulk Zone Import'));
+		$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+		
+		$message = sprintf('<p>%s</p>', __('Bulk zone import complete.'));
+		$view_name = $ttl = null;
+		$view_id = 0;
+		
+		$file = fopen($_FILES['import-file']['tmp_name'], 'r');
+		while (!feof($file)){
+			$line = fgets($file);
+			
+			if (strpos($line, '.bind/CH') !== false || strpos($line, '.server/CH') !== false) {
+				continue;
+			}
+			
+			/** Handle view creations */
+			if (strpos($line, 'Start view') !== false) {
+				$view_name = trim(str_replace('; Start view ', '', $line));
+				
+				if (!$view_id = getNameFromID($view_name, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_name', 'view_id')) {
+					/** Create the view */
+					if (!class_exists('fm_dns_views')) {
+						include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
+					}
+					$view_create_result = $fm_dns_views->add(array('view_name'=>$view_name, 'view_comment'=>'', 'server_serial_no'=>0));
+					if ($view_create_result !== true) {
+						$message = sprintf(__('Import failed to create the %s view. %s'), $view_name, $view_create_result);
+						break;
+					} else {
+						$view_id = getNameFromID($view_name, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_name', 'view_id');
+					}
+				}
+			}
+			
+			/** Handle zone creations */
+			if (strpos($line, 'Zone dump') !== false) {
+				$domain_name = strtolower(trim(str_replace(array("; Zone dump of '", "/IN'", "/IN/$view_name'"), '', $line)));
+				
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_name, 'domain_', 'domain_name', "AND domain_view='$view_id'");
+				
+				if (!$fmdb->num_rows) {
+					$domain_mapping = (strpos($domain_name, 'in-addr.arpa') !== false || strpos($domain_name, 'ip6.arpa') !== false) ? 'reverse' : 'forward';
+					
+					/** Create the zone */
+					if (!class_exists('fm_dns_zones')) {
+						include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+					}
+					$domain_id = $fm_dns_zones->add(array('domain_name'=>$domain_name, 'domain_mapping'=>$domain_mapping, 'domain_view'=>$view_id, 'domain_name_servers'=>0));
+					if (!is_int($domain_id)) {
+						$message = sprintf(__('Import failed to create the %s zone. %s'), $domain_name, $domain_id);
+						break;
+					}
+				} else {
+					$domain_id = $fmdb->last_result[0]->domain_id;
+				}
+				
+				$ttl = null;
+			}
+			
+			
+			/** Handle record creations */
+			if (!class_exists('fm_dns_records')) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+			}
+			
+			if (strpos($line, 'IN SOA') !== false) {
+				if (!getSOACount($domain_id)) {
+					$soa = explode('IN SOA', $line);
+					$soa_fields = preg_split('/\s+/', trim($soa[1]));
+
+					list($soa_array['soa_master_server'], $soa_array['soa_email_address'], $soa_serial_no, $soa_array['soa_refresh'],
+						$soa_array['soa_retry'], $soa_array['soa_expire'], $soa_array['soa_ttl']) = $soa_fields;
+					$ttl = $soa_array['soa_ttl'];
+
+					$fm_dns_records->add($domain_id, 'SOA', $soa_array);
+
+					/** Set SOA serial number from import */
+					if (!class_exists('fm_dns_zones')) {
+						include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+					}
+					$fm_dns_zones->updateSOASerialNo($domain_id, $soa_serial_no, 'static');
+
+					unset($soa);
+					unset($soa_fields);
+					unset($soa_array);
+				} else {
+					$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE 
+						domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.account_id='{$_SESSION['user']['account_id']}'
+						AND s.soa_id=d.soa_id AND d.domain_id='$domain_id'";
+					$fmdb->get_results($query);
+					if ($fmdb->num_rows) {
+						$ttl = $fmdb->last_result[0]->soa_ttl;
+					}
+				}
+			} elseif (strpos($line, ' IN ') !== false) {
+				$line = str_replace('.' . trimFullStop($domain_name) . '.', '', $line);
+				$rr_fields = preg_split('/\s+/', trim($line));
+				
+				$rr['record_name'] = $rr_fields[0];
+				$rr['record_name'] = str_replace(trimFullStop($domain_name) . '.', '', $rr['record_name']);
+				if (!strlen($rr['record_name'])) {
+					unset($rr['record_name']);
+				}
+				if ($rr_fields[1] != $ttl) {
+					$rr['record_ttl'] = $rr_fields[1];
+				}
+				$rr['record_class'] = $rr_fields[2];
+				$rr['record_type'] = $rr_fields[3];
+				$rr['record_value'] = $rr_fields[4];
+				
+				/** Process specific RRs */
+				switch ($rr['record_type']) {
+					case 'CERT':
+						$rr['record_cert_type'] = $rr_fields[4];
+						$rr['record_key_tag'] = $rr_fields[5];
+						$rr['record_algorithm'] = $rr_fields[6];
+						$txt_record = null;
+						for ($i=7; $i<count($rr_fields); $i++) {
+							$txt_record[] = $rr_fields[$i];
+						}
+						$rr['record_value'] = join("\n", $txt_record);
+						break;
+					case 'DNSKEY':
+					case 'KEY':
+						$rr['record_flags'] = $rr_fields[4];
+						$rr['record_algorithm'] = $rr_fields[6];
+						$txt_record = null;
+						for ($i=7; $i<count($rr_fields); $i++) {
+							$txt_record[] = $rr_fields[$i];
+						}
+						$rr['record_value'] = join("\n", $txt_record);
+						break;
+					case 'HINFO':
+						$rr['record_os'] = $rr_fields[5];
+						break;
+					case 'KX':
+					case 'MX':
+						$rr['record_priority'] = $rr_fields[4];
+						$rr['record_value'] = $rr_fields[5];
+						break;
+					case 'NAPTR':
+						$rr['record_weight'] = $rr_fields[4];
+						$rr['record_priority'] = $rr_fields[5];
+						$rr['record_flags'] = $rr_fields[6];
+						$rr['record_params'] = str_replace('"', '', $rr_fields[7]);
+						$rr['record_regex'] = str_replace('"', '', $rr_fields[8]);
+						$rr['record_value'] = $rr_fields[9];
+						break;
+					case 'RP':
+						$rr['record_text'] = $rr_fields[5];
+						break;
+					case 'SSHFP':
+						$rr['record_algorithm'] = $rr_fields[4];
+						$rr['record_value'] = $rr_fields[6];
+						break;
+					case 'SRV':
+						$rr['record_priority'] = $rr_fields[4];
+						$rr['record_weight'] = $rr_fields[5];
+						$rr['record_port'] = $rr_fields[6];
+						$rr['record_value'] = $rr_fields[7];
+						break;
+					case 'TXT':
+						$txt_record = null;
+						for ($i=4; $i<count($rr_fields); $i++) {
+							$txt_record .= $rr_fields[$i] . ' ';
+						}
+						$rr['record_value'] = rtrim($txt_record);
+						break;
+				}
+				
+				if (substr($rr['record_value'], -1) == '.') {
+					$rr['record_append'] = 'no';
+				}
+				$rr['record_value'] = str_replace('"', '', $rr['record_value']);
+				
+				$fm_dns_records->add($domain_id, $rr['record_type'], $rr);
+
+				unset($rr);
+				unset($rr_fields);
+			}
+		}
+		fclose($file);
+
+		return $popup_header . $message . $popup_footer;
+	}
+
 }
 
 if (!isset($fm_module_tools))

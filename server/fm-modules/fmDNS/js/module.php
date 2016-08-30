@@ -383,8 +383,17 @@ $(document).ready(function() {
 		return false;
 	});
 	
-});
+	$("#admin-tools-form").delegate("#zone_import_domain_list", "change", function(e) {
+		if ($(this).val() == 0) {
+			$("#import-records").val("' . __('Import Zones') . '");
+//			$("#import-records").attr("id", "import-zones");
+		} else {
+			$("#import-records").val("' . __('Import Records') . '");
+//			$("#import-zones").attr("id", "import-records");
+		}
+	});
 
+});
 
 function displayOptionPlaceholder(option_value) {
 	var option_name = document.getElementById("cfg_name").value;

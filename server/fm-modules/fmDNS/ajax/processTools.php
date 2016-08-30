@@ -29,11 +29,11 @@ require_once('../../../fm-init.php');
 if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
-			case 'import-records':
-				$response = buildPopup('header', __('Zone Import Wizard'));
+			case 'import-zones':
+				$response = buildPopup('header', __('Bulk Zone Import'));
 				if (!empty($_FILES['import-file']['tmp_name'])) {
 					$block_style = 'style="display: block;"';
-					$response = $fm_module_tools->zoneImportWizard(sanitize($_POST['domain_id']));
+					$response = $fm_module_tools->bulkZoneImportWizard();
 					if (strpos($output, 'You do not have permission') === false) {
 						$classes = 'wide';
 					}

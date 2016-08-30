@@ -35,9 +35,10 @@ $selected_zone = 0;
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
 		case __('Import Records'):
+		case __('Import Zones'):
 			if (!empty($_FILES['import-file']['tmp_name'])) {
 				$block_style = 'style="display: block;"';
-				$output = $fm_module_tools->zoneImportWizard(sanitize($_POST['domain_id']));
+				$output = ($_POST['submit'] == __('Import Records')) ? $fm_module_tools->zoneImportWizard(sanitize($_POST['domain_id'])) : $fm_module_tools->bulkZoneImportWizard();
 				if (strpos($output, 'You do not have permission') === false) {
 					$classes = 'wide';
 				}
@@ -56,18 +57,21 @@ if (array_key_exists('submit', $_POST)) {
 	}
 }
 
-$available_zones = $fm_dns_zones->availableZones(true, 'master', true);
+$available_zones = array_reverse($fm_dns_zones->availableZones(true, 'master', true));
+$available_zones[] = array(null, null);
+$available_zones = array_reverse($available_zones);
 $button = null;
 if ($available_zones) {
 	$zone_options = buildSelect('domain_id', 'zone_import_domain_list', $available_zones, $selected_zone);
 	if (currentUserCan('run_tools') && currentUserCan('manage_records', $_SESSION['module'])) {
-		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="' . __('Import Records') . '" class="button" /></p>';
+		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="' . __('Import Zones') . '" class="button text-change" /></p>';
 	}
 } else {
 	$zone_options = __('You need to define one or more zones first.');
 }
 
-$tools_option[] = sprintf('<h2>%s</h2>
+$tools_option[] = sprintf('<div id="admin-tools-select">
+			<h2>%s</h2>
 			<p>%s</p>
 			<table class="form-table">
 				<tr>
@@ -80,9 +84,11 @@ $tools_option[] = sprintf('<h2>%s</h2>
 						%s<br />
 						<p id="table_edits" name="domains"><a id="plus" href="#" title="%s" name="forward">+ %s</a></p>
 					</td>
+				</tr>
 			</table>
 			%s
-			<br />', __('Import Zone Files'), __('Import records from BIND-compatible zone files.'),
+			</div>
+			<br />', __('Import Zone Files'), __('Import records from a BIND-compatible zone file into a single zone or import all views, zones, and records from a BIND-compatible zone dump file.') . ' <code>(rndc dumpdb -zones)</code>',
 				__('File to import'), __('Zone to import to'), $zone_options, __('Add New'), __('Add New Zone'), $button);
 
 $button = null;
