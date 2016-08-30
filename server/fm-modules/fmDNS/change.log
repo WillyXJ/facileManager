@@ -6,6 +6,7 @@
            to make migrations to fmDNS easier. (Issue #96)
 * Server - [improvement] Zone previews now show all available RRs regardless
            of DNS server version hosting the zone.
+* Server - [bug] address_match_element values now strip any inputed semi-colons.
 
 2.2.5 (2016-08-??)
 ==================

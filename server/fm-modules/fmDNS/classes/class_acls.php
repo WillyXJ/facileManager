@@ -462,7 +462,7 @@ HTML;
 				$domain_id = str_replace('domain_', '', $address);
 				$formatted_acls[] = getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active');
 			} else {
-				$formatted_acls[] = $address;
+				$formatted_acls[] = str_replace(';', '', $address);
 			}
 		}
 		
