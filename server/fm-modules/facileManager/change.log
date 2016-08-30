@@ -1,6 +1,7 @@
 ? (2016-0?-??)
 ==================
 * Server - [bug] Added missing translation text and removed duplicates.
+* Server - [bug] Fixed Redhat clients only reporting 'Red' as the OS.
 
 2.3 (2016-07-21)
 ================

@@ -684,7 +684,7 @@ function detectOSDistro() {
 		if (file_exists($filename = '/etc/redhat-release')
 			&& $rh_release = file_get_contents($filename)) {
 			 $rh_release = explode(' ', $rh_release);
-			 return $rh_release[0];
+			 return ($rh_release[0] == 'Red') ? 'Redhat' : $rh_release[0];
 		}
 		
 		/** OS-release systems */
