@@ -92,6 +92,9 @@ $__FM_CONFIG['options']['date_format']					= array(array(date('F j, Y'), 'F j, Y
 $__FM_CONFIG['options']['time_format']					= array(array(date('g:i a'), 'g:i a'), array(date('g:i:s a'), 'g:i:s a'), array(date('g:i A'), 'g:i A'), array(date('g:i:s A'), 'g:i:s A'), array(date('H:i'), 'H:i'), array(date('H:i:s'), 'H:i:s'), array(date('H:i:s O'), 'H:i:s O'), array(date('H:i:s T'), 'H:i:s T'));
 $__FM_CONFIG['options']['software_update_interval']		= array(array(_('Hourly'), 'hour'), array(_('Daily'), 'day'), array(_('Weekly'), 'week'), array(_('Monthly'), 'month'));
 $__FM_CONFIG['options']['software_update_tree']			= array(_('Stable'), _('Release Candidate'), _('Beta'), _('Alpha'));
+$__FM_CONFIG['options']['log_method']					= array(array(_('Builtin'), 0), array('syslog', 1), array(_('Builtin + syslog'), 2));
+$__FM_CONFIG['options']['syslog_facilities']			= array(array('auth', 32), array('authpriv', 80), array('cron', 72), array('daemon', 24), array('kern', 0), array('lpr', 48), array('mail', 16), array('news', 56), array('syslog', 40), array('user', 8), array('uucp', 64),
+															array('local0', 128), array('local1', 136), array('local2', 144), array('local3', 152), array('local4', 160), array('local5', 168), array('local6', 176), array('local7', 184));
 
 if (function_exists('ldap_connect')) array_push($__FM_CONFIG['options']['auth_method'], array(_('LDAP Authentication'), 2));
 

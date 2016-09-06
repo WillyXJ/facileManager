@@ -271,6 +271,13 @@ class fm_settings {
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		$time_format_list = buildSelect('time_format[' . $_SESSION['user']['account_id'] . ']', 'time_format', $__FM_CONFIG['options']['time_format'], $time_format);
 		
+		/** Logging Method */
+		$log_method = getOption('log_method');
+		$log_method_list = buildSelect('log_method', 'log_method', $__FM_CONFIG['options']['log_method'], $log_method);
+		$log_syslog_options_style = (!$log_method) ? 'style="display: none;"' : null;
+		$syslog_facility = getOption('syslog_facility');
+		$syslog_facilities = buildSelect('syslog_facility', 'syslog_facility', $__FM_CONFIG['options']['syslog_facilities'], $syslog_facility);
+		
 		/** Other Section */
 		$show_errors = getOption('show_errors');
 		$show_errors_checked = $show_errors ? 'checked' : null;
@@ -569,6 +576,28 @@ class fm_settings {
 						</div>
 						<div class="choices">
 							' . $time_format_list . '
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="log_method">' . _('Logging Method') . '</label>
+							<p>' . sprintf(_('Where to send %s log messages.'), $fm_name) . '</p>
+						</div>
+						<div class="choices">
+							' . $log_method_list . '
+						</div>
+					</div>
+					<div id="log_syslog_options" ' . $log_syslog_options_style . '>
+						<div id="setting-row">
+							<div class="description">
+								<label for="software_update_tree">' . _('Syslog Facility') . '</label>
+								<p>' . sprintf(_('The syslog facility %s should send log messages to.'), $fm_name) . '</p>
+							</div>
+							<div class="choices">
+								' . $syslog_facilities . '
+							</div>
 						</div>
 					</div>
 				</div>

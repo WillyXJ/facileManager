@@ -1264,11 +1264,19 @@ function addLogEntry($log_data, $module = null) {
 	$user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : 0;
 	$module = isset($module) ? $module : $_SESSION['module'];
 	
-	$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
-	if (is_object($fmdb)) {
-		$fmdb->query($insert);
-	} else {
-		die(_('Lost connection to the database.'));
+	$log_method = getOption('log_method');
+	
+	if ($log_method != 1) {
+		$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
+		if (is_object($fmdb)) {
+			$fmdb->query($insert);
+		} else {
+			die(_('Lost connection to the database.'));
+		}
+	}
+	
+	if ($log_method) {
+		addSyslogEntry(trim($log_data), $module);
 	}
 }
 
@@ -3303,6 +3311,34 @@ function useMySQLi() {
 	}
 	
 	return false;
+}
+
+
+/**
+ * Send log message to syslog
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $message Message to send
+ * @param string $module Module name sending the message
+ * @return null
+ */
+function addSyslogEntry($message, $module) {
+	$syslog_facility = getOption('syslog_facility');
+	
+	if ($syslog_facility) {
+		openlog($module, LOG_PERROR, $syslog_facility);
+		$x = 0;
+		foreach (explode("\n", $message) as $line) {
+			if ($x) {
+				$line = "  --> $line";
+			}
+			syslog(LOG_INFO, $line);
+			$x++;
+		}
+		closelog();
+	}
 }
 
 

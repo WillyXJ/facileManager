@@ -3,6 +3,7 @@
 * Server - [bug] Added missing translation text and removed duplicates.
 * Server - [bug] Fixed Redhat clients only reporting 'Red' as the OS.
 * Server - [feature] Use mysqli functions where available. (Issue #343)
+* Server - [feature] Added setting to send audit logs to syslog. (Issue #326)
 
 2.3 (2016-07-21)
 ================

@@ -716,6 +716,14 @@ echo '$(document).ready(function() {
 		}
 	});
 	
+	$("#log_method").change(function() {
+		if ($(this).val() == 0) {
+			$("#log_syslog_options").slideUp();
+		} else {
+			$("#log_syslog_options").show("slow");
+		}
+	});
+	
 	$("#software_update").click(function() {
 		if ($(this).is(":checked")) {
 			$("#software_update_options").show("slow");
