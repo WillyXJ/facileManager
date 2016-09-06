@@ -525,20 +525,20 @@ To reset your password, click the following link:
 		if ($ldap_connect) {
 			/** Set protocol version */
 			if (!@ldap_set_option($ldap_connect, LDAP_OPT_PROTOCOL_VERSION, $ldap_version)) {
-				@ldap_close($ldap_connect);
+				$this->closeLDAPConnect($ldap_connect);
 				return false;
 			}
 			
 			/** Set referrals */
 			if(!@ldap_set_option($ldap_connect, LDAP_OPT_REFERRALS, $ldap_referrals)) {
-				@ldap_close($ldap_connect);
+				$this->closeLDAPConnect($ldap_connect);
 				return false;
 			}
 			
 			/** Start TLS if requested */
 			if ($ldap_encryption == 'TLS') {
 				if (!@ldap_start_tls($ldap_connect)) {
-					@ldap_close($ldap_connect);
+					$this->closeLDAPConnect($ldap_connect);
 					return false;
 				}
 			}
@@ -551,7 +551,7 @@ To reset your password, click the following link:
 					$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $username);
 					
 					if ($ldap_group_response !== true) {
-						@ldap_close($ldap_connect);
+						$this->closeLDAPConnect($ldap_connect);
 						return false;
 					}
 				}
@@ -560,18 +560,20 @@ To reset your password, click the following link:
 				$fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=2 AND `user_template_only`='no' AND `user_login`='$username'");
 				if (!$fmdb->num_rows) {
 					if (!$this->createUserFromTemplate($username)) {
-						@ldap_close($ldap_connect);
+						$this->closeLDAPConnect($ldap_connect);
 						return false;
 					}
 				}
 				
 				$this->setSession($fmdb->last_result[0]);
+
+				$this->closeLDAPConnect($ldap_connect);
 				
 				return true;
 			}
 			
 			/** Close LDAP connection */
-			@ldap_close($ldap_connect);
+			$this->closeLDAPConnect($ldap_connect);
 		}
 		
 		return false;
@@ -608,6 +610,23 @@ To reset your password, click the following link:
 		return true;
 	}
 
+
+	/**
+	 * Closes a LDAP resource
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 *
+	 * @param resource $ldap_connect Resource to close
+	 * @return boolean
+	 */
+	private function closeLDAPConnect($ldap_connect) {
+		if (is_resource($ldap_connect)) {
+			@ldap_close($ldap_connect);
+		}
+	}
+	
+	
 }
 
 if (!isset($fm_login))
