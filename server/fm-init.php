@@ -57,14 +57,17 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 	/** Load language */
 	include_once(ABSPATH . 'fm-includes/i18n.php');
+	
+	/** Load fmdb class */
+	require_once(ABSPATH . 'fm-includes/fm-db.php');
 
 	$GLOBALS['URI'] = convertURIToArray();
 
 	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
 		
 	if (!defined('INSTALL') && !defined('CLIENT') && !defined('FM_NO_CHECKS')) {
-		require_once(ABSPATH . 'fm-includes/fm-db.php');
-		
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
+
 		/** Handle special cases with config.inc.php */
 		handleHiddenFlags();
 	
@@ -217,7 +220,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 		}
 	} elseif (defined('CLIENT')) {
-		require_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
 	}
 	
 	if (isset($_POST['module_name'])) {

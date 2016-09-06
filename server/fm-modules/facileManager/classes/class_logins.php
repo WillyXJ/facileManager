@@ -266,7 +266,11 @@ class fm_login {
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);
 				}
 				if (!$fmdb->num_rows) {
-					@mysql_free_result($result);
+					if (useMySQLi()) {
+						@mysqli_free_result($result);
+					} else {
+						@mysql_free_result($result);
+					}
 					return false;
 				} else {
 					$user = $fmdb->last_result[0];
@@ -285,7 +289,11 @@ class fm_login {
 			
 					$this->setSession($user);
 			
-					@mysql_free_result($result);
+					if (useMySQLi()) {
+						@mysqli_free_result($result);
+					} else {
+						@mysql_free_result($result);
+					}
 					
 					return true;
 				}

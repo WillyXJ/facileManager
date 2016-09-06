@@ -327,7 +327,9 @@ class fm_dns_zones {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= strlen(sanitize($data)) ? $key . "='" . mysql_real_escape_string($data) . "'," : $key . '=NULL,';
+				$data = sanitize($data);
+				
+				$sql_edit .= strlen($data) ? $key . "='$data'," : $key . '=NULL,';
 				if ($key == 'domain_view') $data = $log_message_views;
 				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
 				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;

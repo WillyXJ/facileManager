@@ -124,7 +124,7 @@ CFG;
  * @package facileManager
  * @subpackage Installer
  */
-function fmInstall($link, $database) {
+function fmInstall($database) {
 	global $fm_name, $branding_logo;
 	
 	printf('<form method="post" action="?step=3">
@@ -134,7 +134,7 @@ function fmInstall($link, $database) {
 	<div id="window">
 <table class="form-table">' . "\n", $branding_logo, _('Install'));
 
-	$retval = installDatabase($link, $database);
+	$retval = installDatabase($database);
 	
 	echo "</table>\n";
 
@@ -150,19 +150,19 @@ function fmInstall($link, $database) {
 }
 
 
-function installDatabase($link, $database) {
-	global $fm_version, $fm_name;
+function installDatabase($database) {
+	global $fmdb, $fm_version, $fm_name;
 	
-	$db_selected = @mysql_select_db($database, $link);
+	$db_selected = $fmdb->select($database, 'silent');
 	if (!$db_selected) {
 		$query = sanitize("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
-		$result = mysql_query($query, $link);
-		$output = displayProgress(_('Creating Database'), $result);
+		$result = $fmdb->query($query);
+		$output = displayProgress(_('Creating Database'), $fmdb->result);
 	} else {
 		$output = true;
 	}
 	
-	if ($output == true) $output = installSchema($link, $database);
+	if ($output == true) $output = installSchema($database);
 	if ($output == true) {
 		$modules = getAvailableModules();
 		if (count($modules)) {
@@ -177,10 +177,10 @@ function installDatabase($link, $database) {
 					
 					$function = 'install' . $module_name . 'Schema';
 					if (function_exists($function)) {
-						$output = $function($link, $database, $module_name);
+						$output = $function($database, $module_name);
 					}
 					if ($output == true) {
-						addLogEntry(sprintf(_('%s %s was born.'), $module_name, $fm_version), $module_name, $link);
+						addLogEntry(sprintf(_('%s %s was born.'), $module_name, $fm_version), $module_name);
 					}
 				}
 			}
@@ -191,7 +191,9 @@ function installDatabase($link, $database) {
 }
 
 
-function installSchema($link, $database) {
+function installSchema($database) {
+	global $fmdb;
+	
 	include(ABSPATH . 'fm-includes/version.php');
 	include(ABSPATH . 'fm-modules/facileManager/variables.inc.php');
 	
@@ -378,27 +380,27 @@ INSERT;
 
 	/** Create table schema */
 	foreach ($table as $schema) {
-		$result = @mysql_query($schema, $link);
-		if (mysql_error()) {
-			return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result, 'noisy', mysql_error());
+		$result = $fmdb->query($schema);
+		if ($fmdb->last_error) {
+			return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $fmdb->result, 'noisy', $fmdb->last_error);
 		}
 	}
 
 	/** Insert site values if not already present */
 	$query = "SELECT * FROM fm_options";
-	$temp_result = mysql_query($query, $link);
-	if (!@mysql_num_rows($temp_result)) {
+	$temp_result = $fmdb->query($query);
+	if (!$fmdb->num_rows) {
 		foreach ($inserts as $query) {
-			$result = @mysql_query($query, $link);
-			if (mysql_error()) {
-				return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result, 'noisy', mysql_error());
+			$result = $fmdb->query($query);
+			if ($fmdb->last_error) {
+				return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $fmdb->result, 'noisy', $fmdb->last_error);
 			}
 		}
 	}
 	
-	addLogEntry(sprintf(_('%s %s was born.'), $fm_name, $fm_version), $fm_name, $link);
+	addLogEntry(sprintf(_('%s %s was born.'), $fm_name, $fm_version), $fm_name);
 
-	return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $result);
+	return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $fmdb->result);
 }
 
 

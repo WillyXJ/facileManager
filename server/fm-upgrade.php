@@ -85,6 +85,7 @@ switch ($step) {
 
 		include(ABSPATH . 'config.inc.php');
 		include_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
 
 		fmUpgrade($__FM_CONFIG['db']['name']);
 		break;

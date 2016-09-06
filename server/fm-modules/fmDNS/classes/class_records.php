@@ -100,7 +100,7 @@ class fm_dns_records {
 			if ($key == 'record_type') continue;
 			if ($record_type == 'SOA' && in_array($key, array('record_type', 'record_comment'))) continue;
 			$sql_fields .= $key . ',';
-			$sql_values .= "'" . mysql_real_escape_string($data) . "',";
+			$sql_values .= "'" . sanitize($data) . "',";
 			if ($key != 'account_id') {
 				$log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			}
@@ -154,7 +154,7 @@ class fm_dns_records {
 			if (in_array($key, $null_keys) && empty($data)) {
 				$sql_edit .= $key . '=NULL,';
 			} else {
-				$sql_edit .= $key . "='" . mysql_real_escape_string(str_replace("\r\n", "\n", $data)) . "',";
+				$sql_edit .= $key . "='" . sanitize(str_replace("\r\n", "\n", $data)) . "',";
 			}
 			if (!$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			if ($key == 'soa_default' && $data == 'yes') {

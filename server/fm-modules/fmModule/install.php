@@ -20,8 +20,8 @@
  +-------------------------------------------------------------------------+
 */
 
-function installfmModuleSchema($link = null, $database, $module, $noisy = 'noisy') {
-	global $fm_name;
+function installfmModuleSchema($database, $module, $noisy = 'noisy') {
+	global $fmdb, $fm_name;
 	
 	/** Include module variables */
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
@@ -68,43 +68,24 @@ INSERT;
 
 	/** Create table schema */
 	foreach ($table as $schema) {
-		if ($link) {
-			$result = mysql_query($schema, $link);
-			if (mysql_error($link)) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
-			}
-		} else {
-			global $fmdb;
-			$result = $fmdb->query($schema);
-			if ($fmdb->last_error) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
-			}
+		$result = $fmdb->query($schema);
+		if ($fmdb->last_error) {
+			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
 	}
 
 	/** Insert site values if not already present */
 	foreach ($inserts as $query) {
-		if ($link) {
-			$result = mysql_query($query, $link);
-			if (mysql_error($link)) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
-			}
-		} else {
-			$result = $fmdb->query($query);
-			if ($fmdb->last_error) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
-			}
+		$result = $fmdb->query($query);
+		if ($fmdb->last_error) {
+			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
 	}
 	
 	if (function_exists('displayProgress')) {
-		return displayProgress($module, $result, $noisy);
+		return displayProgress($module, $fmdb->result, $noisy);
 	} else {
-		if ($result) {
-			return 'Success';
-		} else {
-			return 'Failed';
-		}
+		return ($fmdb->result) ? 'Success' : 'Failed';
 	}
 }
 

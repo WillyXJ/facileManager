@@ -398,8 +398,8 @@ BODY;
 		
 		foreach ($array as $key => $data) {
 			if (!in_array($key, array('record_comment', 'record_ttl'))) {
-				$data = mysql_real_escape_string($data);
-				$sql_select .= ($data) ? "$key='" . mysql_real_escape_string($data) . "' AND " : "($key='' OR $key IS NULL) AND ";
+				$data = sanitize($data);
+				$sql_select .= ($data) ? "$key='$data' AND " : "($key='' OR $key IS NULL) AND ";
 			}
 		}
 		$sql_select = rtrim($sql_select, ' AND ');

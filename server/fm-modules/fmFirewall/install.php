@@ -20,8 +20,8 @@
  +-------------------------------------------------------------------------+
 */
 
-function installfmFirewallSchema($link = null, $database, $module, $noisy = 'noisy') {
-	global $fm_name;
+function installfmFirewallSchema($database, $module, $noisy = 'noisy') {
+	global $fmdb, $fm_name;
 	
 	/** Include module variables */
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
@@ -410,32 +410,17 @@ INSERT;
 
 	/** Create table schema */
 	foreach ($table as $schema) {
-		if ($link) {
-			$result = mysql_query($schema, $link);
-			if (mysql_error($link)) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
-			}
-		} else {
-			global $fmdb;
-			$result = $fmdb->query($schema);
-			if ($fmdb->last_error) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
-			}
+		$result = $fmdb->query($schema);
+		if ($fmdb->last_error) {
+			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
 	}
 
 	/** Insert site values if not already present */
 	foreach ($inserts as $query) {
-		if ($link) {
-			$result = mysql_query($query, $link);
-			if (mysql_error($link)) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
-			}
-		} else {
-			$result = $fmdb->query($query);
-			if ($fmdb->last_error) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
-			}
+		$result = $fmdb->query($query);
+		if ($fmdb->last_error) {
+			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
 	}
 	
@@ -446,27 +431,13 @@ INSERT;
 		foreach ($item_array as $item) {
 			list($protocol, $name) = explode('|', $item);
 			if ($protocol == 'group') {
-				if ($link) {
-					$query = "SELECT * FROM `$database`.fm_{$__FM_CONFIG[$module]['prefix']}groups WHERE group_status!='deleted'
-								AND account_id=1 AND group_name='$name' LIMIT 1";
-					$result = mysql_query($query, $link);
-					$temp_result = mysql_fetch_object($result);
-				} else {
-					basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}groups", $name, 'group_', 'group_name', null, 1);
-					$temp_result = $fmdb->last_result[0];
-				}
+				basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}groups", $name, 'group_', 'group_name', null, 1);
+				$temp_result = $fmdb->last_result[0];
 				$type_id = 'group_id';
 				$prefix = 'g';
 			} else {
-				if ($link) {
-					$query = "SELECT * FROM `$database`.fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s WHERE {$group_type}_status!='deleted'
-								AND account_id=1 AND {$group_type}_name='$name' AND {$group_type}_type = '$protocol' LIMIT 1";
-					$result = mysql_query($query, $link);
-					$temp_result = mysql_fetch_object($result);
-				} else {
-					basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s", $name, $group_type . '_', $group_type . '_name', "AND {$group_type}_type = '$protocol'", 1);
-					$temp_result = $fmdb->last_result[0];
-				}
+				basicGet($database . "`.`fm_{$__FM_CONFIG[$module]['prefix']}{$group_type}s", $name, $group_type . '_', $group_type . '_name', "AND {$group_type}_type = '$protocol'", 1);
+				$temp_result = $fmdb->last_result[0];
 				$type_id = $group_type . '_id';
 				$prefix = substr($group_type, 0, 1);
 			}
@@ -487,27 +458,16 @@ INSERT;
 
 	/** Insert site values if not already present */
 	foreach ($group_inserts as $query) {
-		if ($link) {
-			$result = mysql_query($query, $link);
-			if (mysql_error($link)) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
-			}
-		} else {
-			$result = $fmdb->query($query);
-			if ($fmdb->last_error) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
-			}
+		$result = $fmdb->query($query);
+		if ($fmdb->last_error) {
+			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
 	}
 	
 	if (function_exists('displayProgress')) {
-		return displayProgress($module, $result, $noisy);
+		return displayProgress($module, $fmdb->result, $noisy);
 	} else {
-		if ($result) {
-			return 'Success';
-		} else {
-			return 'Failed';
-		}
+		return ($fmdb->result) ? 'Success' : 'Failed';
 	}
 }
 

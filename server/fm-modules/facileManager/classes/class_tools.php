@@ -43,7 +43,7 @@ class fm_tools {
 			
 			$function = 'install' . $module_name . 'Schema';
 			if (function_exists($function)) {
-				$output = $function(null, $__FM_CONFIG['db']['name'], $module_name, 'quiet');
+				$output = $function($__FM_CONFIG['db']['name'], $module_name, 'quiet');
 			}
 			if ($output != true) {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;

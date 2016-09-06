@@ -192,6 +192,8 @@ function isNewVersionAvailable($package, $version) {
  * @package facileManager
  */
 function sanitize($data, $replace = null) {
+	global $fmdb;
+	
 	if ($replace) {
 		$strip_chars = array("'", "\"", "`", "$", "?", "*", "&", "^", "!", "#");
 		$replace_chars = array(" ", "\\", "_", "(", ")", ",", ".", "-");
@@ -199,8 +201,15 @@ function sanitize($data, $replace = null) {
 		$data = str_replace($strip_chars, '', $data);
 		$data = str_replace($replace_chars, $replace, $data);
 		$data = str_replace('--', '-', $data);
+		
 		return $data;
-	} else return @mysql_real_escape_string($data);
+	} else {
+		if ($fmdb->use_mysqli) {
+			return @mysqli_real_escape_string($fmdb->dbh, $data);
+		} else {
+			return @mysql_real_escape_string($data);
+		}
+	}
 }
 
 
@@ -1248,7 +1257,7 @@ HTML;
  * @since 1.0
  * @package facileManager
  */
-function addLogEntry($log_data, $module = null, $link = null) {
+function addLogEntry($log_data, $module = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$account_id = isset($_SESSION['user']['account_id']) ? $_SESSION['user']['account_id'] : 0;
@@ -1256,10 +1265,10 @@ function addLogEntry($log_data, $module = null, $link = null) {
 	$module = isset($module) ? $module : $_SESSION['module'];
 	
 	$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
-	if ($link) {
-		$result = @mysql_query($insert, $link) or die(mysql_error());
-	} else {
+	if (is_object($fmdb)) {
 		$fmdb->query($insert);
+	} else {
+		die(_('Lost connection to the database.'));
 	}
 }
 
@@ -1810,8 +1819,6 @@ function bailOut($message, $tryagain = 'try again', $title = null) {
  * @return string
  */
 function displayProgress($step, $result, $process = 'noisy', $error = null) {
-	global $fmdb;
-	
 	if ($result == true) {
 		$output = '<i class="fa fa-check fa-lg"></i>';
 		$status = 'success';
@@ -1819,7 +1826,9 @@ function displayProgress($step, $result, $process = 'noisy', $error = null) {
 		global $fmdb;
 		
 		if (!$error) {
-			$error = is_object($fmdb) ? $fmdb->last_error : mysql_error();
+			if (is_object($fmdb)) {
+				$error = $fmdb->last_error;
+			}
 		}
 		if ($error) {
 			$output = '<a href="#" class="error-message tooltip-right" data-tooltip="' . $error . '"><i class="fa fa-times fa-lg"></i></a>';
@@ -3271,6 +3280,29 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	@unlink($temp_ssh_key);
 	
 	return array('failures' => $failures, 'output' => $output);
+}
+
+
+/**
+ * Use MySQLi or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @return boolean
+ */
+function useMySQLi() {
+	include(ABSPATH . 'fm-includes/version.php');
+		
+	if (function_exists('mysqli_connect')) {
+		if (version_compare(phpversion(), '5.5', '>=') || ! function_exists('mysql_connect')) {
+			return true;
+		} elseif (strpos($fm_version, '-') !== false) {
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 
