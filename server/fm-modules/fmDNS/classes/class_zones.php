@@ -265,6 +265,10 @@ class fm_dns_zones {
 			$post['domain_type'] != 'master'){
 				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('masters', 'slaves')), 'yes', 'build');
 		}
+		
+		/* Update the user/group limited access */
+		$this->updateUserZoneAccess($insert_id);
+		
 		return $insert_id;
 	}
 
@@ -1707,6 +1711,43 @@ HTML;
 			}
 		}
 		return $children;
+	}
+	
+	
+	/**
+	 * Updates limited user access with newly created domain_id
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param int $domain_id Domain ID to add to allowed list
+	 * @return void
+	 */
+	function updateUserZoneAccess($domain_id) {
+		global $fmdb;
+		
+		$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
+		
+		if (array_key_exists($_SESSION['module'], $user_capabilities)) {
+			if (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']])) {
+				$user_capabilities[$_SESSION['module']]['access_specific_zones'][] = $domain_id;
+				
+				if (getUserCapabilities($_SESSION['user']['id'])) {
+					$user_or_group = 'user';
+					$id = $_SESSION['user']['id'];
+				} else {
+					$user_or_group = 'group';
+					$id = getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_group');
+				}
+				
+				$sql = $user_or_group . "_caps='" . serialize($user_capabilities) . "'";
+				
+				/** Update the user or group capabilities */
+				$query = "UPDATE `fm_{$user_or_group}s` SET $sql WHERE `{$user_or_group}_id`=$id AND `account_id`='{$_SESSION['user']['account_id']}'";
+				$result = $fmdb->query($query);
+			}
+		}
 	}
 	
 	

@@ -8,6 +8,8 @@
            of DNS server version hosting the zone.
 * Server - [bug] address_match_element values now strip any inputed semi-colons.
 * Server - [feature] Use mysqli functions where available. (Issue #343)
+* Server - [improvement] Users limited to specific zones and the capability to
+           create new zones now can view their newly created zones. (Issue #339)
 
 2.2.5 (2016-08-??)
 ==================
