@@ -1242,7 +1242,7 @@ function addSudoersConfig($module_name, $sudoers_line, $user) {
 			}
 		}
 		$cmd = "echo '$sudoers_line' >> $sudoers_file 2>/dev/null";
-		if (strpos(file_get_contents($sudoers_file), $sudoers_line) === false) {
+		if (strpos(@file_get_contents($sudoers_file), $sudoers_line) === false) {
 			$sudoers_update = system($cmd, $retval);
 
 			if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
