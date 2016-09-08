@@ -1,5 +1,5 @@
-? (2016-0?-??)
-==================
+3.0-alpha1 (2016-09-07)
+=======================
 * Server - [bug] Added missing translation text and removed duplicates.
 * Server - [bug] Fixed Redhat clients only reporting 'Red' as the OS.
 * Server - [feature] Use mysqli functions where available. (Issue #343)
