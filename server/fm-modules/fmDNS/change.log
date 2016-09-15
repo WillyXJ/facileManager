@@ -1,3 +1,7 @@
+2.2.6 (2016-0?-??)
+==================
+* Server - [bug] Added missing dnssec-validation value. (Issue #347)
+
 2.2.5 (2016-08-23)
 ==================
 * Server - [bug] Fixed named configuration and zone file checks. (Issue #333)

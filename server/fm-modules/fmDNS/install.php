@@ -421,7 +421,7 @@ VALUES
 ('options', 'dnssec-lookaside', 'domain trust-anchor domain', 'no', 'OV', NULL, 'no'),
 ('options', 'dnssec-must-be-secure', 'domain ( yes | no )', 'no', 'OV', NULL, 'no'),
 ('options', 'dnssec-secure-to-insecure', '( yes | no )', 'no', 'OVZ', 'MS', 'yes'),
-('options', 'dnssec-validation', '( yes | no )', 'no', 'OV', NULL, 'yes'),
+('options', 'dnssec-validation', '( yes | no | auto )', 'no', 'OV', NULL, 'yes'),
 ('options', 'dual-stack-servers', '( quoted_string )', 'yes', 'OV', NULL, 'no'),
 ('options', 'dump-file', '( quoted_string )', 'no', 'O', NULL, 'no'),
 ('options', 'edns', '( yes | no )', 'no', 'S', NULL, 'yes'),
