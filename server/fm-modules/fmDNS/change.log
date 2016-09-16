@@ -1,6 +1,8 @@
 2.2.6 (2016-0?-??)
 ==================
 * Server - [bug] Added missing dnssec-validation value. (Issue #347)
+* Server - [improvement] When limiting zone access to a user or group, the view
+           is appended to the name. (Issue #349)
 
 2.2.5 (2016-08-23)
 ==================
