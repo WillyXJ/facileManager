@@ -51,8 +51,13 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 	basicGetList('fm_' . $__FM_CONFIG[$module_name]['prefix'] .'domains', 'domain_mapping`,`domain_name', 'domain_');
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$available_zones[$i+1][] = (!function_exists('displayFriendlyDomainName')) ? $results[$i]->domain_name : displayFriendlyDomainName($results[$i]->domain_name);
+		$count = $fmdb->num_rows;
+		for ($i=0; $i<$count; $i++) {
+			$domain_name = (!function_exists('displayFriendlyDomainName')) ? $results[$i]->domain_name : displayFriendlyDomainName($results[$i]->domain_name);
+			if ($results[$i]->domain_view) {
+				$domain_name .= ' (' . getNameFromID($results[$i]->domain_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ')';
+			}
+			$available_zones[$i+1][] = $domain_name;
 			$available_zones[$i+1][] = $results[$i]->domain_id;
 		}
 	}

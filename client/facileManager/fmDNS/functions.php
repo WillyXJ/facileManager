@@ -96,6 +96,7 @@ function buildConf($url, $data) {
 		exit(1);
 	}
 	extract($raw_data, EXTR_SKIP);
+	$chroot_environment = false;
 	
 	if (dirname($server_chroot_dir)) {
 		$server_root_dir = $server_chroot_dir . $server_root_dir;
@@ -106,6 +107,7 @@ function buildConf($url, $data) {
 		}
 		$files = $new_files;
 		unset($new_files);
+		$chroot_environment = true;
 	}
 	
 	if ($debug) {
@@ -162,7 +164,7 @@ function buildConf($url, $data) {
 			$message = "The server is not running - attempting to start it\n";
 			if ($debug) echo fM($message);
 			addLogEntry($message);
-			$named_rc_script = getStartupScript();
+			$named_rc_script = getStartupScript($chroot_environment);
 			if ($named_rc_script === false) {
 				$last_line = "Cannot locate the start script\n";
 				$retval = true;
@@ -259,17 +261,17 @@ function versionCheck($app_version, $serverhost, $compress) {
 }
 
 
-function getStartupScript() {
+function getStartupScript($chroot_environment = false) {
 	$distros = array(
 		'Arch'      => array('/etc/rc.d/named start', findProgram('systemctl') . ' start named.service'),
 		'Debian'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
 		'Ubuntu'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
 		'Fubuntu'   => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
-		'Fedora'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
-		'Redhat'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
-		'CentOS'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
-		'ClearOS'   => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
-		'Oracle'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+		'Fedora'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
+		'Redhat'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
+		'CentOS'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
+		'ClearOS'   => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
+		'Oracle'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
 		'SUSE'      => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
 		'Gentoo'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
 		'Slackware' => array('/etc/rc.d/rc.bind start', findProgram('systemctl') . ' start bind.service'),
@@ -285,6 +287,12 @@ function getStartupScript() {
 			foreach ($distros[$os] as $rcscript) {
 				$script = preg_split('/\s+/', $rcscript);
 				if (file_exists($script[0])) {
+					if ($chroot_environment) {
+						if (strpos($distros[$os][count($distros[$os])-1], $script[0]) !== false) {
+							return $distros[$os][count($distros[$os])-1];
+						}
+					}
+					
 					return $rcscript;
 				}
 			}
