@@ -1672,6 +1672,28 @@ function upgradefmDNS_221($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 2.2.6 */
+function upgradefmDNS_226($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '2.2.1', '<') ? upgradefmDNS_221($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | auto )' WHERE `def_option` = 'dnssec-validation'";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	setOption('version', '2.2.6', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
 /** 3.0-alpha1 */
 function upgradefmDNS_3001($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;

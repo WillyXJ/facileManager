@@ -11,6 +11,14 @@
 * Server - [improvement] Users limited to specific zones and the capability to
            create new zones now can view their newly created zones. (Issue #339)
 
+2.2.6 (2016-09-22)
+==================
+* Server - [bug] Added missing dnssec-validation value. (Issue #347)
+* Server - [improvement] When limiting zone access to a user or group, the view
+           is appended to the name. (Issue #349)
+* Client - [bug] EL7-based systems use named-chroot.service for chroot
+           environments. (Issue #345)
+
 2.2.5 (2016-08-23)
 ==================
 * Server - [bug] Fixed named configuration and zone file checks. (Issue #333)
