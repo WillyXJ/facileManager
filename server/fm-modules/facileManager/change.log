@@ -1,4 +1,4 @@
-2.3.2 (2016-0?-??)
+2.3.2 (2016-09-22)
 ==================
 * Server - [bug] Fixed an issue with clients incorrectly updating on every
            polling cycle. (Issue #348)
