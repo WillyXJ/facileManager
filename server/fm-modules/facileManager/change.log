@@ -5,6 +5,11 @@
 * Server - [feature] Use mysqli functions where available. (Issue #343)
 * Server - [feature] Added setting to send audit logs to syslog. (Issue #326)
 
+2.3.3 (2016-10-??)
+==================
+* Server - [bug] Fixed an issue where fM would hang during the software update
+           check. (Issue #353)
+
 2.3.2 (2016-09-22)
 ==================
 * Server - [bug] Fixed an issue with clients incorrectly updating on every
