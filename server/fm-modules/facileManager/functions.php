@@ -174,7 +174,13 @@ function isNewVersionAvailable($package, $version) {
 	}
 	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
 		$data['software_update_tree'] = getOption('software_update_tree');
-		$result = getPostData($fm_site_url, $data);
+		
+		/** Use file_get_contents if allowed else use POST */
+		if (ini_get('allow_url_fopen')) {
+			$result = file_get_contents($fm_site_url . '?' . http_build_query($data));
+		} else {
+			$result = getPostData($fm_site_url . '?' . http_build_query($data), $data, 'get', array(CURLOPT_CONNECTTIMEOUT => 1));
+		}
 		
 		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, true, 0, $package);
 		
@@ -963,13 +969,27 @@ function socketTest($host, $port, $timeout) {
  * @since 1.0
  * @package facileManager
  */
-function getPostData($url, $data) {
+function getPostData($url, $data, $post = 'post', $options = array()) {
+	if ($post == 'post') {
+		$options = array(
+			CURLOPT_POST => true,
+			CURLOPT_POSTFIELDS => $data
+		);
+	}
+	$defaults = array (
+		CURLOPT_HEADER => false,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_FRESH_CONNECT => true,
+		CURLOPT_FORBID_REUSE => true,
+		CURLOPT_CONNECTTIMEOUT => 2,
+		CURLOPT_TIMEOUT => 5,
+		CURLOPT_SSL_VERIFYPEER => false,
+		CURLOPT_SSL_VERIFYHOST => false,
+		CURLOPT_FAILONERROR => true,
+		CURLOPT_URL => $url
+	);
 	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	curl_setopt_array($ch, ($options + $defaults));
 	$result = curl_exec($ch);
 	curl_close($ch);
 	return $result;
