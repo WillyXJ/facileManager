@@ -59,7 +59,10 @@ function checkAppVersions($single_check = true) {
 	}
 
 	/** PHP Extensions */
-	$required_php_extensions = array('mysql', 'mysqli', 'curl', 'posix', 'filter', 'json');
+	$required_php_extensions = array('curl', 'posix', 'filter', 'json', 'mysqli');
+	if (!useMySQLi()) {
+		$required_php_extensions[] = 'mysql';
+	}
 	foreach ($required_php_extensions as $extension) {
 		if (!extension_loaded($extension)) {
 			$message = sprintf(_('Your PHP installation appears to be missing the %1s extension which is required by %2s.'), $extension, $fm_name);
