@@ -1,4 +1,4 @@
-2.3.3 (2016-10-??)
+2.3.3 (2016-10-07)
 ==================
 * Server - [bug] Fixed an issue where fM would hang during the software update
            check. (Issue #353)
