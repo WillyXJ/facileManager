@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}reco
   `record_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `domain_id` int(11) NOT NULL DEFAULT '0',
+  `record_ptr_id` int(11) NOT NULL DEFAULT '0',
   `record_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `record_name` varchar(255) DEFAULT '@',
   `record_value` text,

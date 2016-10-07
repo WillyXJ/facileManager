@@ -30,7 +30,7 @@ function upgradefmDNSSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '3.0-alpha1', '<') ? upgradefmDNS_3001($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '3.0-alpha2', '<') ? upgradefmDNS_3002($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -1721,6 +1721,63 @@ function upgradefmDNS_3001($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '3.0-alpha1', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 3.0-alpha2 */
+function upgradefmDNS_3002($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '3.0-alpha1', '<') ? upgradefmDNS_3001($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD `record_ptr_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_id`";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Link existing RRs */
+	if (basicGetList("fm_{$__FM_CONFIG['fmDNS']['prefix']}records", 'record_id', 'record_', "AND record_type='PTR'")) {
+		$ptr_count = $fmdb->num_rows;
+		$ptr_results = $fmdb->last_result;
+		
+		for ($i=0; $i<$ptr_count; $i++) {
+			$record_value = trim($ptr_results[$i]->record_value, '.');
+			$domain_parts = explode('.', $record_value);
+			
+			$temp_domain_parts = $domain_parts;
+			$reversed_domain_parts = array_reverse($temp_domain_parts);
+			for ($j=1; $j<count($domain_parts); $j++) {
+				for ($k=0; $k<$j; $k++) {
+					$popped = array_pop($reversed_domain_parts);
+				}
+
+				$domain = join('.', array_reverse($reversed_domain_parts));
+				if ($domain_id = getNameFromID($domain, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_name', 'domain_id')) {
+					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` SET `record_ptr_id`='{$ptr_results[$i]->record_id}' "
+							. "WHERE `account_id`='{$_SESSION['user']['account_id']}' AND `domain_id`='$domain_id' "
+							. "AND `record_type`='A' AND `record_name`='{$domain_parts[0]}' LIMIT 1";
+					if ($fmdb->query($query)) break;
+				}
+			}
+		}
+	}
+	
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.0-alpha2', 'auto', false, 0, $module_name);
 	
 	return true;
 }

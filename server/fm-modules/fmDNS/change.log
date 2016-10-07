@@ -1,3 +1,7 @@
+3.0-alpha2 (2016-??-??)
+=======================
+* Server - [improvement] PTR RRs are better linked with the A record. (Issue #277)
+
 3.0-alpha1 (2016-09-07)
 =======================
 * Server - [feature] Added support for dynamic zones. (Issue #90)

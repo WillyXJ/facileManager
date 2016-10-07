@@ -116,16 +116,19 @@ class fm_dns_records {
 		$result = $fmdb->query($query);
 		
 		if (!$fmdb->result) return false;
+		$insert_id = $fmdb->insert_id;
 		
 		/** Update domain with SOA ID */
 		if ($record_type == 'SOA') {
-			$this->assignSOA($fmdb->insert_id, $domain_id);
+			$this->assignSOA($insert_id, $domain_id);
 		}
 
 		/** Update the SOA serial number */
 		$this->processSOAUpdates($domain_id, $record_type, 'add');
 
 		addLogEntry($log_message);
+		
+		$fmdb->insert_id = $insert_id;
 		return true;
 	}
 
@@ -200,6 +203,11 @@ class fm_dns_records {
 		/** Update the SOA serial number */
 		foreach ($domain_id_array as $domain_id) {
 			$this->processSOAUpdates($domain_id, $record_type, 'update');
+		}
+		
+		/** Unlink PTR */
+		if ($record_type == 'PTR' && $array['record_status'] == 'deleted') {
+			basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $id, 'record_ptr_id', 0, 'record_ptr_id');
 		}
 
 		addLogEntry($log_message);
@@ -420,6 +428,11 @@ class fm_dns_records {
 				} else {
 					$field_values['data']['Value'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
 				}
+
+				/** Linked PTR */
+				if ($record_ptr_id) {
+					$field_values['data']['Value'] .= ' <a href="#" class="tooltip-right" data-tooltip="' . __('Linked PTR exists') . '"><i class="template-icon fa fa-exchange"></i></a>';
+				}
 			}
 			
 			if ($type == 'RP') {
@@ -442,7 +455,12 @@ class fm_dns_records {
 			if ($new) {
 				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . __('Create PTR') . '</label>' : null;
 			} else {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . __('Create PTR') . '</label><br />' : ' align="center">';
+				$field_values['data']['Actions'] = ' align="center">';
+				if (in_array($type, array('A'))) {
+					$field_values['data']['Actions'] .= '<label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />';
+					$field_values['data']['Actions'] .= ($record_ptr_id) ? __('Update PTR') : __('Create PTR');
+					$field_values['data']['Actions'] .= '</label><br />';
+				}
 				$field_values['data']['Actions'] .= '<label><input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" />' . _('Delete') . '</label>';
 			}
 		} else {
