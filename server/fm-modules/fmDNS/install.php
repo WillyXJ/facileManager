@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}cont
   `control_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `control_type` enum('controls','statistics') NOT NULL DEFAULT 'controls',
   `control_ip` varchar(15) NOT NULL DEFAULT '*',
   `control_port` int(5) NOT NULL DEFAULT '953',
   `control_addresses` text NOT NULL,

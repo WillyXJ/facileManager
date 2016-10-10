@@ -189,7 +189,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	}
 	
 	if ($add_new) {
-		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
+		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls'))) {
 			$edit_form = $post_class->printForm(null, $action, sanitize($_POST['item_sub_type']));
 		} elseif ($_POST['item_type'] == 'domains') {
 			$edit_form = $post_class->printForm(null, $action, $type_map);
@@ -201,7 +201,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		if (!$fmdb->num_rows) returnError();
 		
 		$edit_form_data[] = $fmdb->last_result[0];
-		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
+		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls'))) {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', sanitize($_POST['item_sub_type']));
 		} else {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $item_id);

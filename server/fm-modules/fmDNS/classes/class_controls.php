@@ -25,11 +25,12 @@ class fm_dns_controls {
 	/**
 	 * Displays the control list
 	 */
-	function rows($result) {
+	function rows($result, $type) {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', __('There are no controls.'));
+			$message = $type == 'controls' ? __('There are no controls.') : __('There are no statistics channels.');
+			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', $message);
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
@@ -40,13 +41,15 @@ class fm_dns_controls {
 							'name' => 'controls'
 						);
 
-			$title_array = array(__('IP Address'), __('Port'), __('Address List'), __('Keys'), __('Comment'));
+			$title_array = array(__('IP Address'), __('Port'), __('Address List'));
+			if ($type == 'controls') $title_array[] = __('Keys');
+			$title_array[] = __('Comment');
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
 			for ($x=0; $x<$num_rows; $x++) {
-				$this->displayRow($results[$x]);
+				$this->displayRow($results[$x], $type);
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -57,7 +60,11 @@ class fm_dns_controls {
 	 * Adds the new control
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		if (!class_exists('fm_dns_acls')) {
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		}
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -86,7 +93,8 @@ class fm_dns_controls {
 		
 		if (!$fmdb->result) return __('Could not add the control because a database error occurred.');
 
-		addLogEntry(__('Added control') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Addresses') . ": $control_addresses\n" . __('Comment') . ": {$post['control_comment']}");
+		$control_addresses = strpos($post['control_addresses'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['control_addresses']) : $post['control_addresses'];
+		addLogEntry(__('Added control') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . __('Comment') . ": {$post['control_comment']}");
 		return true;
 	}
 
@@ -94,7 +102,11 @@ class fm_dns_controls {
 	 * Updates the selected control
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		if (!class_exists('fm_dns_acls')) {
+			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		}
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -125,8 +137,8 @@ class fm_dns_controls {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$control_addresses = $post['control_predefined'] == 'as defined:' ? $post['control_addresses'] : $post['control_predefined'];
-		addLogEntry(sprintf(__("Updated control '%s' to the following:"), $old_name) . "\n" . __('Name') . ": {$post['control_name']}\n" . __('Addresses') . ": $control_addresses\n" . __('Comment') . ": {$post['control_comment']}");
+		$control_addresses = strpos($post['control_addresses'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['control_addresses']) : $post['control_addresses'];
+		addLogEntry(__('Updated control to the following') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . __('Comment') . ": {$post['control_comment']}");
 		return true;
 	}
 	
@@ -148,14 +160,14 @@ class fm_dns_controls {
 	}
 
 
-	function displayRow($row) {
+	function displayRow($row, $type) {
 		global $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
 		
 		if (!class_exists('fm_dns_acls')) {
 			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
 		}
 		
-		if (!class_exists('fm_dns_keys')) {
+		if (!class_exists('fm_dns_keys') && $type == 'controls') {
 			include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
 		}
 		
@@ -163,13 +175,13 @@ class fm_dns_controls {
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
-			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->control_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= '">';
 			$edit_status .= ($row->control_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 		} else {
 			$edit_status = null;
@@ -177,7 +189,7 @@ class fm_dns_controls {
 		
 		$control_port = !empty($row->control_port) ? $row->control_port : 953;
 		$control_addresses = strpos($row->control_addresses, 'acl_') !== false ? $fm_dns_acls->parseACL($row->control_addresses) : $row->control_addresses;
-		$control_keys = $fm_dns_keys->parseKey($row->control_keys);
+		$control_keys = ($type == 'controls') ? '<td>' . $fm_dns_keys->parseKey($row->control_keys) . '</td>' : null;
 		
 		$comments = nl2br($row->control_comment);
 
@@ -186,7 +198,7 @@ class fm_dns_controls {
 			<td>$row->control_ip</td>
 			<td>$control_port</td>
 			<td>$control_addresses</td>
-			<td>$control_keys</td>
+			$control_keys
 			<td>$comments</td>
 			$edit_status
 		</tr>
@@ -196,14 +208,14 @@ HTML;
 	/**
 	 * Displays the form to add new control
 	 */
-	function printForm($data = '', $action = 'add') {
+	function printForm($data = '', $action = 'add', $type = 'controls') {
 		global $__FM_CONFIG, $fm_dns_acls, $fm_module_servers;
 		
 		$control_id = 0;
 		$control_ip = $control_addresses = $control_comment = null;
 		$control_port = $control_keys = null;
 		$ucaction = ucfirst($action);
-		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -213,7 +225,15 @@ HTML;
 		}
 		
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $control_addresses), ';'));
-		$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
+		if ($type == 'controls') {
+			$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
+			$control_key_form = sprintf('<tr>
+					<th width="33&#37;" scope="row"><label for="control_keys">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>', __('Keys'), $control_keys);
+		} else {
+			$control_key_form = null;
+		}
 
 		$available_acls = $fm_dns_acls->buildACLJSON($control_addresses, $server_serial_no);
 		
@@ -227,6 +247,7 @@ HTML;
 			<input type="hidden" name="control_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
 			<input type="hidden" name="control_keys" value="" />
+			<input type="hidden" name="control_type" value="%s" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="control_ip">%s</label></th>
@@ -243,10 +264,7 @@ HTML;
 						( address_match_element )
 					</td>
 				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="control_keys">%s</label></th>
-					<td width="67&#37;">%s</td>
-				</tr>
+				%s
 				<tr>
 					<th width="33&#37;" scope="row"><label for="control_comment">%s</label></th>
 					<td width="67&#37;"><textarea id="control_comment" name="control_comment" rows="4" cols="30">%s</textarea></td>
@@ -276,11 +294,11 @@ HTML;
 			});
 		</script>',
 				$popup_header,
-				$action, $control_id, $server_serial_no,
+				$action, $control_id, $server_serial_no, $type,
 				__('IP Address'), $control_ip,
 				__('Port'), $control_port,
 				__('Allowed Address List'), __('Define allowed hosts'), $control_addresses,
-				__('Keys'), $control_keys,
+				$control_key_form,
 				__('Comment'), $control_comment,
 				$popup_footer, $available_acls
 			);

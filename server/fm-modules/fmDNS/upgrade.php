@@ -1733,6 +1733,7 @@ function upgradefmDNS_3002($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD `record_ptr_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_id`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` ADD `control_type` ENUM('controls','statistics') NOT NULL DEFAULT 'controls' AFTER `server_serial_no`";
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {

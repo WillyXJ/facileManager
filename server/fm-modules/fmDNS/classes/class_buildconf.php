@@ -298,9 +298,9 @@ class fm_module_buildconf {
 			
 			/** Build controls configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="controls" AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
 			} else {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="controls" AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
 			}
 			if ($fmdb->num_rows) {
 				$control_result = $fmdb->last_result;
@@ -322,7 +322,34 @@ class fm_module_buildconf {
 			} else $control_config = null;
 			
 			$config .= $control_config;
-			unset($control_config);
+			unset($control_result, $control_config_count, $control_config);
+
+			/** Build statistics-channels configs */
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="statistics" AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
+			} else {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="statistics" AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
+			}
+			if ($fmdb->num_rows) {
+				$control_result = $fmdb->last_result;
+				$control_config_count = $fmdb->num_rows;
+				$control_config = "statistics-channels {\n";
+				for ($i=0; $i < $control_config_count; $i++) {
+					if ($control_result[$i]->control_comment) {
+						$comment = wordwrap($control_result[$i]->control_comment, 50, "\n");
+						$control_config .= "\t// " . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
+					$control_config .= "\tinet " . $control_result[$i]->control_ip;
+					$control_config .= ' port ' . $control_result[$i]->control_port;
+					if (!empty($control_result[$i]->control_addresses)) $control_config .= ' allow { ' . trim($fm_dns_acls->parseACL($control_result[$i]->control_addresses), '; ') . '; }';
+					$control_config .= "\n";
+				}
+				$control_config .= "};\n\n";
+			} else $control_config = null;
+			
+			$config .= $control_config;
+			unset($control_result, $control_config_count, $control_config);
 
 			/** Build extra includes */
 			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, 0, 'outside');
