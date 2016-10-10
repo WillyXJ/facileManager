@@ -101,6 +101,7 @@ class fm_module_buildconf {
 						for ($j=0; $j < $server_count; $j++) {
 							$servers .= $this->formatServerKeys($server_result[$j]->server_name, $key_name);
 						}
+						unset($server_result, $server_count);
 					}
 				}
 			}
@@ -112,6 +113,7 @@ class fm_module_buildconf {
 			
 				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
 			}
+			unset($key_result, $key_config_count, $key_config, $servers, $keys);
 			
 			
 			/** Build ACLs */
@@ -129,6 +131,7 @@ class fm_module_buildconf {
 						}
 					}
 					$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
+					unset($acl_child_result);
 				}
 			} else $global_acl_array = array();
 
@@ -149,6 +152,7 @@ class fm_module_buildconf {
 							}
 						}
 						$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+						unset($acl_child_result, $server_acl_addresses);
 					}
 				}
 			}
@@ -168,6 +172,7 @@ class fm_module_buildconf {
 						}
 					}
 					$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+					unset($acl_child_result, $server_acl_addresses);
 				}
 			}
 
@@ -187,6 +192,7 @@ class fm_module_buildconf {
 				if ($acl_item) $config .= ';';
 				$config .= "\n};\n\n";
 			}
+			unset($acl_result, $global_acl_array, $server_acl_array, $acl_array);
 
 
 			/** Build logging config */
@@ -218,8 +224,7 @@ class fm_module_buildconf {
 								$logging .= ";\n";
 							} else {
 								$channels = null;
-								$assoc_channels = explode(';', $child_result[$j]->cfg_data);
-								foreach ($assoc_channels as $channel) {
+								foreach (explode(';', $child_result[$j]->cfg_data) as $channel) {
 									if (is_numeric($channel)) {
 										$channel = getNameFromID($channel, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 									}
@@ -233,10 +238,12 @@ class fm_module_buildconf {
 					/** Close */
 					$logging .= "\t};\n";
 				}
+				unset($logging_result, $count, $child_result, $count2);
 			}
 			if ($logging) $logging = "logging {\n$logging};\n\n";
 			
 			$config .= $logging;
+			unset($logging);
 
 			
 			/** Build global configs */
@@ -249,6 +256,7 @@ class fm_module_buildconf {
 				for ($i=0; $i < $global_config_count; $i++) {
 					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
 				}
+				unset($config_result, $global_config_count);
 			} else $global_config = array();
 
 			$server_config = array();
@@ -257,10 +265,11 @@ class fm_module_buildconf {
 				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
 				if ($fmdb->num_rows) {
 					$server_config_result = $fmdb->last_result;
-					$global_config_count = $fmdb->num_rows;
-					for ($j=0; $j < $global_config_count; $j++) {
+					$config_count = $fmdb->num_rows;
+					for ($j=0; $j < $config_count; $j++) {
 						$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 					}
+					unset($server_config_result, $global_config_count);
 				}
 			}
 
@@ -268,14 +277,16 @@ class fm_module_buildconf {
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$server_config_result = $fmdb->last_result;
-				$global_config_count = $fmdb->num_rows;
-				for ($j=0; $j < $global_config_count; $j++) {
+				$config_count = $fmdb->num_rows;
+				for ($j=0; $j < $config_count; $j++) {
 					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 				}
+				unset($server_config_result, $global_config_count);
 			}
 
 			/** Merge arrays */
 			$config_array = array_merge($global_config, $server_config);
+			unset($global_config, $server_config);
 			
 			$include_hint_zone = false;
 
@@ -294,6 +305,7 @@ class fm_module_buildconf {
 			$config .= $this->getRateLimits(0, $server_serial_no);
 			
 			$config .= "};\n\n";
+			unset($config_array);
 			
 			
 			/** Build controls configs */
@@ -389,6 +401,7 @@ class fm_module_buildconf {
 						for ($j=0; $j < $view_config_count; $j++) {
 							$view_config[$config_result[$j]->cfg_name] = array($config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 						}
+						unset($config_result, $view_config_count);
 					} else $view_config = array();
 
 					$server_view_config = array();
@@ -401,6 +414,7 @@ class fm_module_buildconf {
 							for ($j=0; $j < $view_config_count; $j++) {
 								$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 							}
+							unset($server_config_result, $view_config_count);
 						}
 					}
 
@@ -412,16 +426,19 @@ class fm_module_buildconf {
 						for ($j=0; $j < $view_config_count; $j++) {
 							$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 						}
+						unset($server_config_result, $view_config_count);
 					}
 
 					/** Merge arrays */
 					$config_array = array_merge($view_config, $server_view_config);
+					unset($view_config, $server_view_config);
 
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
 						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 					}
+					unset($config_array);
 
 					/** Build includes */
 					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids, $server_root_dir);
@@ -456,9 +473,11 @@ class fm_module_buildconf {
 								for ($j=0; $j < $server_count; $j++) {
 									$config .= $this->formatServerKeys($server_result[$j]->server_name, $key_name, true);
 								}
+								unset($server_result, $server_count);
 							}
 						}
 						$data->files[$server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys'] = array('contents' => $key_config, 'mode' => 0400);
+						unset($key_result, $key_count);
 					}
 					
 					/** Generate zone file */
@@ -496,8 +515,10 @@ class fm_module_buildconf {
 			}
 
 			$data->files[$server_config_file] = array('contents' => $config, 'mode' => 0444, 'chown' => 'root');
+			unset($config);
 			if (is_array($files)) {
 				$data->files = array_merge($data->files, $files);
+				unset($files);
 			}
 
 			/** Set variable containing all loaded domain_ids */
@@ -594,6 +615,7 @@ class fm_module_buildconf {
 							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 						}
 					}
+					unset($zone_result, $count);
 					if (isset($data->files)) {
 						/** set the server_update_config flag */
 						if (!$dryrun) setBuildUpdateConfigFlag($server_serial_no, 'yes', 'update');
@@ -735,6 +757,7 @@ class fm_module_buildconf {
 					}
 				}
 			}
+			unset($zone_result, $count);
 			
 			if ($view_name) {
 				$files[$server_zones_dir . '/zones.conf.' . $view_name] = $zones;
@@ -1104,6 +1127,7 @@ class fm_module_buildconf {
 				$zone_file .= implode('', $rr_array['Data']);
 				$zone_file .= "\n";
 			}
+			unset($record_result);
 		}
 		
 		return $zone_file;
@@ -1453,6 +1477,7 @@ HTML;
 			for ($i=0; $i < $global_config_count; $i++) {
 				$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
 			}
+			unset($config_result);
 		} else $global_config = array();
 
 		/** Override with server-specific configs */
@@ -1463,10 +1488,12 @@ HTML;
 			for ($j=0; $j < $global_config_count; $j++) {
 				$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 			}
+			unset($server_config_result);
 		} else $server_config = array();
 
 		/** Merge arrays */
 		$config_array = array_merge($global_config, $server_config);
+		unset($global_config, $server_config);
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			list($cfg_info, $cfg_comment) = $cfg_data;
@@ -1512,6 +1539,7 @@ HTML;
 					$rate_config_array[$rate_result[$i]->cfg_name][] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
 				}
 			}
+			unset($rate_result);
 		}
 		
 		/** Override with server-specific configs */
@@ -1526,10 +1554,12 @@ HTML;
 					$server_config[$server_config_result[$i]->cfg_name][] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
 				}
 			}
+			unset($server_config_result);
 		} else $server_config = array();
 
 		/** Merge arrays */
 		$rate_config_array = array_merge((array)$rate_config_array, $server_config);
+		unset($rate_config_array, $server_config);
 		
 		foreach ($rate_config_array as $cfg_name => $value_array) {
 			foreach ($value_array as $domain_name => $cfg_data) {
@@ -1719,6 +1749,7 @@ HTML;
 			for ($i=0; $i < $fmdb->num_rows; $i++) {
 				$include_config['include'][] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
 			}
+			unset($config_result);
 		} else $include_config = null;
 
 		if (is_array($include_config)) {

@@ -1,3 +1,8 @@
+1.4-alpha2 (2016-??-??)
+=======================
+* Server - [improvement] Unset large variables after use to free up system
+           resources.
+
 1.4-alpha1 (2016-09-07)
 =======================
 * Server - [bug] Added missing translation text and removed duplicates.

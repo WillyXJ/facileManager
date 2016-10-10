@@ -72,9 +72,11 @@ class fm_module_buildconf {
 				
 				$function = $server_type . 'BuildConfig';
 				$config .= $this->$function($policy_result, $policy_count);
+				unset($policy_result);
 			}
 
 			$data->files[$server_config_file] = $config;
+			unset($config);
 			
 			/** Debian-based systems */
 			if (isDebianSystem($server_os_distro)) {
