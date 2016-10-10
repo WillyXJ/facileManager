@@ -1,6 +1,7 @@
 3.0-alpha2 (2016-??-??)
 =======================
 * Server - [bug] Fixed mysql requirement check. (result of adding #343)
+* Server - [improvement] Updated error page titles.
 
 3.0-alpha1 (2016-09-07)
 =======================

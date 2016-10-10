@@ -2428,17 +2428,18 @@ function formatLogKeyData($strip, $key, $data) {
  * @param string $link_display Show or Hide the page back link
  * @return string
  */
-function fMDie($message = null, $link_display = 'show') {
+function fMDie($message = null, $link_display = 'show', $title = null) {
 	global $fm_name;
 	
 	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
 
 	if (!$message) $message = _('An unknown error occurred.');
+	if (!$title) $title = _('Oops!');
 	
 	printHeader('Error', 'install', 'no-help', 'no-menu');
 	
 	printf('<div id="fm-branding"><img src="%s" /><span>%s</span></div>
-		<div id="window"><p>%s</p>', $branding_logo, _('Oops!'), $message);
+		<div id="window"><p>%s</p>', $branding_logo, $title, $message);
 	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>';
 	echo '</div>';
 	
@@ -2456,7 +2457,7 @@ function fMDie($message = null, $link_display = 'show') {
  * @return string
  */
 function unAuth($link_display = 'show') {
-	fMDie(_('You do not have permission to view this page. Please contact your administrator for access.'), $link_display);
+	fMDie(_('You do not have permission to view this page. Please contact your administrator for access.'), $link_display, _('Forbidden'));
 }
 
 
@@ -2791,7 +2792,7 @@ function hasExceededMaxInputVars() {
 function checkMaxInputVars() {
 	if ($required_input_vars = hasExceededMaxInputVars()) {
 		fMDie(sprintf(_('PHP max_input_vars (%1$d) has been reached and %2$s or more are required. Please increase the limit to fulfill this request. One method is to set the following in %3$s.htaccess:') .
-			'<p><code>php_value max_input_vars %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH), true);
+			'<p><code>php_value max_input_vars %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH));
 	}
 }
 
