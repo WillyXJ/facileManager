@@ -3064,15 +3064,16 @@ function countArrayDimensions($array) {
  * @param string $style Use an image or font
  * @return string
  */
-function displayAddNew($name = null, $rel = null, $title = null, $style = 'fa-plus-square-o') {
+function displayAddNew($name = null, $rel = null, $title = null, $style = 'default') {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = _('Add New');
+	$contents = ($style == 'default') ? $title : null;
 	
 	if ($name) $name = ' name="' . $name . '"';
 	if ($rel) $rel = ' rel="' . $rel . '"';
 	
-	$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
+	$image = '<i class="template-icon ' . $style . '" title="' . $title . '">' . $contents . '</i>';
 	
 	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
 }

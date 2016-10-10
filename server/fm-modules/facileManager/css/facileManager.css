@@ -878,7 +878,7 @@ tbody {
 }
 
 a {
-	color: #00019b;
+	color: #3a62a3;
 	text-decoration: none;
 }
 
@@ -1189,6 +1189,19 @@ a {
 	position: relative;
 	top: 1px;
 	z-index: 3;
+}
+#plus i.default {
+	color: #fff;
+	background: #3a62a3;
+	padding: 2px 4px;
+	position: relative;
+	top: -4px;
+	left: 5px;
+	font-size: 9px;
+	font-style: normal;
+	font-family: "Open Sans",sans-serif;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
 }
 
 p#table_edits {
