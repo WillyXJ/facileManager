@@ -905,10 +905,11 @@ HTML;
 	}
 
 	function cloneDomainsList($domain_id) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $user_capabilities;
 		
 		$return = null;
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', 'AND domain_template="no" ORDER BY domain_name');
+		$limited_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? 'AND domain_id IN (' . join(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ')' : null;
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', $limited_ids . ' AND domain_template="no" ORDER BY domain_name');
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
 			$clone_results = $fmdb->last_result;

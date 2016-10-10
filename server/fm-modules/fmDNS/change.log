@@ -4,6 +4,8 @@
 * Server - [feature] Added support for statistics-channels. (Issue #352)
 * Server - [improvement] Unset large variables after use to free up system
            resources.
+* Server - [bug] Fixed display of available zones when the user is restricted to
+           a cloned zone. (Issue #350)
 
 3.0-alpha1 (2016-09-07)
 =======================

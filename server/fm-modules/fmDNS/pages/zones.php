@@ -139,7 +139,15 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 
 /** Get zones based on access */
 $user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
-$limited_domain_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
+$limited_domain_ids = ')';
+if (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) {
+	$limited_domain_ids = "OR domain_clone_domain_id>0) AND domain_id IN (";
+	$temp_domain_ids = array();
+	foreach ($user_capabilities[$_SESSION['module']]['access_specific_zones'] as $limited_id) {
+		$temp_domain_ids[] = $limited_id;
+	}
+	$limited_domain_ids .= join(',', array_unique($temp_domain_ids)) . ')';
+}
 
 /** Process domain_view filtering */
 if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
@@ -152,7 +160,7 @@ if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
 	}
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql . (string) $search_query, null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND (domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql . (string) $search_query, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 
