@@ -1047,12 +1047,15 @@ class fm_module_buildconf {
 					case 'DHCID':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DHCP ID records';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DLV':
-					case 'DS':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DNSSEC Lookaside Validation';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						break;
+					case 'DS':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Delegation Signer';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . ' ' . $record_result[$i]->record_cert_type . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DNSKEY':
 					case 'KEY':

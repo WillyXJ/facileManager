@@ -7,6 +7,7 @@
 * Server - [bug] Fixed display of available zones when the user is restricted to
            a cloned zone. (Issue #350)
 * Server - [improvement] Added item name to the delete confirmations. (Issue #185)
+* Server - [feature] Added support for DHCID, DLV, and DS resource records.
 
 3.0-alpha1 (2016-09-07)
 =======================

@@ -69,7 +69,8 @@ $__FM_CONFIG['records']['cert_algorithms'] = array(
 											array('DSA-NSEC3-SHA1', 6),
 											array('RSASHA1-NSEC3-SHA1', 7),
 											array('RSA/SHA-256', 8),
-											array('RSA/SHA-512', 10)
+											array('RSA/SHA-512', 10),
+											array('GOST R 34.10-2001', 12)
 											);
 $__FM_CONFIG['records']['sshfp_algorithms'] = array(
 											array('RSA', 1),
@@ -77,6 +78,10 @@ $__FM_CONFIG['records']['sshfp_algorithms'] = array(
 											);
 $__FM_CONFIG['records']['naptr_flags']	= array('U', 'S', 'A', 'P', '');
 $__FM_CONFIG['records']['flags']		= array('0', '256', '257');
+$__FM_CONFIG['records']['digest_types'] = array(
+											array('SHA-1', 1),
+											array('SHA-256', 2)
+											);
 
 $__FM_CONFIG['servers']['avail_types']    = array('servers' => __('Servers'), 'groups' => __('Groups'));
 $__FM_CONFIG['options']['avail_types']    = array('global' => __('Global'), 'ratelimit' => __('Rate Limit'));

@@ -268,10 +268,15 @@ class fm_dns_records {
 		}
 		if ($type == 'CERT' ) {
 			$title_array[] = array('title' => __('Type'), 'rel' => 'record_cert_type');
+		}
+		if (in_array($type, array('CERT', 'DLV', 'DS'))) {
 			$title_array[] = array('title' => __('Key Tag'), 'rel' => 'record_key_tag');
 		}
-		if (in_array($type, array('CERT', 'SSHFP'))) {
+		if (in_array($type, array('CERT', 'SSHFP', 'DLV', 'DS'))) {
 			$title_array[] = array('title' => __('Algorithm'), 'rel' => 'record_algorithm');
+		}
+		if ($type == 'DS') {
+			$title_array[] = array('title' => __('Type'), 'rel' => 'record_cert_type');
 		}
 		if ($type == 'HINFO') {
 			$title_array[] = array('title' => __('Hardware'), 'rel' => 'record_value');
@@ -420,6 +425,17 @@ class fm_dns_records {
 				$field_values['data']['Regex'] = '><input maxlength="255" style="width: 100px;" type="text" name="' . $action . '[_NUM_][record_regex]" value="' . $record_regex . '" />';
 				$field_values['data']['Replace'] = '><input maxlength="255" type="text" name="' . $action . '[_NUM_][record_value]" value="' . $record_value . '" />';
 				$show_value = false;
+			}
+			
+			if (in_array($type, array('DHCID', 'DLV', 'DS'))) {
+				if (in_array($type, array('DLV', 'DS'))) {
+					$field_values['data']['Key Tag'] = '><input style="width: 45px;" type="text" name="' . $action . '[_NUM_][record_key_tag]" value="' . $record_key_tag . '" onkeydown="return validateNumber(event)" />';
+					$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['cert_algorithms'], $record_algorithm);
+					if ($type == 'DS') {
+						$field_values['data']['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['digest_types'], $record_cert_type);
+					}
+				}
+				$value_textarea = true;
 			}
 			
 			if ($show_value) {

@@ -647,6 +647,32 @@ BODY;
 						}
 						$rr['record_value'] = join("\n", $txt_record);
 						break;
+					case 'DHCID':
+						$txt_record = null;
+						for ($i=4; $i<count($rr_fields); $i++) {
+							$txt_record[] = $rr_fields[$i];
+						}
+						$rr['record_value'] = join("\n", $txt_record);
+						break;
+					case 'DLV':
+						$rr['record_key_tag'] = $rr_fields[4];
+						$rr['record_algorithm'] = $rr_fields[5];
+						$txt_record = null;
+						for ($i=6; $i<count($rr_fields); $i++) {
+							$txt_record[] = $rr_fields[$i];
+						}
+						$rr['record_value'] = join("\n", $txt_record);
+						break;
+					case 'DS':
+						$rr['record_key_tag'] = $rr_fields[4];
+						$rr['record_algorithm'] = $rr_fields[5];
+						$rr['record_cert_type'] = $rr_fields[6];
+						$txt_record = null;
+						for ($i=7; $i<count($rr_fields); $i++) {
+							$txt_record[] = $rr_fields[$i];
+						}
+						$rr['record_value'] = join("\n", $txt_record);
+						break;
 					case 'DNSKEY':
 					case 'KEY':
 						$rr['record_flags'] = $rr_fields[4];

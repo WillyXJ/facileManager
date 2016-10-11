@@ -1734,6 +1734,7 @@ function upgradefmDNS_3002($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD `record_ptr_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_id`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` ADD `control_type` ENUM('controls','statistics') NOT NULL DEFAULT 'controls' AFTER `server_serial_no`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}CHANGE `record_type` `record_type` ENUM('A','AAAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','KEY','KX','MX','NS','PTR','RP','SRV','TXT','HINFO','SSHFP','NAPTR') NOT NULL DEFAULT 'A'";
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {
