@@ -513,7 +513,7 @@ class fm_module_servers {
 			if ($class) $class = 'class="' . $class . '"';
 
 			echo <<<HTML
-		<tr id="$row->server_id" $class>
+		<tr id="$row->server_id" name="$row->server_name" $class>
 			$checkbox
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$edit_name</td>
@@ -570,7 +570,7 @@ HTML;
 			$group_slaves = wordwrap($group_slaves);
 
 			echo <<<HTML
-		<tr id="$row->group_id" $class>
+		<tr id="$row->group_id" name="$row->group_name" $class>
 			$checkbox
 			<td>$row->group_name</td>
 			<td>$group_masters</td>

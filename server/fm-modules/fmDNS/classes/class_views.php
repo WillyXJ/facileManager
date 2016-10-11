@@ -187,7 +187,7 @@ class fm_dns_views {
 		$comments = nl2br($row->view_comment);
 
 		echo <<<HTML
-		<tr id="$row->view_id"$disabled_class>
+		<tr id="$row->view_id" name="$row->view_name"$disabled_class>
 			<td>$edit_name</td>
 			<td>$comments</td>
 			$edit_status

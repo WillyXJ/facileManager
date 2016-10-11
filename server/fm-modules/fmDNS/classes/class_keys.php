@@ -193,7 +193,7 @@ class fm_dns_keys {
 		$comments = nl2br($row->key_comment);
 
 		echo <<<HTML
-		<tr id="$row->key_id"$disabled_class>
+		<tr id="$row->key_id" name="$row->key_name"$disabled_class>
 			<td>$edit_name</td>
 			<td>$row->key_algorithm</td>
 			<td>$row->key_secret</td>

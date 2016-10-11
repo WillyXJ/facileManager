@@ -91,12 +91,13 @@ class fm_module_templates {
 		} else {
 			$edit_name = $row->$field_name;
 		}
+		$name = $row->$field_name;
 		$field_name = $prefix . '_default';
 		$star = $row->$field_name == 'yes' ? str_replace(__('Super Admin'), __('Default Template'), $__FM_CONFIG['icons']['star']) : null;
 		
 		$field_id = $prefix . '_id';
 		echo <<<HTML
-		<tr id="{$row->$field_id}">
+		<tr id="{$row->$field_id}" name="$name">
 			<td>$star</td>
 			<td>$edit_name</td>
 HTML;

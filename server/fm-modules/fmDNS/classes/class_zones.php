@@ -607,7 +607,7 @@ class fm_dns_zones {
 		$template_icon = ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))) : null;
 		
 		echo <<<HTML
-		<tr title="$response" id="$row->domain_id" $class>
+		<tr title="$response" id="$row->domain_id" name="$row->domain_name" $class>
 			$checkbox
 			<td>$row->domain_id</td>
 			<td><b>$edit_name</b> $dynamic_icon $template_icon $add_new $clone_names</td>

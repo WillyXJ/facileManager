@@ -175,7 +175,7 @@ class fm_module_services {
 		} else $service_tcp_flags = null;
 		
 		echo <<<HTML
-			<tr id="$row->service_id"$disabled_class>
+			<tr id="$row->service_id" name="$row->service_name"$disabled_class>
 				<td>$row->service_name</td>
 
 HTML;

@@ -202,7 +202,7 @@ class fm_module_groups {
 		$comments = nl2br($row->group_comment);
 		
 		echo <<<HTML
-			<tr id="$row->group_id"$disabled_class>
+			<tr id="$row->group_id" name="$row->group_name"$disabled_class>
 				<td>$row->group_name</td>
 				<td>$group_items</td>
 				<td>$comments</td>

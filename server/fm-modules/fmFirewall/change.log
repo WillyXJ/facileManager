@@ -2,6 +2,7 @@
 =======================
 * Server - [improvement] Unset large variables after use to free up system
            resources.
+* Server - [improvement] Added item name to the delete confirmations. (Issue #185)
 
 1.4-alpha1 (2016-09-07)
 =======================

@@ -159,7 +159,7 @@ class fm_sqlpass_groups {
 		}
 		
 		echo <<<HTML
-		<tr id="$row->group_id"$disabled_class>
+		<tr id="$row->group_id" name="$row->group_name"$disabled_class>
 			<td>$row->group_name</td>
 			<td>$assoc_servers</td>
 			$edit_status

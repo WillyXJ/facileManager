@@ -235,7 +235,7 @@ class fm_module_options {
 		$cfg_name = ($row->cfg_in_clause == 'yes') ? $row->cfg_name : '<b>' . $row->cfg_name . '</b>';
 
 		echo <<<HTML
-		<tr id="$row->cfg_id"$disabled_class>
+		<tr id="$row->cfg_id" name="$row->cfg_name"$disabled_class>
 			$zone_row
 			<td>$cfg_name</td>
 			<td>$cfg_data</td>

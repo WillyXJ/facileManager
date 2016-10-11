@@ -331,6 +331,7 @@ echo '$(document).ready(function() {
         var $this 		= $(this);
         var $row_id		= $this.parent().parent();
         item_id			= $row_id.attr("id");
+        item_name		= $row_id.attr("name");
         item_type		= $("#table_edits").attr("name");
         item_sub_type	= $this.attr("name");
         var log_type	= getUrlVars()["type"];
@@ -346,7 +347,7 @@ echo '$(document).ready(function() {
 			is_ajax: 1
 		};
 
-		if (confirm("' . _('Are you sure you want to delete this item?') . '")) {
+		if (confirm("' . _('Are you sure you want to delete this item?') . ' ("+ item_name +")")) {
 			$.ajax({
 				type: "POST",
 				url: "fm-modules/facileManager/ajax/processPost.php",

@@ -238,7 +238,7 @@ class fm_dns_acls {
 		$class = 'class="' . implode(' ', $classes) . '"';
 
 		echo <<<HTML
-		<tr id="$row->acl_id" $class>
+		<tr id="$row->acl_id" name="$row->acl_name" $class>
 			<td>$edit_name $element_names</td>
 			<td>$comments $element_comment</td>
 			$edit_status

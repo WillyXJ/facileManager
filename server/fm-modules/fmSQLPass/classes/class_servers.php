@@ -285,7 +285,7 @@ class fm_module_servers {
 		if (empty($groups)) $groups = 'None';
 
 		echo <<<HTML
-		<tr id="$row->server_id"$disabled_class>
+		<tr id="$row->server_id" name="$row->server_name"$disabled_class>
 			<td>{$row->server_name}</td>
 			<td>{$row->server_type} (tcp/{$row->server_port})</td>
 			<td>$groups</td>

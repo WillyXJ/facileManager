@@ -266,7 +266,7 @@ HTML;
 		$comments = nl2br($row->policy_comment);
 
 		echo <<<HTML
-		<tr id="$row->policy_id"$disabled_class>
+		<tr id="$row->policy_id" name="$row->policy_name"$disabled_class>
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
 			<td>$source_not $source</td>
 			<td>$destination_not $destination</td>

@@ -464,7 +464,7 @@ class fm_module_logging {
 		$comments = nl2br($row->cfg_comment);
 
 		echo <<<HTML
-		<tr id="$row->cfg_id"$disabled_class>
+		<tr id="$row->cfg_id" name="$row->cfg_data"$disabled_class>
 			<td>$edit_name</td>
 			$channels_row
 			<td>$comments</td>

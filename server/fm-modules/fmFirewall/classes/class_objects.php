@@ -174,7 +174,7 @@ class fm_module_objects {
 		$comments = nl2br($row->object_comment);
 		
 		echo <<<HTML
-			<tr id="$row->object_id"$disabled_class>
+			<tr id="$row->object_id" name="$row->object_name"$disabled_class>
 				<td>$row->object_name</td>
 				<td>$row->object_address</td>
 				$netmask

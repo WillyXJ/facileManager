@@ -188,7 +188,7 @@ class fm_module_time {
 		$comments = nl2br($row->time_comment);
 		
 		echo <<<HTML
-			<tr id="$row->time_id"$disabled_class>
+			<tr id="$row->time_id" name="$row->time_name"$disabled_class>
 				<td>$row->time_name</td>
 				<td>$date_range</td>
 				<td>$row->time_start_time &rarr; $row->time_end_time</td>

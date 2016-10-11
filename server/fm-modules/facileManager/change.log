@@ -4,6 +4,7 @@
 * Server - [improvement] Updated error page titles.
 * Server - [improvement] Swapped the plus sign for "Add New" text.
 * Server - [bug] Fixed help file with PHP 7 installations. (Issue #354)
+* Server - [improvement] Added item name to the delete confirmations. (Issue #185)
 
 3.0-alpha1 (2016-09-07)
 =======================

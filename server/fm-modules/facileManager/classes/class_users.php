@@ -436,6 +436,7 @@ class fm_users {
 			<td>$user_ipaddr</td>
 			<td>$user_auth_type</td>
 			<td>$super_admin_status</td>";
+			$name = $row->user_login;
 		} else {
 			$id = $row->group_id;
 			if (currentUserCan('manage_users')) {
@@ -446,10 +447,11 @@ class fm_users {
 			}
 			$column = "<td>{$row->group_name}</td>
 			<td>" . nl2br($row->group_comment) . "</td>";
+			$name = $row->group_name;
 		}
 		
 		echo <<<HTML
-		<tr id="$id"$disabled_class>
+		<tr id="$id" name="$name"$disabled_class>
 			$column
 			<td id="edit_delete_img">$edit_status</td>
 		</tr>
