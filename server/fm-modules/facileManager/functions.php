@@ -1167,7 +1167,7 @@ function buildHelpFile() {
 			<p>$fm_name incorporates the use of multiple user accounts with granular permissions. This way you can limit access to your 
 			environment.</p>
 			
-			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="__menu{Users}">Users</a>.</p>
+			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="__menu{Users & Groups}">Users</a>.</p>
 			
 			<p>For non-LDAP users, there are some options you can select:</p>
 			<ul>
@@ -1209,7 +1209,7 @@ function buildHelpFile() {
 				<li><b>None</b><br />
 				Every user will be automatically logged in as the default super-admin account that was created during the installation process.</li>
 				<li><b>Built-in Authentication</b><br />
-				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users}">Users</a>.</li>
+				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users & Groups}">Users</a>.</li>
 				<li><b>LDAP Authentication</b><br />
 				Users are authenticated against a defined LDAP server. Upon success, users are created in the $fm_name database using the selected 
 				template account for granular permissions within the environment. If no template is selected then user authentication will fail 
@@ -2850,6 +2850,7 @@ function getMenuURL($search_slug = null) {
 	global $menu, $submenu;
 	
 	if (!$search_slug) $search_slug = $GLOBALS['basename'];
+	if (is_array($search_slug)) $search_slug = $search_slug[1];
 	
 	foreach ($menu as $position => $menu_items) {
 		$parent_key = array_search($search_slug, $menu_items, true);
@@ -2967,7 +2968,7 @@ function parseAjaxOutput($output) {
  * @return string Parsed output
  */
 function parseMenuLinks($html) {
-	$string = preg_replace("/__menu{(.+?)}/esim", "getMenuURL('\\1')", $html);
+	$string = preg_replace_callback("/__menu{(.+?)}/", 'getMenuURL', $html);
 	return $string;
 }
 
