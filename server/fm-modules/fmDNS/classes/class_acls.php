@@ -221,7 +221,7 @@ class fm_dns_acls {
 			$edit_status = null;
 		}
 		
-		$edit_name = '<b>' . $row->acl_name . '</b>' . displayAddNew('acl', $row->acl_id);
+		$edit_name = '<b>' . $row->acl_name . '</b>' . displayAddNew('acl', $row->acl_id, null, 'fa fa-plus-square-o');
 		$edit_addresses = nl2br(str_replace(',', "\n", $row->acl_addresses));
 		$edit_addresses = $this->getACLElements($row->acl_id);
 		$element_names = $element_comment = null;
