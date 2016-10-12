@@ -907,8 +907,10 @@ HTML;
 	function cloneDomainsList($domain_id) {
 		global $fmdb, $__FM_CONFIG, $user_capabilities;
 		
-		$return = null;
-		$limited_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? 'AND domain_id IN (' . join(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ')' : null;
+		$return = $limited_ids = null;
+		if (isset($user_capabilities)) {
+			$limited_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? 'AND domain_id IN (' . join(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ')' : null;
+		}
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', $limited_ids . ' AND domain_template="no" ORDER BY domain_name');
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
@@ -958,7 +960,7 @@ HTML;
 		/** Get zones based on access */
 		if (!currentUserCan('do_everything')) {
 			$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
-			$domain_id_sql .= (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
+			$domain_id_sql .= (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? " AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
 		}
 		
 		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE domain_clone_domain_id=0 AND domain_mapping='$map' AND domain_type='master' AND domain_status='active' AND domain_template='no' $domain_id_sql ORDER BY domain_name ASC";

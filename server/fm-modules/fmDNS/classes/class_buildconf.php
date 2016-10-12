@@ -354,7 +354,7 @@ class fm_module_buildconf {
 					}
 					$control_config .= "\tinet " . $control_result[$i]->control_ip;
 					$control_config .= ' port ' . $control_result[$i]->control_port;
-					if (!empty($control_result[$i]->control_addresses)) $control_config .= ' allow { ' . trim($fm_dns_acls->parseACL($control_result[$i]->control_addresses), '; ') . '; }';
+					if (!empty($control_result[$i]->control_addresses)) $control_config .= ' allow { ' . trim($fm_dns_acls->parseACL($control_result[$i]->control_addresses), '; ') . '; };';
 					$control_config .= "\n";
 				}
 				$control_config .= "};\n\n";
