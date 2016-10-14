@@ -1698,7 +1698,7 @@ function upgradefmDNS_226($__FM_CONFIG, $running_version) {
 function upgradefmDNS_3001($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
-	$success = version_compare($running_version, '2.2.1', '<') ? upgradefmDNS_221($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.2.6', '<') ? upgradefmDNS_221($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_clone_dname`";
@@ -1734,7 +1734,9 @@ function upgradefmDNS_3002($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` ADD `record_ptr_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_id`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` ADD `control_type` ENUM('controls','statistics') NOT NULL DEFAULT 'controls' AFTER `server_serial_no`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}CHANGE `record_type` `record_type` ENUM('A','AAAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','KEY','KX','MX','NS','PTR','RP','SRV','TXT','HINFO','SSHFP','NAPTR') NOT NULL DEFAULT 'A'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE `record_type` `record_type` ENUM('A','AAAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','KEY','KX','MX','NS','PTR','RP','SRV','TXT','HINFO','SSHFP','NAPTR') NOT NULL DEFAULT 'A'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_minimum_version` VARCHAR(20) NULL";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','ratelimit','rrset') NOT NULL DEFAULT 'global'";
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {
@@ -1771,6 +1773,108 @@ function upgradefmDNS_3002($__FM_CONFIG, $running_version) {
 		}
 	}
 	
+	$inserts[] = <<<INSERT
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_zone_support`,
+`def_dropdown`,
+`def_max_parameters`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'global', 'serial-update-method', '( increment | unixtime | date )', 'no', 'OVZ', 'M', 'yes', 1, '9.9.0'),
+('options', 'global', 'inline-signing', '( yes | no )', 'no', 'Z', 'MS', 'yes', 1, '9.9.0'),
+('options', 'global', 'dnstap', '( auth | auth response | auth query | client | client response | client query | forwarder | forward response | forwarder query | resolver | resolver response | resolver query )', 'yes', 'OV', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'dnstap-output', '( file | unix ) ( quoted_string )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'dnstap-identity', '( quoted_string | hostname | none )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'dnstap-version', '( quoted_string | none )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'geoip-directory', '( quoted_string )', 'no', 'O', NULL, 'no', 1, '9.10.0'),
+('options', 'global', 'lock-file', '( quoted_string | none )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'dscp', '( integer )', 'no', 'O', NULL, 'no', 1, '9.10.0'),
+('options', 'global', 'root-delegation-only exclude', '( quoted_string )', 'yes', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'disable-ds-digests', 'domain { digest_type; [ digest_type; ] }', 'no', 'O', NULL, 'no', '-1', '9.10.0'),
+('options', 'global', 'dnssec-loadkeys-interval', '( minutes )', 'no', 'OZ', 'MS', 'no', 1, NULL),
+('options', 'global', 'dnssec-update-mode', '( maintain | no-resign )', 'no', 'OZ', 'MS', 'yes', 1, '9.9.0'),
+('options', 'global', 'nta-lifetime', '( duration )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'nta-recheck', '( duration )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'max-zone-ttl', '( unlimited | integer )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'automatic-interface-scan', '( yes | no )', 'no', 'O', NULL, 'yes', 1, '9.10.0'),
+('options', 'global', 'allow-new-zones', '( yes | no )', 'no', 'O', NULL, 'yes', 1, NULL),
+('options', 'global', 'geoip-use-ecs', '( yes | no )', 'no', 'O', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'message-compression', '( yes | no )', 'no', 'O', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'minimal-any', '( yes | no )', 'no', 'O', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'require-server-cookie', '( yes | no )', 'no', 'O', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'send-cookie', '( yes | no )', 'no', 'OS', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'nocookie-udp-size', '( integer )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'cookie-algorithm', '( aes | sha1 | sha256 )', 'no', 'O', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'cookie-secret', '( quoted_string )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'request-expire', '( yes | no )', 'no', 'OS', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'filter-aaaa-on-v4', '( yes | no | break-dnssec )', 'no', 'O', NULL, 'yes', 1, NULL),
+('options', 'global', 'filter-aaaa-on-v6', '( yes | no | break-dnssec )', 'no', 'O', NULL, 'yes', 1, NULL),
+('options', 'global', 'check-names', '( master | slave | response ) ( warn | fail | ignore )', 'no', 'O', NULL, 'yes', 1, NULL),
+('options', 'global', 'check-spf', '( warn | ignore )', 'no', 'OVZ', 'M', 'yes', 1, NULL),
+('options', 'global', 'allow-v6-synthesis', '( address_match_element )', 'yes', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'filter-aaaa', '( address_match_element )', 'yes', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'keep-response-order', '( address_match_element )', 'yes', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'no-case-compress', '( address_match_element )', 'yes', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'resolver-query-timeout', '( integer )', 'no', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'notify-rate', '( integer )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'startup-notify-rate', '( integer )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'transfer-message-size', '( integer )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'fetches-per-zone', '( integer [ ( drop | fail ) ] )', 'no', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'fetches-per-server', '( integer [ ( drop | fail ) ] )', 'no', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'fetch-quota-params', '( integer fixedpoint fixedpoint fixedpoint )', 'no', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'topology', '( address_match_element )', 'yes', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'servfail-ttl', '( seconds )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'masterfile-style', '( relative | full )', 'no', 'O', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'max-recursion-depth', '( integer )', 'no', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'max-recursion-queries', '( integer )', 'no', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'max-rsa-exponent-size', '( integer )', 'no', 'O', NULL, 'no', 1, NULL),
+('options', 'global', 'prefetch', '( integer [integer] )', 'no', 'O', NULL, 'no', 1, '9.10.0'),
+('options', 'global', 'v6-bias', '( integer )', 'no', 'O', NULL, 'no', 1, '9.10.0'),
+('options', 'global', 'edns-version', '( integer )', 'no', 'S', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'tcp-only', '( yes | no )', 'no', 'S', NULL, 'yes', 1, '9.11.0'),
+('options', 'global', 'keys', '( key_id )', 'no', 'S', NULL, 'no', 1, NULL),
+('options', 'global', 'use-queryport-pool', '( yes | no )', 'no', 'S', NULL, 'yes', 1, NULL),
+('options', 'global', 'queryport-pool-ports', '( integer )', 'no', 'S', NULL, 'no', 1, NULL),
+('options', 'global', 'queryport-pool-updateinterval', '( integer )', 'no', 'S', NULL, 'no', 1, NULL),
+('options', 'global', 'lwres-tasks', '( integer )', 'no', 'R', NULL, 'no', 1, '9.11.0'),
+('options', 'global', 'lwres-clients', '( integer )', 'no', 'R', NULL, 'no', 1, '9.11.0'),
+('options', 'rrset', 'rrset-order', '( rrset_order_spec )', 'no', 'OV', NULL, 'no', '-1', NULL)
+;
+INSERT;
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | auto )' WHERE `def_option` = 'dnssec-validation'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_minimum_version` = '9.9.4', `def_clause_support` = 'OVZ' WHERE `def_option_type` = 'ratelimit'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( hmac-sha1 | hmac-sha224 | hmac-sha256 | hmac-sha384 | hmac-sha512 | hmac-md5 )', `def_dropdown`='yes' WHERE `def_option` = 'session-keyalg'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( auto | no | domain trust-anchor domain )' WHERE `def_option` = 'dnssec-lookaside'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( full | terse | none | yes | no )' WHERE `def_option` = 'zone-statistics'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | explicit | master-only )' WHERE `def_option` = 'notify'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OSV' WHERE `def_option` = 'provide-ixfr'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OSVZ' WHERE `def_option` IN ('request-ixfr', 'query-source', 'query-source-v6')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OVZ' WHERE `def_option` = 'ixfr-from-differences'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OSV' WHERE `def_option` IN ('request-nsid')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( allow | maintain | off )' WHERE `def_option` = 'auto-dnssec'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `def_option` = 'update-check-ksk'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = NULL WHERE `def_option` = 'forward'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_max_parameters` = '-1' WHERE `def_option` IN ('listen-on', 'listen-on-v6', 'disable-empty-zone')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( range ip_port ip_port )' WHERE `def_option` IN ('avoid-v4-udp-ports', 'avoid-v6-udp-ports')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( size_spec )' WHERE `def_type` = '( size_in_bytes )'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( size_spec )' WHERE `def_option` IN ('files')";
+	$inserts[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` WHERE `def_option` IN ('cleaning-interval')";
+	$inserts[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_name` IN ('cleaning-interval')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( text | raw | map )' WHERE `def_option` = 'masterfile-format'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( quoted_string ) [ except-from { ( quoted_string ) } ]' WHERE `def_option` IN ('deny-answer-aliases')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_option` = 'deny-answer-addresses' WHERE `def_option` = 'deny-answer-address'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name` = 'deny-answer-addresses' WHERE `fm_dns_config`.`cfg_name` = 'deny-answer-address'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( integer )' WHERE `def_option` = 'responses-per-second'";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'S' WHERE `def_option` IN ('try-tcp-refresh', 'request-ixfr')";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( domain { algorithm; [ algorithm; ] } )', `def_zone_support` = 'O', `def_max_parameters` = '-1', `def_multiple_values` = 'no' WHERE `def_option` = 'disable-algorithms'";
+
 	/** Run queries */
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $schema) {

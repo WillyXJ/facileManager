@@ -32,7 +32,6 @@ $response = isset($response) ? $response : null;
 
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['operations']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'controls';
 $display_type = ($type == 'controls') ? __('Controls') : __('Statistics Channels');
-$server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';

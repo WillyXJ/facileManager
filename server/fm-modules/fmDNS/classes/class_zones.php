@@ -1190,8 +1190,15 @@ HTML;
 		$result = $fmdb->query($query);
 	}
 	
-	function availableZones($include_clones = false, $zone_type = null, $restricted = false) {
+	function availableZones($include_clones = false, $zone_type = null, $restricted = false, $extra = 'none') {
 		global $fmdb, $__FM_CONFIG;
+		
+		$start = 0;
+		
+		if ($extra == 'all') {
+			$start = 1;
+			$return = array(array(__('All Zones'), 0));
+		}
 		
 		/** Get restricted zones only */
 		$restricted_sql = null;
@@ -1223,8 +1230,8 @@ HTML;
 				$domain_names[] = $results[$i]->domain_name;
 			}
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i][] = count(array_keys($domain_names, $results[$i]->domain_name)) > 1 ? $results[$i]->domain_name . ' (' . $results[$i]->domain_id . ')' : $results[$i]->domain_name;
-				$return[$i][] = $results[$i]->domain_id;
+				$return[$i+$start][] = count(array_keys($domain_names, $results[$i]->domain_name)) > 1 ? $results[$i]->domain_name . ' (' . $results[$i]->domain_id . ')' : $results[$i]->domain_name;
+				$return[$i+$start][] = $results[$i]->domain_id;
 			}
 		}
 		return $return;
@@ -1580,7 +1587,7 @@ HTML;
 	 */
 	function buildZoneJSON($saved_zones) {
 		$temp_zones = $this->availableZones(true, array('master', 'slave', 'forward'));
-		$available_zones = array(array('id' => 0, 'text' => 'All Zones'));
+		$available_zones = array(array('id' => 0, 'text' => __('All Zones')));
 		$i = 1;
 		foreach ($temp_zones as $temp_zone_array) {
 			$available_zones[$i]['id'] = $temp_zone_array[1];

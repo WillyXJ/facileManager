@@ -68,6 +68,8 @@ class fm_module_options {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
+		if (empty($post['cfg_name'])) return false;
+		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}'");
 		if ($fmdb->num_rows) {
@@ -102,7 +104,7 @@ class fm_module_options {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('A database error occurred.') . ' ' . $fmdb->last_error;
+		if ($fmdb->sql_errors) return __('A database error occurred.') . ' ' . $fmdb->last_error;
 
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
@@ -260,6 +262,7 @@ HTML;
 		switch(strtolower($cfg_type)) {
 			case 'global':
 			case 'ratelimit':
+			case 'rrset':
 				if (isset($_POST['item_sub_type'])) {
 					$cfg_id_name = sanitize($_POST['item_sub_type']);
 				} else {
@@ -467,7 +470,7 @@ HTML;
 	function availableOptions($action, $server_serial_no, $option_type = 'global', $cfg_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$temp_array = null;
+		$temp_array = $return = null;
 		
 		if ($action == 'add') {
 			if (isset($_POST['view_id'])) {
@@ -500,7 +503,7 @@ HTML;
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='options'
 				AND def_option_type='$option_type'";
 			$query .= " AND def_clause_support LIKE '%";
-			if (isset($option_type) && $option_type == 'global' &&
+			if (isset($option_type) && in_array($option_type, array_keys($__FM_CONFIG['options']['avail_types'])) &&
 					isset($_POST['item_id']) && $_POST['item_id'] != 0) {
 				switch ($_POST['item_sub_type']) {
 					case 'view_id':
@@ -570,7 +573,6 @@ HTML;
 					case 'integer':
 					case 'seconds':
 					case 'minutes':
-					case 'size_in_bytes':
 						if (!verifyNumber($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid number.';
 						break;
 					case 'port':
@@ -580,8 +582,10 @@ HTML;
 						$post['cfg_data'] = '"' . str_replace(array('"', "'"), '', $post['cfg_data']) . '"';
 						break;
 					case 'quoted_string | none':
+					case 'quoted_string | none | hostname':
 						$post['cfg_data'] = '"' . str_replace(array('"', "'"), '', $post['cfg_data']) . '"';
 						if ($post['cfg_data'] == '"none"') $post['cfg_data'] = 'none';
+						if ($post['cfg_data'] == '"hostname"') $post['cfg_data'] = 'hostname';
 						break;
 					case 'address_match_element':
 						/** Need to check for valid ACLs or IP addresses */
@@ -623,6 +627,20 @@ HTML;
 			$result = $fmdb->last_result;
 			if (isset($result[0]->def_type)) $def_type = $result[0]->def_type;
 		} else $def_type = null;
+		
+		if (strpos($def_type, 'rrset_order_spec') !== false) {
+			$order_spec_elements = explode(' ', $cfg_data);
+			// class
+			if ($order_spec_elements[0] != 'any') $order_spec[] = 'class ' . $order_spec_elements[0];
+			// type
+			if ($order_spec_elements[1] != 'any') $order_spec[] = 'type ' . $order_spec_elements[1];
+			// name
+			if ($order_spec_elements[2] != 0) $order_spec[] = 'name "' . displayFriendlyDomainName(getNameFromID($order_spec_elements[2], "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name')) . '"';
+			//order
+			$order_spec[] = 'order ' . $order_spec_elements[3];
+			
+			return join(' ', $order_spec);
+		}
 		
 		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \
 			strpos($cfg_data, 'domain_') !== false || strpos($def_type, 'address_match_element') !== false || \

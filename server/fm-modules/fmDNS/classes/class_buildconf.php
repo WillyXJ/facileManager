@@ -304,6 +304,9 @@ class fm_module_buildconf {
 			/** Build rate limits */
 			$config .= $this->getRateLimits(0, $server_serial_no);
 			
+			/** Build rate limits */
+			$config .= $this->getRRSetOrder(0, $server_serial_no);
+			
 			$config .= "};\n\n";
 			unset($config_array);
 			
@@ -445,6 +448,9 @@ class fm_module_buildconf {
 
 					/** Build rate limits */
 					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
+
+					/** Build rate limits */
+					$config .= $this->getRRSetOrder($view_result[$i]->view_id, $server_serial_no);
 
 					/** Get cooresponding keys */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', "AND key_status='active' AND key_view='" . $view_result[$i]->view_id . "'");
@@ -1511,7 +1517,7 @@ HTML;
 	}
 	
 	/**
-	 * Formats the server key statements
+	 * Formats the server rate-limit statements
 	 *
 	 * @since 2.0
 	 * @package fmDNS
@@ -1827,6 +1833,47 @@ HTML;
 		
 		return strtotime('+' . str_replace($search, $replace, strtoupper($soa))) - time();
 	}
+	
+	
+	/**
+	 * Formats the server rrset-order statements
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @return string
+	 */
+	function getRRSetOrder($view_id, $server_serial_no) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		$rrsets = $rrsets_domains = $rrset_config_array = null;
+		
+		/** Use server-specific configs if present */
+		foreach (array($server_serial_no, 0) as $serial_no) {
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="rrset" AND view_id=' . $view_id . ' AND server_serial_no=' . $serial_no . ' AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				$result = $fmdb->last_result;
+				$count = $fmdb->num_rows;
+				for ($i=0; $i < $count; $i++) {
+					$config[$result[$i]->cfg_name][] = array($result[$i]->cfg_data, $result[$i]->cfg_comment);
+				}
+				unset($result);
+				break;
+			}
+		}
+		
+		foreach ($config as $cfg_name => $value_array) {
+			foreach ($value_array as $cfg_data) {
+				list($cfg_info, $cfg_comment) = $cfg_data;
+				$rrsets .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
+			}
+		}
+		$rrsets = str_replace($cfg_name, null, $rrsets);
+		return ($rrsets) ? "\trrset-order {\n{$rrsets}\t};\n\n" : null;
+	}
+	
 }
 
 if (!isset($fm_module_buildconf))

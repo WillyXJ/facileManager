@@ -33,7 +33,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
-	$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
+	$query = "SELECT def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
@@ -42,7 +42,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
-					%s</td>
+					%s
 					<script>
 					$(".address_match_element").select2({
 						createSearchChoice:function(term, data) { 
@@ -57,6 +57,23 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 						data: %s
 					});
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
+		} elseif (strpos($result[0]->def_type, 'rrset_order_spec') !== false) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			$cfg_data = ($cfg_data) ? explode(' ', $cfg_data) : array(null, null, null, null);
+			
+			$available_classes = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class')), $cfg_data[0]);
+			$available_types = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type')), $cfg_data[1]);
+			$available_domains = buildSelect('cfg_data[]', 'cfg_data_zones', $fm_dns_zones->availableZones(true, null, false, 'all'), $cfg_data[2]);
+			$available_orders = $fm_module_options->populateDefTypeDropdown('( random | cyclic | fixed )', $cfg_data[3]);
+
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;">class %s<br />type %s<br />name %s<br />order %s
+					<script>
+					$("#cfg_data_zones").select2({
+						width: "250px",
+					});
+					</script>',
+					__('Option Value'), $available_classes, $available_types, $available_domains, $available_orders);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			$checkbox = null;
 			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !$_POST['view_id']) {
@@ -65,13 +82,14 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 			}
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
-					%s %s</td>', __('Option Value'), str_replace(array('"', "'"), '', $cfg_data), $result[0]->def_type, $checkbox);
+					%s %s', __('Option Value'), str_replace(array('"', "'"), '', $cfg_data), $result[0]->def_type, $checkbox);
 		} else {
 			/** Build array of possible values */
 			$dropdown = $fm_module_options->populateDefTypeDropdown($result[0]->def_type, $cfg_data);
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67&#37;">%s</td>', __('Option Value'), $dropdown);
+					<td width="67&#37;">%s', __('Option Value'), $dropdown);
 		}
+		if ($result[0]->def_minimum_version) printf('<br /><span class="note">%s</span></td>', sprintf(__('This option requires BIND %s or later.'), $result[0]->def_minimum_version));
 	}
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_available_clones', $_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {

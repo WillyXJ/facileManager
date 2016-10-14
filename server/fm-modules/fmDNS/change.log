@@ -8,6 +8,10 @@
            a cloned zone. (Issue #350)
 * Server - [improvement] Added item name to the delete confirmations. (Issue #185)
 * Server - [feature] Added support for DHCID, DLV, and DS resource records.
+* Server - [feature] Added support for more BIND configuration options
+           including rrset-order, 9.10, and 9.11 options. (Issue #336)
+* Server - [improvement] Configuration options may now display the minimum
+           version of BIND required to use the option.
 
 3.0-alpha1 (2016-09-07)
 =======================
