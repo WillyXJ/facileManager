@@ -1,4 +1,4 @@
-1.4-alpha2 (2016-??-??)
+1.4-alpha2 (2016-10-17)
 =======================
 * Server - [improvement] Unset large variables after use to free up system
            resources.

@@ -1,4 +1,4 @@
-3.0-alpha2 (2016-??-??)
+3.0-alpha2 (2016-10-17)
 =======================
 * Server - [bug] Fixed mysql requirement check. (result of adding #343)
 * Server - [improvement] Updated error page titles.

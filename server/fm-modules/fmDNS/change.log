@@ -1,4 +1,4 @@
-3.0-alpha2 (2016-??-??)
+3.0-alpha2 (2016-10-17)
 =======================
 * Server - [improvement] PTR RRs are better linked with the A record. (Issue #277)
 * Server - [feature] Added support for statistics-channels. (Issue #352)
