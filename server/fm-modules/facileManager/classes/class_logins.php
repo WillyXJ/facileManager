@@ -512,7 +512,6 @@ To reset your password, click the following link:
 		if (empty($ldap_dn))              $ldap_dn              = getOption('ldap_dn');
 		if (empty($ldap_group_require))   $ldap_group_require   = getOption('ldap_group_require');
 		if (empty($ldap_group_dn))        $ldap_group_dn        = getOption('ldap_group_dn');
-		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
 		
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
@@ -547,8 +546,14 @@ To reset your password, click the following link:
 			
 			if ($ldap_bind) {
 				if ($ldap_group_require) {
+					/** Convert AD ldap_dn to real ldap_dn */
+					if (strpos($ldap_dn, '@') !== false) {
+						$ldap_dn_parts = explode('@', $ldap_dn);
+						$ldap_dn = 'dc=' . join(',dc=', explode('.', $ldap_dn_parts[1]));
+					}
+					
 					/** Process group membership if required */
-					$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $username);
+					$ldap_group_response = $this->checkGroupMembership($ldap_connect, $this->getDN($ldap_connect, $username, $ldap_dn), $ldap_group_dn);
 					
 					if ($ldap_group_response !== true) {
 						$this->closeLDAPConnect($ldap_connect);
@@ -626,6 +631,60 @@ To reset your password, click the following link:
 		}
 	}
 	
+	
+	/**
+	 * Gets the DN of an account name
+	 * (based on user comment from http://php.net/manual/en/ref.ldap.php#99347)
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 *
+	 * @param resource $ldap_connect Resource to use
+	 * @param string $samaccountname SAM Account name to search for
+	 * @param string $basedn Base DN to use
+	 * @return boolean
+	 */
+	private function getDN($ldap_connect, $samaccountname, $basedn) {
+		$attributes = array('dn');
+		$result = ldap_search($ldap_connect, $basedn,
+			"(samaccountname={$samaccountname})", $attributes);
+		if ($result === false) return '';
+		$entries = ldap_get_entries($ldap_connect, $result);
+		return ($entries['count']>0) ? $entries[0]['dn'] : '';
+	}
+	
+	
+	/**
+	 * Checks recursive group membership of the user
+	 * (based on user comment from http://php.net/manual/en/ref.ldap.php#99347)
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 *
+	 * @param resource $ldap_connect Resource to use
+	 * @param string $userdn
+	 * @param string $groupdn
+	 * @return boolean
+	 */
+	private function checkGroupMembership($ldap_connect, $userdn, $groupdn) {
+		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
+
+		$result = ldap_read($ldap_connect, $userdn, '(objectclass=*)', array($ldap_group_attribute));
+		if ($result === false) return false;
+		
+		$entries = ldap_get_entries($ldap_connect, $result);
+		if ($entries['count'] <= 0) return false;
+		
+		if (empty($entries[0][$ldap_group_attribute])) {
+			return false;
+		} else {
+			for ($i = 0; $i < $entries[0][$ldap_group_attribute]['count']; $i++) {
+				if ($entries[0][$ldap_group_attribute][$i] == $groupdn) return true;
+				elseif ($this->checkGroupMembership($ldap_connect, $entries[0][$ldap_group_attribute][$i], $groupdn)) return true;
+			};
+		};
+		return false;
+	}
 	
 }
 
