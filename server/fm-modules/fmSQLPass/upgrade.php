@@ -30,7 +30,7 @@ function upgradefmSQLPassSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.0-rc1', '<') ? upgradefmSQLPass_01009($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.3-alpha3', '<') ? upgradefmSQLPass_01303($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	return true;
@@ -202,6 +202,28 @@ function upgradefmSQLPass_01009($__FM_CONFIG, $running_version) {
 	}
 	
 	setOption('version', '1.0-rc1', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 1.3-alpha2 */
+function upgradefmSQLPass_01303($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '1.0-rc1', '<') ? upgradefmSQLPass_01009($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE `server_type` `server_type` ENUM('MySQL','PostgreSQL') NOT NULL";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	setOption('version', '1.3-alpha3', 'auto', false, 0, $module_name);
 	
 	return true;
 }

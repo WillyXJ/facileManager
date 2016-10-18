@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` int(10) NOT NULL,
-  `server_type` enum('MySQL') NOT NULL,
+  `server_type` enum('MySQL','PostgreSQL') NOT NULL,
   `server_port` int(5) DEFAULT NULL,
   `server_name` varchar(255) NOT NULL,
   `server_groups` text,

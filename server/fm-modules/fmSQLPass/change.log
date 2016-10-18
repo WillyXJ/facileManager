@@ -1,3 +1,7 @@
+1.3-alpha3 (2016-??-??)
+=======================
+* Server - [feature] Added support for PostgreSQL. (Issue #178)
+
 1.3-alpha2 (2016-10-17)
 =======================
 * Server - [improvement] Added item name to the delete confirmations. (Issue #185)

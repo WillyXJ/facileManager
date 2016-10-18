@@ -303,7 +303,7 @@ HTML;
 		$server_id = 0;
 		$server_name = $server_groups = $server_type = $server_port = null;
 		$server_cred_user = $server_cred_password = $server_credentials = null;
-		$server_type = 'database';
+		$server_type = 'MySQL';
 		$ucaction = ucfirst($action);
 		
 		/** Build groups options */
@@ -327,6 +327,7 @@ HTML;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
 
 		$server_types = buildSelect('server_type', 'server_type', $this->getServerTypes(), $server_type);
+		$server_port = ($server_port) ? $server_port : $__FM_CONFIG['fmSQLPass']['default']['ports'][$server_type];
 		$groups = (is_array($group_options)) ? buildSelect('server_groups', 1, $group_options, $server_groups, 4, null, true) : __('Server Groups need to be defined first.');
 		
 		/** Handle credentials */
@@ -356,7 +357,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_port">%s</label></th>
-					<td width="67&#37;"><input type="number" name="server_port" value="%d" placeholder="3306" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></td>
+					<td width="67&#37;"><input type="number" name="server_port" id="server_port" value="%d" placeholder="3306" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_groups">%s</label></th>
@@ -404,6 +405,7 @@ HTML;
 		
 		foreach ($db_support as $db_type) {
 			$php_function = (strtolower($db_type) == 'postgresql') ? 'pg' : strtolower($db_type);
+			if ($php_function == 'mysql' && useMySQLi()) $php_function .= 'i';
 			if (function_exists($php_function . '_connect') && function_exists('change' . $db_type . 'UserPassword')) $fm_supported_servers[] = $db_type;
 		}
 		

@@ -47,6 +47,11 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$("#manage_item_contents").delegate("#server_type", "change", function(e) {
+		var server_ports = ' . json_encode($__FM_CONFIG['fmSQLPass']['default']['ports']) . ';
+		$("#server_port").val(server_ports[$(this).val()]);
+	});
+	
 });
 ';
 ?>
