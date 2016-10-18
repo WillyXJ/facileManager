@@ -8,6 +8,7 @@
 * Server - [bug] Fixed LDAP authentication using group membership requirements
            with Active Directory. (Issue #342)
 * Server - [bug] Fixed PHP error during installer with an empty database.
+* Server - [bug] Fixed module installation status through modules page.
 
 3.0-alpha1 (2016-09-07)
 =======================

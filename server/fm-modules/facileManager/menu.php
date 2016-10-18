@@ -43,7 +43,7 @@ $menu[45] = array(null, null, null, null, null, 'separator');
 
 $menu[50] = array(_('Admin'), null, 'run_tools', $fm_name, 'admin-tools.php');
 	$submenu['admin-tools.php'][5] = array(_('Tools'), _('Tools'), 'run_tools', $fm_name, 'admin-tools.php');
-	if (getOption('auth_method')) {
+	if (!defined('AJAX') && getOption('auth_method')) {
 		$submenu['admin-tools.php'][10] = array(_('Users & Groups'), _('Users & Groups'), 'manage_users', $fm_name, 'admin-users.php');
 	}
 	$submenu['admin-tools.php'][15] = array(_('Logs'), _('Logs'), 'view_logs', $fm_name, 'admin-logs.php');
@@ -51,6 +51,7 @@ $menu[50] = array(_('Admin'), null, 'run_tools', $fm_name, 'admin-tools.php');
 $menu[70] = array(_('Settings'), _('General Settings'), 'manage_settings', $fm_name, 'admin-settings.php', null, null, true);
 	$submenu['admin-settings.php'][5] = array(_('General'), _('General Settings'), 'manage_settings', $fm_name, 'admin-settings.php');
 
-$menu[99] = array(_('Modules'), _('Module Configuration'), 'manage_modules', $fm_name, 'admin-modules.php', null, getBadgeCounts('modules'), true);
+$badge_counts = (!defined('AJAX')) ? getBadgeCounts('modules') : null;
+$menu[99] = array(_('Modules'), _('Module Configuration'), 'manage_modules', $fm_name, 'admin-modules.php', null, $badge_counts, true);
 
 ?>

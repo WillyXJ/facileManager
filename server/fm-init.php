@@ -216,9 +216,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		$page = isset($_GET['p']) && intval($_GET['p']) > 0 ? intval($_GET['p']) : 1;
 		
 		/** Build the user menu */
-		if (!defined('AJAX')) {
-			include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
-		}
+		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 	} elseif (defined('CLIENT')) {
 		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
 	}
