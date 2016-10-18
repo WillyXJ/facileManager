@@ -7,6 +7,7 @@
 * Server - [improvement] Added item name to the delete confirmations. (Issue #185)
 * Server - [bug] Fixed LDAP authentication using group membership requirements
            with Active Directory. (Issue #342)
+* Server - [bug] Fixed PHP error during installer with an empty database.
 
 3.0-alpha1 (2016-09-07)
 =======================

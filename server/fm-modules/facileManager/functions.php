@@ -1340,6 +1340,7 @@ function getAvailableModules() {
  */
 function getOption($option = null, $account_id = 0, $module_name = null) {
 	global $fmdb;
+	if (!$fmdb) return false;
 	
 	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
 
