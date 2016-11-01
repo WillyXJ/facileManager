@@ -2002,7 +2002,6 @@ function verifyNumber($number, $min_range = 0, $max_range = null, $decimal_allow
 		if (!$decimal_allowed) {
 			return filter_var($number, FILTER_VALIDATE_INT, array('options' => array('min_range' => $min_range, 'max_range' => $max_range)));
 		} else {
-			
 			return filter_var($number, FILTER_VALIDATE_INT, array('options' => array('min_range' => $min_range, 'max_range' => $max_range)));
 		}
 	} else {

@@ -469,5 +469,54 @@ function loadDynamicZone() {
 
 	return false;
 }
+
+function validateTimeFormat(event, that) {
+	// Allow: backspace, delete, tab, escape, and enter
+	if (event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 || 
+		// Allow: Ctrl+A
+		(event.keyCode == 65 && event.ctrlKey === true) || 
+		// Allow: home, end, left, right
+		(event.keyCode >= 35 && event.keyCode <= 39)) {
+			// let it happen, do not do anything
+			return;
+	}
+	// Ensure that it is a s, m, h, d, or w
+	else if (event.keyCode == 83 || event.keyCode == 77 || event.keyCode == 72 || event.keyCode == 68 || event.keyCode == 87) {
+		switch (event.keyCode) {
+			case 83:
+				if (that.value.match(/(s|[a-z]$)/gi)) {
+					event.preventDefault();
+				}
+				break;
+			case 77:
+				if (that.value.match(/(m|[a-z]$)/gi)) {
+					event.preventDefault();
+				}
+				break;
+			case 72:
+				if (that.value.match(/(h|[a-z]$)/gi)) {
+					event.preventDefault();
+				}
+				break;
+			case 68:
+				if (that.value.match(/(d|[a-z]$)/gi)) {
+					event.preventDefault();
+				}
+				break;
+			case 87:
+				if (that.value.match(/(w|[a-z]$)/gi)) {
+					event.preventDefault();
+				}
+				break;
+		}
+		return;
+	}
+	// Ensure that it is a number and stop the keypress
+	else {
+		if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
+			event.preventDefault();
+		}
+	}
+}
 ';
 ?>

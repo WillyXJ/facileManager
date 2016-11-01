@@ -192,8 +192,14 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 				}
 			}
 			
-			if (in_array($key, array('record_ttl', 'record_priority', 'record_weight', 'record_port'))) {
+			if (in_array($key, array('record_priority', 'record_weight', 'record_port'))) {
 				if (!empty($val) && verifyNumber($val) === false) {
+					$messages['errors'][$key] = __('Invalid');
+				}
+			}
+			
+			if ($key == 'record_ttl') {
+				if (!empty($val) && verifyTTL($val) === false) {
 					$messages['errors'][$key] = __('Invalid');
 				}
 			}
@@ -283,7 +289,11 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 						$messages['errors'][$key] = __('Invalid');
 					}
 				} else {
-					if (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
+					if (in_array($key, array('soa_refresh', 'soa_retry', 'soa_expire', 'soa_ttl'))) {
+						if (!empty($val) && verifyTTL($val) === false) {
+							$messages['errors'][$key] = __('Invalid');
+						}
+					} elseif (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
 						if (!verifyNAME($val, $id, false)) {
 							$messages['errors'][$key] = __('Invalid');
 						}
@@ -468,6 +478,36 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 function validateHostname($hostname) {
 	if ($hostname[0] == '-' || strpos($hostname, '_') !== false) {
 		return false;
+	}
+	
+	return true;
+}
+
+/**
+ * Returns whether record TTL is valid or not
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @param string $ttl TTL to check
+ * @return boolean
+ */
+function verifyTTL($ttl) {
+	/** Return true if $ttl is a number */
+	if (verifyNumber($ttl)) return true;
+	
+	/** Check if last character is a-z */
+	if (!preg_match('/[a-z]/i', substr($ttl, -1))) return false;
+	
+	/** Check for s, m, h, d, w */
+	preg_match_all('/\d+[a-z]/i', $ttl, $matches);
+	
+	/** Something is wrong */
+	if (count($matches) > 1) return false;
+	
+	foreach ($matches[0] as $match) {
+		$split = preg_split('/[smhdw]/i', $match);
+		if (!verifyNumber($split[0])) return false;
 	}
 	
 	return true;

@@ -380,7 +380,7 @@ class fm_dns_records {
 			} else {
 				$field_values['data']['Record'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
 			}
-			$field_values['data']['TTL'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_ttl]" value="' . $record_ttl . '" onkeydown="return validateNumber(event)" />';
+			$field_values['data']['TTL'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_ttl]" value="' . $record_ttl . '" onkeydown="return validateTimeFormat(event, this)" />';
 			$field_values['data']['Class'] = '>' . $class;
 			
 			if ($type == 'CERT') {
@@ -625,19 +625,19 @@ HTML;
 		</tr>
 		<tr>
 			<th>{$labels[2]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_refresh]" size="25" value="$soa_refresh" $disabled /></td>
+			<td><input type="text" name="{$action}[$soa_id][soa_refresh]" size="25" value="$soa_refresh" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		<tr>
 			<th>{$labels[3]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_retry]" size="25" value="$soa_retry" $disabled /></td>
+			<td><input type="text" name="{$action}[$soa_id][soa_retry]" size="25" value="$soa_retry" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		<tr>
 			<th>{$labels[4]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_expire]" size="25" value="$soa_expire" $disabled /></td>
+			<td><input type="text" name="{$action}[$soa_id][soa_expire]" size="25" value="$soa_expire" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		<tr>
 			<th>{$labels[5]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_ttl]" size="25" value="$soa_ttl" $disabled /></td>
+			<td><input type="text" name="{$action}[$soa_id][soa_ttl]" size="25" value="$soa_ttl" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		$template_append
 		$create_template
