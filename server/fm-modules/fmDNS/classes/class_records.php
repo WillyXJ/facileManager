@@ -275,6 +275,9 @@ class fm_dns_records {
 		if (in_array($type, array('CERT', 'SSHFP', 'DLV', 'DS'))) {
 			$title_array[] = array('title' => __('Algorithm'), 'rel' => 'record_algorithm');
 		}
+		if ($type == 'SSHFP' ) {
+			$title_array[] = array('title' => __('Type'), 'rel' => 'record_cert_type');
+		}
 		if ($type == 'DS') {
 			$title_array[] = array('title' => __('Type'), 'rel' => 'record_cert_type');
 		}
@@ -392,6 +395,7 @@ class fm_dns_records {
 			
 			if ($type == 'SSHFP') {
 				$field_values['data']['Algorithm'] = '>' . buildSelect($action . '[_NUM_][record_algorithm]', '_NUM_', $__FM_CONFIG['records']['sshfp_algorithms'], $record_algorithm);
+				$field_values['data']['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['digest_types'], $record_cert_type);
 				$value_textarea = true;
 			}
 			

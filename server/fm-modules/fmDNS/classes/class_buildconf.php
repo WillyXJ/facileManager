@@ -1108,7 +1108,7 @@ class fm_module_buildconf {
 					case 'SSHFP':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'SSH Key Fingerprint records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_algorithm . ' 1 ' . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_algorithm . ' ' . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'SRV':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';

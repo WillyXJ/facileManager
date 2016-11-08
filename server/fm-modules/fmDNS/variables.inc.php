@@ -74,7 +74,9 @@ $__FM_CONFIG['records']['cert_algorithms'] = array(
 											);
 $__FM_CONFIG['records']['sshfp_algorithms'] = array(
 											array('RSA', 1),
-											array('DSA', 2)
+											array('DSA', 2),
+											array('ECDSA', 3),
+											array('ED25519', 4)
 											);
 $__FM_CONFIG['records']['naptr_flags']	= array('U', 'S', 'A', 'P', '');
 $__FM_CONFIG['records']['flags']		= array('0', '256', '257');

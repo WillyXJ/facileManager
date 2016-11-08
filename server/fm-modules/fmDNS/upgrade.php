@@ -1888,4 +1888,34 @@ INSERT;
 	return true;
 }
 
+/** 3.0-alpha3 */
+function upgradefmDNS_3003($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '3.0-alpha2', '<') ? upgradefmDNS_3002($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` SET `record_cert_type`=1 WHERE `record_type`='SSHFP'";
+
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.0-alpha3', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
 ?>
