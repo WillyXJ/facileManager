@@ -41,7 +41,7 @@ class fm_module_policies {
 						);
 			if (currentUserCan('manage_servers', $_SESSION['module']) && $num_rows > 1) $table_info['class'] .= ' grab';
 
-			$title_array = array(array('class' => 'header-tiny'), __('Source'), __('Destination'), __('Service'), __('Interface'),
+			$title_array = array(array('class' => 'header-tiny'), array('class' => 'header-tiny'), __('Source'), __('Destination'), __('Service'), __('Interface'),
 									__('Direction'), __('Time'), array('title' => __('Comment'), 'style' => 'width: 20%;'));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
@@ -267,6 +267,7 @@ HTML;
 
 		echo <<<HTML
 		<tr id="$row->policy_id" name="$row->policy_name"$disabled_class>
+			<td><i class="fa fa-bars template-icon"></i></td>
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
 			<td>$source_not $source</td>
 			<td>$destination_not $destination</td>
