@@ -1,6 +1,7 @@
 1.4-alpha3 (2016-??-??)
 =======================
 * Server - [improvement] Added reorder icon to the policy view.
+* Server - [bug] Fixed if-up-pre.d script on Debian-based systems. (Issue #356)
 
 1.4-alpha2 (2016-10-17)
 =======================

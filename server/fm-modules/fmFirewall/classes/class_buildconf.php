@@ -80,7 +80,7 @@ class fm_module_buildconf {
 			
 			/** Debian-based systems */
 			if (isDebianSystem($server_os_distro)) {
-				$data->files['/etc/network/if-pre-up.d/fmFirewall'] = "#!/bin/sh\n{$config_head}iptables-restore < $server_config_file\nexit0";
+				$data->files['/etc/network/if-pre-up.d/fmFirewall'] = "#!/bin/sh\n{$config_head}iptables-restore < $server_config_file\nexit 0";
 			}
 			if (is_array($files)) {
 				$data->files = array_merge($data->files, $files);
