@@ -516,7 +516,8 @@ h4 {
 .modules .active.upgrade {
 	background-color: #f5ebeb;
 }
-.display_results tbody tr.attention td:first-child{
+.display_results tbody tr.attention td:first-child,
+.modules tbody tr.active.upgrade td:first-child {
 	border-color: #CB3739;
 }
 .display_results th.header-actions {
