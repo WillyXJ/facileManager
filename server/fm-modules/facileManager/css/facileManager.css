@@ -541,7 +541,8 @@ h4 {
 }
 .display_results.sortable th:not(.header-nosort):hover,
 #help_buttons img,
-.eye-attention {
+.eye-attention,
+.popout {
 	cursor: pointer;
 }
 .display_results.sortable th i {
@@ -1043,17 +1044,18 @@ a {
 }
 
 .close {
-	float: right;
+	float: none;
 	border: none;
 	background: none;
+	background-color: #fff;
 	cursor: pointer;
 	font-weight: bold;
-	color: #333;
-	width: 20px;
+	color: #c11515;
 }
 
 .popup-header .close {
-	margin-top: 8px;
+	margin-top: 11px;
+	float: right;
 }
 
 .popup-wait {
@@ -1182,6 +1184,22 @@ a {
 
 .center {
 	text-align: center;
+}
+
+i.star {
+	padding-right: 2px;
+	color: #e8a412;
+}
+
+i.fail {
+	color: #ce0606;
+	float: none;
+}
+i.ok {
+	color: #07af17;
+}
+i.popout {
+	padding-right: 2px;
 }
 
 #plus {
@@ -1372,7 +1390,7 @@ span.not_installed {
 	text-align: right;
 	float: right;
 	width: 49%;
-	margin-top: 16px;
+	margin-top: 18px;
 }
 
 #help_file_container {

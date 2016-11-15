@@ -42,21 +42,21 @@ $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'
 if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Images */
-$__FM_CONFIG['icons']['fail']			= sprintf('<img src="fm-modules/%1$s/images/error24.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Failed'));
+$__FM_CONFIG['icons']['fail']			= sprintf('<i class="fa fa-times fa-lg fail" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Failed'));
 $__FM_CONFIG['icons']['caution']		= sprintf('<img src="fm-modules/%1$s/images/orangequestion.jpg" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Caution'));
-$__FM_CONFIG['icons']['ok']				= sprintf('<img src="fm-modules/%1$s/images/ok24.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));
+$__FM_CONFIG['icons']['ok']				= sprintf('<i class="fa fa-check fa-lg ok" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
 $__FM_CONFIG['icons']['edit']			= sprintf('<img src="fm-modules/%1$s/images/edit24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit'));
 $__FM_CONFIG['icons']['delete']			= sprintf('<img src="fm-modules/%1$s/images/delete24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Delete'));
 $__FM_CONFIG['icons']['copy']			= sprintf('<img src="fm-modules/%1$s/images/copy24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Duplicate'));
 $__FM_CONFIG['icons']['enable']			= sprintf('<img src="fm-modules/%1$s/images/enable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Enable'));
 $__FM_CONFIG['icons']['disable']		= sprintf('<img src="fm-modules/%1$s/images/disable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Disable'));
-$__FM_CONFIG['icons']['popout']			= sprintf('<img src="fm-modules/%1$s/images/popout24.png" border="0" alt="%2$s" title="%2$s" width="20" class="popout" />', $fm_name, _('Popout'));
-$__FM_CONFIG['icons']['close']			= sprintf('<img src="fm-modules/%1$s/images/error24.png" alt="%2$s" title="%2$s" class="close" />', $fm_name, _('Close'));
+$__FM_CONFIG['icons']['popout']			= sprintf('<i class="fa fa-external-link-square fa-lg popout" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Popout'));
+$__FM_CONFIG['icons']['close']			= sprintf('<i class="fa fa-window-close fa-lg close" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Close'));
 $__FM_CONFIG['icons']['pwd_change']		= sprintf('<img src="fm-modules/%1$s/images/profile24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit Profile'));
 $__FM_CONFIG['icons']['pwd_reset']		= sprintf('<img src="fm-modules/%1$s/images/password-change24.png" border="0" alt="%2$s" title="%2$s" height="20" />', $fm_name, _('Send Password Reset Email'));
 $__FM_CONFIG['icons']['account']		= sprintf('<img src="fm-modules/%1$s/images/account24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Account Settings'));
-$__FM_CONFIG['icons']['star']			= sprintf('<img src="fm-modules/%1$s/images/star16.png" border="0" alt="%2$s" title="%2$s" width="12" style="padding-right: 2px;" />', $fm_name, _('Super Admin'));
-$__FM_CONFIG['icons']['template_user']	= sprintf('<img src="fm-modules/%1$s/images/template_user16.png" border="0" alt="%2$s" title="%2$s" width="12" style="padding-right: 2px;" />', $fm_name, _('Template Account'));
+$__FM_CONFIG['icons']['star']			= sprintf('<i class="fa fa-star star" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Super Admin'));
+$__FM_CONFIG['icons']['template_user']	= sprintf('<i class="fa fa-user" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Template Account'));
 $__FM_CONFIG['icons']['fm_logo']		= sprintf('<img src="'. $GLOBALS['FM_URL'] . 'fm-modules/%1$s/images/fm.png" border="0" alt="%1$s" title="%1$s" style="padding-left: 17px;" />', $fm_name);
 $__FM_CONFIG['icons']['shield_error']	= sprintf('<img src="fm-modules/%1$s/images/redshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Error'));
 $__FM_CONFIG['icons']['shield_info']	= sprintf('<img src="fm-modules/%1$s/images/yellowshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Information'));

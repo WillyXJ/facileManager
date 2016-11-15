@@ -272,7 +272,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui-1.10.2.min.css" />
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css">
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/tooltip.css" type="text/css">
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-1.9.1.min.js"></script>
@@ -2848,6 +2848,8 @@ function setUserModule($user_default_module) {
  */
 function getMenuURL($search_slug = null) {
 	global $menu, $submenu;
+	
+	if (!is_array($menu)) return false;
 	
 	if (!$search_slug) $search_slug = $GLOBALS['basename'];
 	if (is_array($search_slug)) $search_slug = $search_slug[1];
