@@ -410,8 +410,7 @@ class fm_users {
 					$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				}
 			} else {
-				$user_actions = ($row->user_id == $_SESSION['user']['id'] && getOption('auth_method') != 2) ? '<a style="width: 110px; margin: auto;" class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#">' . $__FM_CONFIG['icons']['pwd_change'] . '</a>' : 'N/A';
-				$edit_status = $user_actions;
+				$edit_status = '<a style="width: 110px; margin: auto;" class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#">' . $__FM_CONFIG['icons']['pwd_change'] . '</a>';
 			}
 
 			$star = (userCan($row->user_id, 'do_everything')) ? $__FM_CONFIG['icons']['star'] : null;

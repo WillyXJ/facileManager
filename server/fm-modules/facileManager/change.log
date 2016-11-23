@@ -2,6 +2,8 @@
 =======================
 * Server - [improvement] Replaced several icons with Font Awesome fonts.
 * Server - [improvement] CSS tweaks.
+* Server - [bug] Fixed an issue where local account passwords could not be
+           changed when LDAP authentication was being used. (Issue #360)
 
 3.0-alpha2 (2016-10-17)
 =======================
@@ -22,7 +24,7 @@
 * Server - [feature] Use mysqli functions where available. (Issue #343)
 * Server - [feature] Added setting to send audit logs to syslog. (Issue #326)
 
-2.3.3 (2016-10-??)
+2.3.3 (2016-10-07)
 ==================
 * Server - [bug] Fixed an issue where fM would hang during the software update
            check. (Issue #353)

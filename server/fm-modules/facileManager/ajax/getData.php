@@ -46,7 +46,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
 	$form_bits = array('user_login', 'user_email', 'user_module');
-	if (getOption('auth_method') == 1) {
+	if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_auth_type') == 1) {
 		$form_bits[] = 'user_password';
 	}
 	$edit_form = '<div id="popup_response" style="display: none;"></div>' . "\n";
