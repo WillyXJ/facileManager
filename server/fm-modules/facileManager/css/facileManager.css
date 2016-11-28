@@ -506,18 +506,18 @@ h4 {
 .display_results tbody tr.disabled td:first-child {
 	border-color: #aaa;
 }
-.display_results tbody tr.build {
+.display_results tbody tr.build,
+.modules .active.upgrade {
 	background-color: #E6F4F9;
 }
-.display_results tbody tr.build td:first-child {
+.display_results tbody tr.build td:first-child,
+.modules tbody tr.active.upgrade td:first-child {
 	border-color: #2ea2cc;
 }
-.display_results tbody tr.attention,
-.modules .active.upgrade {
+.display_results tbody tr.attention {
 	background-color: #f5ebeb;
 }
-.display_results tbody tr.attention td:first-child,
-.modules tbody tr.active.upgrade td:first-child {
+.display_results tbody tr.attention td:first-child {
 	border-color: #CB3739;
 }
 .display_results th.header-actions {
@@ -602,18 +602,13 @@ h4 {
 	padding-right: 8px;
 }
 .modules .upgrade_notice {
-	background-color: #D9D9D9;
-	background-color: rgba(0,0,0,.03);
+	background-color: #fff8e5;
 	padding: 6px 1em;
 	position: relative;
 	margin: 0 4px 4px 0;
 }
 .modules .upgrade_notice p {
 	margin: 0;
-}
-.modules .active.upgrade .upgrade_notice {
-	background-color: #F2D5D5;
-	background-color: rgba(0,0,0,.03);
 }
 .modules .module_actions {
 	font-size: 12px;

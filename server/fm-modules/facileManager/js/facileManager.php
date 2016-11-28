@@ -602,7 +602,7 @@ echo '$(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply, .double-click\"), #module_install, #module_upgrade",
+    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply, .double-click\"), #module_install, #module_upgrade, #update_core",
     "click tap",function(e){
         var $this 	= $(this);
         task		= $this.attr("id");

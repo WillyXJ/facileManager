@@ -4,6 +4,7 @@
 * Server - [improvement] CSS tweaks.
 * Server - [bug] Fixed an issue where local account passwords could not be
            changed when LDAP authentication was being used. (Issue #360)
+* Server - [feature] Added server update support via the modules page. (Issue #113)
 
 3.0-alpha2 (2016-10-17)
 =======================

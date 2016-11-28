@@ -152,6 +152,25 @@ class fm_tools {
 				return true;
 
 				break;
+			case 'update':
+				if (!in_array($module_name, getAvailableModules())) return;
+				
+				$fm_new_version_available = getOption('version_check', 0, $module_name);
+				if ($fm_new_version_available !== false && isset($fm_new_version_available['data']['link'])) {
+					list($message, $local_update_package) = downloadfMFile($fm_new_version_available['data']['link']);
+					if ($local_update_package !== false) {
+						$message .= extractPackage($local_update_package);
+					}
+				} else {
+					$message = _('No updated packages are found.');
+				}
+				
+				$response = '<strong>' . $module_name . '</strong><br /><pre>' . $message . '</pre>';
+				if (strpos($message, "\n")) $response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
+				
+				return $response;
+
+				break;
 		}
 		
 		return false;

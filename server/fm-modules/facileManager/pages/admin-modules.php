@@ -26,7 +26,8 @@ if (!currentUserCan('manage_modules')) unAuth();
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 
-$output = $avail_modules = $response = null;
+$output = $avail_modules = $response = $update_core = null;
+$allow_update_core = true;
 $import_output = sprintf('<p>%s <i class="fa fa-spinner fa-spin"></i></p>', _('Processing...'));
 
 if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
@@ -58,7 +59,20 @@ printHeader();
 @printMenu();
 
 echo '<div id="body_container">';
-if (!empty($response) || !empty($fm_new_version_available)) echo '<div id="response">' . $fm_new_version_available . '<p>' . $response . '</p></div>';
+if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
+
+if (!empty($fm_new_version_available)) {
+	list($tmp_dir, $allow_update_core) = clearUpdateDir();
+	
+	if (!is_writable_r(ABSPATH)) $allow_update_core = false;
+	
+	extract($fm_new_version_available);
+
+	$buttons = sprintf('<a href="%s" class="button" />%s</a> ', $link, sprintf(_('Download %s'), $version));
+	$buttons .= ($allow_update_core) ? sprintf('<input type="button" name="update_core" id="update_core" value="%s" class="button primary" />', _('Update Core')) : sprintf('<p>' . _('%s and %s need to be writeable by %s in order for the core and modules to be updated automatically.') . '</p>', $fm_temp_directory, ABSPATH, $__FM_CONFIG['webserver']['user_info']['name']);
+
+	$update_core = sprintf('<h2>%s</h2><p>%s</p><p>%s</p><br />', sprintf(_('Update %s Core'), $fm_name), $text, $buttons);
+}
 
 $table_info = array(
 				'class' => 'display_results modules',
@@ -67,7 +81,7 @@ $table_info = array(
 			);
 
 if (currentUserCan('manage_modules')) {
-	$bulk_actions_list = array(_('Activate'), _('Deactivate'));
+	$bulk_actions_list = array(_('Activate'), _('Deactivate'), _('Update'));
 }
 if (count((array) $bulk_actions_list)) {
 	$title_array[] = array(
@@ -82,7 +96,7 @@ $header = displayTableHeader($table_info, $title_array);
 
 $modules = getAvailableModules();
 if (count($modules)) {
-	$module_display = sprintf('<p>%s</p>', _('The following modules have been detected:')) . @buildBulkActionMenu($bulk_actions_list, 'module_list') . $header;
+	$module_display = @buildBulkActionMenu($bulk_actions_list, 'module_list') . $header;
 
 	foreach ($modules as $module_name) {
 		/** Include module variables */
@@ -106,9 +120,7 @@ if (count($modules)) {
 				}
 			} else {
 				include(ABSPATH . 'fm-includes/version.php');
-				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
-					$upgrade_link = sprintf('<span class="upgrade_link"><a href="#" id="module_upgrade" name="%s" />%s</a></span>' . "\n", $module_name, _('Update Database Now'));
-				} else {
+				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version'], '<')) {
 					$upgrade_link .= sprintf('<span class="upgrade_link">' . _('%s v%s or later is required<br />before this module can be upgraded.') . '</span>', $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
 				}
 				$activate_link = $uninstall_link;
@@ -118,7 +130,7 @@ if (count($modules)) {
 		} else {
 			$module_version = $__FM_CONFIG[$module_name]['version'];
 			include(ABSPATH . 'fm-includes/version.php');
-			if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version']) >= 0) {
+			if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version'], '>=')) {
 				$status_options .= sprintf('<a href="#" id="module_install" name="%s" />%s</a>', $module_name, _('Install Now'));
 			} else {
 				$status_options .= sprintf(_('%s v%s or later is required.'), $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
@@ -126,7 +138,7 @@ if (count($modules)) {
 		}
 		
 		if ($module_new_version_available = isNewVersionAvailable($module_name, $module_version)) {
-			$module_new_version_available = '<div class="upgrade_notice">' . $module_new_version_available . '</div>';
+			$module_new_version_available = '<div class="upgrade_notice">' . $module_new_version_available['text'] . '</div>';
 			$class[] = 'upgrade';
 		}
 		$class = implode(' ', array_unique($class));
@@ -154,14 +166,16 @@ HTML;
 	$module_display .= sprintf(_('<p>If you don\'t have any modules, you can download them from the %smodule directory</a>.</p>') . "\n", '<a href="http://www.facilemanager.com/modules/">');
 }
 
-echo '
+printf('
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="">
-			<h2>' . getPageTitle() . '</h2>
-			' . $module_display . '
+			%s
+			<h2>%s</h2>
+			%s
 		</form>
 	</div>
-</div>' . "\n";
+</div>' . "\n",
+		$update_core, getPageTitle(), $module_display);
 
 printFooter(null, $output);
 
