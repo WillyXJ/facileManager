@@ -62,7 +62,7 @@ echo '<div id="body_container">';
 if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
 
 if (!empty($fm_new_version_available)) {
-	list($tmp_dir, $allow_update_core) = clearUpdateDir();
+	list($fm_temp_directory, $allow_update_core) = clearUpdateDir();
 	
 	if (!is_writable_r(ABSPATH)) $allow_update_core = false;
 	

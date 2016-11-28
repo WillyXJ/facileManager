@@ -169,7 +169,7 @@ function isNewVersionAvailable($package, $version) {
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
 		$method = 'insert';
-	} elseif (strpos($last_version_check['data'], $version)) {
+	} elseif (isset($last_version_check['data']['version']) && $last_version_check['data']['version'] == $version) {
 		$last_version_check['timestamp'] = 0;
 	}
 	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
@@ -1088,7 +1088,7 @@ function buildDashboard() {
 		$dashboard = <<<DASH
 	<div id="shadow_box" class="fullwidthbox">
 		<div id="shadow_container" class="fullwidthbox">
-		$fm_new_version_available
+		{$fm_new_version_available['text']}
 		</div>
 	</div>
 	<br />
@@ -1123,7 +1123,7 @@ function buildHelpFile() {
 	/** facileManager help */
 	$body = <<<HTML
 <div id="issue_tracker">
-	<p>Have an idea for a new feature? Find a bug? Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
+	<p>Have an idea for a new feature? Found a bug? Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
 </div>
 <h3>$fm_name</h3>
 <ul>
@@ -2248,6 +2248,12 @@ function getBadgeCounts($type) {
 	$badge_count = 0;
 	
 	if (!defined('INSTALL') && !defined('UPGRADE')) {
+		if ($type == 'core') {
+			include(ABSPATH . 'fm-includes/version.php');
+			
+			/** New versions available */
+			if (isNewVersionAvailable($fm_name, $fm_version)) $badge_count++;
+		}
 		if ($type == 'modules') {
 			/** Get fM badge counts */
 			$modules = getAvailableModules();
@@ -3290,7 +3296,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	foreach ($host_array as $host) {
 		/** Test the port first */
 		if (!socketTest($host, $port, 10)) {
-			return '[' . $host . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $port, $port) . "\n";
+			return '[' . $host . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $host, $port) . "\n";
 			$failures = true;
 			break;
 		}
@@ -3364,6 +3370,169 @@ function addSyslogEntry($message, $module) {
 		}
 		closelog();
 	}
+}
+
+
+/**
+ * Performs a recursive is_writable
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $dir Top level directory to check
+ * @return boolean
+ */
+function is_writable_r($dir) {
+	if (is_dir($dir)) {
+		if (is_writable($dir)) {
+			$objects = scandir($dir);
+			foreach ($objects as $object) {
+				if ($object != '.' && $object != '..') {
+					if (!is_writable_r($dir . DIRECTORY_SEPARATOR . $object)) return false;
+					else continue;
+				}
+			}    
+			return true;    
+		} else {
+			return false;
+		}
+	} elseif (file_exists($dir)) {
+		return is_writable($dir);
+	}
+}
+
+
+/**
+ * Downloads a file from the fM website
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $file File to download
+ * @return array
+ */
+function downloadfMFile($file) {
+	global $__FM_CONFIG;
+	
+	$message = "Downloading $file\n";
+	
+	list($tmp_dir, $created) = clearUpdateDir();
+	if (!$created) {
+		return sprintf('<p>' . _('%s and %s need to be writeable by %s in order for the core and modules to be updated automatically.') . "</p>\n", $tmp_dir, ABSPATH, $__FM_CONFIG['webserver']['user_info']['name']);
+	}
+
+	$local_file = $tmp_dir . basename($file);
+	@unlink($local_file);
+	
+	$fh = fopen($local_file, 'w+');
+	$ch = curl_init();
+	$options = array(
+		CURLOPT_URL				=> $file,
+		CURLOPT_TIMEOUT			=> 3600,
+		CURLOPT_HEADER			=> false,
+		CURLOPT_FOLLOWLOCATION	=> true,
+		CURLOPT_SSL_VERIFYPEER  => false,
+		CURLOPT_RETURNTRANSFER  => true
+	);
+	@curl_setopt_array($ch, $options);
+	$result = curl_exec($ch);
+	@fputs($fh, $result);
+	@fclose($fh);
+	if ($result === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+		$message .= "Unable to download file.\n";
+		$message .= "\n" . curl_error($ch) . "\n";
+		
+		curl_close($ch);
+		$local_file = false;
+	}
+	
+	curl_close($ch);
+	
+	return array($message, $local_file);
+}
+
+
+/**
+ * Extracts files
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $package Package names to extract
+ */
+function extractPackage($package) {
+	$message = null;
+	
+	if (!is_array($package)) {
+		$package = array($package);
+	}
+	
+	foreach ($package as $filename) {
+		$message .= sprintf(_('Extracting %s') . "\n", basename($filename));
+
+		$tmp_dir = dirname($filename);
+		if (!file_exists($filename)) {
+			return sprintf(_('%s does not exist!') . "\n", $filename);
+		}
+
+		$path_parts = pathinfo($filename);
+		$untar_opt = '-C ' . $tmp_dir . ' -x';
+		switch($path_parts['extension']) {
+			case 'bz2':
+				$untar_opt .= 'j';
+				break;
+			case 'tgz':
+			case 'gz':
+				$untar_opt .= 'z';
+				break;
+		}
+		$untar_opt .= 'f';
+
+		$command = findProgram('tar') . " $untar_opt $filename";
+		@system($command, $retval);
+		if ($retval) {
+			$message .= sprintf(_('Failed to extract %s!') . "\n", $filename);
+			return $message;
+		}
+	}
+		
+	/** Move files */
+	$message .= sprintf(_('Moving files to %s') . "\n", ABSPATH);
+	$command = findProgram('cp') . " -r $tmp_dir/facileManager/server/* " . ABSPATH;
+	@system($command, $retval);
+	if ($retval) {
+		$message .= _('Failed to save files!') . "\n";
+	}
+	
+	if ($tmp_dir != '/') {
+		@system(findProgram('rm') . " -rf $tmp_dir");
+	}
+	
+	return $message;
+}
+
+
+/**
+ * Clears out the temporary update directory
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array Temp directory and if it was created
+ */
+function clearUpdateDir() {
+	$created = true;
+	
+	$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
+	$tmp_dir = rtrim($fm_temp_directory, '/') . '/fm_updates/';
+	system('rm -rf ' . $tmp_dir);
+	if (!is_dir($tmp_dir)) {
+		if (!@mkdir($tmp_dir, 0777, true)) {
+			$created = false;
+		}
+	}
+
+	return array($tmp_dir, $created);
 }
 
 
