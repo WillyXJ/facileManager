@@ -36,14 +36,10 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 		switch($_POST['task']) {
 			case 'connect-test':
 				$response = buildPopup('header', _('Connectivity Test Results'));
-				$response .= '<pre>' . "\n";
 				$response .= $fm_shared_module_tools->connectTests();
-				$response .= '</pre>' . "\n";
 				break;
 		}
 	}
-	
-	$response .= "<br />\n";
 } else {
 	echo buildPopup('header', _('Error'));
 	printf("<p>%s</p>\n", _('You are not authorized to run these tools.'));

@@ -32,7 +32,7 @@ function moduleFunctionalCheck() {
 	$html_checks = null;
 	
 	/** Count active name servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . __('You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL(__('Servers')));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . _('You currently have no active servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL(_('Servers')));
 	
 	/** Count global options */
 	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : sprintf('<p>' . __('You currently have no global options defined for named.conf. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL(__('Options')));
@@ -68,9 +68,9 @@ function buildModuleDashboard() {
 			if ($server_results[$i]->server_installed != 'yes') {
 				$errors .= sprintf('<b>%s</b> - %s' . "\n", $server_results[$i]->server_name, __('Client is not installed.'));
 			} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name, __('Client needs to be upgraded.'));
+				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(_('Servers')), $server_results[$i]->server_name, __('Client needs to be upgraded.'));
 			} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
-				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name, __('Server needs a new configuration built.'));
+				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(_('Servers')), $server_results[$i]->server_name, __('Server needs a new configuration built.'));
 			}
 		}
 	}
@@ -759,7 +759,7 @@ function buildModuleMenu() {
 		addSubmenuPage('zones.php', null, __('Record Validation'), null, $_SESSION['module'], 'zone-records-validate.php');
 	
 	addObjectPage(__('Config'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', __('Servers'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
+		addSubmenuPage('config-servers.php', _('Servers'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
 		addSubmenuPage('config-servers.php', __('Views'), __('Views'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-views.php');
 		addSubmenuPage('config-servers.php', __('ACLs'), __('Access Control Lists'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
 		addSubmenuPage('config-servers.php', __('Keys'), __('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
@@ -936,14 +936,14 @@ function availableDNSServers($server_id_type = 'serial') {
 	/** Server names */
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
 	if ($fmdb->num_rows) {
-		$server_array[__('Servers')][] = null;
+		$server_array[_('Servers')][] = null;
 		$results = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[__('Servers')][$j][] = $results[$i]->server_name;
+			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
 			if ($server_id_type == 'serial') {
-				$server_array[__('Servers')][$j][] = $results[$i]->server_serial_no;
+				$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
 			} elseif ($server_id_type == 'id') {
-				$server_array[__('Servers')][$j][] = 's_' . $results[$i]->server_id;
+				$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
 			}
 			$j++;
 		}

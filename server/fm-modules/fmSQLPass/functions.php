@@ -33,7 +33,7 @@ function moduleFunctionalCheck() {
 	$checks = array();
 	
 	/** Count active database servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf(__('<p>You currently have no active database servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), getMenuURL(__('Servers')));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf(__('<p>You currently have no active database servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), getMenuURL(_('Servers')));
 	
 	/** Count groups */
 	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : sprintf(__('<p>You currently have no database server groups defined. <a href="%s">Click here</a> to define one or more.</p>'), getMenuURL(__('Server Groups')));
@@ -291,7 +291,7 @@ function changePostgreSQLUserPassword($server_name, $server_port, $admin_user, $
  */
 function buildModuleMenu() {
 	addObjectPage(__('Config'), __('Database Servers'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', __('Servers'), __('Database Servers'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', _('Servers'), __('Database Servers'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
 		addSubmenuPage('config-servers.php', __('Groups'), __('Server Groups'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-groups.php');
 		addSubmenuPage('config-servers.php', __('Passwords'), __('Passwords'), array('manage_passwords', 'view_all'), $_SESSION['module'], 'config-passwords.php');
 
