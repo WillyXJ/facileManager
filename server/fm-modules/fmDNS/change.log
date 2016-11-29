@@ -4,6 +4,8 @@
 * Server - [improvement] Added support for additional SSHFP algorithms and
            certificate types. (Issue #355)
 * Server - [bug] Unprivileged users could see the ACL add new button.
+* Server - [bug] Fixed rate-limit options when only limits for domains are
+           specified.
 
 3.0-alpha2 (2016-10-17)
 =======================

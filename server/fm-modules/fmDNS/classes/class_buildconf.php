@@ -1568,7 +1568,7 @@ HTML;
 
 		/** Merge arrays */
 		$rate_config_array = array_merge((array)$rate_config_array, $server_config);
-		unset($rate_config_array, $server_config);
+		unset($server_config);
 		
 		foreach ($rate_config_array as $cfg_name => $value_array) {
 			foreach ($value_array as $domain_name => $cfg_data) {
@@ -1577,16 +1577,20 @@ HTML;
 					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
 				} else {
 					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
-						$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
+						$ratelimits_domains .= "\trate-limit {\n\t\tdomain $domain_name;\n";
 						foreach ($domain_cfg_data as $domain_cfg_data2) {
 							list($cfg_param, $cfg_comment) = $domain_cfg_data2;
 							$ratelimits_domains .= $this->formatConfigOption($domain_cfg_name, $cfg_param, $cfg_comment);
 						}
+						$ratelimits_domains .= "\t};\n";
 					}
 				}
 			}
 		}
-		return ($ratelimits || $ratelimits_domains) ? "\trate-limit {\n{$ratelimits}{$ratelimits_domains}\t};\n\n" : null;
+		if ($ratelimits) {
+			$ratelimits = "\trate-limit {\n{$ratelimits}\t};\n";
+		}
+		return ($ratelimits || $ratelimits_domains) ? $ratelimits . $ratelimits_domains : null;
 	}
 	
 	/**
@@ -1848,7 +1852,7 @@ HTML;
 	function getRRSetOrder($view_id, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
-		$rrsets = $rrsets_domains = $rrset_config_array = null;
+		$rrsets = $rrsets_domains = $rrset_config_array = $config = null;
 		
 		/** Use server-specific configs if present */
 		foreach (array($server_serial_no, 0) as $serial_no) {
@@ -1864,14 +1868,14 @@ HTML;
 			}
 		}
 		
-		foreach ($config as $cfg_name => $value_array) {
+		foreach ((array) $config as $cfg_name => $value_array) {
 			foreach ($value_array as $cfg_data) {
 				list($cfg_info, $cfg_comment) = $cfg_data;
 				$rrsets .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
 			}
+			$rrsets = str_replace($cfg_name, null, $rrsets);
 		}
-		$rrsets = str_replace($cfg_name, null, $rrsets);
-		return ($rrsets) ? "\trrset-order {\n{$rrsets}\t};\n\n" : null;
+		return ($rrsets) ? "\trrset-order {\n{$rrsets}\t};\n" : null;
 	}
 	
 }
