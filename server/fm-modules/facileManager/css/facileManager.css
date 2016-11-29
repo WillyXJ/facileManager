@@ -492,6 +492,7 @@ h4 {
 	background-color:#fff;
 }
 .display_results tbody tr.disabled,
+.display_results tbody tr.disabled td i.star,
 .grey {
 	color: #aaa;
 }

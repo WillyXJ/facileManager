@@ -728,7 +728,7 @@ PERM;
 		</form>
 		<script>
 			$(document).ready(function() {
-				$("select").select2({
+				$(".form-table select").select2({
 					containerCss: { "min-width": "165px" },
 					minimumResultsForSearch: -1
 				});
