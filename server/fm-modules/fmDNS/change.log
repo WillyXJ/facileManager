@@ -3,6 +3,7 @@
 * Server - [improvement] BIND time formats are allowed for TTL and SOA values.
 * Server - [improvement] Added support for additional SSHFP algorithms and
            certificate types. (Issue #355)
+* Server - [bug] Unprivileged users could see the ACL add new button.
 
 3.0-alpha2 (2016-10-17)
 =======================
