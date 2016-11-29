@@ -55,12 +55,6 @@ if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
 require(ABSPATH . 'fm-includes/version.php');
 $fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version);
 
-printHeader();
-@printMenu();
-
-echo '<div id="body_container">';
-if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
-
 if (!empty($fm_new_version_available)) {
 	list($fm_temp_directory, $allow_update_core) = clearUpdateDir();
 	
@@ -69,10 +63,20 @@ if (!empty($fm_new_version_available)) {
 	extract($fm_new_version_available);
 
 	$buttons = sprintf('<a href="%s" class="button" />%s</a> ', $link, sprintf(_('Download %s'), $version));
-	$buttons .= ($allow_update_core) ? sprintf('<input type="button" name="update_core" id="update_core" value="%s" class="button primary" />', _('Update Core')) : sprintf('<p>' . _('%s and %s need to be writeable by %s in order for the core and modules to be updated automatically.') . '</p>', $fm_temp_directory, ABSPATH, $__FM_CONFIG['webserver']['user_info']['name']);
+	if ($allow_update_core) {
+		$buttons .= sprintf('<input type="button" name="update_core" id="update_core" value="%s" class="button primary" />', _('Update Core'));
+	} else {
+		$response .= sprintf(_('%s and %s need to be writeable by %s in order for the core and modules to be updated automatically.'), $fm_temp_directory, ABSPATH, $__FM_CONFIG['webserver']['user_info']['name']);
+	}
 
 	$update_core = sprintf('<h2>%s</h2><p>%s</p><p>%s</p><br />', sprintf(_('Update %s Core'), $fm_name), $text, $buttons);
 }
+
+printHeader();
+@printMenu();
+
+echo '<div id="body_container">';
+if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
 
 $table_info = array(
 				'class' => 'display_results modules',

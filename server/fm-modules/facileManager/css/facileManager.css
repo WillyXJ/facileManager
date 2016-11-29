@@ -815,12 +815,10 @@ tbody {
 	text-align: center;
 	color: #000;
 	font-size: 10pt;
-	margin-top: -15px;
+	margin-top: -26px;
 	width: 75%;
 	margin-left: 12.5%;
-	padding-top: 1px;
 	background-color: #FFFBCC;
-	line-height: 50%;
 	border: 1px #E6DB55 solid;
 	border-top: none;
 	-webkit-border-bottom-right-radius: 3px;
@@ -832,6 +830,11 @@ tbody {
 	-khtml-box-shadow: 0 4px 10px -1px #ccc;
 	box-shadow: 0 4px 10px -1px #ccc;
 	z-index: 2;
+}
+#response p {
+	position: relative;
+	top: 6px;
+	padding: 0 10px;
 }
 #response p.error {
 	color: red;
