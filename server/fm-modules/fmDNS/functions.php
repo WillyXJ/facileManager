@@ -581,6 +581,17 @@ function reloadAllowed($domain_id = null) {
 	
 
 /**
+ * Removed trailing periods
+ *
+ * @since 1.0
+ * @package facileManager
+ */
+function trimFullStop($value){
+	return rtrim($value, '.');
+}
+
+
+/**
  * Gets the menu badge counts
  *
  * @since 1.1

@@ -833,16 +833,6 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 	return $build_select;
 }
 
-/**
- * Removed trailing periods
- *
- * @since 1.0
- * @package facileManager
- */
-function trimFullStop($value){
-	return rtrim($value, '.');
-}
-
 
 /**
  * Gets name from an id
