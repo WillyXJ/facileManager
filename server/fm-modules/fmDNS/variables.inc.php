@@ -151,6 +151,11 @@ $__FM_CONFIG['fmDNS']['default']['options'] = @array(
 		'clones_use_dnames' => array(
 				'description' => array(__('Use DNAME Resource Records for Clones'), __('When creating cloned zones, use the DNAME resource record rather than a full clone (when available).')),
 				'default_value' => 'yes',
+				'type' => 'checkbox'),
+		'zone_sort_hierarchical' => array(
+				'description' => array(__('Sort Zone Names Hierarchically'), __('Sort zone names with a hierarchy to group sub-zones together. For example:') . "
+								<pre>domain.com\nbar.domain.com\nfoo.bar.domain.com</pre>"),
+				'default_value' => 'no',
 				'type' => 'checkbox')
 	);
 

@@ -7,6 +7,7 @@
 * Server - [bug] Fixed rate-limit options when only limits for domains are
            specified.
 * Server - [improvement] Language changes.
+* Server - [improvement] Added the option to sort zones hierarchically. (Issue #278)
 
 3.0-alpha2 (2016-10-17)
 =======================
