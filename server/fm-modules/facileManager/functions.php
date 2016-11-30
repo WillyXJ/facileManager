@@ -182,6 +182,10 @@ function isNewVersionAvailable($package, $version) {
 			$result = getPostData($fm_site_url . '?' . http_build_query($data), $data, 'get', array(CURLOPT_CONNECTTIMEOUT => 1));
 		}
 		
+		if (isSerialized($result)) {
+			$result = unserialize($result);
+		}
+		
 		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, true, 0, $package);
 		
 		return $result;
