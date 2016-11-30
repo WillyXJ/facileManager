@@ -26,7 +26,7 @@ $(document).ready(function() {
 		
 		$.ajax({
 			type: "POST",
-			url: "fm-modules/fmSQLPass/ajax/processPost.php",
+			url: "fm-modules/' . $_SESSION['module'] . '/ajax/processPost.php",
 			data: $("#manage").serialize(),
 			success: function(response)
 			{

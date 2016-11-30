@@ -30,13 +30,17 @@ if (file_exists($module_tools_file)) {
 	include($module_tools_file);
 }
 
+if (!isset($fm_module_tools)) {
+	$fm_module_tools = new fm_shared_module_tools();
+}
+
 $response = null;
 if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
 			case 'connect-test':
 				$response = buildPopup('header', _('Connectivity Test Results'));
-				$response .= $fm_shared_module_tools->connectTests();
+				$response .= $fm_module_tools->connectTests();
 				break;
 		}
 	}

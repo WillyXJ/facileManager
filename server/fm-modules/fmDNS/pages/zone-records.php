@@ -52,7 +52,7 @@ define('FM_INCLUDE_SEARCH', true);
 printHeader();
 @printMenu();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 $search_query = createSearchSQL(array('name', 'value', 'ttl', 'class', 'text', 'comment'), 'record_');
 

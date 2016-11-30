@@ -41,7 +41,7 @@ class fm_module_templates {
 						);
 
 			global $fm_dns_records;
-			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($template_type)));
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 

@@ -25,7 +25,7 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
 $option_type = (isset($_GET['option_type'])) ? sanitize(ucfirst($_GET['option_type'])) : 'Global';
 $display_option_type = $__FM_CONFIG['options']['avail_types'][strtolower($option_type)];

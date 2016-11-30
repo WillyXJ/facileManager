@@ -27,7 +27,7 @@ $template_type = 'domain';
 $table = 'domains';
 
 if (!empty($_POST)) {
-	include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 
 	if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'create';

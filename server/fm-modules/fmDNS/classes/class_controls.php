@@ -63,7 +63,7 @@ class fm_dns_controls {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		if (!class_exists('fm_dns_acls')) {
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
 		
 		/** Validate post */
@@ -105,7 +105,7 @@ class fm_dns_controls {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		if (!class_exists('fm_dns_acls')) {
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
 		
 		/** Validate post */
@@ -164,11 +164,11 @@ class fm_dns_controls {
 		global $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
 		
 		if (!class_exists('fm_dns_acls')) {
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
 		
 		if (!class_exists('fm_dns_keys') && $type == 'controls') {
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_keys.php');
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 		}
 		
 		$disabled_class = ($row->control_status == 'disabled') ? ' class="disabled"' : null;

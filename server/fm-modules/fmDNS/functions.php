@@ -719,7 +719,7 @@ function setDefaultOverrideOptions() {
 	}
 	
 	if (is_array($config)) {
-		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		
 		foreach ($config as $config_data) {
 			$fm_module_options->add($config_data);

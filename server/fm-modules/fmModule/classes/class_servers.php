@@ -20,7 +20,9 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_servers {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
+
+class fm_module_servers extends fm_shared_module_servers {
 	
 	/**
 	 * Displays the server list

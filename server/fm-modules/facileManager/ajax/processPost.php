@@ -86,7 +86,10 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				returnUnAuth();
 			}
 			
-			$bulk_class = $fm_shared_module_servers;
+			if (!class_exists('fm_module_servers')) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+			}
+			$bulk_class = $fm_module_servers;
 			$bulk_function = 'doClientUpgrade';
 			$page = _('Servers');
 			break;
@@ -97,7 +100,10 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 				returnUnAuth();
 			}
 			
-			$bulk_class = $fm_shared_module_servers;
+			if (!class_exists('fm_module_servers')) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+			}
+			$bulk_class = $fm_module_servers;
 			$bulk_function = 'doBulkServerBuild';
 			$page = _('Servers');
 			break;
@@ -122,12 +128,15 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND server_status="active" AND server_installed="yes"');
 		$server_count = $fmdb->num_rows;
 		$server_results = $fmdb->last_result;
+		if (!class_exists('fm_module_servers')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+		}
 		for ($i=0; $i<$server_count; $i++) {
 			if (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-				$result .= $fm_shared_module_servers->doClientUpgrade($server_results[$i]->server_serial_no);
+				$result .= $fm_module_servers->doClientUpgrade($server_results[$i]->server_serial_no);
 				$result .= "\n";
 			} elseif ($server_results[$i]->server_build_config != 'no') {
-				$result .= $fm_shared_module_servers->doBulkServerBuild($server_results[$i]->server_serial_no);
+				$result .= $fm_module_servers->doBulkServerBuild($server_results[$i]->server_serial_no);
 				$result .= "\n";
 			}
 		}

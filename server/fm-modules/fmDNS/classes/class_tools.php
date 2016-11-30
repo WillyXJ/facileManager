@@ -20,7 +20,9 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_tools {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_tools.php');
+
+class fm_module_tools extends fm_shared_module_tools {
 	
 	/**
 	 * Imports records from a zone file and presents a confirmation
@@ -441,7 +443,7 @@ BODY;
 	/**
 	 * Tests server connectivity
 	 */
-	function connectTests($server_data) {
+	function moduleConnectTests($server_data) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** dns tests */

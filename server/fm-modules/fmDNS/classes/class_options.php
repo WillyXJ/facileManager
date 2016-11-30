@@ -111,7 +111,7 @@ class fm_module_options {
 		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
-		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Added option:\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
@@ -173,7 +173,7 @@ class fm_module_options {
 		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
-		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
@@ -203,7 +203,7 @@ class fm_module_options {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		if (!class_exists('fm_dns_acls')) {
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_acls.php');
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
@@ -363,7 +363,7 @@ HTML;
 
 						$.ajax({
 							type: "POST",
-							url: "fm-modules/fmDNS/ajax/getData.php",
+							url: "fm-modules/%s/ajax/getData.php",
 							data: form_data,
 							success: function(response) {
 								$swap.html(response);
@@ -377,7 +377,7 @@ HTML;
 					});
 					</script>
 				</tr>',
-					__('Zone'), $domain_id, $available_zones
+					__('Zone'), $domain_id, $available_zones, $_SESSION['module']
 				);
 		}
 		

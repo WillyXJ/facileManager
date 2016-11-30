@@ -25,7 +25,7 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_logging.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
 $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'channel';
 $display_type = $__FM_CONFIG['logging']['avail_types'][$type];

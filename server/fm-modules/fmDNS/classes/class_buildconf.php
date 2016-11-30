@@ -20,7 +20,9 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_buildconf {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_buildconf.php');
+
+class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	/**
 	 * Generates the server config and updates the DNS server
@@ -44,7 +46,7 @@ class fm_module_buildconf {
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		$message = null;
 		extract($post_data);
-		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
+		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
 
 		$GLOBALS['built_domain_ids'] = null;
@@ -989,7 +991,7 @@ class fm_module_buildconf {
 			
 			/** Are there any skipped records? */
 			global $fm_dns_records;
-			if (!class_exists('fm_dns_records')) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			if (!class_exists('fm_dns_records')) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			if ($skipped_records = $fm_dns_records->getSkippedRecordIDs($domain->parent_domain_id)) $full_zone_clone = false;
 			
 			$valid_domain_ids = $full_zone_clone == false ? "IN (" . join(',', getZoneParentID($domain->parent_domain_id)) . ')' : "='{$domain->domain_id}' AND record_type='NS'";
@@ -1474,7 +1476,7 @@ HTML;
 			if (!$id) unset($domain_ids[$key]);
 		}
 		
-		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		$config = null;
 		
 		$server_root_dir = getNameFromID($server_serial_no, "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');

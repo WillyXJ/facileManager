@@ -24,7 +24,7 @@
 
 require_once('fm-init.php');
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
 
@@ -44,7 +44,7 @@ if (isset($update) && is_array($update)) {
 		
 		if (isset($data['soa_serial_no'])) {
 			if (!class_exists('fm_dns_zones')) {
-				include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 			}
 			$fm_dns_zones->updateSOASerialNo($domain_id, $data['soa_serial_no'], 'no-increment');
 

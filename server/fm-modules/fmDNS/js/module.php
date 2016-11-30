@@ -132,7 +132,7 @@ $(document).ready(function() {
 
 		$.ajax({
 			type: "POST",
-			url: "fm-modules/fmDNS/ajax/getData.php",
+			url: "fm-modules/' . $_SESSION['module'] . '/ajax/getData.php",
 			data: form_data,
 			success: function(response)
 			{
@@ -167,7 +167,7 @@ $(document).ready(function() {
 
 		$.ajax({
 			type: "POST",
-			url: "fm-modules/fmDNS/ajax/addFormElements.php",
+			url: "fm-modules/' . $_SESSION['module'] . '/ajax/addFormElements.php",
 			data: form_data,
 			success: function(response)
 			{
@@ -372,7 +372,7 @@ $(document).ready(function() {
 
 		$.ajax({
 			type: "POST",
-			url: "fm-modules/fmDNS/ajax/getData.php",
+			url: "fm-modules/' . $_SESSION['module'] . '/ajax/getData.php",
 			data: form_data,
 			success: function(response)
 			{
@@ -415,7 +415,7 @@ function displayOptionPlaceholder(option_value) {
 
 	$.ajax({
 		type: "POST",
-		url: "fm-modules/fmDNS/ajax/getData.php",
+		url: "fm-modules/' . $_SESSION['module'] . '/ajax/getData.php",
 		data: form_data,
 		success: function(response)
 		{

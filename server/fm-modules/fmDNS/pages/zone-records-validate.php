@@ -22,7 +22,7 @@
  +-------------------------------------------------------------------------+
 */
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
 extract($_POST);
@@ -48,7 +48,7 @@ if (isset($_POST['update'])) {
 	if ($_POST['update']['soa_template_chosen']) {
 		global $fm_dns_records;
 		/** Save the soa_template_chosen in domains table and end */
-		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 		$fm_dns_records->assignSOA($_POST['update']['soa_template_chosen'], $domain_id);
 		header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $domain_id . '&record_type=SOA');
 	}
@@ -255,7 +255,7 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 		if ($_POST['create']['soa_template_chosen']) {
 			global $fm_dns_records;
 			// Save the soa_template_chosen in domains table and end
-			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$fm_dns_records->assignSOA($_POST['create']['soa_template_chosen'], $_POST['domain_id']);
 			header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $_POST['domain_id'] . '&record_type=SOA');
 		}
@@ -456,7 +456,7 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		global $fm_dns_zones;
 
 		if (!class_exists('fm_dns_zones')) {
-			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 		}
 		$retval = $fm_dns_zones->add($ptr_array);
 

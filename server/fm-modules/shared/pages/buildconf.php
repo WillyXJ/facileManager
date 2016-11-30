@@ -59,7 +59,7 @@ if (array_key_exists('action', $_POST)) {
 	
 	/** Process updating the tables */
 	if ($_POST['action'] == 'update') {
-		$data = $fm_shared_module_buildconf->updateReloadFlags($_POST);
+		$data = $fm_module_buildconf->updateReloadFlags($_POST);
 	}
 	
 	/** Include actions from module */
@@ -74,9 +74,9 @@ if (array_key_exists('action', $_POST)) {
 		else echo serialize($data);
 	}
 	
-	$fm_shared_module_servers->updateServerVersion();
+	$fm_module_servers->updateServerVersion();
 }
 
-$fm_shared_module_servers->updateClientVersion();
+$fm_module_servers->updateClientVersion();
 
 ?>

@@ -26,8 +26,8 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_groups.php');
-include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_servers.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
 	echo 0;

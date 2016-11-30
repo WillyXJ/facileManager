@@ -25,7 +25,7 @@
 
 if (!currentUserCan(array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 
 if (!isset($map)) header('Location: zones-forward.php');
 if (isset($_GET['map'])) header('Location: zones-' . sanitize(strtolower($_GET['map'])) . '.php');
@@ -67,7 +67,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 	case 'download':
 		if (array_key_exists('domain_id', $_POST) && is_numeric($_POST['domain_id'])) {
 			include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_buildconf.php');
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
 			
 			$data['SERIALNO'] = -1;
 			$data['compress'] = 0;

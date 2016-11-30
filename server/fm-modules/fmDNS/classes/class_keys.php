@@ -210,7 +210,7 @@ HTML;
 	function printForm($data = '', $action = 'add') {
 		global $__FM_CONFIG, $fm_dns_zones;
 		
-		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 		
 		$key_id = 0;
 		$key_name = $key_root_dir = $key_zones_dir = $key_comment = null;

@@ -20,7 +20,9 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_servers {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
+
+class fm_module_servers extends fm_shared_module_servers {
 	
 	/**
 	 * Displays the server list
@@ -787,7 +789,7 @@ FORM;
 	}
 
 	function manageCache($server_id, $action) {
-		global $fmdb, $__FM_CONFIG, $fm_shared_module_servers;
+		global $fmdb, $__FM_CONFIG;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($server_id), 'server_', 'server_id');
@@ -806,7 +808,7 @@ FORM;
 		}
 		
 		if (count($response) == 1) {
-			foreach (makePlainText($fm_shared_module_servers->buildServerConfig($server_serial_no, $action, ucfirst(str_replace('-', ' ', $action))), true) as $line) {
+			foreach (makePlainText($this->buildServerConfig($server_serial_no, $action, ucfirst(str_replace('-', ' ', $action))), true) as $line) {
 				$response[] = ' --> ' . $line;
 			}
 		}

@@ -101,9 +101,9 @@ class fm_shared_module_tools {
 			/** Module-specific connection tests */
 			$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
 			if (file_exists($module_tools_file)) {
-				if (!class_exists('fm_module_tools')) include($module_tools_file);
+				include_once($module_tools_file);
 				
-				$return .= $fm_module_tools->connectTests($results[$x]);
+				$return .= $fm_module_tools->moduleConnectTests($results[$x]);
 			}
 			
 			$return .=  "\n";
@@ -115,8 +115,5 @@ class fm_shared_module_tools {
 	}
 	
 }
-
-if (!isset($fm_shared_module_tools))
-	$fm_shared_module_tools = new fm_shared_module_tools();
 
 ?>

@@ -471,7 +471,4 @@ class fm_shared_module_servers {
 
 }
 
-if (!isset($fm_shared_module_servers))
-	$fm_shared_module_servers = new fm_shared_module_servers();
-
 ?>

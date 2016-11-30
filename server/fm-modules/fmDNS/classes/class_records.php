@@ -674,7 +674,7 @@ HTML;
 		/** Update the SOA serial number */
 		if ($domain_reload == 'no') {
 			if (!isset($fm_dns_zones)) {
-				include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 			}
 			$fm_dns_zones->updateSOASerialNo($domain_id, getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_serial_no'));
 		}

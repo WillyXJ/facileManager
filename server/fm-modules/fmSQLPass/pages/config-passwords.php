@@ -30,7 +30,7 @@ $response = isset($response) ? $response : null;
 printHeader();
 @printMenu();
 
-include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_passwords.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_passwords.php');
 include(ABSPATH . 'fm-modules/facileManager/classes/class_users.php');
 
 echo printPageHeader($response);

@@ -20,7 +20,9 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_buildconf {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_buildconf.php');
+
+class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	/**
 	 * Generates the server config and updates the client

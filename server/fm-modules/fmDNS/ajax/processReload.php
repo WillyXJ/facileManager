@@ -24,7 +24,7 @@
 */
 
 if (is_array($_POST) && count($_POST)) {
-	include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 	
 	/** Clean variable */
 	$domain_id = intval($_POST['domain_id']);
