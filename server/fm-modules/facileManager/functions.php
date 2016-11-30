@@ -153,6 +153,7 @@ function isNewVersionAvailable($package, $version) {
 	
 	$data['package'] = $package;
 	$data['version'] = $version;
+	$data['format']  = 'array';
 	
 	$method = 'update';
 	
