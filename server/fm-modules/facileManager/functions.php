@@ -1082,7 +1082,7 @@ function buildDashboard() {
 		$dashboard = <<<DASH
 	<div id="shadow_box" class="fullwidthbox">
 		<div id="shadow_container" class="fullwidthbox">
-		{$fm_new_version_available['text']}
+		<p>{$fm_new_version_available['text']}</p>
 		</div>
 	</div>
 	<br />
