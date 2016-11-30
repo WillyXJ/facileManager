@@ -815,7 +815,7 @@ tbody {
 	text-align: center;
 	color: #000;
 	font-size: 10pt;
-	margin-top: -26px;
+	margin-top: -12px;
 	width: 75%;
 	margin-left: 12.5%;
 	background-color: #FFFBCC;
@@ -832,9 +832,20 @@ tbody {
 	z-index: 2;
 }
 #response p {
-	position: relative;
-	top: 6px;
-	padding: 0 10px;
+	margin: 0;
+	padding: 3px 10px;
+}
+#response p:first-child {
+	padding-top: 6px;
+	padding-bottom: 3px;
+}
+#response p:last-child {
+	padding-top: 3px;
+	padding-bottom: 6px;
+}
+#response p:only-child {
+	padding-top: 6px;
+	padding-bottom: 6px;
 }
 #response p.error {
 	color: red;
@@ -844,7 +855,6 @@ tbody {
 	left: 12.5%;
 	width: 60%;
 }
-
 #response a {
 	text-decoration: underline;
 }

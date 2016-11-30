@@ -2149,9 +2149,13 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	
 	if (empty($title)) $title = getPageTitle();
 	
+	$style = (empty($response)) ? 'style="display: none;"' : null;
+	if (strpos($response, '</p>') === false) {
+		$response = '<p class="error">' . $response . '</p>';
+	}
+
 	echo '<div id="body_container">' . "\n";
-	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-	else echo '<div id="response" style="display: none;"></div>' . "\n";
+	echo '<div id="response" ' . $style . '>' . $response . "</div>\n";
 	echo '<h2>' . $title;
 	
 	if ($allowed_to_add) {
@@ -2640,46 +2644,6 @@ function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $mo
 			$menu[$parent_menu_key][6] += $badge_count;
 		}
 	}
-}
-
-
-/**
- * Adds a submenu item to the Dashboard menu
- *
- * @since 1.2
- * @package facileManager
- *
- * @param string $menu_title Text used to display the menu item
- * @param string $page_title Text used to display the page title when the page loads
- * @param string $capability Minimum capability required for the menu item to be visible to the user
- * @param string $module Module name the menu item is for
- * @param string $menu_slug Menu item slug name to used to reference this item
- * @param string $class Class name to apply to the menu item
- * @param integer $position Menu position for the item
- * @param integer $badge_count Number of items to display in the badge
- */
-function addDashboardPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
-	addSubmenuPage('index.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
-}
-
-
-/**
- * Adds a submenu item to the Admin menu
- *
- * @since 1.2
- * @package facileManager
- *
- * @param string $menu_title Text used to display the menu item
- * @param string $page_title Text used to display the page title when the page loads
- * @param string $capability Minimum capability required for the menu item to be visible to the user
- * @param string $module Module name the menu item is for
- * @param string $menu_slug Menu item slug name to used to reference this item
- * @param string $class Class name to apply to the menu item
- * @param integer $position Menu position for the item
- * @param integer $badge_count Number of items to display in the badge
- */
-function addAdminPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
-	addSubmenuPage('admin-tools.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
 }
 
 
