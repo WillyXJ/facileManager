@@ -120,6 +120,11 @@ p.soa_import span {
 	width: 24em;
 }
 
+.form-table.zone-form p,
+.form-table.zone-template-form p {
+	font-size: 8pt;
+}
+
 .form-table td span.note {
 	font-size: 11px;
 	position: relative;
@@ -177,8 +182,4 @@ td > .template-icon {
 
 #table_edits > tbody > tr.subelements > td {
 	vertical-align: top;
-}
-
-#define_template p, #clone_override p {
-	font-size: 8pt;
 }

@@ -383,6 +383,14 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$("#manage_item_contents").delegate("#domain_dnssec", "click", function(e) {
+		if ($(this).is(":checked")) {
+			$("#dnssec_option").show("slow");
+		} else {
+			$("#dnssec_option").slideUp();
+		}
+	});
+
 	$("#admin-tools-form").delegate("#zone_import_domain_list", "change", function(e) {
 		if ($(this).val() == 0) {
 			$("#import-records").val("' . __('Import Zones') . '");

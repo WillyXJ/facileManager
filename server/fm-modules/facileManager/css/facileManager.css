@@ -1200,6 +1200,9 @@ i.star {
 	padding-right: 2px;
 	color: #e8a412;
 }
+i.secure {
+	color: #09a30c;
+}
 
 i.fail {
 	color: #ce0606;

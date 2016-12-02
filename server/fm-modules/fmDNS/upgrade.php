@@ -1918,4 +1918,37 @@ function upgradefmDNS_3003($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 3.0-alpha4 */
+function upgradefmDNS_3004($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '3.0-alpha3', '<') ? upgradefmDNS_3003($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dnssec` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_dynamic`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dnssec_sig_expire` INT(11) NOT NULL AFTER `domain_dnssec`";
+
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+//	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` SET `record_cert_type`=1 WHERE `record_type`='SSHFP'";
+
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.0-alpha4', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
 ?>

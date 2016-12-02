@@ -523,7 +523,7 @@ class fm_dns_zones {
 		$zone_access_allowed = zoneAccessIsAllowed(array($row->domain_id));
 		
 		if ($row->domain_status == 'disabled') $classes[] = 'disabled';
-		$response = $add_new = null;
+		$response = $add_new = $icons = null;
 		
 		$checkbox = (currentUserCan('reload_zones', $_SESSION['module'])) ? '<td></td>' : null;
 		
@@ -549,7 +549,7 @@ class fm_dns_zones {
 		$clone_names = $clone_types = $clone_views = $clone_counts = null;
 		foreach ($clones as $clone_id => $clone_array) {
 			$clone_names .= '<p class="subelement' . $clone_id . '"><span><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
-					'</a></span>' . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
+					'</a></span>' . $clone_array['dnssec'] . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
 			$clone_types .= '<p class="subelement' . $clone_id . '">' . __('clone') . '</p>' . "\n";
 			$clone_views .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 			$clone_counts_array = explode('|', $clone_array['clone_count']);
@@ -603,14 +603,15 @@ class fm_dns_zones {
 			$record_count = $fmdb->last_result[0]->record_count;
 		}
 		
-		$dynamic_icon = ($dynamic_zone == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates')) : null;
-		$template_icon = ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))) : null;
+		$icons .= (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="template-icon fa fa-lock secure" title="%s"></i>', __('Zone is secured with DNSSEC')) : null;
+		$icons .= ($dynamic_zone == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates')) : null;
+		$icons .= ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))) : null;
 		
 		echo <<<HTML
 		<tr title="$response" id="$row->domain_id" name="$row->domain_name" $class>
 			$checkbox
 			<td>$row->domain_id</td>
-			<td><b>$edit_name</b> $dynamic_icon $template_icon $add_new $clone_names</td>
+			<td><b>$edit_name</b> $icons $add_new $clone_names</td>
 			<td>$row->domain_type
 				$clone_types</td>
 			<td>$domain_view
@@ -634,7 +635,7 @@ HTML;
 		
 		$domain_id = $domain_view = $domain_name_servers = 0;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
-		$dynamic_zone = $domain_dynamic = $domain_template = null;
+		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = $domain_dnssec_sig_expire = null;
 		$disabled = $action == 'create' ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -731,7 +732,7 @@ HTML;
 		}
 		$clone_dname_dropdown = buildSelect('domain_clone_dname', 'domain_clone_dname', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_clone_dname'), $domain_clone_dname);
 		
-		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) || !currentUserCan('manage_servers', $_SESSION['module']) ? null : sprintf('<tr class="include-with-template"><td></td><td><p><a href="config-options.php?domain_id=%d">%s</a></p></td></tr>', $domain_id, __('Configure Additional Options'));
+		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) || !currentUserCan('manage_servers', $_SESSION['module']) ? null : sprintf('<tr class="include-with-template"><td></td><td><span><a href="config-options.php?domain_id=%d">%s</a></span></td></tr>', $domain_id, __('Configure Additional Options'));
 		
 		$popup_title = $action == 'create' ? __('Add Zone') : __('Edit Zone');
 		$popup_header = buildPopup('header', $popup_title);
@@ -774,10 +775,27 @@ HTML;
 		</tr>', $template_name_show_hide, $default_checked, __('Make Default Template'));
 		} else {
 			$dynamic_checked = ($domain_dynamic == 'yes') ? 'checked' : null;
-			$dynamic_zone = sprintf('<tr class="include-with-template" id="dynamic_updates">
+			$addl_zone_options = sprintf('<tr class="include-with-template" id="dynamic_updates">
 			<th>%s</th>
 			<td><input type="checkbox" id="domain_dynamic" name="domain_dynamic" value="yes" %s /><label for="domain_dynamic"> %s</label></td>
 		</tr>', __('Support Dynamic Updates'), $dynamic_checked, __('yes'));
+			
+			$dnssec_checked = ($domain_dnssec == 'yes') ? 'checked' : null;
+			$dnssec_style = ($domain_dnssec == 'yes') ? 'block' : 'none';
+			if (!$domain_dnssec_sig_expire) $domain_dnssec_sig_expire = null;
+			$addl_zone_options .= sprintf('<tr class="include-with-template" id="enable_dnssec">
+			<th>%s</th>
+			<td>
+				<input type="checkbox" id="domain_dnssec" name="domain_dnssec" value="yes" %s /><label for="domain_dnssec"> %s</label> <a href="#" class="tooltip-right grey" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+				<div id="dnssec_option" style="display: %s;">
+					<h4>%s</h4>
+					<label for="domain_dnssec_sig_expire">%s</label> <input type="number" id="domain_dnssec_sig_expire" name="domain_dnssec_sig_expire" value="%s" placeholder="60" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
+				</div>
+			</td>
+		</tr>', __('Enable DNSSEC'), $dnssec_checked, __('yes'), 
+				sprintf(__('(Experimental) The dnssec-signzone and dnssec-keygen utilities must be installed on %s in order for this to work.'), php_uname('n')),
+				$dnssec_style, __('Signature Expiry Override'), __('Days'), $domain_dnssec_sig_expire
+			);
 		}
 		
 		$return_form = (array_search('popup', $show) !== false) ? '<form name="manage" id="manage" method="post" action="">' . $popup_header : null;
@@ -844,7 +862,7 @@ HTML;
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
 				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
-				$soa_templates . $dynamic_zone . $additional_config_link . $create_template . $template_name
+				$soa_templates . $addl_zone_options . $additional_config_link . $create_template . $template_name
 				);
 
 		$return_form .= (array_search('popup', $show) !== false) ? $popup_footer . '</form>' : null;
@@ -941,6 +959,9 @@ HTML;
 				
 				/** Dynamic updates support */
 				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i> ', __('Zone supports dynamic updates')) : null;
+				
+				/** DNSSEC support */
+				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="template-icon fa fa-lock secure" title="%s"></i> ', __('Zone is secured with DNSSEC')) : null;
 			}
 		}
 		return $return;
@@ -1423,9 +1444,20 @@ HTML;
 			$post['domain_dynamic'] = 'no';
 		}
 		
+		/** DNSSEC */
+		if ($post['domain_dnssec'] != 'yes') {
+			$post['domain_dnssec'] = 'no';
+		}
+		if (!empty($post['domain_dnssec_sig_expire'])) {
+			if (!verifyNumber($post['domain_dnssec_sig_expire'], 0, null, false)) return __('DNSSEC signature expiry must be a valid number of days.');
+		} else {
+			$post['domain_dnssec_sig_expire'] = 0;
+		}
+		
 		/** Is this based on a template? */
 		if ($post['domain_template_id']) {
-			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 'domain_dynamic');
+			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
+				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire');
 			foreach ($include as $key) {
 				$new_post[$key] = $post[$key];
 			}

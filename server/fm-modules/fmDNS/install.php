@@ -94,6 +94,8 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `domain_clone_domain_id` int(11) NOT NULL DEFAULT '0',
   `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL,
   `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no',
+  `domain_dnssec` enum('yes','no') NOT NULL DEFAULT 'no',
+  `domain_dnssec_sig_expire` int(11) NOT NULL,
   `domain_reload` enum('yes','no') NOT NULL DEFAULT 'no',
   `domain_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`domain_id`),

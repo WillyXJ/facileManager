@@ -156,7 +156,11 @@ $__FM_CONFIG['fmDNS']['default']['options'] = @array(
 				'description' => array(__('Sort Zone Names Hierarchically'), __('Sort zone names with a hierarchy to group sub-zones together. For example:') . "
 								<pre>domain.com\nbar.domain.com\nfoo.bar.domain.com</pre>"),
 				'default_value' => 'no',
-				'type' => 'checkbox')
+				'type' => 'checkbox'),
+		'dnssec_expiry' => array(
+				'description' => array(__('Default DNSSEC Signature Expiry'), __('Define the number of days the DNSSEC signatures should be valid for (each zone can override this).')),
+				'default_value' => 60,
+				'type' => 'text')
 	);
 
 /** Array sorts */
