@@ -221,7 +221,11 @@ class fm_login {
 				}
 				
 				/** Should the user be logged in? */
-				if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_status') != 'active') header('Location: ' . $GLOBALS['RELPATH'] . '?logout');
+				if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_status') != 'active') {
+					session_write_close();
+					header('Location: ' . $GLOBALS['RELPATH'] . '?logout');
+					return false;
+				}
 				session_write_close();
 				
 				return true;

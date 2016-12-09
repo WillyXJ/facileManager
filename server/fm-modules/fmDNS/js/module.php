@@ -49,8 +49,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 
@@ -85,8 +86,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 
@@ -136,8 +138,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -201,8 +204,9 @@ $(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response.indexOf("force_logout") >= 0) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
+						return false;
 					} else if (response == "' . _('Success') . '") {
 						$("."+$subelement).css({"background-color":"#D98085"});
 						$("."+$subelement).fadeOut("slow", function() {
@@ -255,8 +259,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -427,8 +432,9 @@ function displayOptionPlaceholder(option_value) {
 		data: form_data,
 		success: function(response)
 		{
-			if (response.indexOf("force_logout") >= 0) {
+			if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 				doLogout();
+				return false;
 			}
 			$(".value_placeholder").html(response);
 			if (response.toLowerCase().indexOf("address_match_element") == -1) {
@@ -458,8 +464,9 @@ function loadDynamicZone() {
 		data: form_data,
 		success: function(response)
 		{
-			if (response.indexOf("force_logout") >= 0) {
+			if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 				doLogout();
+				return false;
 			}
 
 			if (response.toLowerCase().indexOf("no records") > -1) {

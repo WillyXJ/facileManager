@@ -176,8 +176,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -235,8 +236,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -277,8 +279,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else if (response == "Success") {
 					$row_id.removeClass("active disabled build");
 					$row_id.addClass(item_status);
@@ -354,8 +357,9 @@ echo '$(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response.indexOf("force_logout") >= 0) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
+						return false;
 					} else if (response == "' . _('Success') . '") {
 						$row_id.css({"background-color":"#D98085"});
 						$row_id.fadeOut("slow", function() {
@@ -421,8 +425,9 @@ echo '$(document).ready(function() {
 			data: $("#manage").serialize(),
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else {
 					$("#response").removeClass("static").html(response);
 					$("#response")
@@ -455,8 +460,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else if (response == "Success") {
 					$("#gen_ssh_action").html("<p>' . _('SSH key pair is generated.') . '</p>");
 				} else {
@@ -499,8 +505,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				$(".form-table input").first().focus();
@@ -520,8 +527,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else if (response == "Success") {
 					$("#popup_response").html("<p>' . _('Profile has been updated.') . '</p>");
 				} else {
@@ -580,8 +588,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#response").html(response);
 				$("#response")
@@ -621,8 +630,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 			}
@@ -778,8 +788,9 @@ echo '$(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
-						if (response.indexOf("force_logout") >= 0) {
+						if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 							doLogout();
+							return false;
 						}
 						var eachLine = response.split("\n");
 						if (eachLine.length <= 2) {
@@ -863,8 +874,9 @@ echo '$(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
-						if (response.indexOf("force_logout") >= 0) {
+						if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 							doLogout();
+							return false;
 						}
 						$("#manage_item_contents").html(response);
 						if ($("#manage_item_contents").width() >= 700) {
@@ -896,8 +908,9 @@ echo '$(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response.indexOf("force_logout") >= 0) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
+						return false;
 					}
 					$this.find("i").removeClass("fa-spin");
 					$("#manage_item_contents").html(response);

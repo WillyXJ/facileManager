@@ -142,7 +142,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 	
 		/** Enforce authentication */
-		if (!$is_logged_in) $fm_login->printLoginForm();
+		if (!$is_logged_in) {
+			if (defined('AJAX')) {
+				exit('force_logout');
+			}
+			$fm_login->printLoginForm();
+		}
 		
 		/** Show/Hide errors */
 		if (getOption('show_errors')) {

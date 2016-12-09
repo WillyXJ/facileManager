@@ -30,8 +30,9 @@ $(document).ready(function() {
 			data: $("#manage").serialize(),
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				if ($("#verbose").is(":checked") == false) {
 					$("#response").html(response);
