@@ -1146,7 +1146,7 @@ HTML;
 			$fm_dns_records->updateSOAReload($domain_id, 'no', 'all');
 		}
 
-		addLogEntry(sprintf(__("Reloaded zone '%s'."), displayFriendlyDomainName($domain_name)));
+		addLogEntry(sprintf(__("Reloaded zone '%s'."), displayFriendlyDomainName(getNameFromID($domain_id, 'fm_'. $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))));
 		return $response;
 	}
 
