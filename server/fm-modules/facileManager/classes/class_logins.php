@@ -367,40 +367,10 @@ class fm_login {
 		$user_info = getUserInfo($fm_login);
 		if (isEmailAddressValid($user_info['user_email']) === false) return _('There is no valid e-mail address associated with this user.');
 		
-		$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
-		if (!file_exists($phpmailer_file)) {
-			return _('Unable to send email - PHPMailer class is missing.');
-		} else {
-			require $phpmailer_file;
-		}
+		$subject = sprintf(_('%s Password Reset'), $fm_name);
+		$from = getOption('mail_from');
 		
-		$mail = new PHPMailer;
-		
-		/** Set PHPMailer options from database */
-		$mail->Host = getOption('mail_smtp_host');
-		$mail->SMTPAuth = getOption('mail_smtp_auth');
-		if ($mail->SMTPAuth) {
-			$mail->Username = getOption('mail_smtp_user');
-			$mail->Password = getOption('mail_smtp_pass');
-		}
-		if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
-		
-		$mail->FromName = $fm_name;
-		$mail->From = getOption('mail_from');
-		$mail->AddAddress($user_info['user_email']);
-		
-		$mail->Subject = sprintf(_('%s Password Reset'), $fm_name);
-		$mail->Body = $this->buildPwdResetEmail($user_info, $uniq_hash, true, $mail->Subject, $mail->From);
-		$mail->AltBody = $this->buildPwdResetEmail($user_info, $uniq_hash, false);
-		$mail->IsHTML(true);
-		
-		$mail->IsSMTP();
-		
-		if(!$mail->Send()) {
-			return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
-		}
-		
-		return true;
+		return sendEmail($user_info['user_email'], $subject, $this->buildPwdResetEmail($user_info, $uniq_hash, true, $subject, $from), $this->buildPwdResetEmail($user_info, $uniq_hash, false));
 	}
 	
 	/**
