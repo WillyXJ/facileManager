@@ -4,6 +4,7 @@
 * Server - [security] Fixed an issue where unprivileged users could still make
            changes before a forced logout.
 * Server - [improvement] Code changes to add global response error formatting.
+* Server - [improvement] Added Windows server icon for other modules to use.
 
 3.0-alpha3 (2016-11-29)
 =======================
