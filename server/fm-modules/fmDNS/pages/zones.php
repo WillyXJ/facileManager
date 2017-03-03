@@ -40,7 +40,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		if (!empty($_POST)) {
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
-				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
+				$response = displayResponseClose($insert_id);
 			} else {
 				if ($_POST['domain_template'] == 'yes') {
 					header('Location: templates-zones.php');
@@ -55,12 +55,12 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		if (!empty($_POST)) {
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
-				$response = '<p class="error">' . $zone_update_status . '</p>'. "\n";
+				$response = displayResponseClose($zone_update_status);
 			} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_GET['domain_id'], 'domain_', $_GET['status'], 'domain_id')) {
-				$response = sprintf('<p class="error">' . __('This item could not be set to %s.') . "</p>\n", $_GET['status']);
+				$response = displayResponseClose(sprintf(__('This item could not be set to %s.'), $_GET['status']));
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;

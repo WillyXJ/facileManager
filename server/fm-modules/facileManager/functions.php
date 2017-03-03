@@ -2153,7 +2153,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	
 	$style = (empty($response)) ? 'style="display: none;"' : null;
 	if (strpos($response, '</p>') === false) {
-		$response = '<p class="error">' . $response . '</p>';
+		$response = displayResponseClose($response);
 	}
 
 	echo '<div id="body_container">' . "\n";
@@ -3246,13 +3246,13 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH key */
 	$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 	if (!$ssh_key) {
-		return '<p class="error">' . sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+		return displayResponseClose(sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
 	}
 
 	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
 	if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 	if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-		return '<p class="error">' . sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key) . '</p>'. "\n";
+		return displayResponseClose(sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
 	}
 
 	@chmod($temp_ssh_key, 0400);
@@ -3260,7 +3260,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH user */
 	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 	if (!$ssh_user) {
-		return '<p class="error">' . sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+		return displayResponseClose(sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
 	}
 
 	/** Run remote command */
@@ -3489,13 +3489,86 @@ function extractPackage($package) {
  * @since 3.0
  * @package facileManager
  *
- * @param array Temp directory and if it was created
+ * @return array Temp directory and if it was created
  */
 function clearUpdateDir() {
+	return createTempDir('fm_updates');
+}
+
+
+/**
+ * Generic mailing function
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $sendto Email address to send to
+ * @param string $subject Email subject
+ * @param string $body Email body
+ * @param string $altbody Email alternate body (plaintext)
+ * @return boolean
+ */
+function sendEmail($sendto, $subject, $body, $altbody = null) {
+	global $fm_name;
+
+	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
+	if (!file_exists($phpmailer_file)) {
+		return _('Unable to send email - PHPMailer class is missing.');
+	} else {
+		require $phpmailer_file;
+	}
+
+	$mail = new PHPMailer;
+
+	/** Set PHPMailer options from database */
+	$mail->Host = getOption('mail_smtp_host');
+	$mail->SMTPAuth = getOption('mail_smtp_auth');
+	if ($mail->SMTPAuth) {
+		$mail->Username = getOption('mail_smtp_user');
+		$mail->Password = getOption('mail_smtp_pass');
+	}
+	if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
+
+	$mail->FromName = $fm_name;
+	$mail->From = getOption('mail_from');
+	$mail->AddAddress($sendto);
+
+	$mail->Subject = $subject;
+	$mail->Body = $body;
+	if ($altbody) {
+		$mail->AltBody = $altbody;
+	}
+	$mail->IsHTML(true);
+
+	$mail->IsSMTP();
+
+	if(!$mail->Send()) {
+		return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
+	}
+
+	return true;
+}
+
+
+/**
+ * Create a temporary directory
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $subdir Sub directory name
+ * @param string $append String to append to directory name
+ * @return array Temp directory and if it was created
+ */
+function createTempDir($subdir, $append = null) {
 	$created = true;
 	
+	if ($append) {
+		$subdir .= ($append == 'datetime') ? '_' . date("YmdHis") : "_$append";
+	}
+	
 	$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
-	$tmp_dir = rtrim($fm_temp_directory, '/') . '/fm_updates/';
+	$tmp_dir = rtrim($fm_temp_directory, '/') . "/$subdir/";
 	system('rm -rf ' . $tmp_dir);
 	if (!is_dir($tmp_dir)) {
 		if (!@mkdir($tmp_dir, 0777, true)) {
@@ -3504,6 +3577,20 @@ function clearUpdateDir() {
 	}
 
 	return array($tmp_dir, $created);
+}
+
+
+/**
+ * Displays a close button in the response
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $message Error message to include
+ * @return string
+ */
+function displayResponseClose($message) {
+	return sprintf('<div id="response_close"><p><i class="fa fa-close close" aria-hidden="true" title="%s"></i></p></div><p class="error">%s</p>', _('Close'), $message);
 }
 
 

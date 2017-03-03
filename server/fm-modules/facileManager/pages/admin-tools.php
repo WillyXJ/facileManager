@@ -80,7 +80,7 @@ foreach ($tools_option as $tool) {
 }
 
 echo '<div id="body_container">' . "\n";
-if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
+if (!empty($response)) echo '<div id="response">' . displayResponseClose($response) . "</div>\n";
 else echo '<div id="response" style="display: none;"></div>' . "\n";
 
 echo <<<HTML

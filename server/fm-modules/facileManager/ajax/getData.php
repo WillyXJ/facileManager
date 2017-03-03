@@ -35,7 +35,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		if ($result === true) {
 			printf(_('<p>Password reset email has been sent to %s.</p>'), $_POST['user_id']);
 		} else {
-			echo '<p class="error">' . $result . '</p>';
+			echo displayResponseClose($result);
 		}
 		
 		exit;

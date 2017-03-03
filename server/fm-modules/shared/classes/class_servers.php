@@ -133,7 +133,7 @@ class fm_shared_module_servers {
 					
 					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 					if (!$ssh_user) {
-						return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
+						return displayResponseClose(sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
 					}
 
 					unset($post_result);
@@ -308,7 +308,7 @@ class fm_shared_module_servers {
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>', _('This server is not found.'));
+		if (!$fmdb->num_rows) return displayResponseClose(_('This server is not found.'));
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
@@ -354,7 +354,7 @@ class fm_shared_module_servers {
 			case 'https':
 				/** Test the port first */
 				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
+					return displayResponseClose(sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
 				}
 				
 				/** Remote URL to use */
@@ -371,9 +371,9 @@ class fm_shared_module_servers {
 				if (!is_array($post_result)) {
 					/** Something went wrong */
 					if (empty($post_result)) {
-						return sprintf('<p class="error">%s</p>', sprintf(_('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
+						return displayResponseClose(sprintf(_('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
 					}
-					return '<p class="error">' . $post_result . '</p>';
+					return displayResponseClose($post_result);
 				} else {
 					if (count($post_result) > 1) {
 						$response .= "<pre>\n";
@@ -392,26 +392,26 @@ class fm_shared_module_servers {
 			case 'ssh':
 				/** Test the port first */
 				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
+					return displayResponseClose(sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
 				}
 				
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
+					return displayResponseClose(sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
 				}
 				
 				$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
 				if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
+					return displayResponseClose(sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
 				}
 				
 				@chmod($temp_ssh_key, 0400);
 				
 				$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 				if (!$ssh_user) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
+					return displayResponseClose(sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
 				}
 		
 				/** Test SSH authentication */
@@ -421,7 +421,7 @@ class fm_shared_module_servers {
 					@unlink($temp_ssh_key);
 					
 					/** Handle error codes */
-					return ($retval == 255) ? sprintf('<p class="error">%s</p>'. "\n", _('Failed: Could not login via SSH.')) : sprintf('<p class="error">%s</p>'. "\n", _('Failed: Client file is not present.'));
+					return ($retval == 255) ? displayResponseClose(_('Failed: Could not login via SSH.')) : displayResponseClose(_('Failed: Client file is not present.'));
 				}
 				unset($post_result);
 				
@@ -432,7 +432,7 @@ class fm_shared_module_servers {
 				
 				if ($retval) {
 					/** Something went wrong */
-					return '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
+					return displayResponseClose(ucfirst($friendly_action) . ' failed.');
 				}
 				
 				if (!count($post_result)) $post_result[] = ucfirst($friendly_action) . ' was successful.';

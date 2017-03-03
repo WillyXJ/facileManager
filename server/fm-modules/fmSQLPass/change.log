@@ -1,6 +1,7 @@
 1.3-?? (2016-??-??)
 =======================
 * Server - [improvement] Code changes to better reference shared classes.
+* Server - [improvement] Utilizes response error formatting.
 
 1.3-alpha3 (2016-11-29)
 =======================

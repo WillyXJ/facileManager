@@ -221,7 +221,7 @@ class fm_tools {
 	function backupDatabase() {
 		global $__FM_CONFIG, $fm_name;
 		
-		if (!currentUserCan('run_tools')) return sprintf('<p class="error">%s</p>', _('You are not authorized to run these tools.'));
+		if (!currentUserCan('run_tools')) return displayResponseClose(_('You are not authorized to run these tools.'));
 		
 		/** Temporary fix for MySQL 5.6 warnings */
 		$exclude_warnings = array('Warning: Using a password on the command line interface can be insecure.' . "\n");
@@ -231,7 +231,7 @@ class fm_tools {
 		$error_log = str_replace('.sql', '.err', $sql_file);
 		
 		$mysqldump = findProgram('mysqldump');
-		if (!$mysqldump) return sprintf('<p class="error">' . _('mysqldump is not found on %s.') . '</p>', php_uname('n'));
+		if (!$mysqldump) return displayResponseClose(sprintf(_('mysqldump is not found on %s.'), php_uname('n')));
 		
 		$command_string = "$mysqldump --opt -Q -h {$__FM_CONFIG['db']['host']} -u {$__FM_CONFIG['db']['user']} -p{$__FM_CONFIG['db']['pass']} {$__FM_CONFIG['db']['name']} > " . getOption('fm_temp_directory') . "/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
 		@system($command_string, $retval);
@@ -240,7 +240,7 @@ class fm_tools {
 		if ($retval) {
 			@unlink($error_log);
 			@unlink($sql_file);
-			return '<p class="error">' . nl2br(str_replace($exclude_warnings, '', $retarr)) . '</p>';
+			return displayResponseClose(nl2br(str_replace($exclude_warnings, '', $retarr)));
 		}
 		
 		compressFile($sql_file, @file_get_contents($sql_file));
@@ -263,7 +263,7 @@ class fm_tools {
 	function purgeLogs() {
 		global $fmdb, $fm_name;
 		
-		if (!currentUserCan('do_everything')) return sprintf('<p class="error">%s</p>', _('You are not authorized to run these tools.'));
+		if (!currentUserCan('do_everything')) return displayResponseClose(_('You are not authorized to run these tools.'));
 		
 		$query = "TRUNCATE fm_logs";
 		$fmdb->query($query);

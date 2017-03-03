@@ -4,6 +4,7 @@
 * Server - [bug] Zones based on templates would be incorrectly logged during
            zone reloads.
 * Server - [feature] Added support for DNSSEC. (Issue #285)
+* Server - [improvement] Utilizes response error formatting.
 
 3.0-alpha3 (2016-11-29)
 =======================

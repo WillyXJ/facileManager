@@ -1052,7 +1052,7 @@ HTML;
 				s.soa_id=(SELECT soa_id FROM fm_dns_domains WHERE domain_id={$parent_domain_ids[2]})";
 		}
 		$result = $fmdb->query($query);
-		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>'. "\n", __('Failed: There was no SOA record found for this zone.'));
+		if (!$fmdb->num_rows) return displayResponseClose(__('Failed: There was no SOA record found for this zone.'));
 
 		$domain_details = $fmdb->last_result;
 		extract(get_object_vars($domain_details[0]), EXTR_SKIP);
@@ -1060,7 +1060,7 @@ HTML;
 		$name_servers = $this->getNameServers($domain_name_servers, array('masters'));
 		
 		/** No name servers so return */
-		if (!$name_servers) return sprintf('<p class="error">%s</p>'. "\n", __('There are no DNS servers hosting this zone.'));
+		if (!$name_servers) return displayResponseClose(__('There are no DNS servers hosting this zone.'));
 		
 		/** Loop through name servers */
 		$name_server_count = $fmdb->num_rows;
@@ -1111,20 +1111,20 @@ HTML;
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						return '<p class="error">' . sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+						return displayResponseClose(sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
 					}
 					
 					$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
 					if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 					if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-						return '<p class="error">' . sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key) . '</p>'. "\n";
+						return displayResponseClose(sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
 					}
 					
 					@chmod($temp_ssh_key, 0400);
 					
 					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 					if (!$ssh_user) {
-						return '<p class="error">' . sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+						return displayResponseClose(sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
 					}
 		
 					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$name_servers[$i]->server_update_port} -l $ssh_user {$name_servers[$i]->server_name} 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php zones id=$domain_id'", $post_result, $retval);
@@ -1142,7 +1142,7 @@ HTML;
 
 			if (!is_array($post_result)) {
 				/** Something went wrong */
-				return sprintf('<p class="error">%s</p>'. "\n", $post_result);
+				return displayResponseClose($post_result);
 			} else {
 				if (!count($post_result)) $post_result[] = __('Zone reload was successful.');
 

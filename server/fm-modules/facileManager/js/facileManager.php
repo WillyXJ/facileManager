@@ -311,9 +311,11 @@ echo '$(document).ready(function() {
 									{ queue: false, duration: 200 }
 								);
 							});
-						$("#response").delay(3000).fadeTo(200, 0.00, function() {
-							$("#response").slideUp(400);
-						});
+						if (response.toLowerCase().indexOf("response_close") == -1) {
+							$("#response").delay(3000).fadeTo(200, 0.00, function() {
+								$("#response").slideUp(400);
+							});
+						}
 					} else {
 						$("#manage_item").fadeIn(200);
 						$("#manage_item_contents").fadeIn(200);
@@ -377,9 +379,11 @@ echo '$(document).ready(function() {
 										{ queue: false, duration: 200 }
 									);
 								});
-							$("#response").delay(3000).fadeTo(200, 0.00, function() {
-								$("#response").slideUp(400);
-							});
+							if (response.toLowerCase().indexOf("response_close") == -1) {
+								$("#response").delay(3000).fadeTo(200, 0.00, function() {
+									$("#response").slideUp(400);
+								});
+							}
 						} else {
 							$("#manage_item").fadeIn(200);
 							$("#manage_item_contents").fadeIn(200);
@@ -439,9 +443,11 @@ echo '$(document).ready(function() {
 								{ queue: false, duration: 200 }
 							);
 						});
-					$("#response").delay(3000).fadeTo(200, 0.00, function() {
-						$("#response").slideUp(400);
-					});
+					if (response.toLowerCase().indexOf("response_close") == -1) {
+						$("#response").delay(3000).fadeTo(200, 0.00, function() {
+							$("#response").slideUp(400);
+						});
+					}
 				}
 			}
 		});
@@ -475,9 +481,11 @@ echo '$(document).ready(function() {
 								{ queue: false, duration: 200 }
 							);
 						});
-					$("#response").delay(3000).fadeTo(200, 0.00, function() {
-						$("#response").slideUp(400);
-					});
+					if (response.toLowerCase().indexOf("response_close") == -1) {
+						$("#response").delay(3000).fadeTo(200, 0.00, function() {
+							$("#response").slideUp(400);
+						});
+					}
 				}
 			}
 		});
@@ -601,9 +609,11 @@ echo '$(document).ready(function() {
 							{ queue: false, duration: 200 }
 						);
 					});
-				$("#response").delay(3000).fadeTo(200, 0.00, function() {
-					$("#response").slideUp(400);
-				});
+				if (response.toLowerCase().indexOf("response_close") == -1) {
+					$("#response").delay(3000).fadeTo(200, 0.00, function() {
+						$("#response").slideUp(400);
+					});
+				}
 			}
 		});
 		
@@ -760,7 +770,7 @@ echo '$(document).ready(function() {
 	});
 
 	/* Server config builds */
-    $("#table_edits").delegate("#build", "click tap", function(e) {
+	$("#table_edits").delegate("#build", "click tap", function(e) {
 		if (confirm("' . _('Are you sure you want to build the config for this server?') . '")) {
 	        var $this 	= $(this);
 	        server_id	= $this.parent().parent().attr("id");
@@ -797,9 +807,11 @@ echo '$(document).ready(function() {
 							var myDelay = 6000;
 							$("#response").html(response);
 							
-							$("#response").delay(3000).fadeTo(200, 0.00, function() {
-								$("#response").slideUp(400);
-							});
+							if (response.toLowerCase().indexOf("response_close") == -1) {
+								$("#response").delay(3000).fadeTo(200, 0.00, function() {
+									$("#response").slideUp(400);
+								});
+							}
 						} else {
 							var myDelay = 0;
 		
@@ -818,7 +830,8 @@ echo '$(document).ready(function() {
 						if (response.toLowerCase().indexOf("failed") == -1 && 
 							response.toLowerCase().indexOf("one or more errors") == -1 && 
 							response.toLowerCase().indexOf("you are not authorized") == -1 && 
-							response.toLowerCase().indexOf("does not have php configured") == -1
+							response.toLowerCase().indexOf("does not have php configured") == -1 && 
+							response.toLowerCase().indexOf("response_close") == -1
 							) {
 							$this.fadeOut(400);
 							$this.parent().parent().removeClass("build");
@@ -829,8 +842,14 @@ echo '$(document).ready(function() {
 		}
 		
 		return false;
-    });
+	});
     
+	$("#response").delegate("#response_close i.close", "click tap", function(e) {
+		$("#response").fadeTo(200, 0.00, function() {
+			$("#response").slideUp(400);
+		});
+	});
+
 	$("#mainitems .has-sub").hover(function() {
 		$(this).find("span.arrow").show();
 	}, function() {
@@ -920,7 +939,8 @@ echo '$(document).ready(function() {
 					if (response.toLowerCase().indexOf("failed") == -1 && 
 						response.toLowerCase().indexOf("one or more errors") == -1 && 
 						response.toLowerCase().indexOf("you are not authorized") == -1 && 
-						response.toLowerCase().indexOf("does not have php configured") == -1
+						response.toLowerCase().indexOf("does not have php configured") == -1 && 
+						response.toLowerCase().indexOf("response_close") == -1
 						) {
 						$this.parent().fadeOut(400);
 					}

@@ -222,9 +222,11 @@ $(document).ready(function() {
 									{ queue: false, duration: 200 }
 								);
 							});
-						$("#response").delay(3000).fadeTo(200, 0.00, function() {
-							$("#response").slideUp(400);
-						});
+						if (response.toLowerCase().indexOf("response_close") == -1) {
+							$("#response").delay(3000).fadeTo(200, 0.00, function() {
+								$("#response").slideUp(400);
+							});
+						}
 					}
 				}
 			});
@@ -399,10 +401,8 @@ $(document).ready(function() {
 	$("#admin-tools-form").delegate("#zone_import_domain_list", "change", function(e) {
 		if ($(this).val() == 0) {
 			$("#import-records").val("' . __('Import Zones') . '");
-//			$("#import-records").attr("id", "import-zones");
 		} else {
 			$("#import-records").val("' . __('Import Records') . '");
-//			$("#import-zones").attr("id", "import-records");
 		}
 	});
 
