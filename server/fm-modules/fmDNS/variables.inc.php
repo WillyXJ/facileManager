@@ -89,6 +89,8 @@ $__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Servers'), 'gr
 $__FM_CONFIG['options']['avail_types']    = array('global' => __('Global'), 'ratelimit' => __('Rate Limit'), 'rrset' => __('RRSet'));
 $__FM_CONFIG['logging']['avail_types']    = array('channel' => __('Channels'), 'category' => __('Categories'));
 $__FM_CONFIG['operations']['avail_types'] = array('controls' => __('Controls'), 'statistics' => __('Statistics'));
+$__FM_CONFIG['keys']['avail_types']       = array('tsig' => 'TSIG', 'dnssec' => 'DNSSEC');
+$__FM_CONFIG['keys']['avail_sizes']       = array(4096, 2048, 1024, 768, 512);
 
 /** SOA Default Values */
 $__FM_CONFIG['soa']['soa_master_server']	= '';
@@ -159,8 +161,10 @@ $__FM_CONFIG['fmDNS']['default']['options'] = @array(
 				'type' => 'checkbox'),
 		'dnssec_expiry' => array(
 				'description' => array(__('Default DNSSEC Signature Expiry'), __('Define the number of days the DNSSEC signatures should be valid for (each zone can override this).')),
-				'default_value' => 60,
-				'type' => 'text')
+				'default_value' => 30,
+				'type' => 'number',
+				'size' => 10,
+				'addl' => 'onkeydown="return validateNumber(event)"')
 	);
 
 /** Array sorts */

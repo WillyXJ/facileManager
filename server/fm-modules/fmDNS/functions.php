@@ -151,8 +151,9 @@ function buildModuleToolbar() {
 	
 	if (isset($_REQUEST['domain_id'])) {
 		$domain = displayFriendlyDomainName(getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+		$icon = (getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('&nbsp; <i class="template-icon fa fa-lock" title="%s"></i>', __('Zone is secured with DNSSEC')) : null;
 		$domain_menu = '<div id="topheadpart">
-			<span class="single_line">' . __('Domain') . ':&nbsp;&nbsp; ' . $domain . '</span>
+			<span class="single_line">' . __('Domain') . ':&nbsp;&nbsp; ' . $domain . $icon . '</span>
 		</div>';
 		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
@@ -621,6 +622,10 @@ function getModuleBadgeCounts($type) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
 					} elseif ($domain_results[$i]->domain_reload != 'no') {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
+					} elseif ($domain_results[$i]->domain_dnssec != 'no' && $domain_results[$i]->domain_dnssec_signed) {
+						if (getDNSSECExpiration($domain_results[$i]) <= strtotime('now + 3 days')) {
+							$badge_counts[$domain_results[$i]->domain_mapping]++;
+						}
 					}
 				}
 			}
@@ -1070,6 +1075,17 @@ function availableViews() {
 }
 
 
+/**
+ * Returns an array of resource records from SQL
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $record_type
+ * @param integer $domain_id
+ * @return array
+ */
 function buildSQLRecords($record_type, $domain_id) {
 	global $fmdb, $__FM_CONFIG;
 	
@@ -1129,6 +1145,17 @@ function buildSQLRecords($record_type, $domain_id) {
 }
 
 
+/**
+ * Returns an array of compared array values
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $data_array
+ * @param array $sql_records
+ * @return array
+ */
 function compareValues($data_array, $sql_records) {
 	$changes = array();
 	foreach ($data_array as $key => $val) {
@@ -1139,6 +1166,25 @@ function compareValues($data_array, $sql_records) {
 	}
 
 	return $changes;
+}
+
+
+/**
+ * Returns the DNSSEC expiration date for a zone
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $data Domain details array
+ * @param string $type What expiration should be processed
+ * @return integer
+ */
+function getDNSSECExpiration($data, $type = 'calculated') {
+	$domain_dnssec_sig_expires = ($data->domain_dnssec_sig_expire) ? $data->domain_dnssec_sig_expire : getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']);
+	$domain_dnssec_sig_expires = $type == 'calculated' ? strtotime(date('YmdHis', $data->domain_dnssec_signed) . ' + ' . $domain_dnssec_sig_expires . ' days') : date('YmdHis', strtotime('now + ' . $domain_dnssec_sig_expires . ' days'));
+	
+	return $domain_dnssec_sig_expires;
 }
 
 

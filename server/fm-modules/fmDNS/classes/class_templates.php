@@ -116,6 +116,7 @@ HTML;
 
 		foreach ($row as $key => $val) {
 			if (in_array($key, $excluded_fields)) continue;
+			if (strpos($key, 'dnssec') !== false) continue;
 
 			if ($prefix == 'domain') {
 				/** Friendly servers and view names */

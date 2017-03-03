@@ -183,3 +183,7 @@ td > .template-icon {
 #table_edits > tbody > tr.subelements > td {
 	vertical-align: top;
 }
+
+table.form-table > tbody > tr.dnssec-key-addl-options {
+	display: none;
+}

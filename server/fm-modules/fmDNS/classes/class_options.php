@@ -330,7 +330,7 @@ HTML;
 		
 		$addl_options = null;
 		if ($cfg_type == 'ratelimit') {
-			$available_zones = $fm_dns_zones->buildZoneJSON($cfg_data);
+			$available_zones = $fm_dns_zones->buildZoneJSON();
 
 			$addl_options = sprintf('<tr>
 					<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>

@@ -30,9 +30,18 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $response = isset($response) ? $response : null;
 
+$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['keys']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'tsig';
+$display_type = $__FM_CONFIG['keys']['avail_types'][$type];
+
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST)) ? '?server_serial_no=' . $server_serial_no : null;
+	$uri_params = null;
+	foreach ($GLOBALS['URI'] as $param => $val) {
+		if (!in_array($param, array('type'))) continue;
+		$uri_params[] = "$param=$val";
+	}
+	if ($uri_params) $uri_params = '?' . implode('&', $uri_params);
+	
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
@@ -42,7 +51,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
 			}
 		}
 		break;
@@ -54,7 +63,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
 			}
 		}
 		break;
@@ -64,7 +73,8 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
+$avail_types = buildSubMenu($type);
+echo printPageHeader($response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type);
 	
 $sort_direction = null;
 $sort_field = 'key_name';
@@ -72,9 +82,37 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', array($sort_field, 'key_name'), 'key_', null, null, false, $sort_direction);
-$fm_dns_keys->rows($result);
+echo <<<HTML
+<div id="pagination_container" class="submenus">
+	<div>
+	<div class="stretch"></div>
+	$avail_types
+	</div>
+</div>
+
+HTML;
+	
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', array($sort_field, 'key_name'), 'key_', "AND key_type='$type'", null, false, $sort_direction);
+$fm_dns_keys->rows($result, $type);
 
 printFooter();
+
+function buildSubMenu($option_type = 'tsig') {
+	global $__FM_CONFIG;
+	
+	$menu_selects = $uri_params = null;
+	
+	foreach ($GLOBALS['URI'] as $param => $val) {
+		if (in_array($param, array('type', 'action', 'id', 'status'))) continue;
+		$uri_params .= "&$param=$val";
+	}
+	
+	foreach ($__FM_CONFIG['keys']['avail_types'] as $general => $type) {
+		$select = ($option_type == $general) ? ' class="selected"' : '';
+		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
+	}
+	
+	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+}
 
 ?>

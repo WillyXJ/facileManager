@@ -973,7 +973,7 @@ function socketTest($host, $port, $timeout) {
  * @since 1.0
  * @package facileManager
  */
-function getPostData($url, $data, $post = 'post', $options = array()) {
+function getPostData($url, $data = null, $post = 'post', $options = array()) {
 	if ($post == 'post') {
 		$options = array(
 			CURLOPT_POST => true,
@@ -2042,7 +2042,9 @@ function buildSettingsForm($saved_options, $default_options) {
 				$input_field = buildSelect($option, $option, $options_array['options'], $option_value);
 				break;
 			default:
-				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="40" />';
+				$size = (isset($options_array['size'])) ? $options_array['size'] : 40;
+				$addl = (isset($options_array['addl'])) ? $options_array['addl'] : null;
+				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="' . $size . '" ' . $addl . ' />';
 		}
 		$option_rows .= <<<ROW
 			<div id="setting-row">
@@ -2179,7 +2181,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
  * @return boolean
  */
 function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM_CONFIG = null) {
-	global $fmdb, $fm_dns_zones;
+	global $fmdb;
 	
 	if (!$__FM_CONFIG) global $__FM_CONFIG;
 	
@@ -2204,7 +2206,17 @@ function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM
 	}
 	$result = $fmdb->query($query);
 	
-	if ($fmdb->result) return true;
+	if ($fmdb->result) {
+		if (isset($GLOBALS[$_SESSION['module']]['DNSSEC'])) {
+			foreach ($GLOBALS[$_SESSION['module']]['DNSSEC'] as $items) {
+				basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", $items['domain_id'], 'domain_dnssec_signed', $items['domain_dnssec_signed'], 'domain_id');
+				if ($fmdb->sql_errors || !$fmdb->result) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -2953,7 +2965,7 @@ function countServerUpdates() {
 	
 	if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND (server_build_config!="no" OR server_client_version!="' . getOption('client_version', 0, $_SESSION['module']) . '") AND server_status="active" AND server_installed="yes"', null, false, null, true);
-		if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
+		if (!$fmdb->sql_errors && $fmdb->num_rows) return $fmdb->last_result[0]->count;
 	}
 			
 	return 0;

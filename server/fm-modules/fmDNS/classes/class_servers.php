@@ -652,7 +652,7 @@ FORM;
 
 			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
 			$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
-			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key'), $server_key);
+			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key', 'blank', 'AND `key_type`="tsig"'), $server_key);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
 			$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
@@ -760,7 +760,7 @@ FORM;
 		return $return_form;
 	}
 	
-	function availableItems($type, $default = 'blank') {
+	function availableItems($type, $default = 'blank', $addl_sql = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
@@ -772,7 +772,7 @@ FORM;
 			$j++;
 		}
 		
-		$query = "SELECT {$type}_id,{$type}_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' ORDER BY {$type}_name ASC";
+		$query = "SELECT {$type}_id,{$type}_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' $addl_sql ORDER BY {$type}_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
