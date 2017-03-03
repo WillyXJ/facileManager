@@ -1721,12 +1721,8 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div>';
 	if (isset($addl_blocks)) {
-		if (is_array($addl_blocks)) {
-			foreach ($addl_blocks as $block) {
-				$page_links[] = '<div>' . $block . '</div>';
-			}
-		} else {
-			$page_links[] = '<div>' . $addl_blocks . '</div>';
+		foreach ((array) $addl_blocks as $block) {
+			$page_links[] = '<div>' . $block . '</div>';
 		}
 	}
 	$page_links[] = buildPaginationCountMenu(0, 'pagination');

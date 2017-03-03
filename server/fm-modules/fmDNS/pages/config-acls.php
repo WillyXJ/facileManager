@@ -83,7 +83,9 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 }
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', array($sort_field, 'acl_name'), 'acl_', "AND acl_parent_id=0 AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
-$fm_dns_acls->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_dns_acls->rows($result, $page, $total_pages);
 
 printFooter();
 

@@ -93,7 +93,9 @@ echo <<<HTML
 HTML;
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', array($sort_field, 'key_name'), 'key_', "AND key_type='$type'", null, false, $sort_direction);
-$fm_dns_keys->rows($result, $type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_dns_keys->rows($result, $type, $page, $total_pages);
 
 printFooter();
 

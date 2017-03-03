@@ -60,7 +60,9 @@ $group_type = 'service';
 echo printPageHeader($response, null, currentUserCan('manage_services', $_SESSION['module']), $group_type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='service'");
-$fm_module_groups->rows($result, $group_type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_groups->rows($result, $type, $page, $total_pages);
 
 printFooter();
 

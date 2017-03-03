@@ -27,32 +27,34 @@ class fm_module_servers extends fm_shared_module_servers {
 	/**
 	 * Displays the server list
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
-		
-		$num_rows = $fmdb->num_rows;
-		$results = $fmdb->last_result;
-
-		$bulk_actions_list = null;
-//		if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$bulk_actions_list[] = __('Upgrade');
-		}
-		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-			$bulk_actions_list[] = __('Build Config');
-		}
-		if (is_array($bulk_actions_list)) {
-			$title_array[] = array(
-								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
-								'class' => 'header-tiny header-nosort'
-							);
-		}
 		
 		if (!$result) {
 			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
 		} else {
-			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$bulk_actions_list = null;
+//			if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) {
+				$bulk_actions_list[] = __('Upgrade');
+			}
+			if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+				$bulk_actions_list[] = __('Build Config');
+			}
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$fmdb->num_rows = $num_rows;
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 			
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -85,8 +87,11 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";

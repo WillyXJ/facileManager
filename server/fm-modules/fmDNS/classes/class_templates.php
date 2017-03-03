@@ -25,30 +25,36 @@ class fm_module_templates {
 	/**
 	 * Displays the template list
 	 */
-	function rows($result, $template_type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $template_type, __('There are no templates.'));
+			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no templates.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
+
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
-							'name' => $template_type
+							'name' => $type
 						);
 
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
-			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($template_type)));
+			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
-				$this->displayRow($results[$x], $template_type);
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
+				$this->displayRow($results[$x], $type);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";

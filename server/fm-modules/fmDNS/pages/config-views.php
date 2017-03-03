@@ -84,7 +84,9 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 }
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array($sort_field, 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
-$fm_dns_views->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_dns_views->rows($result, $page, $total_pages);
 
 printFooter();
 

@@ -57,7 +57,9 @@ printHeader();
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_');
-$fm_sqlpass_groups->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_sqlpass_groups->rows($result, $page, $total_pages);
 
 printFooter();
 

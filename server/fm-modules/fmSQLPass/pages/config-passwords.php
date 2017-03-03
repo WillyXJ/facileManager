@@ -36,7 +36,9 @@ include(ABSPATH . 'fm-modules/facileManager/classes/class_users.php');
 echo printPageHeader($response);
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_', 'active');
-$fm_sqlpass_passwords->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_sqlpass_passwords->rows($result, $page, $total_pages);
 
 printFooter();
 

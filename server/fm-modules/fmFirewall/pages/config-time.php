@@ -58,7 +58,9 @@ printHeader();
 echo printPageHeader($response, null, currentUserCan('manage_time', $_SESSION['module']));
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name', 'time_');
-$fm_module_time->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_time->rows($result, $page, $total_pages);
 
 printFooter();
 

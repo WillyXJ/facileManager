@@ -2,6 +2,7 @@
 =======================
 * Server - [improvement] Code changes to better reference shared classes.
 * Server - [improvement] Utilizes response error formatting.
+* Server - [improvement] Pagination is added to all pages.
 
 1.4-alpha3 (2016-11-29)
 =======================

@@ -93,7 +93,9 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 }
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array($sort_field, 'cfg_data'), 'cfg_', 'AND cfg_type="logging" AND cfg_name="' . $channel_category . '" AND server_serial_no="' . $server_serial_no. '"', null, false, $sort_direction);
-$fm_module_logging->rows($result, $channel_category);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_logging->rows($result, $channel_category, $page, $total_pages);
 
 printFooter();
 
