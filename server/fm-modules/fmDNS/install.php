@@ -94,6 +94,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `domain_clone_domain_id` int(11) NOT NULL DEFAULT '0',
   `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL,
   `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no',
+  `domain_dnssec` enum('yes','no') NOT NULL DEFAULT 'no',
+  `domain_dnssec_sig_expire` int(2) NOT NULL DEFAULT '0',
+  `domain_dnssec_signed` INT(2) NOT NULL DEFAULT '0',
   `domain_reload` enum('yes','no') NOT NULL DEFAULT 'no',
   `domain_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`domain_id`),
@@ -123,12 +126,19 @@ TABLE;
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}keys` (
   `key_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
+  `domain_id` INT(11) NOT NULL,
+  `key_type` enum('tsig','dnssec') NOT NULL DEFAULT 'tsig',
+  `key_subtype` ENUM('ZSK','KSK') NULL,
   `key_name` varchar(255) NOT NULL,
-  `key_algorithm` enum('hmac-md5',  'hmac-sha1',  'hmac-sha224',  'hmac-sha256', 'hmac-sha384',  'hmac-sha512') NOT NULL DEFAULT 'hmac-md5',
-  `key_secret` varchar(255) NOT NULL,
+  `key_algorithm` enum('hmac-md5','hmac-sha1','hmac-sha224','hmac-sha256','hmac-sha384','hmac-sha512','rsamd5','rsasha1','dsa','nsec3rsasha1','nsec3dsa','rsasha256','rsasha512','eccgost','ecdsap256sha256','ecdsap384sha384') NOT NULL DEFAULT 'hmac-md5',
+  `key_secret` TEXT NOT NULL,
+  `key_public` text,
+  `key_size` INT(2) NULL,
+  `key_created` INT(2) NULL,
   `key_view` int(11) NOT NULL DEFAULT '0',
   `key_comment` text,
-  `key_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  `key_signing` enum('yes','no') NOT NULL DEFAULT 'no',
+  `key_status` enum('active','disabled','revoked','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`key_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLE;

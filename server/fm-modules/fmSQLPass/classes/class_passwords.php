@@ -25,7 +25,7 @@ class fm_sqlpass_passwords {
 	/**
 	 * Displays the server group list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb, $__FM_CONFIG, $fm_users;
 		
 		if (!$result) {
@@ -33,6 +33,9 @@ class fm_sqlpass_passwords {
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
 
 			$table_info = array(
 							'class' => 'display_results',
@@ -47,8 +50,11 @@ class fm_sqlpass_passwords {
 			echo displayTableHeader($table_info, $title_array);
 			echo '<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">' . "\n";
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -97,7 +103,7 @@ HTML;
 		if (!currentUserCan('manage_passwords', $_SESSION['module'])) $error = __('You do not have permission to perform this task.');
 		
 		if ($error) {
-			return (!$verbose) ? sprintf('<p class="error">%s</p>', $error) : $error;
+			return (!$verbose) ? displayResponseClose($error) : $error;
 		}
 		
 		/** Get default credentials */
@@ -136,7 +142,7 @@ HTML;
 		}
 		
 		if (!$verbose) {
-			$return = strpos($verbose_output, sprintf('[%s] -', _('failed'))) ? sprintf('<p class="error">%s</p>', __('One or more errors occurred during the password change.')) : sprintf('<p>%s</p>', __('Password has been changed.'));
+			$return = strpos($verbose_output, sprintf('[%s] -', _('failed'))) ? displayResponseClose(__('One or more errors occurred during the password change.')) : sprintf('<p>%s</p>', __('Password has been changed.'));
 		} else {
 			$return = $verbose_output;
 		}

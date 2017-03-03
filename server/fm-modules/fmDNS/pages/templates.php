@@ -47,7 +47,9 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 }
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, array($sort_field, $template_type . '_name'), $template_type . '_', "AND {$template_type}_template='yes' " . (string) $limited_domain_ids, null, false, $sort_direction);
-$fm_module_templates->rows($result, $template_type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_templates->rows($result, $template_type, $page, $total_pages);
 
 printFooter();
 

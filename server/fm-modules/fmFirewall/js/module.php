@@ -129,8 +129,9 @@ $(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response.indexOf("force_logout") >= 0) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
+						return false;
 					} else if (response != "Success") {
 						var eachLine = response.split("\n");
 						if (eachLine.length <= 2) {
@@ -143,9 +144,11 @@ $(document).ready(function() {
 										{ queue: false, duration: 200 }
 									);
 								});
-							$("#response").delay(3000).fadeTo(200, 0.00, function() {
-								$("#response").slideUp(400);
-							});
+							if (response.toLowerCase().indexOf("response_close") == -1) {
+								$("#response").delay(3000).fadeTo(200, 0.00, function() {
+									$("#response").slideUp(400);
+								});
+							}
 						} else {
 							$("#manage_item").fadeIn(200);
 							$("#manage_item_contents").fadeIn(200);

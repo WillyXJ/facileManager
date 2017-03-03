@@ -78,7 +78,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 
 			/** Build keys config */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view=0 AND key_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_type="tsig" AND key_view=0 AND key_status="active"');
 			if ($fmdb->num_rows) {
 				$key_result = $fmdb->last_result;
 				$key_config_count = $fmdb->num_rows;
@@ -799,6 +799,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		/** get the records */
 		$zone_file .= $this->buildRecords($domain, $server_serial_no, $soa_ttl);
 		
+		/** Sign the zone? */
+		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes') {
+			$zone_file = $this->dnssecSignZone($domain, $zone_file);
+		}
+		
 		return $zone_file;
 	}
 	
@@ -1188,6 +1193,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$parent_zone->domain_name = $zone->domain_name;
 			$parent_zone->domain_name_file = $zone->domain_name;
 			$parent_zone->domain_clone_dname = $zone->domain_clone_dname;
+			$parent_zone->domain_dnssec = $zone->domain_dnssec;
+			$parent_zone->domain_dnssec_sig_expire = $zone->domain_dnssec_sig_expire;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
 			
@@ -1878,6 +1885,70 @@ HTML;
 			$rrsets = str_replace($cfg_name, null, $rrsets);
 		}
 		return ($rrsets) ? "\trrset-order {\n{$rrsets}\t};\n" : null;
+	}
+	
+	
+	/**
+	 * Signs the DNSSEC zone file
+	 *
+	 * @since 3.0
+	 * @package fmDNS
+	 *
+	 * @param object $domain The domain result
+	 * @param string $zone_file_contents Contents of zone file to sign
+	 * @return string
+	 */
+	function dnssecSignZone($domain, $zone_file_contents) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Locate dnssec binaries */
+		if (!$dnssec_signzone = findProgram('dnssec-signzones')) {
+			exit(displayResponseClose(sprintf(__('The dnssec-signzone binary could not be found on %s so DNSSEC zone signing cannot be done.'), php_uname('n'))));
+		}
+		
+		/** Create temp directory */
+		list($tmp_dir, $created) = createTempDir($_SESSION['module'], 'datetime');
+		if ($created === false) exit(displayResponseClose(sprintf(__('%s is not writeable by %s so DNSSEC zone signing cannot be done.'), $tmp_dir, $__FM_CONFIG['webserver']['user_info']['name'])));
+
+		/** Create temp files */
+		$temp_zone_file = $tmp_dir . 'db.' . $domain->domain_name . '.hosts';
+		file_put_contents($temp_zone_file, $zone_file_contents);
+		
+		/** Get associated DNSSEC keys */
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', array('key_signing', 'key_created'), 'key_', 'AND key_type="dnssec" AND domain_id=' . $domain->parent_domain_id . ' AND key_status IN ("active","revoked")', null, false, 'DESC');
+		if (!$fmdb->sql_errors && $fmdb->num_rows) {
+			$dnssec_keys = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				if ($dnssec_keys[$i]->key_signing == 'yes') {
+					$dnssec_key_signing_array[$dnssec_keys[$i]->key_subtype][] = array($dnssec_keys[$i]->key_name, $dnssec_keys[$i]->key_secret);
+				}
+				file_put_contents($tmp_dir . $dnssec_keys[$i]->key_name . '.private', $dnssec_keys[$i]->key_secret);
+				file_put_contents($tmp_dir . $dnssec_keys[$i]->key_name . '.key', $dnssec_keys[$i]->key_public);
+				file_put_contents($temp_zone_file, $dnssec_keys[$i]->key_public, FILE_APPEND);
+			}
+		} else {
+			return $zone_file_contents;
+		}
+		
+		$dnssec_endtime = getDNSSECExpiration($domain, 'endtime');
+		
+		foreach ($dnssec_key_signing_array['KSK'] as $ksk_array) {
+		file_put_contents($ksk_array[0] . "\n", FILE_APPEND);
+			$dnssec_ksk[] = '-k ' . $ksk_array[0];
+		}
+		$dnssec_ksk = join(' ', $dnssec_ksk);
+		
+		/** Sign zone with all keys */
+		$dnssec_output = shell_exec('cd ' . $tmp_dir . ' && ' . $dnssec_signzone . ' -K ' . $tmp_dir . ' -o ' . $domain->domain_name . ' ' . $dnssec_ksk . ' -f ' . $temp_zone_file . '.signed -e ' . $dnssec_endtime . ' ' . $temp_zone_file . ' ' . $dnssec_key_signing_array['ZSK'][0][0] . ' 2>&1');
+		file_put_contents('/tmp/php.log', 'cd ' . $tmp_dir . ' && ' . $dnssec_signzone . ' -K ' . $tmp_dir . ' -o ' . $domain->domain_name . ' ' . $dnssec_ksk . ' -f ' . $temp_zone_file . '.signed -e ' . $dnssec_endtime . ' ' . $temp_zone_file . ' ' . $dnssec_key_signing_array['ZSK'][0][0] . " 2>&1\n", FILE_APPEND);
+		if (file_exists($temp_zone_file . '.signed')) {
+			$signed_zone = file_get_contents($temp_zone_file . '.signed');
+			$GLOBALS[$_SESSION['module']]['DNSSEC'][] = array('domain_id' => $domain->parent_domain_id, 'domain_dnssec_signed' => strtotime('now'));
+		}
+		
+		system('rm -rf ' . $tmp_dir);
+		
+		return $signed_zone ? $signed_zone : $dnssec_output;
 	}
 	
 }

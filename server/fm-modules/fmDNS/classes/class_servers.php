@@ -27,32 +27,34 @@ class fm_module_servers extends fm_shared_module_servers {
 	/**
 	 * Displays the server list
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
-		
-		$num_rows = $fmdb->num_rows;
-		$results = $fmdb->last_result;
-
-		$bulk_actions_list = null;
-//		if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$bulk_actions_list[] = __('Upgrade');
-		}
-		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-			$bulk_actions_list[] = __('Build Config');
-		}
-		if (is_array($bulk_actions_list)) {
-			$title_array[] = array(
-								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
-								'class' => 'header-tiny header-nosort'
-							);
-		}
 		
 		if (!$result) {
 			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
 		} else {
-			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$bulk_actions_list = null;
+//			if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) {
+				$bulk_actions_list[] = __('Upgrade');
+			}
+			if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+				$bulk_actions_list[] = __('Build Config');
+			}
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$fmdb->num_rows = $num_rows;
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 			
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -85,8 +87,11 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -652,7 +657,7 @@ FORM;
 
 			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
 			$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
-			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key'), $server_key);
+			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key', 'blank', 'AND `key_type`="tsig"'), $server_key);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
 			$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
@@ -760,7 +765,7 @@ FORM;
 		return $return_form;
 	}
 	
-	function availableItems($type, $default = 'blank') {
+	function availableItems($type, $default = 'blank', $addl_sql = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
@@ -772,7 +777,7 @@ FORM;
 			$j++;
 		}
 		
-		$query = "SELECT {$type}_id,{$type}_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' ORDER BY {$type}_name ASC";
+		$query = "SELECT {$type}_id,{$type}_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' $addl_sql ORDER BY {$type}_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;

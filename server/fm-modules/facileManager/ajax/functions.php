@@ -35,7 +35,7 @@ function returnError($window = true) {
 		echo "<p>$msg</p>\n";
 		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	} else {
-		echo '<p class="error">' . $msg . "</p>\n";
+		echo displayResponseClose($msg);
 	}
 	exit;
 }
@@ -54,7 +54,7 @@ function returnUnAuth($window = true) {
 		echo "<p>$msg</p>\n";
 		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	} else {
-		echo '<p class="error">' . $msg . "</p>\n";
+		echo displayResponseClose($msg);
 	}
 	exit;
 }

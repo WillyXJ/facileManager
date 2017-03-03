@@ -49,8 +49,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 
@@ -85,8 +86,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 
@@ -136,8 +138,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -201,8 +204,9 @@ $(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response.indexOf("force_logout") >= 0) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
+						return false;
 					} else if (response == "' . _('Success') . '") {
 						$("."+$subelement).css({"background-color":"#D98085"});
 						$("."+$subelement).fadeOut("slow", function() {
@@ -218,9 +222,11 @@ $(document).ready(function() {
 									{ queue: false, duration: 200 }
 								);
 							});
-						$("#response").delay(3000).fadeTo(200, 0.00, function() {
-							$("#response").slideUp(400);
-						});
+						if (response.toLowerCase().indexOf("response_close") == -1) {
+							$("#response").delay(3000).fadeTo(200, 0.00, function() {
+								$("#response").slideUp(400);
+							});
+						}
 					}
 				}
 			});
@@ -255,8 +261,9 @@ $(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -383,13 +390,19 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$("#manage_item_contents").delegate("#domain_dnssec", "click", function(e) {
+		if ($(this).is(":checked")) {
+			$("#dnssec_option").show("slow");
+		} else {
+			$("#dnssec_option").slideUp();
+		}
+	});
+
 	$("#admin-tools-form").delegate("#zone_import_domain_list", "change", function(e) {
 		if ($(this).val() == 0) {
 			$("#import-records").val("' . __('Import Zones') . '");
-//			$("#import-records").attr("id", "import-zones");
 		} else {
 			$("#import-records").val("' . __('Import Records') . '");
-//			$("#import-zones").attr("id", "import-records");
 		}
 	});
 
@@ -419,8 +432,9 @@ function displayOptionPlaceholder(option_value) {
 		data: form_data,
 		success: function(response)
 		{
-			if (response.indexOf("force_logout") >= 0) {
+			if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 				doLogout();
+				return false;
 			}
 			$(".value_placeholder").html(response);
 			if (response.toLowerCase().indexOf("address_match_element") == -1) {
@@ -450,8 +464,9 @@ function loadDynamicZone() {
 		data: form_data,
 		success: function(response)
 		{
-			if (response.indexOf("force_logout") >= 0) {
+			if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 				doLogout();
+				return false;
 			}
 
 			if (response.toLowerCase().indexOf("no records") > -1) {

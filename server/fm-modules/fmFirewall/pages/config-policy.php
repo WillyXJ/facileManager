@@ -83,7 +83,9 @@ HTML;
 */
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_type='$type'");
-$fm_module_policies->rows($result, $type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_policies->rows($result, $type, $page, $total_pages);
 
 printFooter();
 

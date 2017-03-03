@@ -25,7 +25,7 @@ class fm_module_options {
 	/**
 	 * Displays the option list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -33,6 +33,9 @@ class fm_module_options {
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
 
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -50,8 +53,11 @@ class fm_module_options {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -330,7 +336,7 @@ HTML;
 		
 		$addl_options = null;
 		if ($cfg_type == 'ratelimit') {
-			$available_zones = $fm_dns_zones->buildZoneJSON($cfg_data);
+			$available_zones = $fm_dns_zones->buildZoneJSON();
 
 			$addl_options = sprintf('<tr>
 					<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>

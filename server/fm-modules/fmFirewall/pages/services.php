@@ -62,7 +62,9 @@ printHeader();
 echo printPageHeader($response, null, currentUserCan('manage_services', $_SESSION['module']), $type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name', 'service_', "AND service_type='$type'");
-$fm_module_services->rows($result, $type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_services->rows($result, $type, $page, $total_pages);
 
 printFooter();
 

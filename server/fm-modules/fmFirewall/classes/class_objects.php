@@ -25,7 +25,7 @@ class fm_module_objects {
 	/**
 	 * Displays the object list
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -34,6 +34,9 @@ class fm_module_objects {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
@@ -47,8 +50,11 @@ class fm_module_objects {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";

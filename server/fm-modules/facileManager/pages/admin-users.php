@@ -92,7 +92,9 @@ echo <<<HTML
 HTML;
 
 $result = ($type == 'users') ? basicGetList('fm_users', $sort_field, 'user_', null, null, false, $sort_direction) : basicGetList('fm_groups', $sort_field, 'group_', null, null, false, $sort_direction);
-$fm_users->rows($result, $type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_users->rows($result, $type, $page, $total_pages);
 
 printFooter();
 

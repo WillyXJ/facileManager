@@ -973,7 +973,7 @@ function socketTest($host, $port, $timeout) {
  * @since 1.0
  * @package facileManager
  */
-function getPostData($url, $data, $post = 'post', $options = array()) {
+function getPostData($url, $data = null, $post = 'post', $options = array()) {
 	if ($post == 'post') {
 		$options = array(
 			CURLOPT_POST => true,
@@ -1721,12 +1721,8 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div>';
 	if (isset($addl_blocks)) {
-		if (is_array($addl_blocks)) {
-			foreach ($addl_blocks as $block) {
-				$page_links[] = '<div>' . $block . '</div>';
-			}
-		} else {
-			$page_links[] = '<div>' . $addl_blocks . '</div>';
+		foreach ((array) $addl_blocks as $block) {
+			$page_links[] = '<div>' . $block . '</div>';
 		}
 	}
 	$page_links[] = buildPaginationCountMenu(0, 'pagination');
@@ -2042,7 +2038,9 @@ function buildSettingsForm($saved_options, $default_options) {
 				$input_field = buildSelect($option, $option, $options_array['options'], $option_value);
 				break;
 			default:
-				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="40" />';
+				$size = (isset($options_array['size'])) ? $options_array['size'] : 40;
+				$addl = (isset($options_array['addl'])) ? $options_array['addl'] : null;
+				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="' . $size . '" ' . $addl . ' />';
 		}
 		$option_rows .= <<<ROW
 			<div id="setting-row">
@@ -2151,7 +2149,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	
 	$style = (empty($response)) ? 'style="display: none;"' : null;
 	if (strpos($response, '</p>') === false) {
-		$response = '<p class="error">' . $response . '</p>';
+		$response = displayResponseClose($response);
 	}
 
 	echo '<div id="body_container">' . "\n";
@@ -2179,7 +2177,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
  * @return boolean
  */
 function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM_CONFIG = null) {
-	global $fmdb, $fm_dns_zones;
+	global $fmdb;
 	
 	if (!$__FM_CONFIG) global $__FM_CONFIG;
 	
@@ -2204,7 +2202,17 @@ function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM
 	}
 	$result = $fmdb->query($query);
 	
-	if ($fmdb->result) return true;
+	if ($fmdb->result) {
+		if (isset($GLOBALS[$_SESSION['module']]['DNSSEC'])) {
+			foreach ($GLOBALS[$_SESSION['module']]['DNSSEC'] as $items) {
+				basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", $items['domain_id'], 'domain_dnssec_signed', $items['domain_dnssec_signed'], 'domain_id');
+				if ($fmdb->sql_errors || !$fmdb->result) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -2953,7 +2961,7 @@ function countServerUpdates() {
 	
 	if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND (server_build_config!="no" OR server_client_version!="' . getOption('client_version', 0, $_SESSION['module']) . '") AND server_status="active" AND server_installed="yes"', null, false, null, true);
-		if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
+		if (!$fmdb->sql_errors && $fmdb->num_rows) return $fmdb->last_result[0]->count;
 	}
 			
 	return 0;
@@ -3234,13 +3242,13 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH key */
 	$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 	if (!$ssh_key) {
-		return '<p class="error">' . sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+		return displayResponseClose(sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
 	}
 
 	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
 	if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 	if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-		return '<p class="error">' . sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key) . '</p>'. "\n";
+		return displayResponseClose(sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
 	}
 
 	@chmod($temp_ssh_key, 0400);
@@ -3248,7 +3256,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH user */
 	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 	if (!$ssh_user) {
-		return '<p class="error">' . sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))) . '</p>'. "\n";
+		return displayResponseClose(sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
 	}
 
 	/** Run remote command */
@@ -3477,13 +3485,86 @@ function extractPackage($package) {
  * @since 3.0
  * @package facileManager
  *
- * @param array Temp directory and if it was created
+ * @return array Temp directory and if it was created
  */
 function clearUpdateDir() {
+	return createTempDir('fm_updates');
+}
+
+
+/**
+ * Generic mailing function
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $sendto Email address to send to
+ * @param string $subject Email subject
+ * @param string $body Email body
+ * @param string $altbody Email alternate body (plaintext)
+ * @return boolean
+ */
+function sendEmail($sendto, $subject, $body, $altbody = null) {
+	global $fm_name;
+
+	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
+	if (!file_exists($phpmailer_file)) {
+		return _('Unable to send email - PHPMailer class is missing.');
+	} else {
+		require $phpmailer_file;
+	}
+
+	$mail = new PHPMailer;
+
+	/** Set PHPMailer options from database */
+	$mail->Host = getOption('mail_smtp_host');
+	$mail->SMTPAuth = getOption('mail_smtp_auth');
+	if ($mail->SMTPAuth) {
+		$mail->Username = getOption('mail_smtp_user');
+		$mail->Password = getOption('mail_smtp_pass');
+	}
+	if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
+
+	$mail->FromName = $fm_name;
+	$mail->From = getOption('mail_from');
+	$mail->AddAddress($sendto);
+
+	$mail->Subject = $subject;
+	$mail->Body = $body;
+	if ($altbody) {
+		$mail->AltBody = $altbody;
+	}
+	$mail->IsHTML(true);
+
+	$mail->IsSMTP();
+
+	if(!$mail->Send()) {
+		return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
+	}
+
+	return true;
+}
+
+
+/**
+ * Create a temporary directory
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $subdir Sub directory name
+ * @param string $append String to append to directory name
+ * @return array Temp directory and if it was created
+ */
+function createTempDir($subdir, $append = null) {
 	$created = true;
 	
+	if ($append) {
+		$subdir .= ($append == 'datetime') ? '_' . date("YmdHis") : "_$append";
+	}
+	
 	$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
-	$tmp_dir = rtrim($fm_temp_directory, '/') . '/fm_updates/';
+	$tmp_dir = rtrim($fm_temp_directory, '/') . "/$subdir/";
 	system('rm -rf ' . $tmp_dir);
 	if (!is_dir($tmp_dir)) {
 		if (!@mkdir($tmp_dir, 0777, true)) {
@@ -3492,6 +3573,20 @@ function clearUpdateDir() {
 	}
 
 	return array($tmp_dir, $created);
+}
+
+
+/**
+ * Displays a close button in the response
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $message Error message to include
+ * @return string
+ */
+function displayResponseClose($message) {
+	return sprintf('<div id="response_close"><p><i class="fa fa-close close" aria-hidden="true" title="%s"></i></p></div><p class="error">%s</p>', _('Close'), $message);
 }
 
 
