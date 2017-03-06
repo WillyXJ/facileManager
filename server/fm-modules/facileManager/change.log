@@ -6,6 +6,7 @@
 * Server - [improvement] Code changes to add global response error formatting.
 * Server - [improvement] Added Windows server icon for other modules to use.
 * Server - [improvement] Pagination is added to all pages.
+* Server - [bug] Fixed an issue where the Edit Profile menu option did nothing.
 
 3.0-alpha3 (2016-11-29)
 =======================
