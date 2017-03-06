@@ -1236,6 +1236,9 @@ i.star {
 i.secure {
 	color: #09a30c;
 }
+i.insecure {
+	color: #CB3739;
+}
 
 i.fail {
 	color: #ce0606;

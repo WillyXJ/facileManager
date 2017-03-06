@@ -83,7 +83,16 @@ class fm_dns_zones {
 				if ($y == $_SESSION['user']['record_count']) break;
 				if (array_key_exists('attention', $_GET)) {
 					if (!$results[$x]->domain_clone_domain_id && $results[$x]->domain_type == 'master' && $results[$x]->domain_template == 'no' &&
-						(!getSOACount($results[$x]->domain_id) || !getNSCount($results[$x]->domain_id) || $results[$x]->domain_reload == 'yes')) {
+						(!getSOACount($results[$x]->domain_id) || !getNSCount($results[$x]->domain_id) || $results[$x]->domain_reload == 'yes' ||
+						$results[$x]->domain_dnssec == 'yes')) {
+							/** DNSSEC Check */
+							if ($results[$x]->domain_dnssec == 'yes') {
+								$domain_dnssec_sig_expires = getDNSSECExpiration($results[$x]);
+								basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND domain_id=' . $results[$x]->domain_id);
+								if ($fmdb->num_rows && $domain_dnssec_sig_expires >= strtotime('now + 7 days')) {
+									continue;
+								}
+							}							
 							$this->displayRow($results[$x], $map, $reload_allowed);
 							$y++;
 					}
@@ -612,8 +621,6 @@ class fm_dns_zones {
 		$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . "\">$domain_name</a>" : $domain_name;
 		$domain_view = $this->IDs2Name($row->domain_view, 'view');
 
-		$class = 'class="' . implode(' ', $classes) . '"';
-
 		$record_count = null;
 		if ($row->domain_type == 'master') {
 			$query = "SELECT COUNT(*) record_count FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE account_id={$_SESSION['user']['account_id']} AND domain_id={$row->domain_id} AND record_status!='deleted'";
@@ -621,12 +628,23 @@ class fm_dns_zones {
 			$record_count = $fmdb->last_result[0]->record_count;
 		}
 		
-		$icons .= (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="template-icon fa fa-lock secure" title="%s"></i>', __('Zone is secured with DNSSEC')) : null;
+		if (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') {
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND domain_id=' . $row->domain_id);
+			if ($fmdb->num_rows) {
+				$icons .= sprintf('<i class="template-icon fa fa-lock secure" title="%s"></i>', __('Zone is secured with DNSSEC'));
+			} else {
+				$icons .= sprintf('<i class="template-icon fa fa-lock insecure" title="%s"></i>', __('Zone is configured but not secured with DNSSEC'));
+				$response = __('There are no DNSSEC keys defined for this zone.');
+				$classes[] = 'attention';
+			}
+		}
 		$icons .= ($dynamic_zone == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates')) : null;
 		$icons .= ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))) : null;
 		
 		$response = ($response) ? sprintf('<a href="#" class="tooltip-top grey" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', $response) : null;
 		
+		$class = 'class="' . implode(' ', $classes) . '"';
+
 		echo <<<HTML
 		<tr id="$row->domain_id" name="$row->domain_name" $class>
 			$checkbox
