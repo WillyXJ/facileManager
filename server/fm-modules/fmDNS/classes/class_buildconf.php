@@ -1902,7 +1902,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Locate dnssec binaries */
-		if (!$dnssec_signzone = findProgram('dnssec-signzones')) {
+		if (!$dnssec_signzone = findProgram('dnssec-signzone')) {
 			exit(displayResponseClose(sprintf(__('The dnssec-signzone binary could not be found on %s so DNSSEC zone signing cannot be done.'), php_uname('n'))));
 		}
 		
@@ -1933,14 +1933,12 @@ HTML;
 		$dnssec_endtime = getDNSSECExpiration($domain, 'endtime');
 		
 		foreach ($dnssec_key_signing_array['KSK'] as $ksk_array) {
-		file_put_contents($ksk_array[0] . "\n", FILE_APPEND);
 			$dnssec_ksk[] = '-k ' . $ksk_array[0];
 		}
 		$dnssec_ksk = join(' ', $dnssec_ksk);
 		
 		/** Sign zone with all keys */
-		$dnssec_output = shell_exec('cd ' . $tmp_dir . ' && ' . $dnssec_signzone . ' -K ' . $tmp_dir . ' -o ' . $domain->domain_name . ' ' . $dnssec_ksk . ' -f ' . $temp_zone_file . '.signed -e ' . $dnssec_endtime . ' ' . $temp_zone_file . ' ' . $dnssec_key_signing_array['ZSK'][0][0] . ' 2>&1');
-		file_put_contents('/tmp/php.log', 'cd ' . $tmp_dir . ' && ' . $dnssec_signzone . ' -K ' . $tmp_dir . ' -o ' . $domain->domain_name . ' ' . $dnssec_ksk . ' -f ' . $temp_zone_file . '.signed -e ' . $dnssec_endtime . ' ' . $temp_zone_file . ' ' . $dnssec_key_signing_array['ZSK'][0][0] . " 2>&1\n", FILE_APPEND);
+		$dnssec_output = shell_exec('cd ' . $tmp_dir . ' && ' . $dnssec_signzone . ' -g -K ' . $tmp_dir . ' -o ' . $domain->domain_name . ' ' . $dnssec_ksk . ' -f ' . $temp_zone_file . '.signed -e ' . $dnssec_endtime . ' ' . $temp_zone_file . ' ' . $dnssec_key_signing_array['ZSK'][0][0] . ' 2>&1');
 		if (file_exists($temp_zone_file . '.signed')) {
 			$signed_zone = file_get_contents($temp_zone_file . '.signed');
 			$GLOBALS[$_SESSION['module']]['DNSSEC'][] = array('domain_id' => $domain->parent_domain_id, 'domain_dnssec_signed' => strtotime('now'));
