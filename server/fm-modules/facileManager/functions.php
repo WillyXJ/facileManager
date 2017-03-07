@@ -425,8 +425,8 @@ $user_account_menu
 		</div>
 $module_menu
 $module_toolbar_right
-$search
 $process_all
+$search
 	</div>
 	<div id="help">
 		<div id="help_topbar">
@@ -3587,6 +3587,66 @@ function createTempDir($subdir, $append = null) {
  */
 function displayResponseClose($message) {
 	return sprintf('<div id="response_close"><p><i class="fa fa-close close" aria-hidden="true" title="%s"></i></p></div><p class="error">%s</p>', _('Close'), $message);
+}
+
+
+/**
+ * Generates URI params from current params
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $params Params to exclude or include
+ * @param string $direction Exclude or include
+ * @param string $character Starting character
+ * @param array $null_params Params to return null with
+ * @return string
+ */
+function generateURIParams($params = array(), $direction = 'include', $character = '?', $null_params = array()) {
+	$uri_params = null;
+	
+	foreach ($GLOBALS['URI'] as $param => $val) {
+		if (in_array($param, (array) $null_params)) return null;
+		if ($direction == 'include') {
+			if (!in_array($param, (array) $params)) continue;
+		} else {
+			if (in_array($param, (array) $params)) continue;
+		}
+		$uri_params[] = "$param=$val";
+	}
+	if ($uri_params) $uri_params = $character . implode('&', $uri_params);
+	
+	return $uri_params;
+}
+
+
+/**
+ * Builds the page sub menu items
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $selected Selected option type
+ * @param string $avail_types Available option types
+ * @param array $null_params
+ * @param array $params
+ * @param string $direction
+ * @param string $character
+ * @return string
+ */
+function buildSubMenu($selected, $avail_types, $null_params = array(), $params = array('type', 'action', 'id', 'status'), $direction = 'exclude', $character = '&') {
+	global $__FM_CONFIG;
+	
+	$menu_selects = null;
+	
+	$uri_params = generateURIParams($params, $direction, $character, $null_params);
+	
+	foreach ($avail_types as $general => $type) {
+		$select = ($selected == $general) ? ' class="selected"' : '';
+		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
+	}
+	
+	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
 }
 
 

@@ -65,7 +65,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $server_serial_no);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
 
 $response = $form_data = $action = null;
 
@@ -88,19 +88,5 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_module_policies->rows($result, $type, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'policy', $server_serial_no = null) {
-	global $__FM_CONFIG;
-	
-	$menu_selects = null;
-	
-	foreach ($__FM_CONFIG['policy']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"config-policy?type=$general&server_serial_no=$server_serial_no\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
 
 ?>

@@ -66,7 +66,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['operations']['avail_types']);
 echo printPageHeader($response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 
 $avail_servers = buildServerSubMenu($server_serial_no);
@@ -88,24 +88,5 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_dns_controls->rows($result, $type, $page, $total_pages);
 
 printFooter();
-
-function buildSubMenu($option_type = 'controls') {
-	global $__FM_CONFIG;
-	
-	$menu_selects = $uri_params = null;
-	
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if (in_array($param, array('type', 'action', 'id', 'status'))) continue;
-		$uri_params .= "&$param=$val";
-	}
-	
-	foreach ($__FM_CONFIG['operations']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
-
 
 ?>

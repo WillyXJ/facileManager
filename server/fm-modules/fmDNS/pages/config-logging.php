@@ -71,7 +71,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $server_serial_no_uri);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['logging']['avail_types']);
 $avail_servers = buildServerSubMenu($server_serial_no);
 
 echo printPageHeader($response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
@@ -98,19 +98,5 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_module_logging->rows($result, $channel_category, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'channel', $server_serial_no_uri = null) {
-	global $__FM_CONFIG;
-	
-	$menu_selects = null;
-	
-	foreach ($__FM_CONFIG['logging']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$server_serial_no_uri\">$type</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
 
 ?>
