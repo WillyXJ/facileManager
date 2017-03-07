@@ -301,6 +301,10 @@ class fm_dns_records {
 			$title_array[] = array('title' => __('Replace'), 'rel' => 'record_value');
 		}
 		
+		if ($type == 'CAA') {
+			$title_array[] = array('title' => __('Type'), 'rel' => 'record_params');
+		}
+		
 		if ($show_value) $title_array[] = array('title' => __('Value'), 'rel' => 'record_value');
 				
 		if ($type == 'RP' ) {
@@ -385,6 +389,10 @@ class fm_dns_records {
 			}
 			$field_values['data']['TTL'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_ttl]" value="' . $record_ttl . '" onkeydown="return validateTimeFormat(event, this)" />';
 			$field_values['data']['Class'] = '>' . $class;
+			
+			if ($type == 'CAA') {
+				$field_values['data']['Flags'] = '>' . buildSelect($action . '[_NUM_][record_params]', '_NUM_', $__FM_CONFIG['records']['caa_flags'], $record_params);
+			}
 			
 			if ($type == 'CERT') {
 				$field_values['data']['Type'] = '>' . buildSelect($action . '[_NUM_][record_cert_type]', '_NUM_', $__FM_CONFIG['records']['cert_types'], $record_cert_type);

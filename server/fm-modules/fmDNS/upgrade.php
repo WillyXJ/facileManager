@@ -1938,6 +1938,7 @@ function upgradefmDNS_3004($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD `key_signing` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `key_comment`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD `key_public` TEXT NULL DEFAULT NULL AFTER `key_secret`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE `key_status` `key_status` ENUM('active','disabled','revoked','deleted') NOT NULL DEFAULT 'active'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','KEY','KX','MX','NS','PTR','RP','SRV','TXT','HINFO','SSHFP','NAPTR') NOT NULL DEFAULT  'A'";
 
 	/** Run queries */
 	if (count($table) && $table[0]) {

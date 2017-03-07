@@ -7,6 +7,7 @@
 * Server - [improvement] Utilizes response error formatting.
 * Server - [improvement] Pagination is added to all pages.
 * Server - [improvement] Code clean up.
+* Server - [feature] Added support for the CAA RR. (Issue #361)
 
 3.0-alpha3 (2016-11-29)
 =======================
