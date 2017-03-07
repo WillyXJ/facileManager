@@ -29,6 +29,15 @@ $(document).ready(function() {
 		});
 	}
 
+	if (onPage("config-keys.php")) {
+		$(function() {
+			$("#pagination_container #domain_id").select2({
+				containerCss: { "min-width": "200px" },
+				minimumResultsForSearch: 10
+			});
+		});
+	}
+
 	/* Zone reload button */
 	$("#zones").delegate("form", "click tap", function(e) {
 		var $this 	= $(this);

@@ -111,6 +111,8 @@ echo <<<HTML
 
 HTML;
 
+printFooter(null, $output);
+
 
 function displayLogData($page, $search_sql = null) {
 	global $fmdb, $fm_name, $__FM_CONFIG;

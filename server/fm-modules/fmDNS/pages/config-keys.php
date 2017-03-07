@@ -35,12 +35,7 @@ $display_type = $__FM_CONFIG['keys']['avail_types'][$type];
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = null;
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if (!in_array($param, array('type'))) continue;
-		$uri_params[] = "$param=$val";
-	}
-	if ($uri_params) $uri_params = '?' . implode('&', $uri_params);
+	$uri_params = generateURIParams(array('type'));
 	
 	switch ($action) {
 	case 'add':
@@ -73,7 +68,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['keys']['avail_types']);
 echo printPageHeader($response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type);
 	
 $sort_direction = null;
@@ -91,30 +86,17 @@ echo <<<HTML
 </div>
 
 HTML;
-	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', array($sort_field, 'key_name'), 'key_', "AND key_type='$type'", null, false, $sort_direction);
+
+/** Process domain_id filtering */
+if (isset($_GET['domain_id']) && !in_array(0, $_GET['domain_id'])) {
+	$filter_sql = ' AND domain_id IN (' . sanitize(implode(',', $_GET['domain_id'])) . ')';
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', array($sort_field, 'key_name'), 'key_', "AND key_type='$type'" . (string) $filter_sql, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_dns_keys->rows($result, $type, $page, $total_pages);
 
 printFooter();
-
-function buildSubMenu($option_type = 'tsig') {
-	global $__FM_CONFIG;
-	
-	$menu_selects = $uri_params = null;
-	
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if (in_array($param, array('type', 'action', 'id', 'status'))) continue;
-		$uri_params .= "&$param=$val";
-	}
-	
-	foreach ($__FM_CONFIG['keys']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
 
 ?>

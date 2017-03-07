@@ -622,8 +622,9 @@ function getModuleBadgeCounts($type) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
 					} elseif ($domain_results[$i]->domain_reload != 'no') {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
-					} elseif ($domain_results[$i]->domain_dnssec != 'no' && $domain_results[$i]->domain_dnssec_signed) {
-						if (getDNSSECExpiration($domain_results[$i]) <= strtotime('now + 3 days')) {
+					} elseif ($domain_results[$i]->domain_dnssec != 'no') {
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND domain_id=' . $domain_results[$i]->domain_id);
+						if (!$fmdb->num_rows || ($domain_results[$i]->domain_dnssec_signed && getDNSSECExpiration($domain_results[$i]) <= strtotime('now + 7 days'))) {
 							$badge_counts[$domain_results[$i]->domain_mapping]++;
 						}
 					}
@@ -1182,7 +1183,7 @@ function compareValues($data_array, $sql_records) {
  */
 function getDNSSECExpiration($data, $type = 'calculated') {
 	$domain_dnssec_sig_expires = ($data->domain_dnssec_sig_expire) ? $data->domain_dnssec_sig_expire : getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']);
-	$domain_dnssec_sig_expires = $type == 'calculated' ? strtotime(date('YmdHis', $data->domain_dnssec_signed) . ' + ' . $domain_dnssec_sig_expires . ' days') : date('YmdHis', strtotime('now + ' . $domain_dnssec_sig_expires . ' days'));
+	$domain_dnssec_sig_expires = ($type == 'calculated') ? strtotime(date('YmdHis', $data->domain_dnssec_signed) . ' + ' . $domain_dnssec_sig_expires . ' days') : date('YmdHis', strtotime('now + ' . $domain_dnssec_sig_expires . ' days'));
 	
 	return $domain_dnssec_sig_expires;
 }

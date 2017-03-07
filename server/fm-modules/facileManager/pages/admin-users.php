@@ -71,7 +71,7 @@ case 'edit':
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['users']['avail_types']);
 echo printPageHeader($response, $display_type, currentUserCan('manage_users'), $type);
 
 $sort_field = ($type == 'users') ? 'user_login' : 'group_name';
@@ -97,24 +97,5 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_users->rows($result, $type, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'users') {
-	global $__FM_CONFIG;
-	
-	$menu_selects = $uri_params = null;
-	
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if (in_array($param, array('type', 'action', 'id', 'status'))) continue;
-		$uri_params .= "&$param=$val";
-	}
-	
-	foreach ($__FM_CONFIG['users']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
 
 ?>

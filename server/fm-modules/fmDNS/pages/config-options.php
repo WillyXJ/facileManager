@@ -27,7 +27,7 @@ if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) u
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
-$option_type = (isset($_GET['option_type'])) ? sanitize(ucfirst($_GET['option_type'])) : 'Global';
+$option_type = (isset($_GET['type'])) ? sanitize(ucfirst($_GET['type'])) : 'Global';
 $display_option_type = $__FM_CONFIG['options']['avail_types'][strtolower($option_type)];
 $display_option_type_sql = strtolower($option_type);
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
@@ -72,12 +72,7 @@ if (array_key_exists('view_id', $_GET)) {
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = null;
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if (!in_array($param, array('option_type', 'view_id', 'domain_id', 'server_serial_no'))) continue;
-		$uri_params[] = "$param=$val";
-	}
-	if ($uri_params) $uri_params = '?' . implode('&', $uri_params);
+	$uri_params = generateURIParams(array('type', 'view_id', 'domain_id', 'server_serial_no'), 'include');
 	
 	switch ($action) {
 	case 'add':
@@ -109,7 +104,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu(strtolower($option_type));
+$avail_types = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
 $avail_servers = buildServerSubMenu($server_serial_no);
 $avail_views = buildViewSubMenu($view_id);
 
@@ -138,26 +133,5 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_module_options->rows($result, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'global') {
-	global $__FM_CONFIG;
-	
-	$menu_selects = $uri_params = null;
-	
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if ($param == 'domain_id') return null;
-		if ($param == 'option_type') continue;
-		$uri_params .= "&$param=$val";
-	}
-	
-	foreach ($__FM_CONFIG['options']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?option_type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
-
 
 ?>

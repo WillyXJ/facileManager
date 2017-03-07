@@ -6,6 +6,7 @@
 * Server - [feature] Added support for DNSSEC. (Issue #285)
 * Server - [improvement] Utilizes response error formatting.
 * Server - [improvement] Pagination is added to all pages.
+* Server - [improvement] Code clean up.
 
 3.0-alpha3 (2016-11-29)
 =======================

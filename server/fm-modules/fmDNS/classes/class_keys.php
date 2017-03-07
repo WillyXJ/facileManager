@@ -35,7 +35,9 @@ class fm_dns_keys {
 			$results = $fmdb->last_result;
 			
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
+			$addl_blocks = ($type == 'dnssec') ? array($this->buildFilterMenu(), null) : null;
+			
+			echo displayPagination($page, $total_pages, $addl_blocks);
 
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -596,6 +598,40 @@ HTML;
 	}
 
 
+	/**
+	 * Builds the key listing filter menu
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param id $ids IDs to convert to names
+	 * @return string
+	 */
+	function buildFilterMenu() {
+		global $fm_dns_zones;
+		
+		if (!class_exists('fm_dns_zones')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+		}
+		
+		$domain_view = isset($_GET['domain_id']) ? $_GET['domain_id'] : 0;
+		
+		$available_zones = array_reverse($fm_dns_zones->availableZones(true, 'master', true));
+		$available_zones[] = array(null, null);
+		$available_zones = array_reverse($available_zones);
+		
+		return sprintf('<form method="GET" action="">
+				<input type="hidden" name="type" value="%s" />
+				%s 
+				<input type="submit" name="" id="" value="%s" class="button" /></form>' . "\n",
+				sanitize($_GET['type']),
+				buildSelect('domain_id', 'domain_id', $available_zones, $domain_view, 1, null, true, null, null, __('Filter Zones')),
+				__('Filter')
+			);
+	}
+	
+	
 }
 
 if (!isset($fm_dns_keys))
