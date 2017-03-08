@@ -1932,7 +1932,7 @@ function upgradefmDNS_3004($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD `key_type` ENUM('tsig','dnssec') NOT NULL DEFAULT 'tsig' AFTER `domain_id`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD `key_subtype` ENUM('ZSK','KSK') NULL AFTER `key_type`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE `key_algorithm` `key_algorithm` ENUM('hmac-md5','hmac-sha1','hmac-sha224','hmac-sha256','hmac-sha384','hmac-sha512','rsamd5','rsasha1','dsa','nsec3rsasha1','nsec3dsa','rsasha256','rsasha512','eccgost','ecdsap256sha256','ecdsap384sha384') NOT NULL DEFAULT 'hmac-md5'";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE `key_secret` `key_secret` TEXT NOT NULL'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE `key_secret` `key_secret` TEXT NOT NULL";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD `key_size` INT(2) NULL AFTER `key_secret`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD `key_created` INT(2) NULL AFTER `key_size`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` ADD `key_signing` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `key_comment`";
