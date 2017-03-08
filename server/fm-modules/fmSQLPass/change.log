@@ -1,5 +1,5 @@
-1.3-?? (2016-??-??)
-=======================
+1.3-beta1 (2017-03-08)
+======================
 * Server - [improvement] Code changes to better reference shared classes.
 * Server - [improvement] Utilizes response error formatting.
 * Server - [improvement] Pagination is added to all pages.
