@@ -987,6 +987,9 @@ echo '$(document).ready(function() {
 			$("#search_form_container").fadeOut();
 		}
 	});
+	$("a.search").mouseover(function() {
+		$("#search_form_container").fadeIn();
+	});
 	
 	/* Search input box */
 	$("#search input").keypress(function (e) {

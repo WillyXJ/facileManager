@@ -1,3 +1,7 @@
+3.0-? (2017-??-??)
+======================
+* Server - [improvement] Reworked the search bar for easier usage of it.
+
 3.0-beta1 (2017-03-08)
 ======================
 * Server - [improvement] Code changes to better reference shared classes.

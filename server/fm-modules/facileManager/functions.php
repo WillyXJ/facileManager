@@ -425,8 +425,8 @@ $user_account_menu
 		</div>
 $module_menu
 $module_toolbar_right
-$process_all
 $search
+$process_all
 	</div>
 	<div id="help">
 		<div id="help_topbar">
@@ -2980,26 +2980,22 @@ function countServerUpdates() {
 function displaySearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
 		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
-		$search_remove = '<div class="search_remove">
-			<i class="fa fa-remove fa-lg"></i>
-		</div>';
+		$search_remove = '<i class="search_remove fa fa-remove fa-lg" title="' . _('Clear this search') . '"></i>';
+		$display = ' style="display:block"';
 	} else {
 		$placeholder = _('Search this page by keyword');
-		$search_remove = null;
+		$search_remove = $display = null;
 	}
 	
 	$form = <<<HTML
-	<div id="search_form_container">
+	<div id="search_form_container"$display>
 		<div>
-			<div class="search_icon">
-				<i class="fa fa-search fa-lg"></i>
-			</div>
 			<div id="search_form">
 				<form id="search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
-					<input type="text" placeholder="$placeholder" />
+					<input type="text" placeholder="$placeholder" value="{$_GET['q']}" />
+					$search_remove
 				</form>
 			</div>
-			$search_remove
 		</div>
 	</div>
 HTML;

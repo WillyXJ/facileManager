@@ -1610,12 +1610,9 @@ div.fm-table > div > div.fm-half {
 	z-index: 100;
 	display: none;
 	border: none;
-	width: 40%;
-	padding: 12px;
-	position: fixed;
-	top: 39px;
-	right: 26px;
-	background-color: rgba(63,63,63,0.95);
+	width: 19em;
+	position: relative;
+	float: right;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
 }
@@ -1637,22 +1634,26 @@ div.fm-table > div > div.fm-half {
 }
 
 #search_form > form {
-	margin-bottom: -1em;
 	padding-left: .5em;
-	margin-top: -11px;
 	position: relative;
 }
 
 #search_form input[type=text] {
 	width: 100%;
-	border: none;
+	border: 1px #555 solid;
 	line-height: 20px;
-	background-color: rgba(0,0,0,0);
+	background-color: rgba(63,63,63,0.5);
+	padding: 0 24px 0 4px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
 }
 
 #search_form_container .search_remove {
-	padding-left: .5em;
 	cursor: pointer;
+	position: absolute;
+	display: inline-block;
+	right: -1.5em;
+	top: 4px;
 }
 
 .highlighted {
