@@ -76,12 +76,10 @@ class fm_module_policies {
 		$action_icons[] = 'log';
 		
 		foreach ($action_icons as $action) {
-			$action_active[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action']['active']) . "<span>$action</span></td>\n";
-			$action_disabled[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action']['disabled']) . "<span>$action (" . __('disabled') . ")</span></td>\n";
+			$action_active[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action'][$action]) . "<span>$action</span></td>\n";
 		}
 		
 		$action_active = implode("\n", $action_active);
-		$action_disabled = implode("\n", $action_disabled);
 		
 		echo <<<HTML
 			</table>
@@ -90,9 +88,6 @@ class fm_module_policies {
 				<tbody>
 					<tr>
 						$action_active
-					</tr>
-					<tr>
-						$action_disabled
 					</tr>
 				</tbody>
 			</table>
@@ -257,8 +252,8 @@ HTML;
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
-		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action'][$row->policy_status]) : null;
-		$action = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_status]);
+		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']) : null;
+		$action = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_action]);
 		$source = ($row->policy_source) ? $this->formatPolicyIDs($row->policy_source) : 'any';
 		$destination = ($row->policy_destination) ? $this->formatPolicyIDs($row->policy_destination) : 'any';
 		$services = ($row->policy_services) ? $this->formatPolicyIDs($row->policy_services) : 'any';
@@ -270,10 +265,11 @@ HTML;
 		$service_not = ($row->policy_services_not) ? '!' : null;
 
 		$comments = nl2br($row->policy_comment);
+		$bars_title = __('Click and drag to reorder');
 
 		echo <<<HTML
 		<tr id="$row->policy_id" name="$row->policy_name"$disabled_class>
-			<td><i class="fa fa-bars template-icon"></i></td>
+			<td><i class="fa fa-bars template-icon" title="$bars_title"></i></td>
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
 			<td>$source_not $source</td>
 			<td>$destination_not $destination</td>

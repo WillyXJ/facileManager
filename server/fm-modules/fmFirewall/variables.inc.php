@@ -43,6 +43,10 @@ $__FM_CONFIG['fmFirewall'] = array(
 if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['active']		= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
 	$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action___d.png" border="0" alt="__Action__ (' . __('disabled') . ')" title="__Action__ (' . __('disabled') . ')" width="12" />';
+	$__FM_CONFIG['module']['icons']['action']['pass']		= '<i class="fa fa-arrow-up __action__" alt="__Action__" title="__Action__"></i>';
+	$__FM_CONFIG['module']['icons']['action']['block']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
+	$__FM_CONFIG['module']['icons']['action']['reject']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
+	$__FM_CONFIG['module']['icons']['action']['log']		= '<i class="fa fa-file-text-o __action__" alt="__Action__" title="__Action__"></i>';
 }
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);

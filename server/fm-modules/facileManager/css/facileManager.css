@@ -491,10 +491,12 @@ h4 {
 .display_results tbody tr:nth-child(odd) {
 	background-color:#fff;
 }
-.display_results tbody tr.disabled,
-.display_results tbody tr.disabled td i.star,
+.display_results tbody tr.disabled td,
 .grey {
-	color: #aaa;
+	opacity: .5;
+}
+.display_results tbody tr.disabled td:last-child {
+	opacity: 1;
 }
 
 .display_results tbody tr.attention td:first-child,
@@ -504,9 +506,6 @@ h4 {
 .modules .active.upgrade td:first-child {
 	border-left: 3px solid;
 	padding-left: 1.8em;
-}
-.display_results tbody tr.disabled td:first-child {
-	border-color: #aaa;
 }
 .display_results tbody tr.build,
 .modules .active.upgrade {

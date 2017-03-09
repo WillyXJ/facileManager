@@ -41,7 +41,7 @@
 }
 
 table.legend {
-	margin-top: 5em;
+	margin-top: 3em;
 	font-size: 11px;
 }
 table.legend tr td {
@@ -70,4 +70,18 @@ p.checkbox_desc {
 
 .form-table.policy-form td label {
 	white-space: normal;
+}
+
+.pass {
+	color: #1b8725;
+}
+.block {
+	color: #CB3739;
+}
+.reject {
+	color: #e19419;
+}
+.log {
+	padding-right: 4px;
+	color: #4e65e0;
 }
