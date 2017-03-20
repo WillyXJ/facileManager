@@ -352,18 +352,26 @@ $(document).ready(function() {
 			$("#define_forwarders").show("slow");
 			$("#define_masters").slideUp();
 			$("#define_soa").slideUp();
+			$("#dynamic_updates").slideUp();
+			$("#enable_dnssec").slideUp();
 		} else if ($(this).val() == "slave" || $(this).val() == "stub") {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").show("slow");
 			$("#define_soa").slideUp();
+			$("#dynamic_updates").slideUp();
+			$("#enable_dnssec").slideUp();
 		} else if ($(this).val() == "master") {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").slideUp();
 			$("#define_soa").show("slow");
+			$("#dynamic_updates").show("slow");
+			$("#enable_dnssec").show("slow");
 		} else {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").slideUp();
 			$("#define_soa").slideUp();
+			$("#dynamic_updates").slideUp();
+			$("#enable_dnssec").slideUp();
 		}
 	});
 
