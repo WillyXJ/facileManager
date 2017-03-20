@@ -250,7 +250,7 @@ class fm_dns_keys {
 		
 		$comments = nl2br($row->key_comment);
 		$star = ($row->key_signing == 'yes' && $row->key_status != 'revoked') ? sprintf('<i class="fa fa-star star" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('The zone is signed with this key')) : null;
-		$star = ($row->key_status == 'revoked') ? sprintf('<a href="#" class="tooltip-top grey" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('This key has been revoked.')) : $star;
+		$star = ($row->key_status == 'revoked') ? sprintf('<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('This key has been revoked.')) : $star;
 		$class = 'class="' . implode(' ', $classes) . '"';
 
 		echo <<<HTML

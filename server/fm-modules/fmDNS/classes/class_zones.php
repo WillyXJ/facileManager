@@ -557,11 +557,10 @@ class fm_dns_zones {
 			$domain_dnssec_sig_expires = getDNSSECExpiration($row);
 
 			$message = sprintf(__('The DNSSEC signature expires on %s.'), date($date_format . ' ' . $time_format . ' e', $domain_dnssec_sig_expires));
+			$response = $message;
 			if ($domain_dnssec_sig_expires <= strtotime('now')) {
-				$response = $message;
 				$classes[] = 'attention';
 			} elseif ($domain_dnssec_sig_expires <= strtotime('now + 7 days')) {
-				$response = $message;
 				$classes[] = 'notice';
 			}
 		}
@@ -641,7 +640,7 @@ class fm_dns_zones {
 		$icons .= ($dynamic_zone == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates')) : null;
 		$icons .= ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) ? sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))) : null;
 		
-		$response = ($response) ? sprintf('<a href="#" class="tooltip-top grey" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', $response) : null;
+		$response = ($response) ? sprintf('<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', $response) : null;
 		
 		$class = 'class="' . implode(' ', $classes) . '"';
 
@@ -673,7 +672,8 @@ HTML;
 		
 		$domain_id = $domain_view = $domain_name_servers = 0;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
-		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = $domain_dnssec_sig_expire = null;
+		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
+		$domain_dnssec_sig_expire = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
 		$disabled = $action == 'create' ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -818,24 +818,47 @@ HTML;
 			<td><input type="checkbox" id="domain_dynamic" name="domain_dynamic" value="yes" %s /><label for="domain_dynamic"> %s</label></td>
 		</tr>', __('Support Dynamic Updates'), $dynamic_checked, __('yes (experimental)'));
 			
-			$dnssec_checked = ($domain_dnssec == 'yes') ? 'checked' : null;
-			$dnssec_style = ($domain_dnssec == 'yes') ? 'block' : 'none';
+			if ($domain_dnssec == 'yes') {
+				$dnssec_checked = 'checked';
+				$dnssec_style = 'block';
+			} else {
+				$dnssec_checked = null;
+				$dnssec_style = 'none';
+			}
+			if ($domain_dnssec_generate_ds == 'yes') {
+				$dnssec_ds_style = 'block';
+				$dnssec_generate_ds_checked = 'checked';
+			} else {
+				$dnssec_ds_style = 'none';
+				$dnssec_generate_ds_checked = null;
+			}
 			if (!$domain_dnssec_sig_expire) $domain_dnssec_sig_expire = null;
+			
+			$available_zones = array_reverse($this->availableZones(true, 'master', true));
+			$available_zones[] = array(null, 0);
+			$available_zones = buildSelect('domain_dnssec_parent_domain_id', 'domain_dnssec_parent_domain_id', array_reverse($available_zones), $domain_dnssec_parent_domain_id);
+
 			$addl_zone_options .= sprintf('<tr class="include-with-template" id="enable_dnssec">
 			<th>%s</th>
 			<td>
-				<input type="checkbox" id="domain_dnssec" name="domain_dnssec" value="yes" %s /><label for="domain_dnssec"> %s</label> <a href="#" class="tooltip-top grey" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+				<input type="checkbox" id="domain_dnssec" name="domain_dnssec" value="yes" %s /><label for="domain_dnssec"> %s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
 				<div id="dnssec_option" style="display: %s;">
 					<h4>%s</h4>
 					<label for="domain_dnssec_sig_expire">%s</label> <input type="text" id="domain_dnssec_sig_expire" name="domain_dnssec_sig_expire" value="%s" placeholder="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
-					<a href="#" class="tooltip-top grey" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+					<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a><br />
+					<p><input type="checkbox" id="domain_dnssec_generate_ds" name="domain_dnssec_generate_ds" value="yes" %s /><label for="domain_dnssec_generate_ds"> %s</label></p>
+				</div>
+				<div id="dnssec_ds_option" style="display: %s;">
+					<h4>%s:</h4>
+					%s
 				</div>
 			</td>
 		</tr>', __('Enable DNSSEC'), $dnssec_checked, __('yes (experimental)'), 
-				sprintf(__('The dnssec-signzone and dnssec-keygen utilities must be installed on %s in order for this to work.'), php_uname('n')),
-				$dnssec_style, __('Signature Expiry Override (optional)'), __('Days'), $domain_dnssec_sig_expire, getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']),
+				sprintf(__('The dnssec-signzone and dnssec-keygen utilities must be installed on %s in order for this to work.'), php_uname('n')), $dnssec_style,
+				__('Signature Expiry Override (optional)'), __('Days'), $domain_dnssec_sig_expire, getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']),
 				sprintf(__('Enter the number of days to expire the signature if different from what is defined in the %s.'), _('Settings')),
-				__('Associated Keys')
+				$dnssec_generate_ds_checked, __('Generate DS RR during signing'),
+				$dnssec_ds_style, __('Include DS RR in selected parent zone'), $available_zones
 			);
 		}
 		
@@ -1496,11 +1519,15 @@ HTML;
 		} else {
 			$post['domain_dnssec_sig_expire'] = 0;
 		}
+		if ($post['domain_dnssec_generate_ds'] != 'yes') {
+			$post['domain_dnssec_generate_ds'] = 'no';
+		}
 		
 		/** Is this based on a template? */
 		if ($post['domain_template_id']) {
 			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
-				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire');
+				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
+				'domain_dnssec_parent_domain_id');
 			foreach ($include as $key) {
 				$new_post[$key] = $post[$key];
 			}

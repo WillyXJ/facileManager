@@ -1818,6 +1818,9 @@ a.subelement_edit img {
 	width: 12px;
 }
 
+.tooltip-top {
+	color: #aaa;
+}
 
 /** Firefox hacks :( */
 @-moz-document url-prefix() {

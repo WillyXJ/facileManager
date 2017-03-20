@@ -407,6 +407,14 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#manage_item_contents").delegate("#domain_dnssec_generate_ds", "click", function(e) {
+		if ($(this).is(":checked")) {
+			$("#dnssec_ds_option").show("slow");
+		} else {
+			$("#dnssec_ds_option").slideUp();
+		}
+	});
+
 	$("#admin-tools-form").delegate("#zone_import_domain_list", "change", function(e) {
 		if ($(this).val() == 0) {
 			$("#import-records").val("' . __('Import Zones') . '");

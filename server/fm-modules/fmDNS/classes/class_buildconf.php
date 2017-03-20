@@ -784,7 +784,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildZoneFile($domain, $server_serial_no) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fmdb;
 		
 		/** Get datetime formatting */
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
@@ -792,12 +792,20 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$zone_file = '; This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 		
-		/** get the SOA */
+		/** Get the SOA */
 		list($soa, $soa_ttl) = $this->buildSOA($domain);
 		$zone_file .= $soa;
 		
-		/** get the records */
+		/** Get the records */
 		$zone_file .= $this->buildRecords($domain, $server_serial_no, $soa_ttl);
+		
+		/** Get additional DS records */
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_dnssec_parent_domain_id="' . $domain->parent_domain_id . '"');
+		if ($fmdb->num_rows) {
+			for($i=0; $i<$fmdb->num_rows; $i++) {
+				$zone_file .= $fmdb->last_result[$i]->domain_dnssec_ds_rr;
+			}
+		}
 		
 		/** Sign the zone? */
 		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes') {
@@ -1947,6 +1955,14 @@ HTML;
 		if (file_exists($temp_zone_file . '.signed')) {
 			$signed_zone = file_get_contents($temp_zone_file . '.signed');
 			$GLOBALS[$_SESSION['module']]['DNSSEC'][] = array('domain_id' => $domain->parent_domain_id, 'domain_dnssec_signed' => strtotime('now'));
+		}
+		
+		/** Generated DS RR */
+		if ($domain->domain_dnssec_generate_ds) {
+			if (file_exists($tmp_dir . 'dsset-' . $domain->domain_name . '.')) {
+				$generated_ds_rr = file_get_contents($tmp_dir . 'dsset-' . $domain->domain_name . '.');
+				basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain->parent_domain_id, 'domain_dnssec_ds_rr', $generated_ds_rr, 'domain_id');
+			}
 		}
 		
 		system('rm -rf ' . $tmp_dir);
