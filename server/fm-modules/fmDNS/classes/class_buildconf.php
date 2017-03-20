@@ -689,7 +689,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$view_sql = "AND (`domain_view`<=0 OR `domain_view`=$view_id OR `domain_view` LIKE '$view_id;%' OR `domain_view` LIKE '%;$view_id' OR `domain_view` LIKE '%;$view_id;%')";
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND `domain_template`='no' AND 
 			((`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' $group_sql))
-			 $view_sql ORDER BY `domain_clone_domain_id`,`domain_name`";
+			 $view_sql ORDER BY `domain_dnssec_parent_domain_id` DESC,`domain_clone_domain_id`,`domain_name` ASC";
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
