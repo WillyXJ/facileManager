@@ -1007,6 +1007,9 @@ echo '$(document).ready(function() {
 			return false;
 		}
 	});
+	$("#search input").focusout(function() {
+		$("#search_form_container").fadeOut();
+	});
 
 	/* Search input box cancel */
     $(".search_remove").click(function() {
