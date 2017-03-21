@@ -195,7 +195,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Zones</a>
 		<div>
 			<p>Zones (aka domains) can be managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
-			there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, delete 
+			there you can add, edit {$__FM_CONFIG['icons']['edit']}, delete 
 			{$__FM_CONFIG['icons']['delete']}, and reload {$__FM_CONFIG['icons']['reload']} zones depending on your user permissions.</p>
 			<p>You can define a zone as a clone <i class="template-icon fa fa-clone"></i> of another previously defined master zone.  The cloned zone will contain all of the same records
 			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
@@ -208,6 +208,8 @@ function buildModuleHelpFile() {
 			<p>Zones can support dynamic updates only if the checkbox is ticked while creating or editing individual zones. This will cause 
 			{$_SESSION['module']} to compare the zone file from the DNS server with that in the database and make any necessary changes. This option
 			will increase processing time while reloading zones.</p>
+			<p>Zones can support DNSSEC signing only if the checkbox is ticked while creating or editing individual zones. You must create the KSK and ZSK
+			before zones will be signed. This option will increase processing time while reloading zones.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa). You can also
@@ -256,7 +258,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Servers</a>
 		<div>
 			<p>All aspects of server configuration takes place in the Config menu 
-			item. From there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, 
+			item. From there you can add, edit {$__FM_CONFIG['icons']['edit']}, 
 			delete {$__FM_CONFIG['icons']['delete']} servers and options depending on your user permissions.</p>
 			
 			<p><b>Servers</b><br />
@@ -296,7 +298,7 @@ function buildModuleHelpFile() {
 			
 			<p><b>Keys</b><br />
 			Currently, {$_SESSION['module']} does not generate server keys (TSIG), but once you create them on your server, you can define them in the UI 
-			at Config &rarr; <a href="__menu{Keys}">Keys</a>.</p>
+			at Config &rarr; <a href="__menu{Keys}">Keys</a>. DNSSEC keys, however, can be automatically generated and managed by {$_SESSION['module']}.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			
