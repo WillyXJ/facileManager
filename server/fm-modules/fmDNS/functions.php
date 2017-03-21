@@ -209,7 +209,7 @@ function buildModuleHelpFile() {
 			{$_SESSION['module']} to compare the zone file from the DNS server with that in the database and make any necessary changes. This option
 			will increase processing time while reloading zones.</p>
 			<p>Zones can support DNSSEC signing only if the checkbox is ticked while creating or editing individual zones. You must create the KSK and ZSK
-			before zones will be signed. This option will increase processing time while reloading zones.</p>
+			before zones will be signed (only offline signing is supported). This option will increase processing time while reloading zones.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa). You can also
@@ -298,7 +298,8 @@ function buildModuleHelpFile() {
 			
 			<p><b>Keys</b><br />
 			Currently, {$_SESSION['module']} does not generate server keys (TSIG), but once you create them on your server, you can define them in the UI 
-			at Config &rarr; <a href="__menu{Keys}">Keys</a>. DNSSEC keys, however, can be automatically generated and managed by {$_SESSION['module']}.</p>
+			at Config &rarr; <a href="__menu{Keys}">Keys</a>. DNSSEC keys, however, can be automatically generated and managed by {$_SESSION['module']}.
+			DNSSEC keys can only be deleted when they are not used for signing and/or have been revoked.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			

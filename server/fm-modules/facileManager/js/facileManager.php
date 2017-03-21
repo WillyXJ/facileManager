@@ -989,6 +989,7 @@ echo '$(document).ready(function() {
 	});
 	$("a.search").mouseover(function() {
 		$("#search_form_container").fadeIn();
+		$("#search_form_container input:text").focus();
 	});
 	
 	/* Search input box */

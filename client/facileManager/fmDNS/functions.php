@@ -134,7 +134,7 @@ function buildConf($url, $data) {
 	$chown_dirs = array($server_zones_dir);
 	
 	/** Freeze zones */
-	if (isNamedRunning()) {
+	if (isDaemonRunning('named')) {
 		/** Handle dynamic zones to support reloading */
 		runRndcActions('freeze');
 	}
@@ -164,7 +164,7 @@ function buildConf($url, $data) {
 	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
 		addLogEntry($message);
-		if (isNamedRunning()) {
+		if (isDaemonRunning('named')) {
 			$rndc_actions = array('reload', 'thaw');
 			
 			/** Handle dynamic zones to support reloading */
@@ -449,19 +449,6 @@ function dumpZone($domain, $zonefile) {
 	passthru(findProgram('named-checkzone') . " -j -D $domain $zonefile");
 	
 	exit;
-}
-
-
-/**
- * Returns whether named is running or not
- *
- * @since 3.0
- * @package fmDNS
- *
- * @return boolean
- */
-function isNamedRunning() {
-	return shell_exec('ps -A | grep named | grep -vc grep');
 }
 
 

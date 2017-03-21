@@ -1382,4 +1382,18 @@ function addServer($url, $data) {
 	return array('data' => $data, 'add_result' => "Success\n");
 }
 
+
+/**
+ * Returns whether a daemon is running or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $daemon Daemon name to check
+ * @return boolean
+ */
+function isDaemonRunning($daemon) {
+	return shell_exec('ps -A | grep ' . escapeshellarg($daemon) . ' | grep -vc grep');
+}
+
 ?>

@@ -407,9 +407,16 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$("#manage_item_contents").delegate("#domain_dynamic", "click", function(e) {
+		if ($(this).is(":checked") && $("#domain_dnssec").is(":checked")) {
+			$("#domain_dnssec").click();
+		}
+	});
+
 	$("#manage_item_contents").delegate("#domain_dnssec", "click", function(e) {
 		if ($(this).is(":checked")) {
 			$("#dnssec_option").show("slow");
+			$("#domain_dynamic").prop("checked", false);
 		} else {
 			$("#dnssec_option").slideUp();
 		}
