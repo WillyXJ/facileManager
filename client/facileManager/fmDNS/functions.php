@@ -111,6 +111,9 @@ function buildConf($url, $data) {
 		$files = $new_files;
 		unset($new_files);
 		$chroot_environment = true;
+		
+		/** Add key file to chroot list */
+		addChrootFiles();
 	}
 	
 	if ($debug) {
@@ -317,6 +320,9 @@ function detectChrootDir() {
 			$os = detectOSDistro();
 			if (in_array($os, array('Redhat', 'CentOS', 'ClearOS', 'Oracle'))) {
 				if ($chroot_dir = getParameterValue('^ROOTDIR', '/etc/sysconfig/named')) return $chroot_dir;
+				/** systemd unit file */
+				addChrootFiles();
+				if ($chroot_dir = getParameterValue('ExecStart=/usr/libexec/setup-named-chroot.sh', '/usr/lib/systemd/system/named-chroot-setup.service', ' ')) return $chroot_dir;
 			}
 			if (in_array($os, array('Debian', 'Ubuntu', 'Fubuntu'))) {
 				if ($flags = getParameterValue('^OPTIONS', '/etc/default/bind9')) {
@@ -481,6 +487,21 @@ function runRndcActions($rndc_actions = array()) {
 	}
 	
 	return false;
+}
+
+
+/**
+ * Ensures chroot files are added
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @return boolean
+ */
+function addChrootFiles() {
+	if (file_exists('/usr/libexec/setup-named-chroot.sh') && !exec('grep -c ' . escapeshellarg('named.conf.keys') . ' /usr/libexec/setup-named-chroot.sh')) {
+		file_put_contents('/usr/libexec/setup-named-chroot.sh', str_replace('rndc.key', 'rndc.key /etc/named.conf.keys', file_get_contents('/usr/libexec/setup-named-chroot.sh')));
+	}
 }
 
 
