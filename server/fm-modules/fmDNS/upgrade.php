@@ -1973,6 +1973,7 @@ function upgradefmDNS_3005($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dnssec_generate_ds` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_dnssec`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dnssec_ds_rr` TEXT NULL AFTER `domain_dnssec_generate_ds`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dnssec_parent_domain_id` INT(11) NOT NULL DEFAULT '0' AFTER `domain_dnssec_ds_rr`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` CHANGE `domain_id` `domain_id` INT(11) NULL DEFAULT NULL";
 
 	/** Run queries */
 	if (count($table) && $table[0]) {

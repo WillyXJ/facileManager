@@ -34,8 +34,10 @@ class fm_module_objects {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$bulk_actions_list = array(_('Delete'));
+			
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 			$table_info = array(
 							'class' => 'display_results',
@@ -43,8 +45,14 @@ class fm_module_objects {
 							'name' => 'objects'
 						);
 
-			$title_array = array(__('Object Name'), __('Address'));
-			if ($type != 'address') $title_array[] = __('Netmask');
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address')));
+			if ($type != 'host') $title_array[] = __('Netmask');
 			$title_array[] = array('title' => __('Comment'), 'style' => 'width: 40%;');
 			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
@@ -167,20 +175,26 @@ class fm_module_objects {
 		
 		$disabled_class = ($row->object_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = null;
+		$edit_status = $checkbox = null;
 		
 		if (currentUserCan('manage_objects', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!isItemInPolicy($row->object_id, 'object')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->object_id, 'object')) {
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->object_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
+			}
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
 		$edit_name = $row->object_name;
-		$netmask = ($row->object_type != 'address') ? "<td>$row->object_mask</td>" : null;
+		$netmask = ($row->object_type != 'host') ? "<td>$row->object_mask</td>" : null;
 		$comments = nl2br($row->object_comment);
 		
 		echo <<<HTML
 			<tr id="$row->object_id" name="$row->object_name"$disabled_class>
+				$checkbox
 				<td>$row->object_name</td>
 				<td>$row->object_address</td>
 				$netmask

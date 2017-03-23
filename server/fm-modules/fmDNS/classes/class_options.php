@@ -34,8 +34,10 @@ class fm_module_options {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+			
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -43,6 +45,12 @@ class fm_module_options {
 							'name' => 'options'
 						);
 
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
 			if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
 				$title_array[] = array('title' => __('Zone'), 'rel' => 'domain_id');
 			}
@@ -214,6 +222,8 @@ class fm_module_options {
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
 		
+		$checkbox = (currentUserCan(array('manage_servers'), $_SESSION['module'])) ? '<td><input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" /></td>' : null;
+
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="edit_delete_img">';
@@ -244,6 +254,7 @@ class fm_module_options {
 
 		echo <<<HTML
 		<tr id="$row->cfg_id" name="$row->cfg_name"$disabled_class>
+			$checkbox
 			$zone_row
 			<td>$cfg_name</td>
 			<td>$cfg_data</td>

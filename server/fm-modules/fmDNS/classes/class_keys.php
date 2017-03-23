@@ -34,10 +34,12 @@ class fm_dns_keys {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			$addl_blocks = ($type == 'dnssec') ? array($this->buildFilterMenu(), null) : null;
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
 			
-			echo displayPagination($page, $total_pages, $addl_blocks);
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$addl_blocks = ($type == 'dnssec') ? $this->buildFilterMenu() : null;
+			
+			echo displayPagination($page, $total_pages, array(@buildBulkActionMenu($bulk_actions_list), $addl_blocks));
 
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -45,7 +47,13 @@ class fm_dns_keys {
 							'name' => 'keys'
 						);
 
-			$title_array = array(array('title' => __('Key'), 'rel' => 'key_name'));
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny header-nosort'), array('title' => __('Key'), 'rel' => 'key_name')));
 			if ($type == 'tsig') {
 				$title_array = array_merge($title_array, array(
 					array('title' => __('Algorithm'), 'class' => 'header-nosort'),
@@ -61,8 +69,6 @@ class fm_dns_keys {
 			$title_array[] = array('title' => __('Comment'), 'class' => 'header-nosort');
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
-			array_unshift($title_array, array('class' => 'header-tiny header-nosort'));
-			
 			echo displayTableHeader($table_info, $title_array);
 			
 			$y = 0;
@@ -212,10 +218,13 @@ class fm_dns_keys {
 	function displayRow($row, $type) {
 		global $__FM_CONFIG;
 		
+		$edit_status = $checkbox = null;
+		
 		if ($row->key_status == 'disabled') $classes[] = 'disabled';
 		if ($row->key_status == 'revoked') $classes[] = 'attention';
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$checkbox = '<td></td>';
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" name="' . $row->key_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->key_id, 'key')) {
@@ -226,11 +235,12 @@ class fm_dns_keys {
 					$edit_status .= ($row->key_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 					$edit_status .= '</a>';
 				}
-				if ($row->key_signing == 'no' || $row->key_status == 'revoked') $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				if ($row->key_signing == 'no' || $row->key_status == 'revoked') {
+					$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+					$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->key_id .'" /></td>';
+				}
 			}
 			$edit_status .= '</td>';
-		} else {
-			$edit_status = null;
 		}
 		
 		$edit_name = $row->key_name;
@@ -255,6 +265,7 @@ class fm_dns_keys {
 
 		echo <<<HTML
 		<tr id="$row->key_id" name="$row->key_name" $class>
+			$checkbox
 			<td>$star</td>
 			<td>$edit_name</td>
 			$rows

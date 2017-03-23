@@ -34,8 +34,10 @@ class fm_module_services {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$bulk_actions_list = array(_('Delete'));
+			
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 			$table_info = array(
 							'class' => 'display_results',
@@ -43,7 +45,13 @@ class fm_module_services {
 							'name' => 'services'
 						);
 
-			$title_array = ($type == 'icmp') ? array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), __('Comment')) : array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), __('Comment'));
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), __('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), __('Comment')));
 			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -165,11 +173,16 @@ class fm_module_services {
 		
 		$disabled_class = ($row->service_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = null;
-		
+		$edit_status = $checkbox = null;
+
 		if (currentUserCan('manage_services', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!isItemInPolicy($row->service_id, 'service')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->service_id, 'service')) {
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->service_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
+			}
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -182,6 +195,7 @@ class fm_module_services {
 		
 		echo <<<HTML
 			<tr id="$row->service_id" name="$row->service_name"$disabled_class>
+				$checkbox
 				<td>$row->service_name</td>
 
 HTML;

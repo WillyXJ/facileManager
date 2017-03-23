@@ -865,13 +865,13 @@ echo '$(document).ready(function() {
 		
 		/* Build array of checked items */
 		event.preventDefault();
-		var serverIDs = $("#table_edits input:checkbox:checked").not(".tickall").map(function() {
+		var itemIDs = $("#table_edits input:checkbox:checked").not(".tickall").map(function() {
 			return $(this).val();
 		}).get();
 		
 		/* Process items and action */
-        item_type		= $("#table_edits").attr("name");
-		if (serverIDs.length == 0) {
+		item_type = $("#table_edits").attr("name");
+		if (itemIDs.length == 0) {
 			alert("You must select at least one " + item_type.slice(0,-1) + ".");
 		} else {
 			if (confirm("Are you sure you want to " + $("#bulk_action").val().toLowerCase() + " these selected " + item_type + "?")) {
@@ -880,10 +880,12 @@ echo '$(document).ready(function() {
 				$("#manage_item_contents").html("<p>' . _('Processing Bulk Action') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 		
 				var form_data = {
-					item_id: serverIDs,
+					item_id: itemIDs,
 					action: "bulk",
 					bulk_action: $("#bulk_action").val().toLowerCase(),
 					item_type: item_type,
+					server_serial_no: getUrlVars()["server_serial_no"],
+					rel_url: window.location.href,
 					is_ajax: 1
 				};
 				

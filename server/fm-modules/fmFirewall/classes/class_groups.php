@@ -34,8 +34,10 @@ class fm_module_groups {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$bulk_actions_list = array(_('Delete'));
+			
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 			$table_info = array(
 							'class' => 'display_results',
@@ -43,7 +45,13 @@ class fm_module_groups {
 							'name' => 'groups'
 						);
 
-			$title_array = array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;'));
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = array_merge((array) $title_array, array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;')));
 			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -165,13 +173,18 @@ class fm_module_groups {
 		
 		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $group_items = null;
+		$edit_status = $group_items = $checkbox = null;
 		
 		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_objects';
 		
 		if (currentUserCan($permission, $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!isItemInPolicy($row->group_id, 'group')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->group_id, 'group')) {
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
+			}
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -209,6 +222,7 @@ class fm_module_groups {
 		
 		echo <<<HTML
 			<tr id="$row->group_id" name="$row->group_name"$disabled_class>
+				$checkbox
 				<td>$row->group_name</td>
 				<td>$group_items</td>
 				<td>$comments</td>

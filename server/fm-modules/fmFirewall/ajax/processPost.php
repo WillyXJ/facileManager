@@ -71,12 +71,15 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'services':
 			$post_class = $fm_module_services;
+			$object = __('service');
 			break;
 		case 'objects':
 			$post_class = $fm_module_objects;
+			$object = __('object');
 			break;
 		case 'groups':
 			$post_class = $fm_module_groups;
+			$object = __('group');
 			break;
 		case 'time':
 			$post_class = $fm_module_time;
@@ -134,6 +137,34 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				exit('Success');
 			}
 			exit(__('The sort order could not be updated due to an invalid request.'));
+		case 'bulk':
+			if (array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('enable', 'disable', 'delete'))) {
+				switch($_POST['bulk_action']) {
+					case 'enable':
+					case 'disable':
+					case 'delete':
+						$status = sanitize($_POST['bulk_action']) . 'd';
+						if ($status == 'enabled') $status = 'active';
+						foreach ((array) $_POST['item_id'] as $id) {
+							$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . 'name');
+							if (updateStatus('fm_' . $table, $id, $prefix, $status, $prefix . 'id')) {
+								setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+								if ($server_serial_no && $_POST['item_type'] == 'policies') {
+									$tmp_server = getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+									addLogEntry(sprintf(__('Set %s for %s status to %s.'), $object, $tmp_server, $status));
+								} else {
+									addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, $status));
+								}
+							}
+						}
+
+						echo buildPopup('header', __('Bulk Action Results'));
+						echo '<p>' . sprintf('%s action is complete.', ucfirst($_POST['bulk_action'])) . '</p>';
+						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), sanitize($_POST['rel_url']));
+						break;
+				}
+			}
+			break;
 	}
 
 	exit;

@@ -129,7 +129,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}keys` (
   `key_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
-  `domain_id` INT(11) NOT NULL,
+  `domain_id` INT(11) NULL DEFAULT NULL,
   `key_type` enum('tsig','dnssec') NOT NULL DEFAULT 'tsig',
   `key_subtype` ENUM('ZSK','KSK') NULL,
   `key_name` varchar(255) NOT NULL,

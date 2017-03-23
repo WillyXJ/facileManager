@@ -36,19 +36,8 @@ include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_log
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
-if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
-	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload'))) {
-	
-	$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
-
-	echo buildPopup('header', __('Reload Results')) . '<pre>';
-	echo processBulkDomainIDs($_POST['item_id']);
-	echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.</pre>' . $popup_footer;
-	
-	exit;
-
-	/** Handle mass updates */
-} elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
+/** Handle mass updates */
+if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
 	$result .= processBulkDomainIDs(getZoneReloads('ids'));
 	return;
 }
@@ -150,6 +139,36 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
 					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
 					exit('Success');
+				}
+			}
+			break;
+		case 'bulk':
+			if (array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('reload', 'enable', 'disable', 'delete'))) {
+				switch($_POST['bulk_action']) {
+					case 'reload':
+						$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
+
+						echo buildPopup('header', __('Reload Results')) . '<pre>';
+						echo processBulkDomainIDs($_POST['item_id']);
+						echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.</pre>' . $popup_footer;
+						break;
+					case 'enable':
+					case 'disable':
+					case 'delete':
+						$status = sanitize($_POST['bulk_action']) . 'd';
+						if ($status == 'enabled') $status = 'active';
+						foreach ((array) $_POST['item_id'] as $id) {
+							$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
+							if (updateStatus('fm_' . $table, $id, $prefix, $status, $prefix . 'id')) {
+								setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+								addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, $status));
+							}
+						}
+
+						echo buildPopup('header', __('Bulk Action Results'));
+						echo '<p>' . sprintf('%s action is complete.', ucfirst($_POST['bulk_action'])) . '</p>';
+						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), sanitize($_POST['rel_url']));
+						break;
 				}
 			}
 			break;
