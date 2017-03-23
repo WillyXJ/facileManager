@@ -118,7 +118,9 @@ class fm_module_options {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('A database error occurred.') . ' ' . $fmdb->last_error;
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the option because a database error occurred.'), 'sql');
+		}
 
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
@@ -178,7 +180,9 @@ class fm_module_options {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the option because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the option because a database error occurred.'), 'sql');
+		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -204,7 +208,7 @@ class fm_module_options {
 		$tmp_server_name = $server_serial_no ? getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
-			return __('This option could not be deleted because a database error occurred.');
+			return formatError(__('This option could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("Option '%s' for %s was deleted."), $tmp_name, $tmp_server_name));

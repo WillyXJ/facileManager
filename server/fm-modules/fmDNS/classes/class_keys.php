@@ -138,7 +138,9 @@ class fm_dns_keys {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the key because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the key because a database error occurred.'), 'sql');
+		}
 
 		$view_name = $post['key_view'] ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		addLogEntry("Added key:\nName: {$post['key_name']}\nType: " . strtoupper($post['key_type']) . "\nAlgorithm: {$post['key_algorithm']}\nView: $view_name\nComment: {$post['key_comment']}");
@@ -187,7 +189,9 @@ class fm_dns_keys {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET $sql WHERE `key_id`={$post['key_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the key because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the key because a database error occurred.'), 'sql');
+		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -206,7 +210,7 @@ class fm_dns_keys {
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $id, 'key_', 'deleted', 'key_id') === false) {
-			return __('This key could not be deleted because a database error occurred.');
+			return formatError(__('This key could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("Key '%s' was deleted."), $tmp_name));

@@ -140,7 +140,9 @@ class fm_users {
 				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
 		$result = $fmdb->query($query);
 		
-		if (!$result || $fmdb->sql_errors) return _('Could not add the user to the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not add the user because a database error occurred.'), 'sql');
+		}
 
 		/** Process forced password change */
 		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login);
@@ -192,11 +194,16 @@ class fm_users {
 				VALUES('{$_SESSION['user']['account_id']}', '$group_name', '" . serialize($user_caps) . "', '$group_comment', 'active')";
 		$result = $fmdb->query($query);
 		
-		if (!$result || $fmdb->sql_errors) return _('Could not add the group to the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
+		}
 		
 		if (isset($group_users) && is_array($group_users)) {
 			$query = "UPDATE `fm_users` SET `user_group`='{$fmdb->insert_id}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $group_users) . "')";
-			if (!$fmdb->query($query)) return _('Could not associate the users with the group.');
+			if (!$fmdb->query($query)) {
+				$addl_text = ($fmdb->last_error) ? '<br />' . $fmdb->last_error : null;
+				return formatError(_('Could not associate the users with the group.'), 'sql');
+			}
 		}
 
 		addLogEntry(sprintf(_("Added group '%s'."), $group_name));
@@ -272,7 +279,9 @@ class fm_users {
 		$query = "UPDATE `fm_users` SET $sql WHERE `user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not update the user in the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not update the user because a database error occurred.'), 'sql');
+		}
 		
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($post['user_login']);
@@ -331,14 +340,18 @@ class fm_users {
 		$query = "UPDATE `fm_groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not update the group in the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
+		}
 		
 		/* Associated users with group */
 		$queries[] = "UPDATE `fm_users` SET `user_group`='0', `user_caps`=NULL WHERE `user_group`='{$post['group_id']}'";
 		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $post['group_users']) . "')";
 		foreach ($queries as $query) {
 			$fmdb->query($query);
-			if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not associate the users with the group.');
+			if (!$fmdb->last_result || $fmdb->sql_errors) {
+				return formatError(_('Could not associate the users with the group.'), 'sql');
+			}
 		}
 
 		addLogEntry(sprintf(_("Updated group '%s'."), $post['group_name']));
@@ -366,13 +379,13 @@ class fm_users {
 		} elseif ($type == 'group') {
 			$field = 'group_name';
 			if (basicUpdate('fm_users', $id, 'user_group', null, 'user_group') === false) {
-				return _('This group could not be removed from the associated users.');
+				return formatError(_('This group could not be removed from the associated users.'), 'sql');
 			}
 		}
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $type . 's', $type . '_', $type . '_id', $field);
 		if (!updateStatus('fm_' . $type . 's', $id, $type . '_', 'deleted', $type . '_id')) {
-			return sprintf(_('This %s could not be deleted.'), $type) . "\n";
+			return formatError(sprintf(_('This %s could not be deleted.'), $type), 'sql');
 		} else {
 			addLogEntry(sprintf(_("Deleted %s '%s'."), $type, $tmp_name), $fm_name);
 			return true;

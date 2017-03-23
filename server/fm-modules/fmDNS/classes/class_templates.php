@@ -187,7 +187,7 @@ HTML;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $prefix . '_', $prefix . '_id', $prefix . '_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $id, $prefix . '_', 'deleted', $prefix . '_id') === false) {
-			return __('This template could not be deleted because a database error occurred.');
+			return formatError(__('This template could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			addLogEntry("Deleted $prefix template '$tmp_name'.");
 			return true;

@@ -106,7 +106,9 @@ class fm_dns_acls {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the ACL because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the ACL because a database error occurred.'), 'sql');
+		}
 
 		$log_message = sprintf(__("Added ACL:\nName: %s\nComment: %s"), $post['acl_name'], $post['acl_comment']);
 		if (isset($post['acl_parent_id'])) {
@@ -163,7 +165,9 @@ class fm_dns_acls {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET $sql WHERE `acl_id`={$post['acl_id']}";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the ACL because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the ACL because a database error occurred.'), 'sql');
+		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -194,10 +198,12 @@ class fm_dns_acls {
 			$log_message = sprintf(__("%s was deleted from the %s ACL"), $tmp_address, $tmp_name);
 		} else {
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET `acl_status`='deleted' WHERE account_id='{$_SESSION['user']['account_id']}' AND `acl_parent_id`='" . sanitize($id) . "'";
-			if (!$fmdb->query($query)) return __('The associated ACL elements could not be deleted because a database error occurred.');
+			if (!$fmdb->query($query)) {
+				return formatError(__('The associated ACL elements could not be deleted because a database error occurred.'), 'sql');
+			}
 		}
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $id, 'acl_', 'deleted', 'acl_id') === false) {
-			return __('This ACL could not be deleted because a database error occurred.');
+			return formatError(__('This ACL could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry($log_message);

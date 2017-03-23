@@ -144,7 +144,9 @@ HTML;
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the policy because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the policy because a database error occurred.'), 'sql');
+		}
 
 		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
@@ -172,7 +174,9 @@ HTML;
 				if ($order_id === false) return __('The sort order could not be updated due to an invalid request.');
 				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET `policy_order_id`=$order_id WHERE `policy_id`={$policy_result[$i]->policy_id} AND `server_serial_no`={$post['server_serial_no']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 				$result = $fmdb->query($query);
-				if ($result === false) return __('Could not update the policy order because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(__('Could not update the policy order because a database error occurred.'), 'sql');
+				}
 			}
 			
 			setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
@@ -209,7 +213,9 @@ HTML;
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET $sql WHERE `policy_id`={$post['policy_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the firewall policy because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the firewall policy because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -238,7 +244,7 @@ HTML;
 			}
 		}
 		
-		return __('This policy could not be deleted.');
+		return formatError(__('This policy could not be deleted.'), 'sql');
 	}
 
 

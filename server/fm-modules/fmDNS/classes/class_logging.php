@@ -104,7 +104,9 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return __('Could not add the channel because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the channel because a database error occurred.'), 'sql');
+		}
 
 		/** Insert channel children */
 		$post['cfg_isparent'] = 'no';
@@ -156,7 +158,9 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the channel because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the channel because a database error occurred.'), 'sql');
+		}
 		
 		$log_message = "Added logging channel:\nName: $channel_name\nDestination: {$post['cfg_destination']}";
 		if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
@@ -210,7 +214,9 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return __('Could not add the category because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the category because a database error occurred.'), 'sql');
+		}
 
 		/** Insert category children */
 		$post['cfg_isparent'] = 'no';
@@ -239,7 +245,9 @@ class fm_module_logging {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the category because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the category because a database error occurred.'), 'sql');
+		}
 		
 		addLogEntry("Added logging category:\nName: $category_name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		return true;
@@ -269,7 +277,9 @@ class fm_module_logging {
 			$query = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_parent`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 			$result = $fmdb->query($query);
 			
-			if (!$result) return sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']);
+			if ($fmdb->sql_errors) {
+				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
+			}
 		}
 		
 		/** Update category parent */
@@ -329,7 +339,9 @@ class fm_module_logging {
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
 		
-			if (!$fmdb->result) return sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']);
+			if ($fmdb->sql_errors) {
+				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
+			}
 			
 			addLogEntry("Updated logging category '$old_name' to the following:\nName: $name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		} else {
@@ -379,7 +391,9 @@ class fm_module_logging {
 			$query = "$sql_insert $sql_fields VALUES $sql_values";
 			$result = $fmdb->query($query);
 		
-			if (!$fmdb->result) return sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']);
+			if ($fmdb->sql_errors) {
+				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
+			}
 
 			$log_message = "Updated logging channel '$old_name' to the following:\nName: $name\nDestination: {$post['cfg_destination']}";
 			if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
@@ -419,7 +433,7 @@ class fm_module_logging {
 		
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
-			return sprintf(__('This %s could not be deleted because a database error occurred.'), $type);
+			return formatError(sprintf(__('This %s could not be deleted because a database error occurred.'), $type), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("Logging %s '%s' was deleted."), $type, $tmp_name));

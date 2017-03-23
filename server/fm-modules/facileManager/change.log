@@ -1,6 +1,8 @@
 3.0-? (2017-??-??)
 ======================
 * Server - [improvement] Reworked the search bar for easier usage of it.
+* Server - [improvement] Database errors now get displayed if the Show Errors
+           setting is enabled.
 
 3.0-beta1 (2017-03-08)
 ======================

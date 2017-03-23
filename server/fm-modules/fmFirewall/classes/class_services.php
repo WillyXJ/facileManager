@@ -99,7 +99,9 @@ class fm_module_services {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the service because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the service because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry("Added service:\nName: {$post['service_name']}\nType: {$post['service_type']}\n" .
 				"Update Method: {$post['service_update_method']}\nConfig File: {$post['service_config_file']}");
@@ -132,7 +134,9 @@ class fm_module_services {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}services` SET $sql WHERE `service_id`={$post['service_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the service because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the service because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -164,7 +168,7 @@ class fm_module_services {
 			}
 		}
 		
-		return __('This service could not be deleted.');
+		return formatError(__('This service could not be deleted.'), 'sql');
 	}
 
 

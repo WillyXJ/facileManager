@@ -195,7 +195,9 @@ class fmdb {
 	public function query($query) {
 		$this->sql_errors = false;
 		$this->last_error = null;
-		$this->last_query = $query;
+		if (strpos($query, 'show_errors') === false) {
+			$this->last_query = $query;
+		}
 		
 		if ($this->use_mysqli) {
 			$this->result = @mysqli_query($this->dbh, $query);

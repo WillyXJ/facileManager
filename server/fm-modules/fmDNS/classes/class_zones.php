@@ -240,7 +240,9 @@ class fm_dns_zones {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add zone because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the zone because a database error occurred.'), 'sql');
+		}
 
 		$insert_id = $fmdb->insert_id;
 		
@@ -262,7 +264,9 @@ class fm_dns_zones {
 				$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
 			}
 		}
-		if ($fmdb->sql_errors) return __('Could not add zone because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the zone because a database error occurred.'), 'sql');
+		}
 		
 		$this->updateSOASerialNo($insert_id, 0);
 		
@@ -363,7 +367,9 @@ class fm_dns_zones {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET $sql_edit WHERE `domain_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the zone because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the zone because a database error occurred.'), 'sql');
+		}
 		
 		$rows_affected = $fmdb->rows_affected;
 
@@ -374,7 +380,9 @@ class fm_dns_zones {
 			foreach ($query_arr as $query) {
 				$result = $fmdb->query($query);
 
-				if ($fmdb->sql_errors) return __('Could not update the child zones because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(__('Could not update the child zones because a database error occurred.'), 'sql');
+				}
 
 				$rows_affected += $fmdb->rows_affected;
 			}
@@ -413,7 +421,9 @@ class fm_dns_zones {
 			/** Remove all zone config options */
 			basicDelete("fm_{$__FM_CONFIG['fmDNS']['prefix']}config", $domain_id, 'domain_id');
 		}
-		if ($fmdb->sql_errors) return __('Could not update zone because a database error occurred.') . ' ' . $fmdb->last_error;
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update zone because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if ($rows_affected + $fmdb->rows_affected == 0) return true;
@@ -447,7 +457,7 @@ class fm_dns_zones {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $domain_id, 'cfg_', 'domain_id');
 			if ($fmdb->num_rows) {
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $domain_id, 'cfg_', 'deleted', 'domain_id') === false) {
-					return __('The associated configs for this zone could not be deleted because a database error occurred.');
+					return formatError(__('The associated configs for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
 				unset($fmdb->num_rows);
 			}
@@ -456,14 +466,14 @@ class fm_dns_zones {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) {
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
-					return __('The associated records for this zone could not be deleted because a database error occurred.');
+					return formatError(__('The associated records for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
 				unset($fmdb->num_rows);
 			}
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) {
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
-					return __('The associated records for this zone could not be deleted because a database error occurred.');
+					return formatError(__('The associated records for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
 				unset($fmdb->num_rows);
 			}
@@ -473,7 +483,7 @@ class fm_dns_zones {
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_result->soa_id, 'soa_', 'soa_id', "AND soa_template='no'");
 				if ($fmdb->num_rows) {
 					if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', $domain_result->soa_id, 'soa_', 'deleted', 'soa_id') === false) {
-						return __('The SOA for this zone could not be deleted because a database error occurred.');
+						return formatError(__('The SOA for this zone could not be deleted because a database error occurred.'), 'sql');
 					}
 					unset($fmdb->num_rows);
 				}
@@ -481,7 +491,7 @@ class fm_dns_zones {
 			
 			/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
 			if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $domain_id, 'domain_id', false) === false) {
-				return sprintf(__('The zone could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds');
+				return formatError(sprintf(__('The zone could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds'));
 			}
 			
 			/** Force buildconf for all associated DNS servers */
@@ -498,21 +508,21 @@ class fm_dns_zones {
 					$clone_domain_num_rows = $fmdb->num_rows;
 					for ($i=0; $i<$clone_domain_num_rows; $i++) {
 						if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
-							return __('The associated records for the cloned zones could not be deleted because a database error occurred.');
+							return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
 						}
 					}
 					unset($fmdb->num_rows);
 				}
 				
 				if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_clone_domain_id') === false) {
-					return __('The associated clones for this zone could not be deleted because a database error occurred.');
+					return formatError(__('The associated clones for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
 			}
 			
 			/** Delete zone */
 			$tmp_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'deleted', 'domain_id') === false) {
-				return __('This zone could not be deleted because a database error occurred.');
+				return formatError(__('This zone could not be deleted because a database error occurred.'), 'sql');
 			}
 			
 			addLogEntry("Deleted zone '$tmp_name' and all associated records.");

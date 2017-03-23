@@ -143,7 +143,9 @@ class fm_module_servers extends fm_shared_module_servers {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry($log_message);
 		return true;
@@ -219,7 +221,9 @@ class fm_module_servers extends fm_shared_module_servers {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -243,7 +247,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		// Delete server
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		if (!updateStatus('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $id, 'server_', 'deleted', 'server_id')) {
-			return __('This database server could not be deleted.') . "\n";
+			return formatError(__('This database server could not be deleted.') . "\n");
 		} else {
 			addLogEntry("Deleted database server '$tmp_name'.");
 			return true;

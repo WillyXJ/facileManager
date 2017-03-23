@@ -72,7 +72,9 @@ class fm_sqlpass_groups {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (`account_id`, `group_name`) VALUES('{$_SESSION['user']['account_id']}', '{$post['group_name']}')";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the group because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry("Added server group '$group_name'.");
 		return true;
@@ -104,7 +106,9 @@ class fm_sqlpass_groups {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the group because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -123,7 +127,7 @@ class fm_sqlpass_groups {
 		// Delete group
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 		if (!updateStatus('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', $id, 'group_', 'deleted', 'group_id')) {
-			return __('This server group could not be deleted.') . "\n";
+			return formatError(__('This server group could not be deleted.') . "\n");
 		} else {
 			addLogEntry("Deleted server group '$tmp_name'.");
 			return true;

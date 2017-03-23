@@ -97,7 +97,9 @@ class fm_dns_controls {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the control because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the control because a database error occurred.'), 'sql');
+		}
 
 		$control_addresses = strpos($post['control_addresses'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['control_addresses']) : $post['control_addresses'];
 		addLogEntry(__('Added control') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . __('Comment') . ": {$post['control_comment']}");
@@ -138,7 +140,9 @@ class fm_dns_controls {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET $sql WHERE `control_id`={$post['control_id']}";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the control because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the control because a database error occurred.'), 'sql');
+		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -157,7 +161,7 @@ class fm_dns_controls {
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_', 'control_id', 'control_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', $id, 'control_', 'deleted', 'control_id') === false) {
-			return __('This control could not be deleted because a database error occurred.');
+			return formatError(__('This control could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("Control '%s' was deleted."), $tmp_name));

@@ -73,7 +73,9 @@ class fm_settings {
 				$result = setOption($option, $option_value, $command, false, $account_id);
 				unset($account_id);
 	
-				if (!$result) return _('Could not save settings because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(_('Could not save settings because a database error occurred.'), 'sql');
+				}
 		
 				$log_value = trim($option_value);
 				$log_message .= ucwords(str_replace('_', ' ', $option)) . ': ';
@@ -154,7 +156,9 @@ class fm_settings {
 				/** Update with the new value */
 				$result = setOption($option, $option_value, $command, false, $_SESSION['user']['account_id']);
 		
-				if (!$result) return _('Could not save settings because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(_('Could not save settings because a database error occurred.'), 'sql');
+				}
 			}
 			
 			addLogEntry(_('Generated system SSH key pair.'), $fm_name);

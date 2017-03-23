@@ -2148,7 +2148,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	if (empty($title)) $title = getPageTitle();
 	
 	$style = (empty($response)) ? 'style="display: none;"' : null;
-	if (strpos($response, '</p>') === false) {
+	if (strpos($response, '</p>') === false || strpos($response, _('Database error')) !== false) {
 		$response = displayResponseClose($response);
 	}
 
@@ -3643,6 +3643,29 @@ function buildSubMenu($selected, $avail_types, $null_params = array(), $params =
 	}
 	
 	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+}
+
+
+/**
+ * Formats an error message
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $message Error message to format
+ * @param string $option Display option (sql | null)
+ * @return string
+ */
+function formatError($message, $option = null) {
+	global $fmdb;
+	
+	$addl_text = null;
+	
+	if ($option == 'sql') {
+		$addl_text = ($fmdb->last_error) ? '<br />' . $fmdb->last_error : null;
+	}
+	
+	return $message . $addl_text;
 }
 
 
