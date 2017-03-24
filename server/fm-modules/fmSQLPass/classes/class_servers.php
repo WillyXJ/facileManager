@@ -119,8 +119,8 @@ class fm_module_servers extends fm_shared_module_servers {
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 				if ($key == 'server_credentials') {
 					$clean_data = str_repeat('*', 7);
 				}
@@ -137,8 +137,8 @@ class fm_module_servers extends fm_shared_module_servers {
 				$log_message .= ($clean_data && $key != 'account_id') ? formatLogKeyData('server_', $key, $clean_data) : null;
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
@@ -198,7 +198,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 				if ($key == 'server_credentials') {
 					$data = str_repeat('*', 7);
 				}
@@ -215,7 +215,7 @@ class fm_module_servers extends fm_shared_module_servers {
 				$log_message .= $data ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the server
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";

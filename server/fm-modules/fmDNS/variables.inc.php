@@ -86,7 +86,7 @@ $__FM_CONFIG['records']['digest_types'] = array(
 											);
 $__FM_CONFIG['records']['caa_flags']		= array('issue', 'issuewild', 'iodef');
 
-$__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Servers'), 'groups' => __('Groups'));
+$__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Servers'), 'groups' => _('Groups'));
 $__FM_CONFIG['options']['avail_types']    = array('global' => __('Global'), 'ratelimit' => __('Rate Limit'), 'rrset' => __('RRSet'));
 $__FM_CONFIG['logging']['avail_types']    = array('channel' => __('Channels'), 'category' => __('Categories'));
 $__FM_CONFIG['operations']['avail_types'] = array('controls' => __('Controls'), 'statistics' => __('Statistics'));

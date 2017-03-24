@@ -170,29 +170,29 @@ class fm_dns_zones {
 			foreach ($parent_domain[0] as $field => $value) {
 				if (in_array($field, array('domain_id', 'domain_template_id'))) continue;
 				if ($field == 'domain_clone_domain_id') {
-					$sql_values .= sanitize($post['domain_clone_domain_id']) . ',';
+					$sql_values .= sanitize($post['domain_clone_domain_id']) . ', ';
 				} elseif ($field == 'domain_name') {
 					$log_message .= 'Name: ' . displayFriendlyDomainName(sanitize($post['domain_name'])) . "\n";
 					$log_message .= "Clone of: $value\n";
-					$sql_values .= "'" . sanitize($post['domain_name']) . "',";
+					$sql_values .= "'" . sanitize($post['domain_name']) . "', ";
 				} elseif ($field == 'domain_view') {
 					$log_message .= "Views: $log_message_views\n";
-					$sql_values .= "'" . sanitize($post['domain_view']) . "',";
+					$sql_values .= "'" . sanitize($post['domain_view']) . "', ";
 				} elseif ($field == 'domain_name_servers' && sanitize($post['domain_name_servers'])) {
 					$log_message .= "Servers: $log_message_name_servers\n";
-					$sql_values .= "'" . sanitize($post['domain_name_servers']) . "',";
+					$sql_values .= "'" . sanitize($post['domain_name_servers']) . "', ";
 				} elseif ($field == 'domain_reload') {
-					$sql_values .= "'no',";
+					$sql_values .= "'no', ";
 				} elseif ($field == 'domain_clone_dname') {
 					$log_message .= "Use DNAME RRs: {$post['domain_clone_dname']}\n";
-					$sql_values .= $post['domain_clone_dname'] ? "'" . sanitize($post['domain_clone_dname']) . "'," : 'NULL,';
+					$sql_values .= $post['domain_clone_dname'] ? "'" . sanitize($post['domain_clone_dname']) . "', " : 'NULL, ';
 				} else {
-					$sql_values .= strlen(sanitize($value)) ? "'" . sanitize($value) . "'," : 'NULL,';
+					$sql_values .= strlen(sanitize($value)) ? "'" . sanitize($value) . "', " : 'NULL, ';
 				}
-				$sql_fields .= $field . ',';
+				$sql_fields .= $field . ', ';
 			}
-			$sql_fields = rtrim($sql_fields, ',') . ')';
-			$sql_values = rtrim($sql_values, ',');
+			$sql_fields = rtrim($sql_fields, ', ') . ')';
+			$sql_values = rtrim($sql_values, ', ');
 		} else {
 			/** Format domain_view */
 			$log_message_views = null;
@@ -346,7 +346,7 @@ class fm_dns_zones {
 			if (!in_array($key, $exclude)) {
 				$data = sanitize($data);
 				
-				$sql_edit .= strlen($data) ? $key . "='$data'," : $key . '=NULL,';
+				$sql_edit .= strlen($data) ? $key . "='$data', " : $key . '=NULL, ';
 				if ($key == 'domain_view') $data = $log_message_views;
 				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
 				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;

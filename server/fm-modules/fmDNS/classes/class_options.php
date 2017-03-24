@@ -108,12 +108,12 @@ class fm_module_options {
 				$clean_data = sanitize($data);
 				if (!strlen($clean_data) && $key != 'cfg_comment') return __('Empty values are not allowed.');
 				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return sprintf(__('%s is not an acceptable option name.'), $clean_data);
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
@@ -170,10 +170,10 @@ class fm_module_options {
 				$clean_data = sanitize($data);
 				if (!strlen($clean_data) && $key != 'cfg_comment') return false;
 				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return false;
-				$sql_edit .= $key . "='" . $clean_data . "',";
+				$sql_edit .= $key . "='" . $clean_data . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the config
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');

@@ -258,10 +258,10 @@ class fm_users {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit . $sql_pwd, ',');
+		$sql = rtrim($sql_edit . $sql_pwd, ', ');
 		
 		/** Process user permissions */
 		if (isset($post['process_user_caps']) && (!isset($post['user_caps']) || $post['user_group'])) $post['user_caps'] = array();
@@ -319,10 +319,10 @@ class fm_users {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit . $sql_pwd, ',');
+		$sql = rtrim($sql_edit . $sql_pwd, ', ');
 		
 		/** Process group permissions */
 		if (isset($post['process_user_caps']) && !isset($post['user_caps'])) $post['user_caps'] = array();

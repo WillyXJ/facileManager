@@ -85,8 +85,8 @@ class fm_dns_records {
 		$sql_insert = "INSERT INTO `$table`";
 		$sql_fields = '(';
 		if ($record_type != 'SOA' && $record_type) {
-			$sql_fields .= 'domain_id,record_type,';
-			$sql_values .= "$domain_id,'$record_type',";
+			$sql_fields .= 'domain_id, record_type, ';
+			$sql_values .= "$domain_id, '$record_type', ";
 		}
 		
 		/** Process default integers */
@@ -99,8 +99,8 @@ class fm_dns_records {
 			if ($key == 'PTR') continue;
 			if ($key == 'record_type') continue;
 			if ($record_type == 'SOA' && in_array($key, array('record_type', 'record_comment'))) continue;
-			$sql_fields .= $key . ',';
-			$sql_values .= "'" . sanitize($data) . "',";
+			$sql_fields .= $key . ', ';
+			$sql_values .= "'" . sanitize($data) . "', ";
 			if ($key != 'account_id') {
 				$log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			}
@@ -109,8 +109,8 @@ class fm_dns_records {
 				$result = $fmdb->query($query);
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
@@ -157,7 +157,7 @@ class fm_dns_records {
 			if (in_array($key, $null_keys) && empty($data)) {
 				$sql_edit .= $key . '=NULL,';
 			} else {
-				$sql_edit .= $key . "='" . sanitize(str_replace("\r\n", "\n", $data)) . "',";
+				$sql_edit .= $key . "='" . sanitize(str_replace("\r\n", "\n", $data)) . "', ";
 			}
 			if (!$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			if ($key == 'soa_default' && $data == 'yes') {
@@ -165,7 +165,7 @@ class fm_dns_records {
 				$result = $fmdb->query($query);
 			}
 		}
-		$sql_edit = rtrim($sql_edit, ',');
+		$sql_edit = rtrim($sql_edit, ', ');
 		
 		/** Update the record */
 		if ($skipped_record) {

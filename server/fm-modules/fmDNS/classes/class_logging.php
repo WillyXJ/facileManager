@@ -94,12 +94,12 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data, '_');
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
@@ -144,15 +144,15 @@ class fm_module_logging {
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
 					$clean_data = sanitize($data);
-					if ($i) $sql_fields .= $key . ',';
+					if ($i) $sql_fields .= $key . ', ';
 					
-					$sql_values .= "'$clean_data',";
+					$sql_values .= "'$clean_data', ";
 				}
 			}
 			$i = 0;
-			$sql_values = rtrim($sql_values, ',') . '), (';
+			$sql_values = rtrim($sql_values, ', ') . '), (';
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
@@ -204,12 +204,12 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
@@ -235,12 +235,12 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
@@ -300,10 +300,10 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				$sql_edit .= $key . "='" . $clean_data . "',";
+				$sql_edit .= $key . "='" . $clean_data . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the category */
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
@@ -329,12 +329,12 @@ class fm_module_logging {
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
 					$clean_data = sanitize($data);
-					$sql_fields .= $key . ',';
-					$sql_values .= "'$clean_data',";
+					$sql_fields .= $key . ', ';
+					$sql_values .= "'$clean_data', ";
 				}
 			}
-			$sql_fields = rtrim($sql_fields, ',') . ')';
-			$sql_values = rtrim($sql_values, ',');
+			$sql_fields = rtrim($sql_fields, ', ') . ')';
+			$sql_values = rtrim($sql_values, ', ');
 			
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
@@ -377,15 +377,15 @@ class fm_module_logging {
 				foreach ($post as $key => $data) {
 					if (!in_array($key, $exclude)) {
 						$clean_data = sanitize($data);
-						if ($i) $sql_fields .= $key . ',';
+						if ($i) $sql_fields .= $key . ', ';
 						
-						$sql_values .= "'$clean_data',";
+						$sql_values .= "'$clean_data', ";
 					}
 				}
 				$i = 0;
-				$sql_values = rtrim($sql_values, ',') . '), (';
+				$sql_values = rtrim($sql_values, ', ') . '), (';
 			}
-			$sql_fields = rtrim($sql_fields, ',') . ')';
+			$sql_fields = rtrim($sql_fields, ', ') . ')';
 			$sql_values = rtrim($sql_values, ', (');
 			
 			$query = "$sql_insert $sql_fields VALUES $sql_values";

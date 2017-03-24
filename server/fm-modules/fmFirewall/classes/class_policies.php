@@ -126,8 +126,8 @@ HTML;
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
 						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
@@ -138,8 +138,8 @@ HTML;
 				}
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
@@ -198,7 +198,7 @@ HTML;
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				$sql_edit .= $key . "='" . $clean_data . "',";
+				$sql_edit .= $key . "='" . $clean_data . "', ";
 				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
 						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
@@ -207,7 +207,7 @@ HTML;
 				}
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the policy */
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET $sql WHERE `policy_id`={$post['policy_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
