@@ -130,7 +130,12 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}time
   `time_end_date` date DEFAULT NULL,
   `time_start_time` time NOT NULL,
   `time_end_time` time NOT NULL,
+  `time_weekdays_not` enum('','!') NOT NULL DEFAULT '',
   `time_weekdays` int(3) NOT NULL DEFAULT '0',
+  `time_monthdays_not` enum('','!') NOT NULL DEFAULT '',
+  `time_monthdays` text,
+  `time_contiguous` enum('yes','no') NOT NULL DEFAULT 'no',
+  `time_zone` enum('utc','kerneltz','localtz') NOT NULL DEFAULT 'utc',
   `time_comment` text,
   `time_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`time_id`)

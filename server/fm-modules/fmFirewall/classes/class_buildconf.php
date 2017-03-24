@@ -73,7 +73,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$policy_result = $fmdb->last_result;
 				
 				$function = $server_type . 'BuildConfig';
-				$config .= $this->$function($policy_result, $policy_count);
+				$config .= $this->$function($policy_result, $policy_count, $server_result[0]);
 				unset($policy_result);
 			}
 
@@ -173,7 +173,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	}
 	
 	
-	function iptablesBuildConfig($policy_result, $count) {
+	function iptablesBuildConfig($policy_result, $count, $server_result) {
 		global $fmdb, $__FM_CONFIG;
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
@@ -363,7 +363,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			if ($policy_result[$i]->policy_time) {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $policy_result[$i]->policy_time, 'time_', 'time_id', 'active');
 				if ($fmdb->num_rows) {
-					$time = null;
+					$time[] = '-m time';
 					$time_result = $fmdb->last_result[0];
 					
 					if ($time_result->time_start_date) $time[] = '--datestart ' . date('Y:m:d', strtotime($time_result->time_start_date));
@@ -373,8 +373,25 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					if ($time_result->time_end_time) $time[] = '--timestop ' . $time_result->time_end_time;
 					
 					if ($time_result->time_weekdays && $time_result->time_weekdays != array_sum($__FM_CONFIG['weekdays'])) {
-						$time[] = '--days ' . str_replace(' ', '', $fm_module_time->formatDays($time_result->time_weekdays));
+						if (version_compare($server_result->server_version, '1.4', '<')) {
+							$weekday_prefix = '--days';
+						} else {
+							$weekday_prefix .= $time_result->time_weekdays_not . ' --weekdays';
+						}
+						$time[] = trim($weekday_prefix . ' ' . str_replace(' ', '', $fm_module_time->formatDays($time_result->time_weekdays)));
 					}
+					
+					if (version_compare($server_result->server_version, '1.4', '>')) {
+						if ($time_result->time_monthdays) {
+							$time[] = trim($time_result->time_monthdays_not . ' --monthdays ' . str_replace(';', ',', $time_result->time_monthdays));
+						}
+						
+						if ($time_result->time_contiguous == 'yes' && version_compare($server_result->server_version, '1.4.21', '>')) {
+							$time[] = '--contiguous';
+						}
+					}
+					
+					$time[] = '--' . $time_result->time_zone;
 					
 					$time_restrictions = implode(' ', $time);
 				}

@@ -108,8 +108,9 @@ class fm_module_time {
 		$weekdays = $this->formatDays($post['time_weekdays']);
 		
 		addLogEntry("Added time restriction:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
-					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $this->formatDays($post['time_weekdays']) .
-					"\nComment: {$post['time_comment']}");
+					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
+					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(';', ', ', $post['time_monthdays']) .
+					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
 		return true;
 	}
 
@@ -150,8 +151,9 @@ class fm_module_time {
 //		setBuildUpdateConfigFlag(getServerSerial($post['time_id'], $_SESSION['module']), 'yes', 'build');
 		
 		addLogEntry("Updated time restriction '$old_name' to:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
-					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $this->formatDays($post['time_weekdays']) .
-					"\nComment: {$post['time_comment']}");
+					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
+					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(';', ', ', $post['time_monthdays']) .
+					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
 		return true;
 	}
 	
@@ -206,7 +208,7 @@ class fm_module_time {
 		$date_range = $this->formatDates($row->time_start_date, $row->time_end_date);
 		
 		/** Format weekdays */
-		$weekdays = $this->formatDays($row->time_weekdays);
+		$weekdays .= $row->time_weekdays_not . ' ' . $this->formatDays($row->time_weekdays);
 
 		$comments = nl2br($row->time_comment);
 		
@@ -230,8 +232,8 @@ HTML;
 	function printForm($data = '', $action = 'add') {
 		global $__FM_CONFIG;
 		
-		$time_weekdays = $time_id = 0;
-		$time_name = $time_comment = null;
+		$time_weekdays = $time_weekdays_not = $time_monthdays_not = $time_contiguous = $time_id = 0;
+		$time_name = $time_comment = $time_zone = $time_weekdays = $time_monthdays = null;
 		$time_start_date = $time_start_time = $time_end_date = $time_end_time = null;
 		$ucaction = ucfirst($action);
 		
@@ -256,20 +258,36 @@ HTML;
 		
 		$time_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name');
 		
-		$time_start_hour = BuildSelect('time_start_time_hour', 1, $houropt, $start_hour, 1);
-		$time_start_min = BuildSelect('time_start_time_min', 1, $minopt, $start_min, 1);
+		$time_start_hour = buildSelect('time_start_time_hour', 'time_start_time_hour', $houropt, $start_hour, 1);
+		$time_start_min = buildSelect('time_start_time_min', 'time_start_time_min', $minopt, $start_min, 1);
 
-		$time_end_hour = BuildSelect('time_end_time_hour', 1, $houropt, $end_hour, 1);
-		$time_end_min = BuildSelect('time_end_time_min', 1, $minopt, $end_min, 1);
+		$time_end_hour = buildSelect('time_end_time_hour', 'time_end_time_hour', $houropt, $end_hour, 1);
+		$time_end_min = buildSelect('time_end_time_min', 'time_end_time_min', $minopt, $end_min, 1);
 
 		/** Weekdays */
+		$weekdays_not_check = ($time_weekdays_not) ? 'checked' : null;
 		$weekdays_form = null;
 		foreach ($__FM_CONFIG['weekdays'] as $day => $bit) {
 			$weekdays_form .= '<label><input type="checkbox" name="time_weekdays[' . $bit . ']" ';
 			if ($bit & $time_weekdays) $weekdays_form .= 'checked';
 			$weekdays_form .= '/>' . $day . "</label>\n";
 		}
+		
+		/** Monthdays */
+		$monthdays_not_check = ($time_monthdays_not) ? 'checked' : null;
+		$monthdays_form = null;
+		for ($x = 1; $x <= 31; $x++) {
+			$monthdaysopt[] = sprintf("%02d", $x);
+		}
+		$monthdays_form = buildSelect('time_monthdays', 'time_monthdays', $monthdaysopt, explode(';', trim($time_monthdays, ';')), 1, null, true);
+		
+		$time_zone_form = '<h4>' . _('Timezone') . '</h4>' . buildSelect('time_zone', 'time_zone', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_zone'), $time_zone);
 
+		$checked = ($time_contiguous) ? 'checked' : null;
+		$time_options = sprintf('<input name="time_contiguous" id="time_contiguous" value="yes" type="checkbox" %s /><label for="time_contiguous">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a><br />',
+			$checked, __('Use contiguous time'), __('When end time is smaller than start time, match this as a single time period instead distinct intervals.')
+			);
+		
 		$popup_title = $action == 'add' ? __('Add Restriction') : __('Edit Restriction');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
@@ -278,6 +296,9 @@ HTML;
 		%s
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="time_id" value="%d" />
+			<input type="hidden" name="time_weekdays_not" value="" />
+			<input type="hidden" name="time_monthdays_not" value="" />
+			<input type="hidden" name="time_contiguous" value="no" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="time_name">%s</label></th>
@@ -301,7 +322,26 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;" style="white-space: nowrap;">%s</td>
+					<td width="67&#37;" style="white-space: nowrap;">
+						<input name="time_weekdays_not" id="time_weekdays_not" value="!" type="checkbox" %s /><label for="time_weekdays_not"><b>%s</b></label>
+						<p class="checkbox_desc">%s</p>
+						%s
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;" style="white-space: nowrap;">
+						<input name="time_monthdays_not" id="time_monthdays_not" value="!" type="checkbox" %s /><label for="time_monthdays_not"><b>%s</b></label>
+						<p class="checkbox_desc">%s</p>
+						%s
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						%s
+						%s
+					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="time_comment">%s</label></th>
@@ -313,7 +353,11 @@ HTML;
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: "70px",
+					width: "80px",
+					minimumResultsForSearch: 10
+				});
+				$("#manage select#time_monthdays").select2({
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
@@ -325,7 +369,10 @@ HTML;
 				__('Start Time'), "$time_start_hour : $time_start_min",
 				__('End Date'), $time_end_date,
 				__('End Time'), "$time_end_hour : $time_end_min",
-				__('Weekdays'), $weekdays_form,
+				__('Weekdays'), $weekdays_not_check, __('not'), __('Use this option to invert the match'), $weekdays_form,
+				__('Monthdays'), $monthdays_not_check, __('not'), __('Use this option to invert the match'), $monthdays_form,
+				__('Options'), $time_options,
+				$time_zone_form,
 				__('Comment'), $time_comment,
 				$popup_footer
 			);
@@ -359,6 +406,8 @@ HTML;
 			}
 			$post['time_weekdays'] = $decimals;
 		} else $post['time_weekdays'] = 0;
+		
+		$post['time_monthdays'] = implode(';', $post['time_monthdays']);
 		
 		/** Process dates */
 		if (empty($post['time_start_date'])) unset($post['time_start_date']);

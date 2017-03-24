@@ -30,7 +30,7 @@ function upgradefmFirewallSchema($module_name) {
 	$running_version = getOption('version', 0, $module_name);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.1.1', '<') ? upgradefmFirewall_111($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '1.4-beta2', '<') ? upgradefmFirewall_1401($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
@@ -233,6 +233,50 @@ function upgradefmFirewall_111($__FM_CONFIG, $running_version) {
 	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
 	
 	setOption('version', '1.1.1', 'auto', false, 0, $module_name);
+	
+	return true;
+}
+
+/** 1.4-beta2 */
+function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	$success = version_compare($running_version, '1.1.1', '<') ? upgradefmFirewall_111($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_zone` ENUM('utc','kerneltz','localtz') NOT NULL DEFAULT 'utc' AFTER `time_weekdays`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_weekdays_not` ENUM('','!') NOT NULL DEFAULT '' AFTER `time_end_time`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_contiguous` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `time_weekdays`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays_not` ENUM('','!') NOT NULL DEFAULT '' AFTER `time_weekdays`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays` TEXT NULL DEFAULT NULL AFTER `time_monthdays_not`";
+	
+	$inserts = $updates = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (count($updates) && $updates[0]) {
+		foreach ($updates as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
+	
+	setOption('version', '1.4-beta2', 'auto', false, 0, $module_name);
 	
 	return true;
 }
