@@ -249,9 +249,17 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_contiguous` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `time_weekdays`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays_not` ENUM('','!') NOT NULL DEFAULT '' AFTER `time_weekdays`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays` TEXT NULL DEFAULT NULL AFTER `time_monthdays_not`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_type` `policy_type` ENUM('rules','filter','nat') NOT NULL DEFAULT 'filter'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_packet_state` TEXT NULL DEFAULT NULL AFTER `policy_options`";
 	
 	$inserts = $updates = null;
 	
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_type`='filter'";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='NEW' WHERE `policy_action`='pass'";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='NEW,ESTABLISHED,RELATED' WHERE `policy_action`='pass' AND `policy_options` IN (2,3,7)";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='ESTABLISHED,RELATED' WHERE `policy_action`!='pass' AND `policy_options` IN (2,3,7)";
+	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_type` `policy_type` ENUM('filter','nat') NOT NULL DEFAULT 'filter'";
+
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {

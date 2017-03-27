@@ -190,7 +190,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$config[] = '';
 		
 		for ($i=0; $i<$count; $i++) {
-			$line = null;
+			$line = $keep_state = null;
 			$log_rule = false;
 			
 			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
@@ -219,11 +219,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			}
 			
 			/** Handle keep-states */
-			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' -m state --state NEW' : null;
-
-			/** Handle established option */
-			$keep_state .= ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? ',ESTABLISHED,RELATED' : null;
-
+			if ($policy_result[$i]->policy_packet_state) {
+				$keep_state = ' -m state --state ' . str_replace(';', ',', $policy_result[$i]->policy_packet_state);
+			}
+			
 			/** Handle frags */
 			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? ' -f' : null;
 
@@ -383,7 +382,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					
 					if (version_compare($server_result->server_version, '1.4', '>')) {
 						if ($time_result->time_monthdays) {
-							$time[] = trim($time_result->time_monthdays_not . ' --monthdays ' . str_replace(';', ',', $time_result->time_monthdays));
+							$time[] = trim($time_result->time_monthdays_not . ' --monthdays ' . trim($time_result->time_monthdays, ','));
 						}
 						
 						if ($time_result->time_contiguous == 'yes' && version_compare($server_result->server_version, '1.4.21', '>')) {
@@ -891,7 +890,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Handle established option */
 			$established = ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? 'established ' : null;
 
-			/** Handle established option */
+			/** Handle fragment option */
 			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? 'frag ' : null;
 
 			/** Handle match inverses */

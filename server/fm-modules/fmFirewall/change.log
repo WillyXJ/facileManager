@@ -6,6 +6,8 @@
            setting is enabled.
 * Server - [improvement] Added additional time restriction support based on newer
            versions of iptables.
+* Server - [bug|improvement] Added more flexibility in choosing packet states
+           with iptables. (Issue #364)
 
 1.4-beta1 (2017-03-08)
 ======================

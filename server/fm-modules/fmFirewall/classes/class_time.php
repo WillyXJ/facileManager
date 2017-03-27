@@ -109,7 +109,7 @@ class fm_module_time {
 		
 		addLogEntry("Added time restriction:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
 					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
-					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(';', ', ', $post['time_monthdays']) .
+					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(',', ', ', $post['time_monthdays']) .
 					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
 		return true;
 	}
@@ -152,7 +152,7 @@ class fm_module_time {
 		
 		addLogEntry("Updated time restriction '$old_name' to:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
 					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
-					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(';', ', ', $post['time_monthdays']) .
+					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(',', ', ', $post['time_monthdays']) .
 					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
 		return true;
 	}
@@ -279,7 +279,7 @@ HTML;
 		for ($x = 1; $x <= 31; $x++) {
 			$monthdaysopt[] = sprintf("%02d", $x);
 		}
-		$monthdays_form = buildSelect('time_monthdays', 'time_monthdays', $monthdaysopt, explode(';', trim($time_monthdays, ';')), 1, null, true);
+		$monthdays_form = buildSelect('time_monthdays', 'time_monthdays', $monthdaysopt, explode(',', trim($time_monthdays, ',')), 1, null, true);
 		
 		$time_zone_form = '<h4>' . _('Timezone') . '</h4>' . buildSelect('time_zone', 'time_zone', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_zone'), $time_zone);
 
@@ -407,7 +407,7 @@ HTML;
 			$post['time_weekdays'] = $decimals;
 		} else $post['time_weekdays'] = 0;
 		
-		$post['time_monthdays'] = implode(';', $post['time_monthdays']);
+		$post['time_monthdays'] = implode(',', $post['time_monthdays']);
 		
 		/** Process dates */
 		if (empty($post['time_start_date'])) unset($post['time_start_date']);

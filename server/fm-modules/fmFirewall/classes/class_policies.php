@@ -304,7 +304,7 @@ HTML;
 	/**
 	 * Displays the form to add new policy
 	 */
-	function printForm($data = '', $action = 'add', $type = 'rules') {
+	function printForm($data = '', $action = 'add', $type = 'filter') {
 		global $__FM_CONFIG;
 		
 		$policy_id = $policy_order_id = 0;
@@ -312,6 +312,7 @@ HTML;
 		$policy_services = $policy_source = $policy_destination = $policy_action = null;
 		$source_items = $destination_items = $services_items = null;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
+		$policy_packet_state_form = $policy_packet_state = $policy_time_form = null;
 		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -321,27 +322,7 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
-		$server_firewall_type = getNameFromID($_POST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
-		$available_policy_actions = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
-		if ($server_firewall_type == 'ipfilter') array_pop($available_policy_actions);
-		
-		$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
-		$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
-		$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
-
-		$source_items_assigned = getGroupItems($policy_source);
-		$source_items = buildSelect('source_items', 'source_items', availableGroupItems('object', 'available'), $source_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
-		
-		$destination_items_assigned = getGroupItems($policy_destination);
-		$destination_items = buildSelect('destination_items', 'destination_items', availableGroupItems('object', 'available'), $destination_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
-		
-		$services_items_assigned = getGroupItems($policy_services);
-		$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, __('Select one or more services'));
-		
-		$source_not_check = ($policy_source_not) ? 'checked' : null;
-		$destination_not_check = ($policy_destination_not) ? 'checked' : null;
-		$service_not_check = ($policy_services_not) ? 'checked' : null;
-
+		/** Build form */
 		$popup_title = $action == 'add' ? __('Add Policy') : __('Edit Policy');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
@@ -352,12 +333,62 @@ HTML;
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
+FORM;
+
+		if ($type == 'filter') {
+			$server_firewall_type = getNameFromID($_POST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
+			$available_policy_actions = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
+			if ($server_firewall_type == 'ipfilter') array_pop($available_policy_actions);
+
+			$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
+			$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
+			$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
+
+			$source_items_assigned = getGroupItems($policy_source);
+			$source_items = buildSelect('source_items', 'source_items', availableGroupItems('object', 'available'), $source_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
+
+			$destination_items_assigned = getGroupItems($policy_destination);
+			$destination_items = buildSelect('destination_items', 'destination_items', availableGroupItems('object', 'available'), $destination_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
+
+			$services_items_assigned = getGroupItems($policy_services);
+			$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, __('Select one or more services'));
+
+			$source_not_check = ($policy_source_not) ? 'checked' : null;
+			$destination_not_check = ($policy_destination_not) ? 'checked' : null;
+			$service_not_check = ($policy_services_not) ? 'checked' : null;
+
+			if ($server_firewall_type == 'iptables') {
+				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
+				$policy_time_form .= sprintf('
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_time">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>',
+						__('Time Restriction'), $policy_time
+					);
+
+				$policy_packet_state_form .= sprintf('
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_packet_state">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>',
+						__('Packet State'), buildSelect('policy_packet_state', 'policy_packet_state', $__FM_CONFIG['fw']['policy_states'], explode(',', trim($policy_packet_state, ',')), 1, null, true, null, null, __('Select one or more packet states'))
+					);
+			}
+
+			/** Parse options */
+			$options = null;
+			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
+				if (in_array($server_firewall_type, $opt_array['firewalls'])) {
+					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
+					$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']">' . $opt_array['desc'] . "</label><br />\n";
+				}
+			}
+
+			$return_form .= sprintf('
 			<input type="hidden" name="policy_source_not" value="0" />
 			<input type="hidden" name="policy_destination_not" value="0" />
 			<input type="hidden" name="policy_services_not" value="0" />
-FORM;
-		if ($type == 'rules') {
-			$return_form .= sprintf('
 			<table class="form-table policy-form">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="policy_interface">%s</label></th>
@@ -390,40 +421,13 @@ FORM;
 						<p class="checkbox_desc">%s</p>
 						%s
 					</td>
-				</tr>',
-					__('Interface'), $policy_interface,
-					__('Direction'), $policy_direction,
-					__('Source'), $source_not_check, __('not'), __('Use this option to invert the match'), $source_items,
-					__('Destination'), $destination_not_check, __('not'), __('Use this option to invert the match'), $destination_items,
-					__('Services'), $service_not_check, __('not'), __('Use this option to invert the match'), $services_items
-					);
-			if ($server_firewall_type == 'iptables') {
-				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
-				$return_form .= sprintf('
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_time">%s</label></th>
-					<td width="67&#37;">%s</td>
-				</tr>',
-						__('Time Restriction'), $policy_time
-					);
-			}
-			
-			/** Parse options */
-			$options = null;
-			if ($server_firewall_type == 'pf') {
-				array_pop($__FM_CONFIG['fw']['policy_options']);
-				array_pop($__FM_CONFIG['fw']['policy_options']);
-			}
-			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
-				$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-				$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']">' . $opt_array['desc'] . "</label><br />\n";
-			}
-			
-			$return_form .= sprintf('
+				</tr>
+				%s
 				<tr>
 					<th width="33&#37;" scope="row"><label for="policy_action">%s</label></th>
 					<td width="67&#37;">%s</td>
 				</tr>
+				%s
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
@@ -435,7 +439,13 @@ FORM;
 					<td width="67&#37;"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>',
-					__('Action'), $policy_action,
+					__('Interface'), $policy_interface,
+					__('Direction'), $policy_direction,
+					__('Source'), $source_not_check, __('not'), __('Use this option to invert the match'), $source_items,
+					__('Destination'), $destination_not_check, __('not'), __('Use this option to invert the match'), $destination_items,
+					__('Services'), $service_not_check, __('not'), __('Use this option to invert the match'), $services_items,
+					$policy_time_form,
+					__('Action'), $policy_action, $policy_packet_state_form,
 					__('Options'), $options,
 					__('Comment'), $policy_comment
 				);
@@ -447,7 +457,7 @@ FORM;
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: '200px',
+					width: '230px',
 					minimumResultsForSearch: 10
 				});
 			});
@@ -474,6 +484,7 @@ FORM;
 		$post['policy_source'] = implode(';', $post['source_items']);
 		$post['policy_destination'] = implode(';', $post['destination_items']);
 		$post['policy_services'] = implode(';', $post['services_items']);
+		$post['policy_packet_state'] = implode(',', $post['policy_packet_state']);
 		unset($post['source_items']);
 		unset($post['destination_items']);
 		unset($post['services_items']);

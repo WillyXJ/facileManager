@@ -29,7 +29,7 @@ if (!currentUserCan(array('manage_policies', 'view_all'), $_SESSION['module'])) 
 if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
 
 $server_config_page = $GLOBALS['RELPATH'] . $menu[getParentMenuKey()][4];
-$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'rules';
+$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'filter';
 $server_serial_no = (isset($_GET['server_serial_no'])) ? sanitize($_GET['server_serial_no']) : header('Location: ' . $server_config_page);
 if (!$server_id = getServerID($server_serial_no, $_SESSION['module'])) header('Location: ' . $server_config_page);
 
@@ -37,6 +37,7 @@ if (!$server_id = getServerID($server_serial_no, $_SESSION['module'])) header('L
 if (getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_installed') != 'yes') header('Location: ' . $server_config_page);
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_policies.php');
+$response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -66,8 +67,6 @@ printHeader();
 @printMenu();
 
 $avail_types = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
-
-$response = $form_data = $action = null;
 
 echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']), $type);
 /*

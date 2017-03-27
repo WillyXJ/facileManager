@@ -58,18 +58,24 @@ $__FM_CONFIG['weekdays']				= array(__('Mon') => 1, __('Tue') => 2, __('Wed') =>
 /** Policy options */
 $__FM_CONFIG['fw']['policy_options']	= array(
 											'log' => array(
+												'firewalls' => array('iptables', 'ipfw', 'ipfilter', 'pf'),
 												'bit' => 1,
 												'desc' => __('Log packets processed by this rule')
 											),
 											'established' => array(
+												'firewalls' => array('ipfw', 'ipfilter'),
 												'bit' => 2,
 												'desc' => __('Established connection packets')
 											),
 											'frag' => array(
+												'firewalls' => array('iptables', 'ipfw', 'ipfilter'),
 												'bit' => 4,
 												'desc' => __('Matches packets that are fragments and not the first fragment of an IP datagram')
 											)
 										);
+
+/** Policy states */
+$__FM_CONFIG['fw']['policy_states']	= array('INVALID', 'ESTABLISHED', 'NEW', 'RELATED', 'UNTRACKED');
 
 /** Default values */
 $__FM_CONFIG['fw']['config_file'] 		= array(
@@ -100,7 +106,7 @@ $__FM_CONFIG['fw']['notes'] 			= array(
 												'ipfilter' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked will be passed by default. So make sure you take care with your rule order.')
 											);
 
-$__FM_CONFIG['policy']['avail_types'] = array('rules' => 'Rules', 'nat' => 'NAT');
+$__FM_CONFIG['policy']['avail_types'] = array('filter' => 'Filter', 'nat' => 'NAT');
 
 /** Cleanup options */
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'groups'=>'group', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'objects'=>'object',
