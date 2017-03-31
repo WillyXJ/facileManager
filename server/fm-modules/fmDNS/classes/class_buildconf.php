@@ -726,17 +726,22 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
 					$zones .= 'zone "' . rtrim($domain_name, '.') . "\" {\n";
 					$zones .= "\ttype $domain_type;\n";
-					$file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
+					$default_file_ext = $file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 					
 					/** Are there multiple zones with the same name? */
 					if (isset($zone_result[$i]->parent_domain_id)) {
 						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->parent_domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$file_ext";
+						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$default_file_ext";
 					} else {
 						$zone_result[$i]->parent_domain_id = $zone_result[$i]->domain_id;
 						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
+						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$default_file_ext";
 					}
+					
+					if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
+						$file_ext = $view_id . ".$default_file_ext";
+					}
+					unset($default_file_ext);
 					
 					switch($domain_type) {
 						case 'master':
