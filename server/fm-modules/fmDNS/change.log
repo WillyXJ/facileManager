@@ -7,6 +7,8 @@
            setting is enabled.
 * Server - [improvement] Code clean up.
 * Server - [bug] Slave zones now work with multiple views. (Issue #367)
+* Server - [bug] Changing to a different template for a zone, the serial number
+           was not updating thus slaves would not get updated. (Issue #368)
 
 3.0-beta1 (2017-03-08)
 ======================

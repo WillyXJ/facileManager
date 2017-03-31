@@ -436,6 +436,11 @@ class fm_dns_zones {
 		/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
 		basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $domain_id, 'domain_id', false);
 
+		/** Update the SOA serial number */
+		if ($post['domain_type'] == 'master') {
+			$this->updateSOASerialNo($domain_id, getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'soa_serial_no'));
+		}
+
 		addLogEntry($log_message);
 		return true;
 	}
