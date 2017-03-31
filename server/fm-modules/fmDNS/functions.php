@@ -151,7 +151,7 @@ function buildModuleToolbar() {
 	
 	if (isset($_REQUEST['domain_id'])) {
 		$domain = displayFriendlyDomainName(getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-		$icon = (getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('&nbsp; <i class="template-icon fa fa-lock" title="%s"></i>', __('Zone is secured with DNSSEC')) : null;
+		$icon = (getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('&nbsp; <i class="mini-icon fa fa-lock" title="%s"></i>', __('Zone is secured with DNSSEC')) : null;
 		$domain_menu = '<div id="topheadpart">
 			<span class="single_line">' . __('Domain') . ':&nbsp;&nbsp; ' . $domain . $icon . '</span>
 		</div>';
@@ -197,13 +197,13 @@ function buildModuleHelpFile() {
 			<p>Zones (aka domains) can be managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
 			there you can add, edit {$__FM_CONFIG['icons']['edit']}, delete 
 			{$__FM_CONFIG['icons']['delete']}, and reload {$__FM_CONFIG['icons']['reload']} zones depending on your user permissions.</p>
-			<p>You can define a zone as a clone <i class="template-icon fa fa-clone"></i> of another previously defined master zone.  The cloned zone will contain all of the same records
+			<p>You can define a zone as a clone <i class="mini-icon fa fa-clone"></i> of another previously defined master zone.  The cloned zone will contain all of the same records
 			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
 			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
 			<p>Zones can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
 			management if you have several zones with a similar framework. You can create a zone template when creating a new zone or you can 
 			completely manage them from <a href="__menu{Zone Templates}">Templates</a>. All zones based on a template will be shown with the
-			<i class="template-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
+			<i class="mini-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
 			with them. In addition, clones of a zone based on a template cannot be shortened to a DNAME RR.</p>
 			<p>Zones can support dynamic updates only if the checkbox is ticked while creating or editing individual zones. This will cause 
 			{$_SESSION['module']} to compare the zone file from the DNS server with that in the database and make any necessary changes. This option

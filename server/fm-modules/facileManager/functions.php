@@ -3045,7 +3045,7 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'defau
 	if ($name) $name = ' name="' . $name . '"';
 	if ($rel) $rel = ' rel="' . $rel . '"';
 	
-	$image = '<i class="template-icon ' . $style . '" title="' . $title . '">' . $contents . '</i>';
+	$image = '<i class="mini-icon ' . $style . '" title="' . $title . '">' . $contents . '</i>';
 	
 	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
 }

@@ -643,24 +643,24 @@ class fm_dns_zones {
 		}
 		
 		if (in_array($row->domain_type, array('master', 'slave')) && currentUserCan('manage_servers', $_SESSION['module'])) {
-			$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="template-icon"><i class="template-icon fa fa-sliders" title="%s"></i></a>', $row->domain_id, __('Configure Additional Options'));
+			$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s"></i></a>', $row->domain_id, __('Configure Additional Options'));
 		}
 		
 		if (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') {
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND domain_id=' . $row->domain_id);
 			if ($fmdb->num_rows) {
-				$icons[] = sprintf('<i class="template-icon fa fa-lock secure" title="%s"></i>', __('Zone is secured with DNSSEC'));
+				$icons[] = sprintf('<i class="mini-icon fa fa-lock secure" title="%s"></i>', __('Zone is secured with DNSSEC'));
 			} else {
-				$icons[] = sprintf('<i class="template-icon fa fa-lock insecure" title="%s"></i>', __('Zone is configured but not secured with DNSSEC'));
+				$icons[] = sprintf('<i class="mini-icon fa fa-lock insecure" title="%s"></i>', __('Zone is configured but not secured with DNSSEC'));
 				$response = __('There are no DNSSEC keys defined for this zone.');
 				$classes[] = 'attention';
 			}
 		}
 		if ($dynamic_zone == 'yes') {
-			$icons[] = sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates'));
+			$icons[] = sprintf('<i class="mini-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates'));
 		}
 		if ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
-			$icons[] = sprintf('<i class="template-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')));
+			$icons[] = sprintf('<i class="mini-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')));
 		}
 		
 		$response = ($response) ? sprintf('<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', $response) : null;
@@ -1048,10 +1048,10 @@ HTML;
 				$return[$clone_id]['clone_views'] = $clone_results[$i]->domain_view;
 				
 				/** Dynamic updates support */
-				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<i class="template-icon fa fa-share-alt" title="%s"></i> ', __('Zone supports dynamic updates')) : null;
+				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<i class="mini-icon fa fa-share-alt" title="%s"></i> ', __('Zone supports dynamic updates')) : null;
 				
 				/** DNSSEC support */
-				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="template-icon fa fa-lock secure" title="%s"></i> ', __('Zone is secured with DNSSEC')) : null;
+				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="mini-icon fa fa-lock secure" title="%s"></i> ', __('Zone is secured with DNSSEC')) : null;
 			}
 		}
 		return $return;
