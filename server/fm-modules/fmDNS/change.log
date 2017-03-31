@@ -9,6 +9,8 @@
 * Server - [bug] Slave zones now work with multiple views. (Issue #367)
 * Server - [bug] Changing to a different template for a zone, the serial number
            was not updating thus slaves would not get updated. (Issue #368)
+* Server - [improvement] Added an icon on the zones pages for faster access to
+           the zone options.
 
 3.0-beta1 (2017-03-08)
 ======================
