@@ -118,9 +118,10 @@ strong {
 #fm-branding span {
 	color: #D0D0D0;
 	position: relative;
-	left: 10px;
-	bottom: 13px;
 	font-size: 30px;
+}
+#fm-branding span i {
+	padding-right: 3px;
 }
 
 #window {

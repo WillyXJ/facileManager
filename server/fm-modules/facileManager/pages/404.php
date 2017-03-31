@@ -23,12 +23,12 @@
  * Displays 404 Error
  */
 
-$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . basename(dirname(dirname(__FILE__))) . '/images/fm.png';
+$branding_logo = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
 
 printHeader(_('File Not Found'), 'install');
 
-printf('<div id="fm-branding"><img src="%s">
-<span>%s</span></div>
+printf('<div id="fm-branding">
+<span>%s %s</span></div>
 <div id="window"><p>%s</p>
 <p>%s</p>
 <p id="forgotton_link"><a href="javascript:history.back();">%s</a></p></div>',
