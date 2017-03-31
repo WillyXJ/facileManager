@@ -24,7 +24,6 @@
 if (!currentUserCan(array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-$response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -53,7 +52,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
 
 /** Get server listing */
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');

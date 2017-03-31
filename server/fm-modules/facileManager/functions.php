@@ -1839,7 +1839,7 @@ function bailOut($message, $tryagain = 'try again', $title = null) {
  * @return string
  */
 function displayProgress($step, $result, $process = 'noisy', $error = null) {
-	if ($result == true) {
+	if ($result === true) {
 		$output = '<i class="fa fa-check fa-lg"></i>';
 		$status = 'success';
 	} else {
@@ -3666,6 +3666,91 @@ function formatError($message, $option = null) {
 	}
 	
 	return $message . $addl_text;
+}
+
+
+/**
+ * Builds the server listing in a dropdown menu
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param integer $server_serial_no Selected server serial number
+ * @param array $available_servers Available servers for the list
+ * @param array $class Additional classes to pass to the div
+ * @return string
+ */
+function buildServerSubMenu($server_serial_no = 0, $available_servers = null, $class = null) {
+	if (!$available_servers) $available_servers = availableServers();
+	$server_list = buildSelect('server_serial_no', 'server_serial_no', $available_servers, $server_serial_no, 1, null, false, 'this.form.submit()');
+	
+	$hidden_inputs = null;
+	foreach ($GLOBALS['URI'] as $param => $value) {
+		if ($param == 'server_serial_no') continue;
+		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
+	}
+	
+	$class = $class ? 'class="' . join(' ', (array) $class) . '"' : null;
+
+	$return = <<<HTML
+	<div id="configtypesmenu" $class>
+		<form action="{$GLOBALS['basename']}" method="GET">
+		$hidden_inputs
+		$server_list
+		</form>
+	</div>
+HTML;
+
+	return $return;
+}
+
+
+/**
+ * Returns an array of servers and groups
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $server_id_type What server ID should be used (serial|id)
+ * @return array
+ */
+function availableServers($server_id_type = 'serial') {
+	global $fmdb, $__FM_CONFIG;
+	
+	$server_array[0][] = null;
+	$server_array[0][0][] = __('All Servers');
+	$server_array[0][0][] = '0';
+	
+	$j = 0;
+	/** Server Groups */
+	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
+	if ($fmdb->num_rows && !$fmdb->sql_errors) {
+		$server_array[__('Groups')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[__('Groups')][$j][] = $results[$i]->group_name;
+			$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+			$j++;
+		}
+	}
+	$j = 0;
+	/** Server names */
+	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
+	if ($fmdb->num_rows && !$fmdb->sql_errors) {
+		$server_array[_('Servers')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+			if ($server_id_type == 'serial') {
+				$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
+			} elseif ($server_id_type == 'id') {
+				$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+			}
+			$j++;
+		}
+	}
+	
+	return $server_array;
 }
 
 

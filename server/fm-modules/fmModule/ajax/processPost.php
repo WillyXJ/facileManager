@@ -42,7 +42,7 @@ $allowed_capabilities = array_unique($checks_array);
 
 if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
 	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
-		echo $unpriv_message;
+		returnUnAuth();
 		exit;
 	}
 	

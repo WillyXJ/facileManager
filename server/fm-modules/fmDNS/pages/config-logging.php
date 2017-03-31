@@ -31,7 +31,6 @@ $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'channel'
 $display_type = $__FM_CONFIG['logging']['avail_types'][$type];
 $channel_category = ($type == 'channel') ? 'channel' : 'category';
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$response = isset($response) ? $response : null;
 
 /* Ensure proper type is defined */
 if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {
@@ -74,7 +73,7 @@ printHeader();
 $avail_types = buildSubMenu($type, $__FM_CONFIG['logging']['avail_types']);
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

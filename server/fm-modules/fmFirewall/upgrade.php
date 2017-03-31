@@ -284,7 +284,7 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 
 	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
 	
-	setOption('version', '1.4-beta2', 'auto', false, 0, $module_name);
+	setOption('version', '1.4-beta2', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
 }

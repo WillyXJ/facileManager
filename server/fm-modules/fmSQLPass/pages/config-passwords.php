@@ -25,7 +25,6 @@
 
 if (!currentUserCan(array('manage_passwords', 'view_all'), $_SESSION['module'])) unAuth();
 
-$response = isset($response) ? $response : null;
 
 printHeader();
 @printMenu();
@@ -33,7 +32,7 @@ printHeader();
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_passwords.php');
 include(ABSPATH . 'fm-modules/facileManager/classes/class_users.php');
 
-echo printPageHeader($response);
+echo printPageHeader((string) $response);
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_', 'active');
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

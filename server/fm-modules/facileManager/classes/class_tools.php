@@ -45,7 +45,7 @@ class fm_tools {
 			if (function_exists($function)) {
 				$output = $function($__FM_CONFIG['db']['name'], $module_name, 'quiet');
 			}
-			if ($output != true) {
+			if ($output !== true) {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
 				return sprintf('<p>' . _('%s installation failed!') . '</p>%s', $module_name, $error);
 			}

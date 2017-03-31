@@ -28,7 +28,6 @@ if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) u
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$response = isset($response) ? $response : null;
 
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['keys']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'tsig';
 $display_type = $__FM_CONFIG['keys']['avail_types'][$type];
@@ -69,7 +68,7 @@ printHeader();
 @printMenu();
 
 $avail_types = buildSubMenu($type, $__FM_CONFIG['keys']['avail_types']);
-echo printPageHeader($response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type);
 	
 $sort_direction = null;
 $sort_field = 'key_name';

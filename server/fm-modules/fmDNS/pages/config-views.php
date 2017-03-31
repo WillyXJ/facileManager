@@ -29,7 +29,6 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.ph
 
 $view_option = (isset($_GET['view_option'])) ? ucfirst($_GET['view_option']) : __('Views');
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$response = isset($response) ? $response : null;
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -66,7 +65,7 @@ printHeader();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

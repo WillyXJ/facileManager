@@ -725,7 +725,7 @@ HTML;
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
 		$domain_types = buildSelect('domain_type', 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains','domain_type'), $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
-		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableDNSServers('id'), $domain_name_servers, 1, null, true);
+		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableServers('id'), $domain_name_servers, 1, null, true);
 
 		$forwarders_show = $masters_show = 'none';
 		$domain_forward_servers = $domain_master_servers = $domain_forward = null;

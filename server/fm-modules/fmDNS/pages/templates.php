@@ -32,12 +32,10 @@ if (!currentUserCan($tpl_perms, $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
-$response = isset($response) ? $response : null;
-
 printHeader();
 @printMenu();
 
-echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_SESSION['module']));
 	
 $sort_direction = null;
 $sort_field = $template_type . '_name';

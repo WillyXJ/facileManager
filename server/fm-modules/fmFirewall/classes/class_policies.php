@@ -34,27 +34,30 @@ class fm_module_policies {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
-			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
-
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
 							'name' => 'policies'
 						);
-			if (currentUserCan('manage_servers', $_SESSION['module']) && $num_rows > 1) $table_info['class'] .= ' grab';
+			if (currentUserCan('manage_servers', $_SESSION['module'])) {
+				if ($num_rows > 1) $table_info['class'] .= ' grab';
+
+				$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+			}
+			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 			if (is_array($bulk_actions_list)) {
 				$title_array[] = array(
 									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 									'class' => 'header-tiny header-nosort'
 								);
+				$title_array[] = array('class' => 'header-tiny');
 			}
-			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), array('class' => 'header-tiny'), __('Source'), __('Destination'), __('Service'), __('Interface'),
+			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Source'), __('Destination'), __('Service'), __('Interface'),
 									__('Direction'), __('Time'), array('title' => __('Comment'), 'style' => 'width: 20%;')));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -253,10 +256,9 @@ HTML;
 		
 		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $edit_actions = null;
+		$edit_status = $edit_actions = $checkbox = $grab_bars = null;
+		$bars_title = __('Click and drag to reorder');
 		
-		$checkbox = (currentUserCan(array('manage_servers'), $_SESSION['module'])) ? '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>' : null;
-
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
@@ -266,6 +268,8 @@ HTML;
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
+			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
+			$grab_bars = '<td><i class="fa fa-bars template-icon" title="' . $bars_title . '"></i></td>';
 		}
 		
 		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']) : null;
@@ -281,12 +285,11 @@ HTML;
 		$service_not = ($row->policy_services_not) ? '!' : null;
 
 		$comments = nl2br($row->policy_comment);
-		$bars_title = __('Click and drag to reorder');
 
 		echo <<<HTML
 		<tr id="$row->policy_id" name="$row->policy_name"$disabled_class>
 			$checkbox
-			<td><i class="fa fa-bars template-icon" title="$bars_title"></i></td>
+			$grab_bars
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
 			<td>$source_not $source</td>
 			<td>$destination_not $destination</td>

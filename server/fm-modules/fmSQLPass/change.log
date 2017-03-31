@@ -2,6 +2,7 @@
 ======================
 * Server - [improvement] Database errors now get displayed if the Show Errors
            setting is enabled.
+* Server - [improvement] Code clean up.
 
 1.3-beta1 (2017-03-08)
 ======================

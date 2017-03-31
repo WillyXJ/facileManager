@@ -58,8 +58,7 @@ $allowed_capabilities = array_unique($checks_array);
 
 if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
 	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
-		echo $unpriv_message;
-		exit;
+		returnUnAuth();
 	}
 	
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . sanitize($_POST['item_type']);
@@ -110,7 +109,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$type = sanitize($_POST['item_type']) . 's';
 			break;
 		default:
-			$post_class = ${"fm_dns_${_POST['item_type']}"};
+			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$object = substr($item_type, 0, -1);
 	}
 	

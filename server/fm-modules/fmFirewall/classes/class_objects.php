@@ -34,7 +34,9 @@ class fm_module_objects {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
-			$bulk_actions_list = array(_('Delete'));
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+				$bulk_actions_list = array(_('Delete'));
+			}
 			
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
 			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
@@ -54,7 +56,7 @@ class fm_module_objects {
 			$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address')));
 			if ($type != 'host') $title_array[] = __('Netmask');
 			$title_array[] = array('title' => __('Comment'), 'style' => 'width: 40%;');
-			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			

@@ -37,7 +37,6 @@ if (!$server_id = getServerID($server_serial_no, $_SESSION['module'])) header('L
 if (getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_installed') != 'yes') header('Location: ' . $server_config_page);
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_policies.php');
-$response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -68,7 +67,7 @@ printHeader();
 
 $avail_types = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
 
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']), $type);
 /*
 echo <<<HTML
 <div id="pagination_container" class="submenus">

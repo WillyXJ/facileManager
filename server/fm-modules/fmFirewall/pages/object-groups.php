@@ -26,7 +26,6 @@
 if (!currentUserCan(array('manage_objects', 'view_all'), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
-$response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_objects', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -57,7 +56,7 @@ printHeader();
 
 $group_type = 'object';
 
-echo printPageHeader($response, null, currentUserCan('manage_objects', $_SESSION['module']), $group_type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), $group_type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='object'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

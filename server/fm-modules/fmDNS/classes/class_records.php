@@ -234,7 +234,7 @@ class fm_dns_records {
 		$return .= $this->getInputForm(strtoupper($record_type), true, $domain_id);
 		$return .= sprintf('</tbody>
 		</table>
-		<p class="add_records"><a id="add_records" href="#">+ %s</a></p>', __('Add more records'));
+		<p class="add_more add_records"><a id="add_records" href="#">+ %s</a></p>', __('Add more records'));
 		
 		return $return;
 	}

@@ -21,19 +21,22 @@
 
 /**
  * Displays 404 Error
- *
- * @author		Jon LaBass
- * @version		$Id:$
- * @copyright	2013
- *
  */
+
+$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . basename(dirname(dirname(__FILE__))) . '/images/fm.png';
 
 printHeader(_('File Not Found'), 'install');
 
-printf('<div id="message"><p class="failed">' . _('File Not Found') . '</p></div>
-<p>' . _('The file you tried (%s) is not found at this location. The URL or link may be outdated or incorrect.') . '</p>
-<p>' . _('If you typed the URL in the address bar, please make sure the spelling is correct.') . '</p>
-<p id="forgotton_link"><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>', $_SERVER['REQUEST_URI']);
+printf('<div id="fm-branding"><img src="%s">
+<span>%s</span></div>
+<div id="window"><p>%s</p>
+<p>%s</p>
+<p id="forgotton_link"><a href="javascript:history.back();">%s</a></p></div>',
+		$branding_logo, _('File Not Found'),
+		sprintf(_('The file you tried (%s) is not found at this location. The URL or link may be outdated or incorrect.'), $_SERVER['REQUEST_URI']),
+		_('If you typed the URL in the address bar, please make sure the spelling is correct.'),
+		_('&larr; Back')
+	);
 
 exit(printFooter());
 

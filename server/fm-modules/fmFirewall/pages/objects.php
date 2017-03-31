@@ -32,7 +32,6 @@ if (!currentUserCan(array('manage_objects', 'view_all'), $_SESSION['module'])) u
 if (!in_array($type, enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'))) header('Location: ' . $GLOBALS['basename']);
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_objects.php');
-$response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_objects', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -62,7 +61,7 @@ printHeader();
 @printMenu();
 
 //$allowed_to_add = ($type == 'custom' && currentUserCan('manage_objects', $_SESSION['module'])) ? true : false;
-echo printPageHeader($response, null, currentUserCan('manage_objects', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), $type);
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name', 'object_', "AND object_type='$type'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

@@ -226,8 +226,6 @@ class fm_module_options {
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$checkbox = (currentUserCan(array('manage_servers'), $_SESSION['module'])) ? '<td><input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" /></td>' : null;
-
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="edit_delete_img">';
@@ -239,8 +237,9 @@ class fm_module_options {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
+			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" /></td>';
 		} else {
-			$edit_status = null;
+			$edit_status = $checkbox = null;
 		}
 		
 		$comments = nl2br($row->cfg_comment);

@@ -60,7 +60,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 						/** Add new server */
 						$add_server = moduleAddServer('add');
 						if ($add_server !== true) {
-							$data = _('Could not add server to account.') . "\n";
+							$data = _('Could not add server to account.') . "\n" . $add_server;
 						}
 					} else {
 						$data = _('Client automatic registration is not allowed.') . "\n";

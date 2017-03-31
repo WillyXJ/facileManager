@@ -31,8 +31,6 @@ if (!isset($map)) header('Location: zones-forward.php');
 if (isset($_GET['map'])) header('Location: zones-' . sanitize(strtolower($_GET['map'])) . '.php');
 $map = (isset($_POST['createZone'][0]['domain_mapping'])) ? sanitize(strtolower($_POST['createZone'][0]['domain_mapping'])) : $map;
 
-$response = isset($response) ? $response : null;
-
 if (currentUserCan('manage_zones', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'create';
 	switch ($action) {
@@ -129,7 +127,7 @@ $search_query = createSearchSQL(array('name', 'mapping', 'type'), 'domain_');
 $reload_allowed = reloadAllowed();
 if (!$reload_allowed && !$response) $response = '<p>' . sprintf(__('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL(_('Servers'))) . '</p>';
 
-echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
+echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	
 $sort_direction = null;
 $sort_field = 'domain_name';

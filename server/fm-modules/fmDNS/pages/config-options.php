@@ -31,7 +31,6 @@ $option_type = (isset($_GET['type'])) ? sanitize(ucfirst($_GET['type'])) : 'Glob
 $display_option_type = $__FM_CONFIG['options']['avail_types'][strtolower($option_type)];
 $display_option_type_sql = strtolower($option_type);
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$response = isset($response) ? $response : null;
 
 /* Configure options for a view */
 if (array_key_exists('view_id', $_GET)) {
@@ -114,7 +113,7 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo printPageHeader($response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
+echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

@@ -26,7 +26,6 @@
 if (!currentUserCan(array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-$response = isset($response) ? $response : null;
 
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['servers']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'servers';
 $display_type = ($type == 'servers') ? __('Name Servers') : __('Name Server Groups');
@@ -90,7 +89,7 @@ printHeader();
 @printMenu();
 
 $avail_types = buildSubMenu($type, $__FM_CONFIG['servers']['avail_types']);
-echo printPageHeader($response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 	
 $sort_direction = null;
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {

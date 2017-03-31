@@ -34,7 +34,9 @@ class fm_module_services {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
-			$bulk_actions_list = array(_('Delete'));
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+				$bulk_actions_list = array(_('Delete'));
+			}
 			
 			$start = $_SESSION['user']['record_count'] * ($page - 1);
 			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
@@ -52,7 +54,7 @@ class fm_module_services {
 								);
 			}
 			$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), __('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), __('Comment')));
-			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			

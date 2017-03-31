@@ -187,3 +187,6 @@ td > .template-icon {
 table.form-table > tbody > tr.dnssec-key-addl-options {
 	display: none;
 }
+.add_records {
+	padding: 5px 6px 5px 2em;
+}

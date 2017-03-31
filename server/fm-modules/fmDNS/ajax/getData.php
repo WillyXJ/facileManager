@@ -203,7 +203,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$table .= 's';
 			break;
 		default:
-			$post_class = ${"fm_dns_${_POST['item_type']}"};
+			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 	}
 	
 	if ($add_new) {
@@ -216,7 +216,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		}
 	} else {
 		basicGet('fm_' . $table, $id, $prefix, $prefix . 'id');
-		if (!$fmdb->num_rows) returnError();
+		if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
 		
 		$edit_form_data[] = $fmdb->last_result[0];
 		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys'))) {

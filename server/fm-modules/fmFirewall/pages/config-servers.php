@@ -26,7 +26,6 @@
 if (!currentUserCan(array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-$response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -55,7 +54,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
 	
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

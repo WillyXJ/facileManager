@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_name` varchar(255) NOT NULL,
   `server_os` varchar(50) DEFAULT NULL,
   `server_os_distro` varchar(150) DEFAULT NULL,
+  `server_config_file` varchar(255) NOT NULL DEFAULT '/etc/dhcp/dhcpd.conf',
   `server_update_method` enum('http','https','cron','ssh') NOT NULL DEFAULT 'http',
   `server_update_port` int(5) NOT NULL DEFAULT '0',
   `server_build_config` enum('yes','no') NOT NULL DEFAULT 'no',
