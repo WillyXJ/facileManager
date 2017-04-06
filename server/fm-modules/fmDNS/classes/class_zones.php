@@ -1178,7 +1178,7 @@ HTML;
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						return displayResponseClose(sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
+						return displayResponseClose(noSSHDefined('key'));
 					}
 					
 					$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
@@ -1191,7 +1191,7 @@ HTML;
 					
 					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 					if (!$ssh_user) {
-						return displayResponseClose(sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
+						return displayResponseClose(noSSHDefined('user'));
 					}
 		
 					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$name_servers[$i]->server_update_port} -l $ssh_user {$name_servers[$i]->server_name} 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php zones id=$domain_id'", $post_result, $retval);

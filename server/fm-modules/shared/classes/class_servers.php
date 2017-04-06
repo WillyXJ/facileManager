@@ -118,7 +118,7 @@ class fm_shared_module_servers {
 					/** Get SSH key */
 					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 					if (!$ssh_key) {
-						$response[] = ' --> ' . sprintf(_('Failed: SSH key is not %sdefined</a>.'), '<a href="' . getMenuURL(_('General')) . '">');
+						$response[] = ' --> ' . sprintf(_('Failed: SSH key is not defined. You can generate a keypair in the <a href="%s">Settings</a>.'), getMenuURL(_('General')));
 						break;
 					}
 					
@@ -133,7 +133,7 @@ class fm_shared_module_servers {
 					
 					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 					if (!$ssh_user) {
-						return displayResponseClose(sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
+						return displayResponseClose(sprintf(_('Failed: SSH user is not defined. You can define the user in the <a href="%s">Settings</a>.'), getMenuURL(_('General'))));
 					}
 
 					unset($post_result);
@@ -398,7 +398,7 @@ class fm_shared_module_servers {
 				/** Get SSH key */
 				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 				if (!$ssh_key) {
-					return displayResponseClose(sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
+					return displayResponseClose(noSSHDefined('key'));
 				}
 				
 				$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
@@ -411,7 +411,7 @@ class fm_shared_module_servers {
 				
 				$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 				if (!$ssh_user) {
-					return displayResponseClose(sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
+					return displayResponseClose(noSSHDefined('user'));
 				}
 		
 				/** Test SSH authentication */

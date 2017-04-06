@@ -3238,7 +3238,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH key */
 	$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 	if (!$ssh_key) {
-		return displayResponseClose(sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
+		return displayResponseClose(noSSHDefined('key'));
 	}
 
 	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
@@ -3252,7 +3252,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH user */
 	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 	if (!$ssh_user) {
-		return displayResponseClose(sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('Settings'))));
+		return displayResponseClose(noSSHDefined('user'));
 	}
 
 	/** Run remote command */
@@ -3751,6 +3751,25 @@ function availableServers($server_id_type = 'serial') {
 	}
 	
 	return $server_array;
+}
+
+
+/**
+ * Returns a SSH error message
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $type What is not defined
+ * @return array
+ */
+function noSSHDefined($type = 'user') {
+	if ($type == 'user') {
+		return sprintf(_('Failed: SSH user is not defined. You can define the user in the <a href="%s">Settings</a>.'), getMenuURL(_('General')));
+	}
+	if ($type == 'key') {
+		return sprintf(_('Failed: SSH key is not defined. You can generate a keypair in the <a href="%s">Settings</a>.'), getMenuURL(_('General')));
+	}
 }
 
 

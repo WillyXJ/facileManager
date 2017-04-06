@@ -5,6 +5,8 @@
            setting is enabled.
 * Server - [improvement] Updated 404 page styling.
 * Server - [improvement] Code clean up.
+* Both   - [improvement] Updated the error messages surrounding failed SSH
+           connections. (Issue #371)
 
 3.0-beta1 (2017-03-08)
 ======================

@@ -831,7 +831,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			$user = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			$result = ($user) ? 'ok' : 'failed';
 			if ($result == 'failed') {
-				echo fM("Installation failed.  No SSH user found for this account.\n");
+				echo fM("Installation failed.  No SSH user found for this account.  Please define the user in the General Settings first.\n");
 				exit(1);
 			}
 			
