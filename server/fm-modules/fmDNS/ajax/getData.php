@@ -108,7 +108,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 	
 	/** Add popup header and footer if missing */
 	if (strpos($server_zone_data, 'popup-header') === false) {
-		$server_zone_data = buildPopup('header', _('Error')) . $server_zone_data . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+		$server_zone_data = buildPopup('header', _('Error')) . '<p>' . makePlainText($server_zone_data) . '</p>' . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	}
 	
 	exit($server_zone_data);

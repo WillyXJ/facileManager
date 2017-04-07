@@ -882,7 +882,7 @@ HTML;
 		foreach (explode(',', getZoneServers($domain_id)) as $server_serial_no) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 			if (!$fmdb->num_rows) {
-				return sprintf('<p>%s</p>', __('An error occured retrieving the associated servers from the database.'));
+				return sprintf('<p>%s</p>', sprintf(__('An error occured retrieving the associated servers from the database.  Could not find any active <a href="%s">name servers</a> for this zone.'), getMenuURL('Servers')));
 			}
 			extract(get_object_vars($fmdb->last_result[0]));
 			
@@ -890,35 +890,57 @@ HTML;
 			
 			/** Get zone data via ssh */
 			if ($server_update_method == 'ssh') {
-				$server_gather_zone = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.hosts', 'return', $server_update_port);
+				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.hosts', 'return', $server_update_port);
+			} elseif (in_array($server_update_method, array('http', 'https'))) {
+				/** Get zone data via http(s) */
+				/** Test the port first */
+				if (socketTest($server_name, $server_update_port, 10)) {
+					/** Remote URL to use */
+					$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
 
-				if (is_array($server_gather_zone)) {
-					if (array_key_exists('output', $server_gather_zone) && !count($server_gather_zone['output'])) {
-						unset($server_gather_zone);
+					/** Data to post to $url */
+					$post_data = array('action' => 'get_zone_contents',
+						'serial_no' => $server_serial_no,
+						'domain_id' => $domain_id,
+						'module' => $_SESSION['module'],
+						'command_args' => 'dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.hosts'
+					);
+
+					$server_remote = getPostData($url, $post_data);
+					if (isSerialized($server_remote)) {
+						$server_remote = unserialize($server_remote);
+					}
+				}
+			}
+			
+			if (isset($server_remote)) {
+				if (is_array($server_remote)) {
+					if (array_key_exists('output', $server_remote) && !count($server_remote['output'])) {
+						unset($server_remote);
 						continue;
 					}
 
-					if ($server_gather_zone['failures']) {
-						return join("\n", $server_gather_zone['output']);
+					if (isset($server_remote['failures']) && $server_remote['failures']) {
+						return join("\n", $server_remote['output']);
 					}
 				} else {
-					return '<pre>' . $server_gather_zone . '</pre>';
+					return '<pre>' . $server_remote . '</pre>';
 				}
-			} elseif (in_array($server_update_method, array('http', 'https'))) {
-				/** Get zone data via http(s) */
-				
-				
-				
 			}
 		}
 		
 		/** Return if the zone did not get dumped from the server */
-		if (!isset($server_gather_zone)) {
-			return sprintf('<p>%s</p>', __('The zone could not be retrieved from the DNS servers.'));
+		if (!isset($server_remote['output'])) {
+			$return = sprintf('<p>%s</p>', __('The zone could not be retrieved from the DNS servers. Possible causes include:'));
+			$return .= sprintf('<ul><li>%s</li><li>%s</li><li>%s</li><li>%s</li></ul>',
+					__('There are no active name servers configured for this zone'),
+					__('The update ports on the active name servers are not accessible'),
+					__('All name servers configured for this zone are not upgraded to at least 3.0-alpha1'),
+					__('All name servers configured for this zone are updated via cron (only SSH and http/https are supported)'));
 		}
 		
 		$_FILES['import-file']['tmp_name'] = $_FILES['import-file']['name'] = '/tmp/db.' . $domain_name;
-		file_put_contents($_FILES['import-file']['tmp_name'], join("\n", $server_gather_zone['output']));
+		file_put_contents($_FILES['import-file']['tmp_name'], join("\n", $server_remote['output']));
 
 		$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
 		if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {

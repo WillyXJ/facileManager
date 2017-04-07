@@ -69,7 +69,10 @@ class fm_module_tools extends fm_shared_module_tools {
 		if (((!getSOACount($domain_id) || $get_dynamic_zone_data) && strpos($clean_contents, ' SOA ') !== false) &&
 			(in_array('SOA', $__FM_CONFIG['records']['require_zone_rights']) && currentUserCan('manage_zones', $_SESSION['module']))) {
 			
-			$raw_soa = preg_replace("/SOA(.+?)\)/esim", "str_replace(PHP_EOL, ' ', '\\1')", $clean_contents);
+			$raw_soa = preg_replace_callback("/SOA(.+?)\)/sim", 
+					function ($matches) {
+						return str_replace(PHP_EOL, ' ', $matches);
+					}, $clean_contents);
 			preg_match("/SOA(.+?)(\)|\n)/esim", $clean_contents, $raw_soa);
 			preg_match("/TTL(.+?)$/esim", $clean_contents, $raw_ttl);
 			if (is_array($raw_soa)) {

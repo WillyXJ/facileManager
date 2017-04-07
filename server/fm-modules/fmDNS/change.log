@@ -11,6 +11,9 @@
            was not updating thus slaves would not get updated. (Issue #368)
 * Server - [improvement] Added an icon on the zones pages for faster access to
            the zone options.
+* Both   - [feature] Dynamic zones are now supported with servers updated via
+           http/https. (Issue #90)
+* Server - [improvement] Better error messages surrounding dynamic zones. (Issue #370)
 
 3.0-beta1 (2017-03-08)
 ======================

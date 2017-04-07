@@ -1131,7 +1131,7 @@ HTML;
 		
 		/** Loop through name servers */
 		$name_server_count = $fmdb->num_rows;
-		$response = '<textarea rows="12" cols="85">';
+		$response = null;
 		$failures = false;
 		for ($i=0; $i<$name_server_count; $i++) {
 			unset($post_result);
@@ -1167,49 +1167,25 @@ HTML;
 					
 					break;
 				case 'ssh':
-					/** Test the port first */
-					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
-						$post_result = '[' . $name_servers[$i]->server_name . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
-						$response .= $post_result;
-						$failures = true;
-						break;
-					}
-					
-					/** Get SSH key */
-					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-					if (!$ssh_key) {
-						return displayResponseClose(noSSHDefined('key'));
-					}
-					
-					$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
-					if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-					if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-						return displayResponseClose(sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
-					}
-					
-					@chmod($temp_ssh_key, 0400);
-					
-					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-					if (!$ssh_user) {
-						return displayResponseClose(noSSHDefined('user'));
-					}
-		
-					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$name_servers[$i]->server_update_port} -l $ssh_user {$name_servers[$i]->server_name} 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php zones id=$domain_id'", $post_result, $retval);
-					
-					if ($retval) {
-						$failures = true;
+					$server_remote = runRemoteCommand($name_servers[$i]->server_name, "sudo php /usr/local/facileManager/fmDNS/client.php zones id=$domain_id", 'return', $name_servers[$i]->server_update_port);
+
+					if (is_array($server_remote)) {
+						if (array_key_exists('output', $server_remote) && (!count($server_remote['output'])) || strpos($server_remote['output'][0], 'successful') !== false) {
+							$server_remote['output'] = array();
+						}
+						extract($server_remote);
+						$post_result = $output;
+						unset($output);
 					} else {
-						$post_result = array();
+						$post_result = array($server_remote);
 					}
-					
-					@unlink($temp_ssh_key);
 					
 					break;
 			}
 
 			if (!is_array($post_result)) {
 				/** Something went wrong */
-				return displayResponseClose($post_result);
+				return $post_result;
 			} else {
 				if (!count($post_result)) $post_result[] = __('Zone reload was successful.');
 
@@ -1217,26 +1193,25 @@ HTML;
 					/** Loop through and format the output */
 					foreach ($post_result as $line) {
 						$response .= '[' . $name_servers[$i]->server_name . "] $line\n";
-						if (strpos(strtolower($line), 'fail')) $failures = true;
+						if (strpos(strtolower($line), 'fail') !== false) $failures = true;
 					}
 				} else {
 					$response .= "[{$name_servers[$i]->server_name}] " . $post_result[0] . "\n";
-					if (strpos(strtolower($post_result[0]), 'fail')) $failures = true;
+					if (strpos(strtolower($post_result[0]), 'fail') !== false) $failures = true;
 				}
 			}
 			/** Set the server_update_config flag */
 			setBuildUpdateConfigFlag($name_servers[$i]->server_serial_no, 'yes', 'update');
 		}
-		$response .= "</textarea>\n";
 		
 		/** Reset the domain_reload flag */
 		if (!$failures) {
 			global $fm_dns_records;
 			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$fm_dns_records->updateSOAReload($domain_id, 'no', 'all');
-		}
 
-		addLogEntry(sprintf(__("Reloaded zone '%s'."), displayFriendlyDomainName(getNameFromID($domain_id, 'fm_'. $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))));
+			addLogEntry(sprintf(__("Reloaded zone '%s'."), displayFriendlyDomainName(getNameFromID($domain_id, 'fm_'. $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'))));
+		}
 		return $response;
 	}
 

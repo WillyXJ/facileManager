@@ -429,6 +429,19 @@ function moduleInitWebRequest() {
 				$output = array_merge($output, $rawoutput);
 			}
 			break;
+		case 'get_zone_contents':
+			if (!isset($_POST['domain_id']) || !is_numeric($_POST['domain_id'])) {
+				exit(serialize('Zone ID is not found.'));
+			}
+			$output['failures'] = false;
+			$output['output'] = array();
+
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/client.php ' . $_POST['command_args'], $output['output'], $rc);
+			if ($rc) {
+				/** Something went wrong */
+				$output['failures'] = true;
+			}
+			break;
 	}
 	
 	return $output;

@@ -3228,6 +3228,8 @@ function isDebianSystem($os) {
  * @return boolean
  */
 function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22) {
+	global $fm_name;
+	
 	$failures = false;
 	
 	/** Convert $host to an array */
@@ -3244,7 +3246,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
 	if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 	if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-		return displayResponseClose(sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
+		return displayResponseClose(sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
 	}
 
 	@chmod($temp_ssh_key, 0400);
@@ -3252,6 +3254,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH user */
 	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 	if (!$ssh_user) {
+		if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 		return displayResponseClose(noSSHDefined('user'));
 	}
 
@@ -3259,10 +3262,20 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	foreach ($host_array as $host) {
 		/** Test the port first */
 		if (!socketTest($host, $port, 10)) {
-			return '[' . $host . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $host, $port) . "\n";
-			$failures = true;
-			break;
+			if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
+			return displayResponseClose(sprintf(_('Failed: could not access %s (tcp/%d).'), $host, $port));
 		}
+
+		/** Test SSH authentication */
+		exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $port -l $ssh_user $host 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $output, $rc);
+		if ($rc) {
+			/** Something went wrong */
+			@unlink($temp_ssh_key);
+
+			/** Handle error codes */
+			return ($rc == 255) ? displayResponseClose(_('Failed: Could not login via SSH. Check the system logs on the client for the reason.')) : displayResponseClose(_('Failed: Client file is not present - is the client software installed?'));
+		}
+		unset($output);
 
 		exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $port -l $ssh_user $host \"$command\"", $output, $rc);
 	

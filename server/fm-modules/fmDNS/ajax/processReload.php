@@ -36,7 +36,7 @@ if (is_array($_POST) && count($_POST)) {
 		echo buildPopup('header', __('Zone Reload Results'));
 		
 		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
-			$response = $fm_dns_zones->buildZoneConfig($_POST['domain_id']);
+			$response = sprintf('<pre>%s</pre>', makePlainText($fm_dns_zones->buildZoneConfig($_POST['domain_id'])));
 		}
 		
 		echo $response . "<br />\n";
