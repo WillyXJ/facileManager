@@ -62,8 +62,14 @@ $__FM_CONFIG['icons']['shield_error']	= sprintf('<img src="fm-modules/%1$s/image
 $__FM_CONFIG['icons']['shield_info']	= sprintf('<img src="fm-modules/%1$s/images/yellowshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Information'));
 $__FM_CONFIG['icons']['shield_ok']		= sprintf('<img src="fm-modules/%1$s/images/greenshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));
 
+//$__FM_CONFIG['icons']['edit']			= sprintf('<i class="fa fa-pencil-square-o" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Edit'));
+//$__FM_CONFIG['icons']['delete']			= sprintf('<i class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
+//$__FM_CONFIG['icons']['enable']			= sprintf('<i class="fa fa-toggle-off toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Enable'));
+//$__FM_CONFIG['icons']['disable']		= sprintf('<i class="fa fa-toggle-on toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Disable'));
+
 /** Module variables */
 $__FM_CONFIG['module']['icons']['preview'] = sprintf('<img src="fm-modules/%1$s/images/preview24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Preview Config'));
+//$__FM_CONFIG['module']['icons']['preview'] = sprintf('<i class="fa fa-eye preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Preview Config'));
 $__FM_CONFIG['module']['icons']['build']   = sprintf('<input type="image" id="build" src="fm-modules/%1$s/images/build24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Build Config'));
 if (isset($_SESSION['module'])) {
 	foreach (array('ajax', 'classes', 'css', 'extra', 'images', 'js') as $dir) {

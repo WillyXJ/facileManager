@@ -939,7 +939,20 @@ a {
 	text-align: center;
 	white-space: nowrap;
 }
-
+#edit_delete_img i {
+	padding: 4px;
+	font-size: 18px;
+	color: #c0c0c0;
+}
+#edit_delete_img i.delete {
+	color: #c11515;
+}
+#edit_delete_img i.preview {
+	color: #8ba7d6;
+}
+#edit_delete_img i.toggle {
+	color: #569b42;
+}
 #edit_delete_img img {
 	padding: 0 5px;
 	margin-top: 2px;
@@ -1109,6 +1122,10 @@ a {
 
 .popup-contents p.complete {
 	padding: 0 10px;
+}
+
+.popup-contents > p > a {
+	text-decoration: underline;
 }
 
 .popup-footer {

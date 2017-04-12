@@ -47,6 +47,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 }
 if (isset($fm_name)) {
 	$__FM_CONFIG['module']['icons']['sub_delete']	= '<img class="subelement_remove" id="__ID__" src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Delete" title="Delete" width="12" />';
+//	$__FM_CONFIG['module']['icons']['sub_delete']	= sprintf('<i id="__ID__" class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
 }
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
