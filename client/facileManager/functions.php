@@ -1396,4 +1396,31 @@ function isDaemonRunning($daemon) {
 	return shell_exec('ps -A | grep ' . escapeshellarg($daemon) . ' | grep -vc grep');
 }
 
+
+/**
+ * Returns whether a daemon is running or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $app_version Detected application version
+ * @param string $serverhost FMHOST
+ * @param boolean $compress Compress the request or not
+ * @return string
+ */
+function versionCheck($app_version, $serverhost, $compress) {
+	$url = str_replace(':/', '://', str_replace('//', '/', $serverhost . '/buildconf.php'));
+	$data['action'] = 'version_check';
+	$server_type = detectServerType();
+	$data['server_type'] = $server_type['type'];
+	$data['server_version'] = $app_version;
+	$data['compress'] = $compress;
+	
+	$raw_data = getPostData($url, $data);
+	$raw_data = $compress ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	
+	return $raw_data;
+}
+
+
 ?>

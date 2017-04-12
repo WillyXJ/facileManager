@@ -255,21 +255,6 @@ function detectDaemonVersion($return_array = false) {
 }
 
 
-function versionCheck($app_version, $serverhost, $compress) {
-	$url = str_replace(':/', '://', str_replace('//', '/', $serverhost . '/buildconf.php'));
-	$data['action'] = 'version_check';
-	$server_type = detectServerType();
-	$data['server_type'] = $server_type['type'];
-	$data['server_version'] = $app_version;
-	$data['compress'] = $compress;
-	
-	$raw_data = getPostData($url, $data);
-	$raw_data = $compress ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	
-	return $raw_data;
-}
-
-
 function getStartupScript($chroot_environment = false) {
 	$distros = array(
 		'Arch'      => array('/etc/rc.d/named start', findProgram('systemctl') . ' start named.service'),

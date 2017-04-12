@@ -4,7 +4,7 @@
 * Server - [improvement] Database errors now get displayed if the Show Errors
            setting is enabled.
 * Server - [improvement] Updated 404 page styling.
-* Server - [improvement] Code clean up.
+* Both   - [improvement] Code clean up.
 * Both   - [improvement] Updated the error messages surrounding failed SSH
            connections. (Issue #371)
 * Server - [improvement] CSS tweaks for Firefox compatibility.
