@@ -1446,6 +1446,7 @@ span.not_installed {
 	font-size: 9pt;
 	overflow-y: auto;
 	height: 90%;
+	width: 90%;
 }
 
 #help_file_container ul {
@@ -1823,8 +1824,8 @@ a.subelement_edit img {
 
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
-	#pagination_container {
-		top: -3px;
+	#search_form_container {
+		width: 16.5em;
 	}
 }
 

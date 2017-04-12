@@ -7,6 +7,7 @@
 * Server - [improvement] Code clean up.
 * Both   - [improvement] Updated the error messages surrounding failed SSH
            connections. (Issue #371)
+* Server - [improvement] CSS tweaks for Firefox compatibility.
 
 3.0-beta1 (2017-03-08)
 ======================
