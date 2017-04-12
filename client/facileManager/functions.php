@@ -866,7 +866,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			}
 			
 			/** Add an entry to sudoers */
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . ' *';
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'ssh';
