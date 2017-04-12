@@ -866,7 +866,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			}
 			
 			/** Add an entry to sudoers */
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/client.php *';
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'ssh';
@@ -919,7 +919,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 				$user = getParameterValue($user_var, findFile('envvars'), '=');
 			}
 			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/client.php *';
 			
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
