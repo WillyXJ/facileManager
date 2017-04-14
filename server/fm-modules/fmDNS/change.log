@@ -14,6 +14,7 @@
 * Both   - [feature] Dynamic zones are now supported with servers updated via
            http/https. (Issue #90)
 * Server - [improvement] Better error messages surrounding dynamic zones. (Issue #370)
+* Server - [improvement] Added locale number formatting.
 
 3.0-beta1 (2017-03-08)
 ======================

@@ -639,7 +639,7 @@ class fm_dns_zones {
 		if ($row->domain_type == 'master') {
 			$query = "SELECT COUNT(*) record_count FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE account_id={$_SESSION['user']['account_id']} AND domain_id={$row->domain_id} AND record_status!='deleted'";
 			$fmdb->query($query);
-			$record_count = $fmdb->last_result[0]->record_count;
+			$record_count = formatNumber($fmdb->last_result[0]->record_count);
 		}
 		
 		if (in_array($row->domain_type, array('master', 'slave')) && currentUserCan('manage_servers', $_SESSION['module'])) {

@@ -87,3 +87,26 @@ function loadModuleLanguage($module, $encoding = 'UTF-8') {
 	bindtextdomain($module, ABSPATH . 'fm-modules/' . $module . '/languages');
 	bind_textdomain_codeset($module, $encoding);
 }
+
+
+/**
+ * Formats a number based on locale
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $number Number to format
+ * @return string
+ */
+function formatNumber($number) {
+	switch ($_SESSION['language']) {
+		case 'de_DE':
+			return number_format($number, 0, ',', '.');
+			break;
+		case 'fr_FR':
+			return number_format($number, 0, ',', ' ');
+			break;
+		default:
+			return number_format($number);
+	}
+}

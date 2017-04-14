@@ -1729,7 +1729,7 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
-	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', $fmdb->num_rows), $fmdb->num_rows));
+	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', formatNumber($fmdb->num_rows)), formatNumber($fmdb->num_rows)));
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
@@ -1738,7 +1738,7 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	}
 	
 	/** Page number */
-	$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . $total_pages;
+	$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . formatNumber($total_pages);
 	
 	/** Next link */
 	if ($page < $total_pages) {
@@ -2961,7 +2961,7 @@ function countServerUpdates() {
 	
 	if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND (server_build_config!="no" OR server_client_version!="' . getOption('client_version', 0, $_SESSION['module']) . '") AND server_status="active" AND server_installed="yes"', null, false, null, true);
-		if (!$fmdb->sql_errors && $fmdb->num_rows) return $fmdb->last_result[0]->count;
+		if (!$fmdb->sql_errors && $fmdb->num_rows) return formatNumber($fmdb->last_result[0]->count);
 	}
 			
 	return 0;

@@ -57,26 +57,25 @@ function buildModuleDashboard() {
 
 	/** Server stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
-	$summary = '<li>You have <b>' . $fmdb->num_rows . '</b> database server';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' configured.</li>' . "\n";
+	$server_count = $fmdb->num_rows;
 	
 	/** Group stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_');
-	$summary .= '<li>You have <b>' . $fmdb->num_rows . '</b> group';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' defined.</li>' . "\n";
+	$group_count = $fmdb->num_rows;
 	
-	$dashboard = <<<DASH
-	<div class="fm-half">
+	$dashboard = sprintf('<div class="fm-half">
 	<div id="shadow_box">
 		<div id="shadow_container">
-		<h3>Summary</h3>
-		$summary
+		<h3>%s</h3>
+		<li>%s</li>
+		<li>%s</li>
 		</div>
 	</div>
-	</div>
-DASH;
+	</div>', __('Summary'),
+			sprintf(ngettext('You have <b>%s</b> database server configured.', 'You have <b>%s</b> database servers configured.', formatNumber($server_count)), formatNumber($server_count)),
+			sprintf(ngettext('You have <b>%s</b> group defined.', 'You have <b>%s</b> groups defined.', formatNumber($group_count)), formatNumber($group_count))
+			);
+
 
 	return $dashboard;
 }

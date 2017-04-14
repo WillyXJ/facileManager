@@ -1249,19 +1249,19 @@ i.star {
 	padding-right: 2px;
 	color: #e8a412;
 }
+i.ok
 i.secure {
 	color: #09a30c;
 }
+i.fail,
 i.insecure {
 	color: #CB3739;
 }
-
-i.fail {
-	color: #ce0606;
-	float: none;
+i.notice {
+	color: #E2A93C;
 }
-i.ok {
-	color: #07af17;
+i.fail {
+	float: none;
 }
 i.popout {
 	padding-right: 2px;

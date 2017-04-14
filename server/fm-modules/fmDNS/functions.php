@@ -120,9 +120,9 @@ function buildModuleDashboard() {
 		</div>
 	</div>
 	</div>', __('Summary'),
-			sprintf(__('You have <b>%s</b> name servers configured.'), $server_count),
-			sprintf(__('You have <b>%s</b> zones defined.'), $domain_count),
-			sprintf(__('You have <b>%s</b> records.'), $record_count)
+			sprintf(ngettext('You have <b>%s</b> name server configured.', 'You have <b>%s</b> name servers configured.', formatNumber($server_count)), formatNumber($server_count)),
+			sprintf(ngettext('You have <b>%s</b> zone defined.', 'You have <b>%s</b> zones defined.', formatNumber($domain_count)), formatNumber($domain_count)),
+			sprintf(ngettext('You have <b>%s</b> record.', 'You have <b>%s</b> records.', formatNumber($record_count)), formatNumber($record_count))
 			);
 
 	if ($error_display) {
