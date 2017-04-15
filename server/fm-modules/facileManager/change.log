@@ -1,4 +1,4 @@
-3.0-? (2017-??-??)
+3.0-beta2 (2017-04-14)
 ======================
 * Server - [improvement] Reworked the search bar for easier usage of it.
 * Server - [improvement] Database errors now get displayed if the Show Errors

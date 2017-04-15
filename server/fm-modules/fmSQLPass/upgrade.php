@@ -206,7 +206,7 @@ function upgradefmSQLPass_01009($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 1.3-alpha2 */
+/** 1.3-alpha3 */
 function upgradefmSQLPass_01303($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	

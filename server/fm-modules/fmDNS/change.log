@@ -1,4 +1,4 @@
-3.0-beta2 (2017-??-??)
+3.0-beta2 (2017-04-14)
 ======================
 * Server - [feature] Added support to automatically generate a DS RR. (Issue #285)
 * Client - [bug] EL chroot mounts now include fmDNS files. (Issue #346)
