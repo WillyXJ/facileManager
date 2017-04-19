@@ -62,7 +62,7 @@ class fm_tools {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function upgradeModule($module_name = null, $process = 'noisy') {
+	function upgradeModule($module_name = null, $process = 'noisy', $running_version = null) {
 		global $fmdb;
 		
 		if (!$module_name) {
@@ -78,7 +78,7 @@ class fm_tools {
 			
 			$function = 'upgrade' . $module_name . 'Schema';
 			if (function_exists($function)) {
-				$output = $function($module_name);
+				$output = $function($running_version);
 			}
 			if ($output !== true) {
 				if ($process == 'quiet') return false;

@@ -1342,7 +1342,7 @@ function getOption($option = null, $account_id = 0, $module_name = null) {
 	$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql LIMIT 1";
 	$fmdb->get_results($query);
 	
-	if ($fmdb->num_rows) {
+	if ($fmdb->num_rows && !$fmdb->sql_errors) {
 		$results = $fmdb->last_result;
 		
 		if (isSerialized($results[0]->option_value)) {
@@ -1387,11 +1387,10 @@ function setOption($option = null, $value = null, $insert_update = 'auto', $auto
 		}
 		$query = "INSERT INTO fm_options (" . implode(',', $keys) . ") VALUES ('" . implode("','", $values) . "')";
 	} else {
-		$query = "UPDATE fm_options SET option_name='$option', option_value='$value' WHERE option_name='$option' AND account_id=$account_id $module_sql";
+		$query = "UPDATE fm_options SET option_value='$value' WHERE option_name='$option' AND account_id=$account_id $module_sql";
 	}
-	$result = $fmdb->query($query);
 	
-	return $result;
+	return $fmdb->query($query);
 }
 
 /**

@@ -20,14 +20,16 @@
  +-------------------------------------------------------------------------+
 */
 
-function upgradefmSQLPassSchema($module_name) {
+function upgradefmSQLPassSchema($running_version) {
 	global $fmdb;
 	
 	/** Include module variables */
 	@include(dirname(__FILE__) . '/variables.inc.php');
 	
 	/** Get current version */
-	$running_version = getOption('version', 0, $module_name);
+	if (!$running_version) {
+		$running_version = getOption('version', 0, 'fmSQLPass');
+	}
 
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = version_compare($running_version, '1.3-alpha3', '<') ? upgradefmSQLPass_01303($__FM_CONFIG, $running_version) : true;
@@ -38,7 +40,7 @@ function upgradefmSQLPassSchema($module_name) {
 
 /** 1.0-b2 */
 function upgradefmSQLPass_01002($__FM_CONFIG, $running_version) {
-	global $fmdb, $module_name;
+	global $fmdb;
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` ADD  `server_port` INT( 5 ) NULL DEFAULT NULL AFTER  `server_type` ";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_groups`  `server_groups` TEXT NULL DEFAULT NULL ";
@@ -52,14 +54,14 @@ function upgradefmSQLPass_01002($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('version', '1.0-beta2', 'auto', false, 0, $module_name);
+	setOption('version', '1.0-beta2', 'auto', false, 0, 'fmSQLPass');
 	
 	return true;
 }
 
 /** 1.0-b4 */
 function upgradefmSQLPass_01004($__FM_CONFIG, $running_version) {
-	global $fmdb, $module_name;
+	global $fmdb;
 	
 	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_01002($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
@@ -91,14 +93,14 @@ function upgradefmSQLPass_01004($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('version', '1.0-beta4', 'auto', false, 0, $module_name);
+	setOption('version', '1.0-beta4', 'auto', false, 0, 'fmSQLPass');
 	
 	return true;
 }
 
 /** 1.0-beta8 */
 function upgradefmSQLPass_01008($__FM_CONFIG, $running_version) {
-	global $fmdb, $module_name;
+	global $fmdb;
 	
 	$success = version_compare($running_version, '1.0-b2', '<') ? upgradefmSQLPass_01004($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
@@ -155,14 +157,14 @@ function upgradefmSQLPass_01008($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	setOption('version', '1.0-beta8', 'auto', false, 0, $module_name);
+	setOption('version', '1.0-beta8', 'auto', false, 0, 'fmSQLPass');
 	
 	return true;
 }
 
 /** 1.0-rc1 */
 function upgradefmSQLPass_01009($__FM_CONFIG, $running_version) {
-	global $fmdb, $module_name;
+	global $fmdb;
 	
 	$success = version_compare($running_version, '1.0-beta8', '<') ? upgradefmSQLPass_01008($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
@@ -201,14 +203,14 @@ function upgradefmSQLPass_01009($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	setOption('version', '1.0-rc1', 'auto', false, 0, $module_name);
+	setOption('version', '1.0-rc1', 'auto', false, 0, 'fmSQLPass');
 	
 	return true;
 }
 
 /** 1.3-alpha3 */
 function upgradefmSQLPass_01303($__FM_CONFIG, $running_version) {
-	global $fmdb, $module_name;
+	global $fmdb;
 	
 	$success = version_compare($running_version, '1.0-rc1', '<') ? upgradefmSQLPass_01009($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
@@ -223,7 +225,7 @@ function upgradefmSQLPass_01303($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	setOption('version', '1.3-alpha3', 'auto', false, 0, $module_name);
+	setOption('version', '1.3-alpha3', 'auto', false, 0, 'fmSQLPass');
 	
 	return true;
 }

@@ -67,7 +67,7 @@ function fmUpgrade($database) {
 	$module_list = $fmdb->last_result;
 	for ($x=0; $x<$num_rows; $x++) {
 		$module_name = $module_list[$x]->module_name;
-		$success = $fm_tools->upgradeModule($module_name, 'quiet');
+		$success = $fm_tools->upgradeModule($module_name, 'quiet', $module_list[$x]->option_value);
 		if (!$success || $fmdb->last_error) {
 			$errors = true;
 			$success = false;
