@@ -2,7 +2,7 @@ _This template was created based on the work of [`udemy-dl`](https://github.com/
 
 # Contributors Guide
 
-Please read and understand the contribution guide before creating an issue or pull request.
+Please read and understand the contribution guide before creating an issue or pull request.  Please do not submit issues for bugs found in unreleased/unpackaged code (the unstable-dev branches) - submit a pull request instead.
 
 ## Etiquette
 
