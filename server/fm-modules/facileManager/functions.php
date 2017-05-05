@@ -410,10 +410,12 @@ HTML;
 				displaySearchForm() . '</div>';
 		} else $search = null;
 
+		$branding_logo = getBrandLogo();
+		
 		$return = <<<HTML
 	<div id="tophead">
 		<div id="topheadpart">
-			<img src="fm-modules/$fm_name/images/fm.png" alt="$fm_name" title="$fm_name" />
+			<img src="$branding_logo" alt="$fm_name" title="$fm_name" />
 			$fm_name<br />
 			v$fm_version
 		</div>
@@ -760,8 +762,14 @@ function basicUpdate($table, $id, $update_field, $update_value, $field = 'id') {
  *
  * @since 1.0
  * @package facileManager
+ * 
+ * @param string $tbl_name Table name
+ * @param string $column_name Column name
+ * @param string $sort Optional sort function
+ * 
+ * return array
  */
-function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
+function enumMYSQLSelect($tbl_name, $column_name, $sort = 'unsorted') {
 	global $fmdb;
 	
 	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name'";
@@ -775,6 +783,10 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
 		$valuestring = "{$head},{$valuestring}";
 	}
 	$values = explode(',', $valuestring);
+	
+	if ($sort != 'unsorted') {
+		$sort($values);
+	}
 	
 	return $values;
 }
@@ -1801,8 +1813,6 @@ function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
 function bailOut($message, $tryagain = 'try again', $title = null) {
 	global $fm_name;
 	
-	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
-
 	if (!$title) $title = _('Requirement Error');
 	
 	if (strpos($message, '<') != 0) {
@@ -1820,7 +1830,7 @@ function bailOut($message, $tryagain = 'try again', $title = null) {
 	printf('<div id="fm-branding">
 		<img src="%s" /><span>%s</span>
 	</div>
-	<div id="window">%s%s</div>', $branding_logo, $title, $message, $tryagain);
+	<div id="window">%s%s</div>', getBrandLogo(), $title, $message, $tryagain);
 	exit(printFooter());
 }
 
@@ -2443,15 +2453,13 @@ function formatLogKeyData($strip, $key, $data) {
 function fMDie($message = null, $link_display = 'show', $title = null) {
 	global $fm_name;
 	
-	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
-
 	if (!$message) $message = _('An unknown error occurred.');
 	if (!$title) $title = _('Oops!');
 	
 	printHeader('Error', 'install', 'no-help', 'no-menu');
 	
 	printf('<div id="fm-branding"><img src="%s" /><span>%s</span></div>
-		<div id="window"><p>%s</p>', $branding_logo, $title, $message);
+		<div id="window"><p>%s</p>', getBrandLogo(), $title, $message);
 	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>';
 	echo '</div>';
 	
@@ -3782,6 +3790,27 @@ function noSSHDefined($type = 'user') {
 	if ($type == 'key') {
 		return sprintf(_('Failed: SSH key is not defined. You can generate a keypair in the <a href="%s">Settings</a>.'), getMenuURL(_('General')));
 	}
+}
+
+
+/**
+ * Returns the branding logo
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @return string
+ */
+function getBrandLogo($size = 'sm_brand_img') {
+	global $fm_name;
+	
+	$branding_logo = getOption($size, $_SESSION['user']['account_id']);
+	
+	if (!$branding_logo) {
+		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+	}
+	
+	return $branding_logo;
 }
 
 

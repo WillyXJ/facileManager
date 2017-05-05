@@ -1,6 +1,7 @@
 3.0-?? (2017-??-??)
 ======================
 * Server - [bug] Fixed the upgrade process.
+* Server - [feature] Added setting to change the branding logo.
 
 3.0-beta2 (2017-04-14)
 ======================

@@ -300,6 +300,7 @@ class fm_settings {
 		} else $software_update_checked = $software_update_options_style = null;
 
 		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
+		$sm_brand_img = getBrandLogo();
 		
 		$return_form = '
 		<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">
@@ -673,6 +674,17 @@ class fm_settings {
 						</div>
 						<div id="gen_ssh_action" class="choices">
 							' . $sshkey_button . '
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label>' . _('Image Branding') . '</label>
+							<p>' . _('Rebrand this installation with your image.') . '</p>
+						</div>
+						<div class="choices">
+							<input name="sm_brand_img[' . $_SESSION['user']['account_id'] . ']" id="sm_brand_img" type="text" value="' . $sm_brand_img . '" size="40" placeholder="path/to/image" />
 						</div>
 					</div>
 				</div>

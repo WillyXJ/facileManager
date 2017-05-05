@@ -106,7 +106,7 @@ input[type=checkbox].modules {
 	top: 1px;
 }
 #topheadpart img {
-	width: 27px;
+	height: 27px;
 	float: left;
 	border: none;
 	margin-right: 10px;
@@ -1249,14 +1249,17 @@ i.star {
 	padding-right: 2px;
 	color: #e8a412;
 }
+#edit_delete_img i.ok,
 i.ok
 i.secure {
 	color: #09a30c;
 }
+#edit_delete_img i.fail,
 i.fail,
 i.insecure {
 	color: #CB3739;
 }
+#edit_delete_img i.notice,
 i.notice {
 	color: #E2A93C;
 }
