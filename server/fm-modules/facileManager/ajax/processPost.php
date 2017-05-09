@@ -56,7 +56,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 	$save_result = $fm_module_settings->save();
-	echo ($save_result !== false) ? displayResponseClose($save_result) : sprintf("<p>%s</p>\n", _('These settings have been saved.'));
+	echo ($save_result !== true) ? displayResponseClose($save_result) : sprintf("<p>%s</p>\n", _('These settings have been saved.'));
 
 /** Handle bulk actions */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
