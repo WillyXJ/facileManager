@@ -277,9 +277,9 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui-1.10.2.min.css" />
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css">
-		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/tooltip.css" type="text/css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/tooltip.css" type="text/css" />
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-1.9.1.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-ui-1.10.2.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
@@ -3518,9 +3518,11 @@ function clearUpdateDir() {
  * @param string $subject Email subject
  * @param string $body Email body
  * @param string $altbody Email alternate body (plaintext)
+ * @param string/array $from From name and address
+ * @param array $images Images to embed in the email
  * @return boolean
  */
-function sendEmail($sendto, $subject, $body, $altbody = null) {
+function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $images = null) {
 	global $fm_name;
 
 	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
@@ -3541,8 +3543,18 @@ function sendEmail($sendto, $subject, $body, $altbody = null) {
 	}
 	if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
 
-	$mail->FromName = $fm_name;
-	$mail->From = getOption('mail_from');
+	if ($from) {
+		if (is_array($from)) {
+			list($from_name, $from_addr) = $from;
+			$mail->FromName = $from_name;
+		} else {
+			$from_addr = $from;
+		}
+		$mail->From = $from_addr;
+	} else {
+		$mail->FromName = $fm_name;
+		$mail->From = getOption('mail_from');
+	}
 	$mail->AddAddress($sendto);
 
 	$mail->Subject = $subject;
@@ -3551,6 +3563,13 @@ function sendEmail($sendto, $subject, $body, $altbody = null) {
 		$mail->AltBody = $altbody;
 	}
 	$mail->IsHTML(true);
+	
+	if (is_array($images)) {
+		foreach ($images as $filename) {
+			$image_parts = pathinfo($filename);
+			$mail->AddEmbeddedImage($filename, $image_parts['filename'], $image_parts['basename'], 'base64', "image/{$image_parts['extension']}");
+		}
+	}
 
 	$mail->IsSMTP();
 
