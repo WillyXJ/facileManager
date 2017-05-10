@@ -646,6 +646,33 @@ function fmUpgrade_2101($database) {
 }
 
 
+/** fM v3.0-rc1 **/
+function fmUpgrade_3001($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 43) ? fmUpgrade_2101($database) : true;
+	
+	if ($success) {
+		$table[] = "ALTER TABLE `$database`.`fm_users` ADD `user_comment` VARCHAR(255) NULL DEFAULT NULL AFTER `user_email`";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 45, false);
+	
+	return $success;
+}
+
+
 /**
  * Updates the database with the db version number.
  *

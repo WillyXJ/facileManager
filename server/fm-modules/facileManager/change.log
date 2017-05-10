@@ -2,6 +2,7 @@
 ======================
 * Server - [bug] Fixed the upgrade process.
 * Server - [feature] Added setting to change the branding logo.
+* Server - [feature] Added comment field to users.
 
 3.0-beta2 (2017-04-14)
 ======================

@@ -450,7 +450,7 @@ class fm_users {
 				$user_auth_type = _('None');
 			}
 			$column = "<td>$star $template_user</td>
-			<td>{$row->user_login}</td>
+			<td title=\"{$row->user_comment}\">{$row->user_login}</td>
 			<td>$last_login</td>
 			<td>$user_ipaddr</td>
 			<td>$user_auth_type</td>
@@ -488,7 +488,7 @@ HTML;
 		global $__FM_CONFIG, $fm_name, $fm_login;
 
 		$user_id = $group_id = 0;
-		$user_login = $user_password = $cpassword = null;
+		$user_login = $user_password = $cpassword = $user_comment = null;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
@@ -524,6 +524,15 @@ HTML;
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_login">' . _('User Login') . '</label></th>
 					<td width="67%">' . $username_form . '</td>
+				</tr>';
+		}
+		if (in_array('user_comment', $form_bits)) {
+			/** Get field length */
+			$field_length = getColumnLength('fm_users', 'user_comment');
+			
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row"><label for="user_comment">' . _('User Comment') . '</label></th>
+					<td width="67%"><input name="user_comment" id="user_comment" type="text" value="' . $user_comment . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' /></td>
 				</tr>';
 		}
 		if (in_array('user_email', $form_bits)) {
