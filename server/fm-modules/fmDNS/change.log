@@ -1,6 +1,7 @@
 3.0-?? (2017-??-??)
 ======================
 * Server - [bug] Fixed the upgrade process.
+* Server - [bug] Fixed PHP error. (Issue #374)
 
 3.0-beta2 (2017-04-14)
 ======================

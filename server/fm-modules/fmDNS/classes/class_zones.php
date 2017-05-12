@@ -1280,6 +1280,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$start = 0;
+		$return = array();
 		
 		if ($extra == 'all') {
 			$start = 1;
