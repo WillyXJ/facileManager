@@ -59,7 +59,7 @@ if (array_key_exists('backup', $_GET)) {
 	header('Location: ' . $GLOBALS['basename']);
 }
 
-$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+$branding_logo = getBrandLogo();
 
 printHeader(_('Upgrade'), 'install');
 

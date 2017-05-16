@@ -57,7 +57,6 @@ $__FM_CONFIG['icons']['pwd_reset']		= sprintf('<img src="fm-modules/%1$s/images/
 $__FM_CONFIG['icons']['account']		= sprintf('<img src="fm-modules/%1$s/images/account24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Account Settings'));
 $__FM_CONFIG['icons']['star']			= sprintf('<i class="fa fa-star star" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Super Admin'));
 $__FM_CONFIG['icons']['template_user']	= sprintf('<i class="fa fa-user" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Template Account'));
-$__FM_CONFIG['icons']['fm_logo']		= sprintf('<img src="'. $GLOBALS['FM_URL'] . 'fm-modules/%1$s/images/fm.png" border="0" alt="%1$s" title="%1$s" style="padding-left: 17px;" />', $fm_name);
 $__FM_CONFIG['icons']['shield_error']	= sprintf('<img src="fm-modules/%1$s/images/redshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Error'));
 $__FM_CONFIG['icons']['shield_info']	= sprintf('<img src="fm-modules/%1$s/images/yellowshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Information'));
 $__FM_CONFIG['icons']['shield_ok']		= sprintf('<img src="fm-modules/%1$s/images/greenshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));

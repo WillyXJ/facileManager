@@ -130,6 +130,10 @@ strong {
 	bottom: 60%;
 }
 
+#fm-branding img {
+	width: 48px;
+}
+
 #fm-branding span {
 	color: #D0D0D0;
 	position: relative;

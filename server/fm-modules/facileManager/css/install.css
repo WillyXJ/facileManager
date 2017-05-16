@@ -115,10 +115,15 @@ strong {
 	bottom: 70%;
 }
 
+#fm-branding img {
+	width: 48px;
+}
 #fm-branding span {
 	color: #D0D0D0;
 	position: relative;
 	font-size: 30px;
+	left: 10px;
+	bottom: 13px;
 }
 #fm-branding span i {
 	padding-right: 3px;

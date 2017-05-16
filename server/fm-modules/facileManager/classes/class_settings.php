@@ -680,11 +680,12 @@ class fm_settings {
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
+							<span id="brand_img"><img src="' . $sm_brand_img . '" /></span>
 							<label>' . _('Image Branding') . '</label>
-							<p>' . _('Rebrand this installation with your image.') . '</p>
+							<p>' . _('Rebrand this installation with your image.<br />(Recommended size: 48px x 48px)') . '</p>
 						</div>
 						<div class="choices">
-							<input name="sm_brand_img[' . $_SESSION['user']['account_id'] . ']" id="sm_brand_img" type="text" value="' . $sm_brand_img . '" size="40" placeholder="path/to/image" />
+							<input name="sm_brand_img" id="sm_brand_img" type="text" value="' . $sm_brand_img . '" size="40" placeholder="path/to/image" />
 						</div>
 					</div>
 				</div>

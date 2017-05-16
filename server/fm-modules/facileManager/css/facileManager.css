@@ -748,6 +748,12 @@ tbody {
 	text-align: left;
 	margin-left: 2em;
 }
+#setting-row span#brand_img {
+	float: right;
+}
+#setting-row span#brand_img img {
+	width: 48px;
+}
 #settings input[type="submit"] {
 	margin-top: 1.5em;
 }

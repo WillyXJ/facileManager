@@ -3823,7 +3823,7 @@ function noSSHDefined($type = 'user') {
 function getBrandLogo($size = 'sm_brand_img') {
 	global $fm_name;
 	
-	$branding_logo = getOption($size, $_SESSION['user']['account_id']);
+	$branding_logo = getOption($size);
 	
 	if (!$branding_logo) {
 		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';

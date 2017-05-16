@@ -39,7 +39,7 @@ class fm_login {
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : false;
 		$forgot_link = ($mail_enable && $auth_method == 1) ? sprintf('<p id="forgotton_link"><a href="?forgot_password">%s</a></p>', _('Forgot your password?')) : null;
 		
-		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+		$branding_logo = getBrandLogo();
 		
 		$login_message = getOption('login_message');
 		if ($login_message) {
@@ -92,7 +92,7 @@ class fm_login {
 		global $fm_name;
 		printHeader(_('Password Reset'), 'login');
 		
-		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+		$branding_logo = getBrandLogo();
 		
 		printf('<form id="loginform" action="%s?forgot_password" method="post">
 		<input type="hidden" name="reset_pwd" value="1" />
@@ -390,6 +390,8 @@ class fm_login {
 		global $fm_name, $__FM_CONFIG;
 		
 		if ($build_html) {
+			$branding_logo = $GLOBALS['FM_URL'] . str_replace('//', '/', str_replace($GLOBALS['RELPATH'], '', getBrandLogo()));
+			
 			$body = <<<BODY
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -400,8 +402,8 @@ class fm_login {
 </head>
 <body style="background-color: #eeeeee; font: 13px 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, Verdana, sans-serif; margin: 1em auto; min-width: 600px; max-width: 600px; padding: 20px; padding-bottom: 50px; -webkit-text-size-adjust: none;">
 <div style="margin-bottom: -8px;">
-{$__FM_CONFIG['icons']['fm_logo']}
-<span style="font-size: 16pt; font-weight: bold; position: relative; top: -10px; margin-left: 10px;">$fm_name</span>
+<img src="$branding_logo" style="padding-left: 17px;" />
+<span style="font-size: 16pt; font-weight: bold; position: relative; top: -16px; margin-left: 10px;">$fm_name</span>
 </div>
 <div id="shadow" style="-moz-border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px; -webkit-border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px; border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px; -moz-box-shadow: rgba(0,0,0,.30) 0 2px 3px !important; -webkit-box-shadow: rgba(0,0,0,.30) 0 2px 3px !important; box-shadow: rgba(0,0,0,.30) 0 2px 3px !important;">
 <div id="container" style="background-color: #fff; min-height: 200px; margin-top: 1em; padding: 0 1.5em .5em; border: 1px solid #fff; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; -webkit-box-shadow: inset 0 2px 1px rgba(255,255,255,.97) !important; -moz-box-shadow: inset 0 2px 1px rgba(255,255,255,.97) !important; box-shadow: inset 0 2px 1px rgba(255,255,255,.97) !important;">

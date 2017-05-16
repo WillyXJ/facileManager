@@ -63,7 +63,7 @@ echo '$(document).ready(function() {
 		}
 	});
 	
-	$("input:text, input:password, select").first().focus();
+	$("input:text, input:password, select, textarea").first().focus();
 	
 	// Everything we need for scrolling up and down.
 	$(window).scroll( function(){
@@ -1043,6 +1043,11 @@ echo '$(document).ready(function() {
 
 		location.search = $.param(queryParameters);
 		return false;
+	});
+	
+	/* Show branding image in the settings */
+	$("#setting-row #sm_brand_img").keyup(function (e) {
+		$("#setting-row #brand_img").html("<img src=\"" + $(this).val() + "\" />");
 	});
 
 });
