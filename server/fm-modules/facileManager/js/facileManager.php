@@ -1047,7 +1047,17 @@ echo '$(document).ready(function() {
 	
 	/* Show branding image in the settings */
 	$("#setting-row #sm_brand_img").keyup(function (e) {
-		$("#setting-row #brand_img").html("<img src=\"" + $(this).val() + "\" />");
+		var url = $(this).val();
+		$.ajax({
+			url:url,
+			type:"HEAD",
+			error: function() {
+				$("#setting-row #brand_img").html("<i class=\"fa fa-question fa-4x\"></i>");
+			},
+			success: function() {
+				$("#setting-row #brand_img").html("<img src=\"" + url + "\" />");
+			}
+		});
 	});
 
 });

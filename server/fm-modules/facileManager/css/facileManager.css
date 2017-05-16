@@ -750,9 +750,29 @@ tbody {
 }
 #setting-row span#brand_img {
 	float: right;
+	height: 48px;
+	width: 48px;
+	text-align: center;
+	background-image:
+		-moz-linear-gradient(45deg, #ccc 25%, transparent 25%), 
+		-moz-linear-gradient(-45deg, #ccc 25%, transparent 25%),
+		-moz-linear-gradient(45deg, transparent 75%, #ccc 75%),
+		-moz-linear-gradient(-45deg, transparent 75%, #ccc 75%);
+	background-image:
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, #ccc), color-stop(.25, transparent)), 
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, #ccc), color-stop(.25, transparent)),
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, #ccc)),
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, #ccc));
+
+	-moz-background-size:10px 10px;
+	background-size:10px 10px;
+	-webkit-background-size:10px 11px;
+
+	background-position:0 0, 5px 0, 5px -5px, 0px 5px;
 }
 #setting-row span#brand_img img {
 	width: 48px;
+	height: 48px;
 }
 #settings input[type="submit"] {
 	margin-top: 1.5em;
