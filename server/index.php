@@ -28,11 +28,12 @@
  *
  */
 
-if (isset($_POST['module_type']) && $_POST['module_type'] == 'CLIENT') {
+if (isset($_REQUEST['module_type']) && $_REQUEST['module_type'] == 'CLIENT') {
 	define('CLIENT', true);
 }
-if (isset($_POST['module_name'])) {
-	$_SESSION['module'] = $_POST['module_name'];
+if (isset($_REQUEST['module_name'])) {
+	@session_start();
+	$_SESSION['module'] = $_REQUEST['module_name'];
 }
 
 require('fm-init.php');
