@@ -1,5 +1,5 @@
-3.0-?? (2017-??-??)
-======================
+3.0-rc1 (2017-05-24)
+====================
 * Server - [bug] Fixed the upgrade process.
 * Server - [feature] Added setting to change the branding logo.
 * Server - [feature] Added comment field to users.
