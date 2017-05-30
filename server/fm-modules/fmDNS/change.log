@@ -1,3 +1,7 @@
+3.0-?? (2017-0?-??)
+====================
+* Server - [bug] Fixed the SOA during bulk zone imports. (Issue #377)
+
 3.0-rc1 (2017-05-24)
 ====================
 * Server - [bug] Fixed the upgrade process.

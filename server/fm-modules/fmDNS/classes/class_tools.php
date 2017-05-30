@@ -603,6 +603,7 @@ BODY;
 					list($soa_array['soa_master_server'], $soa_array['soa_email_address'], $soa_serial_no, $soa_array['soa_refresh'],
 						$soa_array['soa_retry'], $soa_array['soa_expire'], $soa_array['soa_ttl']) = $soa_fields;
 					$ttl = $soa_array['soa_ttl'];
+					$soa_array['soa_append'] = 'no';
 
 					$fm_dns_records->add($domain_id, 'SOA', $soa_array);
 
