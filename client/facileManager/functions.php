@@ -672,7 +672,7 @@ function detectOSDistro() {
 			if ($lsb_release && trim($lsb_release) != '') {
 				$distrib = explode(':', $lsb_release);
 				$distrib_id = explode(' ', trim($distrib[1]));
-				return $distrib_id[0];
+				return (substr($distrib_id[0], 0, 3) == 'Red') ? 'Redhat' : $distrib_id[0];
 			} elseif (file_exists($filename = '/etc/lsb-release')
 				&& $lsb_release = file_get_contents($filename)
 				&& preg_match('/^DISTRIB_ID="?([^"\n]+)"?/m', $lsb_release, $id)) {
