@@ -26,16 +26,8 @@ printHeader();
 @printMenu();
 
 $response = isset($response) ? $response : functionalCheck();
-$line_count = substr_count($response, '<p>');
-$line_height = $line_count * 1.5 + .8;
-$margin = ($line_height - 1 < 1.5) ? 4 : $line_height + 1.5;
-$style = ($line_count > 1) ? ' style="height: ' . $line_height . 'em;"' : null;
 
-$dashboard = buildDashboard();
-
-echo '<div id="body_container">' . "\n";
-if (!empty($response)) echo '<div id="response"' . $style . '>' . $response . "</div>\n";
-echo '<h2>' . getPageTitle() . '</h2>' . $dashboard . '</div>';
+echo printPageHeader($response, null, false) . buildDashboard();
 
 printFooter();
 

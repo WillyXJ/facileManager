@@ -20,7 +20,9 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_buildconf {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_buildconf.php');
+
+class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	/**
 	 * Generates the server config and updates the DNS server
@@ -44,7 +46,7 @@ class fm_module_buildconf {
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		$message = null;
 		extract($post_data);
-		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
+		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
 
 		$GLOBALS['built_domain_ids'] = null;
@@ -76,7 +78,7 @@ class fm_module_buildconf {
 			
 
 			/** Build keys config */
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view=0 AND key_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_type="tsig" AND key_view=0 AND key_status="active"');
 			if ($fmdb->num_rows) {
 				$key_result = $fmdb->last_result;
 				$key_config_count = $fmdb->num_rows;
@@ -101,6 +103,7 @@ class fm_module_buildconf {
 						for ($j=0; $j < $server_count; $j++) {
 							$servers .= $this->formatServerKeys($server_result[$j]->server_name, $key_name);
 						}
+						unset($server_result, $server_count);
 					}
 				}
 			}
@@ -112,6 +115,7 @@ class fm_module_buildconf {
 			
 				$config .= "include \"" . dirname($server_config_file) . "/named.conf.keys\";\n\n";
 			}
+			unset($key_result, $key_config_count, $key_config, $servers, $keys);
 			
 			
 			/** Build ACLs */
@@ -129,6 +133,7 @@ class fm_module_buildconf {
 						}
 					}
 					$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
+					unset($acl_child_result);
 				}
 			} else $global_acl_array = array();
 
@@ -149,6 +154,7 @@ class fm_module_buildconf {
 							}
 						}
 						$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+						unset($acl_child_result, $server_acl_addresses);
 					}
 				}
 			}
@@ -168,6 +174,7 @@ class fm_module_buildconf {
 						}
 					}
 					$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+					unset($acl_child_result, $server_acl_addresses);
 				}
 			}
 
@@ -187,6 +194,7 @@ class fm_module_buildconf {
 				if ($acl_item) $config .= ';';
 				$config .= "\n};\n\n";
 			}
+			unset($acl_result, $global_acl_array, $server_acl_array, $acl_array);
 
 
 			/** Build logging config */
@@ -218,8 +226,7 @@ class fm_module_buildconf {
 								$logging .= ";\n";
 							} else {
 								$channels = null;
-								$assoc_channels = explode(';', $child_result[$j]->cfg_data);
-								foreach ($assoc_channels as $channel) {
+								foreach (explode(';', $child_result[$j]->cfg_data) as $channel) {
 									if (is_numeric($channel)) {
 										$channel = getNameFromID($channel, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 									}
@@ -233,10 +240,12 @@ class fm_module_buildconf {
 					/** Close */
 					$logging .= "\t};\n";
 				}
+				unset($logging_result, $count, $child_result, $count2);
 			}
 			if ($logging) $logging = "logging {\n$logging};\n\n";
 			
 			$config .= $logging;
+			unset($logging);
 
 			
 			/** Build global configs */
@@ -249,6 +258,7 @@ class fm_module_buildconf {
 				for ($i=0; $i < $global_config_count; $i++) {
 					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
 				}
+				unset($config_result, $global_config_count);
 			} else $global_config = array();
 
 			$server_config = array();
@@ -257,10 +267,11 @@ class fm_module_buildconf {
 				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
 				if ($fmdb->num_rows) {
 					$server_config_result = $fmdb->last_result;
-					$global_config_count = $fmdb->num_rows;
-					for ($j=0; $j < $global_config_count; $j++) {
+					$config_count = $fmdb->num_rows;
+					for ($j=0; $j < $config_count; $j++) {
 						$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 					}
+					unset($server_config_result, $global_config_count);
 				}
 			}
 
@@ -268,14 +279,16 @@ class fm_module_buildconf {
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="include" AND view_id=0 AND domain_id=0  AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				$server_config_result = $fmdb->last_result;
-				$global_config_count = $fmdb->num_rows;
-				for ($j=0; $j < $global_config_count; $j++) {
+				$config_count = $fmdb->num_rows;
+				for ($j=0; $j < $config_count; $j++) {
 					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 				}
+				unset($server_config_result, $global_config_count);
 			}
 
 			/** Merge arrays */
 			$config_array = array_merge($global_config, $server_config);
+			unset($global_config, $server_config);
 			
 			$include_hint_zone = false;
 
@@ -293,14 +306,18 @@ class fm_module_buildconf {
 			/** Build rate limits */
 			$config .= $this->getRateLimits(0, $server_serial_no);
 			
+			/** Build rate limits */
+			$config .= $this->getRRSetOrder(0, $server_serial_no);
+			
 			$config .= "};\n\n";
+			unset($config_array);
 			
 			
 			/** Build controls configs */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="controls" AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
 			} else {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="controls" AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
 			}
 			if ($fmdb->num_rows) {
 				$control_result = $fmdb->last_result;
@@ -322,7 +339,34 @@ class fm_module_buildconf {
 			} else $control_config = null;
 			
 			$config .= $control_config;
-			unset($control_config);
+			unset($control_result, $control_config_count, $control_config);
+
+			/** Build statistics-channels configs */
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="statistics" AND server_serial_no IN ("0","' . $server_serial_no . '", "g_' . implode('","g_', $server_group_ids) . '") AND control_status="active"');
+			} else {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', 'AND control_type="statistics" AND server_serial_no IN ("0","' . $server_serial_no . '") AND control_status="active"');
+			}
+			if ($fmdb->num_rows) {
+				$control_result = $fmdb->last_result;
+				$control_config_count = $fmdb->num_rows;
+				$control_config = "statistics-channels {\n";
+				for ($i=0; $i < $control_config_count; $i++) {
+					if ($control_result[$i]->control_comment) {
+						$comment = wordwrap($control_result[$i]->control_comment, 50, "\n");
+						$control_config .= "\t// " . str_replace("\n", "\n// ", $comment) . "\n";
+						unset($comment);
+					}
+					$control_config .= "\tinet " . $control_result[$i]->control_ip;
+					$control_config .= ' port ' . $control_result[$i]->control_port;
+					if (!empty($control_result[$i]->control_addresses)) $control_config .= ' allow { ' . trim($fm_dns_acls->parseACL($control_result[$i]->control_addresses), '; ') . '; };';
+					$control_config .= "\n";
+				}
+				$control_config .= "};\n\n";
+			} else $control_config = null;
+			
+			$config .= $control_config;
+			unset($control_result, $control_config_count, $control_config);
 
 			/** Build extra includes */
 			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, 0, 'outside');
@@ -362,6 +406,7 @@ class fm_module_buildconf {
 						for ($j=0; $j < $view_config_count; $j++) {
 							$view_config[$config_result[$j]->cfg_name] = array($config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 						}
+						unset($config_result, $view_config_count);
 					} else $view_config = array();
 
 					$server_view_config = array();
@@ -374,6 +419,7 @@ class fm_module_buildconf {
 							for ($j=0; $j < $view_config_count; $j++) {
 								$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 							}
+							unset($server_config_result, $view_config_count);
 						}
 					}
 
@@ -385,22 +431,28 @@ class fm_module_buildconf {
 						for ($j=0; $j < $view_config_count; $j++) {
 							$server_view_config[$server_config_result[$j]->cfg_name] = array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
 						}
+						unset($server_config_result, $view_config_count);
 					}
 
 					/** Merge arrays */
 					$config_array = array_merge($view_config, $server_view_config);
+					unset($view_config, $server_view_config);
 
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
 						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
 					}
+					unset($config_array);
 
 					/** Build includes */
 					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids, $server_root_dir);
 
 					/** Build rate limits */
 					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
+
+					/** Build rate limits */
+					$config .= $this->getRRSetOrder($view_result[$i]->view_id, $server_serial_no);
 
 					/** Get cooresponding keys */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', "AND key_status='active' AND key_view='" . $view_result[$i]->view_id . "'");
@@ -429,9 +481,11 @@ class fm_module_buildconf {
 								for ($j=0; $j < $server_count; $j++) {
 									$config .= $this->formatServerKeys($server_result[$j]->server_name, $key_name, true);
 								}
+								unset($server_result, $server_count);
 							}
 						}
 						$data->files[$server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys'] = array('contents' => $key_config, 'mode' => 0400);
+						unset($key_result, $key_count);
 					}
 					
 					/** Generate zone file */
@@ -469,8 +523,10 @@ class fm_module_buildconf {
 			}
 
 			$data->files[$server_config_file] = array('contents' => $config, 'mode' => 0444, 'chown' => 'root');
+			unset($config);
 			if (is_array($files)) {
 				$data->files = array_merge($data->files, $files);
+				unset($files);
 			}
 
 			/** Set variable containing all loaded domain_ids */
@@ -567,6 +623,7 @@ class fm_module_buildconf {
 							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 						}
 					}
+					unset($zone_result, $count);
 					if (isset($data->files)) {
 						/** set the server_update_config flag */
 						if (!$dryrun) setBuildUpdateConfigFlag($server_serial_no, 'yes', 'update');
@@ -632,7 +689,7 @@ class fm_module_buildconf {
 		$view_sql = "AND (`domain_view`<=0 OR `domain_view`=$view_id OR `domain_view` LIKE '$view_id;%' OR `domain_view` LIKE '%;$view_id' OR `domain_view` LIKE '%;$view_id;%')";
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND `domain_template`='no' AND 
 			((`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' $group_sql))
-			 $view_sql ORDER BY `domain_clone_domain_id`,`domain_name`";
+			 $view_sql ORDER BY `domain_dnssec_parent_domain_id` DESC,`domain_clone_domain_id`,`domain_name` ASC";
 		$result = $fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
@@ -669,17 +726,22 @@ class fm_module_buildconf {
 					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
 					$zones .= 'zone "' . rtrim($domain_name, '.') . "\" {\n";
 					$zones .= "\ttype $domain_type;\n";
-					$file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
+					$default_file_ext = $file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
 					
 					/** Are there multiple zones with the same name? */
 					if (isset($zone_result[$i]->parent_domain_id)) {
 						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->parent_domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$file_ext";
+						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$default_file_ext";
 					} else {
 						$zone_result[$i]->parent_domain_id = $zone_result[$i]->domain_id;
 						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
+						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$default_file_ext";
 					}
+					
+					if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
+						$file_ext = $view_id . ".$default_file_ext";
+					}
+					unset($default_file_ext);
 					
 					switch($domain_type) {
 						case 'master':
@@ -708,6 +770,7 @@ class fm_module_buildconf {
 					}
 				}
 			}
+			unset($zone_result, $count);
 			
 			if ($view_name) {
 				$files[$server_zones_dir . '/zones.conf.' . $view_name] = $zones;
@@ -726,7 +789,7 @@ class fm_module_buildconf {
 	 * @package fmDNS
 	 */
 	function buildZoneFile($domain, $server_serial_no) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fmdb;
 		
 		/** Get datetime formatting */
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
@@ -734,11 +797,25 @@ class fm_module_buildconf {
 		
 		$zone_file = '; This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 		
-		/** get the SOA */
-		$zone_file .= $this->buildSOA($domain);
+		/** Get the SOA */
+		list($soa, $soa_ttl) = $this->buildSOA($domain);
+		$zone_file .= $soa;
 		
-		/** get the records */
-		$zone_file .= $this->buildRecords($domain, $server_serial_no);
+		/** Get the records */
+		$zone_file .= $this->buildRecords($domain, $server_serial_no, $soa_ttl);
+		
+		/** Get additional DS records */
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', 'AND domain_dnssec_parent_domain_id="' . $domain->parent_domain_id . '"');
+		if ($fmdb->num_rows) {
+			for($i=0; $i<$fmdb->num_rows; $i++) {
+				$zone_file .= $fmdb->last_result[$i]->domain_dnssec_ds_rr;
+			}
+		}
+		
+		/** Sign the zone? */
+		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes') {
+			$zone_file = $this->dnssecSignZone($domain, $zone_file);
+		}
 		
 		return $zone_file;
 	}
@@ -893,7 +970,7 @@ class fm_module_buildconf {
 			$zone_file .= "\t\t$soa_ttl )\t\t; Negative caching of TTL\n\n";
 		}
 		
-		return $zone_file;
+		return array($zone_file, $this->getSOASeconds($soa_ttl));
 	}
 
 
@@ -903,12 +980,15 @@ class fm_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildRecords($domain, $server_serial_no) {
+	function buildRecords($domain, $server_serial_no, $default_ttl) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$zone_file = $skipped_records = null;
 		$domain_name_trim = trimFullStop($domain->domain_name);
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
+		if (!$server_version) {
+			$server_version = '10.0';
+		}
 		
 		/** Is this a cloned zone */
 		if (isset($domain->parent_domain_id)) {
@@ -929,7 +1009,7 @@ class fm_module_buildconf {
 			
 			/** Are there any skipped records? */
 			global $fm_dns_records;
-			if (!class_exists('fm_dns_records')) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			if (!class_exists('fm_dns_records')) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			if ($skipped_records = $fm_dns_records->getSkippedRecordIDs($domain->parent_domain_id)) $full_zone_clone = false;
 			
 			$valid_domain_ids = $full_zone_clone == false ? "IN (" . join(',', getZoneParentID($domain->parent_domain_id)) . ')' : "='{$domain->domain_id}' AND record_type='NS'";
@@ -967,7 +1047,11 @@ class fm_module_buildconf {
 					$record_name = $domain_name;
 				}
 				
-				$record_start = str_pad($record_name, 25) . $separator . $record_result[$i]->record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
+				$record_ttl = $record_result[$i]->record_ttl;
+				if ($domain->domain_dynamic == 'yes') {
+					$record_ttl = ($record_ttl > 0) ? $record_ttl : $default_ttl;
+				}
+				$record_start = str_pad($record_name, 25) . $separator . $record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
 				
 				switch($record_result[$i]->record_type) {
 					case 'A':
@@ -980,6 +1064,11 @@ class fm_module_buildconf {
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Certificates';
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
+					case 'CAA':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.9.6';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Certification Authority Authorizations';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . '0 ' . $record_result[$i]->record_params . ' "' . $record_result[$i]->record_value . '"' . $record_comment . "\n";
+						break;
 					case 'CNAME':
 					case 'DNAME':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Aliases';
@@ -989,12 +1078,15 @@ class fm_module_buildconf {
 					case 'DHCID':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.5.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DHCP ID records';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_flags . ' 3 ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DLV':
-					case 'DS':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'DNSSEC Lookaside Validation';
-//						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						break;
+					case 'DS':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Delegation Signer';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . ' ' . $record_result[$i]->record_cert_type . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'DNSKEY':
 					case 'KEY':
@@ -1041,7 +1133,7 @@ class fm_module_buildconf {
 					case 'SSHFP':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'SSH Key Fingerprint records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_algorithm . ' 1 ' . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_algorithm . ' ' . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'SRV':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';
@@ -1069,6 +1161,7 @@ class fm_module_buildconf {
 				$zone_file .= implode('', $rr_array['Data']);
 				$zone_file .= "\n";
 			}
+			unset($record_result);
 		}
 		
 		return $zone_file;
@@ -1118,6 +1211,8 @@ class fm_module_buildconf {
 			$parent_zone->domain_name = $zone->domain_name;
 			$parent_zone->domain_name_file = $zone->domain_name;
 			$parent_zone->domain_clone_dname = $zone->domain_clone_dname;
+			$parent_zone->domain_dnssec = $zone->domain_dnssec;
+			$parent_zone->domain_dnssec_sig_expire = $zone->domain_dnssec_sig_expire;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
 			
@@ -1406,7 +1501,7 @@ HTML;
 			if (!$id) unset($domain_ids[$key]);
 		}
 		
-		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		$config = null;
 		
 		$server_root_dir = getNameFromID($server_serial_no, "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
@@ -1418,6 +1513,7 @@ HTML;
 			for ($i=0; $i < $global_config_count; $i++) {
 				$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
 			}
+			unset($config_result);
 		} else $global_config = array();
 
 		/** Override with server-specific configs */
@@ -1428,10 +1524,12 @@ HTML;
 			for ($j=0; $j < $global_config_count; $j++) {
 				$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 			}
+			unset($server_config_result);
 		} else $server_config = array();
 
 		/** Merge arrays */
 		$config_array = array_merge($global_config, $server_config);
+		unset($global_config, $server_config);
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			list($cfg_info, $cfg_comment) = $cfg_data;
@@ -1446,7 +1544,7 @@ HTML;
 	}
 	
 	/**
-	 * Formats the server key statements
+	 * Formats the server rate-limit statements
 	 *
 	 * @since 2.0
 	 * @package fmDNS
@@ -1477,6 +1575,7 @@ HTML;
 					$rate_config_array[$rate_result[$i]->cfg_name][] = array($rate_result[$i]->cfg_data, $rate_result[$i]->cfg_comment);
 				}
 			}
+			unset($rate_result);
 		}
 		
 		/** Override with server-specific configs */
@@ -1491,10 +1590,12 @@ HTML;
 					$server_config[$server_config_result[$i]->cfg_name][] = array($server_config_result[$i]->cfg_data, $server_config_result[$i]->cfg_comment);
 				}
 			}
+			unset($server_config_result);
 		} else $server_config = array();
 
 		/** Merge arrays */
 		$rate_config_array = array_merge((array)$rate_config_array, $server_config);
+		unset($server_config);
 		
 		foreach ($rate_config_array as $cfg_name => $value_array) {
 			foreach ($value_array as $domain_name => $cfg_data) {
@@ -1503,16 +1604,20 @@ HTML;
 					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
 				} else {
 					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
-						$ratelimits_domains .= "\t};\n\trate-limit {\n\t\tdomain $domain_name;\n";
+						$ratelimits_domains .= "\trate-limit {\n\t\tdomain $domain_name;\n";
 						foreach ($domain_cfg_data as $domain_cfg_data2) {
 							list($cfg_param, $cfg_comment) = $domain_cfg_data2;
 							$ratelimits_domains .= $this->formatConfigOption($domain_cfg_name, $cfg_param, $cfg_comment);
 						}
+						$ratelimits_domains .= "\t};\n";
 					}
 				}
 			}
 		}
-		return ($ratelimits || $ratelimits_domains) ? "\trate-limit {\n{$ratelimits}{$ratelimits_domains}\t};\n\n" : null;
+		if ($ratelimits) {
+			$ratelimits = "\trate-limit {\n{$ratelimits}\t};\n";
+		}
+		return ($ratelimits || $ratelimits_domains) ? $ratelimits . $ratelimits_domains : null;
 	}
 	
 	/**
@@ -1684,6 +1789,7 @@ HTML;
 			for ($i=0; $i < $fmdb->num_rows; $i++) {
 				$include_config['include'][] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
 			}
+			unset($config_result);
 		} else $include_config = null;
 
 		if (is_array($include_config)) {
@@ -1737,6 +1843,138 @@ HTML;
 			$fmdb->query($query);
 		}
 	}
+	
+	
+	/**
+	 * Converts a SOA value to seconds
+	 *
+	 * @since 3.0
+	 * @package fmDNS
+	 *
+	 * @param string $soa SOA value
+	 * @return integer
+	 */
+	function getSOASeconds($soa) {
+		if (!preg_match('/\d[a-zA-Z]/', $soa)) {
+			return $soa;
+		}
+		
+		$search = array('S', 'M', 'H', 'D', 'W');
+		$replace = array(' seconds ', ' minutes ', ' hours ', ' days ', ' weeks ');
+		
+		return strtotime('+' . str_replace($search, $replace, strtoupper($soa))) - time();
+	}
+	
+	
+	/**
+	 * Formats the server rrset-order statements
+	 *
+	 * @since 2.0
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @return string
+	 */
+	function getRRSetOrder($view_id, $server_serial_no) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		
+		$rrsets = $rrsets_domains = $rrset_config_array = $config = null;
+		
+		/** Use server-specific configs if present */
+		foreach (array($server_serial_no, 0) as $serial_no) {
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="rrset" AND view_id=' . $view_id . ' AND server_serial_no=' . $serial_no . ' AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				$result = $fmdb->last_result;
+				$count = $fmdb->num_rows;
+				for ($i=0; $i < $count; $i++) {
+					$config[$result[$i]->cfg_name][] = array($result[$i]->cfg_data, $result[$i]->cfg_comment);
+				}
+				unset($result);
+				break;
+			}
+		}
+		
+		foreach ((array) $config as $cfg_name => $value_array) {
+			foreach ($value_array as $cfg_data) {
+				list($cfg_info, $cfg_comment) = $cfg_data;
+				$rrsets .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
+			}
+			$rrsets = str_replace($cfg_name, null, $rrsets);
+		}
+		return ($rrsets) ? "\trrset-order {\n{$rrsets}\t};\n" : null;
+	}
+	
+	
+	/**
+	 * Signs the DNSSEC zone file
+	 *
+	 * @since 3.0
+	 * @package fmDNS
+	 *
+	 * @param object $domain The domain result
+	 * @param string $zone_file_contents Contents of zone file to sign
+	 * @return string
+	 */
+	function dnssecSignZone($domain, $zone_file_contents) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Locate dnssec binaries */
+		if (!$dnssec_signzone = findProgram('dnssec-signzone')) {
+			exit(displayResponseClose(sprintf(__('The dnssec-signzone binary could not be found on %s so DNSSEC zone signing cannot be done.'), php_uname('n'))));
+		}
+		
+		/** Create temp directory */
+		list($tmp_dir, $created) = createTempDir($_SESSION['module'], 'datetime');
+		if ($created === false) exit(displayResponseClose(sprintf(__('%s is not writeable by %s so DNSSEC zone signing cannot be done.'), $tmp_dir, $__FM_CONFIG['webserver']['user_info']['name'])));
+
+		/** Create temp files */
+		$temp_zone_file = $tmp_dir . 'db.' . $domain->domain_name . '.hosts';
+		file_put_contents($temp_zone_file, $zone_file_contents);
+		
+		/** Get associated DNSSEC keys */
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', array('key_signing', 'key_created'), 'key_', 'AND key_type="dnssec" AND domain_id=' . $domain->parent_domain_id . ' AND key_status IN ("active","revoked")', null, false, 'DESC');
+		if (!$fmdb->sql_errors && $fmdb->num_rows) {
+			$dnssec_keys = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				if ($dnssec_keys[$i]->key_signing == 'yes') {
+					$dnssec_key_signing_array[$dnssec_keys[$i]->key_subtype][] = array($dnssec_keys[$i]->key_name, $dnssec_keys[$i]->key_secret);
+				}
+				file_put_contents($tmp_dir . $dnssec_keys[$i]->key_name . '.private', $dnssec_keys[$i]->key_secret);
+				file_put_contents($tmp_dir . $dnssec_keys[$i]->key_name . '.key', $dnssec_keys[$i]->key_public);
+				file_put_contents($temp_zone_file, $dnssec_keys[$i]->key_public, FILE_APPEND);
+			}
+		} else {
+			return $zone_file_contents;
+		}
+		
+		$dnssec_endtime = getDNSSECExpiration($domain, 'endtime');
+		
+		foreach ($dnssec_key_signing_array['KSK'] as $ksk_array) {
+			$dnssec_ksk[] = '-k ' . $ksk_array[0];
+		}
+		$dnssec_ksk = join(' ', $dnssec_ksk);
+		
+		/** Sign zone with all keys */
+		$dnssec_output = shell_exec('cd ' . $tmp_dir . ' && ' . $dnssec_signzone . ' -g -K ' . $tmp_dir . ' -o ' . $domain->domain_name . ' ' . $dnssec_ksk . ' -f ' . $temp_zone_file . '.signed -e ' . $dnssec_endtime . ' ' . $temp_zone_file . ' ' . $dnssec_key_signing_array['ZSK'][0][0] . ' 2>&1');
+		if (file_exists($temp_zone_file . '.signed')) {
+			$signed_zone = file_get_contents($temp_zone_file . '.signed');
+			$GLOBALS[$_SESSION['module']]['DNSSEC'][] = array('domain_id' => $domain->parent_domain_id, 'domain_dnssec_signed' => strtotime('now'));
+		}
+		
+		/** Generated DS RR */
+		if ($domain->domain_dnssec_generate_ds) {
+			if (file_exists($tmp_dir . 'dsset-' . $domain->domain_name . '.')) {
+				$generated_ds_rr = file_get_contents($tmp_dir . 'dsset-' . $domain->domain_name . '.');
+				basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain->parent_domain_id, 'domain_dnssec_ds_rr', $generated_ds_rr, 'domain_id');
+			}
+		}
+		
+		system('rm -rf ' . $tmp_dir);
+		
+		return $signed_zone ? $signed_zone : $dnssec_output;
+	}
+	
 }
 
 if (!isset($fm_module_buildconf))

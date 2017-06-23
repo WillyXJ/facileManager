@@ -75,7 +75,7 @@ function printPasswordResetForm($message = null) {
 	echo '<form id="forgotpwd" method="post" action="' . $_SERVER['REQUEST_URI'] . '">
 		<input type="hidden" name="reset_pwd" value="1" />
 		<div id="fm-branding">
-			<img src="' . $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png' . '" /><span>' . _('Password Reset') . '</span>
+			<img src="' . getBrandLogo() . '" /><span>' . _('Password Reset') . '</span>
 		</div>
 		<div id="window">
 		<div id="message">' . $message . '</div>
@@ -163,7 +163,7 @@ function printResetConfirmation() {
 	printHeader(_('Password Reset'), 'install');
 	
 	printf('<div id="fm-branding">
-		<img src="' . $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png' . '" /><span>' . _('Password Reset') . '</span>
+		<img src="' . getBrandLogo() . '" /><span>' . _('Password Reset') . '</span>
 	</div>
 	<div id="window"><p>' . _("Your password has been updated! Click 'Next' to login and start using %s.") . '</p>
 		<p class="step"><a href="%s" class="button">' . _('Next') . '</a></p>

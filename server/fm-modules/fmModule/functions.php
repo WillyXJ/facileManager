@@ -190,8 +190,8 @@ function getModuleBadgeCounts($type) {
 function buildModuleMenu() {
 	$badge_counts = getModuleBadgeCounts('type1');
 	
-	addObjectPage(__('Config'), __('Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', __('Servers'), __('Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
+	addObjectPage(__('Config'), _('Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', _('Servers'), _('Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
 
 	addObjectPage(__('Menu Title 1'), __('Page Title 1'), array('required_permissions', 'view_all'), $_SESSION['module'], 'page1.php');
 		addSubmenuPage('page1.php', __('Submenu Title 1'), __('Submenu Page Title 1'), null, $_SESSION['module'], 'page1-submenu1.php', null, null, $badge_counts['submenu1']);

@@ -25,8 +25,7 @@
 
 if (!currentUserCan(array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_servers.php');
-$response = isset($response) ? $response : null;
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['servers']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'servers';
 $display_type = ($type == 'servers') ? __('Name Servers') : __('Name Server Groups');
@@ -89,8 +88,8 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type);
-echo printPageHeader($response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['servers']['avail_types']);
+echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 	
 $sort_direction = null;
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
@@ -112,28 +111,11 @@ if ($type == 'groups') {
 } else {
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_', null, null, false, $sort_direction);
 }
-$fm_module_servers->rows($result, $type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_servers->rows($result, $type, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'servers') {
-	global $__FM_CONFIG;
-	
-	$menu_selects = $uri_params = null;
-	
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if (in_array($param, array('type', 'action', 'id', 'status'))) continue;
-		$uri_params .= "&$param=$val";
-	}
-	
-	foreach ($__FM_CONFIG['servers']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
 
 
 ?>

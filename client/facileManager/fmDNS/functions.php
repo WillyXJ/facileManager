@@ -41,8 +41,11 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-  -z|zones       Build all associated zone files
+   -D            Name of zone to dump (required by dump-zone)
+   -f            Filename hosting the zone data (required by dump-zone)
+   -z|zones      Build all associated zone files
      dump-cache  Dump the DNS cache
+     dump-zone   Dump the specified zone data to STDOUT
      clear-cache Clear the DNS cache
      id=XX       Specify the individual DomainID to build and reload
   
@@ -108,6 +111,9 @@ function buildConf($url, $data) {
 		$files = $new_files;
 		unset($new_files);
 		$chroot_environment = true;
+		
+		/** Add key file to chroot list */
+		addChrootFiles();
 	}
 	
 	if ($debug) {
@@ -126,6 +132,12 @@ function buildConf($url, $data) {
 	
 	$runas = ($server_run_as_predefined == 'as defined:') ? $server_run_as : $server_run_as_predefined;
 	$chown_dirs = array($server_zones_dir);
+	
+	/** Freeze zones */
+	if (isDaemonRunning('named')) {
+		/** Handle dynamic zones to support reloading */
+		runRndcActions('freeze');
+	}
 		
 	/** Remove previous files so there are no stale files */
 	if ($purge || ($purge_config_files == 'yes' && $server_update_config == 'conf')) {
@@ -152,14 +164,11 @@ function buildConf($url, $data) {
 	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
 		addLogEntry($message);
-		if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
-			$rndc_actions = array('freeze', 'reload', 'thaw');
+		if (isDaemonRunning('named')) {
+			$rndc_actions = array('reload', 'thaw');
 			
 			/** Handle dynamic zones to support reloading */
-			foreach ($rndc_actions as $action) {
-				$last_line = system(findProgram('rndc') . " $action 2>&1", $retval);
-				if ($retval) return processReloadFailure($last_line);
-			}
+			runRndcActions($rndc_actions);
 		} else {
 			$message = "The server is not running - attempting to start it\n";
 			if ($debug) echo fM($message);
@@ -246,21 +255,6 @@ function detectDaemonVersion($return_array = false) {
 }
 
 
-function versionCheck($app_version, $serverhost, $compress) {
-	$url = str_replace(':/', '://', str_replace('//', '/', $serverhost . '/buildconf.php'));
-	$data['action'] = 'version_check';
-	$server_type = detectServerType();
-	$data['server_type'] = $server_type['type'];
-	$data['server_version'] = $app_version;
-	$data['compress'] = $compress;
-	
-	$raw_data = getPostData($url, $data);
-	$raw_data = $compress ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	
-	return $raw_data;
-}
-
-
 function getStartupScript($chroot_environment = false) {
 	$distros = array(
 		'Arch'      => array('/etc/rc.d/named start', findProgram('systemctl') . ' start named.service'),
@@ -311,6 +305,9 @@ function detectChrootDir() {
 			$os = detectOSDistro();
 			if (in_array($os, array('Redhat', 'CentOS', 'ClearOS', 'Oracle'))) {
 				if ($chroot_dir = getParameterValue('^ROOTDIR', '/etc/sysconfig/named')) return $chroot_dir;
+				/** systemd unit file */
+				addChrootFiles();
+				if ($chroot_dir = getParameterValue('ExecStart=/usr/libexec/setup-named-chroot.sh', '/usr/lib/systemd/system/named-chroot-setup.service', ' ')) return $chroot_dir;
 			}
 			if (in_array($os, array('Debian', 'Ubuntu', 'Fubuntu'))) {
 				if ($flags = getParameterValue('^OPTIONS', '/etc/default/bind9')) {
@@ -417,9 +414,79 @@ function moduleInitWebRequest() {
 				$output = array_merge($output, $rawoutput);
 			}
 			break;
+		case 'get_zone_contents':
+			if (!isset($_POST['domain_id']) || !is_numeric($_POST['domain_id'])) {
+				exit(serialize('Zone ID is not found.'));
+			}
+			$output['failures'] = false;
+			$output['output'] = array();
+
+			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/client.php ' . $_POST['command_args'], $output['output'], $rc);
+			if ($rc) {
+				/** Something went wrong */
+				$output['failures'] = true;
+			}
+			break;
 	}
 	
 	return $output;
+}
+
+
+/**
+ * Dumps the specified zone data to STDOUT
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @param string $domain Domain name
+ * @param string $zonefile Filename of zone file
+ * @return boolean
+ */
+function dumpZone($domain, $zonefile) {
+	passthru(findProgram('named-checkzone') . " -j -D $domain $zonefile");
+	
+	exit;
+}
+
+
+/**
+ * Runs a rndc action
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @param array $rndc_actions rndc actions to run
+ * @return boolean
+ */
+function runRndcActions($rndc_actions = array()) {
+	if (!is_array($rndc_actions)) $rndc_actions = array($rndc_actions);
+	
+	$rndc = findProgram('rndc');
+	
+	foreach ($rndc_actions as $action) {
+		$last_line = system("$rndc $action 2>&1", $retval);
+		if ($retval) {
+			return processReloadFailure($last_line);
+		}
+	}
+	
+	return false;
+}
+
+
+/**
+ * Ensures chroot files are added
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @return boolean
+ */
+function addChrootFiles() {
+	if (file_exists('/usr/libexec/setup-named-chroot.sh') && !exec('grep -c ' . escapeshellarg('named.conf.keys') . ' /usr/libexec/setup-named-chroot.sh')) {
+		file_put_contents('/usr/libexec/setup-named-chroot.sh', str_replace('rndc.key', 'rndc.key /etc/named.conf.keys', file_get_contents('/usr/libexec/setup-named-chroot.sh')));
+	}
 }
 
 

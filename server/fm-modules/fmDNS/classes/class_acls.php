@@ -25,7 +25,7 @@ class fm_dns_acls {
 	/**
 	 * Displays the acl list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -34,6 +34,9 @@ class fm_dns_acls {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
+
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
@@ -46,8 +49,11 @@ class fm_dns_acls {
 
 			echo displayTableHeader($table_info, $title_array, 'acls');
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -90,17 +96,19 @@ class fm_dns_acls {
 			$clean_data = sanitize($data);
 			if ($key == 'acl_name' && empty($clean_data)) return __('No ACL name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the ACL because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the ACL because a database error occurred.'), 'sql');
+		}
 
 		$log_message = sprintf(__("Added ACL:\nName: %s\nComment: %s"), $post['acl_name'], $post['acl_comment']);
 		if (isset($post['acl_parent_id'])) {
@@ -146,10 +154,10 @@ class fm_dns_acls {
 		$sql_edit = null;
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the acl
 		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
@@ -157,7 +165,9 @@ class fm_dns_acls {
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET $sql WHERE `acl_id`={$post['acl_id']}";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the ACL because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the ACL because a database error occurred.'), 'sql');
+		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -188,10 +198,12 @@ class fm_dns_acls {
 			$log_message = sprintf(__("%s was deleted from the %s ACL"), $tmp_address, $tmp_name);
 		} else {
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET `acl_status`='deleted' WHERE account_id='{$_SESSION['user']['account_id']}' AND `acl_parent_id`='" . sanitize($id) . "'";
-			if (!$fmdb->query($query)) return __('The associated ACL elements could not be deleted because a database error occurred.');
+			if (!$fmdb->query($query)) {
+				return formatError(__('The associated ACL elements could not be deleted because a database error occurred.'), 'sql');
+			}
 		}
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $id, 'acl_', 'deleted', 'acl_id') === false) {
-			return __('This ACL could not be deleted because a database error occurred.');
+			return formatError(__('This ACL could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry($log_message);
@@ -221,7 +233,10 @@ class fm_dns_acls {
 			$edit_status = null;
 		}
 		
-		$edit_name = '<b>' . $row->acl_name . '</b>' . displayAddNew('acl', $row->acl_id);
+		$edit_name = '<b>' . $row->acl_name . '</b>';
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$edit_name .= displayAddNew('acl', $row->acl_id, null, 'fa fa-plus-square-o');
+		}
 		$edit_addresses = nl2br(str_replace(',', "\n", $row->acl_addresses));
 		$edit_addresses = $this->getACLElements($row->acl_id);
 		$element_names = $element_comment = null;
@@ -238,7 +253,7 @@ class fm_dns_acls {
 		$class = 'class="' . implode(' ', $classes) . '"';
 
 		echo <<<HTML
-		<tr id="$row->acl_id" $class>
+		<tr id="$row->acl_id" name="$row->acl_name" $class>
 			<td>$edit_name $element_names</td>
 			<td>$comments $element_comment</td>
 			$edit_status
@@ -462,7 +477,7 @@ HTML;
 				$domain_id = str_replace('domain_', '', $address);
 				$formatted_acls[] = getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active');
 			} else {
-				$formatted_acls[] = $address;
+				$formatted_acls[] = str_replace(';', '', $address);
 			}
 		}
 		

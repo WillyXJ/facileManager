@@ -41,7 +41,7 @@
 }
 
 table.legend {
-	margin-top: 5em;
+	margin-top: 3em;
 	font-size: 11px;
 }
 table.legend tr td {
@@ -53,11 +53,14 @@ table.legend tr td span {
 	margin-left: 18px;
 }
 
-#table_edits.grab tbody tr {
+#table_edits.grab tbody tr td:nth-child(2) {
 	cursor: url(http://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
 }
-#table_edits.grabbing tbody tr {
+#table_edits.grabbing tbody tr td:nth-child(2) {
 	cursor: url(http://www.google.com/intl/en_ALL/mapfiles/closedhand.cur) 8 8, move;
+}
+#table_edits.grabbing tbody tr {
+	border: 1px #dfdfdf solid;
 }
 p.checkbox_desc {
 	font-size: 10px;
@@ -67,4 +70,18 @@ p.checkbox_desc {
 
 .form-table.policy-form td label {
 	white-space: normal;
+}
+
+.pass {
+	color: #1b8725;
+}
+.block {
+	color: #CB3739;
+}
+.reject {
+	color: #e19419;
+}
+.log {
+	padding-right: 4px;
+	color: #4e65e0;
 }

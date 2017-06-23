@@ -1,3 +1,62 @@
+3.0 (2017-06-22)
+================
+* Server - [bug] Fixed the SOA during bulk zone imports. (Issue #377)
+* Server - [bug] Fixed the upgrade process.
+* Server - [bug] Fixed PHP error. (Issue #374)
+* Server - [feature] Added support to automatically generate a DS RR. (Issue #285)
+* Client - [bug] EL chroot mounts now include fmDNS files. (Issue #346)
+* Server - [improvement] Added bulk actions to several pages.
+* Server - [improvement] Database errors now get displayed if the Show Errors
+           setting is enabled.
+* Both   - [improvement] Code clean up.
+* Server - [bug] Slave zones now work with multiple views. (Issue #367)
+* Server - [bug] Changing to a different template for a zone, the serial number
+           was not updating thus slaves would not get updated. (Issue #368)
+* Server - [improvement] Added an icon on the zones pages for faster access to
+           the zone options.
+* Both   - [feature] Dynamic zones are now supported with servers updated via
+           http/https. (Issue #90)
+* Server - [improvement] Better error messages surrounding dynamic zones. (Issue #370)
+* Server - [improvement] Added locale number formatting.
+* Server - [improvement] Code changes to better reference shared classes.
+* Server - [bug] Zones based on templates would be incorrectly logged during
+           zone reloads.
+* Server - [feature] Added support for DNSSEC. (Issue #285)
+* Server - [improvement] Utilizes response error formatting.
+* Server - [improvement] Pagination is added to all pages.
+* Server - [improvement] Code clean up.
+* Server - [feature] Added support for the CAA RR. (Issue #361)
+* Server - [improvement] BIND time formats are allowed for TTL and SOA values.
+* Server - [improvement] Added support for additional SSHFP algorithms and
+           certificate types. (Issue #355)
+* Server - [bug] Unprivileged users could see the ACL add new button.
+* Server - [bug] Fixed rate-limit options when only limits for domains are
+           specified.
+* Server - [improvement] Language changes.
+* Server - [improvement] Added the option to sort zones hierarchically. (Issue #278)
+* Server - [improvement] PTR RRs are better linked with the A record. (Issue #277)
+* Server - [feature] Added support for statistics-channels. (Issue #352)
+* Server - [improvement] Unset large variables after use to free up system
+           resources.
+* Server - [bug] Fixed display of available zones when the user is restricted to
+           a cloned zone. (Issue #350)
+* Server - [improvement] Added item name to the delete confirmations. (Issue #185)
+* Server - [feature] Added support for DHCID, DLV, and DS resource records.
+* Server - [feature] Added support for more BIND configuration options
+           including rrset-order, 9.10, and 9.11 options. (Issue #336)
+* Server - [improvement] Configuration options may now display the minimum
+           version of BIND required to use the option.
+* Server - [feature] Added support for dynamic zones. (Issue #90)
+* Server - [bug] Added missing translation text and removed duplicates.
+* Server - [feature] Added support to import a BIND-compatible zone dump file
+           to make migrations to fmDNS easier. (Issue #96)
+* Server - [improvement] Zone previews now show all available RRs regardless
+           of DNS server version hosting the zone.
+* Server - [bug] address_match_element values now strip any inputed semi-colons.
+* Server - [feature] Use mysqli functions where available. (Issue #343)
+* Server - [improvement] Users limited to specific zones and the capability to
+           create new zones now can view their newly created zones. (Issue #339)
+
 2.2.6 (2016-09-22)
 ==================
 * Server - [bug] Added missing dnssec-validation value. (Issue #347)

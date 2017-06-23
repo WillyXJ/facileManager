@@ -70,7 +70,7 @@ class fm_shared_module_buildconf {
 	}
 	
 	/**
-	 * Generates the server config and updates the firewall server
+	 * Generates the server config and updates the server
 	 *
 	 * @since 2.2
 	 * @package facileManager
@@ -137,7 +137,7 @@ class fm_shared_module_buildconf {
 	
 	
 	/**
-	 * Figures out what files to update on the firewall
+	 * Figures out what files to update on the server
 	 *
 	 * @since 2.2
 	 * @package facileManager
@@ -221,8 +221,5 @@ class fm_shared_module_buildconf {
 	
 
 }
-
-if (!isset($fm_shared_module_buildconf))
-	$fm_shared_module_buildconf = new fm_shared_module_buildconf();
 
 ?>

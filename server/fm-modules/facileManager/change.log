@@ -1,3 +1,49 @@
+3.0 (2017-06-22)
+================
+* Client - [bug] Fixed OS distro reporting for RHEL when using lsb tools. (Issue #379)
+* Server - [bug] Fixed the upgrade process.
+* Server - [feature] Added setting to change the branding logo.
+* Server - [feature] Added comment field to users.
+* Server - [improvement] Reworked the search bar for easier usage of it.
+* Server - [improvement] Database errors now get displayed if the Show Errors
+           setting is enabled.
+* Server - [improvement] Updated 404 page styling.
+* Both   - [improvement] Code clean up.
+* Both   - [improvement] Updated the error messages surrounding failed SSH
+           connections. (Issue #371)
+* Server - [improvement] CSS tweaks for Firefox compatibility.
+* Client - [bug] Client installer ensures absolute path is defined in the sudoers
+           file. (Issue #372)
+* Server - [improvement] Added locale number formatting.
+* Server - [improvement] Code changes to better reference shared classes.
+* Server - [security] Fixed an issue where unprivileged users could still make
+           changes before a forced logout.
+* Server - [improvement] Code changes to add global response error formatting.
+* Server - [improvement] Added Windows server icon for other modules to use.
+* Server - [improvement] Pagination is added to all pages.
+* Server - [bug] Fixed an issue where the Edit Profile menu option did nothing.
+* Server - [improvement] Code clean up.
+* Server - [improvement] Replaced several icons with Font Awesome fonts.
+* Server - [improvement] CSS tweaks.
+* Server - [bug] Fixed an issue where local account passwords could not be
+           changed when LDAP authentication was being used. (Issue #360)
+* Server - [feature] Added server update support via the modules page. (Issue #113)
+* Server - [improvement] Cleaned up server connection tests output.
+* Server - [improvement] Language changes.
+* Server - [bug] Fixed mysql requirement check. (result of adding #343)
+* Server - [improvement] Updated error page titles.
+* Server - [improvement] Swapped the plus sign for "Add New" text.
+* Server - [bug] Fixed help file with PHP 7 installations. (Issue #354)
+* Server - [improvement] Added item name to the delete confirmations. (Issue #185)
+* Server - [bug] Fixed LDAP authentication using group membership requirements
+           with Active Directory. (Issue #342)
+* Server - [bug] Fixed PHP error during installer with an empty database.
+* Server - [bug] Fixed module installation status through modules page.
+* Server - [bug] Added missing translation text and removed duplicates.
+* Server - [bug] Fixed Redhat clients only reporting 'Red' as the OS.
+* Server - [feature] Use mysqli functions where available. (Issue #343)
+* Server - [feature] Added setting to send audit logs to syslog. (Issue #326)
+
 2.3.3 (2016-10-07)
 ==================
 * Server - [bug] Fixed an issue where fM would hang during the software update

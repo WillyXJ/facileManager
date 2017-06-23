@@ -30,20 +30,20 @@ if (file_exists($module_tools_file)) {
 	include($module_tools_file);
 }
 
+if (!isset($fm_module_tools)) {
+	$fm_module_tools = new fm_shared_module_tools();
+}
+
 $response = null;
 if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
 			case 'connect-test':
 				$response = buildPopup('header', _('Connectivity Test Results'));
-				$response .= '<pre>' . "\n";
-				$response .= $fm_shared_module_tools->connectTests();
-				$response .= '</pre>' . "\n";
+				$response .= $fm_module_tools->connectTests();
 				break;
 		}
 	}
-	
-	$response .= "<br />\n";
 } else {
 	echo buildPopup('header', _('Error'));
 	printf("<p>%s</p>\n", _('You are not authorized to run these tools.'));

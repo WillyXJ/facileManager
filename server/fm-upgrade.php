@@ -59,7 +59,7 @@ if (array_key_exists('backup', $_GET)) {
 	header('Location: ' . $GLOBALS['basename']);
 }
 
-$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+$branding_logo = getBrandLogo();
 
 printHeader(_('Upgrade'), 'install');
 
@@ -85,6 +85,7 @@ switch ($step) {
 
 		include(ABSPATH . 'config.inc.php');
 		include_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
 
 		fmUpgrade($__FM_CONFIG['db']['name']);
 		break;

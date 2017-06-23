@@ -27,13 +27,19 @@ class fm_users {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
 			$message = ($type == 'users') ? _('There are no users.') : _('There are no groups.');
 			printf('<p id="table_edits" class="noresult" name="users">%s</p>', $message);
 		} else {
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
+
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
@@ -56,10 +62,11 @@ class fm_users {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -133,7 +140,9 @@ class fm_users {
 				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
 		$result = $fmdb->query($query);
 		
-		if (!$result || $fmdb->sql_errors) return _('Could not add the user to the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not add the user because a database error occurred.'), 'sql');
+		}
 
 		/** Process forced password change */
 		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login);
@@ -185,11 +194,16 @@ class fm_users {
 				VALUES('{$_SESSION['user']['account_id']}', '$group_name', '" . serialize($user_caps) . "', '$group_comment', 'active')";
 		$result = $fmdb->query($query);
 		
-		if (!$result || $fmdb->sql_errors) return _('Could not add the group to the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
+		}
 		
 		if (isset($group_users) && is_array($group_users)) {
 			$query = "UPDATE `fm_users` SET `user_group`='{$fmdb->insert_id}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $group_users) . "')";
-			if (!$fmdb->query($query)) return _('Could not associate the users with the group.');
+			if (!$fmdb->query($query)) {
+				$addl_text = ($fmdb->last_error) ? '<br />' . $fmdb->last_error : null;
+				return formatError(_('Could not associate the users with the group.'), 'sql');
+			}
 		}
 
 		addLogEntry(sprintf(_("Added group '%s'."), $group_name));
@@ -244,10 +258,10 @@ class fm_users {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit . $sql_pwd, ',');
+		$sql = rtrim($sql_edit . $sql_pwd, ', ');
 		
 		/** Process user permissions */
 		if (isset($post['process_user_caps']) && (!isset($post['user_caps']) || $post['user_group'])) $post['user_caps'] = array();
@@ -265,7 +279,9 @@ class fm_users {
 		$query = "UPDATE `fm_users` SET $sql WHERE `user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not update the user in the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not update the user because a database error occurred.'), 'sql');
+		}
 		
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($post['user_login']);
@@ -303,10 +319,10 @@ class fm_users {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit . $sql_pwd, ',');
+		$sql = rtrim($sql_edit . $sql_pwd, ', ');
 		
 		/** Process group permissions */
 		if (isset($post['process_user_caps']) && !isset($post['user_caps'])) $post['user_caps'] = array();
@@ -324,14 +340,18 @@ class fm_users {
 		$query = "UPDATE `fm_groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not update the group in the database.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
+		}
 		
 		/* Associated users with group */
 		$queries[] = "UPDATE `fm_users` SET `user_group`='0', `user_caps`=NULL WHERE `user_group`='{$post['group_id']}'";
 		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $post['group_users']) . "')";
 		foreach ($queries as $query) {
 			$fmdb->query($query);
-			if (!$fmdb->last_result || $fmdb->sql_errors) return _('Could not associate the users with the group.');
+			if (!$fmdb->last_result || $fmdb->sql_errors) {
+				return formatError(_('Could not associate the users with the group.'), 'sql');
+			}
 		}
 
 		addLogEntry(sprintf(_("Updated group '%s'."), $post['group_name']));
@@ -359,13 +379,13 @@ class fm_users {
 		} elseif ($type == 'group') {
 			$field = 'group_name';
 			if (basicUpdate('fm_users', $id, 'user_group', null, 'user_group') === false) {
-				return _('This group could not be removed from the associated users.');
+				return formatError(_('This group could not be removed from the associated users.'), 'sql');
 			}
 		}
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $type . 's', $type . '_', $type . '_id', $field);
 		if (!updateStatus('fm_' . $type . 's', $id, $type . '_', 'deleted', $type . '_id')) {
-			return sprintf(_('This %s could not be deleted.'), $type) . "\n";
+			return formatError(sprintf(_('This %s could not be deleted.'), $type), 'sql');
 		} else {
 			addLogEntry(sprintf(_("Deleted %s '%s'."), $type, $tmp_name), $fm_name);
 			return true;
@@ -410,8 +430,7 @@ class fm_users {
 					$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				}
 			} else {
-				$user_actions = ($row->user_id == $_SESSION['user']['id'] && getOption('auth_method') != 2) ? '<a style="width: 110px; margin: auto;" class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#">' . $__FM_CONFIG['icons']['pwd_change'] . '</a>' : 'N/A';
-				$edit_status = $user_actions;
+				$edit_status = '<a style="width: 110px; margin: auto;" class="account_settings" id="' . $_SESSION['user']['id'] . '" href="#">' . $__FM_CONFIG['icons']['pwd_change'] . '</a>';
 			}
 
 			$star = (userCan($row->user_id, 'do_everything')) ? $__FM_CONFIG['icons']['star'] : null;
@@ -431,11 +450,12 @@ class fm_users {
 				$user_auth_type = _('None');
 			}
 			$column = "<td>$star $template_user</td>
-			<td>{$row->user_login}</td>
+			<td title=\"{$row->user_comment}\">{$row->user_login}</td>
 			<td>$last_login</td>
 			<td>$user_ipaddr</td>
 			<td>$user_auth_type</td>
 			<td>$super_admin_status</td>";
+			$name = $row->user_login;
 		} else {
 			$id = $row->group_id;
 			if (currentUserCan('manage_users')) {
@@ -446,10 +466,11 @@ class fm_users {
 			}
 			$column = "<td>{$row->group_name}</td>
 			<td>" . nl2br($row->group_comment) . "</td>";
+			$name = $row->group_name;
 		}
 		
 		echo <<<HTML
-		<tr id="$id"$disabled_class>
+		<tr id="$id" name="$name"$disabled_class>
 			$column
 			<td id="edit_delete_img">$edit_status</td>
 		</tr>
@@ -467,7 +488,7 @@ HTML;
 		global $__FM_CONFIG, $fm_name, $fm_login;
 
 		$user_id = $group_id = 0;
-		$user_login = $user_password = $cpassword = null;
+		$user_login = $user_password = $cpassword = $user_comment = null;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
@@ -503,6 +524,15 @@ HTML;
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_login">' . _('User Login') . '</label></th>
 					<td width="67%">' . $username_form . '</td>
+				</tr>';
+		}
+		if (in_array('user_comment', $form_bits)) {
+			/** Get field length */
+			$field_length = getColumnLength('fm_users', 'user_comment');
+			
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row"><label for="user_comment">' . _('User Comment') . '</label></th>
+					<td width="67%"><input name="user_comment" id="user_comment" type="text" value="' . $user_comment . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' /></td>
 				</tr>';
 		}
 		if (in_array('user_email', $form_bits)) {
@@ -727,7 +757,7 @@ PERM;
 		</form>
 		<script>
 			$(document).ready(function() {
-				$("select").select2({
+				$(".form-table select").select2({
 					containerCss: { "min-width": "165px" },
 					minimumResultsForSearch: -1
 				});

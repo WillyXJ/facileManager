@@ -26,8 +26,8 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_groups.php');
-include(ABSPATH . 'fm-modules/fmSQLPass/classes/class_servers.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
 	echo 0;
@@ -71,7 +71,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('manage_servers', $_SESS
 	} else {
 		basicGet('fm_' . $table, $id, $prefix, $field);
 		$results = $fmdb->last_result;
-		if (!$fmdb->num_rows) returnError();
+		if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
 		
 		$edit_form_data[] = $results[0];
 		if ($_POST['item_type'] == 'logging') {

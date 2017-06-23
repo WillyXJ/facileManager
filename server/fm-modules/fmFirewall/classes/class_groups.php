@@ -25,7 +25,7 @@ class fm_module_groups {
 	/**
 	 * Displays the group list
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -34,19 +34,35 @@ class fm_module_groups {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+				$bulk_actions_list = array(_('Delete'));
+			}
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
 							'name' => 'groups'
 						);
 
-			$title_array = array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;'));
-			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = array_merge((array) $title_array, array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;')));
+			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
-				$this->displayRow($results[$x]);
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
+				$this->displayRow($results[$x], $type);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -75,17 +91,19 @@ class fm_module_groups {
 			$clean_data = sanitize($data);
 			if (($key == 'group_name') && empty($clean_data)) return _('No group name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return _('Could not add the group because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry("Added {$post['group_type']} group:\nName: {$post['group_name']}\n" .
 				"Comment: {$post['group_comment']}");
@@ -108,17 +126,19 @@ class fm_module_groups {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the group
 		$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return _('Could not update the group because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -150,7 +170,7 @@ class fm_module_groups {
 			}
 		}
 		
-		return _('This group could not be deleted.');
+		return formatError(_('This group could not be deleted.'), 'sql');
 	}
 
 
@@ -159,13 +179,18 @@ class fm_module_groups {
 		
 		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $group_items = null;
+		$edit_status = $group_items = $checkbox = null;
 		
 		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_objects';
 		
 		if (currentUserCan($permission, $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!isItemInPolicy($row->group_id, 'group')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->group_id, 'group')) {
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
+			}
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -202,7 +227,8 @@ class fm_module_groups {
 		$comments = nl2br($row->group_comment);
 		
 		echo <<<HTML
-			<tr id="$row->group_id"$disabled_class>
+			<tr id="$row->group_id" name="$row->group_name"$disabled_class>
+				$checkbox
 				<td>$row->group_name</td>
 				<td>$group_items</td>
 				<td>$comments</td>

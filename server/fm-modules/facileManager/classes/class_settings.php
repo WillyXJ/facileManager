@@ -73,7 +73,9 @@ class fm_settings {
 				$result = setOption($option, $option_value, $command, false, $account_id);
 				unset($account_id);
 	
-				if (!$result) return _('Could not save settings because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(_('Could not save settings because a database error occurred.'), 'sql');
+				}
 		
 				$log_value = trim($option_value);
 				$log_message .= ucwords(str_replace('_', ' ', $option)) . ': ';
@@ -154,7 +156,9 @@ class fm_settings {
 				/** Update with the new value */
 				$result = setOption($option, $option_value, $command, false, $_SESSION['user']['account_id']);
 		
-				if (!$result) return _('Could not save settings because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(_('Could not save settings because a database error occurred.'), 'sql');
+				}
 			}
 			
 			addLogEntry(_('Generated system SSH key pair.'), $fm_name);
@@ -271,6 +275,13 @@ class fm_settings {
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		$time_format_list = buildSelect('time_format[' . $_SESSION['user']['account_id'] . ']', 'time_format', $__FM_CONFIG['options']['time_format'], $time_format);
 		
+		/** Logging Method */
+		$log_method = getOption('log_method');
+		$log_method_list = buildSelect('log_method', 'log_method', $__FM_CONFIG['options']['log_method'], $log_method);
+		$log_syslog_options_style = (!$log_method) ? 'style="display: none;"' : null;
+		$syslog_facility = getOption('syslog_facility');
+		$syslog_facilities = buildSelect('syslog_facility', 'syslog_facility', $__FM_CONFIG['options']['syslog_facilities'], $syslog_facility);
+		
 		/** Other Section */
 		$show_errors = getOption('show_errors');
 		$show_errors_checked = $show_errors ? 'checked' : null;
@@ -289,6 +300,7 @@ class fm_settings {
 		} else $software_update_checked = $software_update_options_style = null;
 
 		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
+		$sm_brand_img = getBrandLogo();
 		
 		$return_form = '
 		<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">
@@ -575,6 +587,28 @@ class fm_settings {
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
+							<label for="log_method">' . _('Logging Method') . '</label>
+							<p>' . sprintf(_('Where to send %s log messages.'), $fm_name) . '</p>
+						</div>
+						<div class="choices">
+							' . $log_method_list . '
+						</div>
+					</div>
+					<div id="log_syslog_options" ' . $log_syslog_options_style . '>
+						<div id="setting-row">
+							<div class="description">
+								<label for="software_update_tree">' . _('Syslog Facility') . '</label>
+								<p>' . sprintf(_('The syslog facility %s should send log messages to.'), $fm_name) . '</p>
+							</div>
+							<div class="choices">
+								' . $syslog_facilities . '
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
 							<label for="show_errors">' . _('Show Errors') . '</label>
 							<p>' . sprintf(_('If this is checked, %s will display application errors when they occur.'), $fm_name) . '</p>
 						</div>
@@ -640,6 +674,18 @@ class fm_settings {
 						</div>
 						<div id="gen_ssh_action" class="choices">
 							' . $sshkey_button . '
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<span id="brand_img"><img src="' . $sm_brand_img . '" /></span>
+							<label>' . _('Image Branding') . '</label>
+							<p>' . _('Rebrand this installation with your image.<br />(Recommended size: 48px x 48px)') . '</p>
+						</div>
+						<div class="choices">
+							<input name="sm_brand_img" id="sm_brand_img" type="text" value="' . $sm_brand_img . '" size="40" placeholder="path/to/image" />
 						</div>
 					</div>
 				</div>

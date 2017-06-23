@@ -27,7 +27,7 @@ $template_type = 'domain';
 $table = 'domains';
 
 if (!empty($_POST)) {
-	include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 
 	if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'create';
@@ -35,13 +35,13 @@ if (!empty($_POST)) {
 		case 'create':
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
-				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
+				$response = displayResponseClose($insert_id);
 			} else header('Location: ' . $GLOBALS['basename']);
 			break;
 		case 'update':
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
-				$response = '<p class="error">' . $zone_update_status . '</p>'. "\n";
+				$response = displayResponseClose($zone_update_status);
 			} else header('Location: ' . $GLOBALS['basename']);
 			break;
 		}

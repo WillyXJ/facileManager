@@ -75,7 +75,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	} else {
 		basicGet('fm_' . $table, $id, $prefix, $field);
 		$results = $fmdb->last_result;
-		if (!$fmdb->num_rows) returnError();
+		if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
 		
 		$edit_form_data[] = $results[0];
 		$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $view_id);

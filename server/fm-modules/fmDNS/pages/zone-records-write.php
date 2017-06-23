@@ -19,13 +19,12 @@
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
  | Processes zone record updates                                           |
- | Author: Tim Rowland                                                     |
  +-------------------------------------------------------------------------+
 */
 
 require_once('fm-init.php');
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
 
@@ -41,14 +40,35 @@ if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !c
 
 if (isset($update) && is_array($update)) {
 	foreach ($update as $id => $data) {
+		$old_record = null;
+		
+		if (isset($data['soa_serial_no'])) {
+			if (!class_exists('fm_dns_zones')) {
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			}
+			$fm_dns_zones->updateSOASerialNo($domain_id, $data['soa_serial_no'], 'no-increment');
+
+			continue;
+		}
+		
 		/** Auto-detect IPv4 vs IPv6 A records */
 		if ($record_type == 'A' && strrpos($data['record_value'], ':')) $record_type = 'AAAA';
 		elseif ($record_type == 'AAAA' && !strrpos($data['record_value'], ':')) $record_type = 'A';
+		
+		if ($record_type != 'PTR' && $data['record_status'] == 'deleted') {
+			$data['PTR'] = $domain_id;
+		}
+		
+		/** Get current record information */
+		if (isset($data['PTR'])) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $id, 'record_', 'record_id');
+			if ($fmdb->num_rows) $old_record = $fmdb->last_result[0];
+		}
 
 		$fm_dns_records->update($domain_id, $id, $record_type, $data);
 		
 		/** Are we auto-creating a PTR record? */
-		autoCreatePTR($domain_id, $record_type, $data);
+		autoManagePTR($domain_id, $record_type, $data, 'update', $old_record);
 	}
 }
 
@@ -77,7 +97,7 @@ if (isset($create) && is_array($create)) {
 			$fm_dns_records->add($domain_id, $record_type, $data);
 			
 			/** Are we auto-creating a PTR record? */
-			autoCreatePTR($domain_id, $record_type, $data);
+			autoManagePTR($domain_id, $record_type, $data);
 			
 			$record_count++;
 		}
@@ -100,10 +120,26 @@ if (isset($record_type) && $domain_id && !isset($import_records)) {
 }
 
 
-function autoCreatePTR($domain_id, $record_type, $data) {
-	if ($record_type == 'A' && isset($data['PTR']) && zoneAccessIsAllowed(array($data['PTR']))) {
-		global $__FM_CONFIG;
+/**
+ * Manages the PTR record
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param id $domain_id domain_id
+ * @param string $record_type Type of RR
+ * @param array $data RR data to process
+ * @param string $operation Add or Update
+ * @param object $old_record Old RR information
+ * @return null
+ */
+function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old_record = null) {
+	global $__FM_CONFIG, $fmdb;
 
+	$forward_record_id = ($old_record) ? $old_record->record_id : $fmdb->insert_id;
+	
+	if ($record_type == 'A' && isset($data['PTR']) && zoneAccessIsAllowed(array($data['PTR']))) {
 		$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
 		if ($data['record_name'][0] == '@') {
 			$data['record_name'] = null;
@@ -132,15 +168,31 @@ function autoCreatePTR($domain_id, $record_type, $data) {
 			return;
 		}
 
-		$array = array(
-				'record_name' => $data['record_value'],
-				'record_value' => $data['record_name'] . $domain,
-				'record_comment' => $data['record_comment'],
-				'record_status' => $data['record_status'],
-				);
+		$array['record_status'] = $data['record_status'];
+		if ($data['record_status'] != 'deleted') {
+			$array = array(
+					'record_name' => $data['record_value'],
+					'record_ttl' => $data['record_ttl'],
+					'record_class' => $data['record_class'],
+					'record_value' => $data['record_name'] . $domain,
+					'record_comment' => $data['record_comment'],
+					'record_status' => $data['record_status']
+					);
+		}
 
 		global $fm_dns_records;
+		if ($operation == 'update') {
+			$array['domain_id'] = $data['PTR'];
+			$fm_dns_records->update($data['PTR'], $old_record->record_ptr_id, 'PTR', $array);
+			
+			if ($fmdb->rows_affected) return;
+			array_pop($array);
+		}
+		
 		$fm_dns_records->add($data['PTR'], 'PTR', $array, 'replace');
+		if ($fmdb->insert_id != $forward_record_id) {
+			basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $forward_record_id, 'record_ptr_id', $fmdb->insert_id, 'record_id');
+		}
 	}
 }
 ?>

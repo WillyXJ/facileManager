@@ -20,31 +20,35 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_servers {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
+
+class fm_module_servers extends fm_shared_module_servers {
 	
 	/**
 	 * Displays the server list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
-		$num_rows = $fmdb->num_rows;
-		$results = $fmdb->last_result;
-		
-		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-			$bulk_actions_list = array(__('Upgrade'), __('Build Config'));
-			$title_array[] = array(
-								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
-								'class' => 'header-tiny'
-							);
-		} else {
-			$bulk_actions_list = null;
-		}
-
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no firewall servers.'));
 		} else {
-			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+				$bulk_actions_list = array(__('Upgrade'), __('Build Config'));
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
+									'class' => 'header-tiny'
+								);
+			} else {
+				$bulk_actions_list = null;
+			}
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$fmdb->num_rows = $num_rows;
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 			
 			$table_info = array(
 							'class' => 'display_results',
@@ -61,8 +65,11 @@ class fm_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -97,17 +104,19 @@ class fm_module_servers {
 			$clean_data = sanitize($data);
 			if (($key == 'server_name') && empty($clean_data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
+		}
 		
 		/** Add default fM interaction rules */
 		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
@@ -176,17 +185,19 @@ class fm_module_servers {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the server
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -221,7 +232,7 @@ class fm_module_servers {
 			}
 		}
 		
-		return __('This server could not be deleted.');
+		return formatError(__('This server could not be deleted.'), 'sql');
 	}
 
 
@@ -271,7 +282,7 @@ class fm_module_servers {
 		if ($class) $class = 'class="' . $class . '"';
 		
 		echo <<<HTML
-		<tr id="$row->server_id" $class>
+		<tr id="$row->server_id" name="$row->server_name" $class>
 			$checkbox
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$edit_name</td>

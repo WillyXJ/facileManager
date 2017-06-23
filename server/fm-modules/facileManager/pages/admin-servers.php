@@ -60,7 +60,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 						/** Add new server */
 						$add_server = moduleAddServer('add');
 						if ($add_server !== true) {
-							$data = _('Could not add server to account.') . "\n";
+							$data = _('Could not add server to account.') . "\n" . $add_server;
 						}
 					} else {
 						$data = _('Client automatic registration is not allowed.') . "\n";
@@ -75,7 +75,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				if (function_exists('moduleCompleteClientInstallation')) {
 					moduleCompleteClientInstallation();
 				}
-				$fm_shared_module_servers->updateClientVersion();
+				$fm_module_servers->updateClientVersion();
 			}
 			
 			/** Client upgrades */
@@ -96,7 +96,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				}
 				
 				// Probably need to move/remove this
-				$fm_shared_module_servers->updateClientVersion();
+				$fm_module_servers->updateClientVersion();
 			}
 			
 			if (array_key_exists('ssh', $_GET)) {

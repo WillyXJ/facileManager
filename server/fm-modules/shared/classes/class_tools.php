@@ -33,7 +33,7 @@ class fm_shared_module_tools {
 	function connectTests() {
 		global $fmdb, $__FM_CONFIG, $fm_name, $fm_module_tools;
 		
-		$return = null;
+		$return = "<pre>\n";
 		
 		/** Load ssh key for use */
 		$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
@@ -49,7 +49,10 @@ class fm_shared_module_tools {
 		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
 		
 		/** Process server list */
-		$num_rows = $fmdb->num_rows;
+		if (!$num_rows = $fmdb->num_rows) {
+			global $menu;
+			return sprintf('<p>' . _('You currently have no active servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', $menu[getParentMenuKey(_('Servers'))][4]);
+		}
 		$results = $fmdb->last_result;
 		for ($x=0; $x<$num_rows; $x++) {
 			$return .= sprintf(_("Running tests for %s\n"), $results[$x]->server_name);
@@ -98,9 +101,9 @@ class fm_shared_module_tools {
 			/** Module-specific connection tests */
 			$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
 			if (file_exists($module_tools_file)) {
-				if (!class_exists('fm_module_tools')) include($module_tools_file);
+				include_once($module_tools_file);
 				
-				$return .= $fm_module_tools->connectTests($results[$x]);
+				$return .= $fm_module_tools->moduleConnectTests($results[$x]);
 			}
 			
 			$return .=  "\n";
@@ -108,12 +111,9 @@ class fm_shared_module_tools {
 		
 		@unlink($temp_ssh_key);
 		
-		return $return;
+		return $return . "</pre>\n";
 	}
 	
 }
-
-if (!isset($fm_shared_module_tools))
-	$fm_shared_module_tools = new fm_shared_module_tools();
 
 ?>

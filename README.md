@@ -63,12 +63,12 @@ Operating Systems to allow .htaccess files to be used.
 
 ### Debian-based/Ubuntu - 
 > Edit /etc/apache2/sites-enabled/default and change 'AllowOverride 
-> None' to 'AllowOverride All' under <directory /var/www/> and reload 
+> None' to 'AllowOverride All' under `<directory /var/www/>` and reload 
 > apache.
 
 ### RHEL7/CentOS7 - 
 > Edit /etc/httpd/conf/httpd.conf and change 'AllowOverride 
-> None' to 'AllowOverride All' under <Directory /var/www/html> and reload 
+> None' to 'AllowOverride All' under `<Directory /var/www/html>` and reload 
 > apache.
 
 
@@ -108,6 +108,9 @@ Server Upgrade
    your database.
 7. Once fM is upgraded, you will be redirected to the admin-modules page where
    you can upgrade your modules individually.
+
+Alternatively, since v3.0, you can update the server through the UI (modules
+page).  You should still backup your database though!
 
 
 Client Upgrade

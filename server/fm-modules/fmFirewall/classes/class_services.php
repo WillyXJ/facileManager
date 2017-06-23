@@ -25,7 +25,7 @@ class fm_module_services {
 	/**
 	 * Displays the service list
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -34,19 +34,35 @@ class fm_module_services {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+				$bulk_actions_list = array(_('Delete'));
+			}
+			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
 							'name' => 'services'
 						);
 
-			$title_array = ($type == 'icmp') ? array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), __('Comment')) : array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), __('Comment'));
-			if (currentUserCan('manage_services', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), __('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), __('Comment')));
+			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -75,17 +91,19 @@ class fm_module_services {
 			$clean_data = sanitize($data);
 			if (($key == 'service_name') && empty($clean_data)) return __('No service name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the service because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the service because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry("Added service:\nName: {$post['service_name']}\nType: {$post['service_type']}\n" .
 				"Update Method: {$post['service_update_method']}\nConfig File: {$post['service_config_file']}");
@@ -108,17 +126,19 @@ class fm_module_services {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the service
 		$old_name = getNameFromID($post['service_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}services` SET $sql WHERE `service_id`={$post['service_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the service because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the service because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -150,7 +170,7 @@ class fm_module_services {
 			}
 		}
 		
-		return __('This service could not be deleted.');
+		return formatError(__('This service could not be deleted.'), 'sql');
 	}
 
 
@@ -159,11 +179,16 @@ class fm_module_services {
 		
 		$disabled_class = ($row->service_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = null;
-		
+		$edit_status = $checkbox = null;
+
 		if (currentUserCan('manage_services', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!isItemInPolicy($row->service_id, 'service')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->service_id, 'service')) {
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->service_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
+			}
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -175,7 +200,8 @@ class fm_module_services {
 		} else $service_tcp_flags = null;
 		
 		echo <<<HTML
-			<tr id="$row->service_id"$disabled_class>
+			<tr id="$row->service_id" name="$row->service_name"$disabled_class>
+				$checkbox
 				<td>$row->service_name</td>
 
 HTML;

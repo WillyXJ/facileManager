@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 43) ? fmUpgrade_2101($database) : true;
+	$success = ($GLOBALS['running_db_version'] < 45) ? fmUpgrade_3001($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -67,7 +67,7 @@ function fmUpgrade($database) {
 	$module_list = $fmdb->last_result;
 	for ($x=0; $x<$num_rows; $x++) {
 		$module_name = $module_list[$x]->module_name;
-		$success = $fm_tools->upgradeModule($module_name, 'quiet');
+		$success = $fm_tools->upgradeModule($module_name, 'quiet', $module_list[$x]->option_value);
 		if (!$success || $fmdb->last_error) {
 			$errors = true;
 			$success = false;
@@ -641,6 +641,33 @@ function fmUpgrade_2101($database) {
 	}
 
 	upgradeConfig('fm_db_version', 43, false);
+	
+	return $success;
+}
+
+
+/** fM v3.0-rc1 **/
+function fmUpgrade_3001($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 43) ? fmUpgrade_2101($database) : true;
+	
+	if ($success) {
+		$table[] = "ALTER TABLE `$database`.`fm_users` ADD `user_comment` VARCHAR(255) NULL DEFAULT NULL AFTER `user_email`";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 45, false);
 	
 	return $success;
 }

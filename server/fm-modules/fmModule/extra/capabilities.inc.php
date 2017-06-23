@@ -26,7 +26,7 @@ $fm_user_caps['fmModule'] = array(
 		'view_all'				=> _('View All'),
 		'manage_servers'		=> _('Server Management'),
 		'build_server_configs'	=> _('Build Server Configs'),
-		'user_cap_ref'			=> _('User Capability Title'),
+		'user_cap_ref'			=> __('User Capability Title'),
 		'manage_settings'		=> _('Manage Settings')
 	);
 

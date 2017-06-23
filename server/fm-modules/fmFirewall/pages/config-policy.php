@@ -29,7 +29,7 @@ if (!currentUserCan(array('manage_policies', 'view_all'), $_SESSION['module'])) 
 if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
 
 $server_config_page = $GLOBALS['RELPATH'] . $menu[getParentMenuKey()][4];
-$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'rules';
+$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'filter';
 $server_serial_no = (isset($_GET['server_serial_no'])) ? sanitize($_GET['server_serial_no']) : header('Location: ' . $server_config_page);
 if (!$server_id = getServerID($server_serial_no, $_SESSION['module'])) header('Location: ' . $server_config_page);
 
@@ -65,11 +65,9 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $server_serial_no);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
 
-$response = $form_data = $action = null;
-
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']), $type);
 /*
 echo <<<HTML
 <div id="pagination_container" class="submenus">
@@ -83,22 +81,10 @@ HTML;
 */
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_type='$type'");
-$fm_module_policies->rows($result, $type);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_policies->rows($result, $type, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'policy', $server_serial_no = null) {
-	global $__FM_CONFIG;
-	
-	$menu_selects = null;
-	
-	foreach ($__FM_CONFIG['policy']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"config-policy?type=$general&server_serial_no=$server_serial_no\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
 
 ?>

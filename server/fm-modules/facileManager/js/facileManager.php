@@ -24,7 +24,8 @@ echo '$(document).ready(function() {
 		});
 		$("#admin-tools-select select").select2({
 			containerCss: { "min-width": "300px" },
-			minimumResultsForSearch: 10
+			minimumResultsForSearch: 10,
+			allowClear: true
 		});
 		$(".log_search_form select").select2({
 			containerCss: { "min-width": "165px" },
@@ -62,7 +63,7 @@ echo '$(document).ready(function() {
 		}
 	});
 	
-	$("input:text, input:password, select").first().focus();
+	$("input:text, input:password, select, textarea").first().focus();
 	
 	// Everything we need for scrolling up and down.
 	$(window).scroll( function(){
@@ -175,8 +176,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -234,8 +236,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				if ($("#manage_item_contents").width() >= 700) {
@@ -276,8 +279,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else if (response == "Success") {
 					$row_id.removeClass("active disabled build");
 					$row_id.addClass(item_status);
@@ -307,9 +311,11 @@ echo '$(document).ready(function() {
 									{ queue: false, duration: 200 }
 								);
 							});
-						$("#response").delay(3000).fadeTo(200, 0.00, function() {
-							$("#response").slideUp(400);
-						});
+						if (response.toLowerCase().indexOf("response_close") == -1) {
+							$("#response").delay(3000).fadeTo(200, 0.00, function() {
+								$("#response").slideUp(400);
+							});
+						}
 					} else {
 						$("#manage_item").fadeIn(200);
 						$("#manage_item_contents").fadeIn(200);
@@ -330,6 +336,7 @@ echo '$(document).ready(function() {
         var $this 		= $(this);
         var $row_id		= $this.parent().parent();
         item_id			= $row_id.attr("id");
+        item_name		= $row_id.attr("name");
         item_type		= $("#table_edits").attr("name");
         item_sub_type	= $this.attr("name");
         var log_type	= getUrlVars()["type"];
@@ -345,15 +352,16 @@ echo '$(document).ready(function() {
 			is_ajax: 1
 		};
 
-		if (confirm("' . _('Are you sure you want to delete this item?') . '")) {
+		if (confirm("' . _('Are you sure you want to delete this item?') . ' ("+ item_name +")")) {
 			$.ajax({
 				type: "POST",
 				url: "fm-modules/facileManager/ajax/processPost.php",
 				data: form_data,
 				success: function(response)
 				{
-					if (response.indexOf("force_logout") >= 0) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
+						return false;
 					} else if (response == "' . _('Success') . '") {
 						$row_id.css({"background-color":"#D98085"});
 						$row_id.fadeOut("slow", function() {
@@ -371,9 +379,11 @@ echo '$(document).ready(function() {
 										{ queue: false, duration: 200 }
 									);
 								});
-							$("#response").delay(3000).fadeTo(200, 0.00, function() {
-								$("#response").slideUp(400);
-							});
+							if (response.toLowerCase().indexOf("response_close") == -1) {
+								$("#response").delay(3000).fadeTo(200, 0.00, function() {
+									$("#response").slideUp(400);
+								});
+							}
 						} else {
 							$("#manage_item").fadeIn(200);
 							$("#manage_item_contents").fadeIn(200);
@@ -419,8 +429,9 @@ echo '$(document).ready(function() {
 			data: $("#manage").serialize(),
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else {
 					$("#response").removeClass("static").html(response);
 					$("#response")
@@ -432,9 +443,11 @@ echo '$(document).ready(function() {
 								{ queue: false, duration: 200 }
 							);
 						});
-					$("#response").delay(3000).fadeTo(200, 0.00, function() {
-						$("#response").slideUp(400);
-					});
+					if (response.toLowerCase().indexOf("response_close") == -1) {
+						$("#response").delay(3000).fadeTo(200, 0.00, function() {
+							$("#response").slideUp(400);
+						});
+					}
 				}
 			}
 		});
@@ -453,8 +466,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else if (response == "Success") {
 					$("#gen_ssh_action").html("<p>' . _('SSH key pair is generated.') . '</p>");
 				} else {
@@ -467,9 +481,11 @@ echo '$(document).ready(function() {
 								{ queue: false, duration: 200 }
 							);
 						});
-					$("#response").delay(3000).fadeTo(200, 0.00, function() {
-						$("#response").slideUp(400);
-					});
+					if (response.toLowerCase().indexOf("response_close") == -1) {
+						$("#response").delay(3000).fadeTo(200, 0.00, function() {
+							$("#response").slideUp(400);
+						});
+					}
 				}
 			}
 		});
@@ -497,8 +513,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 				$(".form-table input").first().focus();
@@ -518,8 +535,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				} else if (response == "Success") {
 					$("#popup_response").html("<p>' . _('Profile has been updated.') . '</p>");
 				} else {
@@ -578,8 +596,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#response").html(response);
 				$("#response")
@@ -590,9 +609,11 @@ echo '$(document).ready(function() {
 							{ queue: false, duration: 200 }
 						);
 					});
-				$("#response").delay(3000).fadeTo(200, 0.00, function() {
-					$("#response").slideUp(400);
-				});
+				if (response.toLowerCase().indexOf("response_close") == -1) {
+					$("#response").delay(3000).fadeTo(200, 0.00, function() {
+						$("#response").slideUp(400);
+					});
+				}
 			}
 		});
 		
@@ -600,7 +621,7 @@ echo '$(document).ready(function() {
     });
 
 	/* Admin Tools */
-    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply, .double-click\"), #module_install, #module_upgrade",
+    $("#admin-tools").delegate("form input.button:not(\"#import-records, #import, #db-backup, #bulk_apply, .double-click\"), #module_install, #module_upgrade, #update_core",
     "click tap",function(e){
         var $this 	= $(this);
         task		= $this.attr("id");
@@ -619,8 +640,9 @@ echo '$(document).ready(function() {
 			data: form_data,
 			success: function(response)
 			{
-				if (response.indexOf("force_logout") >= 0) {
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
+					return false;
 				}
 				$("#manage_item_contents").html(response);
 			}
@@ -715,6 +737,14 @@ echo '$(document).ready(function() {
 		}
 	});
 	
+	$("#log_method").change(function() {
+		if ($(this).val() == 0) {
+			$("#log_syslog_options").slideUp();
+		} else {
+			$("#log_syslog_options").show("slow");
+		}
+	});
+	
 	$("#software_update").click(function() {
 		if ($(this).is(":checked")) {
 			$("#software_update_options").show("slow");
@@ -723,7 +753,7 @@ echo '$(document).ready(function() {
 		}
 	});
 	
-	$("#help_topbar img.popout").click(function() {
+	$("#help_topbar i.popout").click(function() {
 		$("#topheadpartright .help_link").click();
 		window.open("help.php","1356124444538","width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0");
 		return false;
@@ -740,7 +770,7 @@ echo '$(document).ready(function() {
 	});
 
 	/* Server config builds */
-    $("#table_edits").delegate("#build", "click tap", function(e) {
+	$("#table_edits").delegate("#build", "click tap", function(e) {
 		if (confirm("' . _('Are you sure you want to build the config for this server?') . '")) {
 	        var $this 	= $(this);
 	        server_id	= $this.parent().parent().attr("id");
@@ -768,17 +798,20 @@ echo '$(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
-						if (response.indexOf("force_logout") >= 0) {
+						if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 							doLogout();
+							return false;
 						}
 						var eachLine = response.split("\n");
 						if (eachLine.length <= 2) {
 							var myDelay = 6000;
 							$("#response").html(response);
 							
-							$("#response").delay(3000).fadeTo(200, 0.00, function() {
-								$("#response").slideUp(400);
-							});
+							if (response.toLowerCase().indexOf("response_close") == -1) {
+								$("#response").delay(3000).fadeTo(200, 0.00, function() {
+									$("#response").slideUp(400);
+								});
+							}
 						} else {
 							var myDelay = 0;
 		
@@ -797,7 +830,8 @@ echo '$(document).ready(function() {
 						if (response.toLowerCase().indexOf("failed") == -1 && 
 							response.toLowerCase().indexOf("one or more errors") == -1 && 
 							response.toLowerCase().indexOf("you are not authorized") == -1 && 
-							response.toLowerCase().indexOf("does not have php configured") == -1
+							response.toLowerCase().indexOf("does not have php configured") == -1 && 
+							response.toLowerCase().indexOf("response_close") == -1
 							) {
 							$this.fadeOut(400);
 							$this.parent().parent().removeClass("build");
@@ -808,8 +842,14 @@ echo '$(document).ready(function() {
 		}
 		
 		return false;
-    });
+	});
     
+	$("#response").delegate("#response_close i.close", "click tap", function(e) {
+		$("#response").fadeTo(200, 0.00, function() {
+			$("#response").slideUp(400);
+		});
+	});
+
 	$("#mainitems .has-sub").hover(function() {
 		$(this).find("span.arrow").show();
 	}, function() {
@@ -825,13 +865,13 @@ echo '$(document).ready(function() {
 		
 		/* Build array of checked items */
 		event.preventDefault();
-		var serverIDs = $("#table_edits input:checkbox:checked").not(".tickall").map(function() {
+		var itemIDs = $("#table_edits input:checkbox:checked").not(".tickall").map(function() {
 			return $(this).val();
 		}).get();
 		
 		/* Process items and action */
-        item_type		= $("#table_edits").attr("name");
-		if (serverIDs.length == 0) {
+		item_type = $("#table_edits").attr("name");
+		if (itemIDs.length == 0) {
 			alert("You must select at least one " + item_type.slice(0,-1) + ".");
 		} else {
 			if (confirm("Are you sure you want to " + $("#bulk_action").val().toLowerCase() + " these selected " + item_type + "?")) {
@@ -840,10 +880,12 @@ echo '$(document).ready(function() {
 				$("#manage_item_contents").html("<p>' . _('Processing Bulk Action') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 		
 				var form_data = {
-					item_id: serverIDs,
+					item_id: itemIDs,
 					action: "bulk",
 					bulk_action: $("#bulk_action").val().toLowerCase(),
 					item_type: item_type,
+					server_serial_no: getUrlVars()["server_serial_no"],
+					rel_url: window.location.href,
 					is_ajax: 1
 				};
 				
@@ -853,8 +895,9 @@ echo '$(document).ready(function() {
 					data: form_data,
 					success: function(response)
 					{
-						if (response.indexOf("force_logout") >= 0) {
+						if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 							doLogout();
+							return false;
 						}
 						$("#manage_item_contents").html(response);
 						if ($("#manage_item_contents").width() >= 700) {
@@ -886,8 +929,9 @@ echo '$(document).ready(function() {
 				data: form_data,
 				success: function(response)
 				{
-					if (response.indexOf("force_logout") >= 0) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
+						return false;
 					}
 					$this.find("i").removeClass("fa-spin");
 					$("#manage_item_contents").html(response);
@@ -897,7 +941,8 @@ echo '$(document).ready(function() {
 					if (response.toLowerCase().indexOf("failed") == -1 && 
 						response.toLowerCase().indexOf("one or more errors") == -1 && 
 						response.toLowerCase().indexOf("you are not authorized") == -1 && 
-						response.toLowerCase().indexOf("does not have php configured") == -1
+						response.toLowerCase().indexOf("does not have php configured") == -1 && 
+						response.toLowerCase().indexOf("response_close") == -1
 						) {
 						$this.parent().fadeOut(400);
 					}
@@ -944,6 +989,10 @@ echo '$(document).ready(function() {
 			$("#search_form_container").fadeOut();
 		}
 	});
+	$("a.search").mouseover(function() {
+		$("#search_form_container").fadeIn();
+		$("#search_form_container input:text").focus();
+	});
 	
 	/* Search input box */
 	$("#search input").keypress(function (e) {
@@ -960,6 +1009,9 @@ echo '$(document).ready(function() {
 			location.search = $.param(queryParameters);
 			return false;
 		}
+	});
+	$("#search input").focusout(function() {
+		$("#search_form_container").fadeOut();
 	});
 
 	/* Search input box cancel */
@@ -991,6 +1043,21 @@ echo '$(document).ready(function() {
 
 		location.search = $.param(queryParameters);
 		return false;
+	});
+	
+	/* Show branding image in the settings */
+	$("#setting-row #sm_brand_img").keyup(function (e) {
+		var url = $(this).val();
+		$.ajax({
+			url:url,
+			type:"HEAD",
+			error: function() {
+				$("#setting-row #brand_img").html("<i class=\"fa fa-question fa-4x\"></i>");
+			},
+			success: function() {
+				$("#setting-row #brand_img").html("<img src=\"" + url + "\" />");
+			}
+		});
 	});
 
 });

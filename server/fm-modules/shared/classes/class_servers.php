@@ -69,7 +69,7 @@ class fm_shared_module_servers {
 				case 'cron':
 					/* Servers updated via cron require manual upgrades */
 					$response[] = ' --> ' . _('This server needs to be upgraded manually with the following command:');
-					$response[] = " --> sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade";
+					$response[] = " --> sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php upgrade";
 					addLogEntry(sprintf(_('Upgraded client scripts on %s.'), $server_name));
 					break;
 				case 'http':
@@ -109,54 +109,38 @@ class fm_shared_module_servers {
 					}
 					break;
 				case 'ssh':
+					$server_remote = runRemoteCommand($server_name, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php upgrade", 'return', $server_update_port);
+
+					if (is_array($server_remote)) {
+						if (array_key_exists('output', $server_remote) && !count($server_remote['output'])) {
+							unset($server_remote);
+							continue;
+						}
+					} else {
+						return $server_remote;
+					}
+					
 					/** Test the port first */
 					if (!socketTest($server_name, $server_update_port, 10)) {
 						$response[] = ' --> ' . sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port);
 						break;
 					}
-					
-					/** Get SSH key */
-					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-					if (!$ssh_key) {
-						$response[] = ' --> ' . sprintf(_('Failed: SSH key is not %sdefined</a>.'), '<a href="' . getMenuURL(_('General')) . '">');
-						break;
-					}
-					
-					$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
-					if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-					if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-						$response[] = ' --> ' . sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key);
-						break;
-					}
-					
-					@chmod($temp_ssh_key, 0400);
-					
-					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-					if (!$ssh_user) {
-						return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-					}
-
-					unset($post_result);
-					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade 2>&1'", $post_result, $retval);
-					
-					@unlink($temp_ssh_key);
-					
-					if ($retval) {
+					if ($server_remote['failures']) {
 						/** Something went wrong */
-						$post_result[] = _('Client upgrade failed.');
+						$server_remote['output'][] = _('Client upgrade failed.');
 					} else {
-						if (!count($post_result)) {
-							$post_result[] = _('Config build was successful.');
+						if (!count($server_remote['output'])) {
+							$server_remote['output'][] = _('Config build was successful.');
 							addLogEntry(sprintf(_('Upgraded client scripts on %s.'), $server_name));
 						}
 					}
-					if (count($post_result) > 1) {
+					if (count($server_remote['output']) > 1) {
 						/** Loop through and format the output */
-						foreach ($post_result as $line) {
+						foreach ($server_remote['output'] as $line) {
 							if (strlen(trim($line))) $response[] = " --> $line";
 						}
 					} else {
-						$response[] = " --> " . $post_result[0];
+						$response[] = " --> " . $server_remote['output'][0];
 					}
 					break;
 			}
@@ -308,7 +292,7 @@ class fm_shared_module_servers {
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>', _('This server is not found.'));
+		if (!$fmdb->num_rows) return displayResponseClose(_('This server is not found.'));
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
@@ -354,7 +338,7 @@ class fm_shared_module_servers {
 			case 'https':
 				/** Test the port first */
 				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
+					return displayResponseClose(sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
 				}
 				
 				/** Remote URL to use */
@@ -371,9 +355,9 @@ class fm_shared_module_servers {
 				if (!is_array($post_result)) {
 					/** Something went wrong */
 					if (empty($post_result)) {
-						return sprintf('<p class="error">%s</p>', sprintf(_('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
+						return displayResponseClose(sprintf(_('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
 					}
-					return '<p class="error">' . $post_result . '</p>';
+					return displayResponseClose($post_result);
 				} else {
 					if (count($post_result) > 1) {
 						$response .= "<pre>\n";
@@ -390,72 +374,41 @@ class fm_shared_module_servers {
 				}
 				break;
 			case 'ssh':
-				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
-				}
-				
-				/** Get SSH key */
-				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-				if (!$ssh_key) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-				}
-				
-				$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
-				if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
-				}
-				
-				@chmod($temp_ssh_key, 0400);
-				
-				$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-				if (!$ssh_user) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-				}
-		
-				/** Test SSH authentication */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $post_result, $retval);
-				if ($retval) {
-					/** Something went wrong */
-					@unlink($temp_ssh_key);
-					
-					/** Handle error codes */
-					return ($retval == 255) ? sprintf('<p class="error">%s</p>'. "\n", _('Failed: Could not login via SSH.')) : sprintf('<p class="error">%s</p>'. "\n", _('Failed: Client file is not present.'));
-				}
-				unset($post_result);
-				
-				/** Run build */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php $action " . implode(' ', $options) . "'", $post_result, $retval);
-				
-				@unlink($temp_ssh_key);
-				
-				if ($retval) {
-					/** Something went wrong */
-					return '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
-				}
-				
-				if (!count($post_result)) $post_result[] = ucfirst($friendly_action) . ' was successful.';
+				$server_remote = runRemoteCommand($server_name, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php $action " . implode(' ', $options), 'return', $server_update_port);
 
-				if (count($post_result) > 1) {
+				if (is_array($server_remote)) {
+					if (array_key_exists('output', $server_remote) && (!count($server_remote['output'])) || strpos($server_remote['output'][0], 'successful') !== false) {
+						$server_remote['output'] = array();
+					}
+				} else {
+					return $server_remote;
+				}
+
+				if ($server_remote['failures']) {
+					/** Something went wrong */
+					return displayResponseClose(ucfirst(strtolower($friendly_action)) . ' failed.' . join('<br />', $server_remote['output']));
+				}
+				
+				if (!count($server_remote['output'])) $server_remote['output'][] = ucfirst(strtolower($friendly_action)) . ' was successful.';
+
+				if (count($server_remote['output']) > 1) {
 					$response = "<pre>\n";
 
 					/** Loop through and format the output */
-					foreach ($post_result as $line) {
+					foreach ($server_remote['output'] as $line) {
 						$response .= "[$server_name] $line\n";
 					}
 
 					$response .= "</pre>\n";
 				} else {
-					$response = "<p>[$server_name] " . $post_result[0] . '</p>';
+					$response = "<p>[$server_name] " . $server_remote['output'][0] . '</p>';
 				}
-
 				break;
 		}
 		
 		if ($action == 'buildconf') {
 			/* reset the server_build_config flag */
-			if (!strpos($response, strtolower('failed'))) {
+			if (strpos($response, strtolower('failed')) === false) {
 				setBuildUpdateConfigFlag($serial_no, 'no', 'build');
 			}
 		}
@@ -470,8 +423,5 @@ class fm_shared_module_servers {
 	}
 
 }
-
-if (!isset($fm_shared_module_servers))
-	$fm_shared_module_servers = new fm_shared_module_servers();
 
 ?>

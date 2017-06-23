@@ -25,7 +25,7 @@ class fm_dns_views {
 	/**
 	 * Displays the view list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -33,6 +33,9 @@ class fm_dns_views {
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
 
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -45,8 +48,11 @@ class fm_dns_views {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -77,7 +83,9 @@ class fm_dns_views {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$view_name', '$view_comment')";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the view because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the view because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry("Added view:\nName: $view_name\nComment: $view_comment");
 		return true;
@@ -109,17 +117,19 @@ class fm_dns_views {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the view */
 		$old_name = getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` SET $sql WHERE `view_id`={$post['view_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the view because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the view because a database error occurred.'), 'sql');
+		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -146,14 +156,14 @@ class fm_dns_views {
 		if ($fmdb->num_rows) {
 			/** Delete corresponding configs */
 			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'view_id') === false) {
-				return __('The corresponding configs could not be deleted.');
+				return formatError(__('The corresponding configs could not be deleted.'), 'sql');
 			}
 		}
 		
 		/** Delete view */
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $id, 'view_', 'deleted', 'view_id') === false) {
-			return __('This view could not be deleted because a database error occurred.');
+			return formatError(__('This view could not be deleted because a database error occurred.'), 'sql');
 		} else {
 //			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry("Deleted view '$tmp_name'.");
@@ -187,7 +197,7 @@ class fm_dns_views {
 		$comments = nl2br($row->view_comment);
 
 		echo <<<HTML
-		<tr id="$row->view_id"$disabled_class>
+		<tr id="$row->view_id" name="$row->view_name"$disabled_class>
 			<td>$edit_name</td>
 			<td>$comments</td>
 			$edit_status

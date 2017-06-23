@@ -32,7 +32,7 @@ function moduleFunctionalCheck() {
 	$html_checks = null;
 	
 	/** Count active name servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . __('You currently have no active name servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL(__('Servers')));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . _('You currently have no active servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL(_('Servers')));
 	
 	/** Count global options */
 	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_')) ? null : sprintf('<p>' . __('You currently have no global options defined for named.conf. <a href="%s">Click here</a> to define one or more.') . '</p>', getMenuURL(__('Options')));
@@ -68,9 +68,9 @@ function buildModuleDashboard() {
 			if ($server_results[$i]->server_installed != 'yes') {
 				$errors .= sprintf('<b>%s</b> - %s' . "\n", $server_results[$i]->server_name, __('Client is not installed.'));
 			} elseif (isset($server_results[$i]->server_client_version) && $server_results[$i]->server_client_version != getOption('client_version', 0, $_SESSION['module'])) {
-				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name, __('Client needs to be upgraded.'));
+				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(_('Servers')), $server_results[$i]->server_name, __('Client needs to be upgraded.'));
 			} elseif ($server_results[$i]->server_build_config != 'no' && $server_results[$i]->server_status == 'active') {
-				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(__('Servers')), $server_results[$i]->server_name, __('Server needs a new configuration built.'));
+				$errors .= sprintf('<a href="%s"><b>%s</b></a> - %s' . "\n", getMenuURL(_('Servers')), $server_results[$i]->server_name, __('Server needs a new configuration built.'));
 			}
 		}
 	}
@@ -120,9 +120,9 @@ function buildModuleDashboard() {
 		</div>
 	</div>
 	</div>', __('Summary'),
-			sprintf(__('You have <b>%s</b> name servers configured.'), $server_count),
-			sprintf(__('You have <b>%s</b> zones defined.'), $domain_count),
-			sprintf(__('You have <b>%s</b> records.'), $record_count)
+			sprintf(ngettext('You have <b>%s</b> name server configured.', 'You have <b>%s</b> name servers configured.', formatNumber($server_count)), formatNumber($server_count)),
+			sprintf(ngettext('You have <b>%s</b> zone defined.', 'You have <b>%s</b> zones defined.', formatNumber($domain_count)), formatNumber($domain_count)),
+			sprintf(ngettext('You have <b>%s</b> record.', 'You have <b>%s</b> records.', formatNumber($record_count)), formatNumber($record_count))
 			);
 
 	if ($error_display) {
@@ -151,8 +151,9 @@ function buildModuleToolbar() {
 	
 	if (isset($_REQUEST['domain_id'])) {
 		$domain = displayFriendlyDomainName(getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+		$icon = (getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('&nbsp; <i class="mini-icon fa fa-lock" title="%s"></i>', __('Zone is secured with DNSSEC')) : null;
 		$domain_menu = '<div id="topheadpart">
-			<span class="single_line">' . __('Domain') . ':&nbsp;&nbsp; ' . $domain . '</span>
+			<span class="single_line">' . __('Domain') . ':&nbsp;&nbsp; ' . $domain . $icon . '</span>
 		</div>';
 		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
@@ -194,22 +195,30 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Zones</a>
 		<div>
 			<p>Zones (aka domains) can be managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
-			there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, delete 
+			there you can add, edit {$__FM_CONFIG['icons']['edit']}, delete 
 			{$__FM_CONFIG['icons']['delete']}, and reload {$__FM_CONFIG['icons']['reload']} zones depending on your user permissions.</p>
-			<p>You can define a zone as a clone <i class="template-icon fa fa-clone"></i> of another previously defined master zone.  The cloned zone will contain all of the same records
+			<p>You can define a zone as a clone <i class="mini-icon fa fa-clone"></i> of another previously defined master zone.  The cloned zone will contain all of the same records
 			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
 			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
 			<p>Zones can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
 			management if you have several zones with a similar framework. You can create a zone template when creating a new zone or you can 
 			completely manage them from <a href="__menu{Zone Templates}">Templates</a>. All zones based on a template will be shown with the
-			<i class="template-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
+			<i class="mini-icon fa fa-picture-o"></i> icon. Zone templates can only be deleted when there are no zones associated 
 			with them. In addition, clones of a zone based on a template cannot be shortened to a DNAME RR.</p>
+			<p>Zones can support dynamic updates only if the checkbox is ticked while creating or editing individual zones. This will cause 
+			{$_SESSION['module']} to compare the zone file from the DNS server with that in the database and make any necessary changes. This option
+			will increase processing time while reloading zones.</p>
+			<p>Zones can support DNSSEC signing only if the checkbox is ticked while creating or editing individual zones. You must create the KSK and ZSK
+			before zones will be signed (only offline signing is supported). This option will increase processing time while reloading zones.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa). You can also
 			delegate reverse zones by specifying the classless IP range in the zone name (1-128.168.192.in-addr.arpa).</p>
 			<p>Zones that are missing SOA and NS records will be highlighted with a red background and will not be built or reloaded until the 
 			records exists.</p>
+			<p>You can also import BIND-compatible zone dump files instead of adding records individually. Go to Admin &rarr; 
+			<a href="__menu{Tools}">Tools</a> and use the Import Zone Files utility. Select your dump file and click 'Import Zones'
+			which will import any views, zones, and records listed in the file.</p>
 			<br />
 		</div>
 	</li>
@@ -249,7 +258,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Servers</a>
 		<div>
 			<p>All aspects of server configuration takes place in the Config menu 
-			item. From there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, 
+			item. From there you can add, edit {$__FM_CONFIG['icons']['edit']}, 
 			delete {$__FM_CONFIG['icons']['delete']} servers and options depending on your user permissions.</p>
 			
 			<p><b>Servers</b><br />
@@ -289,7 +298,8 @@ function buildModuleHelpFile() {
 			
 			<p><b>Keys</b><br />
 			Currently, {$_SESSION['module']} does not generate server keys (TSIG), but once you create them on your server, you can define them in the UI 
-			at Config &rarr; <a href="__menu{Keys}">Keys</a>.</p>
+			at Config &rarr; <a href="__menu{Keys}">Keys</a>. DNSSEC keys, however, can be automatically generated and managed by {$_SESSION['module']}.
+			DNSSEC keys can only be deleted when they are not used for signing and/or have been revoked.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			
@@ -325,37 +335,6 @@ function buildModuleHelpFile() {
 	
 HTML;
 	return $body;
-}
-
-
-/**
- * Builds the server listing in a dropdown menu
- *
- * @since 1.0
- * @package facileManager
- * @subpackage fmDNS
- */
-function buildServerSubMenu($server_serial_no = 0, $class = null) {
-	$server_list = buildSelect('server_serial_no', 'server_serial_no', availableDNSServers(), $server_serial_no, 1, null, false, 'this.form.submit()');
-	
-	$hidden_inputs = null;
-	foreach ($GLOBALS['URI'] as $param => $value) {
-		if ($param == 'server_serial_no') continue;
-		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
-	}
-	
-	$class = $class ? 'class="' . $class . '"' : null;
-
-	$return = <<<HTML
-	<div id="configtypesmenu" $class>
-		<form action="{$GLOBALS['basename']}" method="GET">
-		$hidden_inputs
-		$server_list
-		</form>
-	</div>
-HTML;
-
-	return $return;
 }
 
 
@@ -575,6 +554,17 @@ function reloadAllowed($domain_id = null) {
 	
 
 /**
+ * Removed trailing periods
+ *
+ * @since 1.0
+ * @package facileManager
+ */
+function trimFullStop($value){
+	return rtrim($value, '.');
+}
+
+
+/**
  * Gets the menu badge counts
  *
  * @since 1.1
@@ -604,6 +594,11 @@ function getModuleBadgeCounts($type) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
 					} elseif ($domain_results[$i]->domain_reload != 'no') {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
+					} elseif ($domain_results[$i]->domain_dnssec != 'no') {
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND domain_id=' . $domain_results[$i]->domain_id);
+						if (!$fmdb->num_rows || ($domain_results[$i]->domain_dnssec_signed && getDNSSECExpiration($domain_results[$i]) <= strtotime('now + 7 days'))) {
+							$badge_counts[$domain_results[$i]->domain_mapping]++;
+						}
 					}
 				}
 			}
@@ -702,7 +697,7 @@ function setDefaultOverrideOptions() {
 	}
 	
 	if (is_array($config)) {
-		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		
 		foreach ($config as $config_data) {
 			$fm_module_options->add($config_data);
@@ -712,7 +707,7 @@ function setDefaultOverrideOptions() {
 
 
 /**
- * Sets default override configuration options based on OS distro
+ * Returns if a RR should be allowed or not
  *
  * @since 1.2
  * @package facileManager
@@ -742,13 +737,13 @@ function buildModuleMenu() {
 		addSubmenuPage('zones.php', null, __('Record Validation'), null, $_SESSION['module'], 'zone-records-validate.php');
 	
 	addObjectPage(__('Config'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', __('Servers'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
+		addSubmenuPage('config-servers.php', _('Servers'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
 		addSubmenuPage('config-servers.php', __('Views'), __('Views'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-views.php');
 		addSubmenuPage('config-servers.php', __('ACLs'), __('Access Control Lists'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
 		addSubmenuPage('config-servers.php', __('Keys'), __('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-servers.php', __('Logging'), __('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
-		addSubmenuPage('config-servers.php', __('Controls'), __('Controls'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
+		addSubmenuPage('config-servers.php', __('Operations'), __('Operations'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
 	
 	addObjectPage(__('Templates'), __('Zones'), array('manage_zones', 'view_all'), $_SESSION['module'], 'templates-soa.php');
 		addSubmenuPage('templates-soa.php', __('SOA'), __('SOA Templates'), array('manage_zones', 'view_all'), $_SESSION['module'], 'templates-soa.php');
@@ -887,56 +882,6 @@ function getZoneParentID($domain_id) {
 
 
 /**
- * Returns an array of servers and groups
- *
- * @since 2.0
- * @package facileManager
- * @subpackage fmDNS
- *
- * @param string $server_id_type What server ID should be used (serial|id)
- * @return array
- */
-function availableDNSServers($server_id_type = 'serial') {
-	global $fmdb, $__FM_CONFIG;
-	
-	$server_array[0][] = null;
-	$server_array[0][0][] = __('All Servers');
-	$server_array[0][0][] = '0';
-	
-	$j = 0;
-	/** Server Groups */
-	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_');
-	if ($fmdb->num_rows) {
-		$server_array[__('Groups')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[__('Groups')][$j][] = $results[$i]->group_name;
-			$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
-			$j++;
-		}
-	}
-	$j = 0;
-	/** Server names */
-	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_');
-	if ($fmdb->num_rows) {
-		$server_array[__('Servers')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[__('Servers')][$j][] = $results[$i]->server_name;
-			if ($server_id_type == 'serial') {
-				$server_array[__('Servers')][$j][] = $results[$i]->server_serial_no;
-			} elseif ($server_id_type == 'id') {
-				$server_array[__('Servers')][$j][] = 's_' . $results[$i]->server_id;
-			}
-			$j++;
-		}
-	}
-	
-	return $server_array;
-}
-
-
-/**
  * Returns whether the config is in use or not
  *
  * @since 2.0
@@ -1050,6 +995,119 @@ function availableViews() {
 	}
 	
 	return $array;
+}
+
+
+/**
+ * Returns an array of resource records from SQL
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $record_type
+ * @param integer $domain_id
+ * @return array
+ */
+function buildSQLRecords($record_type, $domain_id) {
+	global $fmdb, $__FM_CONFIG;
+	
+	if ($record_type == 'SOA') {
+		$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
+			`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
+			`soa_template`='no' AND `soa_status`='active'";
+		$fmdb->get_results($soa_query);
+		if ($fmdb->num_rows) $result = $fmdb->last_result;
+		else return null;
+		
+		foreach (get_object_vars($result[0]) as $key => $val) {
+			$sql_results[$result[0]->soa_id][$key] = $val;
+		}
+		array_shift($sql_results[$result[0]->soa_id]);
+		array_shift($sql_results[$result[0]->soa_id]);
+		return $sql_results;
+	} else {
+		$valid_domain_ids = 'IN (' . join(',', getZoneParentID($domain_id)) . ')';
+		
+		$record_sql = "AND domain_id $valid_domain_ids ";
+		if ($record_type != 'all') {
+			if (in_array($record_type, array('A', 'AAAA'))) {
+				$record_sql .= "AND record_type IN ('A', 'AAAA')";
+			} else {
+				$record_sql .= "AND record_type='$record_type'";
+			}
+		}
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_name', 'record_', $record_sql);
+		if ($result) {
+			$results = $fmdb->last_result;
+
+			for ($i=0; $i<$result; $i++) {
+				$static_array = array('record_name', 'record_ttl', 'record_class',
+					'record_type', 'record_value', 'record_comment', 'record_status');
+				$optional_array = array('record_priority', 'record_weight', 'record_port',
+					'record_os', 'record_cert_type', 'record_key_tag', 'record_algorithm',
+					'record_flags', 'record_text', 'record_params', 'record_regex',
+					'record_append');
+				
+				foreach ($static_array as $field) {
+					$sql_results[$results[$i]->record_id][$field] = $results[$i]->$field;
+				}
+				foreach ($optional_array as $field) {
+					if ($results[$i]->$field != null) {
+						$sql_results[$results[$i]->record_id][$field] = $results[$i]->$field;
+					}
+				}
+				
+				/** Skipped record? */
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $results[$i]->record_id, 'record_', 'record_id', "AND domain_id=$domain_id");
+				$sql_results[$results[$i]->record_id]['record_skipped'] = ($fmdb->num_rows) ? 'on' : 'off';
+			}
+		}
+		return $sql_results;
+	}
+}
+
+
+/**
+ * Returns an array of compared array values
+ *
+ * @since 1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $data_array
+ * @param array $sql_records
+ * @return array
+ */
+function compareValues($data_array, $sql_records) {
+	$changes = array();
+	foreach ($data_array as $key => $val) {
+		$diff = array_diff_assoc($data_array[$key], $sql_records[$key]);
+		if ($diff) {
+			$changes[$key] = $diff;
+		}
+	}
+
+	return $changes;
+}
+
+
+/**
+ * Returns the DNSSEC expiration date for a zone
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $data Domain details array
+ * @param string $type What expiration should be processed
+ * @return integer
+ */
+function getDNSSECExpiration($data, $type = 'calculated') {
+	$domain_dnssec_sig_expires = ($data->domain_dnssec_sig_expire) ? $data->domain_dnssec_sig_expire : getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']);
+	$domain_dnssec_sig_expires = ($type == 'calculated') ? strtotime(date('YmdHis', $data->domain_dnssec_signed) . ' + ' . $domain_dnssec_sig_expires . ' days') : date('YmdHis', strtotime('now + ' . $domain_dnssec_sig_expires . ' days'));
+	
+	return $domain_dnssec_sig_expires;
 }
 
 

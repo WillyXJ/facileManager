@@ -672,7 +672,7 @@ function detectOSDistro() {
 			if ($lsb_release && trim($lsb_release) != '') {
 				$distrib = explode(':', $lsb_release);
 				$distrib_id = explode(' ', trim($distrib[1]));
-				return $distrib_id[0];
+				return (substr($distrib_id[0], 0, 3) == 'Red') ? 'Redhat' : $distrib_id[0];
 			} elseif (file_exists($filename = '/etc/lsb-release')
 				&& $lsb_release = file_get_contents($filename)
 				&& preg_match('/^DISTRIB_ID="?([^"\n]+)"?/m', $lsb_release, $id)) {
@@ -684,7 +684,7 @@ function detectOSDistro() {
 		if (file_exists($filename = '/etc/redhat-release')
 			&& $rh_release = file_get_contents($filename)) {
 			 $rh_release = explode(' ', $rh_release);
-			 return $rh_release[0];
+			 return ($rh_release[0] == 'Red') ? 'Redhat' : $rh_release[0];
 		}
 		
 		/** OS-release systems */
@@ -831,7 +831,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			$user = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			$result = ($user) ? 'ok' : 'failed';
 			if ($result == 'failed') {
-				echo fM("Installation failed.  No SSH user found for this account.\n");
+				echo fM("Installation failed.  No SSH user found for this account.  Please define the user in the General Settings first.\n");
 				exit(1);
 			}
 			
@@ -866,7 +866,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			}
 			
 			/** Add an entry to sudoers */
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/client.php *';
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'ssh';
@@ -919,7 +919,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 				$user = getParameterValue($user_var, findFile('envvars'), '=');
 			}
 			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/client.php *';
 			
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
@@ -1381,5 +1381,46 @@ function addServer($url, $data) {
 	
 	return array('data' => $data, 'add_result' => "Success\n");
 }
+
+
+/**
+ * Returns whether a daemon is running or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $daemon Daemon name to check
+ * @return boolean
+ */
+function isDaemonRunning($daemon) {
+	return shell_exec('ps -A | grep ' . escapeshellarg($daemon) . ' | grep -vc grep');
+}
+
+
+/**
+ * Returns whether a daemon is running or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $app_version Detected application version
+ * @param string $serverhost FMHOST
+ * @param boolean $compress Compress the request or not
+ * @return string
+ */
+function versionCheck($app_version, $serverhost, $compress) {
+	$url = str_replace(':/', '://', str_replace('//', '/', $serverhost . '/buildconf.php'));
+	$data['action'] = 'version_check';
+	$server_type = detectServerType();
+	$data['server_type'] = $server_type['type'];
+	$data['server_version'] = $app_version;
+	$data['compress'] = $compress;
+	
+	$raw_data = getPostData($url, $data);
+	$raw_data = $compress ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	
+	return $raw_data;
+}
+
 
 ?>

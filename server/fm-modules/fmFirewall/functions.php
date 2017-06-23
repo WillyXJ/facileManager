@@ -98,7 +98,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Firewalls</a>
 		<div id="fmfw_config_servers">
 			<p>Firewall servers can be managed from the <a href="__menu{Firewalls}">Firewalls</a> menu item. From 
-			there you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, and delete {$__FM_CONFIG['icons']['delete']} 
+			there you can add, edit {$__FM_CONFIG['icons']['edit']}, and delete {$__FM_CONFIG['icons']['delete']} 
 			firewalls depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
 			<p>Select the firewall type from the list, select the method the firewall will be updated, and define the firewall configuration file. All of 
@@ -110,7 +110,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Firewall Policies</a>
 		<div id="fmfw_config_policies">
 			<p>Policy Rules are managed by clicking on the firewall server name from the <a href="__menu{Firewalls}">Firewalls</a> 
-			menu item. From there, you can add <i class="template-icon fa fa-plus-square-o fa-lg"></i>, edit {$__FM_CONFIG['icons']['edit']}, delete 
+			menu item. From there, you can add, edit {$__FM_CONFIG['icons']['edit']}, delete 
 			{$__FM_CONFIG['icons']['delete']}, and reorder rules (drag and drop the row). When adding or editing a rule, you can select the 
 			firewall interface the rule applies to, the direction, source, destination, services, time restriction (iptables only), action, and
 			any options you want for the rule.</p>

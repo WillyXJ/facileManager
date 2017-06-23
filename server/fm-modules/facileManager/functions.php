@@ -153,6 +153,7 @@ function isNewVersionAvailable($package, $version) {
 	
 	$data['package'] = $package;
 	$data['version'] = $version;
+	$data['format']  = 'array';
 	
 	$method = 'update';
 	
@@ -169,7 +170,7 @@ function isNewVersionAvailable($package, $version) {
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
 		$method = 'insert';
-	} elseif (strpos($last_version_check['data'], $version)) {
+	} elseif (isset($last_version_check['data']['version']) && $last_version_check['data']['version'] == $version) {
 		$last_version_check['timestamp'] = 0;
 	}
 	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
@@ -180,6 +181,10 @@ function isNewVersionAvailable($package, $version) {
 			$result = file_get_contents($fm_site_url . '?' . http_build_query($data));
 		} else {
 			$result = getPostData($fm_site_url . '?' . http_build_query($data), $data, 'get', array(CURLOPT_CONNECTTIMEOUT => 1));
+		}
+		
+		if (isSerialized($result)) {
+			$result = unserialize($result);
 		}
 		
 		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, true, 0, $package);
@@ -198,6 +203,8 @@ function isNewVersionAvailable($package, $version) {
  * @package facileManager
  */
 function sanitize($data, $replace = null) {
+	global $fmdb;
+	
 	if ($replace) {
 		$strip_chars = array("'", "\"", "`", "$", "?", "*", "&", "^", "!", "#");
 		$replace_chars = array(" ", "\\", "_", "(", ")", ",", ".", "-");
@@ -205,8 +212,15 @@ function sanitize($data, $replace = null) {
 		$data = str_replace($strip_chars, '', $data);
 		$data = str_replace($replace_chars, $replace, $data);
 		$data = str_replace('--', '-', $data);
+		
 		return $data;
-	} else return @mysql_real_escape_string($data);
+	} else {
+		if ($fmdb->use_mysqli) {
+			return @mysqli_real_escape_string($fmdb->dbh, $data);
+		} else {
+			return @mysql_real_escape_string($data);
+		}
+	}
 }
 
 
@@ -263,9 +277,9 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui-1.10.2.min.css" />
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css">
-		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/tooltip.css" type="text/css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/tooltip.css" type="text/css" />
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-1.9.1.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-ui-1.10.2.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
@@ -396,10 +410,12 @@ HTML;
 				displaySearchForm() . '</div>';
 		} else $search = null;
 
+		$branding_logo = getBrandLogo();
+		
 		$return = <<<HTML
 	<div id="tophead">
 		<div id="topheadpart">
-			<img src="fm-modules/$fm_name/images/fm.png" alt="$fm_name" title="$fm_name" />
+			<img src="$branding_logo" alt="$fm_name" title="$fm_name" />
 			$fm_name<br />
 			v$fm_version
 		</div>
@@ -746,8 +762,14 @@ function basicUpdate($table, $id, $update_field, $update_value, $field = 'id') {
  *
  * @since 1.0
  * @package facileManager
+ * 
+ * @param string $tbl_name Table name
+ * @param string $column_name Column name
+ * @param string $sort Optional sort function
+ * 
+ * return array
  */
-function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
+function enumMYSQLSelect($tbl_name, $column_name, $sort = 'unsorted') {
 	global $fmdb;
 	
 	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name'";
@@ -761,6 +783,10 @@ function enumMYSQLSelect($tbl_name, $column_name, $head = null) {
 		$valuestring = "{$head},{$valuestring}";
 	}
 	$values = explode(',', $valuestring);
+	
+	if ($sort != 'unsorted') {
+		$sort($values);
+	}
 	
 	return $values;
 }
@@ -822,16 +848,6 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 	if ($onchange) $build_select .= ' onchange="' . $onchange . '" ';
 	$build_select .= "$disabled>$type_options</select>\n";
 	return $build_select;
-}
-
-/**
- * Removed trailing periods
- *
- * @since 1.0
- * @package facileManager
- */
-function trimFullStop($value){
-	return rtrim($value, '.');
 }
 
 
@@ -969,7 +985,7 @@ function socketTest($host, $port, $timeout) {
  * @since 1.0
  * @package facileManager
  */
-function getPostData($url, $data, $post = 'post', $options = array()) {
+function getPostData($url, $data = null, $post = 'post', $options = array()) {
 	if ($post == 'post') {
 		$options = array(
 			CURLOPT_POST => true,
@@ -1079,7 +1095,7 @@ function buildDashboard() {
 		$dashboard = <<<DASH
 	<div id="shadow_box" class="fullwidthbox">
 		<div id="shadow_container" class="fullwidthbox">
-		$fm_new_version_available
+		<p>{$fm_new_version_available['text']}</p>
 		</div>
 	</div>
 	<br />
@@ -1114,7 +1130,7 @@ function buildHelpFile() {
 	/** facileManager help */
 	$body = <<<HTML
 <div id="issue_tracker">
-	<p>Have an idea for a new feature? Find a bug? Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
+	<p>Have an idea for a new feature? Found a bug? Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
 </div>
 <h3>$fm_name</h3>
 <ul>
@@ -1158,7 +1174,7 @@ function buildHelpFile() {
 			<p>$fm_name incorporates the use of multiple user accounts with granular permissions. This way you can limit access to your 
 			environment.</p>
 			
-			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="__menu{Users}">Users</a>.</p>
+			<p>You can add, modify, and delete user accounts at Admin &rarr; <a href="__menu{Users & Groups}">Users</a>.</p>
 			
 			<p>For non-LDAP users, there are some options you can select:</p>
 			<ul>
@@ -1200,7 +1216,7 @@ function buildHelpFile() {
 				<li><b>None</b><br />
 				Every user will be automatically logged in as the default super-admin account that was created during the installation process.</li>
 				<li><b>Built-in Authentication</b><br />
-				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users}">Users</a>.</li>
+				Authenticates against the $fm_name database using solely the users defined at Admin &rarr; <a href="__menu{Users & Groups}">Users</a>.</li>
 				<li><b>LDAP Authentication</b><br />
 				Users are authenticated against a defined LDAP server. Upon success, users are created in the $fm_name database using the selected 
 				template account for granular permissions within the environment. If no template is selected then user authentication will fail 
@@ -1268,18 +1284,26 @@ HTML;
  * @since 1.0
  * @package facileManager
  */
-function addLogEntry($log_data, $module = null, $link = null) {
+function addLogEntry($log_data, $module = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$account_id = isset($_SESSION['user']['account_id']) ? $_SESSION['user']['account_id'] : 0;
 	$user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : 0;
 	$module = isset($module) ? $module : $_SESSION['module'];
 	
-	$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
-	if ($link) {
-		$result = @mysql_query($insert, $link) or die(mysql_error());
-	} else {
-		$fmdb->query($insert);
+	$log_method = getOption('log_method');
+	
+	if ($log_method != 1) {
+		$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
+		if (is_object($fmdb)) {
+			$fmdb->query($insert);
+		} else {
+			die(_('Lost connection to the database.'));
+		}
+	}
+	
+	if ($log_method) {
+		addSyslogEntry(trim($log_data), $module);
 	}
 }
 
@@ -1323,13 +1347,14 @@ function getAvailableModules() {
  */
 function getOption($option = null, $account_id = 0, $module_name = null) {
 	global $fmdb;
+	if (!$fmdb) return false;
 	
 	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
 
 	$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql LIMIT 1";
 	$fmdb->get_results($query);
 	
-	if ($fmdb->num_rows) {
+	if ($fmdb->num_rows && !$fmdb->sql_errors) {
 		$results = $fmdb->last_result;
 		
 		if (isSerialized($results[0]->option_value)) {
@@ -1374,11 +1399,10 @@ function setOption($option = null, $value = null, $insert_update = 'auto', $auto
 		}
 		$query = "INSERT INTO fm_options (" . implode(',', $keys) . ") VALUES ('" . implode("','", $values) . "')";
 	} else {
-		$query = "UPDATE fm_options SET option_name='$option', option_value='$value' WHERE option_name='$option' AND account_id=$account_id $module_sql";
+		$query = "UPDATE fm_options SET option_value='$value' WHERE option_name='$option' AND account_id=$account_id $module_sql";
 	}
-	$result = $fmdb->query($query);
 	
-	return $result;
+	return $fmdb->query($query);
 }
 
 /**
@@ -1708,19 +1732,15 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div>';
 	if (isset($addl_blocks)) {
-		if (is_array($addl_blocks)) {
-			foreach ($addl_blocks as $block) {
-				$page_links[] = '<div>' . $block . '</div>';
-			}
-		} else {
-			$page_links[] = '<div>' . $addl_blocks . '</div>';
+		foreach ((array) $addl_blocks as $block) {
+			$page_links[] = '<div>' . $block . '</div>';
 		}
 	}
 	$page_links[] = buildPaginationCountMenu(0, 'pagination');
 
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
-	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', $fmdb->num_rows), $fmdb->num_rows));
+	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', formatNumber($fmdb->num_rows)), formatNumber($fmdb->num_rows)));
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
@@ -1729,7 +1749,7 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	}
 	
 	/** Page number */
-	$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . $total_pages;
+	$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . formatNumber($total_pages);
 	
 	/** Next link */
 	if ($page < $total_pages) {
@@ -1793,8 +1813,6 @@ function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
 function bailOut($message, $tryagain = 'try again', $title = null) {
 	global $fm_name;
 	
-	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
-
 	if (!$title) $title = _('Requirement Error');
 	
 	if (strpos($message, '<') != 0) {
@@ -1812,7 +1830,7 @@ function bailOut($message, $tryagain = 'try again', $title = null) {
 	printf('<div id="fm-branding">
 		<img src="%s" /><span>%s</span>
 	</div>
-	<div id="window">%s%s</div>', $branding_logo, $title, $message, $tryagain);
+	<div id="window">%s%s</div>', getBrandLogo(), $title, $message, $tryagain);
 	exit(printFooter());
 }
 
@@ -1830,16 +1848,16 @@ function bailOut($message, $tryagain = 'try again', $title = null) {
  * @return string
  */
 function displayProgress($step, $result, $process = 'noisy', $error = null) {
-	global $fmdb;
-	
-	if ($result == true) {
+	if ($result === true) {
 		$output = '<i class="fa fa-check fa-lg"></i>';
 		$status = 'success';
 	} else {
 		global $fmdb;
 		
 		if (!$error) {
-			$error = is_object($fmdb) ? $fmdb->last_error : mysql_error();
+			if (is_object($fmdb)) {
+				$error = $fmdb->last_error;
+			}
 		}
 		if ($error) {
 			$output = '<a href="#" class="error-message tooltip-right" data-tooltip="' . $error . '"><i class="fa fa-times fa-lg"></i></a>';
@@ -1984,7 +2002,6 @@ function verifyNumber($number, $min_range = 0, $max_range = null, $decimal_allow
 		if (!$decimal_allowed) {
 			return filter_var($number, FILTER_VALIDATE_INT, array('options' => array('min_range' => $min_range, 'max_range' => $max_range)));
 		} else {
-			
 			return filter_var($number, FILTER_VALIDATE_INT, array('options' => array('min_range' => $min_range, 'max_range' => $max_range)));
 		}
 	} else {
@@ -2030,7 +2047,9 @@ function buildSettingsForm($saved_options, $default_options) {
 				$input_field = buildSelect($option, $option, $options_array['options'], $option_value);
 				break;
 			default:
-				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="40" />';
+				$size = (isset($options_array['size'])) ? $options_array['size'] : 40;
+				$addl = (isset($options_array['addl'])) ? $options_array['addl'] : null;
+				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="' . $size . '" ' . $addl . ' />';
 		}
 		$option_rows .= <<<ROW
 			<div id="setting-row">
@@ -2137,9 +2156,13 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	
 	if (empty($title)) $title = getPageTitle();
 	
+	$style = (empty($response)) ? 'style="display: none;"' : null;
+	if (strpos($response, '</p>') === false || strpos($response, _('Database error')) !== false) {
+		$response = displayResponseClose($response);
+	}
+
 	echo '<div id="body_container">' . "\n";
-	if (!empty($response)) echo '<div id="response"><p class="error">' . $response . "</p></div>\n";
-	else echo '<div id="response" style="display: none;"></div>' . "\n";
+	echo '<div id="response" ' . $style . '>' . $response . "</div>\n";
 	echo '<h2>' . $title;
 	
 	if ($allowed_to_add) {
@@ -2163,16 +2186,16 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
  * @return boolean
  */
 function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM_CONFIG = null) {
-	global $fmdb, $fm_dns_zones;
+	global $fmdb;
 	
 	if (!$__FM_CONFIG) global $__FM_CONFIG;
 	
 	$serial_no = sanitize($serial_no);
 	/** Process server group */
 	if (!empty($serial_no) && $serial_no[0] == 'g') {
-		global $fm_shared_module_servers;
+		global $fm_module_servers;
 		
-		$group_servers = $fm_shared_module_servers->getGroupServers(substr($serial_no, 2));
+		$group_servers = $fm_module_servers->getGroupServers(substr($serial_no, 2));
 
 		if (!is_array($group_servers)) return false;
 
@@ -2188,7 +2211,17 @@ function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM
 	}
 	$result = $fmdb->query($query);
 	
-	if ($fmdb->result) return true;
+	if ($fmdb->result) {
+		if (isset($GLOBALS[$_SESSION['module']]['DNSSEC'])) {
+			foreach ($GLOBALS[$_SESSION['module']]['DNSSEC'] as $items) {
+				basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", $items['domain_id'], 'domain_dnssec_signed', $items['domain_dnssec_signed'], 'domain_id');
+				if ($fmdb->sql_errors || !$fmdb->result) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -2231,6 +2264,12 @@ function getBadgeCounts($type) {
 	$badge_count = 0;
 	
 	if (!defined('INSTALL') && !defined('UPGRADE')) {
+		if ($type == 'core') {
+			include(ABSPATH . 'fm-includes/version.php');
+			
+			/** New versions available */
+			if (isNewVersionAvailable($fm_name, $fm_version)) $badge_count++;
+		}
 		if ($type == 'modules') {
 			/** Get fM badge counts */
 			$modules = getAvailableModules();
@@ -2411,17 +2450,16 @@ function formatLogKeyData($strip, $key, $data) {
  * @param string $link_display Show or Hide the page back link
  * @return string
  */
-function fMDie($message = null, $link_display = 'show') {
+function fMDie($message = null, $link_display = 'show', $title = null) {
 	global $fm_name;
 	
-	$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
-
 	if (!$message) $message = _('An unknown error occurred.');
+	if (!$title) $title = _('Oops!');
 	
 	printHeader('Error', 'install', 'no-help', 'no-menu');
 	
 	printf('<div id="fm-branding"><img src="%s" /><span>%s</span></div>
-		<div id="window"><p>%s</p>', $branding_logo, _('Oops!'), $message);
+		<div id="window"><p>%s</p>', getBrandLogo(), $title, $message);
 	if ($link_display == 'show') echo '<p><a href="javascript:history.back();">' . _('&larr; Back') . '</a></p>';
 	echo '</div>';
 	
@@ -2439,7 +2477,7 @@ function fMDie($message = null, $link_display = 'show') {
  * @return string
  */
 function unAuth($link_display = 'show') {
-	fMDie(_('You do not have permission to view this page. Please contact your administrator for access.'), $link_display);
+	fMDie(_('You do not have permission to view this page. Please contact your administrator for access.'), $link_display, _('Forbidden'));
 }
 
 
@@ -2625,46 +2663,6 @@ function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $mo
 
 
 /**
- * Adds a submenu item to the Dashboard menu
- *
- * @since 1.2
- * @package facileManager
- *
- * @param string $menu_title Text used to display the menu item
- * @param string $page_title Text used to display the page title when the page loads
- * @param string $capability Minimum capability required for the menu item to be visible to the user
- * @param string $module Module name the menu item is for
- * @param string $menu_slug Menu item slug name to used to reference this item
- * @param string $class Class name to apply to the menu item
- * @param integer $position Menu position for the item
- * @param integer $badge_count Number of items to display in the badge
- */
-function addDashboardPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
-	addSubmenuPage('index.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
-}
-
-
-/**
- * Adds a submenu item to the Admin menu
- *
- * @since 1.2
- * @package facileManager
- *
- * @param string $menu_title Text used to display the menu item
- * @param string $page_title Text used to display the page title when the page loads
- * @param string $capability Minimum capability required for the menu item to be visible to the user
- * @param string $module Module name the menu item is for
- * @param string $menu_slug Menu item slug name to used to reference this item
- * @param string $class Class name to apply to the menu item
- * @param integer $position Menu position for the item
- * @param integer $badge_count Number of items to display in the badge
- */
-function addAdminPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $badge_count = 0, $position = null) {
-	addSubmenuPage('admin-tools.php', $menu_title, $page_title, $capability, $module, $menu_slug, $class, $position, $badge_count);
-}
-
-
-/**
  * Adds a submenu item to the Settings menu
  *
  * @since 1.2
@@ -2774,7 +2772,7 @@ function hasExceededMaxInputVars() {
 function checkMaxInputVars() {
 	if ($required_input_vars = hasExceededMaxInputVars()) {
 		fMDie(sprintf(_('PHP max_input_vars (%1$d) has been reached and %2$s or more are required. Please increase the limit to fulfill this request. One method is to set the following in %3$s.htaccess:') .
-			'<p><code>php_value max_input_vars %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH), true);
+			'<p><code>php_value max_input_vars %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH));
 	}
 }
 
@@ -2831,7 +2829,10 @@ function setUserModule($user_default_module) {
 function getMenuURL($search_slug = null) {
 	global $menu, $submenu;
 	
+	if (!is_array($menu)) return false;
+	
 	if (!$search_slug) $search_slug = $GLOBALS['basename'];
+	if (is_array($search_slug)) $search_slug = $search_slug[1];
 	
 	foreach ($menu as $position => $menu_items) {
 		$parent_key = array_search($search_slug, $menu_items, true);
@@ -2949,7 +2950,7 @@ function parseAjaxOutput($output) {
  * @return string Parsed output
  */
 function parseMenuLinks($html) {
-	$string = preg_replace("/__menu{(.+?)}/esim", "getMenuURL('\\1')", $html);
+	$string = preg_replace_callback("/__menu{(.+?)}/", 'getMenuURL', $html);
 	return $string;
 }
 
@@ -2967,7 +2968,7 @@ function countServerUpdates() {
 	
 	if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND (server_build_config!="no" OR server_client_version!="' . getOption('client_version', 0, $_SESSION['module']) . '") AND server_status="active" AND server_installed="yes"', null, false, null, true);
-		if ($fmdb->num_rows) return $fmdb->last_result[0]->count;
+		if (!$fmdb->sql_errors && $fmdb->num_rows) return formatNumber($fmdb->last_result[0]->count);
 	}
 			
 	return 0;
@@ -2986,26 +2987,22 @@ function countServerUpdates() {
 function displaySearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
 		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
-		$search_remove = '<div class="search_remove">
-			<i class="fa fa-remove fa-lg"></i>
-		</div>';
+		$search_remove = '<i class="search_remove fa fa-remove fa-lg" title="' . _('Clear this search') . '"></i>';
+		$display = ' style="display:block"';
 	} else {
 		$placeholder = _('Search this page by keyword');
-		$search_remove = null;
+		$search_remove = $display = null;
 	}
 	
 	$form = <<<HTML
-	<div id="search_form_container">
+	<div id="search_form_container"$display>
 		<div>
-			<div class="search_icon">
-				<i class="fa fa-search fa-lg"></i>
-			</div>
 			<div id="search_form">
 				<form id="search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
-					<input type="text" placeholder="$placeholder" />
+					<input type="text" placeholder="$placeholder" value="{$_GET['q']}" />
+					$search_remove
 				</form>
 			</div>
-			$search_remove
 		</div>
 	</div>
 HTML;
@@ -3046,15 +3043,16 @@ function countArrayDimensions($array) {
  * @param string $style Use an image or font
  * @return string
  */
-function displayAddNew($name = null, $rel = null, $title = null, $style = 'fa-plus-square-o') {
+function displayAddNew($name = null, $rel = null, $title = null, $style = 'default') {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = _('Add New');
+	$contents = ($style == 'default') ? $title : null;
 	
 	if ($name) $name = ' name="' . $name . '"';
 	if ($rel) $rel = ' rel="' . $rel . '"';
 	
-	$image = '<i class="template-icon fa ' . $style . '" title="' . $title . '"></i>';
+	$image = '<i class="mini-icon ' . $style . '" title="' . $title . '">' . $contents . '</i>';
 	
 	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
 }
@@ -3221,6 +3219,617 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
  */
 function isDebianSystem($os) {
 	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu'));
+}
+
+
+/**
+ * Run command on remote machines via SSH
+ * 
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $host_array Hostname of remote machine
+ * @param string $command Command to run on $host
+ * @param string $format Be silent or verbose with output
+ * @param integer $port Remote port to connect to
+ * @return boolean
+ */
+function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22) {
+	global $fm_name;
+	
+	$failures = false;
+	
+	/** Convert $host to an array */
+	if (!is_array($host_array)) {
+		$host_array = array($host_array);
+	}
+	
+	/** Get SSH key */
+	$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
+	if (!$ssh_key) {
+		return displayResponseClose(noSSHDefined('key'));
+	}
+
+	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
+	if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
+	if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
+		return displayResponseClose(sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
+	}
+
+	@chmod($temp_ssh_key, 0400);
+
+	/** Get SSH user */
+	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
+	if (!$ssh_user) {
+		if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
+		return displayResponseClose(noSSHDefined('user'));
+	}
+
+	/** Run remote command */
+	foreach ($host_array as $host) {
+		/** Test the port first */
+		if (!socketTest($host, $port, 10)) {
+			if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
+			return displayResponseClose(sprintf(_('Failed: could not access %s (tcp/%d).'), $host, $port));
+		}
+
+		/** Test SSH authentication */
+		exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $port -l $ssh_user $host 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $output, $rc);
+		if ($rc) {
+			/** Something went wrong */
+			@unlink($temp_ssh_key);
+
+			/** Handle error codes */
+			return ($rc == 255) ? displayResponseClose(_('Failed: Could not login via SSH. Check the system logs on the client for the reason.')) : displayResponseClose(_('Failed: Client file is not present - is the client software installed?'));
+		}
+		unset($output);
+
+		exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $port -l $ssh_user $host \"$command\"", $output, $rc);
+	
+		if ($rc) {
+			$failures = true;
+		} elseif ($format == 'silent') {
+			$output = array();
+		}
+
+		if ($format == 'verbose') {
+			if (isset($output)) {
+				echo "<p><b>$host</b><br />" . join('<br />', $output) . '</p>';
+			}
+		}
+	}
+
+	@unlink($temp_ssh_key);
+	
+	return array('failures' => $failures, 'output' => $output);
+}
+
+
+/**
+ * Use MySQLi or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @return boolean
+ */
+function useMySQLi() {
+	include(ABSPATH . 'fm-includes/version.php');
+		
+	if (function_exists('mysqli_connect')) {
+		if (version_compare(phpversion(), '5.5', '>=') || ! function_exists('mysql_connect')) {
+			return true;
+		} elseif (strpos($fm_version, '-') !== false) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
+/**
+ * Send log message to syslog
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $message Message to send
+ * @param string $module Module name sending the message
+ * @return null
+ */
+function addSyslogEntry($message, $module) {
+	$syslog_facility = getOption('syslog_facility');
+	
+	if ($syslog_facility) {
+		openlog($module, LOG_PERROR, $syslog_facility);
+		$x = 0;
+		foreach (explode("\n", $message) as $line) {
+			if ($x) {
+				$line = "  --> $line";
+			}
+			syslog(LOG_INFO, $line);
+			$x++;
+		}
+		closelog();
+	}
+}
+
+
+/**
+ * Performs a recursive is_writable
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $dir Top level directory to check
+ * @return boolean
+ */
+function is_writable_r($dir) {
+	if (is_dir($dir)) {
+		if (is_writable($dir)) {
+			$objects = scandir($dir);
+			foreach ($objects as $object) {
+				if ($object != '.' && $object != '..') {
+					if (!is_writable_r($dir . DIRECTORY_SEPARATOR . $object)) return false;
+					else continue;
+				}
+			}    
+			return true;    
+		} else {
+			return false;
+		}
+	} elseif (file_exists($dir)) {
+		return is_writable($dir);
+	}
+}
+
+
+/**
+ * Downloads a file from the fM website
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $file File to download
+ * @return array
+ */
+function downloadfMFile($file) {
+	global $__FM_CONFIG;
+	
+	$message = "Downloading $file\n";
+	
+	list($tmp_dir, $created) = clearUpdateDir();
+	if (!$created) {
+		return sprintf('<p>' . _('%s and %s need to be writeable by %s in order for the core and modules to be updated automatically.') . "</p>\n", $tmp_dir, ABSPATH, $__FM_CONFIG['webserver']['user_info']['name']);
+	}
+
+	$local_file = $tmp_dir . basename($file);
+	@unlink($local_file);
+	
+	$fh = fopen($local_file, 'w+');
+	$ch = curl_init();
+	$options = array(
+		CURLOPT_URL				=> $file,
+		CURLOPT_TIMEOUT			=> 3600,
+		CURLOPT_HEADER			=> false,
+		CURLOPT_FOLLOWLOCATION	=> true,
+		CURLOPT_SSL_VERIFYPEER  => false,
+		CURLOPT_RETURNTRANSFER  => true
+	);
+	@curl_setopt_array($ch, $options);
+	$result = curl_exec($ch);
+	@fputs($fh, $result);
+	@fclose($fh);
+	if ($result === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+		$message .= "Unable to download file.\n";
+		$message .= "\n" . curl_error($ch) . "\n";
+		
+		curl_close($ch);
+		$local_file = false;
+	}
+	
+	curl_close($ch);
+	
+	return array($message, $local_file);
+}
+
+
+/**
+ * Extracts files
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $package Package names to extract
+ */
+function extractPackage($package) {
+	$message = null;
+	
+	if (!is_array($package)) {
+		$package = array($package);
+	}
+	
+	foreach ($package as $filename) {
+		$message .= sprintf(_('Extracting %s') . "\n", basename($filename));
+
+		$tmp_dir = dirname($filename);
+		if (!file_exists($filename)) {
+			return sprintf(_('%s does not exist!') . "\n", $filename);
+		}
+
+		$path_parts = pathinfo($filename);
+		$untar_opt = '-C ' . $tmp_dir . ' -x';
+		switch($path_parts['extension']) {
+			case 'bz2':
+				$untar_opt .= 'j';
+				break;
+			case 'tgz':
+			case 'gz':
+				$untar_opt .= 'z';
+				break;
+		}
+		$untar_opt .= 'f';
+
+		$command = findProgram('tar') . " $untar_opt $filename";
+		@system($command, $retval);
+		if ($retval) {
+			$message .= sprintf(_('Failed to extract %s!') . "\n", $filename);
+			return $message;
+		}
+	}
+		
+	/** Move files */
+	$message .= sprintf(_('Moving files to %s') . "\n", ABSPATH);
+	$command = findProgram('cp') . " -r $tmp_dir/facileManager/server/* " . ABSPATH;
+	@system($command, $retval);
+	if ($retval) {
+		$message .= _('Failed to save files!') . "\n";
+	}
+	
+	if ($tmp_dir != '/') {
+		@system(findProgram('rm') . " -rf $tmp_dir");
+	}
+	
+	return $message;
+}
+
+
+/**
+ * Clears out the temporary update directory
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @return array Temp directory and if it was created
+ */
+function clearUpdateDir() {
+	return createTempDir('fm_updates');
+}
+
+
+/**
+ * Generic mailing function
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $sendto Email address to send to
+ * @param string $subject Email subject
+ * @param string $body Email body
+ * @param string $altbody Email alternate body (plaintext)
+ * @param string/array $from From name and address
+ * @param array $images Images to embed in the email
+ * @return boolean
+ */
+function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $images = null) {
+	global $fm_name;
+
+	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
+	if (!file_exists($phpmailer_file)) {
+		return _('Unable to send email - PHPMailer class is missing.');
+	} else {
+		require $phpmailer_file;
+	}
+
+	$mail = new PHPMailer;
+
+	/** Set PHPMailer options from database */
+	$mail->Host = getOption('mail_smtp_host');
+	$mail->SMTPAuth = getOption('mail_smtp_auth');
+	if ($mail->SMTPAuth) {
+		$mail->Username = getOption('mail_smtp_user');
+		$mail->Password = getOption('mail_smtp_pass');
+	}
+	if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
+
+	if ($from) {
+		if (is_array($from)) {
+			list($from_name, $from_addr) = $from;
+			$mail->FromName = $from_name;
+		} else {
+			$from_addr = $from;
+		}
+		$mail->From = $from_addr;
+	} else {
+		$mail->FromName = $fm_name;
+		$mail->From = getOption('mail_from');
+	}
+	$mail->AddAddress($sendto);
+
+	$mail->Subject = $subject;
+	$mail->Body = $body;
+	if ($altbody) {
+		$mail->AltBody = $altbody;
+	}
+	$mail->IsHTML(true);
+	
+	if (is_array($images)) {
+		foreach ($images as $filename) {
+			$image_parts = pathinfo($filename);
+			$mail->AddEmbeddedImage($filename, $image_parts['filename'], $image_parts['basename'], 'base64', "image/{$image_parts['extension']}");
+		}
+	}
+
+	$mail->IsSMTP();
+
+	if(!$mail->Send()) {
+		return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
+	}
+
+	return true;
+}
+
+
+/**
+ * Create a temporary directory
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $subdir Sub directory name
+ * @param string $append String to append to directory name
+ * @return array Temp directory and if it was created
+ */
+function createTempDir($subdir, $append = null) {
+	$created = true;
+	
+	if ($append) {
+		$subdir .= ($append == 'datetime') ? '_' . date("YmdHis") : "_$append";
+	}
+	
+	$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
+	$tmp_dir = rtrim($fm_temp_directory, '/') . "/$subdir/";
+	system('rm -rf ' . $tmp_dir);
+	if (!is_dir($tmp_dir)) {
+		if (!@mkdir($tmp_dir, 0777, true)) {
+			$created = false;
+		}
+	}
+
+	return array($tmp_dir, $created);
+}
+
+
+/**
+ * Displays a close button in the response
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $message Error message to include
+ * @return string
+ */
+function displayResponseClose($message) {
+	return sprintf('<div id="response_close"><p><i class="fa fa-close close" aria-hidden="true" title="%s"></i></p></div><p class="error">%s</p>', _('Close'), $message);
+}
+
+
+/**
+ * Generates URI params from current params
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $params Params to exclude or include
+ * @param string $direction Exclude or include
+ * @param string $character Starting character
+ * @param array $null_params Params to return null with
+ * @return string
+ */
+function generateURIParams($params = array(), $direction = 'include', $character = '?', $null_params = array()) {
+	$uri_params = null;
+	
+	foreach ($GLOBALS['URI'] as $param => $val) {
+		if (in_array($param, (array) $null_params)) return null;
+		if ($direction == 'include') {
+			if (!in_array($param, (array) $params)) continue;
+		} else {
+			if (in_array($param, (array) $params)) continue;
+		}
+		$uri_params[] = "$param=$val";
+	}
+	if ($uri_params) $uri_params = $character . implode('&', $uri_params);
+	
+	return $uri_params;
+}
+
+
+/**
+ * Builds the page sub menu items
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param array $selected Selected option type
+ * @param string $avail_types Available option types
+ * @param array $null_params
+ * @param array $params
+ * @param string $direction
+ * @param string $character
+ * @return string
+ */
+function buildSubMenu($selected, $avail_types, $null_params = array(), $params = array('type', 'action', 'id', 'status'), $direction = 'exclude', $character = '&') {
+	global $__FM_CONFIG;
+	
+	$menu_selects = null;
+	
+	$uri_params = generateURIParams($params, $direction, $character, $null_params);
+	
+	foreach ($avail_types as $general => $type) {
+		$select = ($selected == $general) ? ' class="selected"' : '';
+		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
+	}
+	
+	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+}
+
+
+/**
+ * Formats an error message
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $message Error message to format
+ * @param string $option Display option (sql | null)
+ * @return string
+ */
+function formatError($message, $option = null) {
+	global $fmdb;
+	
+	$addl_text = null;
+	
+	if ($option == 'sql') {
+		$addl_text = ($fmdb->last_error) ? '<br />' . $fmdb->last_error : null;
+	}
+	
+	return $message . $addl_text;
+}
+
+
+/**
+ * Builds the server listing in a dropdown menu
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param integer $server_serial_no Selected server serial number
+ * @param array $available_servers Available servers for the list
+ * @param array $class Additional classes to pass to the div
+ * @return string
+ */
+function buildServerSubMenu($server_serial_no = 0, $available_servers = null, $class = null) {
+	if (!$available_servers) $available_servers = availableServers();
+	$server_list = buildSelect('server_serial_no', 'server_serial_no', $available_servers, $server_serial_no, 1, null, false, 'this.form.submit()');
+	
+	$hidden_inputs = null;
+	foreach ($GLOBALS['URI'] as $param => $value) {
+		if ($param == 'server_serial_no') continue;
+		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
+	}
+	
+	$class = $class ? 'class="' . join(' ', (array) $class) . '"' : null;
+
+	$return = <<<HTML
+	<div id="configtypesmenu" $class>
+		<form action="{$GLOBALS['basename']}" method="GET">
+		$hidden_inputs
+		$server_list
+		</form>
+	</div>
+HTML;
+
+	return $return;
+}
+
+
+/**
+ * Returns an array of servers and groups
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $server_id_type What server ID should be used (serial|id)
+ * @return array
+ */
+function availableServers($server_id_type = 'serial') {
+	global $fmdb, $__FM_CONFIG;
+	
+	$server_array[0][] = null;
+	$server_array[0][0][] = __('All Servers');
+	$server_array[0][0][] = '0';
+	
+	$j = 0;
+	/** Server Groups */
+	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
+	if ($fmdb->num_rows && !$fmdb->sql_errors) {
+		$server_array[__('Groups')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[__('Groups')][$j][] = $results[$i]->group_name;
+			$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+			$j++;
+		}
+	}
+	$j = 0;
+	/** Server names */
+	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
+	if ($fmdb->num_rows && !$fmdb->sql_errors) {
+		$server_array[_('Servers')][] = null;
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+			if ($server_id_type == 'serial') {
+				$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
+			} elseif ($server_id_type == 'id') {
+				$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+			}
+			$j++;
+		}
+	}
+	
+	return $server_array;
+}
+
+
+/**
+ * Returns a SSH error message
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $type What is not defined
+ * @return array
+ */
+function noSSHDefined($type = 'user') {
+	if ($type == 'user') {
+		return sprintf(_('Failed: SSH user is not defined. You can define the user in the <a href="%s">Settings</a>.'), getMenuURL(_('General')));
+	}
+	if ($type == 'key') {
+		return sprintf(_('Failed: SSH key is not defined. You can generate a keypair in the <a href="%s">Settings</a>.'), getMenuURL(_('General')));
+	}
+}
+
+
+/**
+ * Returns the branding logo
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @return string
+ */
+function getBrandLogo($size = 'sm_brand_img') {
+	global $fm_name;
+	
+	$branding_logo = getOption($size);
+	
+	if (!$branding_logo) {
+		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+	}
+	
+	return $branding_logo;
 }
 
 

@@ -25,11 +25,10 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_views.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
 
 $view_option = (isset($_GET['view_option'])) ? ucfirst($_GET['view_option']) : __('Views');
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$response = isset($response) ? $response : null;
 
 $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -66,7 +65,7 @@ printHeader();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
@@ -84,7 +83,9 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 }
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array($sort_field, 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
-$fm_dns_views->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_dns_views->rows($result, $page, $total_pages);
 
 printFooter();
 

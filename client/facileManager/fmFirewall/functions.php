@@ -159,27 +159,6 @@ function detectFWVersion($return_array = false) {
 }
 
 
-function versionCheck($app_version, $serverhost, $compress) {
-	/*
-	 * return true until this function is actually required
-	 * currently there are no features that are version-dependent
-	 */
-	return true;
-	
-	$url = $serverhost . '/buildconf.php';
-	$data['action'] = 'version_check';
-	$server_type = detectFirewallType();
-	$data['server_type'] = $server_type['type'];
-	$data['server_version'] = $app_version;
-	$data['compress'] = $compress;
-	
-	$raw_data = getPostData($url, $data);
-	$raw_data = $compress ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	
-	return $raw_data;
-}
-
-
 function getStartupScript($fw) {
 	$distros = array(
 		'iptables' => array(

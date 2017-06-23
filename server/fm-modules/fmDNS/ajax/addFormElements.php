@@ -28,7 +28,7 @@ require_once('../../../fm-init.php');
 
 $zone_access_allowed = true;
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (is_array($_POST) && count($_POST)) {
 	if (currentUserCan('manage_records', $_SESSION['module'])) {

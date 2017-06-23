@@ -20,37 +20,41 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_servers {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
+
+class fm_module_servers extends fm_shared_module_servers {
 	
 	/**
 	 * Displays the server list
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
-		
-		$num_rows = $fmdb->num_rows;
-		$results = $fmdb->last_result;
-
-		$bulk_actions_list = null;
-//		if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$bulk_actions_list[] = __('Upgrade');
-		}
-		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-			$bulk_actions_list[] = __('Build Config');
-		}
-		if (is_array($bulk_actions_list)) {
-			$title_array[] = array(
-								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
-								'class' => 'header-tiny header-nosort'
-							);
-		}
 		
 		if (!$result) {
 			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
 		} else {
-			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			$bulk_actions_list = null;
+//			if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
+			if (currentUserCan('manage_servers', $_SESSION['module'])) {
+				$bulk_actions_list[] = __('Upgrade');
+			}
+			if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+				$bulk_actions_list[] = __('Build Config');
+			}
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$fmdb->num_rows = $num_rows;
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 			
 			$table_info = array(
 							'class' => 'display_results sortable',
@@ -83,8 +87,11 @@ class fm_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -156,17 +163,19 @@ class fm_module_servers {
 			$clean_data = sanitize($data);
 			if (($key == 'server_name') && empty($clean_data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
+		}
 
 		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
 		$tmp_runas = $post['server_run_as_predefined'] ? $post['server_run_as_predefined'] : $post['server_run_as'];
@@ -235,17 +244,19 @@ class fm_module_servers {
 			$clean_data = sanitize($data);
 			if (($key == 'group_name') && empty($clean_data)) return __('No group name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not add the group because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
+		}
 
 		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
 		addLogEntry(__('Added server group') . ":\n" . __('Name') . ": {$post['group_name']}\n" .
@@ -306,17 +317,19 @@ class fm_module_servers {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the server */
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -385,17 +398,19 @@ class fm_module_servers {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 
 		/** Update the server */
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` SET $sql WHERE `group_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if ($fmdb->sql_errors) return __('Could not update the group because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
+		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -424,7 +439,7 @@ class fm_module_servers {
 
 				/** Delete associated records from fm_{$__FM_CONFIG['fmDNS']['prefix']}track_builds */
 				if (basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false) === false) {
-					return sprintf(__('The server could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds');
+					return formatError(sprintf(__('The server could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds'), 'sql');
 				}
 
 				/** Delete server */
@@ -435,7 +450,7 @@ class fm_module_servers {
 				}
 			}
 
-			return __('This server could not be deleted.');
+			return formatError(__('This server could not be deleted.'), 'sql');
 		} else {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $server_id, 'group_', 'group_id');
 			if ($fmdb->num_rows) {
@@ -451,7 +466,7 @@ class fm_module_servers {
 				}
 			}
 
-			return __('This server group could not be deleted.');
+			return formatError(__('This server group could not be deleted.'), 'sql');
 		}
 
 		return __('There is something wrong with your request.');
@@ -513,7 +528,7 @@ class fm_module_servers {
 			if ($class) $class = 'class="' . $class . '"';
 
 			echo <<<HTML
-		<tr id="$row->server_id" $class>
+		<tr id="$row->server_id" name="$row->server_name" $class>
 			$checkbox
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$edit_name</td>
@@ -570,7 +585,7 @@ HTML;
 			$group_slaves = wordwrap($group_slaves);
 
 			echo <<<HTML
-		<tr id="$row->group_id" $class>
+		<tr id="$row->group_id" name="$row->group_name" $class>
 			$checkbox
 			<td>$row->group_name</td>
 			<td>$group_masters</td>
@@ -650,7 +665,7 @@ FORM;
 
 			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
 			$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
-			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key'), $server_key);
+			$server_key = buildSelect('server_key', 'server_key', $this->availableItems('key', 'blank', 'AND `key_type`="tsig"'), $server_key);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
 			$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
@@ -758,7 +773,7 @@ FORM;
 		return $return_form;
 	}
 	
-	function availableItems($type, $default = 'blank') {
+	function availableItems($type, $default = 'blank', $addl_sql = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
@@ -770,7 +785,7 @@ FORM;
 			$j++;
 		}
 		
-		$query = "SELECT {$type}_id,{$type}_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' ORDER BY {$type}_name ASC";
+		$query = "SELECT {$type}_id,{$type}_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' $addl_sql ORDER BY {$type}_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
@@ -787,7 +802,7 @@ FORM;
 	}
 
 	function manageCache($server_id, $action) {
-		global $fmdb, $__FM_CONFIG, $fm_shared_module_servers;
+		global $fmdb, $__FM_CONFIG;
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', sanitize($server_id), 'server_', 'server_id');
@@ -806,7 +821,7 @@ FORM;
 		}
 		
 		if (count($response) == 1) {
-			foreach (makePlainText($fm_shared_module_servers->buildServerConfig($server_serial_no, $action, ucfirst(str_replace('-', ' ', $action))), true) as $line) {
+			foreach (makePlainText($this->buildServerConfig($server_serial_no, $action, ucfirst(str_replace('-', ' ', $action))), true) as $line) {
 				$response[] = ' --> ' . $line;
 			}
 		}
@@ -867,7 +882,7 @@ FORM;
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_name_servers`='$serverids' WHERE `domain_id`={$result[$i]->domain_id} AND `account_id`='{$_SESSION['user']['account_id']}'";
 			$result2 = $fmdb->query($query);
 			if (!$fmdb->rows_affected) {
-				return __('The associated zones for this server or group could not be updated because a database error occurred.');
+				return formatError(__('The associated zones for this server or group could not be updated because a database error occurred.'), 'sql');
 			}
 		}
 		
@@ -951,22 +966,22 @@ FORM;
 
 		/** Delete associated config options */
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
-			return __('The associated server configs could not be deleted because a database error occurred.');
+			return formatError(__('The associated server configs could not be deleted because a database error occurred.'), 'sql');
 		}
 
 		/** Delete associated views */
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $server_serial_no, 'view_', 'deleted', 'server_serial_no') === false) {
-			return __('The associated views could not be deleted because a database error occurred.');
+			return formatError(__('The associated views could not be deleted because a database error occurred.'), 'sql');
 		}
 
 		/** Delete associated ACLs */
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $server_serial_no, 'acl_', 'deleted', 'server_serial_no') === false) {
-			return __('The associated ACLs could not be deleted because a database error occurred.');
+			return formatError(__('The associated ACLs could not be deleted because a database error occurred.'), 'sql');
 		}
 		
 		/** Delete associated controls */
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', $server_serial_no, 'control_', 'deleted', 'server_serial_no') === false) {
-			return __('The associated controls could not be deleted because a database error occurred.');
+			return formatError(__('The associated controls could not be deleted because a database error occurred.'), 'sql');
 		}
 		
 		return true;
