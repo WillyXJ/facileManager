@@ -1,12 +1,9 @@
-3.0-rc1 (2017-05-24)
-====================
+3.0 (2017-06-22)
+================
+* Client - [bug] Fixed OS distro reporting for RHEL when using lsb tools. (Issue #379)
 * Server - [bug] Fixed the upgrade process.
 * Server - [feature] Added setting to change the branding logo.
 * Server - [feature] Added comment field to users.
-* Client - [bug] Fixed OS distro reporting for RHEL when using lsb tools. (Issue #379)
-
-3.0-beta2 (2017-04-14)
-======================
 * Server - [improvement] Reworked the search bar for easier usage of it.
 * Server - [improvement] Database errors now get displayed if the Show Errors
            setting is enabled.
@@ -18,9 +15,6 @@
 * Client - [bug] Client installer ensures absolute path is defined in the sudoers
            file. (Issue #372)
 * Server - [improvement] Added locale number formatting.
-
-3.0-beta1 (2017-03-08)
-======================
 * Server - [improvement] Code changes to better reference shared classes.
 * Server - [security] Fixed an issue where unprivileged users could still make
            changes before a forced logout.
@@ -29,9 +23,6 @@
 * Server - [improvement] Pagination is added to all pages.
 * Server - [bug] Fixed an issue where the Edit Profile menu option did nothing.
 * Server - [improvement] Code clean up.
-
-3.0-alpha3 (2016-11-29)
-=======================
 * Server - [improvement] Replaced several icons with Font Awesome fonts.
 * Server - [improvement] CSS tweaks.
 * Server - [bug] Fixed an issue where local account passwords could not be
@@ -39,9 +30,6 @@
 * Server - [feature] Added server update support via the modules page. (Issue #113)
 * Server - [improvement] Cleaned up server connection tests output.
 * Server - [improvement] Language changes.
-
-3.0-alpha2 (2016-10-17)
-=======================
 * Server - [bug] Fixed mysql requirement check. (result of adding #343)
 * Server - [improvement] Updated error page titles.
 * Server - [improvement] Swapped the plus sign for "Add New" text.
@@ -51,9 +39,6 @@
            with Active Directory. (Issue #342)
 * Server - [bug] Fixed PHP error during installer with an empty database.
 * Server - [bug] Fixed module installation status through modules page.
-
-3.0-alpha1 (2016-09-07)
-=======================
 * Server - [bug] Added missing translation text and removed duplicates.
 * Server - [bug] Fixed Redhat clients only reporting 'Red' as the OS.
 * Server - [feature] Use mysqli functions where available. (Issue #343)

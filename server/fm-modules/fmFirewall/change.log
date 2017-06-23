@@ -1,9 +1,6 @@
-1.4-rc1 (2017-05-24)
-====================
+1.4 (2017-06-22)
+================
 * Server - [bug] Fixed the upgrade process.
-
-1.4-beta2 (2017-04-14)
-======================
 * Server - [improvement] Replaced policy icons with Font Awesome fonts.
 * Server - [improvement] Added bulk actions to several pages.
 * Server - [improvement] Database errors now get displayed if the Show Errors
@@ -13,27 +10,15 @@
 * Server - [bug|improvement] Added more flexibility in choosing packet states
            with iptables. (Issue #364)
 * Both   - [improvement] Code clean up.
-
-1.4-beta1 (2017-03-08)
-======================
 * Server - [improvement] Code changes to better reference shared classes.
 * Server - [improvement] Utilizes response error formatting.
 * Server - [improvement] Pagination is added to all pages.
 * Server - [improvement] Code clean up.
-
-1.4-alpha3 (2016-11-29)
-=======================
 * Server - [improvement] Added reorder icon to the policy view.
 * Server - [bug] Fixed if-up-pre.d script on Debian-based systems. (Issue #356)
-
-1.4-alpha2 (2016-10-17)
-=======================
 * Server - [improvement] Unset large variables after use to free up system
            resources.
 * Server - [improvement] Added item name to the delete confirmations. (Issue #185)
-
-1.4-alpha1 (2016-09-07)
-=======================
 * Server - [bug] Added missing translation text and removed duplicates.
 * Server - [feature] Use mysqli functions where available. (Issue #343)
 
