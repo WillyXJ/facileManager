@@ -1,4 +1,34 @@
-1.2-beta1 (2015-??-??)
+1.3 (2017-06-22)
+================
+* Server - [bug] Fixed the upgrade process.
+* Server - [improvement] Database errors now get displayed if the Show Errors
+           setting is enabled.
+* Server - [improvement] Code clean up.
+* Server - [improvement] Added locale number formatting.
+* Server - [improvement] Code changes to better reference shared classes.
+* Server - [improvement] Utilizes response error formatting.
+* Server - [improvement] Pagination is added to all pages.
+* Server - [feature] Added support for PostgreSQL. (Issue #178)
+* Server - [improvement] Language changes.
+* Server - [improvement] Added item name to the delete confirmations. (Issue #185)
+* Server - [bug] Added missing translation text and removed duplicates.
+* Server - [feature] Use mysqli functions where available. (Issue #343)
+
+1.2.3 (2016-07-21)
+==================
+* Server - [improvement] AJAX now redirects to login page when fM and module
+           database updates are required.
+
+1.2.2 (2016-04-24)
+==================
+* Server - [improvement] Updated help file.
+* Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+
+1.2.1 (2016-03-11)
+==================
+* Server - [bug] Enclosed database references in backticks in SQL statements. (Issue #290)
+
+1.2 (2015-12-02)
 ================
 * Server - [feature] Added user group support. (Issue #211)
 * Server - [improvement] Replaced Add New image with Font Awesome icon.

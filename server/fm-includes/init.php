@@ -59,7 +59,10 @@ function checkAppVersions($single_check = true) {
 	}
 
 	/** PHP Extensions */
-	$required_php_extensions = array('mysql', 'mysqli', 'curl', 'posix', 'filter', 'json');
+	$required_php_extensions = array('curl', 'posix', 'filter', 'json', 'mysqli');
+	if (!useMySQLi()) {
+		$required_php_extensions[] = 'mysql';
+	}
 	foreach ($required_php_extensions as $extension) {
 		if (!extension_loaded($extension)) {
 			$message = sprintf(_('Your PHP installation appears to be missing the %1s extension which is required by %2s.'), $extension, $fm_name);
@@ -132,7 +135,7 @@ RewriteRule . index.php [L]
 &lt;/IfModule&gt;
 </textarea>');
 				} else {
-					$requirement_check .= displayProgress(_('.htaccess File Present'), false, 'display');
+					$requirement_check .= displayProgress(_('.htaccess File Present'), false, 'display', sprintf(_('The %1s.htaccess file from the tar file is missing and is required by %2s.'), ABSPATH, $fm_name));
 					$error = true;
 				}
 			}
@@ -147,7 +150,8 @@ RewriteRule . index.php [L]
 			$test_output = getPostData($GLOBALS['FM_URL'] . 'admin-accounts.php?verify', array('module_type' => 'CLIENT'));
 			$test_output = isSerialized($test_output) ? unserialize($test_output) : $test_output;
 			if (strpos($test_output, 'Account is not found.') === false) {
-				$message = sprintf(_('The required .htaccess file appears to not work with your Apache configuration which is required by %1s.'), $fm_name);
+				$message = sprintf(_('The required .htaccess file appears to not work with your Apache configuration which is required by %1s. '
+						. 'AllowOverride None in your configuration may be blocking the use of .htaccess.'), $fm_name);
 				if ($single_check) {
 					bailOut($message);
 				} else {
@@ -161,11 +165,8 @@ RewriteRule . index.php [L]
 	}
 	
 	if ($error) {
-		$requirement_check = sprintf('
-			<div id="window">
-			<table class="form-table">%s</table>
-			<p class="step"><a href="%s" class="button">%s</a></p></div>',
-				$requirement_check, $_SERVER['PHP_SELF'], _('Try Again'));
+		$requirement_check = sprintf('<br /><table class="form-table">%s</table>',
+				$requirement_check);
 	} else $requirement_check = null;
 	
 	return $requirement_check;

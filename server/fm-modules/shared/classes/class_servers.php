@@ -69,7 +69,7 @@ class fm_shared_module_servers {
 				case 'cron':
 					/* Servers updated via cron require manual upgrades */
 					$response[] = ' --> ' . _('This server needs to be upgraded manually with the following command:');
-					$response[] = " --> sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade";
+					$response[] = " --> sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php upgrade";
 					addLogEntry(sprintf(_('Upgraded client scripts on %s.'), $server_name));
 					break;
 				case 'http':
@@ -81,10 +81,12 @@ class fm_shared_module_servers {
 					}
 					
 					/** Remote URL to use */
-					$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
+					$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
 					
 					/** Data to post to $url */
-					$post_data = array('action'=>'upgrade', 'serial_no'=>$server_serial_no);
+					$post_data = array('action' => 'upgrade',
+						'serial_no' => $server_serial_no,
+						'module' => $_SESSION['module']);
 					
 					$post_result = @unserialize(getPostData($url, $post_data));
 					
@@ -107,54 +109,38 @@ class fm_shared_module_servers {
 					}
 					break;
 				case 'ssh':
+					$server_remote = runRemoteCommand($server_name, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php upgrade", 'return', $server_update_port);
+
+					if (is_array($server_remote)) {
+						if (array_key_exists('output', $server_remote) && !count($server_remote['output'])) {
+							unset($server_remote);
+							continue;
+						}
+					} else {
+						return $server_remote;
+					}
+					
 					/** Test the port first */
 					if (!socketTest($server_name, $server_update_port, 10)) {
 						$response[] = ' --> ' . sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port);
 						break;
 					}
-					
-					/** Get SSH key */
-					$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-					if (!$ssh_key) {
-						$response[] = ' --> ' . sprintf(_('Failed: SSH key is not %sdefined</a>.'), '<a href="' . getMenuURL(_('General')) . '">');
-						break;
-					}
-					
-					$temp_ssh_key = sys_get_temp_dir() . '/fm_id_rsa';
-					if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-					if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-						$response[] = ' --> ' . sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key);
-						break;
-					}
-					
-					@chmod($temp_ssh_key, 0400);
-					
-					$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-					if (!$ssh_user) {
-						return sprintf('<p class="error">%s</p>'. "\n", sprintf(_('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-					}
-
-					unset($post_result);
-					exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/\$(ls /usr/local/$fm_name/{$_SESSION['module']} | grep php | grep -v functions) upgrade 2>&1'", $post_result, $retval);
-					
-					@unlink($temp_ssh_key);
-					
-					if ($retval) {
+					if ($server_remote['failures']) {
 						/** Something went wrong */
-						$post_result[] = _('Client upgrade failed.');
+						$server_remote['output'][] = _('Client upgrade failed.');
 					} else {
-						if (!count($post_result)) {
-							$post_result[] = _('Config build was successful.');
+						if (!count($server_remote['output'])) {
+							$server_remote['output'][] = _('Config build was successful.');
 							addLogEntry(sprintf(_('Upgraded client scripts on %s.'), $server_name));
 						}
 					}
-					if (count($post_result) > 1) {
+					if (count($server_remote['output']) > 1) {
 						/** Loop through and format the output */
-						foreach ($post_result as $line) {
+						foreach ($server_remote['output'] as $line) {
 							if (strlen(trim($line))) $response[] = " --> $line";
 						}
 					} else {
-						$response[] = " --> " . $post_result[0];
+						$response[] = " --> " . $server_remote['output'][0];
 					}
 					break;
 			}
@@ -167,6 +153,21 @@ class fm_shared_module_servers {
 	
 	/**
 	 * Updates the daemon version number in the database
+	 *
+	 * @since 2.2
+	 * @package facileManager
+	 */
+	function updateServerVersion() {
+		global $fmdb, $__FM_CONFIG;
+		
+		$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_version`='" . $_POST['server_version'] . "', `server_os`='" . $_POST['server_os'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
+			(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
+		$fmdb->query($query);
+	}
+	
+	
+	/**
+	 * Updates the fM client version number in the database
 	 *
 	 * @since 1.1
 	 * @package facileManager
@@ -213,7 +214,7 @@ class fm_shared_module_servers {
 			
 			$response = null;
 			foreach ($group_servers as $serial_no) {
-				if (is_numeric($serial_no)) $response .= $this->doClientUpgrade($serial_no) . "\n";
+				if (is_numeric($serial_no)) $response .= $this->doBulkServerBuild($serial_no) . "\n";
 			}
 			return $response;
 		}
@@ -239,7 +240,7 @@ class fm_shared_module_servers {
 			if (!isset($fm_module_servers)) {
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 			}
-			foreach (makePlainText($fm_module_servers->buildServerConfig($server_serial_no), true) as $line) {
+			foreach (makePlainText($this->buildServerConfig($server_serial_no), true) as $line) {
 				$response[] = ' --> ' . $line;
 			}
 		}
@@ -274,9 +275,153 @@ class fm_shared_module_servers {
 		
 		return (array) $server_serial_nos;
 	}
-}
 
-if (!isset($fm_shared_module_servers))
-	$fm_shared_module_servers = new fm_shared_module_servers();
+	/**
+	 * Builds the server configuration
+	 *
+	 * @since 2.2
+	 * @package facileManager
+	 *
+	 * @param integer $serial_no Server serial number to build the config for
+	 * @param string $action buildconf or other
+	 * @param string $friendly_action Friendly version of $action for user display
+	 * @return string
+	 */
+	function buildServerConfig($serial_no, $action = 'buildconf', $friendly_action = 'Configuration Build') {
+		global $fmdb, $__FM_CONFIG, $fm_name;
+		
+		/** Check serial number */
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
+		if (!$fmdb->num_rows) return displayResponseClose(_('This server is not found.'));
+
+		$server_details = $fmdb->last_result;
+		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+		$options[] = $response = null;
+		
+		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
+		
+		if ($action == 'buildconf') {
+			if (getOption('enable_named_checks', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+				global $fm_module_buildconf;
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
+
+				$data['SERIALNO'] = $server_serial_no;
+				$data['compress'] = 0;
+				$data['dryrun'] = true;
+
+				basicGet('fm_accounts', $_SESSION['user']['account_id'], 'account_', 'account_id');
+				$account_result = $fmdb->last_result;
+				$data['AUTHKEY'] = $account_result[0]->account_key;
+
+				list($raw_data, $response) = $fm_module_buildconf->buildServerConfig($data);
+
+				$response .= @$fm_module_buildconf->namedSyntaxChecks($raw_data);
+				if (strpos($response, 'error') !== false) return buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
+			}
+
+			if (getOption('purge_config_files', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+				$options[] = 'purge';
+			}
+		}
+		
+		switch($server_update_method) {
+			case 'cron':
+				if ($action == 'buildconf') {
+					/* set the server_update_config flag */
+					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
+					$response = sprintf('<p>%s</p>'. "\n", _('This server will be updated on the next cron run.'));
+				} else {
+					$response = sprintf('<p>%s</p>'. "\n", _('This server receives updates via cron - please manage the server manually.'));
+				}
+				break;
+			case 'http':
+			case 'https':
+				/** Test the port first */
+				if (!socketTest($server_name, $server_update_port, 10)) {
+					return displayResponseClose(sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
+				}
+				
+				/** Remote URL to use */
+				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
+				
+				/** Data to post to $url */
+				$post_data = array('action' => $action,
+					'serial_no' => $server_serial_no,
+					'options' => implode(' ', $options),
+					'module' => $_SESSION['module']);
+				
+				$post_result = @unserialize(getPostData($url, $post_data));
+				
+				if (!is_array($post_result)) {
+					/** Something went wrong */
+					if (empty($post_result)) {
+						return displayResponseClose(sprintf(_('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
+					}
+					return displayResponseClose($post_result);
+				} else {
+					if (count($post_result) > 1) {
+						$response .= "<pre>\n";
+						
+						/** Loop through and format the output */
+						foreach ($post_result as $line) {
+							$response .= "[$server_name] $line\n";
+						}
+						
+						$response .= "</pre>\n";
+					} else {
+						$response = "<p>[$server_name] " . $post_result[0] . '</p>';
+					}
+				}
+				break;
+			case 'ssh':
+				$server_remote = runRemoteCommand($server_name, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php $action " . implode(' ', $options), 'return', $server_update_port);
+
+				if (is_array($server_remote)) {
+					if (array_key_exists('output', $server_remote) && (!count($server_remote['output'])) || strpos($server_remote['output'][0], 'successful') !== false) {
+						$server_remote['output'] = array();
+					}
+				} else {
+					return $server_remote;
+				}
+
+				if ($server_remote['failures']) {
+					/** Something went wrong */
+					return displayResponseClose(ucfirst(strtolower($friendly_action)) . ' failed.' . join('<br />', $server_remote['output']));
+				}
+				
+				if (!count($server_remote['output'])) $server_remote['output'][] = ucfirst(strtolower($friendly_action)) . ' was successful.';
+
+				if (count($server_remote['output']) > 1) {
+					$response = "<pre>\n";
+
+					/** Loop through and format the output */
+					foreach ($server_remote['output'] as $line) {
+						$response .= "[$server_name] $line\n";
+					}
+
+					$response .= "</pre>\n";
+				} else {
+					$response = "<p>[$server_name] " . $server_remote['output'][0] . '</p>';
+				}
+				break;
+		}
+		
+		if ($action == 'buildconf') {
+			/* reset the server_build_config flag */
+			if (strpos($response, strtolower('failed')) === false) {
+				setBuildUpdateConfigFlag($serial_no, 'no', 'build');
+			}
+		}
+
+		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+		addLogEntry(ucfirst($friendly_action) . " was performed on server '$tmp_name'.");
+
+		if (strpos($response, '<pre>') !== false) {
+			$response = buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
+		}
+		return $response;
+	}
+
+}
 
 ?>

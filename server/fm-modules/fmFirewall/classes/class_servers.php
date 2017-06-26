@@ -20,31 +20,35 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_servers {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
+
+class fm_module_servers extends fm_shared_module_servers {
 	
 	/**
 	 * Displays the server list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
-		$num_rows = $fmdb->num_rows;
-		$results = $fmdb->last_result;
-		
-		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-			$bulk_actions_list = array(__('Upgrade'), __('Build Config'));
-			$title_array[] = array(
-								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
-								'class' => 'header-tiny'
-							);
-		} else {
-			$bulk_actions_list = null;
-		}
-
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no firewall servers.'));
 		} else {
-			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+			$num_rows = $fmdb->num_rows;
+			$results = $fmdb->last_result;
+
+			if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+				$bulk_actions_list = array(__('Upgrade'), __('Build Config'));
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
+									'class' => 'header-tiny'
+								);
+			} else {
+				$bulk_actions_list = null;
+			}
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			$fmdb->num_rows = $num_rows;
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 			
 			$table_info = array(
 							'class' => 'display_results',
@@ -61,8 +65,11 @@ class fm_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -90,47 +97,66 @@ class fm_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
+			'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
 			if (($key == 'server_name') && empty($clean_data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
+		}
 		
 		/** Add default fM interaction rules */
 		$account_id = (isset($post['AUTHKEY'])) ? getAccountID($post['AUTHKEY']) : $_SESSION['user']['account_id'];
 		include_once(ABSPATH . 'fm-modules/' . $module . '/classes/class_policies.php');
 		$fm_host_id = getNameFromID($fm_name, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'objects', 'object_', 'object_name', 'object_id', $account_id);
-		$fm_service_id[] = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
-		if ($post['server_type'] == 'iptables') $fm_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+		
+		/** Get server->client interaction services */
+		$web_service_id = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
+		$fm_out_service_id[] = $web_service_id;
+		switch ($post['server_update_method']) {
+			case 'http':
+			case 'https':
+				$fm_in_service_id[] = $web_service_id;
+				break;
+			case 'ssh':
+				$fm_in_service_id[] = 's' . getNameFromID('ssh', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+				break;
+		}
+		if ($post['server_type'] == 'iptables') $fm_out_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
+		if (is_array($fm_in_service_id)) {
+			$default_rules[] = array(
+				'account_id' => $account_id,
+				'server_serial_no' => $post['server_serial_no'],
+				'source_items' => array('o' . $fm_host_id),
+				'destination_items' => '',
+				'services_items' => $fm_in_service_id,
+				'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
+				'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
+			);
+		}
 		$default_rules[] = array(
-								'account_id' => $account_id,
-								'server_serial_no' => $post['server_serial_no'],
-								'source_items' => 'o' . $fm_host_id,
-								'destination_items' => '',
-								'services_items' => implode(';', $fm_service_id),
-								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
-							);
-		$default_rules[] = array(
-								'account_id' => $account_id,
-								'server_serial_no' => $post['server_serial_no'],
-								'policy_direction' => 'out',
-								'source_items' => '',
-								'destination_items' => 'o' . $fm_host_id,
-								'services_items' => implode(';', $fm_service_id),
-								'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
-							);
+			'account_id' => $account_id,
+			'server_serial_no' => $post['server_serial_no'],
+			'policy_direction' => 'out',
+			'source_items' => '',
+			'destination_items' => array('o' . $fm_host_id),
+			'services_items' => $fm_out_service_id,
+			'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
+			'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
+		);
 
 		foreach ($default_rules as $rule) {
 			$fm_module_policies->add($rule);
@@ -151,23 +177,27 @@ class fm_module_servers {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
+			'module_name', 'module_type', 'config', 'SERIALNO',
+			'update_from_client', 'dryrun');
 
 		$sql_edit = null;
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the server
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -202,7 +232,7 @@ class fm_module_servers {
 			}
 		}
 		
-		return __('This server could not be deleted.');
+		return formatError(__('This server could not be deleted.'), 'sql');
 	}
 
 
@@ -214,7 +244,7 @@ class fm_module_servers {
 		$os_image = setOSIcon($row->server_os_distro);
 		
 		$edit_status = $edit_actions = null;
-		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+		$edit_actions = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		
@@ -252,7 +282,7 @@ class fm_module_servers {
 		if ($class) $class = 'class="' . $class . '"';
 		
 		echo <<<HTML
-		<tr id="$row->server_id" $class>
+		<tr id="$row->server_id" name="$row->server_name" $class>
 			$checkbox
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$edit_name</td>
@@ -360,136 +390,6 @@ HTML;
 			);
 
 		return $return_form;
-	}
-	
-	function buildServerConfig($serial_no) {
-		global $fmdb, $__FM_CONFIG, $fm_name;
-		
-		/** Check serial number */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return sprintf('<p class="error">%s</p>', __('This server is not found.'));
-
-		$server_details = $fmdb->last_result;
-		extract(get_object_vars($server_details[0]), EXTR_SKIP);
-		
-		$response = null;
-		
-		switch($server_update_method) {
-			case 'cron':
-				if ($action == 'buildconf') {
-					/* set the server_update_config flag */
-					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
-					$response = sprintf('<p>%s</p>'. "\n", __('This server will be updated on the next cron run.'));
-				} else {
-					$response = sprintf('<p>%s</p>'. "\n", __('This server receives updates via cron - please manage the server manually.'));
-				}
-				break;
-			case 'http':
-			case 'https':
-				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
-				}
-				
-				/** Remote URL to use */
-				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/' . $_SESSION['module'] . '/reload.php';
-				
-				/** Data to post to $url */
-				$post_data = array('action'=>'buildconf', 'serial_no'=>$server_serial_no);
-				
-				$post_result = @unserialize(getPostData($url, $post_data));
-				
-				if (!is_array($post_result)) {
-					/** Something went wrong */
-					if (empty($post_result)) {
-						return sprintf('<p class="error">%s</p>', sprintf(__('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
-					}
-					return $response . '<p class="error">' . $post_result . '</p>'. "\n";
-				} else {
-					if (count($post_result) > 1) {
-						$response .= '<textarea rows="7" cols="100">';
-						
-						/** Loop through and format the output */
-						foreach ($post_result as $line) {
-							$response .= "[$server_name] $line\n";
-						}
-						
-						$response .= "</textarea>\n";
-					} else {
-						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
-					}
-				}
-				break;
-			case 'ssh':
-				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
-				}
-				
-				/** Get SSH key */
-				$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
-				if (!$ssh_key) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH key is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-				}
-				
-				$temp_ssh_key = sys_get_temp_dir() . '/fm_id_rsa';
-				if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-				if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: could not load SSH key into %s.'), $temp_ssh_key));
-				}
-				
-				@chmod($temp_ssh_key, 0400);
-				
-				$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
-				if (!$ssh_user) {
-					return sprintf('<p class="error">%s</p>'. "\n", sprintf(__('Failed: SSH user is not <a href="%s">defined</a>.'), getMenuURL(_('General'))));
-				}
-		
-				/** Test SSH authentication */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'ls /usr/local/$fm_name/{$_SESSION['module']}/fw.php'", $post_result, $retval);
-				if ($retval) {
-					/** Something went wrong */
-					@unlink($temp_ssh_key);
-					return sprintf('<p class="error">%s</p>'. "\n", __('Could not login via SSH.'));
-				}
-				unset($post_result);
-				
-				/** Run build */
-				exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $server_update_port -l $ssh_user $server_name 'sudo php /usr/local/$fm_name/{$_SESSION['module']}/fw.php $action " . implode(' ', $options) . "'", $post_result, $retval);
-				
-				@unlink($temp_ssh_key);
-				
-				if ($retval) {
-					/** Something went wrong */
-					return '<p class="error">' . ucfirst($friendly_action) . ' failed.</p>'. "\n";
-				} else {
-				if (!count($post_result)) $post_result[] = ucfirst($friendly_action) . ' was successful.';
-					
-					if (count($post_result) > 1) {
-						$response .= '<textarea rows="4" cols="100">';
-						
-						/** Loop through and format the output */
-						foreach ($post_result as $line) {
-							$response .= "[$server_name] $line\n";
-						}
-						
-						$response .= "</textarea>\n";
-					} else {
-						$response .= "<p>[$server_name] " . $post_result[0] . '</p>';
-					}
-				}
-				break;
-		}
-		
-		/* reset the server_build_config flag */
-		if (!strpos($response, strtolower('failed'))) {
-			setBuildUpdateConfigFlag($serial_no, 'no', 'build');
-		}
-
-		$tmp_name = getNameFromID($serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-		addLogEntry(ucfirst($friendly_action) . " was performed on server '$tmp_name'.");
-
-		return $response;
 	}
 	
 	function validatePost($post) {

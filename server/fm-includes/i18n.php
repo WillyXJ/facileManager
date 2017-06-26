@@ -30,7 +30,9 @@ $directory = ABSPATH . 'fm-modules/' . $fm_name . '/languages';
 $domain = $fm_name;
 $encoding = 'UTF-8';
 
+session_start();
 $_SESSION['language'] = getLanguage($directory);
+session_write_close();
 
 putenv('LANG=' . $_SESSION['language']); 
 setlocale(LC_ALL, $_SESSION['language']);
@@ -56,9 +58,7 @@ if (function_exists('textdomain')) {
  * @return string
  */
 function getLanguage($directory) {
-	session_start();
-
-	if (isset($_SESSION['language'])) $_SESSION['language'];
+	if (@isset($_SESSION['language']) && isset($_SESSION['user']['logged_in'])) return $_SESSION['language'];
 	
 	$supported_languages = scandir($directory);
 	$languages = @explode(',', str_replace('-', '_', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
@@ -86,4 +86,27 @@ function getLanguage($directory) {
 function loadModuleLanguage($module, $encoding = 'UTF-8') {
 	bindtextdomain($module, ABSPATH . 'fm-modules/' . $module . '/languages');
 	bind_textdomain_codeset($module, $encoding);
+}
+
+
+/**
+ * Formats a number based on locale
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $number Number to format
+ * @return string
+ */
+function formatNumber($number) {
+	switch ($_SESSION['language']) {
+		case 'de_DE':
+			return number_format($number, 0, ',', '.');
+			break;
+		case 'fr_FR':
+			return number_format($number, 0, ',', ' ');
+			break;
+		default:
+			return number_format($number);
+	}
 }

@@ -74,15 +74,12 @@ switch ($step) {
 		require_once(ABSPATH . 'fm-modules/facileManager/install.php');
 		
 		@include(ABSPATH . 'config.inc.php');
-		$link = @mysql_connect($__FM_CONFIG['db']['host'], $__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass']);
+		include_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host'], 'connect only');
 		
-		if (!$link) {
-			bailOut(_('The connection to the database has failed. Please check the configuration.') . '<p class="step"><a href="" class="button">' . _('Try Again') . '</a></p>');
-			break;
-		}
-		
-		if (version_compare(mysql_get_server_info(), $required_mysql_version, '<')) {
-			bailOut(sprintf('<p style="text-align: center;">' . _('Your MySQL server (%1$s) is running MySQL version %2$s but %3$s %4$s requires at least %5$s.') . '</p>', $__FM_CONFIG['db']['host'], mysql_get_server_info(), $fm_name, $fm_version, $required_mysql_version));
+		$mysql_server_version = ($fmdb->use_mysqli) ? $fmdb->dbh->server_info : mysql_get_server_info();
+		if (version_compare($mysql_server_version, $required_mysql_version, '<')) {
+			bailOut(sprintf('<p style="text-align: center;">' . _('Your MySQL server (%1$s) is running MySQL version %2$s but %3$s %4$s requires at least %5$s.') . '</p>', $__FM_CONFIG['db']['host'], $mysql_server_version, $fm_name, $fm_version, $required_mysql_version));
 			break;
 		}
 		
@@ -91,30 +88,31 @@ switch ($step) {
 		/** Check if already installed */
 		if (isset($__FM_CONFIG['db']['name'])) {
 			$query = "SELECT option_id FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `option_name`='fm_db_version'";
-			$result = @mysql_query($query, $link);
+			$result = $fmdb->query($query);
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH']);
 		}
 		
-		if ($result && @mysql_num_rows($result)) {
+		if ($result && $fmdb->num_rows) {
 			/** Check if the default admin account exists */
-			if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
+			if (!checkAccountCreation($__FM_CONFIG['db']['name'])) {
 				header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4');
 			} else {
 				header('Location: ' . $GLOBALS['RELPATH']);
 			}
 		} else {
-			fmInstall($link, $__FM_CONFIG['db']['name']);
+			fmInstall($__FM_CONFIG['db']['name']);
 		}
 		break;
 	case 4:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 		
 		include(ABSPATH . 'config.inc.php');
-		$link = @mysql_connect($__FM_CONFIG['db']['host'], $__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass']);
+		include_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host'], 'connect only');
 		
 		/** Make sure the super-admin account doesn't already exist */
-		if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
+		if (!checkAccountCreation($__FM_CONFIG['db']['name'])) {
 			printHeader(_('Installation'), 'install');
 			displayAccountSetup();
 		} else {
@@ -127,11 +125,12 @@ switch ($step) {
 		if (!$_POST || !array($_POST)) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
 		
 		include(ABSPATH . 'config.inc.php');
-		$link = @mysql_connect($__FM_CONFIG['db']['host'], $__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass']);
+		include_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host'], 'connect only');
 		
 		/** Make sure the super-admin account doesn't already exist */
-		if (!checkAccountCreation($link, $__FM_CONFIG['db']['name'])) {
-			processAccountSetup($link, $__FM_CONFIG['db']['name']);
+		if (!checkAccountCreation($__FM_CONFIG['db']['name'])) {
+			processAccountSetup($__FM_CONFIG['db']['name']);
 		}
 		
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=6');
@@ -212,18 +211,18 @@ function displaySetup($error = null) {
 function processSetup() {
 	extract($_POST);
 	
-	$link = @mysql_connect($dbhost, $dbuser, $dbpass);
-	if (!$link) {
-		exit(displaySetup(_('Could not connect to MySQL.<br />Please check your credentials.')));
+	include_once(ABSPATH . 'fm-includes/fm-db.php');
+	$fmdb = new fmdb($dbuser, $dbpass, $dbname, $dbhost, 'silent connect');
+	if (!$fmdb->dbh) {
+		exit(displaySetup(_('Could not connect to MySQL. Please check your credentials.')));
 	} else {
-		$db_selected = @mysql_select_db($dbname, $link);
-		if (mysql_error() && strpos(mysql_error(), 'Unknown database') === false) {
-			exit(displaySetup(mysql_error()));
+		$db_selected = $fmdb->select($dbname, 'silent');
+		if ($fmdb->last_error && strpos($fmdb->last_error, 'Unknown database') === false) {
+			exit(displaySetup($fmdb->last_error));
 		}
 		if ($db_selected) {
-			$tables = @mysql_query(sanitize('SHOW TABLES FROM ' . $dbname . ';'), $link);
-			@mysql_close($link);
-			if (@mysql_num_rows($tables)) {
+			$tables = $fmdb->query(sanitize('SHOW TABLES FROM `' . $dbname . '`;'));
+			if ($fmdb->num_rows) {
 				exit(displaySetup(_('Database already exists and contains one or more tables.<br />Please choose a different name.')));
 			}
 		}
@@ -293,8 +292,8 @@ function displayAccountSetup($error = null) {
  * @package facileManager
  * @subpackage Installer
  */
-function processAccountSetup($link, $database) {
-	global $fm_name;
+function processAccountSetup($database) {
+	global $fmdb, $fm_name;
 	
 	if (!function_exists('sanitize')) {
 		require_once(ABSPATH . '/fm-modules/facileManager/functions.php');
@@ -311,10 +310,10 @@ function processAccountSetup($link, $database) {
 		exit(displayAccountSetup(_('Username and password cannot be empty.')));
 	}
 	
-	$query = "INSERT INTO $database.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
-	$result = mysql_query($query, $link) or die(mysql_error());
+	$query = "INSERT INTO `$database`.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
+	$result = $fmdb->query($query) or die($fmdb->last_error);
 	
-	addLogEntry(sprintf(_("Installer created user '%s'"), $user), $fm_name, $link);
+	addLogEntry(sprintf(_("Installer created user '%s'"), $user), $fm_name);
 }
 
 /**
@@ -324,11 +323,13 @@ function processAccountSetup($link, $database) {
  * @package facileManager
  * @subpackage Installer
  */
-function checkAccountCreation($link, $database) {
-	$query = "SELECT user_id FROM $database.fm_users WHERE user_id='1'";
-	$result = mysql_query($query, $link);
+function checkAccountCreation($database) {
+	global $fmdb;
 	
-	return ($result === false || ($result && @mysql_num_rows($result))) ? true : false;
+	$query = "SELECT user_id FROM `$database`.fm_users WHERE user_id='1'";
+	$result = $fmdb->query($query);
+	
+	return ($result === false || ($result && $fmdb->num_rows)) ? true : false;
 }
 
 ?>

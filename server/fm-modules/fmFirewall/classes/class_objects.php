@@ -25,7 +25,7 @@ class fm_module_objects {
 	/**
 	 * Displays the object list
 	 */
-	function rows($result, $type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -34,21 +34,37 @@ class fm_module_objects {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+				$bulk_actions_list = array(_('Delete'));
+			}
+			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
 							'name' => 'objects'
 						);
 
-			$title_array = array(__('Object Name'), __('Address'));
-			if ($type != 'address') $title_array[] = __('Netmask');
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address')));
+			if ($type != 'host') $title_array[] = __('Netmask');
 			$title_array[] = array('title' => __('Comment'), 'style' => 'width: 40%;');
-			if (currentUserCan('manage_objects', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -77,17 +93,19 @@ class fm_module_objects {
 			$clean_data = sanitize($data);
 			if (($key == 'object_name') && empty($clean_data)) return __('No object name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the object because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the object because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry("Added object:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
 				"Address: {$post['object_address']} / {$post['object_mask']}\nComment: {$post['object_comment']}");
@@ -110,17 +128,19 @@ class fm_module_objects {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the object
 		$old_name = getNameFromID($post['object_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}objects` SET $sql WHERE `object_id`={$post['object_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the object because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the object because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -152,7 +172,7 @@ class fm_module_objects {
 			}
 		}
 		
-		return __('This object could not be deleted.');
+		return formatError(__('This object could not be deleted.'), 'sql');
 	}
 
 
@@ -161,20 +181,26 @@ class fm_module_objects {
 		
 		$disabled_class = ($row->object_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = null;
+		$edit_status = $checkbox = null;
 		
 		if (currentUserCan('manage_objects', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!isItemInPolicy($row->object_id, 'object')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->object_id, 'object')) {
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->object_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
+			}
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
 		$edit_name = $row->object_name;
-		$netmask = ($row->object_type != 'address') ? "<td>$row->object_mask</td>" : null;
+		$netmask = ($row->object_type != 'host') ? "<td>$row->object_mask</td>" : null;
 		$comments = nl2br($row->object_comment);
 		
 		echo <<<HTML
-			<tr id="$row->object_id"$disabled_class>
+			<tr id="$row->object_id" name="$row->object_name"$disabled_class>
+				$checkbox
 				<td>$row->object_name</td>
 				<td>$row->object_address</td>
 				$netmask

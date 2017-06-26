@@ -20,12 +20,14 @@
  +-------------------------------------------------------------------------+
 */
 
-function installfmSQLPassSchema($link, $database, $module, $noisy = 'noisy') {
+function installfmSQLPassSchema($database, $module, $noisy = 'noisy') {
+	global $fmdb;
+	
 	/** Include module variables */
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `group_name` varchar(255) NOT NULL,
@@ -36,11 +38,11 @@ CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}gr
 TABLE;
 
 	$table[] = <<<TABLE
-CREATE TABLE IF NOT EXISTS $database.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` (
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` int(10) NOT NULL,
-  `server_type` enum('MySQL') NOT NULL,
+  `server_type` enum('MySQL','PostgreSQL') NOT NULL,
   `server_port` int(5) DEFAULT NULL,
   `server_name` varchar(255) NOT NULL,
   `server_groups` text,
@@ -52,10 +54,10 @@ TABLE;
 
 
 	$inserts[] = <<<INSERT
-INSERT INTO $database.`fm_options` (option_name, option_value, module_name) 
+INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
-	(SELECT option_name FROM $database.`fm_options` WHERE option_name = 'version'
+	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'version'
 		AND module_name='$module');
 INSERT;
 
@@ -63,43 +65,24 @@ INSERT;
 
 	/** Create table schema */
 	foreach ($table as $schema) {
-		if ($link) {
-			$result = mysql_query($schema, $link);
-			if (mysql_error($link)) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
-			}
-		} else {
-			global $fmdb;
-			$result = $fmdb->query($schema);
-			if ($fmdb->last_error) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
-			}
+		$result = $fmdb->query($schema);
+		if ($fmdb->last_error) {
+			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
 	}
 
 	/** Insert site values if not already present */
 	foreach ($inserts as $query) {
-		if ($link) {
-			$result = mysql_query($query, $link);
-			if (mysql_error($link)) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, mysql_error($link)) : $result;
-			}
-		} else {
-			$result = $fmdb->query($query);
-			if ($fmdb->last_error) {
-				return (function_exists('displayProgress')) ? displayProgress($module, $result, $noisy, $fmdb->last_error) : $result;
-			}
+		$result = $fmdb->query($query);
+		if ($fmdb->last_error) {
+			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
 	}
 
 	if (function_exists('displayProgress')) {
-		return displayProgress($module, $result, $noisy);
+		return displayProgress($module, $fmdb->result, $noisy);
 	} else {
-		if ($result) {
-			return 'Success';
-		} else {
-			return 'Failed';
-		}
+		return ($fmdb->result) ? 'Success' : 'Failed';
 	}
 }
 

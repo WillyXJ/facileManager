@@ -98,7 +98,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Firewalls</a>
 		<div id="fmfw_config_servers">
 			<p>Firewall servers can be managed from the <a href="__menu{Firewalls}">Firewalls</a> menu item. From 
-			there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
+			there you can add, edit {$__FM_CONFIG['icons']['edit']}, and delete {$__FM_CONFIG['icons']['delete']} 
 			firewalls depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
 			<p>Select the firewall type from the list, select the method the firewall will be updated, and define the firewall configuration file. All of 
@@ -110,13 +110,13 @@ function buildModuleHelpFile() {
 		<a class="list_title">Firewall Policies</a>
 		<div id="fmfw_config_policies">
 			<p>Policy Rules are managed by clicking on the firewall server name from the <a href="__menu{Firewalls}">Firewalls</a> 
-			menu item. From there, you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), delete 
-			({$__FM_CONFIG['icons']['delete']}), and reorder rules (drag and drop the row). When adding or editing a rule, you can select the 
+			menu item. From there, you can add, edit {$__FM_CONFIG['icons']['edit']}, delete 
+			{$__FM_CONFIG['icons']['delete']}, and reorder rules (drag and drop the row). When adding or editing a rule, you can select the 
 			firewall interface the rule applies to, the direction, source, destination, services, time restriction (iptables only), action, and
 			any options you want for the rule.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete firewall policies.</i></p>
-			<p>When the rules are defined and ready for deployment to the firewall server, you can preview ({$__FM_CONFIG['icons']['preview']}) the config
-			before building ({$__FM_CONFIG['icons']['build']}) it from the <a href="__menu{Firewalls}">Firewalls</a> 
+			<p>When the rules are defined and ready for deployment to the firewall server, you can preview {$__FM_CONFIG['icons']['preview']} the config
+			before building {$__FM_CONFIG['icons']['build']} it from the <a href="__menu{Firewalls}">Firewalls</a> 
 			menu item.</p>
 			<p><i>The 'Build Server Configs' or 'Super Admin' permission is required to build and deploy firewall policies.</i></p>
 			<br />
@@ -292,7 +292,7 @@ function getModuleBadgeCounts($type) {
 			$server_builds[] = $server_results[$i]->server_name;
 		}
 		if (version_compare(getOption('version', 0, $_SESSION['module']), '1.0-b3', '>=')) {
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption($_SESSION['module'] . '_client_version') . "'");
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption('client_version', 0, $_SESSION['module']) . "'");
 			$server_count = $fmdb->num_rows;
 			$server_results = $fmdb->last_result;
 			for ($i=0; $i<$server_count; $i++) {

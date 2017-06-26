@@ -25,30 +25,36 @@ class fm_module_templates {
 	/**
 	 * Displays the template list
 	 */
-	function rows($result, $template_type) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $template_type, __('There are no templates.'));
+			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no templates.'));
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
+
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
-							'name' => $template_type
+							'name' => $type
 						);
 
 			global $fm_dns_records;
-			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
-			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($template_type)));
+			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
-				$this->displayRow($results[$x], $template_type);
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
+				$this->displayRow($results[$x], $type);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -91,19 +97,21 @@ class fm_module_templates {
 		} else {
 			$edit_name = $row->$field_name;
 		}
+		$name = $row->$field_name;
 		$field_name = $prefix . '_default';
 		$star = $row->$field_name == 'yes' ? str_replace(__('Super Admin'), __('Default Template'), $__FM_CONFIG['icons']['star']) : null;
 		
 		$field_id = $prefix . '_id';
 		echo <<<HTML
-		<tr id="{$row->$field_id}">
+		<tr id="{$row->$field_id}" name="$name">
 			<td>$star</td>
 			<td>$edit_name</td>
 HTML;
 		$row = get_object_vars($row);
 		
 		$excluded_fields = array($prefix . '_id', 'account_id', $prefix . '_template', $prefix . '_default',
-				$prefix . '_name', $prefix . '_status', $prefix . '_template_id');
+				$prefix . '_name', $prefix . '_status', $prefix . '_template_id', $prefix . '_dynamic',
+				'soa_serial_no_previous');
 		
 		if ($prefix == 'soa') {
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));
@@ -114,6 +122,7 @@ HTML;
 
 		foreach ($row as $key => $val) {
 			if (in_array($key, $excluded_fields)) continue;
+			if (strpos($key, 'dnssec') !== false) continue;
 
 			if ($prefix == 'domain') {
 				/** Friendly servers and view names */
@@ -173,12 +182,12 @@ HTML;
 	/**
 	 * Deletes the selected template
 	 */
-	function delete($id, $table, $prefix) {
+	function delete($id, $prefix, $table) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $prefix . '_', $prefix . '_id', $prefix . '_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, $id, $prefix . '_', 'deleted', $prefix . '_id') === false) {
-			return __('This template could not be deleted because a database error occurred.');
+			return formatError(__('This template could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			addLogEntry("Deleted $prefix template '$tmp_name'.");
 			return true;

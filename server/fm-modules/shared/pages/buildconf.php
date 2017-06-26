@@ -45,11 +45,38 @@ if ($account_verify != 'Success') {
 	exit;
 }
 
-$module_buildconf_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_POST['module_name'] . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . 'buildconf.inc.php';
-if (file_exists($module_buildconf_file)) {
-	include($module_buildconf_file);
+/** Process action */
+if (array_key_exists('action', $_POST)) {
+	/** Process building of the server config */
+	if ($_POST['action'] == 'buildconf') {
+		@list($data, $message) = $fm_module_buildconf->buildServerConfig($_POST);
+	}
+	
+	/** Process building of whatever is required */
+	if ($_POST['action'] == 'cron') {
+		@list($data, $message) = $fm_module_buildconf->buildCronConfigs($_POST);
+	}
+	
+	/** Process updating the tables */
+	if ($_POST['action'] == 'update') {
+		$data = $fm_module_buildconf->updateReloadFlags($_POST);
+	}
+	
+	/** Include actions from module */
+	$module_buildconf_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_POST['module_name'] . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . 'buildconf.inc.php';
+	if (file_exists($module_buildconf_file)) {
+		include($module_buildconf_file);
+	}
+
+	/** Output $data */
+	if (!empty($data)) {
+		if ($_POST['compress']) echo gzcompress(serialize($data));
+		else echo serialize($data);
+	}
+	
+	$fm_module_servers->updateServerVersion();
 }
 
-$fm_shared_module_servers->updateClientVersion();
+$fm_module_servers->updateClientVersion();
 
 ?>

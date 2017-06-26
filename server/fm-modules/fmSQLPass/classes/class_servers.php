@@ -20,12 +20,14 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_servers {
+require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
+
+class fm_module_servers extends fm_shared_module_servers {
 	
 	/**
 	 * Displays the server list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -33,6 +35,9 @@ class fm_module_servers {
 		} else {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
+
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
 
 			$table_info = array(
 							'class' => 'display_results',
@@ -45,8 +50,11 @@ class fm_module_servers {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -111,8 +119,8 @@ class fm_module_servers {
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 				if ($key == 'server_credentials') {
 					$clean_data = str_repeat('*', 7);
 				}
@@ -129,13 +137,15 @@ class fm_module_servers {
 				$log_message .= ($clean_data && $key != 'account_id') ? formatLogKeyData('server_', $key, $clean_data) : null;
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
+		}
 
 		addLogEntry($log_message);
 		return true;
@@ -188,7 +198,7 @@ class fm_module_servers {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 				if ($key == 'server_credentials') {
 					$data = str_repeat('*', 7);
 				}
@@ -205,13 +215,15 @@ class fm_module_servers {
 				$log_message .= $data ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the server
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the server because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -235,7 +247,7 @@ class fm_module_servers {
 		// Delete server
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		if (!updateStatus('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $id, 'server_', 'deleted', 'server_id')) {
-			return __('This database server could not be deleted.') . "\n";
+			return formatError(__('This database server could not be deleted.') . "\n");
 		} else {
 			addLogEntry("Deleted database server '$tmp_name'.");
 			return true;
@@ -285,7 +297,7 @@ class fm_module_servers {
 		if (empty($groups)) $groups = 'None';
 
 		echo <<<HTML
-		<tr id="$row->server_id"$disabled_class>
+		<tr id="$row->server_id" name="$row->server_name"$disabled_class>
 			<td>{$row->server_name}</td>
 			<td>{$row->server_type} (tcp/{$row->server_port})</td>
 			<td>$groups</td>
@@ -303,7 +315,7 @@ HTML;
 		$server_id = 0;
 		$server_name = $server_groups = $server_type = $server_port = null;
 		$server_cred_user = $server_cred_password = $server_credentials = null;
-		$server_type = 'database';
+		$server_type = 'MySQL';
 		$ucaction = ucfirst($action);
 		
 		/** Build groups options */
@@ -327,6 +339,7 @@ HTML;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
 
 		$server_types = buildSelect('server_type', 'server_type', $this->getServerTypes(), $server_type);
+		$server_port = ($server_port) ? $server_port : $__FM_CONFIG['fmSQLPass']['default']['ports'][$server_type];
 		$groups = (is_array($group_options)) ? buildSelect('server_groups', 1, $group_options, $server_groups, 4, null, true) : __('Server Groups need to be defined first.');
 		
 		/** Handle credentials */
@@ -356,7 +369,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_port">%s</label></th>
-					<td width="67&#37;"><input type="number" name="server_port" value="%d" placeholder="3306" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></td>
+					<td width="67&#37;"><input type="number" name="server_port" id="server_port" value="%d" placeholder="3306" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_groups">%s</label></th>
@@ -404,6 +417,7 @@ HTML;
 		
 		foreach ($db_support as $db_type) {
 			$php_function = (strtolower($db_type) == 'postgresql') ? 'pg' : strtolower($db_type);
+			if ($php_function == 'mysql' && useMySQLi()) $php_function .= 'i';
 			if (function_exists($php_function . '_connect') && function_exists('change' . $db_type . 'UserPassword')) $fm_supported_servers[] = $db_type;
 		}
 		

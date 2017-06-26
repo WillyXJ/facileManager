@@ -25,13 +25,12 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_logging.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 
 $type = (isset($_GET['type'])) ? sanitize(strtolower($_GET['type'])) : 'channel';
 $display_type = $__FM_CONFIG['logging']['avail_types'][$type];
 $channel_category = ($type == 'channel') ? 'channel' : 'category';
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$response = isset($response) ? $response : null;
 
 /* Ensure proper type is defined */
 if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {
@@ -71,10 +70,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $server_serial_no_uri);
+$avail_types = buildSubMenu($type, $__FM_CONFIG['logging']['avail_types']);
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader($response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
@@ -93,22 +92,10 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 }
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array($sort_field, 'cfg_data'), 'cfg_', 'AND cfg_type="logging" AND cfg_name="' . $channel_category . '" AND server_serial_no="' . $server_serial_no. '"', null, false, $sort_direction);
-$fm_module_logging->rows($result, $channel_category);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_logging->rows($result, $channel_category, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'channel', $server_serial_no_uri = null) {
-	global $__FM_CONFIG;
-	
-	$menu_selects = null;
-	
-	foreach ($__FM_CONFIG['logging']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$server_serial_no_uri\">$type</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
 
 ?>

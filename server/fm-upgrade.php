@@ -45,9 +45,7 @@ if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('
 /** Ensure we meet the requirements */
 require_once(ABSPATH . 'fm-includes/init.php');
 require_once(ABSPATH . 'fm-includes/version.php');
-$app_compat = checkAppVersions(false);
-
-if ($app_compat) {
+if ($app_compat = checkAppVersions(false)) {
 	bailOut($app_compat);
 }
 
@@ -61,7 +59,7 @@ if (array_key_exists('backup', $_GET)) {
 	header('Location: ' . $GLOBALS['basename']);
 }
 
-$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+$branding_logo = getBrandLogo();
 
 printHeader(_('Upgrade'), 'install');
 
@@ -87,6 +85,7 @@ switch ($step) {
 
 		include(ABSPATH . 'config.inc.php');
 		include_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
 
 		fmUpgrade($__FM_CONFIG['db']['name']);
 		break;

@@ -25,13 +25,11 @@
 
 if (!currentUserCan(array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 
 if (!isset($map)) header('Location: zones-forward.php');
 if (isset($_GET['map'])) header('Location: zones-' . sanitize(strtolower($_GET['map'])) . '.php');
 $map = (isset($_POST['createZone'][0]['domain_mapping'])) ? sanitize(strtolower($_POST['createZone'][0]['domain_mapping'])) : $map;
-
-$response = isset($response) ? $response : null;
 
 if (currentUserCan('manage_zones', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'create';
@@ -40,7 +38,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		if (!empty($_POST)) {
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
-				$response = '<p class="error">' . $insert_id . '</p>'. "\n";
+				$response = displayResponseClose($insert_id);
 			} else {
 				if ($_POST['domain_template'] == 'yes') {
 					header('Location: templates-zones.php');
@@ -55,19 +53,19 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		if (!empty($_POST)) {
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
-				$response = '<p class="error">' . $zone_update_status . '</p>'. "\n";
+				$response = displayResponseClose($zone_update_status);
 			} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_GET['domain_id'], 'domain_', $_GET['status'], 'domain_id')) {
-				$response = sprintf('<p class="error">' . __('This item could not be set to %s.') . "</p>\n", $_GET['status']);
+				$response = displayResponseClose(sprintf(__('This item could not be set to %s.'), $_GET['status']));
 			} else header('Location: ' . $GLOBALS['basename']);
 		}
 		break;
 	case 'download':
 		if (array_key_exists('domain_id', $_POST) && is_numeric($_POST['domain_id'])) {
 			include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-			include(ABSPATH . 'fm-modules/fmDNS/classes/class_buildconf.php');
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
 			
 			$data['SERIALNO'] = -1;
 			$data['compress'] = 0;
@@ -127,9 +125,9 @@ $search_query = createSearchSQL(array('name', 'mapping', 'type'), 'domain_');
 
 /** Check if any servers need their configs built first */
 $reload_allowed = reloadAllowed();
-if (!$reload_allowed && !$response) $response = '<p>' . sprintf(__('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL(__('Servers'))) . '</p>';
+if (!$reload_allowed && !$response) $response = '<p>' . sprintf(__('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL(_('Servers'))) . '</p>';
 
-echo printPageHeader($response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
+echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
 	
 $sort_direction = null;
 $sort_field = 'domain_name';
@@ -139,7 +137,15 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 
 /** Get zones based on access */
 $user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
-$limited_domain_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? "AND domain_id IN (" . implode(',', $user_capabilities[$_SESSION['module']]['access_specific_zones']) . ")" : null;
+$limited_domain_ids = ')';
+if (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) {
+	$limited_domain_ids = "OR domain_clone_domain_id>0) AND domain_id IN (";
+	$temp_domain_ids = array();
+	foreach ($user_capabilities[$_SESSION['module']]['access_specific_zones'] as $limited_id) {
+		$temp_domain_ids[] = $limited_id;
+	}
+	$limited_domain_ids .= join(',', array_unique($temp_domain_ids)) . ')';
+}
 
 /** Process domain_view filtering */
 if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
@@ -152,7 +158,12 @@ if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
 	}
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql . (string) $search_query, null, false, $sort_direction);
+if (getOption('zone_sort_hierarchical', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+	$query = "SELECT *,SUBSTRING_INDEX(`domain_name`, '.', -2) AS a,SUBSTRING_INDEX(`domain_name`, '.', 2) AS b FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`!='deleted' AND account_id='1' AND domain_template='no' AND domain_mapping='{$map}' AND (domain_clone_domain_id='0' " . $limited_domain_ids . (string) $domain_view_sql . (string) $search_query . " ORDER BY a $sort_direction, b $sort_direction, `domain_name` $sort_direction";
+	$result = $fmdb->query($query);
+} else {
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND (domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql . (string) $search_query, null, false, $sort_direction, false, "SUBSTRING_INDEX(`domain_name`, '.', -2),SUBSTRING_INDEX(`domain_name`, '.', 2),`domain_name`");
+}
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 

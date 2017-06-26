@@ -19,11 +19,10 @@
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
  | Processes zone record updates                                           |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
 extract($_POST);
@@ -42,16 +41,19 @@ $domain_info['map']         = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fm
 $domain_info['clone_of']    = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
 $domain_info['template_id'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
 
+/* RR types that allow record append */
+$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
+
 if (isset($_POST['update'])) {
 	if ($_POST['update']['soa_template_chosen']) {
 		global $fm_dns_records;
 		/** Save the soa_template_chosen in domains table and end */
-		include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 		$fm_dns_records->assignSOA($_POST['update']['soa_template_chosen'], $domain_id);
 		header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $domain_id . '&record_type=SOA');
 	}
 	
-	$_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update']);
+	$_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update'], $append);
 }
 
 $table_info = array('class' => 'display_results no-left-pad');
@@ -60,7 +62,7 @@ $header = displayTableHeader($table_info, $header_array);
 
 $body = null;
 foreach($_POST as $name => $array) {
-	if (in_array($name, array('create', 'update'))) $body .= createOutput($domain_info, $record_type, $array, $name, $header_array);
+	if (in_array($name, array('create', 'update'))) $body .= createOutput($domain_info, $record_type, $array, $name, $header_array, $append);
 }
 
 printHeader();
@@ -86,7 +88,7 @@ printf('<div id="body_container">
 printFooter();
 
 
-function createOutput($domain_info, $record_type, $data_array, $type, $header_array) {
+function createOutput($domain_info, $record_type, $data_array, $type, $header_array, $append) {
 	global $__FM_CONFIG;
 	
 	$html = null;
@@ -99,7 +101,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	foreach ($data_array as $id => $data) {
 		if (!is_array($data)) continue;
 		if (isset($data['Delete'])) {
-			$action = __('Delete');
+			$action = _('Delete');
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');
 			$value[$id] = $data;
 		} elseif (array_key_exists('record_skipped', $data) && $skips_allowed) {
@@ -113,7 +115,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 			$value[$id] = $data;
 		} else {
 			$action = ucfirst($type);
-			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type);
+			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type, $append);
 			if (!isset($input_error[$id])) unset($input_error[$id]);
 			$html .= $valid_html;
 			if (is_array($valid_data)) {
@@ -166,10 +168,9 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	return $html;
 }
 
-function validateEntry($action, $id, $data, $record_type) {
+function validateEntry($action, $id, $data, $record_type, $append) {
 	$messages = null;
 	$html = null;
-	$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
 	
 	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';
@@ -191,8 +192,14 @@ function validateEntry($action, $id, $data, $record_type) {
 				}
 			}
 			
-			if (in_array($key, array('record_ttl', 'record_priority', 'record_weight', 'record_port'))) {
+			if (in_array($key, array('record_priority', 'record_weight', 'record_port'))) {
 				if (!empty($val) && verifyNumber($val) === false) {
+					$messages['errors'][$key] = __('Invalid');
+				}
+			}
+			
+			if ($key == 'record_ttl') {
+				if (!empty($val) && verifyTTL($val) === false) {
 					$messages['errors'][$key] = __('Invalid');
 				}
 			}
@@ -248,7 +255,7 @@ function validateEntry($action, $id, $data, $record_type) {
 		if ($_POST['create']['soa_template_chosen']) {
 			global $fm_dns_records;
 			// Save the soa_template_chosen in domains table and end
-			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_records.php');
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$fm_dns_records->assignSOA($_POST['create']['soa_template_chosen'], $_POST['domain_id']);
 			header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $_POST['domain_id'] . '&record_type=SOA');
 		}
@@ -282,7 +289,11 @@ function validateEntry($action, $id, $data, $record_type) {
 						$messages['errors'][$key] = __('Invalid');
 					}
 				} else {
-					if (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
+					if (in_array($key, array('soa_refresh', 'soa_retry', 'soa_expire', 'soa_ttl'))) {
+						if (!empty($val) && verifyTTL($val) === false) {
+							$messages['errors'][$key] = __('Invalid');
+						}
+					} elseif (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
 						if (!verifyNAME($val, $id, false)) {
 							$messages['errors'][$key] = __('Invalid');
 						}
@@ -305,8 +316,12 @@ function buildInputReturn($action, $id, $key, $val) {
 	return '<input type="hidden" name="' . $action . "[$id][$key]" . '" value="' . $val . "\">\n";
 }
 
-function buildUpdateArray($domain_id, $record_type, $data_array) {
+function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
 	$exclude_keys = array('record_skipped');
+	if (!in_array($record_type, $append)) {
+		$exclude_keys[] = 'record_append';
+	}
+	
 	$sql_records = buildSQLRecords($record_type, $domain_id);
 	if (!count($sql_records) && $record_type == 'SOA') {
 		return $data_array;
@@ -329,74 +344,6 @@ function buildUpdateArray($domain_id, $record_type, $data_array) {
 	return $changes;
 }
 
-function buildSQLRecords($record_type, $domain_id) {
-	global $fmdb, $__FM_CONFIG;
-	
-	if ($record_type == 'SOA') {
-		$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
-			`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
-			`soa_template`='no' AND `soa_status`='active'";
-		$fmdb->get_results($soa_query);
-		if ($fmdb->num_rows) $result = $fmdb->last_result;
-		else return null;
-		
-		foreach (get_object_vars($result[0]) as $key => $val) {
-			$sql_results[$result[0]->soa_id][$key] = $val;
-		}
-		array_shift($sql_results[$result[0]->soa_id]);
-		array_shift($sql_results[$result[0]->soa_id]);
-		return $sql_results;
-	} else {
-		$valid_domain_ids = 'IN (' . join(',', getZoneParentID($domain_id)) . ')';
-		
-		if (in_array($record_type, array('A', 'AAAA'))) {
-			$record_sql = "AND domain_id $valid_domain_ids AND record_type IN ('A', 'AAAA')";
-		} else {
-			$record_sql = "AND domain_id $valid_domain_ids AND record_type='$record_type'";
-		}
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_name', 'record_', $record_sql);
-		if ($result) {
-			$results = $fmdb->last_result;
-
-			for ($i=0; $i<$result; $i++) {
-				$static_array = array('record_name', 'record_ttl', 'record_class',
-					'record_value', 'record_comment', 'record_status');
-				$optional_array = array('record_priority', 'record_weight', 'record_port',
-					'record_os', 'record_cert_type', 'record_key_tag', 'record_algorithm',
-					'record_flags', 'record_text', 'record_params', 'record_regex',
-					'record_append');
-				
-				foreach ($static_array as $field) {
-					$sql_results[$results[$i]->record_id][$field] = $results[$i]->$field;
-				}
-				foreach ($optional_array as $field) {
-					if ($results[$i]->$field != null) {
-						$sql_results[$results[$i]->record_id][$field] = $results[$i]->$field;
-					}
-				}
-				
-				/** Skipped record? */
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $results[$i]->record_id, 'record_', 'record_id', "AND domain_id=$domain_id");
-				$sql_results[$results[$i]->record_id]['record_skipped'] = ($fmdb->num_rows) ? 'on' : 'off';
-			}
-		}
-		return $sql_results;
-	}
-
-}
-
-function compareValues($data_array, $sql_records) {
-	$changes = array();
-	foreach ($data_array as $key => $val) {
-		$diff = array_diff_assoc($data_array[$key], $sql_records[$key]);
-		if ($diff) {
-			$changes[$key] = $diff;
-		}
-	}
-
-	return $changes;
-}
-
 function verifyName($record_name, $id, $allow_null = true, $record_type = null) {
 	global $fmdb, $__FM_CONFIG;
 	
@@ -404,7 +351,7 @@ function verifyName($record_name, $id, $allow_null = true, $record_type = null) 
 	
 	/** Ensure singleton RR type */
 	$sql = $record_type != 'CNAME' ? " AND record_type='CNAME'" : " AND record_id!=$id";
-	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql", null, false, 'ASC', true);
+	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql AND record_status='active'", null, false, 'ASC', true);
 	if ($fmdb->last_result[0]->count) return false;
 	
 	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
@@ -509,7 +456,7 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		global $fm_dns_zones;
 
 		if (!class_exists('fm_dns_zones')) {
-			include_once(ABSPATH . 'fm-modules/fmDNS/classes/class_zones.php');
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 		}
 		$retval = $fm_dns_zones->add($ptr_array);
 
@@ -531,6 +478,36 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 function validateHostname($hostname) {
 	if ($hostname[0] == '-' || strpos($hostname, '_') !== false) {
 		return false;
+	}
+	
+	return true;
+}
+
+/**
+ * Returns whether record TTL is valid or not
+ *
+ * @since 3.0
+ * @package fmDNS
+ *
+ * @param string $ttl TTL to check
+ * @return boolean
+ */
+function verifyTTL($ttl) {
+	/** Return true if $ttl is a number */
+	if (verifyNumber($ttl)) return true;
+	
+	/** Check if last character is a-z */
+	if (!preg_match('/[a-z]/i', substr($ttl, -1))) return false;
+	
+	/** Check for s, m, h, d, w */
+	preg_match_all('/\d+[a-z]/i', $ttl, $matches);
+	
+	/** Something is wrong */
+	if (count($matches) > 1) return false;
+	
+	foreach ($matches[0] as $match) {
+		$split = preg_split('/[smhdw]/i', $match);
+		if (!verifyNumber($split[0])) return false;
 	}
 	
 	return true;

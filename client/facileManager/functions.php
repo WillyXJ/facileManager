@@ -29,9 +29,13 @@
 
 error_reporting(0);
 $compress = true;
+$whoami = 'root';
+$url = null;
 
-/** Check if PHP is CGI */
-if (strpos(php_sapi_name(), 'cgi') !== false) {
+if (!isset($module_name) && isset($_POST['module'])) $module_name = $_POST['module'];
+
+/** Check if PHP is CGI for CLI operations */
+if (strpos(php_sapi_name(), 'cgi') !== false && count($argv)) {
 	echo fM("Your server is running a CGI version of PHP and the CLI version is required.\n\n");
 	exit(1);
 }
@@ -42,6 +46,9 @@ $debug		= (in_array('-d', $argv) || in_array('debug', $argv)) ? true : false;
 $proto		= (in_array('-s', $argv) || in_array('no-ssl', $argv)) ? 'http' : 'https';
 $purge		= (in_array('-p', $argv) || in_array('purge', $argv)) ? true : false;
 $no_sudoers	= (in_array('no-sudoers', $argv)) ? true : false;
+$dryrun		= (in_array('-n', $argv) || in_array('dryrun', $argv)) ? true : false;
+$buildconf	= (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : false;
+$cron		= (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
@@ -75,6 +82,31 @@ if (!function_exists('curl_init')) {
 	exit(1);
 }
 
+/** Define sys_get_temp_dir function */
+if (!function_exists('sys_get_temp_dir')) {
+	function sys_get_temp_dir() {
+		return '/tmp';
+	}
+}
+
+/** Check running user */
+if (exec(findProgram('whoami')) != $whoami && !$dryrun && count($argv)) {
+	echo fM("This script must run as $whoami.\n");
+	exit(1);
+}
+
+/** Build everything required via cron */
+if ($cron) {
+	$data['action'] = 'cron';
+}
+
+/** Build the server config */
+if ($buildconf) {
+	$data['action'] = 'buildconf';
+}
+
+$data['dryrun'] = $dryrun;
+
 $config_file = dirname(__FILE__) . '/config.inc.php';
 
 /** Include module functions */
@@ -90,10 +122,10 @@ $data['server_os_distro'] = detectOSDistro();
 $data['update_from_client']	= (in_array('no-update', $argv)) ? false : true;
 
 /** Run the installer */
-if (in_array('install', $argv)) {
+if (in_array('install', $argv) || in_array('reinstall', $argv)) {
 	if (file_exists($config_file)) {
-		require ($config_file);
-		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO')) {
+		require($config_file);
+		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO') && in_array('install', $argv)) {
 			$proto = (socketTest(FMHOST, 443)) ? 'https' : 'http';
 			$url = "${proto}://" . FMHOST . "admin-accounts.php?verify";
 			$data['compress'] = $compress;
@@ -113,7 +145,7 @@ if (in_array('install', $argv)) {
 if (!file_exists($config_file)) {
 	echo fM("The $module_name client is not installed. Please install it with the following:\nphp {$argv[0]} install\n");
 	exit(1);
-} else require($config_file);
+} else require_once($config_file);
 
 $data['AUTHKEY'] = AUTHKEY;
 $data['SERIALNO'] = SERIALNO;
@@ -136,11 +168,16 @@ if (!socketTest($server_path['hostname'], $port, 20)) {
 	}
 }
 
+/** Set variables to pass */
+$url = $proto . '://' . FMHOST . 'buildconf.php';
+
 /** Run the upgrader */
 if (in_array('upgrade', $argv)) {
 	upgradeFM($proto . '://' . FMHOST . 'admin-servers.php?upgrade', $data);
 }
 
+/** Display dry-run messaging */
+if ($dryrun && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 
 
 /** ============================================================================================= */
@@ -150,11 +187,14 @@ function printHelp () {
 	
 	echo <<<HELP
 php {$argv[0]} [options]
-  -h|help        Display this help
-  -v|version     Display the client version
+  -b|buildconf   Build server configuration and associated files
+  -c|cron        Run in cron mode
   -d|debug       Enter debug mode for more output
+  -h|help        Display this help
+  -n|dryrun      Do not save any files - just output what will happen
   -p|purge       Delete old configuration files before writing
   -s|no-ssl      Do not use SSL to retrieve the configs
+  -v|version     Display the client version
      no-sudoers  Do not create/update the sudoers file at install time
      no-update   Do not update the server configuration from the client
 
@@ -174,6 +214,7 @@ HELP;
   
      install     Install the client components
      upgrade     Upgrade the client components
+     reinstall   Reinstall the client components
 
 HELP;
 	exit;
@@ -288,7 +329,7 @@ function installFM($proto, $compress) {
 
 	/** Add new server */
 	echo fM('  --> Adding ' . $data['server_name'] . ' to the database...');
-	$add_server_result = moduleAddServer($url, $data);
+	$add_server_result = addServer($url, $data);
 	extract($add_server_result, EXTR_OVERWRITE);
 	echo fM($add_result);
 
@@ -308,15 +349,6 @@ function installFM($proto, $compress) {
 	addLogEntry('Client installed successfully.');
 	
 	echo fM("Installation is complete. Please login to the UI to ensure the server settings are correct.\n");
-	
-	/** chmod and prepend php to this file */
-	chmod($argv[0], 0755);
-	$contents = file_get_contents($argv[0]);
-	$bin = '#!' . findProgram('php');
-	if (strpos($contents, $bin) === false) {
-		$contents = $bin . "\n" . $contents;
-		file_put_contents($argv[0], $contents);
-	}
 	
 	exit;
 }
@@ -349,12 +381,10 @@ function upgradeFM($url, $data) {
 	echo fM('Latest version: ' . $latest_module_version . "\n");
 	
 	/** Download latest core files */
-	echo fM("Downloading ");
 	$core_file = 'facilemanager-core-' . $latest_core_version . '.tar.gz';
 	downloadfMFile($core_file);
 	
 	/** Download latest module files */
-	echo fM("Downloading ");
 	$module_file = strtolower($module_name) . '-' . $latest_module_version . '.tar.gz';
 	downloadfMFile($module_file, true);
 	
@@ -642,7 +672,7 @@ function detectOSDistro() {
 			if ($lsb_release && trim($lsb_release) != '') {
 				$distrib = explode(':', $lsb_release);
 				$distrib_id = explode(' ', trim($distrib[1]));
-				return $distrib_id[0];
+				return (substr($distrib_id[0], 0, 3) == 'Red') ? 'Redhat' : $distrib_id[0];
 			} elseif (file_exists($filename = '/etc/lsb-release')
 				&& $lsb_release = file_get_contents($filename)
 				&& preg_match('/^DISTRIB_ID="?([^"\n]+)"?/m', $lsb_release, $id)) {
@@ -654,7 +684,7 @@ function detectOSDistro() {
 		if (file_exists($filename = '/etc/redhat-release')
 			&& $rh_release = file_get_contents($filename)) {
 			 $rh_release = explode(' ', $rh_release);
-			 return $rh_release[0];
+			 return ($rh_release[0] == 'Red') ? 'Redhat' : $rh_release[0];
 		}
 		
 		/** OS-release systems */
@@ -719,6 +749,29 @@ function initWebRequest() {
 	if ($serial_no != SERIALNO) {
 		exit(serialize(fM('The serial numbers do not match for ' . php_uname('n') . '.')));
 	}
+	
+	/** Process action request */
+	if (isset($_POST['action'])) {
+		switch ($_POST['action']) {
+			case 'buildconf':
+				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $_POST['module'] .  '/client.php buildconf' . $_POST['options'] . ' 2>&1', $output, $rc);
+				if ($rc) {
+					/** Something went wrong */
+					$output[] = 'Config build failed.';
+				}
+				break;
+			case 'upgrade':
+				exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $_POST['module'] . '/client.php upgrade 2>&1', $output);
+				break;
+			default:
+				/** Process module-specific requests */
+				if (function_exists('moduleInitWebRequest')) {
+					$output = moduleInitWebRequest();
+				}
+		}
+	}
+
+	echo serialize($output);
 }
 
 
@@ -730,9 +783,11 @@ function initWebRequest() {
  *
  * @param string $module_name Module currently being used
  * @param string $update_method User entered update method
+ * @param array $data Data array containing client information
+ * @param string $url URL to post data to
  * @return string
  */
-function processUpdateMethod($module_name, $update_method, $data, $url) {
+function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 	global $argv;
 	
 	/** Update via cron or http/s? */
@@ -749,7 +804,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 		/** cron */
 		case 'c':
 			$tmpfile = sys_get_temp_dir() . '/crontab.facileManager';
-			$dump = shell_exec('crontab -l | grep -v ' . $argv[0] . '> ' . $tmpfile . ' 2>/dev/null');
+			$dump = shell_exec('crontab -l | grep -v ' . $module_name . '> ' . $tmpfile . ' 2>/dev/null');
 			
 			/** Handle special cases */
 			if (PHP_OS == 'SunOS') {
@@ -760,7 +815,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 				unset($minopt);
 			} else $minutes = '*/5';
 			
-			$cmd = "echo '" . $minutes . ' * * * * ' . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/' . basename($argv[0]) . " cron' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
+			$cmd = "echo '" . $minutes . ' * * * * ' . findProgram('php') . ' ' . $argv[0] . " cron' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
 			$cron_update = system($cmd, $retval);
 			unlink($tmpfile);
 			
@@ -776,7 +831,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			$user = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			$result = ($user) ? 'ok' : 'failed';
 			if ($result == 'failed') {
-				echo fM("Installation failed.  No SSH user found for this account.\n");
+				echo fM("Installation failed.  No SSH user found for this account.  Please define the user in the General Settings first.\n");
 				exit(1);
 			}
 			
@@ -796,9 +851,10 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			$raw_data = getPostData(str_replace('genserial', 'ssh=key_pub', $url), $data);
 			$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 			if (strpos($raw_data, 'ssh-rsa') !== false) {
-				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys2'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys2', $raw_data, FILE_APPEND) : true;
-				@chown($ssh_dir . '/authorized_keys2', $user);
-				@chmod($ssh_dir . '/authorized_keys2', 0600);
+				$result = (strpos(@file_get_contents($ssh_dir . '/authorized_keys'), $raw_data) === false) ? @file_put_contents($ssh_dir . '/authorized_keys', trim($raw_data) . "\n", FILE_APPEND) : true;
+				@chown($ssh_dir . '/authorized_keys', $user);
+				@chmod($ssh_dir . '/authorized_keys', 0644);
+				@chmod($ssh_dir, 0700);
 				if ($result !== false) $result = 'ok';
 			} else {
 				$result = 'failed';
@@ -810,7 +866,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			}
 			
 			/** Add an entry to sudoers */
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/client.php *';
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'ssh';
@@ -848,12 +904,12 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 				echo fM("  --> $docroot does not exist.  Aborting.\n");
 				exit(1);
 			}
-			$link_name = $docroot . DIRECTORY_SEPARATOR . $module_name;
+			$link_name = $docroot . DIRECTORY_SEPARATOR . 'fM';
 			
 			echo fM("  --> Creating $link_name link.\n");
 			
 			if (!is_link($link_name)) {
-				symlink(dirname(__FILE__) . '/' . $module_name . '/www', $link_name);
+				symlink(dirname(__FILE__) . '/www', $link_name);
 			} else echo fM("      --> $link_name already exists...skipping\n");
 			
 			/** Add an entry to sudoers */
@@ -863,7 +919,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 				$user = getParameterValue($user_var, findFile('envvars'), '=');
 			}
 			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
-			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . $argv[0] . ' *';
+			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/client.php *';
 			
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
@@ -908,7 +964,7 @@ function addUser($user_info, $passwd_users) {
 	}
 	
 	if (!$retval) {
-		$ssh_dir = shell_exec("grep $user_name /etc/passwd | awk -F: '{print $6}'");
+		$ssh_dir = trim(shell_exec("grep $user_name /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
 		if ($ssh_dir && $ssh_dir != '/') {
 			createDir($ssh_dir, $user_name);
 			return $ssh_dir;
@@ -947,34 +1003,51 @@ function addLogEntry($log_data) {
  * @since 1.1
  * @package facileManager
  *
- * @param string $user User dirs/files should be chowned as
- * @param array $chown_files dirs/files that should be chowned prior to writing
  * @param array $files Files and contents to write
  * @param boolean $dryrun Whether or not files should be written
+ * @param array $chown_dirs dirs that should be chowned prior to writing
+ * @param string $user User dirs/files should be chowned as
  * @return boolean
  */
-function installFiles($user, $chown_files, $files, $dryrun) {
-	$message = "Setting directory and file permissions for $user\n";
-	if ($debug) echo $message;
-	if (!$dryrun) {
-		addLogEntry($message);
-		/** chown the files/dirs */
-		foreach($chown_files as $file) {
-			@chown($file, $user);
-		}
-	}
-		
+function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), $user = 'root') {
 	/** Process the files */
 	if (count($files)) {
-		foreach($files as $filename => $contents) {
+		foreach($files as $filename => $fileinfo) {
+			if (is_array($fileinfo)) {
+				extract($fileinfo, EXTR_OVERWRITE);
+			} else {
+				$contents = $fileinfo;
+			}
 			$message = "Writing $filename\n";
 			if ($debug) echo $message;
 			if (!$dryrun) {
 				addLogEntry($message);
-				@mkdir(dirname($filename), 0755, true);
-				@chown(dirname($filename), $user);
+				
+				$directory = dirname($filename);
+				@mkdir($directory, 0755, true);
+				chown($directory, $user);
 				file_put_contents($filename, $contents);
-				@chown($filename, $user);
+				
+				/** chown and chmod if applicable */
+				$runas = (isset($chown)) ? $chown : $user;
+				chown($filename, $runas);
+				unset($chown);
+				if (isset($mode)) {
+					chmod($filename, intval($mode));
+					unset($mode);
+				}
+			}
+		}
+		
+		/** chown the dirs */
+		if (count($chown_dirs)) {
+			foreach($chown_dirs as $dir) {
+				$message = "Setting directory permissions on $dir\n";
+				if ($debug) echo $message;
+				if (!$dryrun) {
+					addLogEntry($message);
+					chown($dir, $user);
+				}
 			}
 		}
 	} else {
@@ -998,7 +1071,10 @@ function installFiles($user, $chown_files, $files, $dryrun) {
  * @return string
  */
 function fM($message) {
-	return wordwrap($message, 90, "\n");
+	if (!$columns = shell_exec(findProgram('tput') . ' cols 2>/dev/null')) {
+		$columns = 90;
+	}
+	return wordwrap($message, $columns, "\n");
 }
 
 
@@ -1016,8 +1092,9 @@ function downloadfMFile($file, $module = false) {
 	if ($module) $base_url .= 'module/';
 	$base_url .= $file;
 	
-	echo fM($base_url . "\n");
-	addLogEntry("Downloading $base_url\n");
+	$message = "Downloading $base_url\n";
+	echo fM($message);
+	addLogEntry($message);
 	
 	$local_file = sys_get_temp_dir() . '/' . $file;
 	@unlink($local_file);
@@ -1114,7 +1191,7 @@ function extractFiles($files = array()) {
  * @return string
  */
 function getParameterValue($param, $file, $delimiter = '=') {
-	$raw_line = shell_exec('grep ' . $param . ' ' . $file);
+	$raw_line = shell_exec('grep ' . $param . ' ' . $file . ' 2>/dev/null');
 	if (!$raw_line) {
 		return false;
 	}
@@ -1165,7 +1242,7 @@ function addSudoersConfig($module_name, $sudoers_line, $user) {
 			}
 		}
 		$cmd = "echo '$sudoers_line' >> $sudoers_file 2>/dev/null";
-		if (strpos(file_get_contents($sudoers_file), $sudoers_line) === false) {
+		if (strpos(@file_get_contents($sudoers_file), $sudoers_line) === false) {
 			$sudoers_update = system($cmd, $retval);
 
 			if ($retval) echo fM("  --> The sudoers entry cannot be added.\n$cmd\n");
@@ -1229,5 +1306,121 @@ function deleteFile($file, $debug = false, $dryrun = false) {
 	
 	return true;
 }
+
+
+/**
+ * Finds specified file
+ *
+ * @since 2.2
+ * @package facileManager
+ *
+ * @param string $file Filename to find
+ * @param array $addl_path Additional paths to search
+ * @return string or boolean
+ */
+function findFile($file, $addl_path = null) {
+	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2',
+				'/usr/local/etc/apache22', '/etc/apache2', '/etc', '/usr/local/etc');
+	
+	if (is_array($addl_path)) {
+		$path = array_unique(array_merge($path, $addl_path));
+	}
+
+	while ($this_path = current($path)) {
+		if (is_file("$this_path/$file")) {
+			return "$this_path/$file";
+		}
+		next($path);
+	}
+
+	return false;
+}
+
+
+/**
+ * Adds the server to the database
+ *
+ * @since 2.2
+ * @package facileManager
+ *
+ * @param string $url URL to post data to
+ * @param array $data Data to post
+ * @return array
+ */
+function addServer($url, $data) {
+	$app = array(null, null);
+	
+	/** Get module-specific data */
+	if (function_exists('moduleAddServer')) {
+		$module_data = moduleAddServer();
+		if (is_array($module_data)) {
+			$data = array_merge($data, $module_data);
+		}
+	}
+	
+	/** Detect the app version of the module to manage */
+	if (function_exists('detectAppVersion')) {
+		$app = detectAppVersion(true);
+	}
+	if ($app === null) {
+		echo "failed\n\n";
+		echo fM("Cannot find a supported application to manage - please check the README document for supported applications.  Aborting.\n");
+		exit(1);
+	}
+	$data['server_type'] = $app['server']['type'];
+	$data['server_version'] = $app['app_version'];
+
+	/** Add the server to the account */
+	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	if (!is_array($raw_data)) {
+		if (!$raw_data) echo "An error occurred\n";
+		else echo $raw_data;
+		exit(1);
+	}
+	
+	return array('data' => $data, 'add_result' => "Success\n");
+}
+
+
+/**
+ * Returns whether a daemon is running or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $daemon Daemon name to check
+ * @return boolean
+ */
+function isDaemonRunning($daemon) {
+	return shell_exec('ps -A | grep ' . escapeshellarg($daemon) . ' | grep -vc grep');
+}
+
+
+/**
+ * Returns whether a daemon is running or not
+ *
+ * @since 3.0
+ * @package facileManager
+ *
+ * @param string $app_version Detected application version
+ * @param string $serverhost FMHOST
+ * @param boolean $compress Compress the request or not
+ * @return string
+ */
+function versionCheck($app_version, $serverhost, $compress) {
+	$url = str_replace(':/', '://', str_replace('//', '/', $serverhost . '/buildconf.php'));
+	$data['action'] = 'version_check';
+	$server_type = detectServerType();
+	$data['server_type'] = $server_type['type'];
+	$data['server_version'] = $app_version;
+	$data['compress'] = $compress;
+	
+	$raw_data = getPostData($url, $data);
+	$raw_data = $compress ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	
+	return $raw_data;
+}
+
 
 ?>

@@ -29,26 +29,6 @@
  */
 
 
-/**
- * Prints the module help file
- *
- * @since 1.0
- * @package fmFirewall
- *
- * @return null
- */
-function printModuleHelp () {
-	global $argv;
-	
-	echo <<<HELP
-  -n|dryrun      Do not save - just output what will happen
-  -b|buildconf   Build named config and zone files
-  -c|cron        Run in cron mode
-  
-HELP;
-}
-
-
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
 	global $argv;
 	
@@ -88,8 +68,6 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 function buildConf($url, $data) {
 	global $proto, $debug;
 	
-	if ($data['dryrun'] && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
-	
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (!is_array($raw_data)) {
@@ -108,11 +86,8 @@ function buildConf($url, $data) {
 	
 	extract($raw_data, EXTR_SKIP);
 	
-	$runas = 'root';
-	$chown_files = array($server_root_dir);
-	
 	/** Install the new files */
-	installFiles($runas, $chown_files, $files, $data['dryrun']);
+	installFiles($files, $data['dryrun'], array($server_root_dir));
 	
 	$message = "Reloading the server\n";
 	if ($debug) echo fM($message);
@@ -130,6 +105,9 @@ function buildConf($url, $data) {
 		} else {
 			$last_line = system($rc_script . ' 2>&1', $retval);
 			addLogEntry($last_line);
+			if (array_key_exists('/etc/network/if-pre-up.d/fmFirewall', $files)) {
+				@chmod('/etc/network/if-pre-up.d/fmFirewall', 0755);
+			}
 		}
 		if ($retval) {
 			$message = "There was an error reloading the firewall - please check the logs for details\n";
@@ -144,22 +122,6 @@ function buildConf($url, $data) {
 		}
 	}
 	return true;
-}
-
-
-function findFile($file) {
-	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2', '/usr/local/etc/apache22',
-				'/etc', '/usr/local/etc', '/etc/apache2', '/etc', '/etc/named', '/etc/namedb', '/etc/bind'
-				);
-
-	while ($this_path = current($path)) {
-		if (is_file("$this_path/$file")) {
-			return "$this_path/$file";
-		}
-		next($path);
-	}
-
-	return false;
 }
 
 
@@ -194,43 +156,6 @@ function detectFWVersion($return_array = false) {
 	}
 	
 	return null;
-}
-
-
-function moduleAddServer($url, $data) {
-	/** Add the server to the account */
-	$app = detectFWVersion(true);
-	if ($app === null) {
-		echo "failed\n\n";
-		echo fM("Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n");
-		exit(1);
-	}
-	$data['server_type'] = $app['server']['type'];
-	$data['server_version'] = $app['app_version'];
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	if (!is_array($raw_data)) {
-		if (!$raw_data) echo "An error occurred\n";
-		else echo $raw_data;
-		exit(1);
-	}
-	
-	return array('data' => $data, 'add_result' => "Success\n");
-}
-
-
-function versionCheck($app_version, $serverhost, $compress) {
-	$url = $serverhost . '/buildconf';
-	$data['action'] = 'version_check';
-	$server_type = detectFirewallType();
-	$data['server_type'] = $server_type['type'];
-	$data['server_version'] = $app_version;
-	$data['compress'] = $compress;
-	
-	$raw_data = getPostData($url, $data);
-	$raw_data = $compress ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	
-	return $raw_data;
 }
 
 
@@ -279,7 +204,11 @@ function getInterfaceNames($os) {
 	
 	switch(PHP_OS) {
 		case 'Linux':
-			$command = findProgram('ifconfig') . ' | grep Link';
+			if ($ifcfg = findProgram('ifconfig')) {
+				$command = $ifcfg . ' | grep "Link "';
+			} elseif ($ifcfg = findProgram('ip')) {
+				$command = $ifcfg . ' maddr | grep "^[0-9]*:" | awk \'{print $2}\'';
+			}
 			break;
 		case 'Darwin':
 		case 'FreeBSD':

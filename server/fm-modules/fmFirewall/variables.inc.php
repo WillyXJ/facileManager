@@ -31,17 +31,21 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmFirewall'] = array(
-		'version'							=> '1.2-beta1',
-		'client_version'					=> '1.1',
+		'version'							=> '1.4',
+		'client_version'					=> '1.4',
 		'description'						=> __('Managing software firewalls should not be difficult. Manage one or more software firewall servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files individually.', 'fmFirewall'),
 		'prefix'							=> 'fw_',
-		'required_fm_version'				=> '2.1-beta1',
-		'min_client_auto_upgrade_version'	=> '1.0.2'
+		'required_fm_version'				=> '3.0',
+		'min_client_auto_upgrade_version'	=> '1.3'
 	);
 
 /** Images */
-$__FM_CONFIG['module']['icons']['action']['active']		= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
-$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="fm-modules/' . $_SESSION['module'] . '/images/__action___d.png" border="0" alt="__Action__ (' . __('disabled') . ')" title="__Action__ (' . __('disabled') . ')" width="12" />';
+if (isset($__FM_CONFIG['module']['path'])) {
+	$__FM_CONFIG['module']['icons']['action']['pass']		= '<i class="fa fa-arrow-up __action__" alt="__Action__" title="__Action__"></i>';
+	$__FM_CONFIG['module']['icons']['action']['block']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
+	$__FM_CONFIG['module']['icons']['action']['reject']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
+	$__FM_CONFIG['module']['icons']['action']['log']		= '<i class="fa fa-file-text-o __action__" alt="__Action__" title="__Action__"></i>';
+}
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
@@ -54,18 +58,24 @@ $__FM_CONFIG['weekdays']				= array(__('Mon') => 1, __('Tue') => 2, __('Wed') =>
 /** Policy options */
 $__FM_CONFIG['fw']['policy_options']	= array(
 											'log' => array(
+												'firewalls' => array('iptables', 'ipfw', 'ipfilter', 'pf'),
 												'bit' => 1,
 												'desc' => __('Log packets processed by this rule')
 											),
 											'established' => array(
+												'firewalls' => array('ipfw', 'ipfilter'),
 												'bit' => 2,
 												'desc' => __('Established connection packets')
 											),
 											'frag' => array(
+												'firewalls' => array('iptables', 'ipfw', 'ipfilter'),
 												'bit' => 4,
 												'desc' => __('Matches packets that are fragments and not the first fragment of an IP datagram')
 											)
 										);
+
+/** Policy states */
+$__FM_CONFIG['fw']['policy_states']	= array('INVALID', 'ESTABLISHED', 'NEW', 'RELATED', 'UNTRACKED');
 
 /** Default values */
 $__FM_CONFIG['fw']['config_file'] 		= array(
@@ -96,7 +106,7 @@ $__FM_CONFIG['fw']['notes'] 			= array(
 												'ipfilter' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked will be passed by default. So make sure you take care with your rule order.')
 											);
 
-$__FM_CONFIG['policy']['avail_types'] = array('rules' => 'Rules', 'nat' => 'NAT');
+$__FM_CONFIG['policy']['avail_types'] = array('filter' => 'Filter', 'nat' => 'NAT');
 
 /** Cleanup options */
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'groups'=>'group', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'objects'=>'object',

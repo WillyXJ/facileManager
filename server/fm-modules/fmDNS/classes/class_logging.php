@@ -25,7 +25,7 @@ class fm_module_logging {
 	/**
 	 * Displays the logging list
 	 */
-	function rows($result, $channel_category) {
+	function rows($result, $channel_category, $page, $total_pages) {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!$result) {
@@ -34,6 +34,9 @@ class fm_module_logging {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages);
+
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
@@ -47,8 +50,11 @@ class fm_module_logging {
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $channel_category);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -88,17 +94,19 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data, '_');
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return __('Could not add the channel because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the channel because a database error occurred.'), 'sql');
+		}
 
 		/** Insert channel children */
 		$post['cfg_isparent'] = 'no';
@@ -136,21 +144,23 @@ class fm_module_logging {
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
 					$clean_data = sanitize($data);
-					if ($i) $sql_fields .= $key . ',';
+					if ($i) $sql_fields .= $key . ', ';
 					
-					$sql_values .= "'$clean_data',";
+					$sql_values .= "'$clean_data', ";
 				}
 			}
 			$i = 0;
-			$sql_values = rtrim($sql_values, ',') . '), (';
+			$sql_values = rtrim($sql_values, ', ') . '), (';
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the channel because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the channel because a database error occurred.'), 'sql');
+		}
 		
 		$log_message = "Added logging channel:\nName: $channel_name\nDestination: {$post['cfg_destination']}";
 		if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
@@ -194,17 +204,19 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$result) return __('Could not add the category because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the category because a database error occurred.'), 'sql');
+		}
 
 		/** Insert category children */
 		$post['cfg_isparent'] = 'no';
@@ -223,17 +235,19 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the category because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the category because a database error occurred.'), 'sql');
+		}
 		
 		addLogEntry("Added logging category:\nName: $category_name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		return true;
@@ -263,7 +277,9 @@ class fm_module_logging {
 			$query = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_parent`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 			$result = $fmdb->query($query);
 			
-			if (!$result) return sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']);
+			if ($fmdb->sql_errors) {
+				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
+			}
 		}
 		
 		/** Update category parent */
@@ -284,10 +300,10 @@ class fm_module_logging {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				$sql_edit .= $key . "='" . $clean_data . "',";
+				$sql_edit .= $key . "='" . $clean_data . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the category */
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
@@ -313,17 +329,19 @@ class fm_module_logging {
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
 					$clean_data = sanitize($data);
-					$sql_fields .= $key . ',';
-					$sql_values .= "'$clean_data',";
+					$sql_fields .= $key . ', ';
+					$sql_values .= "'$clean_data', ";
 				}
 			}
-			$sql_fields = rtrim($sql_fields, ',') . ')';
-			$sql_values = rtrim($sql_values, ',');
+			$sql_fields = rtrim($sql_fields, ', ') . ')';
+			$sql_values = rtrim($sql_values, ', ');
 			
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 			$result = $fmdb->query($query);
 		
-			if (!$fmdb->result) return sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']);
+			if ($fmdb->sql_errors) {
+				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
+			}
 			
 			addLogEntry("Updated logging category '$old_name' to the following:\nName: $name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		} else {
@@ -359,21 +377,23 @@ class fm_module_logging {
 				foreach ($post as $key => $data) {
 					if (!in_array($key, $exclude)) {
 						$clean_data = sanitize($data);
-						if ($i) $sql_fields .= $key . ',';
+						if ($i) $sql_fields .= $key . ', ';
 						
-						$sql_values .= "'$clean_data',";
+						$sql_values .= "'$clean_data', ";
 					}
 				}
 				$i = 0;
-				$sql_values = rtrim($sql_values, ',') . '), (';
+				$sql_values = rtrim($sql_values, ', ') . '), (';
 			}
-			$sql_fields = rtrim($sql_fields, ',') . ')';
+			$sql_fields = rtrim($sql_fields, ', ') . ')';
 			$sql_values = rtrim($sql_values, ', (');
 			
 			$query = "$sql_insert $sql_fields VALUES $sql_values";
 			$result = $fmdb->query($query);
 		
-			if (!$fmdb->result) return sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']);
+			if ($fmdb->sql_errors) {
+				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
+			}
 
 			$log_message = "Updated logging channel '$old_name' to the following:\nName: $name\nDestination: {$post['cfg_destination']}";
 			if ($post['cfg_destination'] == 'syslog') $log_message .= " {$post['cfg_syslog']}";
@@ -413,7 +433,7 @@ class fm_module_logging {
 		
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
-			return sprintf(__('This %s could not be deleted because a database error occurred.'), $type);
+			return formatError(sprintf(__('This %s could not be deleted because a database error occurred.'), $type), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("Logging %s '%s' was deleted."), $type, $tmp_name));
@@ -464,7 +484,7 @@ class fm_module_logging {
 		$comments = nl2br($row->cfg_comment);
 
 		echo <<<HTML
-		<tr id="$row->cfg_id"$disabled_class>
+		<tr id="$row->cfg_id" name="$row->cfg_data"$disabled_class>
 			<td>$edit_name</td>
 			$channels_row
 			<td>$comments</td>

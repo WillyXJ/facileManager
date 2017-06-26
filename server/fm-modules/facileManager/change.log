@@ -1,9 +1,140 @@
-2.1-rc1 (2015-??-??)
+3.0 (2017-06-22)
 ================
-* Server - [improvement] fM upgrades now give the option to backup the database.
-* Server - [bug] Fixed server group bulk actions. (Issue #256)
+* Client - [bug] Fixed OS distro reporting for RHEL when using lsb tools. (Issue #379)
+* Server - [bug] Fixed the upgrade process.
+* Server - [feature] Added setting to change the branding logo.
+* Server - [feature] Added comment field to users.
+* Server - [improvement] Reworked the search bar for easier usage of it.
+* Server - [improvement] Database errors now get displayed if the Show Errors
+           setting is enabled.
+* Server - [improvement] Updated 404 page styling.
+* Both   - [improvement] Code clean up.
+* Both   - [improvement] Updated the error messages surrounding failed SSH
+           connections. (Issue #371)
+* Server - [improvement] CSS tweaks for Firefox compatibility.
+* Client - [bug] Client installer ensures absolute path is defined in the sudoers
+           file. (Issue #372)
+* Server - [improvement] Added locale number formatting.
+* Server - [improvement] Code changes to better reference shared classes.
+* Server - [security] Fixed an issue where unprivileged users could still make
+           changes before a forced logout.
+* Server - [improvement] Code changes to add global response error formatting.
+* Server - [improvement] Added Windows server icon for other modules to use.
+* Server - [improvement] Pagination is added to all pages.
+* Server - [bug] Fixed an issue where the Edit Profile menu option did nothing.
+* Server - [improvement] Code clean up.
+* Server - [improvement] Replaced several icons with Font Awesome fonts.
+* Server - [improvement] CSS tweaks.
+* Server - [bug] Fixed an issue where local account passwords could not be
+           changed when LDAP authentication was being used. (Issue #360)
+* Server - [feature] Added server update support via the modules page. (Issue #113)
+* Server - [improvement] Cleaned up server connection tests output.
+* Server - [improvement] Language changes.
+* Server - [bug] Fixed mysql requirement check. (result of adding #343)
+* Server - [improvement] Updated error page titles.
+* Server - [improvement] Swapped the plus sign for "Add New" text.
+* Server - [bug] Fixed help file with PHP 7 installations. (Issue #354)
+* Server - [improvement] Added item name to the delete confirmations. (Issue #185)
+* Server - [bug] Fixed LDAP authentication using group membership requirements
+           with Active Directory. (Issue #342)
+* Server - [bug] Fixed PHP error during installer with an empty database.
+* Server - [bug] Fixed module installation status through modules page.
+* Server - [bug] Added missing translation text and removed duplicates.
+* Server - [bug] Fixed Redhat clients only reporting 'Red' as the OS.
+* Server - [feature] Use mysqli functions where available. (Issue #343)
+* Server - [feature] Added setting to send audit logs to syslog. (Issue #326)
 
-2.1-beta1 (2015-??-??)
+2.3.3 (2016-10-07)
+==================
+* Server - [bug] Fixed an issue where fM would hang during the software update
+           check. (Issue #353)
+
+2.3.2 (2016-09-22)
+==================
+* Server - [bug] Fixed an issue with clients incorrectly updating on every
+           polling cycle. (Issue #348)
+
+2.3.1 (2016-08-23)
+==================
+* Server - [bug] Fixed an issue where i18n requirement checks may fail. (Issue #335)
+* Client - [bug] Fixed a PHP error in the installer.
+
+2.3 (2016-07-21)
+================
+* Server - [improvement] Added support to load any additional js files in the
+           module directory (fm-modules/(module)/js/).
+* Server - [improvement] Removed boolean params for printHeader().
+* Server - [improvement] Updated buildSelect() to allow an array of single options.
+* Server - [bug] Fixed user creations that broke in 2.2.1.
+* Server - [improvement] Made the tooltip CSS globally available.
+* Server - [improvement] Created global variable for module images directory.
+* Server - [improvement] User session timestamp gets logged and login and logout.
+* Server - [bug] Fixed PHP errors during authentication which prevented successful
+           session creation.
+* Server - [feature] Added setting to define custom login message.
+* Server - [bug] Removed an unnecessary button during installation.
+* Server - [improvement] AJAX now redirects to login page when fM and module
+           database updates are required.
+* Server - [bug] Fixed an issue where i18n requirement checks may fail.
+* Both   - [security] Improved permission support for files installed by the
+           client. (Issue #320)
+
+2.2.1 (2016-06-14)
+==================
+* Server - [bug] Fixed issue with adding users to groups. (Issue #319)
+* Server - [improvement] UTC is now an available timezone. (Issue #318)
+* Server - [improvement] Removed an unnecessary database call when determining
+           if there are any updates available.
+
+2.2 (2016-04-24)
+================
+* Client - Upgrading requires a manual installation using the steps in README.md.
+* Both   - [improvement] Cleaned up duplicate functions to simplify code.
+* Client - [feature] Added the client 'reinstall' option.
+* Client - [improvement] Output now wordwraps based on the number of columns
+           in the shell (based on $COLUMNS environment variable).
+* Server - [bug] Fixed server group config build process.
+* Server - [improvement] SSH login failure messages differentiate between login
+           failure and missing client script.
+* Server - [improvement] Updated help file.
+* Server - [improvement] CSS tweaks.
+* Client - [improvement] Silenced client install grep commands.
+* Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+* Client - [improvement] SSH public keys are now stored in authorized_keys
+           instead of the deprecated authorized_keys2. (Issue #303)
+* Server - [improvement] Improved installation checks and added more messaging.
+* Server - [bug] Installation checks no longer throw a PHP fatal error when the
+           .htaccess file is missing. (Issue #306 #308)
+* Server - [improvement] Added French translation.
+* Server - [bug] No longer attempts to load hidden files.
+
+2.1.5 (2016-03-11)
+==================
+* Server - [bug] Fixed module changes. (Issue #292)
+* Server - [bug] Enclosed database references in backticks in SQL statements. (Issue #290)
+
+2.1.4 (2016-01-24)
+==================
+* Server - [bug] Fixed duplicating template user (result of adding #211).
+
+2.1.3 (2015-12-10)
+==================
+* Client - [bug] Supported sys_get_temp_dir() with PHP < 5.2.1.
+
+2.1.2 (2015-12-08)
+==================
+* Server - [bug] Fixed server config builds. (Issue #269)
+
+2.1.1 (2015-12-07)
+==================
+* Server - [bug] Fixed PHP error when changing the server status. (Issue #267)
+* Server - [bug] Clients would not update the database during installation
+           (result of adding #223).
+* Client - [bug] Installer would create the SSH key incorrectly. (Issue #236 #260)
+* Server - [bug] fM defined temporary directory was not always used.
+* Server - [improvement] Overall performance improvements. (Issue #224)
+
+2.1 (2015-12-02)
 ================
 * Server - [feature] Added ability to purge logs. (Issue #212)
 * Client - [feature] Added no-sudoers client option. (Issue #221)
@@ -16,6 +147,9 @@
 * Server - [feature] Added user group support. (Issue #211)
 * Server - [improvement] Upgraded to Font Awesome 4.4.0 and changed some icons.
 * Server - [improvement] Third-party resources now load locally. (Issue #244)
+* Server - [improvement] fM upgrades now give the option to backup the database.
+* Server - [bug] Fixed server group bulk actions. (Issue #256)
+* Server - [bug] Fixed intermittent login issues. (Issue #258)
 
 2.0.3 (2015-06-29)
 ==================

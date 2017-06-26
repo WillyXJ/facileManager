@@ -39,7 +39,12 @@ class fm_login {
 		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : false;
 		$forgot_link = ($mail_enable && $auth_method == 1) ? sprintf('<p id="forgotton_link"><a href="?forgot_password">%s</a></p>', _('Forgot your password?')) : null;
 		
-		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+		$branding_logo = getBrandLogo();
+		
+		$login_message = getOption('login_message');
+		if ($login_message) {
+			$login_message = '<p class="success">' . $login_message . '</p>';
+		}
 
 		printf('<form id="loginform" action="%1$s" method="post">
 		<div id="fm-branding">
@@ -62,9 +67,10 @@ class fm_login {
 			</tr>
 		</table>
 		%6$s
-		<div id="message"></div>
+		<div id="message">%7$s</div>
 		</form>
-		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'), _('Password'), $forgot_link);
+		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'),
+				_('Password'), $forgot_link, $login_message);
 		
 		exit(printFooter());
 	}
@@ -86,7 +92,7 @@ class fm_login {
 		global $fm_name;
 		printHeader(_('Password Reset'), 'login');
 		
-		$branding_logo = $GLOBALS['RELPATH'] . 'fm-modules/' . $fm_name . '/images/fm.png';
+		$branding_logo = getBrandLogo();
 		
 		printf('<form id="loginform" action="%s?forgot_password" method="post">
 		<input type="hidden" name="reset_pwd" value="1" />
@@ -171,8 +177,7 @@ class fm_login {
 		/** No auth_method defined */
 		if (getOption('fm_db_version') >= 18) {
 			if (!getOption('auth_method')) {
-				if (!isset($_COOKIE['myid'])) {
-					session_set_cookie_params(strtotime('+1 week'));
+				if (!isset($_COOKIE['fmid'])) {
 					@session_start();
 	
 					$_SESSION['user']['logged_in'] = true;
@@ -184,26 +189,27 @@ class fm_login {
 						$_SESSION['module'] = (is_array($modules) && count($modules)) ? $modules[0] : $fm_name;
 					}
 	
-					setcookie('myid', session_id(), strtotime('+1 week'));
+					setcookie('fmid', session_id(), strtotime('+1 year'));
 				}
 				
-				session_set_cookie_params(strtotime('+1 week'));
-				if (!empty($_COOKIE['myid'])) {
-					@session_id($_COOKIE['myid']);
+				session_set_cookie_params(strtotime('+1 year'));
+				if (!empty($_COOKIE['fmid'])) {
+					@session_id($_COOKIE['fmid']);
 					@session_start();
 				}
+				session_write_close();
 	
 				return true;
 			}
 		}
 
 		/** Auth method defined so let's validate */
-		if (isset($_COOKIE['myid'])) {
-			$myid = $_COOKIE['myid'];
+		if (isset($_COOKIE['fmid'])) {
+			$fmid = $_COOKIE['fmid'];
 				
 			/** Init the session. */
 			session_set_cookie_params(strtotime('+1 week'));
-			session_id($myid);
+			session_id($fmid);
 			@session_start();
 				
 			/** Check if they're logged in. */
@@ -215,10 +221,16 @@ class fm_login {
 				}
 				
 				/** Should the user be logged in? */
-				if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_status') != 'active') header('Location: ' . $GLOBALS['RELPATH'] . '?logout');
+				if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_status') != 'active') {
+					session_write_close();
+					header('Location: ' . $GLOBALS['RELPATH'] . '?logout');
+					return false;
+				}
+				session_write_close();
 				
 				return true;
 			}
+			session_write_close();
 		}
 		return false;
 	}
@@ -258,7 +270,11 @@ class fm_login {
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);
 				}
 				if (!$fmdb->num_rows) {
-					@mysql_free_result($result);
+					if (useMySQLi()) {
+						@mysqli_free_result($result);
+					} else {
+						@mysql_free_result($result);
+					}
 					return false;
 				} else {
 					$user = $fmdb->last_result[0];
@@ -277,7 +293,11 @@ class fm_login {
 			
 					$this->setSession($user);
 			
-					@mysql_free_result($result);
+					if (useMySQLi()) {
+						@mysqli_free_result($result);
+					} else {
+						@mysql_free_result($result);
+					}
 					
 					return true;
 				}
@@ -317,18 +337,17 @@ class fm_login {
 	 * @return null
 	 */
 	function logout() {
-		if (isset($_COOKIE['myid'])) {
-			$myid = $_COOKIE['myid'];
+		if (isset($_COOKIE['fmid'])) {
+			$fmid = $_COOKIE['fmid'];
 			
 			// Init the session.
-			session_set_cookie_params(strtotime('+1 week'));
-			session_id($myid);
+			session_id($fmid);
 			@session_start();
 			$this->updateSessionDB($_SESSION['user']['name']);
-			@session_unset($_SESSION['user']);
-			setcookie('myid', '');
+			@session_unset();
+			setcookie('fmid', '');
 			@session_destroy();
-			unset($_COOKIE['myid']);
+			unset($_COOKIE['fmid']);
 		}
 	}
 	
@@ -348,40 +367,10 @@ class fm_login {
 		$user_info = getUserInfo($fm_login);
 		if (isEmailAddressValid($user_info['user_email']) === false) return _('There is no valid e-mail address associated with this user.');
 		
-		$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
-		if (!file_exists($phpmailer_file)) {
-			return _('Unable to send email - PHPMailer class is missing.');
-		} else {
-			require $phpmailer_file;
-		}
+		$subject = sprintf(_('%s Password Reset'), $fm_name);
+		$from = getOption('mail_from');
 		
-		$mail = new PHPMailer;
-		
-		/** Set PHPMailer options from database */
-		$mail->Host = getOption('mail_smtp_host');
-		$mail->SMTPAuth = getOption('mail_smtp_auth');
-		if ($mail->SMTPAuth) {
-			$mail->Username = getOption('mail_smtp_user');
-			$mail->Password = getOption('mail_smtp_pass');
-		}
-		if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
-		
-		$mail->FromName = $fm_name;
-		$mail->From = getOption('mail_from');
-		$mail->AddAddress($user_info['user_email']);
-		
-		$mail->Subject = sprintf(_('%s Password Reset'), $fm_name);
-		$mail->Body = $this->buildPwdResetEmail($user_info, $uniq_hash, true, $mail->Subject, $mail->From);
-		$mail->AltBody = $this->buildPwdResetEmail($user_info, $uniq_hash, false);
-		$mail->IsHTML(true);
-		
-		$mail->IsSMTP();
-		
-		if(!$mail->Send()) {
-			return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
-		}
-		
-		return true;
+		return sendEmail($user_info['user_email'], $subject, $this->buildPwdResetEmail($user_info, $uniq_hash, true, $subject, $from), $this->buildPwdResetEmail($user_info, $uniq_hash, false));
 	}
 	
 	/**
@@ -401,6 +390,8 @@ class fm_login {
 		global $fm_name, $__FM_CONFIG;
 		
 		if ($build_html) {
+			$branding_logo = $GLOBALS['FM_URL'] . str_replace('//', '/', str_replace($GLOBALS['RELPATH'], '', getBrandLogo()));
+			
 			$body = <<<BODY
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -411,8 +402,8 @@ class fm_login {
 </head>
 <body style="background-color: #eeeeee; font: 13px 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, Verdana, sans-serif; margin: 1em auto; min-width: 600px; max-width: 600px; padding: 20px; padding-bottom: 50px; -webkit-text-size-adjust: none;">
 <div style="margin-bottom: -8px;">
-{$__FM_CONFIG['icons']['fm_logo']}
-<span style="font-size: 16pt; font-weight: bold; position: relative; top: -10px; margin-left: 10px;">$fm_name</span>
+<img src="$branding_logo" style="padding-left: 17px;" />
+<span style="font-size: 16pt; font-weight: bold; position: relative; top: -16px; margin-left: 10px;">$fm_name</span>
 </div>
 <div id="shadow" style="-moz-border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px; -webkit-border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px; border-radius: 0% 0% 100% 100% / 0% 0% 8px 8px; -moz-box-shadow: rgba(0,0,0,.30) 0 2px 3px !important; -webkit-box-shadow: rgba(0,0,0,.30) 0 2px 3px !important; box-shadow: rgba(0,0,0,.30) 0 2px 3px !important;">
 <div id="container" style="background-color: #fff; min-height: 200px; margin-top: 1em; padding: 0 1.5em .5em; border: 1px solid #fff; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; -webkit-box-shadow: inset 0 2px 1px rgba(255,255,255,.97) !important; -moz-box-shadow: inset 0 2px 1px rgba(255,255,255,.97) !important; box-shadow: inset 0 2px 1px rgba(255,255,255,.97) !important;">
@@ -455,8 +446,8 @@ To reset your password, click the following link:
 	function setSession($user) {
 		global $fm_name;
 		
-		session_set_cookie_params(strtotime('+1 week'));
 		@session_start();
+		session_regenerate_id(true);
 		$_SESSION['user']['logged_in'] = true;
 		$_SESSION['user']['id'] = $user->user_id;
 		$_SESSION['user']['name'] = $user->user_login;
@@ -468,7 +459,9 @@ To reset your password, click the following link:
 		if (getOption('fm_db_version') < 32) $_SESSION['user']['fm_perms'] = $user->user_perms;
 
 		setUserModule($user->user_default_module);
-		setcookie('myid', session_id(), strtotime('+1 week'));
+		setcookie('fmid', session_id(), strtotime('+1 week'));
+		$this->updateSessionDB($_SESSION['user']['name']);
+		session_write_close();
 	}
 	
 	
@@ -495,7 +488,6 @@ To reset your password, click the following link:
 		if (empty($ldap_dn))              $ldap_dn              = getOption('ldap_dn');
 		if (empty($ldap_group_require))   $ldap_group_require   = getOption('ldap_group_require');
 		if (empty($ldap_group_dn))        $ldap_group_dn        = getOption('ldap_group_dn');
-		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
 		
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
@@ -508,20 +500,20 @@ To reset your password, click the following link:
 		if ($ldap_connect) {
 			/** Set protocol version */
 			if (!@ldap_set_option($ldap_connect, LDAP_OPT_PROTOCOL_VERSION, $ldap_version)) {
-				@ldap_close($ldap_connect);
+				$this->closeLDAPConnect($ldap_connect);
 				return false;
 			}
 			
 			/** Set referrals */
 			if(!@ldap_set_option($ldap_connect, LDAP_OPT_REFERRALS, $ldap_referrals)) {
-				@ldap_close($ldap_connect);
+				$this->closeLDAPConnect($ldap_connect);
 				return false;
 			}
 			
 			/** Start TLS if requested */
 			if ($ldap_encryption == 'TLS') {
 				if (!@ldap_start_tls($ldap_connect)) {
-					@ldap_close($ldap_connect);
+					$this->closeLDAPConnect($ldap_connect);
 					return false;
 				}
 			}
@@ -530,11 +522,17 @@ To reset your password, click the following link:
 			
 			if ($ldap_bind) {
 				if ($ldap_group_require) {
+					/** Convert AD ldap_dn to real ldap_dn */
+					if (strpos($ldap_dn, '@') !== false) {
+						$ldap_dn_parts = explode('@', $ldap_dn);
+						$ldap_dn = 'dc=' . join(',dc=', explode('.', $ldap_dn_parts[1]));
+					}
+					
 					/** Process group membership if required */
-					$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $username);
+					$ldap_group_response = $this->checkGroupMembership($ldap_connect, $this->getDN($ldap_connect, $username, $ldap_dn), $ldap_group_dn);
 					
 					if ($ldap_group_response !== true) {
-						@ldap_close($ldap_connect);
+						$this->closeLDAPConnect($ldap_connect);
 						return false;
 					}
 				}
@@ -543,18 +541,20 @@ To reset your password, click the following link:
 				$fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=2 AND `user_template_only`='no' AND `user_login`='$username'");
 				if (!$fmdb->num_rows) {
 					if (!$this->createUserFromTemplate($username)) {
-						@ldap_close($ldap_connect);
+						$this->closeLDAPConnect($ldap_connect);
 						return false;
 					}
 				}
 				
 				$this->setSession($fmdb->last_result[0]);
+
+				$this->closeLDAPConnect($ldap_connect);
 				
 				return true;
 			}
 			
 			/** Close LDAP connection */
-			@ldap_close($ldap_connect);
+			$this->closeLDAPConnect($ldap_connect);
 		}
 		
 		return false;
@@ -591,6 +591,77 @@ To reset your password, click the following link:
 		return true;
 	}
 
+
+	/**
+	 * Closes a LDAP resource
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 *
+	 * @param resource $ldap_connect Resource to close
+	 * @return boolean
+	 */
+	private function closeLDAPConnect($ldap_connect) {
+		if (is_resource($ldap_connect)) {
+			@ldap_close($ldap_connect);
+		}
+	}
+	
+	
+	/**
+	 * Gets the DN of an account name
+	 * (based on user comment from http://php.net/manual/en/ref.ldap.php#99347)
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 *
+	 * @param resource $ldap_connect Resource to use
+	 * @param string $samaccountname SAM Account name to search for
+	 * @param string $basedn Base DN to use
+	 * @return boolean
+	 */
+	private function getDN($ldap_connect, $samaccountname, $basedn) {
+		$attributes = array('dn');
+		$result = ldap_search($ldap_connect, $basedn,
+			"(samaccountname={$samaccountname})", $attributes);
+		if ($result === false) return '';
+		$entries = ldap_get_entries($ldap_connect, $result);
+		return ($entries['count']>0) ? $entries[0]['dn'] : '';
+	}
+	
+	
+	/**
+	 * Checks recursive group membership of the user
+	 * (based on user comment from http://php.net/manual/en/ref.ldap.php#99347)
+	 *
+	 * @since 3.0
+	 * @package facileManager
+	 *
+	 * @param resource $ldap_connect Resource to use
+	 * @param string $userdn
+	 * @param string $groupdn
+	 * @return boolean
+	 */
+	private function checkGroupMembership($ldap_connect, $userdn, $groupdn) {
+		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
+
+		$result = ldap_read($ldap_connect, $userdn, '(objectclass=*)', array($ldap_group_attribute));
+		if ($result === false) return false;
+		
+		$entries = ldap_get_entries($ldap_connect, $result);
+		if ($entries['count'] <= 0) return false;
+		
+		if (empty($entries[0][$ldap_group_attribute])) {
+			return false;
+		} else {
+			for ($i = 0; $i < $entries[0][$ldap_group_attribute]['count']; $i++) {
+				if ($entries[0][$ldap_group_attribute][$i] == $groupdn) return true;
+				elseif ($this->checkGroupMembership($ldap_connect, $entries[0][$ldap_group_attribute][$i], $groupdn)) return true;
+			};
+		};
+		return false;
+	}
+	
 }
 
 if (!isset($fm_login))

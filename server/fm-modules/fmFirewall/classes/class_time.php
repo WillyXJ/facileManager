@@ -25,7 +25,7 @@ class fm_module_time {
 	/**
 	 * Displays the time list
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		if (!$result) {
@@ -34,19 +34,35 @@ class fm_module_time {
 			$num_rows = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			
+			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+				$bulk_actions_list = array(_('Delete'));
+			}
+			
+			$start = $_SESSION['user']['record_count'] * ($page - 1);
+			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
 							'name' => 'time'
 						);
 
-			$title_array = array(__('Restriction Name'), __('Date Range'), __('Time'), __('Weekdays'), array('title' => __('Comment'), 'style' => 'width: 30%;'));
-			if (currentUserCan('manage_time', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+			if (is_array($bulk_actions_list)) {
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			}
+			$title_array = array_merge((array) $title_array, array(__('Restriction Name'), __('Date Range'), __('Time'), __('Weekdays'), array('title' => __('Comment'), 'style' => 'width: 30%;')));
+			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
 			
-			for ($x=0; $x<$num_rows; $x++) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
+				$y++;
 			}
 			
 			echo "</tbody>\n</table>\n";
@@ -76,24 +92,27 @@ class fm_module_time {
 			$clean_data = sanitize($data);
 			if (($key == 'time_name') && empty($clean_data)) return __('No time name defined.');
 			if (!in_array($key, $exclude)) {
-				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 		}
-		$sql_fields = rtrim($sql_fields, ',') . ')';
-		$sql_values = rtrim($sql_values, ',');
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not add the time because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the time restriction because a database error occurred.'), 'sql');
+		}
 
 		/** Format weekdays */
 		$weekdays = $this->formatDays($post['time_weekdays']);
 		
 		addLogEntry("Added time restriction:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
-					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $this->formatDays($post['time_weekdays']) .
-					"\nComment: {$post['time_comment']}");
+					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
+					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(',', ', ', $post['time_monthdays']) .
+					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
 		return true;
 	}
 
@@ -114,17 +133,19 @@ class fm_module_time {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit, ',');
+		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the time
 		$old_name = getNameFromID($post['time_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time` SET $sql WHERE `time_id`={$post['time_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return __('Could not update the time because a database error occurred.');
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not update the time restriction because a database error occurred.'), 'sql');
+		}
 		
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
@@ -132,8 +153,9 @@ class fm_module_time {
 //		setBuildUpdateConfigFlag(getServerSerial($post['time_id'], $_SESSION['module']), 'yes', 'build');
 		
 		addLogEntry("Updated time restriction '$old_name' to:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
-					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $this->formatDays($post['time_weekdays']) .
-					"\nComment: {$post['time_comment']}");
+					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
+					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(',', ', ', $post['time_monthdays']) .
+					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
 		return true;
 	}
 	
@@ -157,7 +179,7 @@ class fm_module_time {
 			}
 		}
 		
-		return __('This time restriction could not be deleted.');
+		return formatError(__('This time restriction could not be deleted.'), 'sql');
 	}
 
 
@@ -166,7 +188,7 @@ class fm_module_time {
 		
 		$disabled_class = ($row->time_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = null;
+		$edit_status = $checkbox = null;
 		
 		if (currentUserCan('manage_time', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -175,7 +197,12 @@ class fm_module_time {
 			$edit_status .= '">';
 			$edit_status .= ($row->time_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
-			if (!isItemInPolicy($row->time_id, 'time')) $edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!isItemInPolicy($row->time_id, 'time')) {
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->time_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
+			}
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 		}
 		
@@ -183,12 +210,13 @@ class fm_module_time {
 		$date_range = $this->formatDates($row->time_start_date, $row->time_end_date);
 		
 		/** Format weekdays */
-		$weekdays = $this->formatDays($row->time_weekdays);
+		$weekdays .= $row->time_weekdays_not . ' ' . $this->formatDays($row->time_weekdays);
 
 		$comments = nl2br($row->time_comment);
 		
 		echo <<<HTML
-			<tr id="$row->time_id"$disabled_class>
+			<tr id="$row->time_id" name="$row->time_name"$disabled_class>
+				$checkbox
 				<td>$row->time_name</td>
 				<td>$date_range</td>
 				<td>$row->time_start_time &rarr; $row->time_end_time</td>
@@ -206,8 +234,8 @@ HTML;
 	function printForm($data = '', $action = 'add') {
 		global $__FM_CONFIG;
 		
-		$time_weekdays = $time_id = 0;
-		$time_name = $time_comment = null;
+		$time_weekdays = $time_weekdays_not = $time_monthdays_not = $time_contiguous = $time_id = 0;
+		$time_name = $time_comment = $time_zone = $time_weekdays = $time_monthdays = null;
 		$time_start_date = $time_start_time = $time_end_date = $time_end_time = null;
 		$ucaction = ucfirst($action);
 		
@@ -232,20 +260,36 @@ HTML;
 		
 		$time_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name');
 		
-		$time_start_hour = BuildSelect('time_start_time_hour', 1, $houropt, $start_hour, 1);
-		$time_start_min = BuildSelect('time_start_time_min', 1, $minopt, $start_min, 1);
+		$time_start_hour = buildSelect('time_start_time_hour', 'time_start_time_hour', $houropt, $start_hour, 1);
+		$time_start_min = buildSelect('time_start_time_min', 'time_start_time_min', $minopt, $start_min, 1);
 
-		$time_end_hour = BuildSelect('time_end_time_hour', 1, $houropt, $end_hour, 1);
-		$time_end_min = BuildSelect('time_end_time_min', 1, $minopt, $end_min, 1);
+		$time_end_hour = buildSelect('time_end_time_hour', 'time_end_time_hour', $houropt, $end_hour, 1);
+		$time_end_min = buildSelect('time_end_time_min', 'time_end_time_min', $minopt, $end_min, 1);
 
 		/** Weekdays */
+		$weekdays_not_check = ($time_weekdays_not) ? 'checked' : null;
 		$weekdays_form = null;
 		foreach ($__FM_CONFIG['weekdays'] as $day => $bit) {
 			$weekdays_form .= '<label><input type="checkbox" name="time_weekdays[' . $bit . ']" ';
 			if ($bit & $time_weekdays) $weekdays_form .= 'checked';
 			$weekdays_form .= '/>' . $day . "</label>\n";
 		}
+		
+		/** Monthdays */
+		$monthdays_not_check = ($time_monthdays_not) ? 'checked' : null;
+		$monthdays_form = null;
+		for ($x = 1; $x <= 31; $x++) {
+			$monthdaysopt[] = sprintf("%02d", $x);
+		}
+		$monthdays_form = buildSelect('time_monthdays', 'time_monthdays', $monthdaysopt, explode(',', trim($time_monthdays, ',')), 1, null, true);
+		
+		$time_zone_form = '<h4>' . _('Timezone') . '</h4>' . buildSelect('time_zone', 'time_zone', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_zone'), $time_zone);
 
+		$checked = ($time_contiguous) ? 'checked' : null;
+		$time_options = sprintf('<input name="time_contiguous" id="time_contiguous" value="yes" type="checkbox" %s /><label for="time_contiguous">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a><br />',
+			$checked, __('Use contiguous time'), __('When end time is smaller than start time, match this as a single time period instead distinct intervals.')
+			);
+		
 		$popup_title = $action == 'add' ? __('Add Restriction') : __('Edit Restriction');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
@@ -254,6 +298,9 @@ HTML;
 		%s
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="time_id" value="%d" />
+			<input type="hidden" name="time_weekdays_not" value="" />
+			<input type="hidden" name="time_monthdays_not" value="" />
+			<input type="hidden" name="time_contiguous" value="no" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="time_name">%s</label></th>
@@ -277,7 +324,26 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;" style="white-space: nowrap;">%s</td>
+					<td width="67&#37;" style="white-space: nowrap;">
+						<input name="time_weekdays_not" id="time_weekdays_not" value="!" type="checkbox" %s /><label for="time_weekdays_not"><b>%s</b></label>
+						<p class="checkbox_desc">%s</p>
+						%s
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;" style="white-space: nowrap;">
+						<input name="time_monthdays_not" id="time_monthdays_not" value="!" type="checkbox" %s /><label for="time_monthdays_not"><b>%s</b></label>
+						<p class="checkbox_desc">%s</p>
+						%s
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						%s
+						%s
+					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="time_comment">%s</label></th>
@@ -289,7 +355,11 @@ HTML;
 		<script>
 			$(document).ready(function() {
 				$("#manage select").select2({
-					width: "70px",
+					width: "80px",
+					minimumResultsForSearch: 10
+				});
+				$("#manage select#time_monthdays").select2({
+					width: "200px",
 					minimumResultsForSearch: 10
 				});
 			});
@@ -301,7 +371,10 @@ HTML;
 				__('Start Time'), "$time_start_hour : $time_start_min",
 				__('End Date'), $time_end_date,
 				__('End Time'), "$time_end_hour : $time_end_min",
-				__('Weekdays'), $weekdays_form,
+				__('Weekdays'), $weekdays_not_check, __('not'), __('Use this option to invert the match'), $weekdays_form,
+				__('Monthdays'), $monthdays_not_check, __('not'), __('Use this option to invert the match'), $monthdays_form,
+				__('Options'), $time_options,
+				$time_zone_form,
 				__('Comment'), $time_comment,
 				$popup_footer
 			);
@@ -335,6 +408,8 @@ HTML;
 			}
 			$post['time_weekdays'] = $decimals;
 		} else $post['time_weekdays'] = 0;
+		
+		$post['time_monthdays'] = implode(',', $post['time_monthdays']);
 		
 		/** Process dates */
 		if (empty($post['time_start_date'])) unset($post['time_start_date']);

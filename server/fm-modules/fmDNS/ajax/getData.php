@@ -33,7 +33,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
-	$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
+	$query = "SELECT def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
@@ -42,7 +42,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
-					%s</td>
+					%s
 					<script>
 					$(".address_match_element").select2({
 						createSearchChoice:function(term, data) { 
@@ -57,16 +57,39 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 						data: %s
 					});
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
+		} elseif (strpos($result[0]->def_type, 'rrset_order_spec') !== false) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			$cfg_data = ($cfg_data) ? explode(' ', $cfg_data) : array(null, null, null, null);
+			
+			$available_classes = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class')), $cfg_data[0]);
+			$available_types = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type')), $cfg_data[1]);
+			$available_domains = buildSelect('cfg_data[]', 'cfg_data_zones', $fm_dns_zones->availableZones(true, null, false, 'all'), $cfg_data[2]);
+			$available_orders = $fm_module_options->populateDefTypeDropdown('( random | cyclic | fixed )', $cfg_data[3]);
+
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;">class %s<br />type %s<br />name %s<br />order %s
+					<script>
+					$("#cfg_data_zones").select2({
+						width: "250px",
+					});
+					</script>',
+					__('Option Value'), $available_classes, $available_types, $available_domains, $available_orders);
 		} elseif ($result[0]->def_dropdown == 'no') {
+			$checkbox = null;
+			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !$_POST['view_id']) {
+				$checked = getNameFromID($_POST['cfg_id'], "fm_{$__FM_CONFIG['fmDNS']['prefix']}config", 'cfg_', 'cfg_id', 'cfg_in_clause') == 'no' ? 'checked' : null;
+				$checkbox = sprintf('<br /><input name="cfg_in_clause" id="cfg_in_clause" type="checkbox" value="no" %s /><label for="cfg_in_clause">%s</label>', $checked, __('Define outside of global options clause'));
+			}
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
-					%s</td>', __('Option Value'), $cfg_data, $result[0]->def_type);
+					%s %s', __('Option Value'), str_replace(array('"', "'"), '', $cfg_data), $result[0]->def_type, $checkbox);
 		} else {
 			/** Build array of possible values */
 			$dropdown = $fm_module_options->populateDefTypeDropdown($result[0]->def_type, $cfg_data);
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67&#37;">%s</td>', __('Option Value'), $dropdown);
+					<td width="67&#37;">%s', __('Option Value'), $dropdown);
 		}
+		if ($result[0]->def_minimum_version) printf('<br /><span class="note">%s</span></td>', sprintf(__('This option requires BIND %s or later.'), $result[0]->def_minimum_version));
 	}
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_available_clones', $_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
@@ -79,6 +102,16 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 	$avail_options_array = $fm_module_options->availableOptions('add', $server_serial_no, $cfg_type);
 	echo buildSelect('cfg_name', 'cfg_name', $avail_options_array, sanitize($_POST['cfg_name']), 1, null, false, 'displayOptionPlaceholder()');
 	exit;
+} elseif (is_array($_POST) && array_key_exists('get_dynamic_zone_data', $_POST) && currentUserCan('manage_records', $_SESSION['module']) && zoneAccessIsAllowed(array($_POST['domain_id']))) {
+	include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+	$server_zone_data = $fm_dns_records->getServerZoneData(sanitize($_POST['domain_id']));
+	
+	/** Add popup header and footer if missing */
+	if (strpos($server_zone_data, 'popup-header') === false) {
+		$server_zone_data = buildPopup('header', _('Error')) . '<p>' . makePlainText($server_zone_data) . '</p>' . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+	}
+	
+	exit($server_zone_data);
 }
 
 if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
@@ -170,11 +203,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$table .= 's';
 			break;
 		default:
-			$post_class = ${"fm_dns_${_POST['item_type']}"};
+			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 	}
 	
 	if ($add_new) {
-		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
+		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys'))) {
 			$edit_form = $post_class->printForm(null, $action, sanitize($_POST['item_sub_type']));
 		} elseif ($_POST['item_type'] == 'domains') {
 			$edit_form = $post_class->printForm(null, $action, $type_map);
@@ -183,10 +216,10 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		}
 	} else {
 		basicGet('fm_' . $table, $id, $prefix, $prefix . 'id');
-		if (!$fmdb->num_rows) returnError();
+		if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
 		
 		$edit_form_data[] = $fmdb->last_result[0];
-		if (in_array($_POST['item_type'], array('logging', 'servers'))) {
+		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys'))) {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', sanitize($_POST['item_sub_type']));
 		} else {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $item_id);

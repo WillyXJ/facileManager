@@ -28,14 +28,16 @@
  * @since 1.0
  * @package facileManager
  */
-function returnError($window = true) {
-	$msg = _('There was a problem with your request.'); 
-	if ($window) {
-		echo buildPopup('header', 'Error');
+function returnError($addl_msg = null, $display = 'window') {
+	$msg = _('There was a problem with your request.');
+	if ($addl_msg) $msg .= $addl_msg;
+	
+	if ($display == 'window') {
+		echo buildPopup('header', _('Error'));
 		echo "<p>$msg</p>\n";
 		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	} else {
-		echo '<p class="error">' . $msg . "</p>\n";
+		echo displayResponseClose($msg);
 	}
 	exit;
 }
@@ -54,7 +56,7 @@ function returnUnAuth($window = true) {
 		echo "<p>$msg</p>\n";
 		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	} else {
-		echo '<p class="error">' . $msg . "</p>\n";
+		echo displayResponseClose($msg);
 	}
 	exit;
 }

@@ -43,9 +43,9 @@ class fm_tools {
 			
 			$function = 'install' . $module_name . 'Schema';
 			if (function_exists($function)) {
-				$output = $function(null, $__FM_CONFIG['db']['name'], $module_name, 'quiet');
+				$output = $function($__FM_CONFIG['db']['name'], $module_name, 'quiet');
 			}
-			if ($output != true) {
+			if ($output !== true) {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
 				return sprintf('<p>' . _('%s installation failed!') . '</p>%s', $module_name, $error);
 			}
@@ -62,7 +62,7 @@ class fm_tools {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function upgradeModule($module_name = null, $process = 'noisy') {
+	function upgradeModule($module_name = null, $process = 'noisy', $running_version = null) {
 		global $fmdb;
 		
 		if (!$module_name) {
@@ -78,7 +78,7 @@ class fm_tools {
 			
 			$function = 'upgrade' . $module_name . 'Schema';
 			if (function_exists($function)) {
-				$output = $function($module_name);
+				$output = $function($running_version);
 			}
 			if ($output !== true) {
 				if ($process == 'quiet') return false;
@@ -152,6 +152,25 @@ class fm_tools {
 				return true;
 
 				break;
+			case 'update':
+				if (!in_array($module_name, getAvailableModules())) return;
+				
+				$fm_new_version_available = getOption('version_check', 0, $module_name);
+				if ($fm_new_version_available !== false && isset($fm_new_version_available['data']['link'])) {
+					list($message, $local_update_package) = downloadfMFile($fm_new_version_available['data']['link']);
+					if ($local_update_package !== false) {
+						$message .= extractPackage($local_update_package);
+					}
+				} else {
+					$message = _('No updated packages are found.');
+				}
+				
+				$response = '<strong>' . $module_name . '</strong><br /><pre>' . $message . '</pre>';
+				if (strpos($message, "\n")) $response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
+				
+				return $response;
+
+				break;
 		}
 		
 		return false;
@@ -202,26 +221,26 @@ class fm_tools {
 	function backupDatabase() {
 		global $__FM_CONFIG, $fm_name;
 		
-		if (!currentUserCan('run_tools')) return sprintf('<p class="error">%s</p>', _('You are not authorized to run these tools.'));
+		if (!currentUserCan('run_tools')) return displayResponseClose(_('You are not authorized to run these tools.'));
 		
 		/** Temporary fix for MySQL 5.6 warnings */
 		$exclude_warnings = array('Warning: Using a password on the command line interface can be insecure.' . "\n");
 		
 		$curdate = date("Y-m-d_H.i.s");
-		$sql_file = sys_get_temp_dir() . '/' . $__FM_CONFIG['db']['name'] . '_' . $curdate . '.sql';
+		$sql_file = getOption('fm_temp_directory') . '/' . $__FM_CONFIG['db']['name'] . '_' . $curdate . '.sql';
 		$error_log = str_replace('.sql', '.err', $sql_file);
 		
 		$mysqldump = findProgram('mysqldump');
-		if (!$mysqldump) return sprintf('<p class="error">' . _('mysqldump is not found on %s.') . '</p>', php_uname('n'));
+		if (!$mysqldump) return displayResponseClose(sprintf(_('mysqldump is not found on %s.'), php_uname('n')));
 		
-		$command_string = "$mysqldump --opt -Q -h {$__FM_CONFIG['db']['host']} -u {$__FM_CONFIG['db']['user']} -p{$__FM_CONFIG['db']['pass']} {$__FM_CONFIG['db']['name']} > " . sys_get_temp_dir() . "/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
+		$command_string = "$mysqldump --opt -Q -h {$__FM_CONFIG['db']['host']} -u {$__FM_CONFIG['db']['user']} -p{$__FM_CONFIG['db']['pass']} {$__FM_CONFIG['db']['name']} > " . getOption('fm_temp_directory') . "/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
 		@system($command_string, $retval);
 		$retarr = @file_get_contents($error_log);
 		
 		if ($retval) {
 			@unlink($error_log);
 			@unlink($sql_file);
-			return '<p class="error">' . nl2br(str_replace($exclude_warnings, '', $retarr)) . '</p>';
+			return displayResponseClose(nl2br(str_replace($exclude_warnings, '', $retarr)));
 		}
 		
 		compressFile($sql_file, @file_get_contents($sql_file));
@@ -244,7 +263,7 @@ class fm_tools {
 	function purgeLogs() {
 		global $fmdb, $fm_name;
 		
-		if (!currentUserCan('do_everything')) return sprintf('<p class="error">%s</p>', _('You are not authorized to run these tools.'));
+		if (!currentUserCan('do_everything')) return displayResponseClose(_('You are not authorized to run these tools.'));
 		
 		$query = "TRUNCATE fm_logs";
 		$fmdb->query($query);

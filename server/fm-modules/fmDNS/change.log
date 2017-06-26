@@ -1,14 +1,183 @@
-2.1-rc1 (2015-??-??)
+3.0 (2017-06-22)
 ================
-* Server - [feature] Added support for the NAPTR RR. (Issue #248)
-* Server - [bug] When specifying a server or group override for a config parameter
-           the appropriate servers would not be flagged for a config build. (Issue #257)
-* Server - [bug] Logging channels and categories would always be defined for all
-           servers regardless of server/group selection.
-* Server - [bug] Updating SOA templates did not set the reload flag for the
-           associated zones. (Issue #259)
+* Server - [bug] Fixed the SOA during bulk zone imports. (Issue #377)
+* Server - [bug] Fixed the upgrade process.
+* Server - [bug] Fixed PHP error. (Issue #374)
+* Server - [feature] Added support to automatically generate a DS RR. (Issue #285)
+* Client - [bug] EL chroot mounts now include fmDNS files. (Issue #346)
+* Server - [improvement] Added bulk actions to several pages.
+* Server - [improvement] Database errors now get displayed if the Show Errors
+           setting is enabled.
+* Both   - [improvement] Code clean up.
+* Server - [bug] Slave zones now work with multiple views. (Issue #367)
+* Server - [bug] Changing to a different template for a zone, the serial number
+           was not updating thus slaves would not get updated. (Issue #368)
+* Server - [improvement] Added an icon on the zones pages for faster access to
+           the zone options.
+* Both   - [feature] Dynamic zones are now supported with servers updated via
+           http/https. (Issue #90)
+* Server - [improvement] Better error messages surrounding dynamic zones. (Issue #370)
+* Server - [improvement] Added locale number formatting.
+* Server - [improvement] Code changes to better reference shared classes.
+* Server - [bug] Zones based on templates would be incorrectly logged during
+           zone reloads.
+* Server - [feature] Added support for DNSSEC. (Issue #285)
+* Server - [improvement] Utilizes response error formatting.
+* Server - [improvement] Pagination is added to all pages.
+* Server - [improvement] Code clean up.
+* Server - [feature] Added support for the CAA RR. (Issue #361)
+* Server - [improvement] BIND time formats are allowed for TTL and SOA values.
+* Server - [improvement] Added support for additional SSHFP algorithms and
+           certificate types. (Issue #355)
+* Server - [bug] Unprivileged users could see the ACL add new button.
+* Server - [bug] Fixed rate-limit options when only limits for domains are
+           specified.
+* Server - [improvement] Language changes.
+* Server - [improvement] Added the option to sort zones hierarchically. (Issue #278)
+* Server - [improvement] PTR RRs are better linked with the A record. (Issue #277)
+* Server - [feature] Added support for statistics-channels. (Issue #352)
+* Server - [improvement] Unset large variables after use to free up system
+           resources.
+* Server - [bug] Fixed display of available zones when the user is restricted to
+           a cloned zone. (Issue #350)
+* Server - [improvement] Added item name to the delete confirmations. (Issue #185)
+* Server - [feature] Added support for DHCID, DLV, and DS resource records.
+* Server - [feature] Added support for more BIND configuration options
+           including rrset-order, 9.10, and 9.11 options. (Issue #336)
+* Server - [improvement] Configuration options may now display the minimum
+           version of BIND required to use the option.
+* Server - [feature] Added support for dynamic zones. (Issue #90)
+* Server - [bug] Added missing translation text and removed duplicates.
+* Server - [feature] Added support to import a BIND-compatible zone dump file
+           to make migrations to fmDNS easier. (Issue #96)
+* Server - [improvement] Zone previews now show all available RRs regardless
+           of DNS server version hosting the zone.
+* Server - [bug] address_match_element values now strip any inputed semi-colons.
+* Server - [feature] Use mysqli functions where available. (Issue #343)
+* Server - [improvement] Users limited to specific zones and the capability to
+           create new zones now can view their newly created zones. (Issue #339)
 
-2.1-beta1 (2015-11-16)
+2.2.6 (2016-09-22)
+==================
+* Server - [bug] Added missing dnssec-validation value. (Issue #347)
+* Server - [improvement] When limiting zone access to a user or group, the view
+           is appended to the name. (Issue #349)
+* Client - [bug] EL7-based systems use named-chroot.service for chroot
+           environments. (Issue #345)
+
+2.2.5 (2016-08-23)
+==================
+* Server - [bug] Fixed named configuration and zone file checks. (Issue #333)
+* Client - [bug] Fixed versioning issue during upgrades.
+
+2.2.4 (2016-07-21)
+==================
+* Server - [bug] Fixed an issue where address_match_element options would not
+           accept any input. (Issue #329)
+* Server - [improvement] AJAX now redirects to login page when fM and module
+           database updates are required.
+* Server - [bug] Fixed an issue where SOA serial numbers were not incrementing
+           for cloned zones. (Issue #330)
+* Server - [bug] Fixed error messaging during zone configuration builds.
+* Both   - [security] Improved permission support for files installed by the
+           client. (Issue #320)
+
+2.2.3 (2016-06-14)
+==================
+* Server - [bug] Fixed incorrect use of DNAME with zone templates. (Issue #321)
+* Server - [bug] Fixed forwarder IP entries for forward zones. (Issue #324)
+
+2.2.2 (2016-05-05)
+==================
+* Client - [bug] Zone reloads via HTTP(s) would not increment the SOA serial
+           number. (Issue #315)
+* Server - [bug] Zones would not proper reload when multiple servers were selected
+           to host the zone. (Issue #315)
+
+2.2.1 (2016-04-29)
+==================
+* Server - [bug] ACLs were not properly upgraded to the new schema. (Issue #313)
+* Server - [bug] New ACLs could not be created.
+* Server - [improvement] CSS fix on ACL table.
+* Server - [bug] Zone file import would incorrectly handle semi-colons in the
+           record value as comments. (Issue #311)
+* Server - [bug] New ACL entries would not be included in the server config.
+
+2.2 (2016-04-24)
+================
+* Client - Upgrading requires a manual installation using the steps in README.md.
+* Server - [bug] Dump and clear cache tools now honor the server selection.
+* Both   - [improvement] Cleaned up duplicate functions to simplify code.
+* Client - [improvement] Client app is renamed to client.php to standardize
+           all module client apps.
+* Server - [improvement] Updated help file.
+* Server - [bug] Fixed audit logging of zone edits.
+* Server - [feature] Added views menu to config options page. (Issue #262)
+* Server - [bug] When deleting servers or server groups, associated configs
+           were not being deleted.
+* Server - [feature] Reworked the ACL configuration page to support additional
+           comments on each ACL element. (Issue #206)
+* Server - [bug] Empty ACLs would break named.conf syntax.
+* Server - [bug] Under certain browsers, the jQuery would not execute. (Issue #298)
+* Server - [improvement] Server configuration previews are now available with
+           disabled servers.
+* Server - [bug] Zone templates can now be deleted. (Issue #300)
+* Server - [improvement] Forward zones no longer enforce forward servers being
+           specified since empty forwarders are valid. (Issue #299)
+* Server - [improvement] Zone file import checks for singleton RR and will
+           tick the 'Skip Import' box. (Issue #280)
+* Server - [feature] User permissions can now be granular on cloned zones. (Issue #272)
+* Server - [improvement] Reverse zone creation now supports RFC2317 and RFC2181
+           names. (Issue #284)
+* Server - [improvement] Added support for include statements to be in named.conf
+           outside of a clause. (Issue #301)
+* Server - [bug] Creating non-master zones triggers server config builds. (Issue #310)
+* Server - [improvement] Added French translation.
+
+2.1.8 (2016-03-24)
+==================
+* Server - [bug] Zones based on a template were not honoring the DNS server
+           selection. (Issue #296)
+
+2.1.7 (2016-03-11)
+==================
+* Server - [bug] Enclosed database references in backticks in SQL statements. (Issue #290)
+
+2.1.6 (2016-01-24)
+==================
+* Server - [bug] ACL names that contain spaces are now quoted. (Issue #281)
+
+2.1.5 (2016-01-08)
+==================
+* Server - [bug] Editing quoted_string options would not show current value.
+* Server - [bug] Record validation regarding singleton RR types now considers
+           record status. (Issue #274)
+
+2.1.4 (2015-12-10)
+==================
+* Server - [bug] Fixed include statement within zone clause. (Issue #270)
+
+2.1.3 (2015-12-08)
+==================
+* Server - [bug] RR updates would incorrectly append the domain. (Issue #269)
+* Server - [bug] Fixed config builds and zone reloads. (Issue #269)
+* Client - [bug] Fixed client upgrade loop.
+
+2.1.2 (2015-12-07)
+==================
+* Server - [bug] Clients would not update the database during installation
+           (result of adding #223).
+* Server - [bug] fM defined temporary directory was not always used.
+* Server - [bug] Fixed PHP errors with server configuration builds. (Issue #268)
+* Server - [bug] Configuration options containing $ROOT would not be stored
+           properly on the clients.
+* Server - [improvement] Overall performance improvements. (Issue #224)
+
+2.1.1 (2015-12-05)
+==================
+* Server - [bug] Fixed client installations. (Issue #265)
+
+2.1 (2015-12-02)
 ================
 * Server - [improvement] Record validation no longer allows a CNAME RR at the
            zone level.
@@ -36,6 +205,15 @@
 * Server - [bug] Fixed RR updates as record append option would default to 'no'.
 * Server - [improvement] Minor performance improvements. (Issue #224)
 * Server - [feature] Added support for IPv6 CIDR notation. (Issue #252)
+* Server - [feature] Added support for the NAPTR RR. (Issue #248)
+* Server - [bug] When specifying a server or group override for a config parameter
+           the appropriate servers would not be flagged for a config build. (Issue #257)
+* Server - [bug] Logging channels and categories would always be defined for all
+           servers regardless of server/group selection.
+* Server - [bug] Updating SOA templates did not set the reload flag for the
+           associated zones. (Issue #259)
+* Server - [security] Users restricted to specific zones can no longer clone
+           zones they do not have access to.
 
 2.0.3 (2015-06-29)
 ==================

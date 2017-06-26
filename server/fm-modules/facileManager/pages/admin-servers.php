@@ -54,13 +54,13 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				if ($fmdb->num_rows) {
 					$server_array = $fmdb->last_result;
 					$_POST['server_id'] = $server_array[0]->server_id;
-					if ($_POST['update_from_client'] === true) $update_server = moduleAddServer('update');
+					if ($_POST['update_from_client'] == true) $update_server = moduleAddServer('update');
 				} else {
 					if (getOption('client_auto_register')) {
 						/** Add new server */
 						$add_server = moduleAddServer('add');
 						if ($add_server !== true) {
-							$data = _('Could not add server to account.') . "\n";
+							$data = _('Could not add server to account.') . "\n" . $add_server;
 						}
 					} else {
 						$data = _('Client automatic registration is not allowed.') . "\n";
@@ -75,7 +75,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				if (function_exists('moduleCompleteClientInstallation')) {
 					moduleCompleteClientInstallation();
 				}
-				$fm_shared_module_servers->updateClientVersion();
+				$fm_module_servers->updateClientVersion();
 			}
 			
 			/** Client upgrades */
@@ -96,7 +96,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				}
 				
 				// Probably need to move/remove this
-				$fm_shared_module_servers->updateClientVersion();
+				$fm_module_servers->updateClientVersion();
 			}
 			
 			if (array_key_exists('ssh', $_GET)) {

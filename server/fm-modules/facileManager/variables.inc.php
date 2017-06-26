@@ -42,28 +42,39 @@ $GLOBALS['FM_URL'] = $GLOBALS['REQUEST_PROTOCOL'] . '://' . $_SERVER['HTTP_HOST'
 if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Images */
-$__FM_CONFIG['icons']['fail']			= sprintf('<img src="fm-modules/%1$s/images/error24.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Failed'));
+$__FM_CONFIG['icons']['fail']			= sprintf('<i class="fa fa-times fa-lg fail" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Failed'));
 $__FM_CONFIG['icons']['caution']		= sprintf('<img src="fm-modules/%1$s/images/orangequestion.jpg" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Caution'));
-$__FM_CONFIG['icons']['ok']				= sprintf('<img src="fm-modules/%1$s/images/ok24.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));
+$__FM_CONFIG['icons']['ok']				= sprintf('<i class="fa fa-check fa-lg ok" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
 $__FM_CONFIG['icons']['edit']			= sprintf('<img src="fm-modules/%1$s/images/edit24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit'));
 $__FM_CONFIG['icons']['delete']			= sprintf('<img src="fm-modules/%1$s/images/delete24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Delete'));
 $__FM_CONFIG['icons']['copy']			= sprintf('<img src="fm-modules/%1$s/images/copy24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Duplicate'));
 $__FM_CONFIG['icons']['enable']			= sprintf('<img src="fm-modules/%1$s/images/enable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Enable'));
 $__FM_CONFIG['icons']['disable']		= sprintf('<img src="fm-modules/%1$s/images/disable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Disable'));
-$__FM_CONFIG['icons']['popout']			= sprintf('<img src="fm-modules/%1$s/images/popout24.png" border="0" alt="%2$s" title="%2$s" width="20" class="popout" />', $fm_name, _('Popout'));
-$__FM_CONFIG['icons']['close']			= sprintf('<img src="fm-modules/%1$s/images/error24.png" alt="%2$s" title="%2$s" class="close" />', $fm_name, _('Close'));
+$__FM_CONFIG['icons']['popout']			= sprintf('<i class="fa fa-external-link-square fa-lg popout" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Popout'));
+$__FM_CONFIG['icons']['close']			= sprintf('<i class="fa fa-window-close fa-lg close" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Close'));
 $__FM_CONFIG['icons']['pwd_change']		= sprintf('<img src="fm-modules/%1$s/images/profile24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit Profile'));
 $__FM_CONFIG['icons']['pwd_reset']		= sprintf('<img src="fm-modules/%1$s/images/password-change24.png" border="0" alt="%2$s" title="%2$s" height="20" />', $fm_name, _('Send Password Reset Email'));
 $__FM_CONFIG['icons']['account']		= sprintf('<img src="fm-modules/%1$s/images/account24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Account Settings'));
-$__FM_CONFIG['icons']['star']			= sprintf('<img src="fm-modules/%1$s/images/star16.png" border="0" alt="%2$s" title="%2$s" width="12" style="padding-right: 2px;" />', $fm_name, _('Super Admin'));
-$__FM_CONFIG['icons']['template_user']	= sprintf('<img src="fm-modules/%1$s/images/template_user16.png" border="0" alt="%2$s" title="%2$s" width="12" style="padding-right: 2px;" />', $fm_name, _('Template Account'));
-$__FM_CONFIG['icons']['fm_logo']		= sprintf('<img src="'. $GLOBALS['FM_URL'] . 'fm-modules/%1$s/images/fm.png" border="0" alt="%1$s" title="%1$s" style="padding-left: 17px;" />', $fm_name);
+$__FM_CONFIG['icons']['star']			= sprintf('<i class="fa fa-star star" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Super Admin'));
+$__FM_CONFIG['icons']['template_user']	= sprintf('<i class="fa fa-user" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Template Account'));
 $__FM_CONFIG['icons']['shield_error']	= sprintf('<img src="fm-modules/%1$s/images/redshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Error'));
 $__FM_CONFIG['icons']['shield_info']	= sprintf('<img src="fm-modules/%1$s/images/yellowshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Information'));
 $__FM_CONFIG['icons']['shield_ok']		= sprintf('<img src="fm-modules/%1$s/images/greenshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));
 
-$__FM_CONFIG['module']['icons']['preview']		= sprintf('<img src="fm-modules/%1$s/images/preview24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Preview Config'));
-$__FM_CONFIG['module']['icons']['build']		= sprintf('<input type="image" id="build" src="fm-modules/%1$s/images/build24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Build Config'));
+//$__FM_CONFIG['icons']['edit']			= sprintf('<i class="fa fa-pencil-square-o" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Edit'));
+//$__FM_CONFIG['icons']['delete']			= sprintf('<i class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
+//$__FM_CONFIG['icons']['enable']			= sprintf('<i class="fa fa-toggle-off toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Enable'));
+//$__FM_CONFIG['icons']['disable']		= sprintf('<i class="fa fa-toggle-on toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Disable'));
+
+/** Module variables */
+$__FM_CONFIG['module']['icons']['preview'] = sprintf('<img src="fm-modules/%1$s/images/preview24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Preview Config'));
+//$__FM_CONFIG['module']['icons']['preview'] = sprintf('<i class="fa fa-eye preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Preview Config'));
+$__FM_CONFIG['module']['icons']['build']   = sprintf('<input type="image" id="build" src="fm-modules/%1$s/images/build24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Build Config'));
+if (isset($_SESSION['module'])) {
+	foreach (array('ajax', 'classes', 'css', 'extra', 'images', 'js') as $dir) {
+		$__FM_CONFIG['module']['path'][$dir]   = sprintf('fm-modules/%s/%s', $_SESSION['module'], $dir);
+	}
+}
 
 /** Cleanup options */
 $__FM_CONFIG['clean']['prefixes']	= array('fm_accounts'=>'account', 'fm_users'=>'user');
@@ -86,6 +97,9 @@ $__FM_CONFIG['options']['date_format']					= array(array(date('F j, Y'), 'F j, Y
 $__FM_CONFIG['options']['time_format']					= array(array(date('g:i a'), 'g:i a'), array(date('g:i:s a'), 'g:i:s a'), array(date('g:i A'), 'g:i A'), array(date('g:i:s A'), 'g:i:s A'), array(date('H:i'), 'H:i'), array(date('H:i:s'), 'H:i:s'), array(date('H:i:s O'), 'H:i:s O'), array(date('H:i:s T'), 'H:i:s T'));
 $__FM_CONFIG['options']['software_update_interval']		= array(array(_('Hourly'), 'hour'), array(_('Daily'), 'day'), array(_('Weekly'), 'week'), array(_('Monthly'), 'month'));
 $__FM_CONFIG['options']['software_update_tree']			= array(_('Stable'), _('Release Candidate'), _('Beta'), _('Alpha'));
+$__FM_CONFIG['options']['log_method']					= array(array(_('Builtin'), 0), array('syslog', 1), array(_('Builtin + syslog'), 2));
+$__FM_CONFIG['options']['syslog_facilities']			= array(array('auth', 32), array('authpriv', 80), array('cron', 72), array('daemon', 24), array('kern', 0), array('lpr', 48), array('mail', 16), array('news', 56), array('syslog', 40), array('user', 8), array('uucp', 64),
+															array('local0', 128), array('local1', 136), array('local2', 144), array('local3', 152), array('local4', 160), array('local5', 168), array('local6', 176), array('local7', 184));
 
 if (function_exists('ldap_connect')) array_push($__FM_CONFIG['options']['auth_method'], array(_('LDAP Authentication'), 2));
 

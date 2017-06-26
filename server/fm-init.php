@@ -57,14 +57,17 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	
 	/** Load language */
 	include_once(ABSPATH . 'fm-includes/i18n.php');
+	
+	/** Load fmdb class */
+	require_once(ABSPATH . 'fm-includes/fm-db.php');
 
 	$GLOBALS['URI'] = convertURIToArray();
 
 	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
 		
 	if (!defined('INSTALL') && !defined('CLIENT') && !defined('FM_NO_CHECKS')) {
-		require_once(ABSPATH . 'fm-includes/fm-db.php');
-		
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
+
 		/** Handle special cases with config.inc.php */
 		handleHiddenFlags();
 	
@@ -78,7 +81,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 		
-		if (!$fm_login->isLoggedIn()) {
+		if (!$is_logged_in = $fm_login->isLoggedIn()) {
 			require_once(ABSPATH . 'fm-includes/init.php');
 			checkAppVersions();
 		}
@@ -90,7 +93,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 		
 		/** Process password resets */
-		if (!$fm_login->isLoggedIn() && array_key_exists('forgot_password', $_GET)) {
+		if (!$is_logged_in && array_key_exists('forgot_password', $_GET)) {
 			$message = array_key_exists('keyInvalid', $_GET) ? sprintf('<p class="failed">%s</p>', _('The specified key is invalid.')) : null;
 			if (count($_POST)) {
 				$result = $fm_login->processUserPwdResetForm($_POST['user_login']);
@@ -111,12 +114,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 		
 		/** Process authentication */
-		if (!$fm_login->isLoggedIn() && is_array($_POST) && count($_POST)) {
+		if (!$is_logged_in && is_array($_POST) && count($_POST)) {
 			$user_login = sanitize($_POST['username']);
 			$user_pass  = sanitize($_POST['password']);
 			
 			$logged_in = $fm_login->checkPassword($user_login, $user_pass, false);
-			if ($_POST['is_ajax']) {
+			if (array_key_exists('is_ajax', $_POST) && $_POST['is_ajax']) {
 				if (!$logged_in) {
 					echo 'failed';
 				} elseif (isUpgradeAvailable()) {
@@ -139,7 +142,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 	
 		/** Enforce authentication */
-		if (!$fm_login->isLoggedIn()) $fm_login->printLoginForm();
+		if (!$is_logged_in) {
+			if (defined('AJAX')) {
+				exit('force_logout');
+			}
+			$fm_login->printLoginForm();
+		}
 		
 		/** Show/Hide errors */
 		if (getOption('show_errors')) {
@@ -156,22 +164,29 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 
 		/** Handle module change request */
 		if (isset($_REQUEST['module']) && !isset($_REQUEST['action'])) {
+			session_start();
 			setUserModule($_REQUEST['module']);
+			session_write_close();
 			header('Location: ' . $GLOBALS['RELPATH']);
 			exit;
 		}
 		
 		/** Ensure selected module is indeed active */
 		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name && !in_array($_SESSION['module'], getActiveModules())) {
+			session_start();
 			$_SESSION['module'] = $fm_name;
+			session_write_close();
 			header('Location: ' . $GLOBALS['RELPATH'] . 'admin-modules.php');
 			exit;
 		}
 		
 		if (!defined('UPGRADE')) {
 			/** Once logged in process the menuing */
-			if ($fm_login->isLoggedIn()) {
+			if ($is_logged_in) {
 				if (isUpgradeAvailable()) {
+					if (defined('AJAX')) {
+						exit('<div class="hidden">force_logout</div>');
+					}
 					$fm_login->logout();
 					header('Location: ' . $GLOBALS['RELPATH']);
 					exit;
@@ -186,10 +201,15 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		/** Handle pagination record counts */
 		if (array_key_exists('rc', $_GET)) {
+			session_start();
 			$_SESSION['user']['record_count'] = in_array($_GET['rc'], $__FM_CONFIG['limit']['records']) ? $_GET['rc'] : $__FM_CONFIG['limit']['records'][0];
 		} else {
-			$_SESSION['user']['record_count'] = isset($_SESSION['user']['record_count']) ? $_SESSION['user']['record_count'] : $__FM_CONFIG['limit']['records'][0];
+			if (!isset($_SESSION['user']['record_count'])) {
+				session_start();
+				$_SESSION['user']['record_count'] = $__FM_CONFIG['limit']['records'][0];
+			}
 		}
+		session_write_close();
 		
 		/** Debug mode */
 		if (array_key_exists('debug', $_GET)) {
@@ -203,10 +223,14 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		/** Build the user menu */
 		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 	} elseif (defined('CLIENT')) {
-		require_once(ABSPATH . 'fm-includes/fm-db.php');
+		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
 	}
 	
-	if (isset($_POST['module_name'])) $_SESSION['module'] = $_POST['module_name'];
+	if (isset($_POST['module_name'])) {
+		session_start();
+		$_SESSION['module'] = $_POST['module_name'];
+		session_write_close();
+	}
 
 	/** Include module functions file */
 	if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {

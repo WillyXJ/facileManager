@@ -33,7 +33,7 @@ function moduleFunctionalCheck() {
 	$checks = array();
 	
 	/** Count active database servers */
-	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf(__('<p>You currently have no active database servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), getMenuURL(__('Servers')));
+	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf(__('<p>You currently have no active database servers defined. <a href="%s">Click here</a> to define one or more to manage.</p>'), getMenuURL(_('Servers')));
 	
 	/** Count groups */
 	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : sprintf(__('<p>You currently have no database server groups defined. <a href="%s">Click here</a> to define one or more.</p>'), getMenuURL(__('Server Groups')));
@@ -57,26 +57,25 @@ function buildModuleDashboard() {
 
 	/** Server stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
-	$summary = '<li>You have <b>' . $fmdb->num_rows . '</b> database server';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' configured.</li>' . "\n";
+	$server_count = $fmdb->num_rows;
 	
 	/** Group stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_');
-	$summary .= '<li>You have <b>' . $fmdb->num_rows . '</b> group';
-	if ($fmdb->num_rows != 1) $summary .= 's';
-	$summary .= ' defined.</li>' . "\n";
+	$group_count = $fmdb->num_rows;
 	
-	$dashboard = <<<DASH
-	<div class="fm-half">
+	$dashboard = sprintf('<div class="fm-half">
 	<div id="shadow_box">
 		<div id="shadow_container">
-		<h3>Summary</h3>
-		$summary
+		<h3>%s</h3>
+		<li>%s</li>
+		<li>%s</li>
 		</div>
 	</div>
-	</div>
-DASH;
+	</div>', __('Summary'),
+			sprintf(ngettext('You have <b>%s</b> database server configured.', 'You have <b>%s</b> database servers configured.', formatNumber($server_count)), formatNumber($server_count)),
+			sprintf(ngettext('You have <b>%s</b> group defined.', 'You have <b>%s</b> groups defined.', formatNumber($group_count)), formatNumber($group_count))
+			);
+
 
 	return $dashboard;
 }
@@ -99,7 +98,7 @@ function buildModuleHelpFile() {
 		<a class="list_title">Configure Servers</a>
 		<div>
 			<p>Database servers can be managed from the Config &rarr; <a href="__menu{Servers}">Servers</a> menu item. From 
-			there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), and delete ({$__FM_CONFIG['icons']['delete']}) 
+			there you can add, edit {$__FM_CONFIG['icons']['edit']}, and delete {$__FM_CONFIG['icons']['delete']} 
 			servers depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete servers.</i></p>
 			<p>Select the database server type from the list and associate the server with a group. You can also override the user credentials 
@@ -115,8 +114,8 @@ function buildModuleHelpFile() {
 			each run). An example would be to create a group for each data center hosting your servers so you can change the password for all database
 			servers within that data center.</p>
 			<p>Database server groups can be managed from the Config &rarr; <a href="__menu{Server Groups}">Server Groups</a> 
-			menu item. From there you can add (<i class="template-icon fa fa-plus-square-o fa-lg"></i>), edit ({$__FM_CONFIG['icons']['edit']}), and delete 
-			({$__FM_CONFIG['icons']['delete']}) servers depending on your user permissions.</p>
+			menu item. From there you can add, edit {$__FM_CONFIG['icons']['edit']}, and delete 
+			{$__FM_CONFIG['icons']['delete']} servers depending on your user permissions.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete server groups.</i></p>
 			<br />
 		</div>
@@ -291,9 +290,10 @@ function changePostgreSQLUserPassword($server_name, $server_port, $admin_user, $
  */
 function buildModuleMenu() {
 	addObjectPage(__('Config'), __('Database Servers'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
-		addSubmenuPage('config-servers.php', __('Servers'), __('Database Servers'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
+		addSubmenuPage('config-servers.php', _('Servers'), __('Database Servers'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-servers.php');
 		addSubmenuPage('config-servers.php', __('Groups'), __('Server Groups'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-groups.php');
-		addSubmenuPage('config-servers.php', __('Passwords'), __('Passwords'), array('manage_passwords', 'view_all'), $_SESSION['module'], 'config-passwords.php');
+
+	addObjectPage(__('Passwords'), __('Passwords'), array('manage_passwords', 'view_all'), $_SESSION['module'], 'config-passwords.php');
 
 	addSettingsPage($_SESSION['module'], sprintf(__('%s Settings'), $_SESSION['module']), array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }

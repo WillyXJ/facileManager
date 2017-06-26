@@ -25,18 +25,20 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/fmDNS/classes/class_options.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
-$option_type = (isset($_GET['option_type'])) ? sanitize(ucfirst($_GET['option_type'])) : 'Global';
+$option_type = (isset($_GET['type'])) ? sanitize(ucfirst($_GET['type'])) : 'Global';
 $display_option_type = $__FM_CONFIG['options']['avail_types'][strtolower($option_type)];
 $display_option_type_sql = strtolower($option_type);
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$response = isset($response) ? $response : null;
 
 /* Configure options for a view */
 if (array_key_exists('view_id', $_GET)) {
 	$view_id = (isset($_GET['view_id'])) ? sanitize($_GET['view_id']) : null;
-	if (!$view_id) header('Location: ' . $GLOBALS['basename']);
+	if (!$view_id) {
+		header('Location: ' . $GLOBALS['basename']);
+		exit;
+	}
 	
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_id, 'view_', 'view_id');
 	if (!$fmdb->num_rows) header('Location: config-views.php');
@@ -69,12 +71,7 @@ if (array_key_exists('view_id', $_GET)) {
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = null;
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if (!in_array($param, array('option_type', 'view_id', 'domain_id', 'server_serial_no'))) continue;
-		$uri_params[] = "$param=$val";
-	}
-	if ($uri_params) $uri_params = '?' . implode('&', $uri_params);
+	$uri_params = generateURIParams(array('type', 'view_id', 'domain_id', 'server_serial_no'), 'include');
 	
 	switch ($action) {
 	case 'add':
@@ -106,8 +103,9 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu(strtolower($option_type));
+$avail_types = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
 $avail_servers = buildServerSubMenu($server_serial_no);
+$avail_views = buildViewSubMenu($view_id);
 
 $sort_direction = null;
 $sort_field = 'cfg_name';
@@ -115,12 +113,13 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo printPageHeader($response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
+echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
 	<div class="stretch"></div>
 	$avail_types
+	$avail_views
 	$avail_servers
 	</div>
 </div>
@@ -128,29 +127,10 @@ echo <<<HTML
 HTML;
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', $sort_field, 'cfg_name'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
-$fm_module_options->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_options->rows($result, $page, $total_pages);
 
 printFooter();
-
-
-function buildSubMenu($option_type = 'global') {
-	global $__FM_CONFIG;
-	
-	$menu_selects = $uri_params = null;
-	
-	foreach ($GLOBALS['URI'] as $param => $val) {
-		if ($param == 'domain_id') return null;
-		if ($param == 'option_type') continue;
-		$uri_params .= "&$param=$val";
-	}
-	
-	foreach ($__FM_CONFIG['options']['avail_types'] as $general => $type) {
-		$select = ($option_type == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?option_type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
-	}
-	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
-}
-
 
 ?>

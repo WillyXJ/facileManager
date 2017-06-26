@@ -73,7 +73,9 @@ class fm_settings {
 				$result = setOption($option, $option_value, $command, false, $account_id);
 				unset($account_id);
 	
-				if (!$result) return _('Could not save settings because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(_('Could not save settings because a database error occurred.'), 'sql');
+				}
 		
 				$log_value = trim($option_value);
 				$log_message .= ucwords(str_replace('_', ' ', $option)) . ': ';
@@ -123,15 +125,17 @@ class fm_settings {
 	function generateSSHKeyPair() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		$tmp = sys_get_temp_dir();
+		if (! $fm_temp_directory = getOption('fm_temp_directory')) {
+			$fm_temp_directory = sys_get_temp_dir();
+		}
 		
 		/** Create the ssh key pair */
-		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f $tmp/fm_id_rsa -N ''", $exec_array, $retval);
-		$array['ssh_key_priv'] = @file_get_contents($tmp . '/fm_id_rsa');
-		$array['ssh_key_pub'] = @file_get_contents($tmp . '/fm_id_rsa.pub');
+		exec(findProgram('ssh-keygen') . " -t rsa -b 2048 -f $fm_temp_directory/fm_id_rsa -N ''", $exec_array, $retval);
+		$array['ssh_key_priv'] = @file_get_contents($fm_temp_directory . '/fm_id_rsa');
+		$array['ssh_key_pub'] = @file_get_contents($fm_temp_directory . '/fm_id_rsa.pub');
 		
-		@unlink($tmp . '/fm_id_rsa');
-		@unlink($tmp . '/fm_id_rsa.pub');
+		@unlink($fm_temp_directory . '/fm_id_rsa');
+		@unlink($fm_temp_directory . '/fm_id_rsa.pub');
 		
 		if ($retval) {
 			return _('SSH key generation failed.');
@@ -152,7 +156,9 @@ class fm_settings {
 				/** Update with the new value */
 				$result = setOption($option, $option_value, $command, false, $_SESSION['user']['account_id']);
 		
-				if (!$result) return _('Could not save settings because a database error occurred.');
+				if ($fmdb->sql_errors) {
+					return formatError(_('Could not save settings because a database error occurred.'), 'sql');
+				}
 			}
 			
 			addLogEntry(_('Generated system SSH key pair.'), $fm_name);
@@ -187,6 +193,8 @@ class fm_settings {
 		$auth_method = getOption('auth_method');
 		$auth_method_list = buildSelect('auth_method', 'auth_method', $__FM_CONFIG['options']['auth_method'], $auth_method);
 		
+		$login_message = getOption('login_message');
+		
 		/** fM Auth Section */
 		$i=0;
 		$password_strength_descriptions = sprintf("<p>%s</p>\n", _('Required password strength for user accounts.'));
@@ -201,6 +209,8 @@ class fm_settings {
 		if ($auth_method == 1) {
 			 $auth_fm_options_style = 'style="display: block;"';
 		} else $auth_fm_options_style = null;
+		
+		$auth_message_option_style = ($auth_method) ? 'style="display: block;"' : null;
 		
 		/** LDAP Section */
 		if ($auth_method == 2) {
@@ -265,6 +275,13 @@ class fm_settings {
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		$time_format_list = buildSelect('time_format[' . $_SESSION['user']['account_id'] . ']', 'time_format', $__FM_CONFIG['options']['time_format'], $time_format);
 		
+		/** Logging Method */
+		$log_method = getOption('log_method');
+		$log_method_list = buildSelect('log_method', 'log_method', $__FM_CONFIG['options']['log_method'], $log_method);
+		$log_syslog_options_style = (!$log_method) ? 'style="display: none;"' : null;
+		$syslog_facility = getOption('syslog_facility');
+		$syslog_facilities = buildSelect('syslog_facility', 'syslog_facility', $__FM_CONFIG['options']['syslog_facilities'], $syslog_facility);
+		
 		/** Other Section */
 		$show_errors = getOption('show_errors');
 		$show_errors_checked = $show_errors ? 'checked' : null;
@@ -283,6 +300,7 @@ class fm_settings {
 		} else $software_update_checked = $software_update_options_style = null;
 
 		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
+		$sm_brand_img = getBrandLogo();
 		
 		$return_form = '
 		<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">
@@ -424,6 +442,17 @@ class fm_settings {
 							</div>
 						</div>
 					</div>
+					<div id="auth_message_option" ' . $auth_message_option_style . '>
+						<div id="setting-row">
+							<div class="description">
+								<label for="login_message">' . _('Login Message') . '</label>
+								<p>' . _('An optional message to display on the login page.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="login_message" id="login_message" type="text" value="' . $login_message . '" size="40" />
+							</div>
+						</div>
+					</div>
 					<div id="setting-row">
 						<div class="description">
 							<label for="client_auto_register">' . _('Automatic Client Registration') . '</label>
@@ -558,6 +587,28 @@ class fm_settings {
 				<div id="settings-section">
 					<div id="setting-row">
 						<div class="description">
+							<label for="log_method">' . _('Logging Method') . '</label>
+							<p>' . sprintf(_('Where to send %s log messages.'), $fm_name) . '</p>
+						</div>
+						<div class="choices">
+							' . $log_method_list . '
+						</div>
+					</div>
+					<div id="log_syslog_options" ' . $log_syslog_options_style . '>
+						<div id="setting-row">
+							<div class="description">
+								<label for="software_update_tree">' . _('Syslog Facility') . '</label>
+								<p>' . sprintf(_('The syslog facility %s should send log messages to.'), $fm_name) . '</p>
+							</div>
+							<div class="choices">
+								' . $syslog_facilities . '
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
 							<label for="show_errors">' . _('Show Errors') . '</label>
 							<p>' . sprintf(_('If this is checked, %s will display application errors when they occur.'), $fm_name) . '</p>
 						</div>
@@ -626,6 +677,18 @@ class fm_settings {
 						</div>
 					</div>
 				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<span id="brand_img"><img src="' . $sm_brand_img . '" /></span>
+							<label>' . _('Image Branding') . '</label>
+							<p>' . _('Rebrand this installation with your image.<br />(Recommended size: 48px x 48px)') . '</p>
+						</div>
+						<div class="choices">
+							<input name="sm_brand_img" id="sm_brand_img" type="text" value="' . $sm_brand_img . '" size="40" placeholder="path/to/image" />
+						</div>
+					</div>
+				</div>
 			' . $save_button . '
 			</div>
 		</form>';
@@ -641,14 +704,11 @@ class fm_settings {
 	 * @package facileManager
 	 */
 	function buildTimezoneList($selected_zone = null) {
-		$continents = array('Africa', 'America', 'Antarctica', 'Arctic', 'Asia', 'Atlantic', 'Australia', 'Europe', 'Indian', 'Pacific');
-		
 		$structure[] = '<select name="timezone[' . $_SESSION['user']['account_id'] . ']" id="timezone">';
 
 		$i = 0;
 		foreach (timezone_identifiers_list() as $zone) {
 			$zone = explode('/', $zone);
-			if (!in_array($zone[0], $continents)) continue;
 			
 			$zonen[$i]['continent'] = isset($zone[0]) ? $zone[0] : '';
 			$zonen[$i]['city'] = isset($zone[1]) ? $zone[1] : '';

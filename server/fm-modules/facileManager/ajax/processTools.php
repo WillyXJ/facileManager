@@ -70,6 +70,23 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$response = buildPopup('header', _('Log Purge Results'));
 				$response .= '<p>' . $fm_tools->purgeLogs() . '</p>';
 				break;
+			case 'update_core':
+				$fm_new_version_available = getOption('version_check', 0, $fm_name);
+				$response = buildPopup('header', _('Core Update Results'));
+				
+				list($message, $local_update_package) = downloadfMFile($fm_new_version_available['data']['link']);
+				if ($local_update_package !== false) {
+					$message .= extractPackage($local_update_package);
+				}
+				
+				$response .= '<p><pre>' . $message . '</pre></p>';
+				$response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
+				$response .= buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(_('Modules')));
+				
+				echo $response;
+				exit;
+
+				break;
 		}
 	}
 } else {

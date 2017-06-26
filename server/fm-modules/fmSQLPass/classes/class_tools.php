@@ -43,16 +43,16 @@ class fm_module_tools {
 			
 			/** ping tests */
 			$return .= "\t" . str_pad(__('Ping:'), 15);
-			if (pingTest($results[$x]->server_name)) $return .=  __('success');
-			else $return .=  __('failed');
+			if (pingTest($results[$x]->server_name)) $return .=  _('success');
+			else $return .=  _('failed');
 			$return .=  "\n";
 
 			/** SQL tests */
 			$return .= "\t" . str_pad($results[$x]->server_type. ':', 15);
 			$port = $results[$x]->server_port ? $results[$x]->server_port : $__FM_CONFIG['fmSQLPass']['default']['ports'][$results[$x]->server_type];
 
-			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  __('success') . ' (tcp/' . $port . ')';
-			else $return .=  __('failed') . ' (tcp/' . $port . ')';
+			if (socketTest($results[$x]->server_name, $port, 10)) $return .=  _('success') . ' (tcp/' . $port . ')';
+			else $return .=  _('failed') . ' (tcp/' . $port . ')';
 			$return .=  "\n\n";
 		}
 		
