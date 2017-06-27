@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-01 16:15-0600\n"
+"POT-Creation-Date: 2017-06-27 11:25-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,33 +17,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: server/fm-modules/fmDNS/functions.extra.php:59
+#: server/fm-modules/fmDNS/functions.extra.php:64
 msgid "Select one or more zones"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.extra.php:66
+#: server/fm-modules/fmDNS/functions.extra.php:71
 msgid "Limit access to the following zones:"
-msgstr ""
-
-#: server/fm-modules/fmDNS/functions.php:35
-#, php-format
-msgid ""
-"You currently have no active name servers defined. <a href=\"%s\">Click "
-"here</a> to define one or more to manage."
-msgstr ""
-
-#: server/fm-modules/fmDNS/functions.php:35
-#: server/fm-modules/fmDNS/functions.php:71
-#: server/fm-modules/fmDNS/functions.php:73
-#: server/fm-modules/fmDNS/functions.php:756
-#: server/fm-modules/fmDNS/functions.php:933
-#: server/fm-modules/fmDNS/functions.php:936
-#: server/fm-modules/fmDNS/functions.php:938
-#: server/fm-modules/fmDNS/functions.php:940
-#: server/fm-modules/fmDNS/variables.inc.php:79
-#: server/fm-modules/fmDNS/ajax/processTools.php:65
-#: server/fm-modules/fmDNS/pages/zones.php:130
-msgid "Servers"
 msgstr ""
 
 #: server/fm-modules/fmDNS/functions.php:38
@@ -54,7 +33,7 @@ msgid ""
 msgstr ""
 
 #: server/fm-modules/fmDNS/functions.php:38
-#: server/fm-modules/fmDNS/functions.php:760
+#: server/fm-modules/fmDNS/functions.php:744
 msgid "Options"
 msgstr ""
 
@@ -66,9 +45,9 @@ msgid ""
 msgstr ""
 
 #: server/fm-modules/fmDNS/functions.php:41
-#: server/fm-modules/fmDNS/functions.php:749
-#: server/fm-modules/fmDNS/functions.php:764
-#: server/fm-modules/fmDNS/functions.php:766
+#: server/fm-modules/fmDNS/functions.php:733
+#: server/fm-modules/fmDNS/functions.php:748
+#: server/fm-modules/fmDNS/functions.php:750
 #: server/fm-modules/fmDNS/pages/zone-records.php:38
 #: server/fm-modules/fmDNS/pages/zone-records.php:39
 msgid "Zones"
@@ -104,157 +83,157 @@ msgstr ""
 
 #: server/fm-modules/fmDNS/functions.php:123
 #, php-format
-msgid "You have <b>%s</b> name servers configured."
-msgstr ""
+msgid "You have <b>%s</b> name server configured."
+msgid_plural "You have <b>%s</b> name servers configured."
+msgstr[0] ""
+msgstr[1] ""
 
 #: server/fm-modules/fmDNS/functions.php:124
 #, php-format
-msgid "You have <b>%s</b> zones defined."
-msgstr ""
+msgid "You have <b>%s</b> zone defined."
+msgid_plural "You have <b>%s</b> zones defined."
+msgstr[0] ""
+msgstr[1] ""
 
 #: server/fm-modules/fmDNS/functions.php:125
 #, php-format
-msgid "You have <b>%s</b> records."
-msgstr ""
+msgid "You have <b>%s</b> record."
+msgid_plural "You have <b>%s</b> records."
+msgstr[0] ""
+msgstr[1] ""
 
 #: server/fm-modules/fmDNS/functions.php:136
 msgid "Needs Attention"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:155
+#: server/fm-modules/fmDNS/functions.php:154
+#: server/fm-modules/fmDNS/classes/class_zones.php:652
+#: server/fm-modules/fmDNS/classes/class_zones.php:1054
+msgid "Zone is secured with DNSSEC"
+msgstr ""
+
+#: server/fm-modules/fmDNS/functions.php:156
 #: server/fm-modules/fmDNS/classes/class_zones.php:69
 msgid "Domain"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:164
+#: server/fm-modules/fmDNS/functions.php:165
 msgid "Clone of"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:164
+#: server/fm-modules/fmDNS/functions.php:165
 msgid "Edit parent zone records"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:173
+#: server/fm-modules/fmDNS/functions.php:174
 msgid "Based on template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:173
+#: server/fm-modules/fmDNS/functions.php:174
 msgid "Edit template zone records"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:476
-#: server/fm-modules/fmDNS/functions.php:486
-#: server/fm-modules/fmDNS/functions.php:489
+#: server/fm-modules/fmDNS/functions.php:459
+#: server/fm-modules/fmDNS/functions.php:469
+#: server/fm-modules/fmDNS/functions.php:472
 #, php-format
 msgid "%s is not valid."
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:750
+#: server/fm-modules/fmDNS/functions.php:734
 msgid "Forward"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:750
+#: server/fm-modules/fmDNS/functions.php:734
 msgid "Forward Zones"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:751
+#: server/fm-modules/fmDNS/functions.php:735
 msgid "Reverse"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:751
+#: server/fm-modules/fmDNS/functions.php:735
 msgid "Reverse Zones"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:752
+#: server/fm-modules/fmDNS/functions.php:736
 #: server/fm-modules/fmDNS/classes/class_zones.php:72
 #: server/fm-modules/fmDNS/pages/zone-records.php:88
 msgid "Records"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:753
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:87
+#: server/fm-modules/fmDNS/functions.php:737
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:86
 msgid "Record Validation"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:755
+#: server/fm-modules/fmDNS/functions.php:739
 msgid "Config"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:755
-#: server/fm-modules/fmDNS/functions.php:756
-#: server/fm-modules/fmDNS/classes/class_records.php:251
-#: server/fm-modules/fmDNS/pages/config-servers.php:32
+#: server/fm-modules/fmDNS/functions.php:739
+#: server/fm-modules/fmDNS/functions.php:740
+#: server/fm-modules/fmDNS/classes/class_records.php:259
+#: server/fm-modules/fmDNS/pages/config-servers.php:31
 msgid "Name Servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:757
-#: server/fm-modules/fmDNS/classes/class_records.php:252
+#: server/fm-modules/fmDNS/functions.php:741
+#: server/fm-modules/fmDNS/classes/class_records.php:260
 #: server/fm-modules/fmDNS/classes/class_zones.php:71
-#: server/fm-modules/fmDNS/classes/class_zones.php:814
+#: server/fm-modules/fmDNS/classes/class_zones.php:946
 #: server/fm-modules/fmDNS/pages/config-views.php:30
 msgid "Views"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:758
+#: server/fm-modules/fmDNS/functions.php:742
 msgid "ACLs"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:758
+#: server/fm-modules/fmDNS/functions.php:742
 msgid "Access Control Lists"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:759
-#: server/fm-modules/fmDNS/classes/class_controls.php:43
-#: server/fm-modules/fmDNS/classes/class_controls.php:283
+#: server/fm-modules/fmDNS/functions.php:743
+#: server/fm-modules/fmDNS/classes/class_controls.php:48
+#: server/fm-modules/fmDNS/classes/class_controls.php:243
+#: server/fm-modules/fmDNS/pages/config-keys.php:71
 msgid "Keys"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:761
+#: server/fm-modules/fmDNS/functions.php:745
 msgid "Logging"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:762
-msgid "Controls"
+#: server/fm-modules/fmDNS/functions.php:746
+msgid "Operations"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:764
+#: server/fm-modules/fmDNS/functions.php:748
 msgid "Templates"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:765
-#: server/fm-modules/fmDNS/pages/zone-records-write.php:98
+#: server/fm-modules/fmDNS/functions.php:749
+#: server/fm-modules/fmDNS/pages/zone-records-write.php:118
 msgid "SOA"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:765
+#: server/fm-modules/fmDNS/functions.php:749
 msgid "SOA Templates"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:766
+#: server/fm-modules/fmDNS/functions.php:750
 msgid "Zone Templates"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:768
+#: server/fm-modules/fmDNS/functions.php:752
 #, php-format
 msgid "%s Settings"
 msgstr ""
 
-#: server/fm-modules/fmDNS/functions.php:914
-#: server/fm-modules/fmDNS/classes/class_zones.php:140
-#: server/fm-modules/fmDNS/classes/class_zones.php:1507
-msgid "All Servers"
-msgstr ""
-
-#: server/fm-modules/fmDNS/functions.php:921
-#: server/fm-modules/fmDNS/functions.php:924
-#: server/fm-modules/fmDNS/functions.php:925
-#: server/fm-modules/fmDNS/variables.inc.php:79
-msgid "Groups"
-msgstr ""
-
-#: server/fm-modules/fmDNS/functions.php:1048
-#: server/fm-modules/fmDNS/classes/class_zones.php:953
-#: server/fm-modules/fmDNS/classes/class_zones.php:1507
+#: server/fm-modules/fmDNS/functions.php:982
+#: server/fm-modules/fmDNS/classes/class_zones.php:1095
+#: server/fm-modules/fmDNS/classes/class_zones.php:1648
 msgid "All Views"
 msgstr ""
 
@@ -264,122 +243,155 @@ msgid ""
 "editing configuration and zone files manually."
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:80
+#: server/fm-modules/fmDNS/variables.inc.php:91
 msgid "Global"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:80
+#: server/fm-modules/fmDNS/variables.inc.php:91
 msgid "Rate Limit"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:81
-#: server/fm-modules/fmDNS/classes/class_logging.php:44
-#: server/fm-modules/fmDNS/classes/class_logging.php:625
+#: server/fm-modules/fmDNS/variables.inc.php:91
+msgid "RRSet"
+msgstr ""
+
+#: server/fm-modules/fmDNS/variables.inc.php:92
+#: server/fm-modules/fmDNS/classes/class_logging.php:47
+#: server/fm-modules/fmDNS/classes/class_logging.php:645
 msgid "Channels"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:81
+#: server/fm-modules/fmDNS/variables.inc.php:92
 msgid "Categories"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:128
+#: server/fm-modules/fmDNS/variables.inc.php:93
+#: server/fm-modules/fmDNS/pages/config-controls.php:33
+msgid "Controls"
+msgstr ""
+
+#: server/fm-modules/fmDNS/variables.inc.php:93
+msgid "Statistics"
+msgstr ""
+
+#: server/fm-modules/fmDNS/variables.inc.php:142
 msgid "Enable named Checks"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:128
+#: server/fm-modules/fmDNS/variables.inc.php:142
 msgid "Enable or disable named-checkconf and named-checkzone utilities."
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:129
+#: server/fm-modules/fmDNS/variables.inc.php:143
 #, php-format
 msgid "sudo must be installed on %s with the following in sudoers:"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:134
+#: server/fm-modules/fmDNS/variables.inc.php:148
 msgid "Purge Configuration Files"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:134
+#: server/fm-modules/fmDNS/variables.inc.php:148
 msgid ""
 "When enabled, configuration files will be deleted on the DNS servers before "
 "building the server config. This can be handy if you want to remove unused "
 "files."
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:138
+#: server/fm-modules/fmDNS/variables.inc.php:152
 msgid "Create Reverse Zones Automatically"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:138
+#: server/fm-modules/fmDNS/variables.inc.php:152
 msgid ""
 "While creating A records and choosing to create the associated PTR record, "
 "reverse zones can be automatically created if they are missing."
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:142
+#: server/fm-modules/fmDNS/variables.inc.php:156
+#: server/fm-modules/fmDNS/classes/class_zones.php:953
 msgid "Use DNAME Resource Records for Clones"
 msgstr ""
 
-#: server/fm-modules/fmDNS/variables.inc.php:142
+#: server/fm-modules/fmDNS/variables.inc.php:156
 msgid ""
 "When creating cloned zones, use the DNAME resource record rather than a full "
 "clone (when available)."
 msgstr ""
 
+#: server/fm-modules/fmDNS/variables.inc.php:160
+msgid "Sort Zone Names Hierarchically"
+msgstr ""
+
+#: server/fm-modules/fmDNS/variables.inc.php:160
+msgid ""
+"Sort zone names with a hierarchy to group sub-zones together. For example:"
+msgstr ""
+
+#: server/fm-modules/fmDNS/variables.inc.php:165
+msgid "Default DNSSEC Signature Expiry"
+msgstr ""
+
+#: server/fm-modules/fmDNS/variables.inc.php:165
+msgid ""
+"Define the number of days the DNSSEC signatures should be valid for (each "
+"zone can override this)."
+msgstr ""
+
 #: server/fm-modules/fmDNS/ajax/getData.php:59
-#: server/fm-modules/fmDNS/ajax/getData.php:68
-#: server/fm-modules/fmDNS/ajax/getData.php:73
+#: server/fm-modules/fmDNS/ajax/getData.php:76
+#: server/fm-modules/fmDNS/ajax/getData.php:85
+#: server/fm-modules/fmDNS/ajax/getData.php:90
 msgid "Option Value"
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/getData.php:64
+#: server/fm-modules/fmDNS/ajax/getData.php:81
 msgid "Define outside of global options clause"
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processPost.php:42
-#: server/fm-modules/fmDNS/classes/class_logging.php:632
-#: server/fm-modules/fmDNS/classes/class_servers.php:751
-#: server/fm-modules/fmDNS/classes/class_tools.php:409
-msgid "OK"
+#: server/fm-modules/fmDNS/ajax/getData.php:92
+#, php-format
+msgid "This option requires BIND %s or later."
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processPost.php:56
+#: server/fm-modules/fmDNS/ajax/processPost.php:45
 msgid "You do not have sufficient privileges."
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processPost.php:89
+#: server/fm-modules/fmDNS/ajax/processPost.php:77
 msgid "server"
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processPost.php:93
+#: server/fm-modules/fmDNS/ajax/processPost.php:81
 msgid "server group"
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processPost.php:101
+#: server/fm-modules/fmDNS/ajax/processPost.php:89
 msgid "option"
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processPost.php:147
-#: server/fm-modules/fmDNS/pages/zones.php:63
+#: server/fm-modules/fmDNS/ajax/processPost.php:135
+#: server/fm-modules/fmDNS/pages/zones.php:61
 #, php-format
 msgid "This item could not be set to %s."
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processPost.php:151
+#: server/fm-modules/fmDNS/ajax/processPost.php:139
+#: server/fm-modules/fmDNS/ajax/processPost.php:163
 #, php-format
 msgid "Set %s (%s) status to %s."
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processReload.php:36
-msgid "Zone Reload Results"
+#: server/fm-modules/fmDNS/ajax/processPost.php:150
+msgid "Reload Results"
 msgstr ""
 
-#: server/fm-modules/fmDNS/ajax/processReload.php:44
-#: server/fm-modules/fmDNS/ajax/processTools.php:94
-#: server/fm-modules/fmDNS/classes/class_logging.php:630
-#: server/fm-modules/fmDNS/classes/class_servers.php:749
-#: server/fm-modules/fmDNS/classes/class_tools.php:407
-msgid "Error"
+#: server/fm-modules/fmDNS/ajax/processPost.php:167
+msgid "Bulk Action Results"
+msgstr ""
+
+#: server/fm-modules/fmDNS/ajax/processReload.php:36
+msgid "Zone Reload Results"
 msgstr ""
 
 #: server/fm-modules/fmDNS/ajax/processReload.php:45
@@ -387,18 +399,12 @@ msgid "You are not authorized to reload this zone."
 msgstr ""
 
 #: server/fm-modules/fmDNS/ajax/processTools.php:33
-msgid "Zone Import Wizard"
+#: server/fm-modules/fmDNS/classes/class_tools.php:533
+msgid "Bulk Zone Import"
 msgstr ""
 
 #: server/fm-modules/fmDNS/ajax/processTools.php:44
 msgid "Cache Management Results"
-msgstr ""
-
-#: server/fm-modules/fmDNS/ajax/processTools.php:65
-#, php-format
-msgid ""
-"<p>You currently have no active name servers defined. <a href=\"%s\">Click "
-"here</a> to define one or more to manage.</p>"
 msgstr ""
 
 #: server/fm-modules/fmDNS/ajax/processTools.php:95
@@ -409,74 +415,73 @@ msgstr ""
 msgid "There are no ACLs."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:43
-#: server/fm-modules/fmDNS/classes/class_controls.php:129
-#: server/fm-modules/fmDNS/classes/class_logging.php:43
-#: server/fm-modules/fmDNS/classes/class_records.php:240
-#: server/fm-modules/fmDNS/classes/class_records.php:250
-#: server/fm-modules/fmDNS/classes/class_servers.php:249
-#: server/fm-modules/fmDNS/classes/class_servers.php:399
+#: server/fm-modules/fmDNS/classes/class_acls.php:46
+#: server/fm-modules/fmDNS/classes/class_logging.php:46
+#: server/fm-modules/fmDNS/classes/class_records.php:248
+#: server/fm-modules/fmDNS/classes/class_records.php:258
+#: server/fm-modules/fmDNS/classes/class_servers.php:262
+#: server/fm-modules/fmDNS/classes/class_servers.php:418
 msgid "Name"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:44
-#: server/fm-modules/fmDNS/classes/class_acls.php:309
-#: server/fm-modules/fmDNS/classes/class_acls.php:360
-#: server/fm-modules/fmDNS/classes/class_controls.php:43
-#: server/fm-modules/fmDNS/classes/class_controls.php:89
-#: server/fm-modules/fmDNS/classes/class_controls.php:129
-#: server/fm-modules/fmDNS/classes/class_controls.php:284
-#: server/fm-modules/fmDNS/classes/class_keys.php:47
-#: server/fm-modules/fmDNS/classes/class_keys.php:275
-#: server/fm-modules/fmDNS/classes/class_logging.php:45
-#: server/fm-modules/fmDNS/classes/class_logging.php:592
-#: server/fm-modules/fmDNS/classes/class_logging.php:626
-#: server/fm-modules/fmDNS/classes/class_options.php:48
-#: server/fm-modules/fmDNS/classes/class_options.php:418
-#: server/fm-modules/fmDNS/classes/class_records.php:305
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
-#: server/fm-modules/fmDNS/classes/class_views.php:43
-#: server/fm-modules/fmDNS/classes/class_views.php:244
+#: server/fm-modules/fmDNS/classes/class_acls.php:47
+#: server/fm-modules/fmDNS/classes/class_acls.php:324
+#: server/fm-modules/fmDNS/classes/class_acls.php:375
+#: server/fm-modules/fmDNS/classes/class_controls.php:49
+#: server/fm-modules/fmDNS/classes/class_controls.php:105
+#: server/fm-modules/fmDNS/classes/class_controls.php:151
+#: server/fm-modules/fmDNS/classes/class_controls.php:312
+#: server/fm-modules/fmDNS/classes/class_keys.php:69
+#: server/fm-modules/fmDNS/classes/class_keys.php:443
+#: server/fm-modules/fmDNS/classes/class_logging.php:48
+#: server/fm-modules/fmDNS/classes/class_logging.php:612
+#: server/fm-modules/fmDNS/classes/class_logging.php:646
+#: server/fm-modules/fmDNS/classes/class_options.php:59
+#: server/fm-modules/fmDNS/classes/class_options.php:441
+#: server/fm-modules/fmDNS/classes/class_records.php:325
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
+#: server/fm-modules/fmDNS/classes/class_views.php:46
+#: server/fm-modules/fmDNS/classes/class_views.php:254
 msgid "Comment"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:45
-#: server/fm-modules/fmDNS/classes/class_controls.php:44
-#: server/fm-modules/fmDNS/classes/class_keys.php:48
-#: server/fm-modules/fmDNS/classes/class_logging.php:46
-#: server/fm-modules/fmDNS/classes/class_options.php:49
-#: server/fm-modules/fmDNS/classes/class_records.php:312
-#: server/fm-modules/fmDNS/classes/class_servers.php:80
-#: server/fm-modules/fmDNS/classes/class_templates.php:46
-#: server/fm-modules/fmDNS/classes/class_tools.php:308
-#: server/fm-modules/fmDNS/classes/class_views.php:44
+#: server/fm-modules/fmDNS/classes/class_acls.php:48
+#: server/fm-modules/fmDNS/classes/class_controls.php:50
+#: server/fm-modules/fmDNS/classes/class_keys.php:70
+#: server/fm-modules/fmDNS/classes/class_logging.php:49
+#: server/fm-modules/fmDNS/classes/class_options.php:60
+#: server/fm-modules/fmDNS/classes/class_records.php:332
+#: server/fm-modules/fmDNS/classes/class_servers.php:84
+#: server/fm-modules/fmDNS/classes/class_templates.php:49
+#: server/fm-modules/fmDNS/classes/class_tools.php:361
+#: server/fm-modules/fmDNS/classes/class_views.php:47
 #: server/fm-modules/fmDNS/classes/class_zones.php:73
 msgid "Actions"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:65
-#: server/fm-modules/fmDNS/classes/class_acls.php:121
+#: server/fm-modules/fmDNS/classes/class_acls.php:71
+#: server/fm-modules/fmDNS/classes/class_acls.php:129
 #, php-format
 msgid "ACL name is too long (maximum %d character)."
 msgid_plural "ACL name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:70
-#: server/fm-modules/fmDNS/classes/class_acls.php:128
+#: server/fm-modules/fmDNS/classes/class_acls.php:76
+#: server/fm-modules/fmDNS/classes/class_acls.php:136
 msgid "This ACL already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:91
-#: server/fm-modules/fmDNS/classes/class_acls.php:131
+#: server/fm-modules/fmDNS/classes/class_acls.php:97
+#: server/fm-modules/fmDNS/classes/class_acls.php:139
 msgid "No ACL name defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:103
+#: server/fm-modules/fmDNS/classes/class_acls.php:110
 msgid "Could not add the ACL because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:105
+#: server/fm-modules/fmDNS/classes/class_acls.php:113
 #, php-format
 msgid ""
 "Added ACL:\n"
@@ -484,16 +489,16 @@ msgid ""
 "Comment: %s"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:107
+#: server/fm-modules/fmDNS/classes/class_acls.php:115
 #, php-format
 msgid "%s was added to the %s ACL"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:160
+#: server/fm-modules/fmDNS/classes/class_acls.php:169
 msgid "Could not update the ACL because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:165
+#: server/fm-modules/fmDNS/classes/class_acls.php:175
 #, php-format
 msgid ""
 "Updated ACL '%s' to the following:\n"
@@ -501,61 +506,61 @@ msgid ""
 "Comment: %s"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:169
+#: server/fm-modules/fmDNS/classes/class_acls.php:179
 #, php-format
 msgid "%s was updated to %s on the %s ACL"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:183
+#: server/fm-modules/fmDNS/classes/class_acls.php:193
 #, php-format
 msgid "ACL '%s' was deleted"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:188
+#: server/fm-modules/fmDNS/classes/class_acls.php:198
 #, php-format
 msgid "%s was deleted from the %s ACL"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:191
+#: server/fm-modules/fmDNS/classes/class_acls.php:202
 msgid ""
 "The associated ACL elements could not be deleted because a database error "
 "occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:194
+#: server/fm-modules/fmDNS/classes/class_acls.php:206
 msgid "This ACL could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:273
+#: server/fm-modules/fmDNS/classes/class_acls.php:288
 msgid "Add ACL Element"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:273
+#: server/fm-modules/fmDNS/classes/class_acls.php:288
 msgid "Edit ACL Element"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:275
+#: server/fm-modules/fmDNS/classes/class_acls.php:290
 msgid "Add ACL"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:275
+#: server/fm-modules/fmDNS/classes/class_acls.php:290
 msgid "Edit ACL"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:308
-#: server/fm-modules/fmDNS/classes/class_acls.php:358
+#: server/fm-modules/fmDNS/classes/class_acls.php:323
+#: server/fm-modules/fmDNS/classes/class_acls.php:373
 msgid "ACL Name"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:308
+#: server/fm-modules/fmDNS/classes/class_acls.php:323
 msgid "internal"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_acls.php:359
+#: server/fm-modules/fmDNS/classes/class_acls.php:374
 msgid "Matched Address List"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1185
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1297
 #, php-format
 msgid ""
 "The named utilities (specifically named-checkconf and named-checkzone) "
@@ -563,132 +568,150 @@ msgid ""
 "be checked for syntax."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1198
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1311
 #, php-format
 msgid "%s is not writeable by %s so the named checks cannot be performed."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1247
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1268
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1352
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1373
 #, php-format
 msgid ""
 "The webserver user (%s) on %s does not have permission to run the following "
 "command:%sThe following error ocurred:%s"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1252
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1357
 msgid "Your named configuration contains one or more errors:"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1280
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1385
 msgid "Your zone configuration files contain one or more errors:"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1283
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1388
 msgid "Your named configuration and zone files are loadable."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1363
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1468
 #, php-format
 msgid ""
 "The root servers have been recently updated, but the webserver user (%s) "
 "cannot write to %s to update the hint zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1364
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1469
 msgid "A local copy will be used instead."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_buildconf.php:1623
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1738
 #, php-format
 msgid "Cannot resolve %s"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1924
+#, php-format
+msgid ""
+"The dnssec-signzone binary could not be found on %s so DNSSEC zone signing "
+"cannot be done."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_buildconf.php:1929
+#, php-format
+msgid "%s is not writeable by %s so DNSSEC zone signing cannot be done."
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_controls.php:32
 msgid "There are no controls."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:43
-#: server/fm-modules/fmDNS/classes/class_controls.php:280
+#: server/fm-modules/fmDNS/classes/class_controls.php:32
+msgid "There are no statistics channels."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_controls.php:47
+#: server/fm-modules/fmDNS/classes/class_controls.php:308
 msgid "IP Address"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:43
-#: server/fm-modules/fmDNS/classes/class_controls.php:281
-#: server/fm-modules/fmDNS/classes/class_records.php:301
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
+#: server/fm-modules/fmDNS/classes/class_controls.php:47
+#: server/fm-modules/fmDNS/classes/class_controls.php:105
+#: server/fm-modules/fmDNS/classes/class_controls.php:151
+#: server/fm-modules/fmDNS/classes/class_controls.php:309
+#: server/fm-modules/fmDNS/classes/class_records.php:321
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "Port"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:43
+#: server/fm-modules/fmDNS/classes/class_controls.php:47
 msgid "Address List"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:87
+#: server/fm-modules/fmDNS/classes/class_controls.php:101
 msgid "Could not add the control because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:89
+#: server/fm-modules/fmDNS/classes/class_controls.php:105
 msgid "Added control"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:89
+#: server/fm-modules/fmDNS/classes/class_controls.php:105
+#: server/fm-modules/fmDNS/classes/class_controls.php:151
 msgid "IP"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:89
-#: server/fm-modules/fmDNS/classes/class_controls.php:129
+#: server/fm-modules/fmDNS/classes/class_controls.php:105
+#: server/fm-modules/fmDNS/classes/class_controls.php:151
 msgid "Addresses"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:123
+#: server/fm-modules/fmDNS/classes/class_controls.php:144
 msgid "Could not update the control because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:129
-#, php-format
-msgid "Updated control '%s' to the following:"
+#: server/fm-modules/fmDNS/classes/class_controls.php:151
+msgid "Updated control to the following"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:142
+#: server/fm-modules/fmDNS/classes/class_controls.php:164
 msgid "This control could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:145
+#: server/fm-modules/fmDNS/classes/class_controls.php:167
 #, php-format
 msgid "Control '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:216
+#: server/fm-modules/fmDNS/classes/class_controls.php:239
 msgid "Select one or more keys"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:220
+#: server/fm-modules/fmDNS/classes/class_controls.php:250
 msgid "Add Control"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:220
+#: server/fm-modules/fmDNS/classes/class_controls.php:250
 msgid "Edit Control"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:282
+#: server/fm-modules/fmDNS/classes/class_controls.php:310
 msgid "Allowed Address List"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:282
+#: server/fm-modules/fmDNS/classes/class_controls.php:310
 msgid "Define allowed hosts"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:302
+#: server/fm-modules/fmDNS/classes/class_controls.php:330
 #, php-format
 msgid "%s is not a valid IP address."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:306
+#: server/fm-modules/fmDNS/classes/class_controls.php:334
 msgid "Allowed addresses not defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_controls.php:310
+#: server/fm-modules/fmDNS/classes/class_controls.php:338
 #, php-format
 msgid "%d is not a valid port number."
 msgstr ""
@@ -697,73 +720,187 @@ msgstr ""
 msgid "There are no keys."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:43
-#: server/fm-modules/fmDNS/classes/class_servers.php:65
-#: server/fm-modules/fmDNS/classes/class_servers.php:704
+#: server/fm-modules/fmDNS/classes/class_keys.php:56
+#: server/fm-modules/fmDNS/classes/class_servers.php:69
+#: server/fm-modules/fmDNS/classes/class_servers.php:723
 msgid "Key"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:44
-#: server/fm-modules/fmDNS/classes/class_keys.php:273
-#: server/fm-modules/fmDNS/classes/class_records.php:266
-#: server/fm-modules/fmDNS/classes/class_records.php:275
+#: server/fm-modules/fmDNS/classes/class_keys.php:59
+#: server/fm-modules/fmDNS/classes/class_keys.php:65
+#: server/fm-modules/fmDNS/classes/class_keys.php:335
+#: server/fm-modules/fmDNS/classes/class_keys.php:398
+#: server/fm-modules/fmDNS/classes/class_records.php:276
+#: server/fm-modules/fmDNS/classes/class_records.php:291
 msgid "Algorithm"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:45
-#: server/fm-modules/fmDNS/classes/class_keys.php:274
+#: server/fm-modules/fmDNS/classes/class_keys.php:60
+#: server/fm-modules/fmDNS/classes/class_keys.php:336
+#: server/fm-modules/fmDNS/classes/class_keys.php:400
 msgid "Secret"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:46
-#: server/fm-modules/fmDNS/classes/class_keys.php:272
+#: server/fm-modules/fmDNS/classes/class_keys.php:61
+#: server/fm-modules/fmDNS/classes/class_keys.php:334
 msgid "View"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:70
-#: server/fm-modules/fmDNS/classes/class_keys.php:116
+#: server/fm-modules/fmDNS/classes/class_keys.php:64
+#: server/fm-modules/fmDNS/classes/class_records.php:262
+#: server/fm-modules/fmDNS/classes/class_records.php:270
+#: server/fm-modules/fmDNS/classes/class_records.php:279
+#: server/fm-modules/fmDNS/classes/class_records.php:282
+#: server/fm-modules/fmDNS/classes/class_records.php:305
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
+#: server/fm-modules/fmDNS/classes/class_zones.php:70
+msgid "Type"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:66
+msgid "Bits"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:67
+msgid "Created"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:95
+msgid "You must specify a zone."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:96
+#: server/fm-modules/fmDNS/classes/class_keys.php:340
+#: server/fm-modules/fmDNS/classes/class_keys.php:538
+#: server/fm-modules/fmDNS/classes/class_keys.php:549
+msgid "Both"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:96
+msgid "You must choose a key type."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:110
+#: server/fm-modules/fmDNS/classes/class_keys.php:162
 #, php-format
 msgid "Key name is too long (maximum %d character)."
 msgid_plural "Key name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:86
-#: server/fm-modules/fmDNS/classes/class_keys.php:111
-msgid "No key defined."
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_keys.php:98
-msgid "Could not add the key because a database error occurred."
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_keys.php:122
+#: server/fm-modules/fmDNS/classes/class_keys.php:115
+#: server/fm-modules/fmDNS/classes/class_keys.php:168
 msgid "This key already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:141
+#: server/fm-modules/fmDNS/classes/class_keys.php:129
+#: server/fm-modules/fmDNS/classes/class_keys.php:157
+msgid "No key defined."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:142
+msgid "Could not add the key because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:193
 msgid "Could not update the key because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:160
+#: server/fm-modules/fmDNS/classes/class_keys.php:213
 msgid "This key could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:163
+#: server/fm-modules/fmDNS/classes/class_keys.php:216
 #, php-format
 msgid "Key '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:234
+#: server/fm-modules/fmDNS/classes/class_keys.php:267
+msgid "This key has been revoked."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:307
 msgid "Add Key"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:234
+#: server/fm-modules/fmDNS/classes/class_keys.php:307
 msgid "Edit Key"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_keys.php:271
+#: server/fm-modules/fmDNS/classes/class_keys.php:333
 msgid "Key Name"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:341
+msgid ""
+"The private key and associated DNSKEY RR will be automatically generated if "
+"this field is left blank."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:395
+#: server/fm-modules/fmDNS/classes/class_options.php:55
+#: server/fm-modules/fmDNS/classes/class_options.php:400
+msgid "Zone"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:396
+#: server/fm-modules/fmDNS/classes/class_zones.php:646
+#: server/fm-modules/fmDNS/classes/class_zones.php:799
+msgid "Configure Additional Options"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:397
+msgid "Key Type"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:399
+msgid "Key Size"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:401
+msgid "DNSKEY RR"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:412
+msgid "Revoke this key"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:422
+msgid "Sign zone with this key"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:530
+#, php-format
+msgid "The dnssec-keygen utility cannot be found on %s to generate the keys."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:533
+#, php-format
+msgid "%s is not writeable by %s so DNSSEC keys cannot be created."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:596
+#, php-format
+msgid "The dnssec-revoke utility cannot be found on %s to revoke the key."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:599
+#, php-format
+msgid "%s is not writeable by %s so the DNSSEC key cannot be revoked."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:612
+#, php-format
+msgid "An error occured while revoking the key: %s"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:644
+msgid "Filter Zones"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_keys.php:645
+#: server/fm-modules/fmDNS/classes/class_zones.php:1727
+msgid "Filter"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_logging.php:32
@@ -771,114 +908,114 @@ msgstr ""
 msgid "There are no %s defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:75
+#: server/fm-modules/fmDNS/classes/class_logging.php:81
 msgid "No channel name defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:78
-#: server/fm-modules/fmDNS/classes/class_logging.php:276
+#: server/fm-modules/fmDNS/classes/class_logging.php:84
+#: server/fm-modules/fmDNS/classes/class_logging.php:292
 msgid "This channel already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:81
-#: server/fm-modules/fmDNS/classes/class_logging.php:252
+#: server/fm-modules/fmDNS/classes/class_logging.php:87
+#: server/fm-modules/fmDNS/classes/class_logging.php:266
 msgid "No file path defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:101
-#: server/fm-modules/fmDNS/classes/class_logging.php:153
+#: server/fm-modules/fmDNS/classes/class_logging.php:108
+#: server/fm-modules/fmDNS/classes/class_logging.php:162
 msgid "Could not add the channel because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:182
+#: server/fm-modules/fmDNS/classes/class_logging.php:192
 msgid "No channel selected."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:207
-#: server/fm-modules/fmDNS/classes/class_logging.php:236
+#: server/fm-modules/fmDNS/classes/class_logging.php:218
+#: server/fm-modules/fmDNS/classes/class_logging.php:249
 msgid "Could not add the category because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:250
-#: server/fm-modules/fmDNS/classes/class_logging.php:255
+#: server/fm-modules/fmDNS/classes/class_logging.php:264
+#: server/fm-modules/fmDNS/classes/class_logging.php:269
 msgid "No channel defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:266
-#: server/fm-modules/fmDNS/classes/class_logging.php:326
-#: server/fm-modules/fmDNS/classes/class_logging.php:376
+#: server/fm-modules/fmDNS/classes/class_logging.php:281
+#: server/fm-modules/fmDNS/classes/class_logging.php:343
+#: server/fm-modules/fmDNS/classes/class_logging.php:395
 #, php-format
 msgid "Could not update the %s because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:405
+#: server/fm-modules/fmDNS/classes/class_logging.php:425
 #, php-format
 msgid ""
 "This %s could not be deleted because it is associated with one or more "
 "categories."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:416
+#: server/fm-modules/fmDNS/classes/class_logging.php:436
 #, php-format
 msgid "This %s could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:419
+#: server/fm-modules/fmDNS/classes/class_logging.php:439
 #, php-format
 msgid "Logging %s '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:495
+#: server/fm-modules/fmDNS/classes/class_logging.php:515
 msgid "Add Channel"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:495
+#: server/fm-modules/fmDNS/classes/class_logging.php:515
 msgid "Add Category"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:497
+#: server/fm-modules/fmDNS/classes/class_logging.php:517
 msgid "Edit Channel"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:497
+#: server/fm-modules/fmDNS/classes/class_logging.php:517
 msgid "Edit Category"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:585
+#: server/fm-modules/fmDNS/classes/class_logging.php:605
 msgid "Channel Name"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:586
+#: server/fm-modules/fmDNS/classes/class_logging.php:606
 msgid "Logging Destination"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:588
+#: server/fm-modules/fmDNS/classes/class_logging.php:608
 msgid "Severity"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:589
+#: server/fm-modules/fmDNS/classes/class_logging.php:609
 msgid "Print Category (optional)"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:590
+#: server/fm-modules/fmDNS/classes/class_logging.php:610
 msgid "Print Severity (optional)"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:591
+#: server/fm-modules/fmDNS/classes/class_logging.php:611
 msgid "Print Time (optional)"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:624
+#: server/fm-modules/fmDNS/classes/class_logging.php:644
 msgid "Category"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:631
-#: server/fm-modules/fmDNS/classes/class_servers.php:750
+#: server/fm-modules/fmDNS/classes/class_logging.php:651
+#: server/fm-modules/fmDNS/classes/class_servers.php:769
 msgid "Oops!"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_logging.php:631
-#: server/fm-modules/fmDNS/classes/class_servers.php:750
+#: server/fm-modules/fmDNS/classes/class_logging.php:651
+#: server/fm-modules/fmDNS/classes/class_servers.php:769
 msgid "Invalid request."
 msgstr ""
 
@@ -886,61 +1023,56 @@ msgstr ""
 msgid "There are no options."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:44
-#: server/fm-modules/fmDNS/classes/class_options.php:377
-msgid "Zone"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_options.php:46
+#: server/fm-modules/fmDNS/classes/class_options.php:57
 msgid "Option"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:47
-#: server/fm-modules/fmDNS/classes/class_records.php:288
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
+#: server/fm-modules/fmDNS/classes/class_options.php:58
+#: server/fm-modules/fmDNS/classes/class_records.php:308
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "Value"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:78
-#: server/fm-modules/fmDNS/classes/class_options.php:141
+#: server/fm-modules/fmDNS/classes/class_options.php:94
+#: server/fm-modules/fmDNS/classes/class_options.php:159
 msgid "This record already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:93
+#: server/fm-modules/fmDNS/classes/class_options.php:109
 msgid "Empty values are not allowed."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:94
+#: server/fm-modules/fmDNS/classes/class_options.php:110
 #, php-format
 msgid "%s is not an acceptable option name."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:105
-msgid "A database error occurred."
+#: server/fm-modules/fmDNS/classes/class_options.php:122
+msgid "Could not add the option because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:165
+#: server/fm-modules/fmDNS/classes/class_options.php:184
 msgid "Could not update the option because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:191
+#: server/fm-modules/fmDNS/classes/class_options.php:211
 msgid "This option could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:194
+#: server/fm-modules/fmDNS/classes/class_options.php:214
 #, php-format
 msgid "Option '%s' for %s was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:324
+#: server/fm-modules/fmDNS/classes/class_options.php:347
 msgid "Add Option"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:324
+#: server/fm-modules/fmDNS/classes/class_options.php:347
 msgid "Edit Option"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_options.php:417
+#: server/fm-modules/fmDNS/classes/class_options.php:440
 msgid "Option Name"
 msgstr ""
 
@@ -949,478 +1081,509 @@ msgstr ""
 msgid "There are no %s records."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:229
+#: server/fm-modules/fmDNS/classes/class_records.php:237
 msgid "Add more records"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:241
+#: server/fm-modules/fmDNS/classes/class_records.php:249
 msgid "Master"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:242
+#: server/fm-modules/fmDNS/classes/class_records.php:250
 msgid "E-mail"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:243
-#: server/fm-modules/fmDNS/classes/class_records.php:574
+#: server/fm-modules/fmDNS/classes/class_records.php:251
+#: server/fm-modules/fmDNS/classes/class_records.php:620
 msgid "Refresh"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:244
-#: server/fm-modules/fmDNS/classes/class_records.php:575
+#: server/fm-modules/fmDNS/classes/class_records.php:252
+#: server/fm-modules/fmDNS/classes/class_records.php:621
 msgid "Retry"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:245
-#: server/fm-modules/fmDNS/classes/class_records.php:576
+#: server/fm-modules/fmDNS/classes/class_records.php:253
+#: server/fm-modules/fmDNS/classes/class_records.php:622
 msgid "Expire"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:246
-#: server/fm-modules/fmDNS/classes/class_records.php:258
-#: server/fm-modules/fmDNS/classes/class_records.php:577
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
+#: server/fm-modules/fmDNS/classes/class_records.php:254
+#: server/fm-modules/fmDNS/classes/class_records.php:266
+#: server/fm-modules/fmDNS/classes/class_records.php:623
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "TTL"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:253
+#: server/fm-modules/fmDNS/classes/class_records.php:261
 msgid "Map"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:254
-#: server/fm-modules/fmDNS/classes/class_records.php:262
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
-#: server/fm-modules/fmDNS/classes/class_zones.php:70
-msgid "Type"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_records.php:257
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
+#: server/fm-modules/fmDNS/classes/class_records.php:265
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "Record"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:259
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
+#: server/fm-modules/fmDNS/classes/class_records.php:267
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "Class"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:263
+#: server/fm-modules/fmDNS/classes/class_records.php:273
 msgid "Key Tag"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:269
+#: server/fm-modules/fmDNS/classes/class_records.php:285
 msgid "Hardware"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:270
+#: server/fm-modules/fmDNS/classes/class_records.php:286
 msgid "OS"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:274
-#: server/fm-modules/fmDNS/classes/class_records.php:282
+#: server/fm-modules/fmDNS/classes/class_records.php:290
+#: server/fm-modules/fmDNS/classes/class_records.php:298
 msgid "Flags"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:280
+#: server/fm-modules/fmDNS/classes/class_records.php:296
 msgid "Order"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:281
+#: server/fm-modules/fmDNS/classes/class_records.php:297
 msgid "Pref"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:283
+#: server/fm-modules/fmDNS/classes/class_records.php:299
 msgid "Params"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:284
+#: server/fm-modules/fmDNS/classes/class_records.php:300
 msgid "Regex"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:285
+#: server/fm-modules/fmDNS/classes/class_records.php:301
 msgid "Replace"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:291
+#: server/fm-modules/fmDNS/classes/class_records.php:311
 msgid "Text"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:297
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
+#: server/fm-modules/fmDNS/classes/class_records.php:317
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "Priority"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:300
-#: server/fm-modules/fmDNS/classes/class_tools.php:306
+#: server/fm-modules/fmDNS/classes/class_records.php:320
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "Weight"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:308
-#: server/fm-modules/fmDNS/classes/class_records.php:568
-#: server/fm-modules/fmDNS/classes/class_tools.php:307
+#: server/fm-modules/fmDNS/classes/class_records.php:328
+#: server/fm-modules/fmDNS/classes/class_records.php:614
+#: server/fm-modules/fmDNS/classes/class_tools.php:360
 msgid "Append Domain"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:310
+#: server/fm-modules/fmDNS/classes/class_records.php:330
 msgid "Status"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:314
+#: server/fm-modules/fmDNS/classes/class_records.php:334
+#: server/fm-modules/fmDNS/classes/class_tools.php:359
 msgid "Action"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:315
+#: server/fm-modules/fmDNS/classes/class_records.php:335
 msgid "Valid"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:341
+#: server/fm-modules/fmDNS/classes/class_records.php:361
 msgid "Active"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:343
+#: server/fm-modules/fmDNS/classes/class_records.php:363
 msgid "Disabled"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:438
-#: server/fm-modules/fmDNS/classes/class_records.php:543
-#: server/fm-modules/fmDNS/classes/class_records.php:568
-#: server/fm-modules/fmDNS/classes/class_zones.php:728
+#: server/fm-modules/fmDNS/classes/class_records.php:462
+msgid "Linked PTR exists"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_records.php:479
+#: server/fm-modules/fmDNS/classes/class_records.php:589
+#: server/fm-modules/fmDNS/classes/class_records.php:614
+#: server/fm-modules/fmDNS/classes/class_zones.php:810
 msgid "yes"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:438
-#: server/fm-modules/fmDNS/classes/class_records.php:568
+#: server/fm-modules/fmDNS/classes/class_records.php:479
+#: server/fm-modules/fmDNS/classes/class_records.php:614
 msgid "no"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:443
-#: server/fm-modules/fmDNS/classes/class_records.php:445
+#: server/fm-modules/fmDNS/classes/class_records.php:484
+#: server/fm-modules/fmDNS/classes/class_records.php:489
 msgid "Create PTR"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:446
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:105
-msgid "Delete"
+#: server/fm-modules/fmDNS/classes/class_records.php:489
+msgid "Update PTR"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:485
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:110
+#: server/fm-modules/fmDNS/classes/class_records.php:531
+#: server/fm-modules/fmDNS/classes/class_tools.php:514
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:109
 msgid "Skip Import"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:535
+#: server/fm-modules/fmDNS/classes/class_records.php:581
 msgid "Select a Template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:543
-#: server/fm-modules/fmDNS/classes/class_zones.php:728
+#: server/fm-modules/fmDNS/classes/class_records.php:589
+#: server/fm-modules/fmDNS/classes/class_zones.php:810
 msgid "Create Template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:558
+#: server/fm-modules/fmDNS/classes/class_records.php:604
 msgid "Template Name"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:559
-#: server/fm-modules/fmDNS/classes/class_zones.php:757
+#: server/fm-modules/fmDNS/classes/class_records.php:605
+#: server/fm-modules/fmDNS/classes/class_zones.php:839
 msgid "Make Default Template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:572
+#: server/fm-modules/fmDNS/classes/class_records.php:618
 msgid "Master Server"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:573
+#: server/fm-modules/fmDNS/classes/class_records.php:619
 msgid "Email Address"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_records.php:684
+#: server/fm-modules/fmDNS/classes/class_records.php:733
 msgid "Custom"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:37
-msgid "Upgrade"
+#: server/fm-modules/fmDNS/classes/class_records.php:872
+msgid "An error occured retrieving the zone from the database."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:40
-msgid "Build Config"
+#: server/fm-modules/fmDNS/classes/class_records.php:878
+msgid "This zone does not support dynamic updates."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:50
+#: server/fm-modules/fmDNS/classes/class_records.php:885
+#, php-format
+msgid ""
+"An error occured retrieving the associated servers from the database.  Could "
+"not find any active <a href=\"%s\">name servers</a> for this zone."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_records.php:934
+msgid ""
+"The zone could not be retrieved from the DNS servers. Possible causes "
+"include:"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_records.php:936
+msgid "There are no active name servers configured for this zone"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_records.php:937
+msgid "The update ports on the active name servers are not accessible"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_records.php:938
+msgid ""
+"All name servers configured for this zone are not upgraded to at least 3.0-"
+"alpha1"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_records.php:939
+msgid ""
+"All name servers configured for this zone are updated via cron (only SSH and "
+"http/https are supported)"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_servers.php:34
 msgid "There are no servers."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:50
+#: server/fm-modules/fmDNS/classes/class_servers.php:34
 msgid "There are no groups."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:63
-msgid "Hostname"
+#: server/fm-modules/fmDNS/classes/class_servers.php:43
+msgid "Upgrade"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:64
-msgid "Method"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_servers.php:66
-#: server/fm-modules/fmDNS/classes/class_servers.php:705
-msgid "Server Type"
+#: server/fm-modules/fmDNS/classes/class_servers.php:46
+msgid "Build Config"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_servers.php:67
-msgid "Version"
+msgid "Hostname"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_servers.php:68
-msgid "Run-as"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_servers.php:69
-#: server/fm-modules/fmDNS/classes/class_servers.php:708
-msgid "Config File"
+msgid "Method"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_servers.php:70
-#: server/fm-modules/fmDNS/classes/class_servers.php:709
-msgid "Server Root"
+#: server/fm-modules/fmDNS/classes/class_servers.php:724
+msgid "Server Type"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_servers.php:71
-msgid "Zones Directory"
+msgid "Version"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_servers.php:72
+msgid "Run-as"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_servers.php:73
+#: server/fm-modules/fmDNS/classes/class_servers.php:727
+msgid "Config File"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_servers.php:74
-#: server/fm-modules/fmDNS/classes/class_servers.php:747
-msgid "Group Name"
+#: server/fm-modules/fmDNS/classes/class_servers.php:728
+msgid "Server Root"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_servers.php:75
-#: server/fm-modules/fmDNS/classes/class_servers.php:747
+msgid "Zones Directory"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_servers.php:78
+#: server/fm-modules/fmDNS/classes/class_servers.php:766
+msgid "Group Name"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_servers.php:79
+#: server/fm-modules/fmDNS/classes/class_servers.php:766
 msgid "Master Servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:76
-#: server/fm-modules/fmDNS/classes/class_servers.php:747
+#: server/fm-modules/fmDNS/classes/class_servers.php:80
+#: server/fm-modules/fmDNS/classes/class_servers.php:766
 msgid "Slave Servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:100
-#: server/fm-modules/fmDNS/classes/class_servers.php:155
-#: server/fm-modules/fmDNS/classes/class_servers.php:261
+#: server/fm-modules/fmDNS/classes/class_servers.php:107
+#: server/fm-modules/fmDNS/classes/class_servers.php:164
+#: server/fm-modules/fmDNS/classes/class_servers.php:274
 msgid "No server name defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:104
-#: server/fm-modules/fmDNS/classes/class_servers.php:273
+#: server/fm-modules/fmDNS/classes/class_servers.php:111
+#: server/fm-modules/fmDNS/classes/class_servers.php:286
 #, php-format
 msgid "Server name is too long (maximum %d character)."
 msgid_plural "Server name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:108
-#: server/fm-modules/fmDNS/classes/class_servers.php:277
+#: server/fm-modules/fmDNS/classes/class_servers.php:115
+#: server/fm-modules/fmDNS/classes/class_servers.php:290
 msgid "This server name already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:130
-#: server/fm-modules/fmDNS/classes/class_servers.php:286
+#: server/fm-modules/fmDNS/classes/class_servers.php:137
+#: server/fm-modules/fmDNS/classes/class_servers.php:299
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:167
+#: server/fm-modules/fmDNS/classes/class_servers.php:177
 msgid "Could not add the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:184
-#: server/fm-modules/fmDNS/classes/class_servers.php:234
-#: server/fm-modules/fmDNS/classes/class_servers.php:337
+#: server/fm-modules/fmDNS/classes/class_servers.php:195
+#: server/fm-modules/fmDNS/classes/class_servers.php:245
+#: server/fm-modules/fmDNS/classes/class_servers.php:354
 msgid "No group name defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:188
-#: server/fm-modules/fmDNS/classes/class_servers.php:341
+#: server/fm-modules/fmDNS/classes/class_servers.php:199
+#: server/fm-modules/fmDNS/classes/class_servers.php:358
 #, php-format
 msgid "Group name is too long (maximum %d character)."
 msgid_plural "Group name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:192
-#: server/fm-modules/fmDNS/classes/class_servers.php:345
+#: server/fm-modules/fmDNS/classes/class_servers.php:203
+#: server/fm-modules/fmDNS/classes/class_servers.php:362
 msgid "This group name already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:246
-msgid "Could not add the group because a database error occurred."
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_servers.php:249
+#: server/fm-modules/fmDNS/classes/class_servers.php:262
 msgid "Added server group"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:250
-#: server/fm-modules/fmDNS/classes/class_servers.php:400
+#: server/fm-modules/fmDNS/classes/class_servers.php:263
+#: server/fm-modules/fmDNS/classes/class_servers.php:419
 msgid "Masters"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:251
-#: server/fm-modules/fmDNS/classes/class_servers.php:401
+#: server/fm-modules/fmDNS/classes/class_servers.php:264
+#: server/fm-modules/fmDNS/classes/class_servers.php:420
 msgid "Slaves"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:315
+#: server/fm-modules/fmDNS/classes/class_servers.php:331
 msgid "Could not update the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:394
-msgid "Could not update the group because a database error occurred."
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_servers.php:399
+#: server/fm-modules/fmDNS/classes/class_servers.php:418
 #, php-format
 msgid "Updated server group '%s' to"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:423
+#: server/fm-modules/fmDNS/classes/class_servers.php:442
 #, php-format
 msgid ""
 "The server could not be removed from the %s table because a database error "
 "occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:429
+#: server/fm-modules/fmDNS/classes/class_servers.php:448
 #, php-format
 msgid "Server '%s' (%s) was deleted"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:434
+#: server/fm-modules/fmDNS/classes/class_servers.php:453
 msgid "This server could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:445
+#: server/fm-modules/fmDNS/classes/class_servers.php:464
 #, php-format
 msgid "Server group '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:450
+#: server/fm-modules/fmDNS/classes/class_servers.php:469
 msgid "This server group could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:453
+#: server/fm-modules/fmDNS/classes/class_servers.php:472
 msgid "There is something wrong with your request."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:495
+#: server/fm-modules/fmDNS/classes/class_servers.php:514
 msgid "Client Upgrade Available"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:499
+#: server/fm-modules/fmDNS/classes/class_servers.php:518
 msgid "Client Install Required"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:552
+#: server/fm-modules/fmDNS/classes/class_servers.php:571
 msgid "missing"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:554
-#: server/fm-modules/fmDNS/classes/class_servers.php:561
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:135
+#: server/fm-modules/fmDNS/classes/class_servers.php:573
+#: server/fm-modules/fmDNS/classes/class_servers.php:580
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:134
 msgid "None"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:603
+#: server/fm-modules/fmDNS/classes/class_servers.php:622
 msgid "Add Server"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:603
+#: server/fm-modules/fmDNS/classes/class_servers.php:622
 msgid "Add Group"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:605
+#: server/fm-modules/fmDNS/classes/class_servers.php:624
 msgid "Edit Server"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:605
+#: server/fm-modules/fmDNS/classes/class_servers.php:624
 msgid "Edit Group"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:652
+#: server/fm-modules/fmDNS/classes/class_servers.php:671
 msgid "Note:"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:652
+#: server/fm-modules/fmDNS/classes/class_servers.php:671
 msgid "The client installer can automatically generate this entry."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:703
+#: server/fm-modules/fmDNS/classes/class_servers.php:722
 msgid "Server Name"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:706
+#: server/fm-modules/fmDNS/classes/class_servers.php:725
 msgid "Run-as Account"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:706
+#: server/fm-modules/fmDNS/classes/class_servers.php:725
 msgid "Other run-as account"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:707
+#: server/fm-modules/fmDNS/classes/class_servers.php:726
 msgid "Update Method"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:710
+#: server/fm-modules/fmDNS/classes/class_servers.php:729
 msgid "Server Chroot"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:711
+#: server/fm-modules/fmDNS/classes/class_servers.php:730
 msgid "Zone File Directory"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:719
+#: server/fm-modules/fmDNS/classes/class_servers.php:738
 msgid "Select master servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:720
+#: server/fm-modules/fmDNS/classes/class_servers.php:739
 msgid "Select slave servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:790
+#: server/fm-modules/fmDNS/classes/class_servers.php:809
 msgid "This server is not found."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:797
+#: server/fm-modules/fmDNS/classes/class_servers.php:816
 msgid "Failed: Client is not installed."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:801
+#: server/fm-modules/fmDNS/classes/class_servers.php:820
 #, php-format
 msgid "Failed: Server is %s."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:866
+#: server/fm-modules/fmDNS/classes/class_servers.php:885
 msgid ""
 "The associated zones for this server or group could not be updated because a "
 "database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:950
+#: server/fm-modules/fmDNS/classes/class_servers.php:969
 msgid ""
 "The associated server configs could not be deleted because a database error "
 "occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:955
+#: server/fm-modules/fmDNS/classes/class_servers.php:974
 msgid ""
 "The associated views could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:960
+#: server/fm-modules/fmDNS/classes/class_servers.php:979
 msgid ""
 "The associated ACLs could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_servers.php:965
+#: server/fm-modules/fmDNS/classes/class_servers.php:984
 msgid ""
 "The associated controls could not be deleted because a database error "
 "occurred."
@@ -1430,119 +1593,136 @@ msgstr ""
 msgid "There are no templates."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_templates.php:90
-#: server/fm-modules/fmDNS/classes/class_zones.php:545
-#: server/fm-modules/fmDNS/classes/class_zones.php:583
+#: server/fm-modules/fmDNS/classes/class_templates.php:96
+#: server/fm-modules/fmDNS/classes/class_zones.php:592
+#: server/fm-modules/fmDNS/classes/class_zones.php:635
 msgid "Edit zone records"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_templates.php:95
+#: server/fm-modules/fmDNS/classes/class_templates.php:102
 msgid "Super Admin"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_templates.php:95
+#: server/fm-modules/fmDNS/classes/class_templates.php:102
 msgid "Default Template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_templates.php:144
+#: server/fm-modules/fmDNS/classes/class_templates.php:153
 msgid "Add Template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_templates.php:144
+#: server/fm-modules/fmDNS/classes/class_templates.php:153
 msgid "Edit Template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_templates.php:181
+#: server/fm-modules/fmDNS/classes/class_templates.php:190
 msgid "This template could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_tools.php:46
+#: server/fm-modules/fmDNS/classes/class_tools.php:58
 msgid "Unsupported Entries"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_tools.php:47
+#: server/fm-modules/fmDNS/classes/class_tools.php:59
 #, php-format
 msgid ""
 "%s currently does not support importing $GENERATE and $ORIGIN entries which "
 "were found in your zone file."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_tools.php:312
+#: server/fm-modules/fmDNS/classes/class_tools.php:102
+msgid "Updated serial number"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_tools.php:150
+#: server/fm-modules/fmDNS/classes/class_tools.php:485
+msgid "Add"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_tools.php:365
 msgid "Import Verification"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_tools.php:313
+#: server/fm-modules/fmDNS/classes/class_tools.php:366
 msgid "Import"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_tools.php:396
+#: server/fm-modules/fmDNS/classes/class_tools.php:388
+msgid "There are no records found."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_tools.php:453
 msgid "DNS:"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_tools.php:398
-msgid "success"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_tools.php:399
-#: server/fm-modules/fmDNS/js/module.php:48
-#: server/fm-modules/fmDNS/js/module.php:81
-msgid "failed"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_tools.php:408
+#: server/fm-modules/fmDNS/classes/class_tools.php:465
 #, php-format
 msgid "You do not have permission to access this %s."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_tools.php:536
+msgid "Bulk zone import complete."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_tools.php:559
+#, php-format
+msgid "Import failed to create the %s view. %s"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_tools.php:582
+#, php-format
+msgid "Import failed to create the %s zone. %s"
 msgstr ""
 
 #: server/fm-modules/fmDNS/classes/class_views.php:32
 msgid "There are no views."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:43
-#: server/fm-modules/fmDNS/classes/class_views.php:243
+#: server/fm-modules/fmDNS/classes/class_views.php:46
+#: server/fm-modules/fmDNS/classes/class_views.php:253
 msgid "View Name"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:66
-#: server/fm-modules/fmDNS/classes/class_views.php:92
+#: server/fm-modules/fmDNS/classes/class_views.php:72
+#: server/fm-modules/fmDNS/classes/class_views.php:100
 msgid "No view name defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:75
-#: server/fm-modules/fmDNS/classes/class_views.php:103
+#: server/fm-modules/fmDNS/classes/class_views.php:81
+#: server/fm-modules/fmDNS/classes/class_views.php:111
 msgid "This view already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:80
+#: server/fm-modules/fmDNS/classes/class_views.php:87
 msgid "Could not add the view because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:97
+#: server/fm-modules/fmDNS/classes/class_views.php:105
 #, php-format
 msgid "View name is too long (maximum %s characters)."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:122
+#: server/fm-modules/fmDNS/classes/class_views.php:131
 msgid "Could not update the view because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:141
+#: server/fm-modules/fmDNS/classes/class_views.php:151
 msgid "There are zones associated with this view."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:149
+#: server/fm-modules/fmDNS/classes/class_views.php:159
 msgid "The corresponding configs could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:156
+#: server/fm-modules/fmDNS/classes/class_views.php:166
 msgid "This view could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:219
+#: server/fm-modules/fmDNS/classes/class_views.php:229
 msgid "Add View"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_views.php:219
+#: server/fm-modules/fmDNS/classes/class_views.php:229
 msgid "Edit View"
 msgstr ""
 
@@ -1562,396 +1742,430 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:114
+#: server/fm-modules/fmDNS/classes/class_zones.php:123
 msgid "Added a zone with the following details:"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:158
+#: server/fm-modules/fmDNS/classes/class_zones.php:149
+#: server/fm-modules/fmDNS/classes/class_zones.php:1648
+msgid "All Servers"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:167
 msgid "Cannot find cloned zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:234
-#: server/fm-modules/fmDNS/classes/class_zones.php:256
-msgid "Could not add zone because a database error occurred."
+#: server/fm-modules/fmDNS/classes/class_zones.php:244
+#: server/fm-modules/fmDNS/classes/class_zones.php:268
+msgid "Could not add the zone because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:294
+#: server/fm-modules/fmDNS/classes/class_zones.php:311
 msgid "There are associated records with this zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:351
+#: server/fm-modules/fmDNS/classes/class_zones.php:371
 msgid "Could not update the zone because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:362
+#: server/fm-modules/fmDNS/classes/class_zones.php:384
 msgid "Could not update the child zones because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:401
+#: server/fm-modules/fmDNS/classes/class_zones.php:425
 msgid "Could not update zone because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:435
+#: server/fm-modules/fmDNS/classes/class_zones.php:465
 msgid ""
 "The associated configs for this zone could not be deleted because a database "
 "error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:444
-#: server/fm-modules/fmDNS/classes/class_zones.php:451
+#: server/fm-modules/fmDNS/classes/class_zones.php:474
+#: server/fm-modules/fmDNS/classes/class_zones.php:481
 msgid ""
 "The associated records for this zone could not be deleted because a database "
 "error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:461
+#: server/fm-modules/fmDNS/classes/class_zones.php:491
 msgid ""
 "The SOA for this zone could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:469
+#: server/fm-modules/fmDNS/classes/class_zones.php:499
 #, php-format
 msgid ""
 "The zone could not be removed from the %s table because a database error "
 "occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:486
+#: server/fm-modules/fmDNS/classes/class_zones.php:516
 msgid ""
 "The associated records for the cloned zones could not be deleted because a "
 "database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:493
+#: server/fm-modules/fmDNS/classes/class_zones.php:523
 msgid ""
 "The associated clones for this zone could not be deleted because a database "
 "error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:500
+#: server/fm-modules/fmDNS/classes/class_zones.php:530
 msgid "This zone could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:508
+#: server/fm-modules/fmDNS/classes/class_zones.php:538
 msgid "This zone does not exist."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:528
+#: server/fm-modules/fmDNS/classes/class_zones.php:558
 #: server/fm-modules/fmDNS/pages/zone-records.php:77
 msgid "The SOA record still needs to be created for this zone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:532
-#: server/fm-modules/fmDNS/pages/zone-records.php:74
-msgid "One more more NS records still needs to be created for this zone"
+#: server/fm-modules/fmDNS/classes/class_zones.php:562
+msgid "One or more NS records still needs to be created for this zone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:539
+#: server/fm-modules/fmDNS/classes/class_zones.php:574
+#, php-format
+msgid "The DNSSEC signature expires on %s."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:586
 msgid "Clone this zone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:547
+#: server/fm-modules/fmDNS/classes/class_zones.php:594
 msgid "clone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:550
+#: server/fm-modules/fmDNS/classes/class_zones.php:597
 msgid "Differences from parent zone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:563
+#: server/fm-modules/fmDNS/classes/class_zones.php:610
 msgid "Reload Available"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:595
+#: server/fm-modules/fmDNS/classes/class_zones.php:654
+msgid "Zone is configured but not secured with DNSSEC"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:655
+msgid "There are no DNSSEC keys defined for this zone."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:660
+#: server/fm-modules/fmDNS/classes/class_zones.php:1051
+msgid "Zone supports dynamic updates"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:663
 #, php-format
 msgid "Based on %s"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:717
-msgid "Configure Additional Options"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_zones.php:719
+#: server/fm-modules/fmDNS/classes/class_zones.php:801
 msgid "Add Zone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:719
+#: server/fm-modules/fmDNS/classes/class_zones.php:801
 msgid "Edit Zone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:740
+#: server/fm-modules/fmDNS/classes/class_zones.php:822
 msgid "Template"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:743
+#: server/fm-modules/fmDNS/classes/class_zones.php:825
 msgid "Changing the template will delete all config options for this zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:812
+#: server/fm-modules/fmDNS/classes/class_zones.php:845
+msgid "Support Dynamic Updates"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:845
+#: server/fm-modules/fmDNS/classes/class_zones.php:882
+msgid "yes (experimental)"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:882
+msgid "Enable DNSSEC"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:883
+#, php-format
+msgid ""
+"The dnssec-signzone and dnssec-keygen utilities must be installed on %s in "
+"order for this to work."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:884
+msgid "Signature Expiry Override (optional)"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:884
+msgid "Days"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:885
+#, php-format
+msgid ""
+"Enter the number of days to expire the signature if different from what is "
+"defined in the %s."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:886
+msgid "Generate DS RR during signing"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:887
+msgid "Include DS RR in selected parent zone"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:944
 msgid "Domain Name"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:815
+#: server/fm-modules/fmDNS/classes/class_zones.php:947
 msgid "Zone Map"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:816
+#: server/fm-modules/fmDNS/classes/class_zones.php:948
 msgid "Zone Type"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:817
+#: server/fm-modules/fmDNS/classes/class_zones.php:949
 msgid "Define forwarders"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:818
+#: server/fm-modules/fmDNS/classes/class_zones.php:950
 msgid "Define masters"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:819
+#: server/fm-modules/fmDNS/classes/class_zones.php:951
 msgid "Clone Of (optional)"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:820
+#: server/fm-modules/fmDNS/classes/class_zones.php:952
 msgid "Override DNAME Resource Record Setting"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:821
+#: server/fm-modules/fmDNS/classes/class_zones.php:954
 msgid "DNS Servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:980
+#: server/fm-modules/fmDNS/classes/class_zones.php:1122
 msgid "Failed: There was no SOA record found for this zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:988
+#: server/fm-modules/fmDNS/classes/class_zones.php:1130
 msgid "There are no DNS servers hosting this zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1005
+#: server/fm-modules/fmDNS/classes/class_zones.php:1145
 msgid "This zone will be updated on the next cron run."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1011
-#: server/fm-modules/fmDNS/classes/class_zones.php:1049
+#: server/fm-modules/fmDNS/classes/class_zones.php:1151
 #, php-format
 msgid "Failed: could not access %s (tcp/%d)."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1057
-#, php-format
-msgid "Failed: SSH key is not <a href=\"%s\">defined</a>."
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_zones.php:1057
-#: server/fm-modules/fmDNS/classes/class_zones.php:1070
-msgid "Settings"
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_zones.php:1063
-#, php-format
-msgid "Failed: could not load SSH key into %s."
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_zones.php:1070
-#, php-format
-msgid "Failed: SSH user is not <a href=\"%s\">defined</a>."
-msgstr ""
-
-#: server/fm-modules/fmDNS/classes/class_zones.php:1082
+#: server/fm-modules/fmDNS/classes/class_zones.php:1190
 msgid "Zone reload was successful."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1110
+#: server/fm-modules/fmDNS/classes/class_zones.php:1213
 #, php-format
 msgid "Reloaded zone '%s'."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1333
+#: server/fm-modules/fmDNS/classes/class_zones.php:1287
+#: server/fm-modules/fmDNS/classes/class_zones.php:1697
+msgid "All Zones"
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:1449
 #, php-format
 msgid "%s is not a valid zone ID."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1342
+#: server/fm-modules/fmDNS/classes/class_zones.php:1458
 msgid "Failed: Zone is not available for reload."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1347
+#: server/fm-modules/fmDNS/classes/class_zones.php:1463
 msgid "Failed: Zone is not a master zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1354
+#: server/fm-modules/fmDNS/classes/class_zones.php:1470
 msgid "Failed: You do not have permission to reload this zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1376
+#: server/fm-modules/fmDNS/classes/class_zones.php:1492
 msgid "No zone name defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1391
+#: server/fm-modules/fmDNS/classes/class_zones.php:1507
 msgid "Invalid zone name."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1436
+#: server/fm-modules/fmDNS/classes/class_zones.php:1520
+msgid "DNSSEC signature expiry must be a valid number of days."
+msgstr ""
+
+#: server/fm-modules/fmDNS/classes/class_zones.php:1572
 msgid "Zone already exists."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1446
+#: server/fm-modules/fmDNS/classes/class_zones.php:1582
 msgid "Zone already exists for all views."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1461
+#: server/fm-modules/fmDNS/classes/class_zones.php:1597
 #, php-format
 msgid "Zone already exists for the '%s' view."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1470
+#: server/fm-modules/fmDNS/classes/class_zones.php:1606
 #, php-format
 msgid "Zone name is too long (maximum %d character)."
 msgid_plural "Zone name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1486
+#: server/fm-modules/fmDNS/classes/class_zones.php:1627
 msgid "No master servers defined."
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1510
+#: server/fm-modules/fmDNS/classes/class_zones.php:1651
 msgid "inherited"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1581
+#: server/fm-modules/fmDNS/classes/class_zones.php:1726
 msgid "Filter Views"
 msgstr ""
 
-#: server/fm-modules/fmDNS/classes/class_zones.php:1582
-msgid "Filter"
-msgstr ""
-
-#: server/fm-modules/fmDNS/extra/capabilities.inc.php:24
-msgid "View All"
-msgstr ""
-
-#: server/fm-modules/fmDNS/extra/capabilities.inc.php:25
-msgid "Server Management"
-msgstr ""
-
-#: server/fm-modules/fmDNS/extra/capabilities.inc.php:26
-msgid "Build Server Configs"
-msgstr ""
-
-#: server/fm-modules/fmDNS/extra/capabilities.inc.php:27
-msgid "Zone Management"
-msgstr ""
-
-#: server/fm-modules/fmDNS/extra/capabilities.inc.php:28
-msgid "Record Management"
-msgstr ""
-
-#: server/fm-modules/fmDNS/extra/capabilities.inc.php:29
-msgid "Reload Zones"
-msgstr ""
-
-#: server/fm-modules/fmDNS/extra/capabilities.inc.php:30
-msgid "Manage Settings"
-msgstr ""
-
-#: server/fm-modules/fmDNS/js/module.php:33
-#: server/fm-modules/fmDNS/js/module.php:66
+#: server/fm-modules/fmDNS/js/module.php:48
+#: server/fm-modules/fmDNS/js/module.php:85
 msgid "Processing Reload"
 msgstr ""
 
-#: server/fm-modules/fmDNS/js/module.php:48
-#: server/fm-modules/fmDNS/js/module.php:81
+#: server/fm-modules/fmDNS/js/module.php:67
+#: server/fm-modules/fmDNS/js/module.php:104
 msgid "you are not authorized"
 msgstr ""
 
-#: server/fm-modules/fmDNS/js/module.php:182
+#: server/fm-modules/fmDNS/js/module.php:209
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: server/fm-modules/fmDNS/js/module.php:189
-msgid "Success"
+#: server/fm-modules/fmDNS/js/module.php:435
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:38
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:67
+msgid "Import Zones"
 msgstr ""
 
+#: server/fm-modules/fmDNS/js/module.php:437
 #: server/fm-modules/fmDNS/pages/admin-tools.inc.php:37
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:64
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:41
 msgid "Import Records"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:46
+#: server/fm-modules/fmDNS/js/module.php:485
+msgid "Pulling the latest zone data from the server"
+msgstr ""
+
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:47
 msgid "Save"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:67
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:70
 msgid "You need to define one or more zones first."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:85
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:91
 msgid "Import Zone Files"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:85
-msgid "Import records from BIND-compatible zone files."
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:91
+msgid ""
+"Import records from a BIND-compatible zone file into a single zone or import "
+"all views, zones, and records from a BIND-compatible zone dump file."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:86
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:92
 msgid "File to import"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:86
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:92
 msgid "Zone to import to"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:86
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:92
 msgid "Add New"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:86
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:92
 msgid "Add New Zone"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:91
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:97
 msgid "Dump Cache"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:91
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:97
 msgid "Clear Cache"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:94
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:100
 msgid "Select one or more servers"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:102
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:108
 msgid "Cache Management"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:102
+#: server/fm-modules/fmDNS/pages/admin-tools.inc.php:108
 msgid "Dump or clear server cache."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/config-servers.php:32
+#: server/fm-modules/fmDNS/pages/config-controls.php:33
+msgid "Statistics Channels"
+msgstr ""
+
+#: server/fm-modules/fmDNS/pages/config-servers.php:31
 msgid "Name Server Groups"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/config-servers.php:65
+#: server/fm-modules/fmDNS/pages/config-servers.php:64
 #, php-format
 msgid "This server could not be set to %s."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/config-servers.php:72
+#: server/fm-modules/fmDNS/pages/config-servers.php:71
 #, php-format
 msgid "Set server (%s) status to %s."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/config-servers.php:77
+#: server/fm-modules/fmDNS/pages/config-servers.php:76
 #, php-format
 msgid "This server group could not be set to %s."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/config-servers.php:80
+#: server/fm-modules/fmDNS/pages/config-servers.php:79
 #, php-format
 msgid "Set server group (%s) status to %s."
+msgstr ""
+
+#: server/fm-modules/fmDNS/pages/zone-records.php:74
+msgid "One more more NS records still needs to be created for this zone"
 msgstr ""
 
 #: server/fm-modules/fmDNS/pages/zone-records.php:106
@@ -1963,69 +2177,71 @@ msgstr ""
 msgid "Add Record"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:87
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:86
 msgid "Back"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:87
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:86
 msgid "Submit"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:113
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:112
 msgid "Include"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:151
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:150
 msgid "empty"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:192
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:198
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:284
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:191
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:197
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:203
 #: server/fm-modules/fmDNS/pages/zone-records-validate.php:289
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:294
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:298
 msgid "Invalid"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:205
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:210
 msgid "Invalid IP"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:224
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:228
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:229
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:233
 msgid "Invalid record"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:240
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:245
 msgid "Invalid value"
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:493
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:434
 msgid "Reverse zone does not exist."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:522
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:463
 msgid "Created reverse zone."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-validate.php:525
+#: server/fm-modules/fmDNS/pages/zone-records-validate.php:466
 msgid "Forward domain not found."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zone-records-write.php:88
+#: server/fm-modules/fmDNS/pages/zone-records-write.php:108
 #, php-format
 msgid "Imported %d record from '%s' into %s."
 msgid_plural "Imported %d records from '%s' into %s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDNS/pages/zones.php:92
+#: server/fm-modules/fmDNS/pages/zones.php:90
 #, php-format
 msgid ""
 "Zone file export failed to write to temp file: %s. Please correct and try "
 "again."
 msgstr ""
 
-#: server/fm-modules/fmDNS/pages/zones.php:130
+#: server/fm-modules/fmDNS/pages/zones.php:128
 #, php-format
 msgid ""
 "You currently have no name servers hosting zones. <a href=\"%s\">Click here</"
