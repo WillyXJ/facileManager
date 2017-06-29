@@ -322,7 +322,7 @@ function getTopHeader($help) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
-	$module_toolbar = $fm_new_version_available = $account_menu = $user_account_menu = $module_menu = null;
+	$module_toolbar = $fm_new_version_available = $account_menu = $user_account_menu = $module_menu = $module_version_info = null;
 	
 	if ($help != 'help-file') {
 		$auth_method = getOption('auth_method');
@@ -412,12 +412,19 @@ HTML;
 
 		$branding_logo = getBrandLogo();
 		
+		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
+			$module_version_info = sprintf('<br />%s v%s', $_SESSION['module'], $__FM_CONFIG[$_SESSION['module']]['version']);
+			$fm_version_info = "$fm_name v$fm_version";
+		} else {
+			$fm_version_info = sprintf('<span class="single_line">%s v%s</span>', $fm_name, $fm_version);
+		}
+		
 		$return = <<<HTML
 	<div id="tophead">
 		<div id="topheadpart">
 			<img src="$branding_logo" alt="$fm_name" title="$fm_name" />
-			$fm_name<br />
-			v$fm_version
+			$fm_version_info
+			$module_version_info
 		</div>
 $account_menu
 $module_toolbar_left
