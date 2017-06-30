@@ -152,11 +152,15 @@ $data['SERIALNO'] = SERIALNO;
 $data['compress'] = $compress;
 
 /** Check if the port is alive first */
-$port = ($proto == 'https') ? 443 : 80;
 $server_path = getServerPath(FMHOST);
-if (!socketTest($server_path['hostname'], $port, 20)) {
+if (!$server_path['port']) {
+	$port = ($proto == 'https') ? 443 : 80;
+} else {
+	$port = $server_path['port'];
+}
+if (!socketTest($server_path['hostname'], $port)) {
 	if ($proto == 'https') {
-		if (socketTest($server_path['hostname'], 80, 20)) {
+		if (socketTest($server_path['hostname'], 80)) {
 			$proto = 'http';
 		} else {
 			echo fM($server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n");
@@ -259,13 +263,15 @@ function installFM($proto, $compress) {
 
 	/** Run tests */
 	echo fM("  --> Testing $hostname via https...");
-	if (socketTest($hostname, 443)) {
+	if (!$port) $port = 443;
+	if (socketTest($hostname, $port)) {
 		echo "ok\n";
 		$proto = 'https';
 	} else {
 		echo "failed\n";
 		echo fM("  --> Testing $hostname via http...");
-		if (socketTest($hostname, 80)) {
+		if ($port == 443) $port = 80;
+		if (socketTest($hostname, $port)) {
 			echo "ok\n";
 			$proto = 'http';
 		} else {
@@ -485,8 +491,6 @@ function getPostData($url, $data) {
  * @package facileManager
  */
 function getServerPath($server) {
-	if (!strpos($server, '/')) return array('hostname'=>$server, 'path'=>null);
-	
 	$server = str_replace('http://', '', $server);
 	$server = str_replace('https://', '', $server);
 	$server_array = explode('/', $server);
@@ -496,6 +500,11 @@ function getServerPath($server) {
 	
 	for ($i=1; $i<count($server_array); $i++) {
 		if ($server_array[$i]) $return['path'] .= $server_array[$i] . '/';
+	}
+	
+	$return['port'] = null;
+	if (strpos($return['hostname'], ':')) {
+		list($return['hostname'], $return['port']) = explode(':', $return['hostname']);
 	}
 	
 	return $return;
