@@ -1,3 +1,7 @@
+3.0.1 (2017-07-06)
+==================
+* Server - [improvement] Updated German translation.
+
 3.0 (2017-06-22)
 ================
 * Client - [bug] Fixed OS distro reporting for RHEL when using lsb tools. (Issue #379)
