@@ -1,5 +1,7 @@
 3.0.1 (2017-07-06)
 ==================
+* Server - [improvement] Added module name and version to header.
+* Client - [bug] Fixed the support for non-standard ports. (Issue #382)
 * Server - [improvement] Updated German translation.
 
 3.0 (2017-06-22)
