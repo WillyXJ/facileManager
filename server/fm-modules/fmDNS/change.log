@@ -1,6 +1,7 @@
-3.0.1 (2017-0?-??)
+3.0.1 (2017-07-06)
 ==================
 * Server - [bug] Fixed the auto-split of long TXT records to include a space.
+* Server - [improvement] Updated German translation.
 
 3.0 (2017-06-22)
 ================
