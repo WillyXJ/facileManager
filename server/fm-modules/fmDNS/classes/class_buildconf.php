@@ -1142,7 +1142,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						break;
 					case 'TXT':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . "\t(\"" . join(" \"\n\t\t\"", $this->characterSplit($record_result[$i]->record_value)) . "\")" . $record_comment . "\n";
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . "\t(\"" . join("\"\n\t\t\"", $this->characterSplit($record_result[$i]->record_value)) . "\")" . $record_comment . "\n";
 						break;
 				}
 			}
@@ -1752,7 +1752,14 @@ HTML;
 	 * @return array
 	 */
 	function characterSplit($text, $limit = 255) {
-		return explode("\n", wordwrap($text, $limit, "\n", true));
+		$temp = explode("\n", wordwrap($text, $limit, "\n", true));
+		for ($i=0; $i<count($temp)-1; $i++) {
+			if (strlen($temp[$i]) < $limit) {
+				$temp[$i] .= ' ';
+			}
+		}
+		
+		return $temp;
 	}
 	
 	/**

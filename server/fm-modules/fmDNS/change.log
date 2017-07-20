@@ -1,3 +1,8 @@
+3.0.2 (2017-07-??)
+==================
+* Server - [bug] Fixed the auto-split of long TXT records adding a space only
+           when necessary. (Issue #171)
+
 3.0.1 (2017-07-06)
 ==================
 * Server - [bug] Fixed the auto-split of long TXT records to include a space.
