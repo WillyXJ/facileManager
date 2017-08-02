@@ -1,3 +1,7 @@
+1.4.2 (2017-??-??)
+==================
+* Client - [bug] Fixed firewall type detection during installation. (Issue #383)
+
 1.4.1 (2017-07-06)
 ==================
 * Server - [improvement] Updated German translation.
