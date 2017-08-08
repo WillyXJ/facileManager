@@ -1,4 +1,4 @@
-3.0.3 (2017-??-??)
+3.0.3 (2017-08-07)
 ==================
 * Server - [bug] Fixed key name definitions when associated with a view. (Issue #385)
 
