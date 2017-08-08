@@ -125,7 +125,7 @@ function buildConf($url, $data) {
 }
 
 
-function detectFirewallType() {
+function detectServerType() {
 	$supported_firewalls = array('iptables'=>'iptables',
 								'ipfw' => 'ipfw',
 								'ipfilter' => 'ipf',
@@ -141,7 +141,7 @@ function detectFirewallType() {
 
 
 function detectFWVersion($return_array = false) {
-	$fw = detectFirewallType();
+	$fw = detectServerType();
 	$fw_flags = array('iptables' => '-V | awk -Fv "{print \$NF}"',
 						'pf' => null,
 						'ipfw' => null,

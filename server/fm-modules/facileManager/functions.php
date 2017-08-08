@@ -698,8 +698,8 @@ function basicGetList($table, $id = 'id', $prefix = '', $sql = null, $limit = nu
 	
 	if (is_array($id)) {
 		$primary_field = sanitize($id[0]);
-		$secondary_fields = implode(',', $id);
-		$secondary_fields = ' ' . $direction . sanitize(substr($secondary_fields, strlen($primary_field)));
+		$secondary_fields = implode(" $direction,", $id);
+		$secondary_fields = ' ' . sanitize(substr($secondary_fields, strlen($primary_field)));
 	} else {
 		$primary_field = sanitize($id);
 		$secondary_fields = null;

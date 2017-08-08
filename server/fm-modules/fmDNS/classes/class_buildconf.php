@@ -461,7 +461,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$key_config = '// This file was built using ' . $_SESSION['module'] . ' ' . $fm_version . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 						$key_count = $fmdb->num_rows;
 						for ($k=0; $k < $key_count; $k++) {
-							$key_name = trimFullStop($key_result[$k]->key_name) . '.';
+							$key_name = trimFullStop($key_result[$k]->key_name);
 							if ($key_result[$k]->key_comment) {
 								$comment = wordwrap($key_result[$k]->key_comment, 50, "\n");
 								$key_config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
