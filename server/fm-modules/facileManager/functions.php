@@ -1011,8 +1011,18 @@ function getPostData($url, $data = null, $post = 'post', $options = array()) {
 		CURLOPT_FAILONERROR => true,
 		CURLOPT_URL => $url
 	);
+	
+	$proxy = array();
+	if (getOption('proxy_enable')) {
+		$proxyauth = getOption('proxy_user') . ':' . getOption('proxy_pass');
+		if ($proxyauth == ':') $proxyauth = null;
+		$proxy = array(
+			CURLOPT_PROXY => getOption('proxy_host') . ':' . getOption('proxy_port'),
+			CURLOPT_PROXYUSERPWD => $proxyauth
+		);
+	}
 	$ch = curl_init();
-	curl_setopt_array($ch, ($options + $defaults));
+	curl_setopt_array($ch, ($options + $proxy + $defaults));
 	$result = curl_exec($ch);
 	curl_close($ch);
 	return $result;

@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed LDAP authentication with group memberships. (Issue #392)
 * Server - [bug] Fixed PHP error. (Issue #386)
+* Server - [feature] Added support for using a proxy server. (Issue #388)
 
 3.0.2 (2017-08-07)
 ==================

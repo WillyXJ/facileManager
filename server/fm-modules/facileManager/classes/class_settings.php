@@ -265,6 +265,18 @@ class fm_settings {
 		
 		$mail_from = getOption('mail_from');
 		
+		/** Proxy Server Section */
+		$proxy_enable = getOption('proxy_enable');
+		if ($proxy_enable) {
+			 $proxy_enable_checked = 'checked';
+			 $fm_proxy_options_style = 'style="display: block;"';
+		} else $proxy_enable_checked = $fm_proxy_options_style = null;
+		
+		$proxy_host = getOption('proxy_host');
+		$proxy_port = getOption('proxy_port');
+		$proxy_user = getOption('proxy_user');
+		$proxy_pass = getOption('proxy_pass');
+		
 		/** Timestamp formatting */
 		$timezone = getOption('timezone', $_SESSION['user']['account_id']);
 		$timezone_list = $this->buildTimezoneList($timezone);
@@ -551,6 +563,55 @@ class fm_settings {
 							</div>
 							<div class="choices">
 								<input name="mail_from" id="mail_from" type="email" value="' . $mail_from . '" size="40" placeholder="noreply@mydomain.com" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="proxy_enable">' . _('Enable Proxy Server') . '</label>
+							<p>' . _('Check this if a proxy server is required to access the Internet.') . '</p>
+						</div>
+						<div class="choices">
+							<input name="proxy_enable" id="proxy_enable" type="checkbox" value="1" ' . $proxy_enable_checked . ' /><label for="proxy_enable">' . _('Enable Proxy Server') . '</label>
+						</div>
+					</div>
+					<div id="fm_proxy_options" ' . $fm_proxy_options_style . '>
+						<div id="setting-row">
+							<div class="description">
+								<label for="proxy_host">' . _('Proxy Server') . '</label>
+								<p>' . _('Proxy server name to use.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="proxy_host" id="proxy_host" type="text" value="' . $proxy_host . '" size="40" placeholder="proxy1.domain.com" />
+							</div>
+						</div>
+						<div id="setting-row">
+							<div class="description">
+								<label for="proxy_port">' . _('Proxy Port') . '</label>
+								<p>' . _('The TCP port your proxy server uses.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="proxy_port" id="proxy_port" type="text" value="' . $proxy_port . '" size="40" placeholder="8080" onkeydown="return validateNumber(event)" maxlength="5" max="65535" />
+							</div>
+						</div>
+						<div id="setting-row">
+							<div class="description">
+								<label for="proxy_user">' . _('Proxy Username') . '</label>
+								<p>' . _('Username your proxy server requires for authentication.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="proxy_user" id="proxy_user" type="text" value="' . $proxy_user . '" size="40" placeholder="username" />
+							</div>
+						</div>
+						<div id="setting-row">
+							<div class="description">
+								<label for="proxy_pass">' . _('Proxy Password') . '</label>
+								<p>' . _('Password your proxy server requires for authentication.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="proxy_pass" id="proxy_pass" type="password" value="' . $proxy_pass . '" size="40" placeholder="password" />
 							</div>
 						</div>
 					</div>

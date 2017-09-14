@@ -737,6 +737,14 @@ echo '$(document).ready(function() {
 		}
 	});
 	
+	$("#proxy_enable").click(function() {
+		if ($(this).is(":checked")) {
+			$("#fm_proxy_options").show("slow");
+		} else {
+			$("#fm_proxy_options").slideUp();
+		}
+	});
+	
 	$("#log_method").change(function() {
 		if ($(this).val() == 0) {
 			$("#log_syslog_options").slideUp();
