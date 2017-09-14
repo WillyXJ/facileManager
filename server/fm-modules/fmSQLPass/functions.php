@@ -72,8 +72,8 @@ function buildModuleDashboard() {
 		</div>
 	</div>
 	</div>', __('Summary'),
-			sprintf(ngettext('You have <b>%s</b> database server configured.', 'You have <b>%s</b> database servers configured.', formatNumber($server_count)), formatNumber($server_count)),
-			sprintf(ngettext('You have <b>%s</b> group defined.', 'You have <b>%s</b> groups defined.', formatNumber($group_count)), formatNumber($group_count))
+			sprintf(ngettext('You have <b>%s</b> database server configured.', 'You have <b>%s</b> database servers configured.', $server_count), formatNumber($server_count)),
+			sprintf(ngettext('You have <b>%s</b> group defined.', 'You have <b>%s</b> groups defined.', $group_count), formatNumber($group_count))
 			);
 
 
