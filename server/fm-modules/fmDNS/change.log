@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed dashboard text.
 * Server - [feature] Added support for using a proxy server. (Issue #388)
+* Server - [bug] Removes extra whitespace from new zone names. (Issue #394)
 
 3.0.3 (2017-08-07)
 ==================

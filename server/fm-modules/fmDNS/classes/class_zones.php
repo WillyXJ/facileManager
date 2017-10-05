@@ -1492,7 +1492,7 @@ HTML;
 		if (empty($post['domain_name'])) return __('No zone name defined.');
 		
 		if ($post['domain_template'] != 'yes') {
-			$post['domain_name'] = rtrim(strtolower($post['domain_name']), '.');
+			$post['domain_name'] = rtrim(trim(strtolower($post['domain_name'])), '.');
 
 			/** Perform domain name validation */
 			if (!isset($post['domain_mapping'])) {
