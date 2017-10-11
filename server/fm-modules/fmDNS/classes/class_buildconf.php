@@ -1455,6 +1455,22 @@ HTML;
 		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
 		$remote_hint_zone = 'http://www.internic.net/domain/named.root';
 		
+		/** Set proxy server settings if applicable */
+		if (getOption('proxy_enable')) {
+			$default_opts = array(
+				'http' => array(
+					'method' => 'GET',
+					'proxy' => 'tcp://' . getOption('proxy_host') . ':' . getOption('proxy_port')
+				)
+			);
+
+			$proxyauth = getOption('proxy_user') . ':' . getOption('proxy_pass');
+			if ($proxyauth != ':') {
+				$default_opts['http']['header'] = 'Proxy-Authorization: Basic ' . base64_encode($proxyauth);
+			}
+			$default = stream_context_set_default($default_opts);
+		}
+		
 		$remote_headers = get_headers($remote_hint_zone, 1);
 		
 		if (filemtime($local_hint_zone) < strtotime($remote_headers['Last-Modified']) && !isset($GLOBALS['root_servers_updated'])) {

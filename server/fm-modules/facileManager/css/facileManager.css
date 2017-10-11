@@ -1324,7 +1324,7 @@ p#table_edits {
 	margin-top: -5px;
 }
 
-#help, #fm_mailing_options,
+#help, #fm_mailing_options, #fm_proxy_options,
 #mail_smtp_auth_options, #auth_ldap_options, #ldap_group_require_options,
 #auth_fm_options, #software_update_options,
 #help_file_container ul li div,

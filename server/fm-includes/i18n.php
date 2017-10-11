@@ -30,9 +30,9 @@ $directory = ABSPATH . 'fm-modules/' . $fm_name . '/languages';
 $domain = $fm_name;
 $encoding = 'UTF-8';
 
-session_start();
+@session_start();
 $_SESSION['language'] = getLanguage($directory);
-session_write_close();
+@session_write_close();
 
 putenv('LANG=' . $_SESSION['language']); 
 setlocale(LC_ALL, $_SESSION['language']);

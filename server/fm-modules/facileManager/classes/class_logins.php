@@ -488,7 +488,8 @@ To reset your password, click the following link:
 		if (empty($ldap_dn))              $ldap_dn              = getOption('ldap_dn');
 		if (empty($ldap_group_require))   $ldap_group_require   = getOption('ldap_group_require');
 		if (empty($ldap_group_dn))        $ldap_group_dn        = getOption('ldap_group_dn');
-		
+		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
+
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
 		if ($ldap_encryption == 'SSL') {
@@ -522,14 +523,17 @@ To reset your password, click the following link:
 			
 			if ($ldap_bind) {
 				if ($ldap_group_require) {
-					/** Convert AD ldap_dn to real ldap_dn */
 					if (strpos($ldap_dn, '@') !== false) {
+						/** Convert AD ldap_dn to real ldap_dn */
 						$ldap_dn_parts = explode('@', $ldap_dn);
 						$ldap_dn = 'dc=' . join(',dc=', explode('.', $ldap_dn_parts[1]));
+						
+						/** Process AD group membership */
+						$ldap_group_response = $this->checkGroupMembership($ldap_connect, $this->getDN($ldap_connect, $username, $ldap_dn), $ldap_group_dn, $ldap_group_attribute);
+					} else {
+						/** Process LDAP group membership */
+						$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $username);
 					}
-					
-					/** Process group membership if required */
-					$ldap_group_response = $this->checkGroupMembership($ldap_connect, $this->getDN($ldap_connect, $username, $ldap_dn), $ldap_group_dn);
 					
 					if ($ldap_group_response !== true) {
 						$this->closeLDAPConnect($ldap_connect);
@@ -640,11 +644,10 @@ To reset your password, click the following link:
 	 * @param resource $ldap_connect Resource to use
 	 * @param string $userdn
 	 * @param string $groupdn
+	 * @param string $ldap_group_attribute
 	 * @return boolean
 	 */
-	private function checkGroupMembership($ldap_connect, $userdn, $groupdn) {
-		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
-
+	private function checkGroupMembership($ldap_connect, $userdn, $groupdn, $ldap_group_attribute) {
 		$result = ldap_read($ldap_connect, $userdn, '(objectclass=*)', array($ldap_group_attribute));
 		if ($result === false) return false;
 		
