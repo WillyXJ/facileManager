@@ -1,4 +1,4 @@
-3.0.3 (2017-??-??)
+3.0.3 (2017-10-10)
 ==================
 * Server - [bug] Fixed LDAP authentication with group memberships. (Issue #392)
 * Server - [bug] Fixed PHP error. (Issue #386)
