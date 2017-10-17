@@ -3249,9 +3249,10 @@ function isDebianSystem($os) {
  * @param string $command Command to run on $host
  * @param string $format Be silent or verbose with output
  * @param integer $port Remote port to connect to
+ * @param string $client_check 'include' or 'skip' the client file check
  * @return boolean
  */
-function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22) {
+function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22, $client_check = 'include') {
 	global $fm_name;
 	
 	$failures = false;
@@ -3297,7 +3298,11 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 			@unlink($temp_ssh_key);
 
 			/** Handle error codes */
-			return ($rc == 255) ? displayResponseClose(_('Failed: Could not login via SSH. Check the system logs on the client for the reason.')) : displayResponseClose(_('Failed: Client file is not present - is the client software installed?'));
+			if ($rc == 255) {
+				return displayResponseClose(_('Failed: Could not login via SSH. Check the system logs on the client for the reason.'));
+			} elseif ($client_check == 'include') {
+				return displayResponseClose(_('Failed: Client file is not present - is the client software installed?'));
+			}
 		}
 		unset($output);
 
