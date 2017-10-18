@@ -1459,6 +1459,7 @@ HTML;
 		if (getOption('proxy_enable')) {
 			$default_opts = array(
 				'http' => array(
+					'request_fulluri' => true,
 					'method' => 'GET',
 					'proxy' => 'tcp://' . getOption('proxy_host') . ':' . getOption('proxy_port')
 				)
