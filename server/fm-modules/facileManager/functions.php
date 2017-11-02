@@ -3295,7 +3295,9 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22,
 		exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $port -l $ssh_user $host 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $output, $rc);
 		if ($rc) {
 			/** Something went wrong */
-			@unlink($temp_ssh_key);
+			if ($rc == 255 || $client_check == 'include') {
+				@unlink($temp_ssh_key);
+			}
 
 			/** Handle error codes */
 			if ($rc == 255) {
