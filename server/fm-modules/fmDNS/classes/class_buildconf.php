@@ -391,6 +391,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$view_result = $fmdb->last_result;
 				$view_count = $fmdb->num_rows;
 				for ($i=0; $i < $view_count; $i++) {
+					$include_hint_zone_local = $include_hint_zone;
+					
 					if ($view_result[$i]->view_comment) {
 						$comment = wordwrap($view_result[$i]->view_comment, 50, "\n");
 						$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
@@ -442,6 +444,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
 						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
+						
+						if ($cfg_name == 'recursion') {
+							$include_hint_zone_local = ($cfg_info == 'yes') ? true : false;
+						}
 					}
 					unset($config_array);
 
@@ -489,7 +495,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 					
 					/** Generate zone file */
-					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, sanitize($view_result[$i]->view_name, '-'), $include_hint_zone);
+					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, sanitize($view_result[$i]->view_name, '-'), $include_hint_zone_local);
 					if ($error) $message = $error;
 					
 					/** Include zones for view */
