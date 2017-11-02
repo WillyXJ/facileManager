@@ -1727,9 +1727,10 @@ function arrayKeysExist($keys, $array) {
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
  * @param string $classes Additional classes to apply to the div
+ * @param string $position Additional blocks to be on left or right
  * @return string
  */
-function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null) {
+function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null, $position = 'left') {
 	global $fmdb;
 	
 	$page_params = null;
@@ -1748,12 +1749,17 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	$page_links = array();
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div>';
+	if ($position == 'right') {
+		$page_links[] = buildPaginationCountMenu(0, 'pagination');
+		if ($addl_blocks) $addl_blocks = (array) $addl_blocks;
+		array_unshift($addl_blocks, null);
+	}
 	if (isset($addl_blocks)) {
 		foreach ((array) $addl_blocks as $block) {
 			$page_links[] = '<div>' . $block . '</div>';
 		}
 	}
-	$page_links[] = buildPaginationCountMenu(0, 'pagination');
+	if ($position == 'left') $page_links[] = buildPaginationCountMenu(0, 'pagination');
 
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';

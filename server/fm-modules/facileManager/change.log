@@ -3,6 +3,8 @@
 * Server - [improvement] Added option to skip client file checks to the
            runRemoteCommand() function.
 * Server - [improvement] Visually show disabled form buttons.
+* Server - [improvement] Additional blocks can now be placed on the left or right
+           of the table header.
 
 3.0.3 (2017-10-10)
 ==================
