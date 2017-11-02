@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] Added option to skip client file checks to the
            runRemoteCommand() function.
+* Server - [improvement] Visually show disabled form buttons.
 
 3.0.3 (2017-10-10)
 ==================

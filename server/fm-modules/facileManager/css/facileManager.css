@@ -666,7 +666,7 @@ tbody {
 	white-space: nowrap;
 }
 
-.form-table input:not([type="image"]):not([type="checkbox"]),
+.form-table input:not([type="image"]):not([type="checkbox"]):not(.select2-input):not(.button),
 .display_results input:not([type="image"]):not([type="checkbox"]),
 .display_results textarea,
 #bulk_action,
@@ -1257,6 +1257,18 @@ a {
 	-webkit-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
 	-moz-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
 	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+input.disabled {
+	background-image: -moz-linear-gradient(top, #fcfcfc, #f5f5f5);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fcfcfc), to(#f5f5f5));
+	background-image: -webkit-linear-gradient(top, #fcfcfc, #f5f5f5);
+	background-image: -o-linear-gradient(top, #fcfcfc, #f5f5f5);
+	background-image: linear-gradient(to bottom, #fcfcfc, #f5f5f5);
+	background-color: #fcfcfc;
+	border-color: #d9d9d9;
+	color: #aeaeae;
+	cursor: not-allowed;
 }
 
 .left {

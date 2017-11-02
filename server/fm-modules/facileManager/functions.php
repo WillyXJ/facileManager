@@ -2882,7 +2882,7 @@ function getMenuURL($search_slug = null) {
  * @param string $link Link to provide for a button
  * @return string Returns the popup section
  */
-function buildPopup($section, $text = null, $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
+function buildPopup($section, $text = null, $buttons = array('primary_button' => 'submit', 'cancel_button' => 'cancel'), $link = null) {
 	global $__FM_CONFIG;
 	
 	if (!$text) $text = _('Save');
