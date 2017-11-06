@@ -1,3 +1,7 @@
+1.4.3 (2017-??-??)
+==================
+* Server - [improvement] Moved the grab CSS/JS to the core for other modules to use.
+
 1.4.2 (2017-08-07)
 ==================
 * Client - [bug] Fixed firewall type detection during installation. (Issue #383)

@@ -585,6 +585,19 @@ h4 {
 	border-bottom: 3px solid #fff;
 }
 
+#table_edits.grab1 tbody tr td:first-child {
+	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
+}
+#table_edits.grab tbody tr td:nth-child(2) {
+	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
+}
+#table_edits.grabbing tbody tr td:nth-child(2) {
+	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/closedhand.cur) 8 8, move;
+}
+#table_edits.grabbing tbody tr {
+	border: 1px #dfdfdf solid;
+}
+
 .modules tr td {
 	vertical-align: top;
 	padding-right: 1em;
