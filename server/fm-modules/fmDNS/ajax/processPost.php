@@ -171,6 +171,15 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				}
 			}
 			break;
+		case 'update_sort':
+			if (!empty($_POST)) {
+				$result = $post_class->update($_POST);
+				if ($result !== true) {
+					exit($result);
+				}
+				exit('Success');
+			}
+			exit(__('The sort order could not be updated due to an invalid request.'));
 	}
 
 	exit;

@@ -1998,4 +1998,34 @@ function upgradefmDNS_3005($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 3.0.5 */
+function upgradefmDNS_3050($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '3.0-beta2', '<') ? upgradefmDNS_3005($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD `view_order_id` INT(11) NOT NULL AFTER `server_serial_no`";
+
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.0-beta2', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
 ?>

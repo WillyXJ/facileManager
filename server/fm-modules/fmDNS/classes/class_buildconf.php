@@ -383,9 +383,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 			/** Build Views */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no', 'g_" . implode("','g_", $server_group_ids) . "')");
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('server_serial_no', 'view_order_id'), 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no', 'g_" . implode("','g_", $server_group_ids) . "')");
 			} else {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no')");
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('server_serial_no', 'view_order_id'), 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no')");
 			}
 			if ($fmdb->num_rows) {
 				$view_result = $fmdb->last_result;

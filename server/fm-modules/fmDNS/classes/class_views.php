@@ -38,13 +38,16 @@ class fm_dns_views {
 			echo displayPagination($page, $total_pages);
 
 			$table_info = array(
-							'class' => 'display_results sortable',
+							'class' => 'display_results',
 							'id' => 'table_edits',
 							'name' => 'views'
 						);
 
-			$title_array = array(array('title' => __('View Name'), 'rel' => 'view_name'), array('title' => __('Comment'), 'class' => 'header-nosort'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+			$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => __('Comment'), 'class' => 'header-nosort'));
+			if (currentUserCan('manage_servers', $_SESSION['module'])) {
+				$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+				if ($num_rows > 1) $table_info['class'] .= ' grab1';
+			}
 
 			echo displayTableHeader($table_info, $title_array);
 			
@@ -80,14 +83,23 @@ class fm_dns_views {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_name, 'view_', 'view_name');
 		if ($fmdb->num_rows) return __('This view already exists.');
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$view_name', '$view_comment')";
+		/** Get view_order_id */
+		if (!isset($view_order_id) || $view_order_id == 0) {
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $server_serial_no, 'view_', 'server_serial_no', 'ORDER BY view_order_id DESC LIMIT 1');
+			if ($fmdb->num_rows) {
+				$view_order_id = $fmdb->last_result[0]->view_order_id + 1;
+			} else $view_order_id = 1;
+		}
+		
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_order_id`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$view_order_id', '$view_name', '$view_comment')";
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the view because a database error occurred.'), 'sql');
 		}
 
-		addLogEntry("Added view:\nName: $view_name\nComment: $view_comment");
+		$tmp_server_name = $server_serial_no ? getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
+		addLogEntry("Added view:\nName: $view_name\nServer: $tmp_server_name\nComment: $view_comment");
 		return true;
 	}
 
@@ -96,6 +108,36 @@ class fm_dns_views {
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
+		
+		/** Update sort order */
+		if ($post['action'] == 'update_sort') {
+			/** Make new order in array */
+			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
+			
+			if (!isset($post['server_serial_no'])) {
+				$post['server_serial_no'] = 0;
+			}
+			
+			/** Get view listing for server */
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_order_id', 'view_', "AND server_serial_no='{$post['server_serial_no']}'");
+			$count = $fmdb->num_rows;
+			$view_result = $fmdb->last_result;
+			for ($i=0; $i<$count; $i++) {
+				$order_id = array_search($view_result[$i]->view_id, $new_sort_order);
+				if ($order_id === false) return __('The sort order could not be updated due to an invalid request.');
+				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}viewss` SET `view_order_id`=$order_id WHERE `view_id`={$view_result[$i]->view_id} AND `server_serial_no`={$post['server_serial_no']} AND `account_id`='{$_SESSION['user']['account_id']}'";
+				$result = $fmdb->query($query);
+				if ($fmdb->sql_errors) {
+					return formatError(__('Could not update the order because a database error occurred.'), 'sql');
+				}
+			}
+			
+			setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+		
+			$servername = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : _('All Servers');
+			addLogEntry('Updated view order for ' . $servername);
+			return true;
+		}
 		
 		if (empty($post['view_name'])) return __('No view name defined.');
 		$post['view_comment'] = trim($post['view_comment']);
@@ -176,6 +218,7 @@ class fm_dns_views {
 		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->view_status == 'disabled') ? ' class="disabled"' : null;
+		$bars_title = __('Click and drag to reorder');
 		
 		$edit_name = '<a href="config-options.php?view_id=' . $row->view_id;
 		$edit_name .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
@@ -190,14 +233,16 @@ class fm_dns_views {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
+			$grab_bars = '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>';
 		} else {
-			$edit_status = null;
+			$edit_status = $grab_bars = null;
 		}
 		
 		$comments = nl2br($row->view_comment);
 
 		echo <<<HTML
 		<tr id="$row->view_id" name="$row->view_name"$disabled_class>
+			$grab_bars
 			<td>$edit_name</td>
 			<td>$comments</td>
 			$edit_status
@@ -211,7 +256,7 @@ HTML;
 	function printForm($data = '', $action = 'add') {
 		global $__FM_CONFIG;
 		
-		$view_id = 0;
+		$view_id = $view_order_id = 0;
 		$view_name = $view_root_dir = $view_zones_dir = $view_comment = null;
 		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
@@ -235,6 +280,7 @@ HTML;
 			<input type="hidden" name="page" id="page" value="views" />
 			<input type="hidden" name="action" id="action" value="%s" />
 			<input type="hidden" name="view_id" id="view_id" value="%d" />
+			<input type="hidden" name="view_order_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
 			<table class="form-table">
 				<tr>
@@ -249,7 +295,7 @@ HTML;
 		%s
 		</form>',
 				$popup_header,
-				$action, $view_id, $server_serial_no,
+				$action, $view_id, $view_order_id, $server_serial_no,
 				__('View Name'), $view_name, $view_name_length,
 				__('Comment'), $view_comment, $popup_footer
 			);

@@ -270,6 +270,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}view
   `view_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `view_order_id` int(11) NOT NULL,
   `view_name` VARCHAR(255) NOT NULL ,
   `view_comment` text,
   `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
