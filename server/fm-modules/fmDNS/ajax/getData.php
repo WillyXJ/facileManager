@@ -177,7 +177,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$post_class = $fm_module_options;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$type_map = @isset($_POST['request_uri']['option_type']) ? sanitize($_POST['request_uri']['option_type']) : 'global';
+			$type_map = @isset($_POST['request_uri']['type']) ? sanitize($_POST['request_uri']['type']) : 'global';
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
