@@ -8,6 +8,8 @@
 * Server - [feature] View order can now be changed. (Issue #397)
 * Server - [bug] Fixed issue where config options for Rate Limit and RRSet were
            incorrect.
+* Server - [bug] Fixed error messages regarding dynamic zones.
+
 
 3.0.4 (2017-10-10)
 ==================
