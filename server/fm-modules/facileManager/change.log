@@ -6,6 +6,7 @@
 * Server - [improvement] Additional blocks can now be placed on the left or right
            of the table header.
 * Server - [improvement] Moved the grab CSS/JS to the core for other modules to use.
+* Server - [improvement] fm_logs now stores the username instead of userid.
 
 3.0.3 (2017-10-10)
 ==================

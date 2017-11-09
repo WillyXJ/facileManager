@@ -30,23 +30,17 @@ printHeader();
 $response = isset($response) ? $response : null;
 
 $search_sql = $list = $log_search_query = $log_search_date_b = $log_search_date_e = null;
-extract($_POST);
+extract($_REQUEST);
 
 /** Module search */
 if (isset($log_search_module) && is_array($log_search_module) && !in_array('All Modules', $log_search_module)) {
-	foreach ($log_search_module as $search_module) {
-		$list .= "'$search_module',";
-	}
-	$search_sql .= 'AND log_module IN (' . rtrim($list, ',') . ') ';
+	$search_sql .= 'AND log_module IN ("' . join('","', $log_search_module) . '") ';
 }
 /** User search */
 $default_timezone = getOption('timezone', $_SESSION['user']['account_id']);
 $list = null;
-if (isset($log_search_user) && is_array($log_search_user) && !in_array(0, $log_search_user)) {
-	foreach ($log_search_user as $search_user) {
-		$list .= "$search_user,";
-	}
-	$search_sql .= 'AND user_id IN (' . rtrim($list, ',') . ') ';
+if (isset($log_search_user) && is_array($log_search_user) && !in_array('0', $log_search_user)) {
+	$search_sql .= 'AND user_login IN ("' . join('","', $log_search_user) . '") ';
 }
 /** Begin date search */
 if (isset($log_search_date_b) && !empty($log_search_date_b)) {
@@ -67,6 +61,7 @@ $log_count = $fmdb->num_rows;
 
 $total_pages = ceil($log_count / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
+if ($page < 1) $page = 1;
 $pagination = displayPagination($page, $total_pages);
 
 $log_search_module = isset($log_search_module) ? $log_search_module : _('All Modules');
@@ -80,7 +75,7 @@ $title_array = array(_('Timestamp'), _('Module'), _('User'), array('title' => _(
 $header = displayTableHeader($table_info, $title_array);
 
 echo printPageHeader($response);
-printf('<form class="search-form" id="date-range" action="" method="post">
+printf('<form class="search-form" id="date-range" action="" method="get">
 		<table class="log_search_form" align="center">
 			<tbody>
 				<tr>
@@ -134,7 +129,7 @@ function displayLogData($page, $search_sql = null) {
 		extract(get_object_vars($result[$i]), EXTR_OVERWRITE);
 		$log_data = nl2br(wordwrap($log_data, 80, "\n", true));
 		if (isset($_POST['log_search_query'])) $log_data = str_replace($_POST['log_search_query'], '<span class="highlighted">' . $_POST['log_search_query'] . '</span>', $log_data);
-		$user_name = $user_id ? getNameFromID($user_id, 'fm_users', 'user_', 'user_id', 'user_login') : $fm_name;
+		$user_name = is_numeric($user_login) ? $fm_name : $user_login;
 		$log_timestamp = date($date_format . ' ' . $time_format . ' e', $log_timestamp);
 		echo <<<ROW
 				<tr>
@@ -168,7 +163,7 @@ function buildModuleList() {
 function buildUserList() {
 	global $fmdb;
 	
-	$array[0] = array(_('All Users'), 0);
+	$array[0] = array(_('All Users'), '0');
 	
 	$query = "SELECT user_id,user_login FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} ORDER BY user_login";
 	$fmdb->get_results($query);
@@ -176,7 +171,7 @@ function buildUserList() {
 		$list = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
 			$array[$i+1][] = $list[$i]->user_login;
-			$array[$i+1][] = $list[$i]->user_id;
+			$array[$i+1][] = $list[$i]->user_login;
 		}
 	}
 	

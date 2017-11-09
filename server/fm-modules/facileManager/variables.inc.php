@@ -77,7 +77,7 @@ if (isset($_SESSION['module'])) {
 }
 
 /** Cleanup options */
-$__FM_CONFIG['clean']['prefixes']	= array('fm_accounts'=>'account', 'fm_users'=>'user');
+$__FM_CONFIG['clean']['prefixes']	= array('fm_accounts' => 'account', 'fm_users' => 'user');
 $__FM_CONFIG['clean']['days']		= 7;
 
 /** Text string variables */
