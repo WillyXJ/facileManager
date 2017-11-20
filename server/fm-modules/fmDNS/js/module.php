@@ -22,8 +22,8 @@ $(document).ready(function() {
 
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
 		$(function() {
-			$("#pagination_container #domain_view").select2({
-				containerCss: { "min-width": "200px" },
+			$("#pagination_container #domain_view, #pagination_container #domain_group").select2({
+				containerCss: { "min-width": "180px", "max-width": "300px" },
 				minimumResultsForSearch: 10
 			});
 		});

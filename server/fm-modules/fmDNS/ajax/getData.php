@@ -63,7 +63,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 			
 			$available_classes = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class')), $cfg_data[0]);
 			$available_types = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type')), $cfg_data[1]);
-			$available_domains = buildSelect('cfg_data[]', 'cfg_data_zones', $fm_dns_zones->availableZones(true, null, false, 'all'), $cfg_data[2]);
+			$available_domains = buildSelect('cfg_data[]', 'cfg_data_zones', $fm_dns_zones->availableZones('no-templates', null, 'all', 'all'), $cfg_data[2]);
 			$available_orders = $fm_module_options->populateDefTypeDropdown('( random | cyclic | fixed )', $cfg_data[3]);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
@@ -184,6 +184,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$type_map = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
 			$action = 'create';
 			if (!$add_new) $item_id = array('popup', 'template_menu');
+			
+			if ($type_map == 'groups') {
+				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups';
+				$prefix = 'group_';
+			}
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;

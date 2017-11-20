@@ -57,7 +57,7 @@ if (array_key_exists('submit', $_POST)) {
 	}
 }
 
-$available_zones = array_reverse($fm_dns_zones->availableZones(true, 'master', true));
+$available_zones = array_reverse($fm_dns_zones->availableZones('all', 'master', 'restricted'));
 $available_zones[] = array(null, null);
 $available_zones = array_reverse($available_zones);
 $button = null;

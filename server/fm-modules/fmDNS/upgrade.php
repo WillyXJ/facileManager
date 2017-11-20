@@ -2006,6 +2006,17 @@ function upgradefmDNS_3050($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD `view_order_id` INT(11) NOT NULL AFTER `server_serial_no`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_groups` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `domain_name`";
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}domain_groups` (
+  `group_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `group_name` varchar(128) NOT NULL,
+  `group_comment` text NOT NULL,
+  `group_status` enum('active','disabled','deleted') NOT NULL
+  PRIMARY KEY (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+TABLE;
 
 	/** Run queries */
 	if (count($table) && $table[0]) {

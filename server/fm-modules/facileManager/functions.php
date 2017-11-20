@@ -3210,17 +3210,26 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 	/** Check capability */
 	if (@array_key_exists($capability, $allowed_capabilities[$module])) {
 		if (is_array($allowed_capabilities[$module][$capability])) {
+			/** Explode module groups */
+			foreach ($allowed_capabilities[$module][$capability] as $cap_id) {
+				if (strpos($cap_id, 'g_') !== false && function_exists('moduleExplodeGroup')) {
+					if ($new_cap = moduleExplodeGroup($cap_id, $capability)) {
+						$allowed_capabilities[$module][$capability] = array_merge($allowed_capabilities[$module][$capability], $new_cap);
+					}
+				}
+			}
 			if (is_array($extra_perm)) {
 				$found = false;
 				
 				foreach ($extra_perm as $needle) {
-					if (in_array($needle, $allowed_capabilities[$module][$capability]))
+					if (in_array((string) $needle, $allowed_capabilities[$module][$capability])) {
 						$found = true;
+					}
 				}
 				
 				return $found;
 			} else {
-				return in_array($extra_perm, $allowed_capabilities[$module][$capability]);
+				return in_array((string) $extra_perm, $allowed_capabilities[$module][$capability]);
 			}
 		}
 		

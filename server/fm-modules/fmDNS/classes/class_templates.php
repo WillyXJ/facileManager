@@ -117,7 +117,7 @@ HTML;
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));
 		}
 		if ($prefix == 'domain') {
-			$excluded_fields = array_merge($excluded_fields, array('soa_serial_no', 'soa_id', $prefix . '_clone_domain_id', $prefix . '_reload', $prefix . '_clone_dname'));
+			$excluded_fields = array_merge($excluded_fields, array('soa_serial_no', 'soa_id', $prefix . '_clone_domain_id', $prefix . '_reload', $prefix . '_clone_dname', $prefix . '_groups'));
 		}
 
 		foreach ($row as $key => $val) {

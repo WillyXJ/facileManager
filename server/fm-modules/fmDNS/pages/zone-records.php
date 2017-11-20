@@ -40,7 +40,6 @@ if (!isValidDomain($domain_id)) header('Location: ' . getMenuURL(__('Zones')));
 
 /** Does the user have access? */
 if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();
-var_dump(currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array('0', $domain_id)));exit;
 
 if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
 if ($record_type == 'SOA') {

@@ -733,6 +733,7 @@ function buildModuleMenu() {
 	addObjectPage(__('Zones'), __('Zones'), array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'], 'zones.php');
 		addSubmenuPage('zones.php', __('Forward'), __('Forward Zones'), null, $_SESSION['module'], 'zones-forward.php', null, null, $badge_counts['forward']);
 		addSubmenuPage('zones.php', __('Reverse'), __('Reverse Zones'), null, $_SESSION['module'], 'zones-reverse.php', null, null, $badge_counts['reverse']);
+		addSubmenuPage('zones.php', __('Groups'), __('Zones Groups'), array('view_all'), $_SESSION['module'], 'zones-groups.php');
 		addSubmenuPage('zones.php', null, __('Records'), null, $_SESSION['module'], 'zone-records.php');
 		addSubmenuPage('zones.php', null, __('Record Validation'), null, $_SESSION['module'], 'zone-records-validate.php');
 	
@@ -1108,6 +1109,35 @@ function getDNSSECExpiration($data, $type = 'calculated') {
 	$domain_dnssec_sig_expires = ($type == 'calculated') ? strtotime(date('YmdHis', $data->domain_dnssec_signed) . ' + ' . $domain_dnssec_sig_expires . ' days') : date('YmdHis', strtotime('now + ' . $domain_dnssec_sig_expires . ' days'));
 	
 	return $domain_dnssec_sig_expires;
+}
+
+
+/**
+ * Returns the members of the group
+ *
+ * @since 3.1
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $group_id Group ID
+ * @param string $capability Capability to process
+ * @return integer
+ */
+function moduleExplodeGroup($group_id, $capability) {
+	global $fmdb, $__FM_CONFIG;
+	
+	$return = false;
+	
+	if ($capability == 'access_specific_zones') {
+		$group_id = substr($group_id, 2);
+		$domain_sql = "AND (domain_groups='$group_id' OR domain_groups LIKE '$group_id;%' OR domain_groups LIKE '%;$group_id;%' OR domain_groups LIKE '%;$group_id')";
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', $domain_sql);
+		for ($x=0; $x<$fmdb->num_rows; $x++) {
+			$return[] = $fmdb->last_result[$x]->domain_id;
+		}
+	}
+	
+	return $return;
 }
 
 
