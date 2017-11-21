@@ -28,15 +28,15 @@ class fm_module_logging {
 	function rows($result, $channel_category, $page, $total_pages) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages);
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(__('There are no %s defined.'), strtolower($__FM_CONFIG['logging']['avail_types'][$channel_category])));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
-
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',

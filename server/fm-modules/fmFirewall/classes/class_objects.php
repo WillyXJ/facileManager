@@ -28,19 +28,19 @@ class fm_module_objects {
 	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Delete'));
+		}
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', sprintf(__('There are no %s objects defined.'), $type));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			
-			if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
-				$bulk_actions_list = array(_('Delete'));
-			}
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
-
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',

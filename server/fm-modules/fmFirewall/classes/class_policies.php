@@ -28,26 +28,26 @@ class fm_module_policies {
 	function rows($result, $type, $page, $total_pages) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'policies'
+					);
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			if ($num_rows > 1) $table_info['class'] .= ' grab';
+
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="policies">%s</p>', __('There are no firewall policies.'));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'policies'
-						);
-			if (currentUserCan('manage_servers', $_SESSION['module'])) {
-				if ($num_rows > 1) $table_info['class'] .= ' grab';
-
-				$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
-			}
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
-
 			if (is_array($bulk_actions_list)) {
 				$title_array[] = array(
 									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',

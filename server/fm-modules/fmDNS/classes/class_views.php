@@ -28,15 +28,15 @@ class fm_dns_views {
 	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages);
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="views">%s</p>', __('There are no views.'));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
-
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',

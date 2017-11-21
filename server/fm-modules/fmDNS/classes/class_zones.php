@@ -41,25 +41,25 @@ class fm_dns_zones {
 			$checkbox = $bulk_actions_list = null;
 		}
 
+		if (array_key_exists('attention', $_GET)) {
+			$num_rows = $GLOBALS['zone_badge_counts'][$map];
+			$total_pages = ceil($num_rows / $_SESSION['user']['record_count']);
+			if ($page > $total_pages) $page = $total_pages;
+		}
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
+
+		$classes = (array_key_exists('attention', $_GET)) ? null : ' grey';
+		$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? '<i class="fa fa-eye fa-lg eye-attention' . $classes . '" title="' . __('Only view zones that need attention') . '"></i>' : null;
+		$addl_blocks = ($map != 'groups') ? array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention) : null;
+		$fmdb->num_rows = $num_rows;
+		echo displayPagination($page, $total_pages, $addl_blocks);
+
 		if (!$result) {
 			$message = ($map == 'groups') ? __('There are no zone groups.') : __('There are no zones.');
 			printf('<p id="table_edits" class="noresult" name="domains">%s</p>', $message);
 		} else {
-			if (array_key_exists('attention', $_GET)) {
-				$num_rows = $GLOBALS['zone_badge_counts'][$map];
-				$total_pages = ceil($num_rows / $_SESSION['user']['record_count']);
-				if ($page > $total_pages) $page = $total_pages;
-			}
-
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
-
-			$classes = (array_key_exists('attention', $_GET)) ? null : ' grey';
-			$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? '<i class="fa fa-eye fa-lg eye-attention' . $classes . '" title="' . __('Only view zones that need attention') . '"></i>' : null;
-			$addl_blocks = ($map != 'groups') ? array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention) : null;
-			$fmdb->num_rows = $num_rows;
-			echo displayPagination($page, $total_pages, $addl_blocks);
-			
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',

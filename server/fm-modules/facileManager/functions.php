@@ -1078,17 +1078,23 @@ function genRandomString($length) {
  */
 function convertURIToArray() {
 	$uri = explode('?', $_SERVER['REQUEST_URI']);
+//	echo '<pre>';
+//	print_r($uri);
 	if (count($uri) > 1) {
 		$raw_params = explode('&', $uri[1]);
+//		print_r($raw_params);
 		
 		for ($i=0; $i<count($raw_params); $i++) {
 			if (strpos($raw_params[$i], '=')) {
 				$param = explode('=', $raw_params[$i]);
 				$return_array[$param[0]] = $param[1];
+//		print_r($param);
 			} else {
 				$return_array[$raw_params[$i]] = null;
 			}
 		}
+//		print_r($return_array);
+//		exit;
 		return $return_array;
 	}
 	

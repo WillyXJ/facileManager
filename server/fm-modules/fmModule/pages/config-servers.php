@@ -56,7 +56,9 @@ echo printPageHeader((string) $response, null, currentUserCan('manage_servers', 
 
 /** Get server listing */
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
-$fm_module_servers->rows($result);
+$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+if ($page > $total_pages) $page = $total_pages;
+$fm_module_servers->rows($result, $page, $total_pages);
 
 printFooter();
 

@@ -1,4 +1,4 @@
-3.0.4 (2017-??-??)
+3.1.0 (2017-??-??)
 ==================
 * Server - [improvement] Added option to skip client file checks to the
            runRemoteCommand() function.
@@ -8,6 +8,7 @@
 * Server - [improvement] Moved the grab CSS/JS to the core for other modules to use.
 * Server - [improvement] fm_logs now stores the username instead of userid.
 * Server - [improvement] Added support to explode module group IDs. (Issue #375)
+* Server - [improvement] Pagination is now displayed even with no items.
 
 3.0.3 (2017-10-10)
 ==================

@@ -28,16 +28,16 @@ class fm_dns_controls {
 	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages);
+
 		if (!$result) {
 			$message = $type == 'controls' ? __('There are no controls.') : __('There are no statistics channels.');
 			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', $message);
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
-
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
