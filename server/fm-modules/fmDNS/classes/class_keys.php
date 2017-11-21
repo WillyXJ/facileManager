@@ -35,6 +35,8 @@ class fm_dns_keys {
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		$addl_blocks = ($type == 'dnssec') ? $this->buildFilterMenu() : null;
+		
+		$fmdb->num_rows = $num_rows;
 
 		echo displayPagination($page, $total_pages, array(@buildBulkActionMenu($bulk_actions_list), $addl_blocks));
 

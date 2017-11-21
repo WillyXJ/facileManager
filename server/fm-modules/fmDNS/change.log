@@ -11,6 +11,7 @@
 * Server - [bug] Fixed error messages regarding dynamic zones.
 * Server - [feature] Added support for zone groups. (Issue #375)
 * Server - [improvement] Pagination is now displayed even with no items.
+* Server - [bug] Fixed display of key item count.
 
 3.0.4 (2017-10-10)
 ==================
