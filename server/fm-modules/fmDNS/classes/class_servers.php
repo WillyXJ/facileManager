@@ -829,32 +829,6 @@ FORM;
 		return implode("\n", $response);
 	}
 	
-	function availableServers($default = 'blank') {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return = null;
-		
-		$j = 0;
-		if ($default == 'blank') {
-			$return[$j][] = '';
-			$return[$j][] = '';
-			$j++;
-		}
-		
-		$query = "SELECT server_id,server_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}servers WHERE account_id='{$_SESSION['user']['account_id']}' AND server_status='active' ORDER BY server_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$j][] = $results[$i]->server_name;
-				$return[$j][] = $results[$i]->server_id;
-				$j++;
-			}
-		}
-		
-		return $return;
-	}
-
 	/**
 	 * Updates the name server assignments
 	 *

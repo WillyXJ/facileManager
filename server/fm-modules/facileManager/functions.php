@@ -3798,39 +3798,49 @@ HTML;
  * @param string $server_id_type What server ID should be used (serial|id)
  * @return array
  */
-function availableServers($server_id_type = 'serial') {
+function availableServers($server_id_type = 'serial', $include = array('all')) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$server_array[0][] = null;
-	$server_array[0][0][] = __('All Servers');
-	$server_array[0][0][] = '0';
+	if (!is_array($include)) {
+		$include = (array) $include;
+	}
 	
-	$j = 0;
-	/** Server Groups */
-	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
-	if ($fmdb->num_rows && !$fmdb->sql_errors) {
-		$server_array[__('Groups')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[__('Groups')][$j][] = $results[$i]->group_name;
-			$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
-			$j++;
+	if (in_array('all', $include)) {
+		$server_array[0][] = null;
+		$server_array[0][0][] = __('All Servers');
+		$server_array[0][0][] = '0';
+	}
+	
+	if (in_array('all', $include) || in_array('groups', $include)) {
+		$j = 0;
+		/** Server Groups */
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
+		if ($fmdb->num_rows && !$fmdb->sql_errors) {
+			$server_array[__('Groups')][] = null;
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$server_array[__('Groups')][$j][] = $results[$i]->group_name;
+				$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+				$j++;
+			}
 		}
 	}
-	$j = 0;
-	/** Server names */
-	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
-	if ($fmdb->num_rows && !$fmdb->sql_errors) {
-		$server_array[_('Servers')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
-			if ($server_id_type == 'serial') {
-				$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
-			} elseif ($server_id_type == 'id') {
-				$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+	if (in_array('all', $include) || in_array('servers', $include)) {
+		$j = 0;
+		/** Server names */
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
+		if ($fmdb->num_rows && !$fmdb->sql_errors) {
+			$server_array[_('Servers')][] = null;
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+				if ($server_id_type == 'serial') {
+					$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
+				} elseif ($server_id_type == 'id') {
+					$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+				}
+				$j++;
 			}
-			$j++;
 		}
 	}
 	
