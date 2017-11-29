@@ -2010,7 +2010,7 @@ function getColumnLength($tbl_name, $column_name) {
  * @return boolean
  */
 function verifyIPAddress($ip_address) {
-	return filter_var($ip_address, FILTER_VALIDATE_IP);
+	return verifySimpleVariable($ip_address, FILTER_VALIDATE_IP);
 }
 
 
@@ -2036,6 +2036,21 @@ function verifyNumber($number, $min_range = 0, $max_range = null, $decimal_allow
 	} else {
 		return filter_var($number, FILTER_VALIDATE_INT);
 	}
+}
+
+
+/**
+ * Runs data through a filter check
+ *
+ * @since 3.1
+ * @package facileManager
+ *
+ * @param string $data Address to check
+ * @param mixed $filter_type PHP filter type to use
+ * @return boolean
+ */
+function verifySimpleVariable($data, $filter_type) {
+	return filter_var($data, $filter_type);
 }
 
 
