@@ -96,7 +96,6 @@ function buildConf($url, $data) {
 	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
 		addLogEntry($message);
-		$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
 		if ($rc_script === false) {
 			$last_line = "Cannot locate the start script\n";
 			if ($debug) echo fM($last_line);
