@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-27 11:25-0600\n"
+"POT-Creation-Date: 2017-11-29 16:33-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -110,7 +110,7 @@ msgid ""
 "password is defined at the server level."
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_groups.php:32
+#: server/fm-modules/fmSQLPass/classes/class_groups.php:38
 msgid "There are no server groups."
 msgstr ""
 
@@ -157,7 +157,7 @@ msgstr ""
 msgid "This group name already exists."
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_passwords.php:32
+#: server/fm-modules/fmSQLPass/classes/class_passwords.php:38
 msgid "There are no active database server groups."
 msgstr ""
 
@@ -224,7 +224,7 @@ msgstr ""
 msgid "Password has been changed."
 msgstr ""
 
-#: server/fm-modules/fmSQLPass/classes/class_servers.php:34
+#: server/fm-modules/fmSQLPass/classes/class_servers.php:40
 #: server/fm-modules/fmSQLPass/classes/class_tools.php:36
 msgid "There are no servers defined."
 msgstr ""
@@ -302,4 +302,16 @@ msgstr ""
 
 #: server/fm-modules/fmSQLPass/classes/class_tools.php:45
 msgid "Ping:"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:24
+msgid "View All"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:25
+msgid "Server Management"
+msgstr ""
+
+#: server/fm-modules/fmSQLPass/extra/capabilities.inc.php:26
+msgid "Password Management"
 msgstr ""

@@ -14,16 +14,16 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmDNS: Easily manage one or more ISC BIND servers                       |
+ | fmSQLPass: Change database user passwords across multiple servers.      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | http://www.facilemanager.com/modules/fmsqlpass/                         |
  +-------------------------------------------------------------------------+
 */
 
 $fm_user_caps['fmSQLPass'] = array(
-		'view_all'				=> _('View All'),
-		'manage_servers'		=> _('Server Management'),
-		'manage_passwords'		=> _('Password Management'),
+		'view_all'				=> __('View All'),
+		'manage_servers'		=> __('Server Management'),
+		'manage_passwords'		=> __('Password Management'),
 		'manage_settings'		=> _('Manage Settings')
 	);
 
