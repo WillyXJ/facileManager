@@ -14,6 +14,7 @@
 * Server - [bug] Fixed display of key item count.
 * Server - [bug] Zone cloning icon is no longer visible on cloned zones when
            a restricted account is used.
+* Server - [bug] Fixed option type validation.
 
 3.0.4 (2017-10-10)
 ==================

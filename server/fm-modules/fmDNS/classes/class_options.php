@@ -617,7 +617,7 @@ HTML;
 					case 'ipv4_address | *':
 					case 'ipv6_address | *':
 						if ($post['cfg_data'] != '*') {
-							if (!verifyIPAddress($post['cfg_data'])) $post['cfg_data'] . ' is an invalid IP address.';
+							if (!verifyIPAddress($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid IP address.';
 						}
 						break;
 				}
