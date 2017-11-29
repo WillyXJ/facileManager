@@ -1051,6 +1051,7 @@ function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), 
 		/** chown the dirs */
 		if (count($chown_dirs)) {
 			foreach($chown_dirs as $dir) {
+				if (!is_dir($dir)) continue;
 				$message = "Setting directory permissions on $dir\n";
 				if ($debug) echo $message;
 				if (!$dryrun) {
