@@ -120,11 +120,11 @@ class fm_dns_zones {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
+
 		/** Validate post */
 		if (array_key_exists('group_name', $post)) {
-			$post = $this->validatePost($post);
-			if (!is_array($post)) return $post;
-
 			/** Zone groups */
 			$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domain_groups`";
 			$sql_fields = '(';
@@ -341,10 +341,10 @@ class fm_dns_zones {
 	function update() {
 		global $fmdb, $__FM_CONFIG;
 		
+		$post = $this->validatePost($_POST);
+		if (!is_array($post)) return $post;
+
 		if (array_key_exists('group_name', $_POST)) {
-			$post = $this->validatePost($_POST);
-			if (!is_array($post)) return $post;
-			
 			$new_domain_ids = $post['group_domain_ids'];
 			
 			/** Get current domain_ids for group */
@@ -838,7 +838,8 @@ HTML;
 		
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
-		$domain_id = $domain_view = $domain_name_servers = 0;
+		$domain_id = $domain_name_servers = 0;
+		$domain_view = -1;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
 		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
 		$domain_dnssec_sig_expire = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
@@ -1040,9 +1041,10 @@ HTML;
 					<td><input type="text" id="domain_name" name="domain_name" size="40" value="%s" maxlength="%d" /></td>
 				</tr>
 				%s
-				<tr>
+				<tr class="include-with-template">
 					<th><label for="domain_view">%s</label></th>
-					<td>%s</td>
+					<td>%s
+					<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></td>
 				</tr>
 				<tr>
 					<th><label for="domain_mapping">%s</label></th>
@@ -1085,7 +1087,7 @@ HTML;
 				$action, $domain_id, $classes,
 				__('Domain Name'), $domain_name, $domain_name_length,
 				$select_template,
-				__('Views'), $views,
+				__('Views'), $views, __('Leave blank to use the views defined in the template.'),
 				__('Zone Map'), $zone_maps,
 				__('Zone Type'), $domain_types,
 				$forwarders_show, $forward_dropdown, __('Define forwarders'), $domain_forward_servers,
@@ -1666,6 +1668,15 @@ HTML;
 		/** Empty domain names are not allowed */
 		if (empty($post['domain_name'])) return __('No zone name defined.');
 		
+		/** Reverse zones should have form of x.x.x.in-addr.arpa */
+		if ($post['domain_mapping'] == 'reverse') {
+			$post['domain_name'] = $this->setReverseZoneName($post['domain_name']);
+		}
+		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
+		if ($field_length !== false && strlen($post['domain_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Zone name is too long (maximum %d character).', 'Zone name is too long (maximum %d characters).', $field_length), $field_length);
+		
 		if ($post['domain_template'] != 'yes') {
 			$post['domain_name'] = rtrim(trim(strtolower($post['domain_name'])), '.');
 
@@ -1700,23 +1711,16 @@ HTML;
 			$post['domain_dnssec_generate_ds'] = 'no';
 		}
 		
-		/** Is this based on a template? */
-		if ($post['domain_template_id']) {
-			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
-				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
-				'domain_dnssec_parent_domain_id');
-			foreach ($include as $key) {
-				$new_post[$key] = $post[$key];
-			}
-			$post = $new_post;
-			unset($new_post, $post['domain_template']);
-			$post['domain_type'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
-			$post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
-			$post['domain_name_servers'] = explode(';', getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
+		/** Ensure domain_view is set */
+		if (!array_key_exists('domain_view', $post)) {
+			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id']) ? -1 : 0;
+		} elseif (is_array($post['domain_view']) && in_array(0, $post['domain_view'])) {
+			$post['domain_view'] = 0;
+		}
 
-			return $post;
-		} else {
-			$post['domain_template_id'] = 0;
+		/** Is this based on a template? */
+		if ($post['domain_template_id'] && !is_array($post['domain_view']) && $post['domain_view'] < 0) {
+			$post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
 		}
 		
 		/** Format domain_clone_domain_id */
@@ -1727,16 +1731,6 @@ HTML;
 			$post['domain_clone_dname'] = null;
 		} else {
 			unset($post['domain_clone_dname_override']);
-		}
-		
-		/** Ensure domain_view is set */
-		if (!array_key_exists('domain_view', $post)) {
-			$post['domain_view'] = ($post['domain_clone_domain_id']) ? -1 : 0;
-		}
-
-		/** Reverse zones should have form of x.x.x.in-addr.arpa */
-		if ($post['domain_mapping'] == 'reverse') {
-			$post['domain_name'] = $this->setReverseZoneName($post['domain_name']);
 		}
 		
 		/** Does the record already exist for this account? */
@@ -1776,9 +1770,24 @@ HTML;
 			}
 		}
 		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
-		if ($field_length !== false && strlen($post['domain_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Zone name is too long (maximum %d character).', 'Zone name is too long (maximum %d characters).', $field_length), $field_length);
+		/** Is this based on a template? */
+		if ($post['domain_template_id']) {
+			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
+				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
+				'domain_dnssec_parent_domain_id', 'domain_view');
+			foreach ($include as $key) {
+				$new_post[$key] = $post[$key];
+			}
+			$post = $new_post;
+			unset($new_post, $post['domain_template']);
+			$post['domain_type'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+			if (!is_array($post['domain_view']) && $post['domain_view'] < 0) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+			$post['domain_name_servers'] = explode(';', getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
+
+			return $post;
+		} else {
+			$post['domain_template_id'] = 0;
+		}
 		
 		/** No need to process more if zone is cloned */
 		if ($post['domain_clone_domain_id']) {

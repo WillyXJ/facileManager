@@ -400,7 +400,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 					$config .= 'view "' . $view_result[$i]->view_name . "\" {\n";
 
-					/** Get cooresponding config records */
+					/** Get corresponding config records */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no='0' AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$config_result = $fmdb->last_result;
@@ -460,7 +460,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					/** Build rate limits */
 					$config .= $this->getRRSetOrder($view_result[$i]->view_id, $server_serial_no);
 
-					/** Get cooresponding keys */
+					/** Get corresponding keys */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', "AND key_status='active' AND key_view='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$key_result = $fmdb->last_result;
