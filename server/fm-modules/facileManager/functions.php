@@ -3286,9 +3286,10 @@ function isDebianSystem($os) {
  * @param string $format Be silent or verbose with output
  * @param integer $port Remote port to connect to
  * @param string $client_check 'include' or 'skip' the client file check
+ * @param string $response Response to include a close button or plaintext
  * @return boolean
  */
-function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22, $client_check = 'include') {
+function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22, $client_check = 'include', $response = 'close') {
 	global $fm_name;
 	
 	$failures = false;
@@ -3301,13 +3302,14 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22,
 	/** Get SSH key */
 	$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 	if (!$ssh_key) {
-		return displayResponseClose(noSSHDefined('key'));
+		return ($response == 'close') ? displayResponseClose(noSSHDefined('key')) : noSSHDefined('key');
 	}
 
 	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
 	if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 	if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-		return displayResponseClose(sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
+		$message = sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key);
+		return ($response == 'close') ? displayResponseClose($message) : $message;
 	}
 
 	@chmod($temp_ssh_key, 0400);
@@ -3316,7 +3318,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22,
 	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 	if (!$ssh_user) {
 		if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-		return displayResponseClose(noSSHDefined('user'));
+		return ($response == 'close') ? displayResponseClose(noSSHDefined('user')) : noSSHDefined('user');
 	}
 
 	/** Run remote command */
@@ -3324,7 +3326,8 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22,
 		/** Test the port first */
 		if (!socketTest($host, $port, 10)) {
 			if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-			return displayResponseClose(sprintf(_('Failed: could not access %s (tcp/%d).'), $host, $port));
+			$message = sprintf(_('Failed: could not access %s (tcp/%d).'), $host, $port);
+			return ($response == 'close') ? displayResponseClose($message) : $message;
 		}
 
 		/** Test SSH authentication */
@@ -3337,9 +3340,11 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22,
 
 			/** Handle error codes */
 			if ($rc == 255) {
-				return displayResponseClose(_('Failed: Could not login via SSH. Check the system logs on the client for the reason.'));
+				$message = _('Failed: Could not login via SSH. Check the system logs on the client for the reason.');
+				return ($response == 'close') ? displayResponseClose($message) : $message;
 			} elseif ($client_check == 'include') {
-				return displayResponseClose(_('Failed: Client file is not present - is the client software installed?'));
+				$message = _('Failed: Client file is not present - is the client software installed?');
+				return ($response == 'close') ? displayResponseClose($message) : $message;
 			}
 		}
 		unset($output);
