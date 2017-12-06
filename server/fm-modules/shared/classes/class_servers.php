@@ -301,7 +301,7 @@ class fm_shared_module_servers {
 		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 		
 		if ($action == 'buildconf') {
-			if (getOption('enable_named_checks', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+			if (getOption('enable_config_checks', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
 				global $fm_module_buildconf;
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
 
@@ -315,7 +315,9 @@ class fm_shared_module_servers {
 
 				list($raw_data, $response) = $fm_module_buildconf->buildServerConfig($data);
 
-				$response .= @$fm_module_buildconf->namedSyntaxChecks($raw_data);
+				if (method_exists($fm_module_buildconf, 'processConfigsChecks')) {
+					$response .= @$fm_module_buildconf->processConfigsChecks($raw_data);
+				}
 				if (strpos($response, 'error') !== false) return buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
 			}
 

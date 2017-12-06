@@ -31,12 +31,10 @@ class fm_shared_module_buildconf {
 	 * @return string
 	 */
 	function processConfigs($raw_data) {
-		global $fm_module_buildconf;
-		
 		$preview = $check_status = null;
 		
-		if (method_exists($fm_module_buildconf, 'processConfigsChecks')) {
-			$check_status = $fm_module_buildconf->processConfigsChecks($raw_data);
+		if (method_exists($this, 'processConfigsChecks')) {
+			$check_status = $this->processConfigsChecks($raw_data);
 		}
 		foreach ($raw_data['files'] as $filename => $fileinfo) {
 			if (is_array($fileinfo)) {
@@ -52,7 +50,7 @@ class fm_shared_module_buildconf {
 				$contents_array = explode("\n", $contents);
 				foreach ($contents_array as $line) {
 					$preview .= '<font color="#ccc">' . str_pad($i, strlen(count($contents_array)), ' ', STR_PAD_LEFT) . '</font> ';
-					if (strpos($check_status, "$filename:$i:") !== false) {
+					if (strpos($check_status, "$filename:$i:") !== false || strpos($check_status, "$filename line $i:") !== false) {
 						$preview .= sprintf('<font color="red">%s</font>', $line);
 					} else {
 						$preview .= $line;
@@ -88,8 +86,6 @@ class fm_shared_module_buildconf {
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);
 
-		$data->server_build_all = true;
-		
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
 			$server_result = $fmdb->last_result;
@@ -220,6 +216,37 @@ class fm_shared_module_buildconf {
 	}
 	
 
+	/**
+	 * Updates tables to reset flags
+	 *
+	 * @since 3.1
+	 * @package facileManager
+	 *
+	 * @param array $post_data Array containing data posted by client
+	 * @return null
+	 */
+	function getSyntaxCheckMessage($type, $addl = array()) {
+		global $__FM_CONFIG;
+		
+		$uname = php_uname('n');
+		extract($addl);
+		
+		$messages = array(
+			'binary' => sprintf('<div id="config_check" class="info"><p>%s</p></div>', 
+							sprintf(_('The %s binary cannot be found on %s. If it was installed, these configs could be checked for syntax.'), $binary, $uname)),
+			'writeable' => sprintf(_('%s is not writeable by %s so the configuration checks cannot be performed.'), $fm_temp_directory, $__FM_CONFIG['webserver']['user_info']['name']),
+			'sudo' => sprintf(_('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
+							$__FM_CONFIG['webserver']['user_info']['name'], $uname,
+							'<br /><pre>' . $checkconf_cmd . '</pre><p>',
+							'<pre>' . $checkconf_results . '</pre>'),
+			'errors' => sprintf('%s<br /><pre>%s</pre>', _('Your configuration contains one or more errors:'), $checkconf_results),
+			'loadable' => _('Your configuration is loadable.')
+			);
+		
+		return (array_key_exists($type, $messages)) ? $messages[$type] : null;
+	}
+	
+	
 }
 
 ?>

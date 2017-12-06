@@ -1998,8 +1998,8 @@ function upgradefmDNS_3005($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 3.0.5 */
-function upgradefmDNS_3050($__FM_CONFIG, $running_version) {
+/** 3.1.0 */
+function upgradefmDNS_310($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '3.0-beta2', '<') ? upgradefmDNS_3005($__FM_CONFIG, $running_version) : true;
@@ -2018,6 +2018,8 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}domain_groups` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLE;
 
+	$inserts[] = "UPDATE `fm_options` SET `option_name` = 'enable_config_checks' WHERE `option_name` = 'enable_named_checks'";
+
 	/** Run queries */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
@@ -2034,7 +2036,7 @@ TABLE;
 		}
 	}
 
-	setOption('version', '3.0-beta2', 'auto', false, 0, 'fmDNS');
+	setOption('version', '3.1', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }

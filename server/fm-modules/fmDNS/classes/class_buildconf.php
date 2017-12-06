@@ -1280,26 +1280,26 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	
 	/**
-	 * Performs syntax checks with named-check* utilities
+	 * Processes the server config checks
 	 *
-	 * @since 1.0
+	 * @since 2.2
 	 * @package fmDNS
 	 *
-	 * @param array $files_array Array containing named files and contents
+	 * @param array $raw_data Array containing named files and contents
 	 * @return string
 	 */
-	function namedSyntaxChecks($files_array) {
+	function processConfigsChecks($files_array) {
 		global $__FM_CONFIG;
 		
 		if (!array_key_exists('server_serial_no', $files_array)) return;
-		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
+		if (getOption('enable_config_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
 		
 		$die = false;
 		$named_checkconf = findProgram('named-checkconf');
 		
 		$uname = php_uname('n');
 		if (!$named_checkconf) {
-			return sprintf('<div id="named_check" class="info"><p>%s</p></div>', 
+			return sprintf('<div id="config_check" class="info"><p>%s</p></div>', 
 					sprintf(__('The named utilities (specifically named-checkconf and named-checkzone) cannot be found on %s. If they were installed, these configs and zones could be checked for syntax.'), $uname));
 		}
 		
@@ -1314,7 +1314,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			if (!is_dir(dirname($tmp_dir . $file))) {
 				if (!@mkdir(dirname($tmp_dir . $file), 0777, true)) {
 					$class = 'class="info"';
-					$message = sprintf(__('%s is not writeable by %s so the named checks cannot be performed.'), $fm_temp_directory, $__FM_CONFIG['webserver']['user_info']['name']);
+					$message = $this->getSyntaxCheckMessage('writeable', array('fm_temp_directory' => $fm_temp_directory));
 					$die = true;
 					break;
 				}
@@ -1355,12 +1355,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$named_checkconf_results = implode("\n", $named_checkconf_results);
 				if (strpos($named_checkconf_results, 'sudo') !== false) {
 					$class = 'class="info"';
-					$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
-							$__FM_CONFIG['webserver']['user_info']['name'], $uname,
-							'<br /><pre>' . $named_checkconf_cmd . '</pre><p>',
-							'<pre>' . $named_checkconf_results . '</pre>');
+					$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $checkconf_cmd, 'checkconf_results' => $checkconf_results));
 				} else {
-					$message = __('Your named configuration contains one or more errors:') . '<br /><pre>' . $named_checkconf_results . '</pre>';
+					$message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkconf_results));
 				}
 				
 			/** Run named-checkzone */
@@ -1376,10 +1373,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								$named_checkzone_results .= implode("\n", $results);
 								if (strpos($named_checkzone_results, 'sudo') !== false) {
 									$class = 'class="info"';
-									$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
-											$__FM_CONFIG['webserver']['user_info']['name'], $uname,
-											'<br /><pre>' . $named_checkzone_cmd . '</pre><p>',
-											'<pre>' . $named_checkzone_results . '</pre>');
+									$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkzone_cmd, 'checkconf_results' => $named_checkzone_results));
 									break 2;
 								}
 							}
@@ -1388,10 +1382,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 				
 				if ($named_checkzone_results) {
-					if (empty($message)) $message = __('Your zone configuration files contain one or more errors:') . '<br /><pre>' . $named_checkzone_results . '</pre>';
+					if (empty($message)) $message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkzone_results));
 				} else {
 					$class = null;
-					$message = __('Your named configuration and zone files are loadable.');
+					$message = $this->getSyntaxCheckMessage('loadable');
 				}
 			}
 		}
@@ -1400,7 +1394,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		system('rm -rf ' . $tmp_dir);
 		
 		return <<<HTML
-			<div id="named_check" $class>
+			<div id="config_check" $class>
 				<p>$message</p>
 			</div>
 
@@ -1487,7 +1481,7 @@ HTML;
 			if (is_writeable($local_hint_zone)) {
 				file_put_contents($local_hint_zone, fopen($remote_hint_zone, 'r'));
 			} else {
-				return sprintf('<div id="named_check" class="info"><p>%s</p><p>%s</p></div>',
+				return sprintf('<div id="config_check" class="info"><p>%s</p><p>%s</p></div>',
 						sprintf(__('The root servers have been recently updated, but the webserver user (%s) cannot write to %s to update the hint zone.'), $__FM_CONFIG['webserver']['user_info']['name'], $local_hint_zone),
 						__('A local copy will be used instead.'));
 			}
@@ -1835,20 +1829,6 @@ HTML;
 			return null;
 		}
 	}
-	
-	/**
-	 * Processes the server config checks
-	 *
-	 * @since 2.2
-	 * @package fmDNS
-	 *
-	 * @param array $raw_data Array containing named files and contents
-	 * @return string
-	 */
-	function processConfigsChecks($raw_data) {
-		return @$this->namedSyntaxChecks($raw_data);
-	}
-	
 	
 	/**
 	 * Updates tables to reset flags
