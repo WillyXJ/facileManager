@@ -388,7 +388,7 @@ class fm_shared_module_servers {
 
 				if ($server_remote['failures']) {
 					/** Something went wrong */
-					return displayResponseClose(ucfirst(strtolower($friendly_action)) . ' failed.' . join('<br />', $server_remote['output']));
+					return displayResponseClose(ucfirst(strtolower($friendly_action)) . ' failed. ' . join('<br />', $server_remote['output']));
 				}
 				
 				if (!count($server_remote['output'])) $server_remote['output'][] = ucfirst(strtolower($friendly_action)) . ' was successful.';
