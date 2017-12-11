@@ -1,6 +1,7 @@
 1.3.3 (2017-??-??)
 ==================
 * Server - [improvement] Pagination is now displayed even with no items.
+* Server - [improvement] Popup boxes now disable body scrolling.
 
 1.3.2 (2017-10-10)
 ==================

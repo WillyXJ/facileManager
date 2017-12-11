@@ -154,6 +154,7 @@ echo '$(document).ready(function() {
 			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
 		}
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
@@ -209,6 +210,7 @@ echo '$(document).ready(function() {
 			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
 		}
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
@@ -415,6 +417,7 @@ echo '$(document).ready(function() {
 		$("#manage_item").fadeOut(200);
 		$("#manage_item_contents").fadeOut(200).html();
 		$("#manage_item_contents").removeClass("wide");
+		$("body").removeClass("fm-noscroll");
 		var link = $(this).attr("href");
 		if (link) {
 			window.location = link;
@@ -498,6 +501,7 @@ echo '$(document).ready(function() {
         var $this 		= $(this);
         user_id			= $this.attr("id");
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#response").fadeOut();
@@ -549,6 +553,7 @@ echo '$(document).ready(function() {
 					$("#manage_item_contents").delay(2000).fadeOut(200, function() {
 						$("#manage_item_contents").html();
 						$("#manage_item").fadeOut(200);
+						$("body").removeClass("fm-noscroll");
 					});
 				} else {
 					$("#popup_response").delay(2000).fadeOut(200, function() {
@@ -630,6 +635,7 @@ echo '$(document).ready(function() {
 
 		form_data += "&task=" + task + "&item=" + item + "&is_ajax=1";
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -823,6 +829,7 @@ echo '$(document).ready(function() {
 						} else {
 							var myDelay = 0;
 		
+							$("body").addClass("fm-noscroll");
 							$("#manage_item").fadeIn(200);
 							$("#manage_item_contents").fadeIn(200);
 							$("#manage_item_contents").html(response);
@@ -883,6 +890,7 @@ echo '$(document).ready(function() {
 			alert("You must select at least one " + item_type.slice(0,-1) + ".");
 		} else {
 			if (confirm("Are you sure you want to " + $("#bulk_action").val().toLowerCase() + " these selected " + item_type + "?")) {
+				$("body").addClass("fm-noscroll");
 				$("#manage_item").fadeIn(200);
 				$("#manage_item_contents").fadeIn(200);
 				$("#manage_item_contents").html("<p>' . _('Processing Bulk Action') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -922,6 +930,7 @@ echo '$(document).ready(function() {
 		if (confirm("' . _('Are you sure you want to process all updates?') . '")) {
 	        var $this 	= $(this);
 			$this.find("i").addClass("fa-spin");
+			$("body").addClass("fm-noscroll");
 			$("#manage_item").fadeIn(200);
 			$("#manage_item_contents").fadeIn(200);
 			$("#manage_item_contents").html("<p>' . _('Processing Updates') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -1146,6 +1155,7 @@ echo '$(document).ready(function() {
 								});
 							}
 						} else {
+							$("body").addClass("fm-noscroll");
 							$("#manage_item").fadeIn(200);
 							$("#manage_item_contents").fadeIn(200);
 							$("#manage_item_contents").html(\'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('header', __('Sort Order Results')))) . '\' + response + \'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('footer', _('OK'), array('cancel_button' => 'cancel')))) . '\');

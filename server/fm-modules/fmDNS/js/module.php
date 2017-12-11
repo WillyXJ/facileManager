@@ -43,6 +43,7 @@ $(document).ready(function() {
 		var $this 	= $(this);
 		domain_id	= $this.attr("id");
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . __('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -80,6 +81,7 @@ $(document).ready(function() {
 		var $this 	= $(this);
 		domain_id	= $this.attr("id");
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . __('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -124,6 +126,7 @@ $(document).ready(function() {
 			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
 		}
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
@@ -251,6 +254,7 @@ $(document).ready(function() {
 		item_type		= $("#table_edits").attr("name");
 		item_sub_type	= $this.attr("name");
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
@@ -480,6 +484,7 @@ function displayOptionPlaceholder(option_value) {
 }
 
 function loadDynamicZone() {
+	$("body").addClass("fm-noscroll");
 	$("#manage_item").fadeIn(200);
 	$("#manage_item_contents").fadeIn(200);
 	$("#manage_item_contents").html("<p>' . __('Pulling the latest zone data from the server') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -504,6 +509,7 @@ function loadDynamicZone() {
 			if (response.toLowerCase().indexOf("no records") > -1) {
 				$("#manage_item").fadeOut(200);
 				$("#manage_item_contents").fadeOut(200);
+				$("body").removeClass("fm-noscroll");
 				return;
 			}
 			
