@@ -177,6 +177,10 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 	} elseif (!isset($data['record_append']) && in_array($record_type, $append)) {
 		$data['record_append'] = 'no';
 	}
+	if (!empty($data['record_name']) && empty($data['record_value'])) {
+		$data['record_value'] = '@';
+		$data['record_append'] = 'no';
+	}
 	if (!empty($data['record_value'])) {
 		$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);
 		foreach ($data as $key => $val) {
