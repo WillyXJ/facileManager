@@ -3821,6 +3821,8 @@ HTML;
 function availableServers($server_id_type = 'serial', $include = array('all')) {
 	global $fmdb, $__FM_CONFIG;
 	
+	$server_array = null;
+	
 	if (!is_array($include)) {
 		$include = (array) $include;
 	}
