@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -1051,6 +1051,7 @@ function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), 
 		/** chown the dirs */
 		if (count($chown_dirs)) {
 			foreach($chown_dirs as $dir) {
+				if (!is_dir($dir)) continue;
 				$message = "Setting directory permissions on $dir\n";
 				if ($debug) echo $message;
 				if (!$dryrun) {

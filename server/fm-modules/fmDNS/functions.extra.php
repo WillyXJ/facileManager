@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -45,9 +45,25 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 	$available_zones_perms = isset($user_module_perms[$module_name]['access_specific_zones']) ? $user_module_perms[$module_name]['access_specific_zones'] : 0;
 	
 	/** Get available zones */
-	$available_zones[0][] = 'All Zones';
-	$available_zones[0][] = '0';
+	$available_zones[0][] = null;
+	$available_zones[0][0][] = 'All Zones';
+	$available_zones[0][0][] = '0';
 	
+	/** Zone Groups */
+	$j = 0;
+	basicGetList('fm_' . $__FM_CONFIG[$module_name]['prefix'] .'domain_groups', 'group_name', 'group_');
+	if ($fmdb->num_rows) {
+		$results = $fmdb->last_result;
+		$count = $fmdb->num_rows;
+		for ($i=0; $i<$count; $i++) {
+			$available_zones[__('Groups')][$j][] = $results[$i]->group_name;
+			$available_zones[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+			$j++;
+		}
+	}
+
+	/** Zones */
+	$j = 0;
 	basicGetList('fm_' . $__FM_CONFIG[$module_name]['prefix'] .'domains', 'domain_mapping`,`domain_name', 'domain_');
 	if ($fmdb->num_rows) {
 		$results = $fmdb->last_result;
@@ -57,10 +73,12 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 			if ($results[$i]->domain_view) {
 				$domain_name .= ' (' . getNameFromID($results[$i]->domain_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ')';
 			}
-			$available_zones[$i+1][] = $domain_name;
-			$available_zones[$i+1][] = $results[$i]->domain_id;
+			$available_zones[__('Zones')][$j][] = $domain_name;
+			$available_zones[__('Zones')][$j][] = $results[$i]->domain_id;
+			$j++;
 		}
 	}
+
 	$zones_list = buildSelect("user_caps[$module_name][access_specific_zones]", 1, $available_zones, $available_zones_perms, 5, null, true, null, 'wide_select', __('Select one or more zones'));
 	
 	return sprintf('

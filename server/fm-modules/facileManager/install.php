@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -223,7 +223,7 @@ TABLE;
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `$database`.`fm_logs` (
   `log_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL DEFAULT '0',
+  `user_login` varchar(255) NOT NULL DEFAULT '0',
   `account_id` int(11) NOT NULL DEFAULT '1',
   `log_module` varchar(255) NOT NULL,
   `log_timestamp` int(10) NOT NULL DEFAULT '0',

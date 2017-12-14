@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -1078,17 +1078,23 @@ function genRandomString($length) {
  */
 function convertURIToArray() {
 	$uri = explode('?', $_SERVER['REQUEST_URI']);
+//	echo '<pre>';
+//	print_r($uri);
 	if (count($uri) > 1) {
 		$raw_params = explode('&', $uri[1]);
+//		print_r($raw_params);
 		
 		for ($i=0; $i<count($raw_params); $i++) {
 			if (strpos($raw_params[$i], '=')) {
 				$param = explode('=', $raw_params[$i]);
 				$return_array[$param[0]] = $param[1];
+//		print_r($param);
 			} else {
 				$return_array[$raw_params[$i]] = null;
 			}
 		}
+//		print_r($return_array);
+//		exit;
 		return $return_array;
 	}
 	
@@ -1727,9 +1733,10 @@ function arrayKeysExist($keys, $array) {
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
  * @param string $classes Additional classes to apply to the div
+ * @param string $position Additional blocks to be on left or right
  * @return string
  */
-function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null) {
+function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null, $position = 'left') {
 	global $fmdb;
 	
 	$page_params = null;
@@ -1748,12 +1755,17 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	$page_links = array();
 	$page_links[] = '<div id="pagination_container">';
 	$page_links[] = '<div>';
+	if ($position == 'right') {
+		$page_links[] = buildPaginationCountMenu(0, 'pagination');
+		if ($addl_blocks) $addl_blocks = (array) $addl_blocks;
+		array_unshift($addl_blocks, null);
+	}
 	if (isset($addl_blocks)) {
 		foreach ((array) $addl_blocks as $block) {
 			$page_links[] = '<div>' . $block . '</div>';
 		}
 	}
-	$page_links[] = buildPaginationCountMenu(0, 'pagination');
+	if ($position == 'left') $page_links[] = buildPaginationCountMenu(0, 'pagination');
 
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
@@ -1998,7 +2010,7 @@ function getColumnLength($tbl_name, $column_name) {
  * @return boolean
  */
 function verifyIPAddress($ip_address) {
-	return filter_var($ip_address, FILTER_VALIDATE_IP);
+	return verifySimpleVariable($ip_address, FILTER_VALIDATE_IP);
 }
 
 
@@ -2024,6 +2036,21 @@ function verifyNumber($number, $min_range = 0, $max_range = null, $decimal_allow
 	} else {
 		return filter_var($number, FILTER_VALIDATE_INT);
 	}
+}
+
+
+/**
+ * Runs data through a filter check
+ *
+ * @since 3.1
+ * @package facileManager
+ *
+ * @param string $data Address to check
+ * @param mixed $filter_type PHP filter type to use
+ * @return boolean
+ */
+function verifySimpleVariable($data, $filter_type) {
+	return filter_var($data, $filter_type);
 }
 
 
@@ -2882,7 +2909,7 @@ function getMenuURL($search_slug = null) {
  * @param string $link Link to provide for a button
  * @return string Returns the popup section
  */
-function buildPopup($section, $text = null, $buttons = array('submit', 'cancel_button' => 'cancel'), $link = null) {
+function buildPopup($section, $text = null, $buttons = array('primary_button' => 'submit', 'cancel_button' => 'cancel'), $link = null) {
 	global $__FM_CONFIG;
 	
 	if (!$text) $text = _('Save');
@@ -3204,17 +3231,26 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 	/** Check capability */
 	if (@array_key_exists($capability, $allowed_capabilities[$module])) {
 		if (is_array($allowed_capabilities[$module][$capability])) {
+			/** Explode module groups */
+			foreach ($allowed_capabilities[$module][$capability] as $cap_id) {
+				if (strpos($cap_id, 'g_') !== false && function_exists('moduleExplodeGroup')) {
+					if ($new_cap = moduleExplodeGroup($cap_id, $capability)) {
+						$allowed_capabilities[$module][$capability] = array_merge($allowed_capabilities[$module][$capability], $new_cap);
+					}
+				}
+			}
 			if (is_array($extra_perm)) {
 				$found = false;
 				
 				foreach ($extra_perm as $needle) {
-					if (in_array($needle, $allowed_capabilities[$module][$capability]))
+					if (in_array((string) $needle, $allowed_capabilities[$module][$capability])) {
 						$found = true;
+					}
 				}
 				
 				return $found;
 			} else {
-				return in_array($extra_perm, $allowed_capabilities[$module][$capability]);
+				return in_array((string) $extra_perm, $allowed_capabilities[$module][$capability]);
 			}
 		}
 		
@@ -3249,9 +3285,11 @@ function isDebianSystem($os) {
  * @param string $command Command to run on $host
  * @param string $format Be silent or verbose with output
  * @param integer $port Remote port to connect to
+ * @param string $client_check 'include' or 'skip' the client file check
+ * @param string $response Response to include a close button or plaintext
  * @return boolean
  */
-function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22) {
+function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22, $client_check = 'include', $response = 'close') {
 	global $fm_name;
 	
 	$failures = false;
@@ -3264,13 +3302,14 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	/** Get SSH key */
 	$ssh_key = getOption('ssh_key_priv', $_SESSION['user']['account_id']);
 	if (!$ssh_key) {
-		return displayResponseClose(noSSHDefined('key'));
+		return ($response == 'close') ? displayResponseClose(noSSHDefined('key')) : noSSHDefined('key');
 	}
 
 	$temp_ssh_key = getOption('fm_temp_directory') . '/fm_id_rsa';
 	if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
 	if (@file_put_contents($temp_ssh_key, $ssh_key) === false) {
-		return displayResponseClose(sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key));
+		$message = sprintf(_('Failed: could not load SSH key into %s.'), $temp_ssh_key);
+		return ($response == 'close') ? displayResponseClose($message) : $message;
 	}
 
 	@chmod($temp_ssh_key, 0400);
@@ -3279,7 +3318,7 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 	$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 	if (!$ssh_user) {
 		if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-		return displayResponseClose(noSSHDefined('user'));
+		return ($response == 'close') ? displayResponseClose(noSSHDefined('user')) : noSSHDefined('user');
 	}
 
 	/** Run remote command */
@@ -3287,17 +3326,26 @@ function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22)
 		/** Test the port first */
 		if (!socketTest($host, $port, 10)) {
 			if (file_exists($temp_ssh_key)) @unlink($temp_ssh_key);
-			return displayResponseClose(sprintf(_('Failed: could not access %s (tcp/%d).'), $host, $port));
+			$message = sprintf(_('Failed: could not access %s (tcp/%d).'), $host, $port);
+			return ($response == 'close') ? displayResponseClose($message) : $message;
 		}
 
 		/** Test SSH authentication */
 		exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p $port -l $ssh_user $host 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $output, $rc);
 		if ($rc) {
 			/** Something went wrong */
-			@unlink($temp_ssh_key);
+			if ($rc == 255 || $client_check == 'include') {
+				@unlink($temp_ssh_key);
+			}
 
 			/** Handle error codes */
-			return ($rc == 255) ? displayResponseClose(_('Failed: Could not login via SSH. Check the system logs on the client for the reason.')) : displayResponseClose(_('Failed: Client file is not present - is the client software installed?'));
+			if ($rc == 255) {
+				$message = _('Failed: Could not login via SSH. Check the system logs on the client for the reason.');
+				return ($response == 'close') ? displayResponseClose($message) : $message;
+			} elseif ($client_check == 'include') {
+				$message = _('Failed: Client file is not present - is the client software installed?');
+				return ($response == 'close') ? displayResponseClose($message) : $message;
+			}
 		}
 		unset($output);
 
@@ -3770,39 +3818,51 @@ HTML;
  * @param string $server_id_type What server ID should be used (serial|id)
  * @return array
  */
-function availableServers($server_id_type = 'serial') {
+function availableServers($server_id_type = 'serial', $include = array('all')) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$server_array[0][] = null;
-	$server_array[0][0][] = __('All Servers');
-	$server_array[0][0][] = '0';
+	$server_array = null;
 	
-	$j = 0;
-	/** Server Groups */
-	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
-	if ($fmdb->num_rows && !$fmdb->sql_errors) {
-		$server_array[__('Groups')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[__('Groups')][$j][] = $results[$i]->group_name;
-			$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
-			$j++;
+	if (!is_array($include)) {
+		$include = (array) $include;
+	}
+	
+	if (in_array('all', $include)) {
+		$server_array[0][] = null;
+		$server_array[0][0][] = __('All Servers');
+		$server_array[0][0][] = '0';
+	}
+	
+	if (in_array('all', $include) || in_array('groups', $include)) {
+		$j = 0;
+		/** Server Groups */
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
+		if ($fmdb->num_rows && !$fmdb->sql_errors) {
+			$server_array[__('Groups')][] = null;
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$server_array[__('Groups')][$j][] = $results[$i]->group_name;
+				$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+				$j++;
+			}
 		}
 	}
-	$j = 0;
-	/** Server names */
-	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
-	if ($fmdb->num_rows && !$fmdb->sql_errors) {
-		$server_array[_('Servers')][] = null;
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$server_array[_('Servers')][$j][] = $results[$i]->server_name;
-			if ($server_id_type == 'serial') {
-				$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
-			} elseif ($server_id_type == 'id') {
-				$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+	if (in_array('all', $include) || in_array('servers', $include)) {
+		$j = 0;
+		/** Server names */
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
+		if ($fmdb->num_rows && !$fmdb->sql_errors) {
+			$server_array[_('Servers')][] = null;
+			$results = $fmdb->last_result;
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+				if ($server_id_type == 'serial') {
+					$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
+				} elseif ($server_id_type == 'id') {
+					$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+				}
+				$j++;
 			}
-			$j++;
 		}
 	}
 	

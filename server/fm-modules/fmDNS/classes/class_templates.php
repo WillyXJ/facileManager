@@ -28,15 +28,15 @@ class fm_module_templates {
 	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages);
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no templates.'));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages);
-
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
@@ -117,7 +117,7 @@ HTML;
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));
 		}
 		if ($prefix == 'domain') {
-			$excluded_fields = array_merge($excluded_fields, array('soa_serial_no', 'soa_id', $prefix . '_clone_domain_id', $prefix . '_reload', $prefix . '_clone_dname'));
+			$excluded_fields = array_merge($excluded_fields, array('soa_serial_no', 'soa_id', $prefix . '_clone_domain_id', $prefix . '_reload', $prefix . '_clone_dname', $prefix . '_groups'));
 		}
 
 		foreach ($row as $key => $val) {

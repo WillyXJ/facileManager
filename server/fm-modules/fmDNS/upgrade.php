@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -1994,6 +1994,49 @@ function upgradefmDNS_3005($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '3.0-beta2', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
+/** 3.1.0 */
+function upgradefmDNS_310($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '3.0-beta2', '<') ? upgradefmDNS_3005($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD `view_order_id` INT(11) NOT NULL AFTER `server_serial_no`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_groups` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `domain_name`";
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}domain_groups` (
+  `group_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `group_name` varchar(128) NOT NULL,
+  `group_comment` text NOT NULL,
+  `group_status` enum('active','disabled','deleted') NOT NULL
+  PRIMARY KEY (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+TABLE;
+
+	$inserts[] = "UPDATE `fm_options` SET `option_name` = 'enable_config_checks' WHERE `option_name` = 'enable_named_checks'";
+
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.1', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }

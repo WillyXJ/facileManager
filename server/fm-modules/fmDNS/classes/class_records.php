@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -937,6 +937,7 @@ HTML;
 					__('The update ports on the active name servers are not accessible'),
 					__('All name servers configured for this zone are not upgraded to at least 3.0-alpha1'),
 					__('All name servers configured for this zone are updated via cron (only SSH and http/https are supported)'));
+			return $return;
 		}
 		
 		$_FILES['import-file']['tmp_name'] = $_FILES['import-file']['name'] = '/tmp/db.' . $domain_name;

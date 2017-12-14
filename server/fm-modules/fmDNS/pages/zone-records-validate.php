@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -175,6 +175,10 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';
 	} elseif (!isset($data['record_append']) && in_array($record_type, $append)) {
+		$data['record_append'] = 'no';
+	}
+	if (!empty($data['record_name']) && empty($data['record_value'])) {
+		$data['record_value'] = '@';
 		$data['record_append'] = 'no';
 	}
 	if (!empty($data['record_value'])) {

@@ -1,3 +1,26 @@
+3.1.0 (2017-??-??)
+==================
+* Client - [improvement] Fixed fetching through proxy server. (Issue #399)
+* Client - [bug] Root hint zone is now included when recursion is allowed only
+           within certain views. (Issue #398)
+* Server - [bug] Fixed an issue where views for specific servers would be
+           created for all servers.
+* Server - [feature] View order can now be changed. (Issue #397)
+* Server - [bug] Fixed issue where config options for Rate Limit and RRSet were
+           incorrect.
+* Server - [bug] Fixed error messages regarding dynamic zones.
+* Server - [feature] Added support for zone groups. (Issue #375)
+* Server - [improvement] Pagination is now displayed even with no items.
+* Server - [bug] Fixed display of key item count.
+* Server - [bug] Zone cloning icon is no longer visible on cloned zones when
+           a restricted account is used.
+* Server - [bug] Fixed option type validation.
+* Server - [improvement] Zones based on templates can now be associated with
+           views independent of the template. (Issue #384)
+* Server - [improvement] Popup boxes now disable body scrolling.
+* Server - [improvement] Creating CNAME, NS, MX records with a null value now
+           implies the domain name. (Issue #390)
+
 3.0.4 (2017-10-10)
 ==================
 * Server - [bug] Fixed dashboard text.

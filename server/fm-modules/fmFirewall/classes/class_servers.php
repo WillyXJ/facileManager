@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -30,26 +30,26 @@ class fm_module_servers extends fm_shared_module_servers {
 	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+			$bulk_actions_list = array(__('Upgrade'), __('Build Config'));
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
+								'class' => 'header-tiny'
+							);
+		} else {
+			$bulk_actions_list = null;
+		}
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		$fmdb->num_rows = $num_rows;
+		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
+			
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no firewall servers.'));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-
-			if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-				$bulk_actions_list = array(__('Upgrade'), __('Build Config'));
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
-									'class' => 'header-tiny'
-								);
-			} else {
-				$bulk_actions_list = null;
-			}
-
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			$fmdb->num_rows = $num_rows;
-			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
-			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',

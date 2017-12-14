@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -96,7 +96,6 @@ function buildConf($url, $data) {
 	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
 		addLogEntry($message);
-		$rc_script = str_replace('__FILE__', $server_config_file, getStartupScript($server_type));
 		if ($rc_script === false) {
 			$last_line = "Cannot locate the start script\n";
 			if ($debug) echo fM($last_line);

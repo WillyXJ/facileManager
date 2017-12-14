@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -171,6 +171,15 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				}
 			}
 			break;
+		case 'update_sort':
+			if (!empty($_POST)) {
+				$result = $post_class->update($_POST);
+				if ($result !== true) {
+					exit($result);
+				}
+				exit('Success');
+			}
+			exit(__('The sort order could not be updated due to an invalid request.'));
 	}
 
 	exit;

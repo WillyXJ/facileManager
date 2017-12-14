@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -14,19 +14,19 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmDNS: Easily manage one or more ISC BIND servers                       |
+ | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
 $fm_user_caps['fmFirewall'] = array(
-		'view_all'				=> _('View All'),
-		'manage_servers'		=> _('Server Management'),
-		'build_server_configs'	=> _('Build Server Configs'),
-		'manage_policies'		=> _('Policy Management'),
-		'manage_objects'		=> _('Object Management'),
-		'manage_services'		=> _('Service Management'),
-		'manage_time'			=> _('Time Management')
+		'view_all'				=> __('View All'),
+		'manage_servers'		=> __('Server Management'),
+		'build_server_configs'	=> __('Build Server Configs'),
+		'manage_policies'		=> __('Policy Management'),
+		'manage_objects'		=> __('Object Management'),
+		'manage_services'		=> __('Service Management'),
+		'manage_time'			=> __('Time Management')
 	);
 

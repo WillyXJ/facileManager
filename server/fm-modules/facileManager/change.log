@@ -1,3 +1,17 @@
+3.1.0 (2017-??-??)
+==================
+* Server - [improvement] Added option to skip client file checks to the
+           runRemoteCommand() function.
+* Server - [improvement] Visually show disabled form buttons.
+* Server - [improvement] Additional blocks can now be placed on the left or right
+           of the table header.
+* Server - [improvement] Moved the grab CSS/JS to the core for other modules to use.
+* Server - [improvement] fm_logs now stores the username instead of userid.
+* Server - [improvement] Added support to explode module group IDs. (Issue #375)
+* Server - [improvement] Pagination is now displayed even with no items.
+* Client - [bug] Chown directories only if they exist.
+* Server - [improvement] Popup boxes now disable body scrolling.
+
 3.0.3 (2017-10-10)
 ==================
 * Server - [bug] Fixed LDAP authentication with group memberships. (Issue #392)

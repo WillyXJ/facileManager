@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -43,8 +43,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$server_serial_no = sanitize($post_data['SERIALNO']);
 		extract($post_data);
 
-		$data->server_build_all = true;
-		
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
 			$server_result = $fmdb->last_result;

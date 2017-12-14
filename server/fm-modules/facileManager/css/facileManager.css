@@ -585,6 +585,19 @@ h4 {
 	border-bottom: 3px solid #fff;
 }
 
+#table_edits.grab1 tbody tr td:first-child {
+	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
+}
+#table_edits.grab tbody tr td:nth-child(2) {
+	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
+}
+#table_edits.grabbing tbody tr td:nth-child(2) {
+	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/closedhand.cur) 8 8, move;
+}
+#table_edits.grabbing tbody tr {
+	border: 1px #dfdfdf solid;
+}
+
 .modules tr td {
 	vertical-align: top;
 	padding-right: 1em;
@@ -666,7 +679,7 @@ tbody {
 	white-space: nowrap;
 }
 
-.form-table input:not([type="image"]):not([type="checkbox"]),
+.form-table input:not([type="image"]):not([type="checkbox"]):not(.select2-input):not(.button),
 .display_results input:not([type="image"]):not([type="checkbox"]),
 .display_results textarea,
 #bulk_action,
@@ -1257,6 +1270,18 @@ a {
 	-webkit-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
 	-moz-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
 	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+input.disabled {
+	background-image: -moz-linear-gradient(top, #fcfcfc, #f5f5f5);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fcfcfc), to(#f5f5f5));
+	background-image: -webkit-linear-gradient(top, #fcfcfc, #f5f5f5);
+	background-image: -o-linear-gradient(top, #fcfcfc, #f5f5f5);
+	background-image: linear-gradient(to bottom, #fcfcfc, #f5f5f5);
+	background-color: #fcfcfc;
+	border-color: #d9d9d9;
+	color: #aeaeae;
+	cursor: not-allowed;
 }
 
 .left {
@@ -1864,8 +1889,43 @@ a.subelement_edit img {
 	width: 12px;
 }
 
-.tooltip-top {
+.tooltip-top, .tooltip-bottom, .tooltip-left, .tooltip-right {
 	color: #aaa;
+}
+
+#config_check {
+	margin: 10px;
+	padding: 3px;
+	font-size: 10pt;
+	border: 1px #C1DCC1 solid;
+	background-color: #E6F6E6;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	background-image: url('../../facileManager/images/greenshield64.png');
+	background-repeat: no-repeat;
+	background-attachment: local;
+	min-height: 59px;
+	overflow: auto;
+}
+#config_check p {
+	padding-left: 5em;
+}
+#config_check.info {
+	border-color: #E6E678;
+	background-color: #FFFFE5;
+	background-image: url('../../facileManager/images/yellowshield64.png');
+	background-repeat: no-repeat;
+}
+#config_check.error {
+	border-color: #B22400;
+	background-color: #EAC1B7;
+	background-image: url('../../facileManager/images/redshield64.png');
+	background-repeat: no-repeat;
+}
+#config_check pre {
+	margin-left: 6.5em;
+	padding: 0;
+	font-size: 9pt;
 }
 
 /** Firefox hacks :( */

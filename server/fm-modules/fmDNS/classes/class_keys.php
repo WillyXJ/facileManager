@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -28,19 +28,21 @@ class fm_dns_keys {
 	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		$addl_blocks = ($type == 'dnssec') ? $this->buildFilterMenu() : null;
+		
+		$fmdb->num_rows = $num_rows;
+
+		echo displayPagination($page, $total_pages, array(@buildBulkActionMenu($bulk_actions_list), $addl_blocks));
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="keys">%s</p>', __('There are no keys.'));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-			
-			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			$addl_blocks = ($type == 'dnssec') ? $this->buildFilterMenu() : null;
-			
-			echo displayPagination($page, $total_pages, array(@buildBulkActionMenu($bulk_actions_list), $addl_blocks));
-
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
@@ -632,7 +634,7 @@ HTML;
 		
 		$domain_view = isset($_GET['domain_id']) ? $_GET['domain_id'] : 0;
 		
-		$available_zones = array_reverse($fm_dns_zones->availableZones(true, 'master', true));
+		$available_zones = array_reverse($fm_dns_zones->availableZones('all', 'master', 'restricted'));
 		$available_zones[] = array(null, null);
 		$available_zones = array_reverse($available_zones);
 		

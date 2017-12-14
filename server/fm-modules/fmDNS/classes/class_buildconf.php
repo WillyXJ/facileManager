@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -383,14 +383,16 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 			/** Build Views */
 			if (is_array($server_group_ids)) {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no', 'g_" . implode("','g_", $server_group_ids) . "')");
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('server_serial_no', 'view_order_id'), 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no', 'g_" . implode("','g_", $server_group_ids) . "')");
 			} else {
-				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no')");
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('server_serial_no', 'view_order_id'), 'view_', "AND view_status='active' AND server_serial_no IN ('0', '$server_serial_no')");
 			}
 			if ($fmdb->num_rows) {
 				$view_result = $fmdb->last_result;
 				$view_count = $fmdb->num_rows;
 				for ($i=0; $i < $view_count; $i++) {
+					$include_hint_zone_local = $include_hint_zone;
+					
 					if ($view_result[$i]->view_comment) {
 						$comment = wordwrap($view_result[$i]->view_comment, 50, "\n");
 						$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
@@ -398,7 +400,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 					$config .= 'view "' . $view_result[$i]->view_name . "\" {\n";
 
-					/** Get cooresponding config records */
+					/** Get corresponding config records */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_status='active' AND cfg_name!='include' AND cfg_type='global' AND server_serial_no='0' AND view_id='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$config_result = $fmdb->last_result;
@@ -442,6 +444,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
 						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
+						
+						if ($cfg_name == 'recursion') {
+							$include_hint_zone_local = ($cfg_info == 'yes') ? true : false;
+						}
 					}
 					unset($config_array);
 
@@ -454,7 +460,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					/** Build rate limits */
 					$config .= $this->getRRSetOrder($view_result[$i]->view_id, $server_serial_no);
 
-					/** Get cooresponding keys */
+					/** Get corresponding keys */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', "AND key_status='active' AND key_view='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
 						$key_result = $fmdb->last_result;
@@ -489,7 +495,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 					
 					/** Generate zone file */
-					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, sanitize($view_result[$i]->view_name, '-'), $include_hint_zone);
+					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, sanitize($view_result[$i]->view_name, '-'), $include_hint_zone_local);
 					if ($error) $message = $error;
 					
 					/** Include zones for view */
@@ -1274,26 +1280,26 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	
 	/**
-	 * Performs syntax checks with named-check* utilities
+	 * Processes the server config checks
 	 *
-	 * @since 1.0
+	 * @since 2.2
 	 * @package fmDNS
 	 *
-	 * @param array $files_array Array containing named files and contents
+	 * @param array $raw_data Array containing named files and contents
 	 * @return string
 	 */
-	function namedSyntaxChecks($files_array) {
+	function processConfigsChecks($files_array) {
 		global $__FM_CONFIG;
 		
 		if (!array_key_exists('server_serial_no', $files_array)) return;
-		if (getOption('enable_named_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
+		if (getOption('enable_config_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
 		
 		$die = false;
 		$named_checkconf = findProgram('named-checkconf');
 		
 		$uname = php_uname('n');
 		if (!$named_checkconf) {
-			return sprintf('<div id="named_check" class="info"><p>%s</p></div>', 
+			return sprintf('<div id="config_check" class="info"><p>%s</p></div>', 
 					sprintf(__('The named utilities (specifically named-checkconf and named-checkzone) cannot be found on %s. If they were installed, these configs and zones could be checked for syntax.'), $uname));
 		}
 		
@@ -1308,7 +1314,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			if (!is_dir(dirname($tmp_dir . $file))) {
 				if (!@mkdir(dirname($tmp_dir . $file), 0777, true)) {
 					$class = 'class="info"';
-					$message = sprintf(__('%s is not writeable by %s so the named checks cannot be performed.'), $fm_temp_directory, $__FM_CONFIG['webserver']['user_info']['name']);
+					$message = $this->getSyntaxCheckMessage('writeable', array('fm_temp_directory' => $fm_temp_directory));
 					$die = true;
 					break;
 				}
@@ -1349,12 +1355,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$named_checkconf_results = implode("\n", $named_checkconf_results);
 				if (strpos($named_checkconf_results, 'sudo') !== false) {
 					$class = 'class="info"';
-					$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
-							$__FM_CONFIG['webserver']['user_info']['name'], $uname,
-							'<br /><pre>' . $named_checkconf_cmd . '</pre><p>',
-							'<pre>' . $named_checkconf_results . '</pre>');
+					$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $checkconf_cmd, 'checkconf_results' => $checkconf_results));
 				} else {
-					$message = __('Your named configuration contains one or more errors:') . '<br /><pre>' . $named_checkconf_results . '</pre>';
+					$message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkconf_results));
 				}
 				
 			/** Run named-checkzone */
@@ -1370,10 +1373,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								$named_checkzone_results .= implode("\n", $results);
 								if (strpos($named_checkzone_results, 'sudo') !== false) {
 									$class = 'class="info"';
-									$message = sprintf(__('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
-											$__FM_CONFIG['webserver']['user_info']['name'], $uname,
-											'<br /><pre>' . $named_checkzone_cmd . '</pre><p>',
-											'<pre>' . $named_checkzone_results . '</pre>');
+									$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkzone_cmd, 'checkconf_results' => $named_checkzone_results));
 									break 2;
 								}
 							}
@@ -1382,10 +1382,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 				
 				if ($named_checkzone_results) {
-					if (empty($message)) $message = __('Your zone configuration files contain one or more errors:') . '<br /><pre>' . $named_checkzone_results . '</pre>';
+					if (empty($message)) $message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkzone_results));
 				} else {
 					$class = null;
-					$message = __('Your named configuration and zone files are loadable.');
+					$message = $this->getSyntaxCheckMessage('loadable');
 				}
 			}
 		}
@@ -1394,7 +1394,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		system('rm -rf ' . $tmp_dir);
 		
 		return <<<HTML
-			<div id="named_check" $class>
+			<div id="config_check" $class>
 				<p>$message</p>
 			</div>
 
@@ -1459,6 +1459,7 @@ HTML;
 		if (getOption('proxy_enable')) {
 			$default_opts = array(
 				'http' => array(
+					'request_fulluri' => true,
 					'method' => 'GET',
 					'proxy' => 'tcp://' . getOption('proxy_host') . ':' . getOption('proxy_port')
 				)
@@ -1480,7 +1481,7 @@ HTML;
 			if (is_writeable($local_hint_zone)) {
 				file_put_contents($local_hint_zone, fopen($remote_hint_zone, 'r'));
 			} else {
-				return sprintf('<div id="named_check" class="info"><p>%s</p><p>%s</p></div>',
+				return sprintf('<div id="config_check" class="info"><p>%s</p><p>%s</p></div>',
 						sprintf(__('The root servers have been recently updated, but the webserver user (%s) cannot write to %s to update the hint zone.'), $__FM_CONFIG['webserver']['user_info']['name'], $local_hint_zone),
 						__('A local copy will be used instead.'));
 			}
@@ -1828,20 +1829,6 @@ HTML;
 			return null;
 		}
 	}
-	
-	/**
-	 * Processes the server config checks
-	 *
-	 * @since 2.2
-	 * @package fmDNS
-	 *
-	 * @param array $raw_data Array containing named files and contents
-	 * @return string
-	 */
-	function processConfigsChecks($raw_data) {
-		return @$this->namedSyntaxChecks($raw_data);
-	}
-	
 	
 	/**
 	 * Updates tables to reset flags

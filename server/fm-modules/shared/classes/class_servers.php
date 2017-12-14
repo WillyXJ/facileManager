@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -301,7 +301,7 @@ class fm_shared_module_servers {
 		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 		
 		if ($action == 'buildconf') {
-			if (getOption('enable_named_checks', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+			if (getOption('enable_config_checks', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
 				global $fm_module_buildconf;
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
 
@@ -315,7 +315,9 @@ class fm_shared_module_servers {
 
 				list($raw_data, $response) = $fm_module_buildconf->buildServerConfig($data);
 
-				$response .= @$fm_module_buildconf->namedSyntaxChecks($raw_data);
+				if (method_exists($fm_module_buildconf, 'processConfigsChecks')) {
+					$response .= @$fm_module_buildconf->processConfigsChecks($raw_data);
+				}
 				if (strpos($response, 'error') !== false) return buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
 			}
 
@@ -386,7 +388,7 @@ class fm_shared_module_servers {
 
 				if ($server_remote['failures']) {
 					/** Something went wrong */
-					return displayResponseClose(ucfirst(strtolower($friendly_action)) . ' failed.' . join('<br />', $server_remote['output']));
+					return displayResponseClose(ucfirst(strtolower($friendly_action)) . ' failed. ' . join('<br />', $server_remote['output']));
 				}
 				
 				if (!count($server_remote['output'])) $server_remote['output'][] = ucfirst(strtolower($friendly_action)) . ' was successful.';

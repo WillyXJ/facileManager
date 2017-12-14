@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `soa_serial_no` INT(2) NOT NULL DEFAULT  '0',
   `soa_serial_no_previous` INT(2) NOT NULL DEFAULT '0',
   `domain_name` varchar(255) NOT NULL DEFAULT '',
+  `domain_groups` varchar(255) NOT NULL DEFAULT '0',
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
   `domain_mapping` enum('forward','reverse') NOT NULL DEFAULT 'forward',
@@ -105,6 +106,17 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   PRIMARY KEY (`domain_id`),
   KEY `idx_domain_status` (`domain_status`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
+TABLE;
+
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}domain_groups` (
+  `group_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `group_name` varchar(128) NOT NULL,
+  `group_comment` text NOT NULL,
+  `group_status` enum('active','disabled','deleted') NOT NULL
+  PRIMARY KEY (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLE;
 
 	$table[] = <<<TABLE
@@ -270,6 +282,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}view
   `view_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `view_order_id` int(11) NOT NULL,
   `view_name` VARCHAR(255) NOT NULL ,
   `view_comment` text,
   `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'

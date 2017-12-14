@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -34,7 +34,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @param array $result Record rows of all servers
 	 * @return null
 	 */
-	function rows($result) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		$num_rows = $fmdb->num_rows;
@@ -50,11 +50,14 @@ class fm_module_servers extends fm_shared_module_servers {
 			$bulk_actions_list = null;
 		}
 
+		echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no servers.'));
 		} else {
-			echo @buildBulkActionMenu($bulk_actions_list, 'server_id_list');
-			
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',

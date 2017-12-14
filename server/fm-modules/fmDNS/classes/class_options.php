@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -28,17 +28,17 @@ class fm_module_options {
 	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="options">%s</p>', __('There are no options.'));
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-
-			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
-			
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
-
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
@@ -617,7 +617,7 @@ HTML;
 					case 'ipv4_address | *':
 					case 'ipv6_address | *':
 						if ($post['cfg_data'] != '*') {
-							if (!verifyIPAddress($post['cfg_data'])) $post['cfg_data'] . ' is an invalid IP address.';
+							if (!verifyIPAddress($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid IP address.';
 						}
 						break;
 				}

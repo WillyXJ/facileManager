@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < 45) ? fmUpgrade_3001($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_3040($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -668,6 +668,48 @@ function fmUpgrade_3001($database) {
 	}
 
 	upgradeConfig('fm_db_version', 45, false);
+	
+	return $success;
+}
+
+
+/** fM v3.0.4 **/
+function fmUpgrade_3040($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 45) ? fmUpgrade_3001($database) : true;
+	
+	if ($success) {
+		$table[] = "ALTER TABLE `$database`.`fm_logs` CHANGE `user_id` `user_login` VARCHAR(255) NOT NULL DEFAULT '0'";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+		
+		/** Update fm_logs with user_login from user_id */
+		$fmdb->get_results("SELECT * FROM `fm_users`");
+		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
+			$result = $fmdb->last_result;
+			for ($i=0; $i<$count; $i++) {
+				$fmdb->query("UPDATE fm_logs SET user_login = '" . $result[$i]->user_login . "' WHERE user_login='" . $result[$i]->user_id . "'");
+				if ($fmdb->sql_errors) return false;
+			}
+		}
+		
+		$fmdb->query("UPDATE fm_logs SET user_login = '$fm_name' WHERE user_login='0'");
+		if ($fmdb->sql_errors) return false;
+		
+	}
+
+	upgradeConfig('fm_db_version', 46, false);
 	
 	return $success;
 }

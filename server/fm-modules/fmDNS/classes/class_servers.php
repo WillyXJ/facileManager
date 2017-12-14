@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -30,32 +30,32 @@ class fm_module_servers extends fm_shared_module_servers {
 	function rows($result, $type, $page, $total_pages) {
 		global $fmdb;
 		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+
+		$bulk_actions_list = null;
+//		if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list[] = __('Upgrade');
+		}
+		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+			$bulk_actions_list[] = __('Build Config');
+		}
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		}
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		$fmdb->num_rows = $num_rows;
+		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
+			
 		if (!$result) {
 			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
 		} else {
-			$num_rows = $fmdb->num_rows;
-			$results = $fmdb->last_result;
-
-			$bulk_actions_list = null;
-//			if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) {
-				$bulk_actions_list[] = __('Upgrade');
-			}
-			if (currentUserCan('build_server_configs', $_SESSION['module'])) {
-				$bulk_actions_list[] = __('Build Config');
-			}
-			if (is_array($bulk_actions_list)) {
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
-									'class' => 'header-tiny header-nosort'
-								);
-			}
-
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			$fmdb->num_rows = $num_rows;
-			echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
-			
 			$table_info = array(
 							'class' => 'display_results sortable',
 							'id' => 'table_edits',
@@ -829,32 +829,6 @@ FORM;
 		return implode("\n", $response);
 	}
 	
-	function availableServers($default = 'blank') {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return = null;
-		
-		$j = 0;
-		if ($default == 'blank') {
-			$return[$j][] = '';
-			$return[$j][] = '';
-			$j++;
-		}
-		
-		$query = "SELECT server_id,server_name FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}servers WHERE account_id='{$_SESSION['user']['account_id']}' AND server_status='active' ORDER BY server_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$j][] = $results[$i]->server_name;
-				$return[$j][] = $results[$i]->server_id;
-				$j++;
-			}
-		}
-		
-		return $return;
-	}
-
 	/**
 	 * Updates the name server assignments
 	 *

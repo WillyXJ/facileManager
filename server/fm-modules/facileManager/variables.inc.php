@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -77,7 +77,7 @@ if (isset($_SESSION['module'])) {
 }
 
 /** Cleanup options */
-$__FM_CONFIG['clean']['prefixes']	= array('fm_accounts'=>'account', 'fm_users'=>'user');
+$__FM_CONFIG['clean']['prefixes']	= array('fm_accounts' => 'account', 'fm_users' => 'user');
 $__FM_CONFIG['clean']['days']		= 7;
 
 /** Text string variables */

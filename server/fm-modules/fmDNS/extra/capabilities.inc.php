@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -21,12 +21,12 @@
 */
 
 $fm_user_caps['fmDNS'] = array(
-		'view_all'				=> _('View All'),
-		'manage_servers'		=> _('Server Management'),
-		'build_server_configs'	=> _('Build Server Configs'),
-		'manage_zones'			=> _('Zone Management'),
-		'manage_records'		=> _('Record Management'),
-		'reload_zones'			=> _('Reload Zones'),
+		'view_all'				=> __('View All'),
+		'manage_servers'		=> __('Server Management'),
+		'build_server_configs'	=> __('Build Server Configs'),
+		'manage_zones'			=> __('Zone Management'),
+		'manage_records'		=> __('Record Management'),
+		'reload_zones'			=> __('Reload Zones'),
 		'manage_settings'		=> _('Manage Settings')
 	);
 

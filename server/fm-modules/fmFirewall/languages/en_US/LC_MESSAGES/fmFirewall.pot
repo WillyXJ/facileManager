@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-27 11:25-0600\n"
+"POT-Creation-Date: 2017-11-29 16:33-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -268,7 +268,7 @@ msgid_plural "Group name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:32
+#: server/fm-modules/fmFirewall/classes/class_objects.php:42
 #, php-format
 msgid "There are no %s objects defined."
 msgstr ""
@@ -355,7 +355,7 @@ msgstr ""
 msgid "Netmask is invalid."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:32
+#: server/fm-modules/fmFirewall/classes/class_policies.php:49
 msgid "There are no firewall policies."
 msgstr ""
 
@@ -466,16 +466,16 @@ msgstr ""
 msgid "none"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:34
-msgid "There are no firewall servers."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:40
+#: server/fm-modules/fmFirewall/classes/class_servers.php:37
 msgid "Upgrade"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:40
+#: server/fm-modules/fmFirewall/classes/class_servers.php:37
 msgid "Build Config"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_servers.php:51
+msgid "There are no firewall servers."
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_servers.php:60
@@ -581,7 +581,7 @@ msgstr ""
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:32
+#: server/fm-modules/fmFirewall/classes/class_services.php:42
 #, php-format
 msgid "There are no %s services defined."
 msgstr ""
@@ -709,7 +709,7 @@ msgstr ""
 msgid "ICMP code is invalid."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:32
+#: server/fm-modules/fmFirewall/classes/class_time.php:42
 msgid "There are no time restrictions defined."
 msgstr ""
 
@@ -824,6 +824,30 @@ msgstr ""
 msgid "Infinity"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/js/module.php:155
-msgid "Sort Order Results"
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:24
+msgid "View All"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:25
+msgid "Server Management"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:26
+msgid "Build Server Configs"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:27
+msgid "Policy Management"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:28
+msgid "Object Management"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:29
+msgid "Service Management"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/extra/capabilities.inc.php:30
+msgid "Time Management"
 msgstr ""

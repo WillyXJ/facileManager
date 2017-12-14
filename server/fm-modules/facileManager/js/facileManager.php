@@ -154,6 +154,7 @@ echo '$(document).ready(function() {
 			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
 		}
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
@@ -209,6 +210,7 @@ echo '$(document).ready(function() {
 			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
 		}
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
@@ -415,6 +417,7 @@ echo '$(document).ready(function() {
 		$("#manage_item").fadeOut(200);
 		$("#manage_item_contents").fadeOut(200).html();
 		$("#manage_item_contents").removeClass("wide");
+		$("body").removeClass("fm-noscroll");
 		var link = $(this).attr("href");
 		if (link) {
 			window.location = link;
@@ -498,6 +501,7 @@ echo '$(document).ready(function() {
         var $this 		= $(this);
         user_id			= $this.attr("id");
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#response").fadeOut();
@@ -549,6 +553,7 @@ echo '$(document).ready(function() {
 					$("#manage_item_contents").delay(2000).fadeOut(200, function() {
 						$("#manage_item_contents").html();
 						$("#manage_item").fadeOut(200);
+						$("body").removeClass("fm-noscroll");
 					});
 				} else {
 					$("#popup_response").delay(2000).fadeOut(200, function() {
@@ -630,6 +635,7 @@ echo '$(document).ready(function() {
 
 		form_data += "&task=" + task + "&item=" + item + "&is_ajax=1";
 
+		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -823,6 +829,7 @@ echo '$(document).ready(function() {
 						} else {
 							var myDelay = 0;
 		
+							$("body").addClass("fm-noscroll");
 							$("#manage_item").fadeIn(200);
 							$("#manage_item_contents").fadeIn(200);
 							$("#manage_item_contents").html(response);
@@ -883,6 +890,7 @@ echo '$(document).ready(function() {
 			alert("You must select at least one " + item_type.slice(0,-1) + ".");
 		} else {
 			if (confirm("Are you sure you want to " + $("#bulk_action").val().toLowerCase() + " these selected " + item_type + "?")) {
+				$("body").addClass("fm-noscroll");
 				$("#manage_item").fadeIn(200);
 				$("#manage_item_contents").fadeIn(200);
 				$("#manage_item_contents").html("<p>' . _('Processing Bulk Action') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -922,6 +930,7 @@ echo '$(document).ready(function() {
 		if (confirm("' . _('Are you sure you want to process all updates?') . '")) {
 	        var $this 	= $(this);
 			$this.find("i").addClass("fa-spin");
+			$("body").addClass("fm-noscroll");
 			$("#manage_item").fadeIn(200);
 			$("#manage_item_contents").fadeIn(200);
 			$("#manage_item_contents").html("<p>' . _('Processing Updates') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
@@ -1068,6 +1077,95 @@ echo '$(document).ready(function() {
 		});
 	});
 
+	var fixHelperModified = function(e, tr) {
+		var $originals = tr.children();
+		var $helper = tr.clone();
+		$helper.children().each(function(index) {
+			$(this).width($originals.eq(index).width())
+		});
+		return $helper;
+	},
+		updateIndex = function(e, ui) {
+			$("td.index", ui.item.parent()).each(function (i) {
+				$(this).html(i + 1);
+			});
+		};
+
+	$("#table_edits.grab tbody, #table_edits.grab1 tbody").sortable({
+		helper: fixHelperModified,
+		start: function() {
+			$(this).parent().addClass("grabbing");
+		},
+		stop: function() {
+			$(this).parent().removeClass("grabbing");
+			updateIndex;
+			
+			var items = $("#table_edits.grab tr, #table_edits.grab1 tr");
+			var linkIDs = [items.size()];
+			var index = 0;
+			
+			items.each(function(intIndex) {
+				linkIDs[index] = $(this).attr("id");
+				index++;
+			});
+			var new_sort_order = linkIDs.join(";");
+			
+			/** Update the database */
+	        var $this 				= $(this);
+	        var item_type			= $("#table_edits").attr("name");
+	        var policy_type			= getUrlVars()["type"];
+	        var server_serial_no	= getUrlVars()["server_serial_no"];
+	
+			var form_data = {
+				item_id: "",
+				item_type: item_type,
+				policy_type: policy_type,
+				server_serial_no: server_serial_no,
+				sort_order: new_sort_order,
+				action: "update_sort",
+				is_ajax: 1
+			};
+			console.log(form_data);
+	
+			$.ajax({
+				type: "POST",
+				url: "fm-modules/facileManager/ajax/processPost.php",
+				data: form_data,
+				success: function(response)
+				{
+				console.log(response);
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+						doLogout();
+						return false;
+					} else if (response != "Success") {
+						var eachLine = response.split("\n");
+						if (eachLine.length <= 2) {
+							$("#response").html("<p class=\"error\">"+response+"</p>");
+							$("#response")
+								.css("opacity", 0)
+								.slideDown(400, function() {
+									$("#response").animate(
+										{ opacity: 1 },
+										{ queue: false, duration: 200 }
+									);
+								});
+							if (response.toLowerCase().indexOf("response_close") == -1) {
+								$("#response").delay(3000).fadeTo(200, 0.00, function() {
+									$("#response").slideUp(400);
+								});
+							}
+						} else {
+							$("body").addClass("fm-noscroll");
+							$("#manage_item").fadeIn(200);
+							$("#manage_item_contents").fadeIn(200);
+							$("#manage_item_contents").html(\'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('header', __('Sort Order Results')))) . '\' + response + \'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('footer', _('OK'), array('cancel_button' => 'cancel')))) . '\');
+						}
+					}
+				}
+			});
+		}
+	}).disableSelection();
+	
 });
 
 function del(msg){

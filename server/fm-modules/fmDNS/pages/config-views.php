@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -76,13 +76,11 @@ echo <<<HTML
 
 HTML;
 	
-$sort_direction = null;
-$sort_field = 'view_name';
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array($sort_field, 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('view_order_id', 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_dns_views->rows($result, $page, $total_pages);

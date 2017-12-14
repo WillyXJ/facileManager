@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -63,7 +63,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 			
 			$available_classes = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class')), $cfg_data[0]);
 			$available_types = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type')), $cfg_data[1]);
-			$available_domains = buildSelect('cfg_data[]', 'cfg_data_zones', $fm_dns_zones->availableZones(true, null, false, 'all'), $cfg_data[2]);
+			$available_domains = buildSelect('cfg_data[]', 'cfg_data_zones', $fm_dns_zones->availableZones('no-templates', null, 'all', 'all'), $cfg_data[2]);
 			$available_orders = $fm_module_options->populateDefTypeDropdown('( random | cyclic | fixed )', $cfg_data[3]);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
@@ -108,7 +108,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 	
 	/** Add popup header and footer if missing */
 	if (strpos($server_zone_data, 'popup-header') === false) {
-		$server_zone_data = buildPopup('header', _('Error')) . '<p>' . makePlainText($server_zone_data) . '</p>' . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+		$server_zone_data = buildPopup('header', _('Error')) . '<p>' . $server_zone_data . '</p>' . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 	}
 	
 	exit($server_zone_data);
@@ -177,13 +177,18 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$post_class = $fm_module_options;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$type_map = @isset($_POST['request_uri']['option_type']) ? sanitize($_POST['request_uri']['option_type']) : 'global';
+			$type_map = @isset($_POST['request_uri']['type']) ? sanitize($_POST['request_uri']['type']) : 'global';
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
 			$type_map = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
 			$action = 'create';
 			if (!$add_new) $item_id = array('popup', 'template_menu');
+			
+			if ($type_map == 'groups') {
+				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups';
+				$prefix = 'group_';
+			}
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;

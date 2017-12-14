@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -138,7 +138,7 @@ $__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefix
 /** Default values */
 $named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkconf') . ', ' . findProgram('named-checkzone') : '/path/to/named-checkconf, /path/to/named-checkzone';
 $__FM_CONFIG['fmDNS']['default']['options'] = @array(
-		'enable_named_checks' => array(
+		'enable_config_checks' => array(
 				'description' => array(__('Enable named Checks'), __('Enable or disable named-checkconf and named-checkzone utilities.') . '</p>
 								<p>' . sprintf(__('sudo must be installed on %s with the following in sudoers:'), php_uname('n')) . '</p>
 								<pre>' . $__FM_CONFIG['webserver']['user_info']['name'] . ' ALL=(root) NOPASSWD: ' . $named_check_utils . '</pre>'),

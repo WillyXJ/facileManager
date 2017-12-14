@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                               |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -31,7 +31,7 @@ $fm_version = '3.0.3';
  *
  * @global int $fm_db_version
  */
-$fm_db_version = 45;
+$fm_db_version = 46;
 
 /**
  * Holds the required PHP version
