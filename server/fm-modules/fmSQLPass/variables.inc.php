@@ -31,10 +31,10 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmSQLPass'] = array(
-		'version'				=> '1.3.2',
+		'version'				=> '1.4',
 		'description'			=> __('Change database user passwords across a server farm running multiple database server types. Password complexity requirements are enforced to ensure secure passwords. Currently supported database servers include MySQL and PostgreSQL.', 'fmSQLPass'),
 		'prefix'				=> 'sqlpass_',
-		'required_fm_version'	=> '3.0'
+		'required_fm_version'	=> '3.1'
 	);
 
 /** Default values */
