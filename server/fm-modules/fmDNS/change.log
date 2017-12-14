@@ -1,4 +1,4 @@
-3.1.0 (2017-??-??)
+3.1.0 (2017-12-13)
 ==================
 * Client - [improvement] Fixed fetching through proxy server. (Issue #399)
 * Client - [bug] Root hint zone is now included when recursion is allowed only
