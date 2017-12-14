@@ -2013,7 +2013,7 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}domain_groups` (
   `account_id` int(11) NOT NULL,
   `group_name` varchar(128) NOT NULL,
   `group_comment` text NOT NULL,
-  `group_status` enum('active','disabled','deleted') NOT NULL
+  `group_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLE;

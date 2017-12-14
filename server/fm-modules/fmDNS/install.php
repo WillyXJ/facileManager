@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `account_id` int(11) NOT NULL,
   `group_name` varchar(128) NOT NULL,
   `group_comment` text NOT NULL,
-  `group_status` enum('active','disabled','deleted') NOT NULL
+  `group_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLE;
