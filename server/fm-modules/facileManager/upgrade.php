@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_310($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_311($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -710,6 +710,34 @@ function fmUpgrade_310($database) {
 	}
 
 	upgradeConfig('fm_db_version', 46, false);
+	
+	return $success;
+}
+
+
+/** fM v3.1.1 **/
+function fmUpgrade_311($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 46) ? fmUpgrade_310($database) : true;
+	
+	if ($success) {
+		/** Update fm_logs with user_login from user_id */
+		$fmdb->get_results("SELECT * FROM `fm_users`");
+		if ($fmdb->num_rows) {
+			$count = $fmdb->num_rows;
+			$result = $fmdb->last_result;
+			for ($i=0; $i<$count; $i++) {
+				$fmdb->query("UPDATE fm_logs SET user_login = '" . $result[$i]->user_login . "' WHERE user_login='" . $result[$i]->user_id . "'");
+				if ($fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 47, false);
 	
 	return $success;
 }

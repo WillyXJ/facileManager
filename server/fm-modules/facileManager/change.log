@@ -1,3 +1,7 @@
+3.1.1 (2017-12-??)
+==================
+* Server - [bug] Fixed username display in the Admin Logs. (Issue #405)
+
 3.1.0 (2017-12-13)
 ==================
 * Server - [improvement] Added option to skip client file checks to the

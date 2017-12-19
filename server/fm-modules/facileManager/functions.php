@@ -1308,16 +1308,16 @@ HTML;
  * @package facileManager
  */
 function addLogEntry($log_data, $module = null) {
-	global $fmdb, $__FM_CONFIG;
+	global $fmdb, $__FM_CONFIG, $fm_name;
 	
 	$account_id = isset($_SESSION['user']['account_id']) ? $_SESSION['user']['account_id'] : 0;
-	$user_id = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : 0;
+	$user_name = isset($_SESSION['user']['name']) ? $_SESSION['user']['name'] : $fm_name;
 	$module = isset($module) ? $module : $_SESSION['module'];
 	
 	$log_method = getOption('log_method');
 	
 	if ($log_method != 1) {
-		$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, $user_id, $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
+		$insert = "INSERT INTO `{$__FM_CONFIG['db']['name']}`.`fm_logs` VALUES (NULL, '$user_name', $account_id, '$module', " . time() . ", '" . sanitize($log_data) . "')";
 		if (is_object($fmdb)) {
 			$fmdb->query($insert);
 		} else {
