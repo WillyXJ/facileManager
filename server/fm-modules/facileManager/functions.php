@@ -1311,7 +1311,7 @@ function addLogEntry($log_data, $module = null) {
 	global $fmdb, $__FM_CONFIG, $fm_name;
 	
 	$account_id = isset($_SESSION['user']['account_id']) ? $_SESSION['user']['account_id'] : 0;
-	$user_name = isset($_SESSION['user']['name']) ? $_SESSION['user']['name'] : $fm_name;
+	$user_name = isset($_SESSION['user']['name']) ? $_SESSION['user']['name'] : 0;
 	$module = isset($module) ? $module : $_SESSION['module'];
 	
 	$log_method = getOption('log_method');
