@@ -1,3 +1,7 @@
+3.1.2 (2017-12-22)
+==================
+* Server - [bug] Fixed zone groups. (Issue #375)
+
 3.1.1 (2017-12-14)
 ==================
 * Server - [bug] Fixed upgrade process. (Issue #404)
