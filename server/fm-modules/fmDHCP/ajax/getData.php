@@ -158,17 +158,24 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$type_map = $_POST['item_type'];
 			$type_map = @isset($_POST['request_uri']['option_type']) ? sanitize($_POST['request_uri']['option_type']) : 'global';
 			break;
+		case 'leases':
+			$post_class = $fm_dhcp_leases;
+			break;
 	}
 	
 	if ($add_new) {
 		$edit_form = $post_class->printForm(null, $action, $type_map, $id);
 	} else {
-		basicGet('fm_' . $table, $id, $prefix, $field);
-		$results = $fmdb->last_result;
-		if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
-		
-		$edit_form_data[] = $results[0];
-		$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map);
+		if ($_POST['item_type'] != 'leases') {
+			basicGet('fm_' . $table, $id, $prefix, $field);
+			$results = $fmdb->last_result;
+			if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
+
+			$edit_form_data[] = $results[0];
+			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map);
+		} else {
+			$edit_form = $post_class->printForm();
+		}
 	}
 	
 	echo $edit_form;

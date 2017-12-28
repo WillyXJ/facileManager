@@ -146,10 +146,14 @@ HTML;
 		$config_name = $config_data;
 
 		/** Get child elements */
-		$hardware_address_entry = explode(' ', $this->getConfig($config_id, 'hardware'));
+		if (!isset($hardware_address_entry)) {
+			$hardware_address_entry = explode(' ', $this->getConfig($config_id, 'hardware'));
+		}
 		$hardware_address = isset($hardware_address_entry[1]) ? $hardware_address_entry[1] : null;
 		$hw_address_types = buildSelect('hardware-type', 'hardware-type', $hw_address_types, $hardware_address_entry[0]);
-		$fixed_address = $this->getConfig($config_id, 'fixed-address');
+		if (!isset($fixed_address)) {
+			$fixed_address = $this->getConfig($config_id, 'fixed-address');
+		}
 		
 		$return_form = sprintf('<tr>
 								<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
@@ -190,9 +194,17 @@ HTML;
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_type='" . rtrim($post['config_type'], 's') . "' AND config_name='" . rtrim($post['config_type'], 's') . "' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
 		if ($fmdb->num_rows) return __('This host already exists.');
 		
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['fixed-address'], 'config_', 'config_data', "AND config_type='host' AND config_name='fixed-address' AND config_is_parent='no' AND config_id!='{$post['config_id']}'");
+		if ($fmdb->num_rows) return __('This address already exists.');
+		
 		/** Valid MAC address? */
 		if ($post['hardware-type'] == 'ethernet' && version_compare(PHP_VERSION, '5.5.0', '>=') && !verifySimpleVariable($post['hardware'], FILTER_VALIDATE_MAC)) {
 			return __('The hardware address is invalid.');
+		}
+		
+		/** Valid IP address? */
+		if ($post['hardware-type'] == 'ethernet' && !verifyIPAddress($post['fixed-address'])) {
+			return __('The IP address is invalid.');
 		}
 		
 		return $post;

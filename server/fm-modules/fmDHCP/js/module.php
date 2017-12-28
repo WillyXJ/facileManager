@@ -7,13 +7,13 @@ header("Content-Type: text/javascript");
 echo '
 $(document).ready(function() {
 	
-	if (onPage("leases.php")) {
-		/* Dynamic zone compare routine */
-		var server_serial_no = getUrlVars()["server_serial_no"];
-		if (server_serial_no > 0) {
-			loadServerLeases();
-		}
-	}
+//	if (onPage("leases.php")) {
+//		/* Dynamic zone compare routine */
+//		var server_serial_no = getUrlVars()["server_serial_no"];
+//		if (server_serial_no > 0) {
+//			loadServerLeases();
+//		}
+//	}
 
 	$(function() {
 		$("#item_id").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "180px", "text-align": "left" }});

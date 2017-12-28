@@ -200,7 +200,7 @@ class fm_dhcp_objects {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware_address']}\nFixed Address: {$post['fixed_address']}";
+		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware']}\nFixed Address: {$post['fixed-address']}";
 		$log_message .= "\nComment: {$post['config_comment']}";
 		addLogEntry($log_message);
 		return true;
@@ -446,14 +446,14 @@ HTML;
 	 * @param string $action Add or edit
 	 * @return string
 	 */
-	function printForm($data = '', $action = 'add', $type = 'host') {
+	function printForm($data = '', $action = 'add', $type = 'host', $addl_vars = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$allow_deny_ignore = array('', 'allow', 'deny', 'ignore');
 		$on_off = array('', 'on', 'off');
 		$yes_no = array('', 'yes', 'no');
 		
-		$unique_form = $this->printObjectForm($data, $action, $type, array('on_off' => $on_off, 'allow_deny_ignore' => $allow_deny_ignore, 'yes_no' => $yes_no));
+		$unique_form = $this->printObjectForm($data, $action, $type, array_merge((array) $addl_vars, array('on_off' => $on_off, 'allow_deny_ignore' => $allow_deny_ignore, 'yes_no' => $yes_no)));
 		
 		$config_id = $config_parent_id = 0;
 		$config_name = $config_comment = $children = $config_children = $parents = null;
@@ -677,7 +677,7 @@ HTML;
 			if ($type != 'subnets') {
 				$members[] = 'subnet';
 			}
-			if ($type == 'hosts') {
+			if (in_array($type, array('hosts', 'host'))) {
 				$members = array('group');
 			}
 		} elseif ($relation == 'children') {

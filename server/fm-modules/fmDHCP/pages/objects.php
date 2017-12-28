@@ -42,7 +42,10 @@ if (currentUserCan($required_permission, $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			} else {
+				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			}
 		}
 		break;
 	case 'edit':
@@ -51,7 +54,10 @@ if (currentUserCan($required_permission, $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			} else {
+				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			}
 		}
 		break;
 	}

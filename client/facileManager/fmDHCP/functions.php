@@ -200,13 +200,11 @@ function moduleAddServer() {
  * @return array
  */
 function moduleInitWebRequest() {
-	$output = array();
-	
-	switch ($_POST['action']) {
-		case 'get_leases':
-			$output['failures'] = false;
-			$output['output'] = array();
+	$output['failures'] = false;
+	$output['output'] = array();
 
+	switch ($_POST['action']) {
+		case 'manage_leases':
 			exec(findProgram('sudo') . ' ' . findProgram('php') . ' ' . dirname(__FILE__) . '/client.php ' . $_POST['command_args'], $output['output'], $rc);
 			if ($rc) {
 				/** Something went wrong */

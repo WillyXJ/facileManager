@@ -43,6 +43,7 @@ $checks_array = @array('servers' => 'manage_servers',
 					'peers' => 'manage_peers',
 					'subnets' => 'manage_networks',
 					'shared' => 'manage_networks',
+					'leases' => 'manage_leases',
 					'options' => 'manage_servers'
 				);
 

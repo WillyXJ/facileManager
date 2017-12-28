@@ -30,15 +30,35 @@ if (currentUserCan('manage_leases', $_SESSION['module'])) {
 	$uri_params = generateURIParams(array('server_serial_no'), 'include');
 	
 	switch ($action) {
-	case 'edit':
+	case 'add':
 		if (!empty($_POST)) {
-			$result = $fm_dhcp_item->update($_POST, $type);
+			if (!isset($fm_dhcp_item)) {
+				if (!class_exists('fm_dhcp_hosts')) {
+					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_hosts.php');
+				}
+
+				$fm_dhcp_item = new fm_dhcp_hosts();
+			}
+
+			$result = $fm_dhcp_item->add($_POST, 'host');
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			} else {
+				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			}
 		}
 		break;
+//	case 'edit':
+//		if (!empty($_POST)) {
+//			$result = $fm_dhcp_item->update($_POST, $type);
+//			if ($result !== true) {
+//				$response = $result;
+//				$form_data = $_POST;
+//			} else header('Location: ' . $GLOBALS['basename'] . $uri_params);
+//		}
+//		break;
 	}
 }
 
@@ -57,9 +77,15 @@ echo <<<HTML
 	$avail_servers
 	</div>
 </div>
-<div id="lease_container">$placeholder</div>
 
 HTML;
+
+if ($server_serial_no) {
+	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_leases.php');
+	$placeholder = $fm_dhcp_leases->getServerLeases(sanitize($server_serial_no));
+}
+
+echo $placeholder;
 
 printFooter();
 
