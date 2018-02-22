@@ -27,10 +27,10 @@ function upgradefmDHCPSchema($module_name) {
 	@include(dirname(__FILE__) . '/variables.inc.php');
 	
 	/** Get current version */
-	$running_version = getOption('version', 0, $module_name);
+	$running_version = getOption('version', 0, 'fmDHCP');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.1', '<') ? upgradefmDHCP_101($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.2', '<') ? upgradefmDHCP_02($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false, 0, 'fmDHCP');
@@ -38,13 +38,41 @@ function upgradefmDHCPSchema($module_name) {
 	return true;
 }
 
-/** 1.0.1 */
-function upgradefmDHCP_101($__FM_CONFIG, $running_version) {
-	global $fmdb, $module_name;
+/** 0.2 */
+function upgradefmDHCP_02($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` ADD `def_prefix` VARCHAR(20) NULL DEFAULT NULL AFTER `def_option_type`";
 	
 	/** Insert upgrade steps here **/
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}table` ...";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}table` ...";
+	$inserts[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` (
+		`def_function`, `def_option_type`, `def_prefix`, `def_option`, `def_type`, `def_multiple_values`, `def_dropdown`, `def_max_parameters`, `def_direction`, `def_minimum_version`
+)
+VALUES
+('options', 'global', 'option', 'host-name', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'routers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'domain-name-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'subnet-mask', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'broadcast-address', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'domain-name', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'domain-search', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'time-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'log-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'swap-server', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'root-path', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'nis-domain', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'nis-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'font-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'x-display-manager', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'ntp-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'netbios-name-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'netbios-scope', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'netbios-node-type', '( integer )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'time-offset', '( integer )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'dhcp-server-identifier', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'slp-directory-agent', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
+('options', 'global', 'option', 'slp-service-scope', '( quoted_string )', 'no', 'no', '1', 'forward', NULL)
+";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -54,17 +82,44 @@ function upgradefmDHCP_101($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	/** Handle updating table with client version and module version **/
-	if (!setOption('fmDHCP_client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false)) return false;
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $query) {
+			$fmdb->query($query);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
 	
-	setOption('version', '1.0.1', 'auto', false, 0, $module_name);
+	/** Add empty options so updates work */
+	$new_options = array(
+		'host-name', 'routers', 'domain-name-servers', 'subnet-mask', 'broadcast-address',
+		'domain-name', 'domain-search', 'time-servers', 'log-servers', 'swap-server',
+		'root-path', 'nis-domain', 'nis-servers', 'font-servers', 'x-display-manager',
+		'ntp-servers', 'netbios-name-servers', 'netbios-scope', 'netbios-node-type',
+		'time-offset', 'dhcp-server-identifier', 'slp-directory-agent', 'slp-service-scope'
+	);
+	$fmdb->query("SELECT * FROM `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` WHERE `config_is_parent`='yes' AND `config_status`!='deleted'");
+	$num_rows = $fmdb->num_rows;
+	$result = $fmdb->last_result;
+	$sql_start = "INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` 
+		(`config_type`,`config_parent_id`,`config_name`,`config_data`,`config_assigned_to`) VALUES ";
+
+	for ($i=0; $i<$num_rows; $i++) {
+		foreach ($new_options as $option) {
+			$values[] = "('{$result[$i]->config_type}','{$result[$i]->config_id}','$option','','{$result[$i]->config_assigned_to}')";
+		}
+		$fmdb->query($sql_start . join(',', $values));
+		unset($values);
+	}
+
+	/** Handle updating table with module version **/
+	setOption('version', '0.2', 'auto', false, 0, 'fmDHCP');
 	
 	return true;
 }
 
 /** 1.1.1 */
 function upgradefmDHCP_111($__FM_CONFIG, $running_version) {
-	global $fmdb, $module_name;
+	global $fmdb;
 	
 	/** Check if previous upgrades have run (to support n+1) **/
 	$success = version_compare($running_version, '1.0.1', '<') ? upgradefmDHCP_101($__FM_CONFIG, $running_version) : true;
@@ -82,10 +137,15 @@ function upgradefmDHCP_111($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	/** Handle updating table with client version and module version **/
-	if (!setOption('fmDHCP_client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false)) return false;
-	
-	setOption('version', '1.1.1', 'auto', false, 0, $module_name);
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $query) {
+			$fmdb->query($query);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	/** Handle updating table with module version **/
+	setOption('version', '1.1.1', 'auto', false, 0, 'fmDHCP');
 	
 	return true;
 }

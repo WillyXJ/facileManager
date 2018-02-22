@@ -493,6 +493,24 @@ HTML;
 			}
 		}
 		
+		if (isset($post['subnet'])) {
+			$post['config_parent_id'] = $post['subnet'];
+			$post['config_type'] = 'subnet';
+			unset($post['subnet']);
+		} elseif (isset($post['shared'])) {
+			$post['config_parent_id'] = $post['shared'];
+			$post['config_type'] = 'shared';
+			unset($post['shared']);
+		} elseif (isset($post['group'])) {
+			$post['config_parent_id'] = $post['group'];
+			$post['config_type'] = 'group';
+			unset($post['group']);
+		} elseif (isset($post['host'])) {
+			$post['config_parent_id'] = $post['host'];
+			$post['config_type'] = 'host';
+			unset($post['host']);
+		}
+		
 		$post = $this->validateDefType($post, $def_option);
 		
 		return $post;
