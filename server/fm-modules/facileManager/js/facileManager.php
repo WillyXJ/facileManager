@@ -411,6 +411,11 @@ echo '$(document).ready(function() {
 		}
 	});
 
+	/* Form submits */
+	$("#manage_item_contents").delegate("form", "submit", function() {
+		$("#primary_button").parent().html("' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i>");
+	});
+	
     /* Cancel button */
     $("#manage_item_contents").delegate("#cancel_button, .close", "click tap", function(e) {
 		e.preventDefault();
