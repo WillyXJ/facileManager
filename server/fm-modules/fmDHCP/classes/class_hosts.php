@@ -194,7 +194,7 @@ HTML;
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_type='" . rtrim($post['config_type'], 's') . "' AND config_name='" . rtrim($post['config_type'], 's') . "' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
 		if ($fmdb->num_rows) return __('This host already exists.');
 		
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['fixed-address'], 'config_', 'config_data', "AND config_type='host' AND config_name='fixed-address' AND config_is_parent='no' AND config_id!='{$post['config_id']}'");
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['fixed-address'], 'config_', 'config_data', "AND config_type='host' AND config_name='fixed-address' AND config_is_parent='no' AND config_parent_id!='{$post['config_id']}'");
 		if ($fmdb->num_rows) return __('This address already exists.');
 		
 		/** Valid MAC address? */

@@ -43,6 +43,7 @@ function upgradefmDHCP_02($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` ADD `def_prefix` VARCHAR(20) NULL DEFAULT NULL AFTER `def_option_type`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','shared','subnet','group','host','pool','peer') NOT NULL DEFAULT 'global'";
 	
 	/** Insert upgrade steps here **/
 	$inserts[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` (
@@ -71,8 +72,10 @@ VALUES
 ('options', 'global', 'option', 'time-offset', '( integer )', 'no', 'no', '1', 'forward', NULL),
 ('options', 'global', 'option', 'dhcp-server-identifier', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
 ('options', 'global', 'option', 'slp-directory-agent', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
-('options', 'global', 'option', 'slp-service-scope', '( quoted_string )', 'no', 'no', '1', 'forward', NULL)
+('options', 'global', 'option', 'slp-service-scope', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
+('options', 'shared', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL)
 ";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` SET `def_option_type`='subnet' WHERE `def_option`='authoritative' AND `def_option_type`='global' LIMIT 1";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {

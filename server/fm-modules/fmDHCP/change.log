@@ -3,6 +3,7 @@
 * Both   - [feature] Added support to delete active leases and to convert a lease
            into a fixed address (host entry/reservation).
 * Server - [feature] Added support to set client options. (Issue #407)
+* Server - [bug] Fixed host edits.
 
 0.1 (2017-12-13)
 ================

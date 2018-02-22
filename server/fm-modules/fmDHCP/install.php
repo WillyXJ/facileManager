@@ -72,7 +72,7 @@ TABLE;
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
   `def_function` enum('options') NOT NULL DEFAULT 'options',
-  `def_option_type` enum('global','host','pool','peer') NOT NULL DEFAULT 'global',
+  `def_option_type` enum('global','shared','subnet','group','host','pool','peer') NOT NULL DEFAULT 'global',
   `def_prefix` varchar(20) DEFAULT NULL,
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
@@ -120,6 +120,8 @@ INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` 
 VALUES 
 ('options', 'host', NULL, 'hardware', '( ethernet | token ring | fddi )', 'no', 'yes', 1, 'forward', NULL),
 ('options', 'host', NULL, 'fixed-address', '( address_match_element )', 'no', 'no', 1, 'forward', NULL),
+('options', 'subnet', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL),
+('options', 'shared', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL),
 ('options', 'global', NULL, 'bootp', '( allow | deny | ignore )', 'no', 'yes', 1, 'reverse', NULL),
 ('options', 'global', NULL, 'booting', '( allow | deny | ignore )', 'no', 'yes', 1, 'reverse', NULL),
 ('options', 'global', NULL, 'duplicates', '( allow | deny | ignore )', 'no', 'yes', 1, 'reverse', NULL),
@@ -132,7 +134,6 @@ VALUES
 ('options', 'global', NULL, 'dynamic-bootp-lease-cutoff', '( date )', 'no', 'no', 1, 'forward', NULL),
 ('options', 'global', NULL, 'dynamic-bootp-lease-length', '( seconds )', 'no', 'no', 1, 'forward', NULL),
 ('options', 'global', NULL, 'get-lease-hostnames', '( on | off )', 'no', 'yes', 1, 'forward', NULL),
-('options', 'global', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL),
 ('options', 'global', NULL, 'always-reply-rfc1048', '( on | off )', 'no', 'yes', 1, 'forward', NULL),
 ('options', 'global', NULL, 'use-lease-addr-for-default-route', '( on | off )', 'no', 'yes', 1, 'forward', NULL),
 ('options', 'global', NULL, 'server-identifier', '( address_match_element )', 'no', 'no', 1, 'forward', NULL),
