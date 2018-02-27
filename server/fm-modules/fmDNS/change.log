@@ -1,3 +1,7 @@
+3.1.2 (2017-??-??)
+==================
+* Server - [bug] Fixed a fatal error during client interactions.
+
 3.1.1 (2017-12-14)
 ==================
 * Server - [bug] Fixed upgrade process. (Issue #404)
