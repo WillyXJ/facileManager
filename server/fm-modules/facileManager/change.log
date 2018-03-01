@@ -1,6 +1,7 @@
 3.2 (2018-??-??)
 ================
 * Server - [improvement] UI enhancements.
+* Server - [bug] Fixed client interaction 500 error codes.
 
 3.1.1 (2017-12-18)
 ==================

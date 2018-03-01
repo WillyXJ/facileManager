@@ -75,6 +75,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				if (function_exists('moduleCompleteClientInstallation')) {
 					moduleCompleteClientInstallation();
 				}
+				require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
 				$fm_module_servers->updateClientVersion();
 			}
 			
@@ -96,6 +97,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				}
 				
 				// Probably need to move/remove this
+				require_once(ABSPATH . 'fm-modules/shared/classes/class_servers.php');
 				$fm_module_servers->updateClientVersion();
 			}
 			
