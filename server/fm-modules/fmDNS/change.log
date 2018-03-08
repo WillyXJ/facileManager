@@ -1,6 +1,8 @@
 3.1.2 (2017-??-??)
 ==================
 * Server - [bug] Fixed a fatal error during client interactions.
+* Server - [bug] Fixed automatic PTR creations when using a class A reverse
+           zone. (Issue #408)
 
 3.1.1 (2017-12-14)
 ==================
