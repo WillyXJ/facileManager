@@ -3,6 +3,7 @@
 * Server - [bug] Fixed a fatal error during client interactions.
 * Server - [bug] Fixed automatic PTR creations when using a class A reverse
            zone. (Issue #408)
+* Server - [bug] Fixed support for multiple NAPTR record values. (Issue #409)
 
 3.1.1 (2017-12-14)
 ==================
