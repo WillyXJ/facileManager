@@ -120,7 +120,11 @@ class fm_users {
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) return _('This user already exists.');
 		
-		if ($user_group) $user_caps = '';
+		if ($user_group) {
+			$user_caps = '';
+		} else {
+			$user_group = 0;
+		}
 		
 		/** Process user permissions */
 		if (isset($user_caps[$fm_name])) {
@@ -136,8 +140,8 @@ class fm_users {
 			}
 		}
 		
-		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_email`, `user_group`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
-				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
+		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_comment`, `user_email`, `user_group`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
+				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_comment', '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
