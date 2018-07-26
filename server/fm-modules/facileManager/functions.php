@@ -3594,7 +3594,7 @@ function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $ima
 	if (!file_exists($phpmailer_file)) {
 		return _('Unable to send email - PHPMailer class is missing.');
 	} else {
-		require $phpmailer_file;
+		require_once($phpmailer_file);
 	}
 
 	$mail = new PHPMailer;
@@ -3818,10 +3818,14 @@ HTML;
  * @param string $server_id_type What server ID should be used (serial|id)
  * @return array
  */
-function availableServers($server_id_type = 'serial', $include = array('all')) {
+function availableServers($server_id_type = 'serial', $include = array('all'), $module = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$server_array = null;
+	
+	if (!$module) {
+		$module = $_SESSION['module'];
+	}
 	
 	if (!is_array($include)) {
 		$include = (array) $include;
@@ -3836,7 +3840,7 @@ function availableServers($server_id_type = 'serial', $include = array('all')) {
 	if (in_array('all', $include) || in_array('groups', $include)) {
 		$j = 0;
 		/** Server Groups */
-		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
+		$result = basicGetList('fm_' . $__FM_CONFIG[$module]['prefix'] . 'server_groups', 'group_name', 'group_');
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$server_array[__('Groups')][] = null;
 			$results = $fmdb->last_result;
@@ -3850,7 +3854,7 @@ function availableServers($server_id_type = 'serial', $include = array('all')) {
 	if (in_array('all', $include) || in_array('servers', $include)) {
 		$j = 0;
 		/** Server names */
-		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
+		$result = basicGetList('fm_' . $__FM_CONFIG[$module]['prefix'] . 'servers', 'server_name', 'server_');
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$server_array[_('Servers')][] = null;
 			$results = $fmdb->last_result;
