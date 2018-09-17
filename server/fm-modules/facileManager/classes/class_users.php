@@ -563,7 +563,7 @@ HTML;
 			}
 		}
 		
-		if (in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) {
+		if ((in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) && !userCan($user_id, 'do_everything') || $user_id == $_SESSION['user']['id']) {
 			if ($action == 'add') $button_disabled = 'disabled';
 			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
