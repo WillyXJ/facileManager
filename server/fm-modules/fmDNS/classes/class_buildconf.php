@@ -39,6 +39,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
 		
 		setTimezone();
 		
@@ -51,6 +52,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 		$GLOBALS['built_domain_ids'] = null;
 		
+		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
+		if (!$server_version) {
+			$server_version = '10.0';
+		}
+
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
 			$server_result = $fmdb->last_result;
@@ -195,6 +201,115 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$config .= "\n};\n\n";
 			}
 			unset($acl_result, $global_acl_array, $server_acl_array, $acl_array);
+
+
+			/** Build Masters */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=0 AND master_status="active" AND server_serial_no="0"');
+			if ($fmdb->num_rows) {
+				$master_result = $fmdb->last_result;
+				$count = $fmdb->num_rows;
+				for ($i=0; $i < $count; $i++) {
+					$global_master_array[$master_result[$i]->master_name] = $global_master_ports = null;
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $master_result[$i]->master_id . ' AND master_status="active" AND server_serial_no="0"');
+					$master_child_result = $fmdb->last_result;
+					for ($j=0; $j < $fmdb->num_rows; $j++) {
+						foreach(explode(',', $master_child_result[$j]->master_addresses) as $address) {
+							if ($master_child_result[$i]->master_comment) $global_master_array[$master_result[$i]->master_name] .= "\t// " . $master_child_result[$i]->master_comment . "\n";
+							if (trim($address)) $global_master_array[$master_result[$i]->master_name] .= "\t" . $fm_dns_acls->parseACL($address);
+							if ($master_child_result[$j]->master_port) $global_master_array[$master_result[$i]->master_name] .= ' port ' . $master_child_result[$j]->master_port;
+							if ($master_child_result[$j]->master_key_id) $global_master_array[$master_result[$i]->master_name] .= ' key "' . $fm_dns_keys->parseKey('key_' . $master_child_result[$j]->master_key_id) . '"';
+							$global_master_array[$master_result[$i]->master_name] .= ";\n";
+						}
+					}
+					if ($master_result[$i]->master_port) {
+						$global_master_ports .= ' port ' . $master_result[$i]->master_port;
+					}
+					if ($master_result[$i]->master_dscp && version_compare($server_version, '9.10', '>=')) {
+						$global_master_ports .= ' dscp ' . $master_result[$i]->master_dscp;
+					}
+					$global_master_array[$master_result[$i]->master_name] = array(rtrim(ltrim($global_master_array[$master_result[$i]->master_name], "\t"), ";\n"), $global_master_ports, $master_result[$i]->master_comment);
+					unset($master_child_result);
+				}
+			} else $global_master_array = array();
+
+			$server_master_array = array();
+			/** Override with group-specific configs */
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=0 AND master_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
+				if ($fmdb->num_rows) {
+					$server_master_result = $fmdb->last_result;
+					$master_config_count = $fmdb->num_rows;
+					for ($i=0; $i < $master_config_count; $i++) {
+						$server_master_addresses = $server_master_ports = null;
+						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $server_master_result[$i]->master_id . ' AND master_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
+						$master_child_result = $fmdb->last_result;
+						for ($j=0; $j < $fmdb->num_rows; $j++) {
+							foreach(explode(',', $master_child_result[$j]->master_addresses) as $address) {
+								if ($master_child_result[$i]->master_comment) $server_master_addresses .= "\t// " . $master_child_result[$i]->master_comment . "\n";
+								if (trim($address)) $server_master_addresses .= "\t" . $fm_dns_acls->parseACL(trim($address));
+								if ($master_child_result[$i]->master_port) $server_master_addresses .= ' port ' . $master_child_result[$i]->master_port;
+								if ($master_child_result[$i]->master_key_id) $server_master_addresses .= ' key "' . $fm_dns_keys->parseKey('key_' . $master_child_result[$i]->master_key_id) . '"';
+								$server_master_addresses .= ";\n";
+							}
+						}
+						if ($master_result[$i]->master_port) {
+							$server_master_ports .= ' port ' . $master_result[$i]->master_port;
+						}
+						if ($master_result[$i]->master_dscp && version_compare($server_version, '9.10', '>=')) {
+							$server_master_ports .= ' dscp ' . $master_result[$i]->master_dscp;
+						}
+						$server_master_array[$server_master_result[$i]->master_name] = array(rtrim(ltrim($server_master_addresses, "\t"), ";\n"), $server_master_ports, $server_master_result[$i]->master_comment);
+						unset($master_child_result, $server_master_addresses);
+					}
+				}
+			}
+
+			/** Override with server-specific Masters */
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=0 AND master_status="active" AND server_serial_no="' . $server_serial_no . '"');
+			if ($fmdb->num_rows) {
+				$server_master_result = $fmdb->last_result;
+				$master_config_count = $fmdb->num_rows;
+				for ($i=0; $i < $master_config_count; $i++) {
+					$server_master_addresses = $server_master_ports = null;
+					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $server_master_result[$i]->master_id . ' AND master_status="active"');
+					$master_child_result = $fmdb->last_result;
+					for ($j=0; $j < $fmdb->num_rows; $j++) {
+						foreach(explode(',', $master_child_result[$j]->master_addresses) as $address) {
+							if ($master_child_result[$i]->master_comment) $server_master_addresses .= "\t// " . $master_child_result[$i]->master_comment . "\n";
+							if (trim($address)) $server_master_addresses .= "\t" . $fm_dns_acls->parseACL(trim($address));
+							if ($master_child_result[$i]->master_port) $server_master_addresses .= ' port ' . $master_child_result[$i]->master_port;
+							if ($master_child_result[$i]->master_key_id) $server_master_addresses .= ' key "' . $fm_dns_keys->parseKey('key_' . $master_child_result[$i]->master_key_id) . '"';
+							$server_master_addresses .= ";\n";
+						}
+					}
+					if ($master_result[$i]->master_port) {
+						$server_master_ports .= ' port ' . $master_result[$i]->master_port;
+					}
+					if ($master_result[$i]->master_dscp && version_compare($server_version, '9.10', '>=')) {
+						$server_master_ports .= ' dscp ' . $master_result[$i]->master_dscp;
+					}
+					$server_master_array[$server_master_result[$i]->master_name] = array(rtrim(ltrim($server_master_addresses, "\t"), ";\n"), $server_master_ports, $server_master_result[$i]->master_comment);
+					unset($master_child_result, $server_master_addresses);
+				}
+			}
+
+			/** Merge arrays */
+			$master_array = array_merge($global_master_array, $server_master_array);
+
+			/** Format ACL config */
+			foreach ($master_array as $master_name => $master_data) {
+				list($master_item, $master_ports, $master_comment) = $master_data;
+				if ($master_comment) {
+					$comment = wordwrap($master_comment, 50, "\n");
+					$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
+					unset($comment);
+				}
+				$config .= 'masters "' . $master_name . '"' . $master_ports . " {\n";
+				$config .= "\t" . $master_item;
+				if ($master_item) $config .= ';';
+				$config .= "\n};\n\n";
+			}
+			unset($master_result, $global_master_array, $server_master_array, $master_array);
 
 
 			/** Build logging config */
@@ -1156,7 +1271,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			ksort($record_array);
 			
 			/** Zone file output */
-			foreach ($record_array as $rr=>$rr_array) {
+			foreach ($record_array as $rr => $rr_array) {
 				/** Check if rr is supported by server_version */
 				if (array_key_exists('Version', $rr_array) && version_compare($server_version, $rr_array['Version'], '<')) {
 					$zone_file .= ";\n; BIND " . $rr_array['Version'] . ' or greater is required for ' . $rr . ' types.' . "\n;\n\n";

@@ -303,6 +303,14 @@ function buildModuleHelpFile() {
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			
+			<p><b>Masters</b><br />
+			Masters can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. To define the masters, 
+			go to Config &rarr; <a href="__menu{Masters}">Masters</a>.</p>
+			<p>Masters can then be used when defining zones and defining the <i>masters</i> and <i>also-notify</i> options.</p>
+			<p>Server-level masters always supercede global ones.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage the masters.</i></p>
+			<br />
+			
 			<p><b>Options</b><br />
 			Options can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. Currently, the options 
 			configuration is rudimentary and can be defined at Config &rarr; <a href="__menu{Options}">Options</a>.</p>
@@ -319,7 +327,7 @@ function buildModuleHelpFile() {
 			
 			<p><b>Controls</b><br />
 			Controls can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. 
-			To manage the controls configuration, go to Config &rarr; <a href="__menu{Controls}">Controls</a>.</p>
+			To manage the controls configuration, go to Config &rarr; <a href="__menu{Operations}">Operations</a>.</p>
 			<p>Server-level controls always supercede global ones.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server controls.</i></p>
 			<br />
@@ -742,6 +750,7 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', __('Views'), __('Views'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-views.php');
 		addSubmenuPage('config-servers.php', __('ACLs'), __('Access Control Lists'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
 		addSubmenuPage('config-servers.php', __('Keys'), __('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
+		addSubmenuPage('config-servers.php', __('Masters'), __('Masters'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-masters.php');
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-servers.php', __('Logging'), __('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
 		addSubmenuPage('config-servers.php', __('Operations'), __('Operations'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
@@ -909,6 +918,14 @@ function getConfigAssoc($id, $type) {
 	/** Controls */
 	$query = "SELECT control_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}controls WHERE account_id='{$_SESSION['user']['account_id']}' AND control_status!='deleted' AND 
 			(control_addresses='{$type}_{$id}' OR control_addresses LIKE '{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id}')";
+	$result = $fmdb->get_results($query);
+	if ($fmdb->num_rows) {
+		return true;
+	}
+
+	/** Masters */
+	$query = "SELECT master_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}masters WHERE account_id='{$_SESSION['user']['account_id']}' AND master_status!='deleted' AND 
+			(master_addresses='{$type}_{$id}' OR master_addresses LIKE '{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id}')";
 	$result = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		return true;

@@ -115,7 +115,7 @@ $(document).ready(function() {
 	});
 
 	/* Add clone or acl element */
-	$("#zones,#acls").delegate("#plus", "click tap", function(e) {
+	$("#zones,#acls,#masters").delegate("#plus", "click tap", function(e) {
 		var $this 		= $(this);
 		item_type		= $("#table_edits").attr("name");
 		item_sub_type	= $this.attr("name");
@@ -139,6 +139,7 @@ $(document).ready(function() {
 			item_sub_type: item_sub_type,
 			domain_clone_domain_id: domain_clone_id,
 			acl_parent_id: domain_clone_id,
+			parent_id: domain_clone_id,
 			no_template: true,
 			request_uri: queryParameters,
 			is_ajax: 1
@@ -439,6 +440,15 @@ $(document).ready(function() {
 			$("#import-records").val("' . __('Import Zones') . '");
 		} else {
 			$("#import-records").val("' . __('Import Records') . '");
+		}
+	});
+
+	$("#manage_item_contents").delegate("#master_addresses", "change", function(e) {
+		if ($(this).val().indexOf("master_") > -1) {
+			$("#master_port").val("");
+			$("#master_port, #master_key_id").attr("disabled", "disabled");
+		} else {
+			$("#master_port, #master_key_id").removeAttr("disabled");
 		}
 	});
 

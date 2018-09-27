@@ -327,7 +327,7 @@ HTML;
 		if (is_array($post['control_keys'])) $post['control_keys'] = join(',', $post['control_keys']);
 		
 		if (!empty($post['control_ip']) && $post['control_ip'] != '*') {
-			if (!verifyIPAddress($post['control_ip'])) sprintf(__('%s is not a valid IP address.'), $post['control_ip']);
+			if (!verifyIPAddress($post['control_ip'])) return sprintf(__('%s is not a valid IP address.'), $post['control_ip']);
 		} else $post['control_ip'] = '*';
 		
 		if (empty($post['control_addresses'])) {

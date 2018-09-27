@@ -501,7 +501,8 @@ class fm_dns_zones {
 					$query .= "'masters', '" . $required_servers . "')";
 					$result = $fmdb->query($query);
 				}
-				$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+				$log_message .= formatLogKeyData('domain_', 'masters', $fm_dns_acls->parseACL($required_servers));
 			}
 		} else {
 			/** Remove all zone config options */
@@ -836,7 +837,7 @@ HTML;
 			return $this->printGroupsForm($data, $action);
 		}
 		
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options, $fm_dns_masters;
 		
 		$domain_id = $domain_name_servers = 0;
 		$domain_view = -1;
@@ -888,7 +889,10 @@ HTML;
 
 		$forwarders_show = $masters_show = 'none';
 		$domain_forward_servers = $domain_master_servers = $domain_forward = null;
-		$available_acls = json_encode(array());
+		$available_acls = $available_masters = json_encode(array());
+		if ($action == 'create') {
+			$available_masters = $fm_dns_masters->buildMasterJSON($domain_master_servers);
+		}
 		if ($domain_type == 'forward') {
 			$forwarders_show = 'block';
 			$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
@@ -897,7 +901,7 @@ HTML;
 		} elseif (in_array($domain_type, array('slave', 'stub'))) {
 			$masters_show = 'block';
 			$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
-			$available_acls = $fm_dns_acls->buildACLJSON($domain_master_servers, 0, 'none');
+			if ($domain_master_servers) $available_masters = $fm_dns_masters->buildMasterJSON($domain_master_servers);
 		}
 		
 		/** Build forward options */
@@ -1042,9 +1046,8 @@ HTML;
 				</tr>
 				%s
 				<tr class="include-with-template">
-					<th><label for="domain_view">%s</label></th>
+					<th><label for="domain_view">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td>%s
-					<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></td>
 				</tr>
 				<tr>
 					<th><label for="domain_mapping">%s</label></th>
@@ -1087,7 +1090,7 @@ HTML;
 				$action, $domain_id, $classes,
 				__('Domain Name'), $domain_name, $domain_name_length,
 				$select_template,
-				__('Views'), $views, __('Leave blank to use the views defined in the template.'),
+				__('Views'), __('Leave blank to use the views defined in the template.'), $views,
 				__('Zone Map'), $zone_maps,
 				__('Zone Type'), $domain_types,
 				$forwarders_show, $forward_dropdown, __('Define forwarders'), $domain_forward_servers,
@@ -1120,6 +1123,18 @@ HTML;
 					width: '300px',
 					tokenSeparators: [",", " ", ";"],
 					data: $available_acls
+				});
+				$("#define_masters .address_match_element").select2({
+					createSearchChoice:function(term, data) { 
+						if ($(data).filter(function() { 
+							return this.text.localeCompare(term)===0; 
+						}).length===0) 
+						{return {id:term, text:term};} 
+					},
+					multiple: true,
+					width: '300px',
+					tokenSeparators: [",", ";"],
+					data: $available_masters
 				});
 				$("#domain_clone_dname_override").click(function() {
 					if ($(this).is(':checked')) {
@@ -1797,8 +1812,10 @@ HTML;
 		/** Cleans up acl_addresses for future parsing **/
 		$clean_fields = array('forwarders', 'masters');
 		foreach ($clean_fields as $val) {
-			$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
-			if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
+			if (strpos($post['domain_required_servers'][$val], 'master_') === false) {
+				$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
+				if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
+			}
 		}
 
 		/** Forward servers */

@@ -33,7 +33,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
-	$query = "SELECT def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
+	$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
@@ -74,9 +74,45 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 					});
 					</script>',
 					__('Option Value'), $available_classes, $available_types, $available_domains, $available_orders);
+		} elseif (in_array($result[0]->def_option, array('masters', 'also-notify'))) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
+			$cfg_data_array = explode('{', rtrim($cfg_data, '}'));
+			$cfg_data_port = $cfg_data_dscp = null;
+			if (count($cfg_data_array) > 1) {
+				$cfg_data = trim($cfg_data_array[1]);
+				$cfg_data_array = explode(' ', $cfg_data_array[0]);
+				$port_key = array_search('port', $cfg_data_array);
+				$cfg_data_port = ($port_key !== false && isset($cfg_data_array[$port_key + 1])) ? $cfg_data_array[$port_key + 1] : null;
+				$dscp_key = array_search('dscp', $cfg_data_array);
+				$cfg_data_dscp = ($dscp_key !== false && isset($cfg_data_array[$dscp_key + 1])) ? $cfg_data_array[$dscp_key + 1] : null;
+				unset($port_key, $dscp_key);
+			}
+			$cfg_data = str_replace(array('{', '}'), '', $cfg_data);
+			$available_acls = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no);
+
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;">
+					<label for="cfg_data_port"><b>Port</b></label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a> <input type="text" id="cfg_data_port" name="cfg_data_port" value="%s" maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)" />
+					<label for="cfg_data_dscp"><b>DSCP</b></label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a> <input type="text" id="cfg_data_dscp" name="cfg_data_dscp" value="%s" maxlength="2" style="width: 5em;" onkeydown="return validateNumber(event)" /><br />
+					<input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
+					%s
+					<script>
+					$(".address_match_element").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: true,
+						width: "200px",
+						tokenSeparators: [",", ";"],
+						data: %s
+					});
+					</script>', __('Option Value'), sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_port, sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_dscp, $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			$checkbox = null;
-			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !$_POST['view_id']) {
+			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST)) {
 				$checked = getNameFromID($_POST['cfg_id'], "fm_{$__FM_CONFIG['fmDNS']['prefix']}config", 'cfg_', 'cfg_id', 'cfg_in_clause') == 'no' ? 'checked' : null;
 				$checkbox = sprintf('<br /><input name="cfg_in_clause" id="cfg_in_clause" type="checkbox" value="no" %s /><label for="cfg_in_clause">%s</label>', $checked, __('Define outside of global options clause'));
 			}
@@ -128,6 +164,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.ph
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
 
 /** Edits */
 $checks_array = array('servers' => 'manage_servers',
@@ -137,6 +174,7 @@ $checks_array = array('servers' => 'manage_servers',
 					'options' => 'manage_servers',
 					'logging' => 'manage_servers',
 					'controls' => 'manage_servers',
+					'masters' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'domain' => 'manage_zones',
 					'soa' => 'manage_zones'

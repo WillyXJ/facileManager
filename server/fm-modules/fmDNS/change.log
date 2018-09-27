@@ -5,6 +5,7 @@
            zone. (Issue #408)
 * Server - [bug] Fixed support for multiple NAPTR record values. (Issue #409)
 * Server - [improvement] Added support for additional logging categories.
+* Server - [feature] Added support for the masters clause. (Issue #401)
 
 3.1.1 (2017-12-14)
 ==================

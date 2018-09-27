@@ -35,6 +35,7 @@ include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zon
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
 
 /** Handle mass updates */
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
@@ -50,6 +51,7 @@ $checks_array = array('servers' => 'manage_servers',
 					'options' => 'manage_servers',
 					'logging' => 'manage_servers',
 					'controls' => 'manage_servers',
+					'masters' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'domain' => 'manage_zones',
 					'soa' => 'manage_zones'
