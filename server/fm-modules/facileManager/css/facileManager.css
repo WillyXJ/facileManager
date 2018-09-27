@@ -704,6 +704,13 @@ tbody {
 	font-weight: normal;
 }
 
+[data-tooltip]:after {
+	font-weight: normal;
+	white-space: normal;
+	text-transform: none;
+	text-align: initial;
+}
+
 .form-table td.status {
 	margin-bottom: 0;
 	padding-top: 16px;
