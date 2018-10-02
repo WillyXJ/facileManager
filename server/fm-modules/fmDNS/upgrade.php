@@ -2065,6 +2065,11 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLE;
 
+	$inserts[] = <<<INSERT
+UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data=REPLACE(cfg_data, '; ', ',') WHERE (cfg_name='also-notify' OR cfg_name='masters') AND cfg_data LIKE '%; %';
+UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data=REPLACE(cfg_data, ';', ',') WHERE (cfg_name='also-notify' OR cfg_name='masters') AND cfg_data LIKE '%;%';
+INSERT;
+
 	/** Run queries */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
