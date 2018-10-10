@@ -486,6 +486,9 @@ BODY;
 		
 		$row = '<tr class="import_swap">' . "\n";
 		$row .= "<td>$action</td>\n<td>";
+		if ($action == _('Delete')) {
+			$row .= '<input type="hidden" name="record_type" value="' . $array['record_type'] . '" />';
+		}
 		$row .= $editable ? '<span id="name' . $id . '" onclick="exchange(this);">' . $array['record_name'] . '</span><input onblur="exchange(this);" type="text" id="name' . $id . 'b" name="' . $db_action . '[' . $id . '][record_name]" value="' . $array['record_name'] . '" />' : $array['record_name'];
 		$row .= "</td>\n<td>";
 		$row .= $editable ? '<span id="ttl' . $id . '" onclick="exchange(this);">' . $array['record_ttl'] . '</span><input onblur="exchange(this);" type="text" id="ttl' . $id . 'b" name="' . $db_action . '[' . $id . '][record_ttl]" value="' . $array['record_ttl'] . '" />' : $array['record_ttl'];

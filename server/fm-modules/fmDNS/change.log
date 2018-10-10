@@ -6,6 +6,7 @@
 * Server - [bug] Fixed support for multiple NAPTR record values. (Issue #409)
 * Server - [improvement] Added support for additional logging categories.
 * Server - [feature] Added support for the masters clause. (Issue #401)
+* Server - [bug] Fixed dynamic update record deletions. (Issue #413)
 
 3.1.1 (2017-12-14)
 ==================
