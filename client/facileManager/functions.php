@@ -1035,11 +1035,13 @@ function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), 
 				$directory = dirname($filename);
 				@mkdir($directory, 0755, true);
 				chown($directory, $user);
+				@chgrp($directory, $user);
 				file_put_contents($filename, $contents);
 				
 				/** chown and chmod if applicable */
 				$runas = (isset($chown)) ? $chown : $user;
 				chown($filename, $runas);
+				@chgrp($filename, $runas);
 				unset($chown);
 				if (isset($mode)) {
 					chmod($filename, intval($mode));
@@ -1057,6 +1059,7 @@ function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), 
 				if (!$dryrun) {
 					addLogEntry($message);
 					chown($dir, $user);
+					@chgrp($dir, $user);
 				}
 			}
 		}
@@ -1278,7 +1281,7 @@ function createDir($dir, $user) {
 	if (!is_dir($dir)) {
 		@mkdir($dir);
 		@chown($dir, $user);
-		@chgrp($dir, $user);
+		@@chgrp($dir, $user);
 	}
 	
 	return true;
