@@ -540,7 +540,7 @@ class fm_dns_zones {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Zone groups */
-		if ($_POST['item_sub_type'] == 'groups') {
+		if (isset($_POST['item_sub_type']) && $_POST['item_sub_type'] == 'groups') {
 			$retval = $this->setZoneGroupMembers($domain_id, $this->getZoneGroupMembers($domain_id), 'remove');
 			if ($retval !== true) {
 				return $retval;

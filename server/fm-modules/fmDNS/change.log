@@ -9,6 +9,7 @@
 * Server - [bug] Fixed dynamic update record deletions. (Issue #413)
 * Server - [improvement] Added support to automatically create PTR records
            during the import wizard. (Issue #402)
+* Server - [bug] Fixed PHP errors.
 
 3.1.1 (2017-12-14)
 ==================
