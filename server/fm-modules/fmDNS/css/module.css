@@ -11,6 +11,10 @@ tr.import_swap select {
 	display: none;
 }
 
+tr.import_swap td {
+	white-space: nowrap;
+}
+
 #server_update_port_style,
 #soa_template_name {
 	display: none;

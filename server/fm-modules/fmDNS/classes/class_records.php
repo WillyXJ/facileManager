@@ -118,7 +118,7 @@ class fm_dns_records {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return false;
+		if ($fmdb->sql_errors) return false;
 		$insert_id = $fmdb->insert_id;
 		
 		/** Update domain with SOA ID */
@@ -187,7 +187,7 @@ class fm_dns_records {
 		}
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return false;
+		if ($fmdb->sql_errors) return false;
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;

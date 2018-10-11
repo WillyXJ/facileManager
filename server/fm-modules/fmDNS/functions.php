@@ -1158,4 +1158,104 @@ function moduleExplodeGroup($group_id, $capability) {
 }
 
 
+/**
+ * Checks the PTR zone for auto-PTR creation
+ *
+ * @since 3.2
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $ip Full IP address to parse
+ * @param integer $domain_id Forward domain ID to link to
+ * @return array
+ */
+function checkPTRZone($ip, $domain_id) {
+	global $fmdb, $__FM_CONFIG;
+
+	$octet = explode('.', $ip);
+	$zone = "'{$octet[2]}.{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[0]}.in-addr.arpa'";
+
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_status!='deleted'");
+	if ($fmdb->num_rows) {
+		$result = $fmdb->last_result;
+		return array($result[0]->domain_id, null);
+	} else {
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='reverse' AND domain_name LIKE '%-%-%'");
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$domain_name = $fmdb->last_result[$i]->domain_name;
+				$range = array();
+				foreach (array_reverse(explode('.', $domain_name)) as $key => $tmp_octect) {
+					if (in_array($key, array(0, 1))) continue;
+					
+					if (strpos($tmp_octect, '-') !== false) {
+						list($start, $end) = explode('-', $tmp_octect);
+						$range['start'][] = $start;
+						$range['end'][] = $end;
+					} else {
+						$range['start'][] = $tmp_octect;
+						$range['end'][] = $tmp_octect;
+					}
+				}
+				$range['start'] = array_pad($range['start'], 4, 0);
+				$range['end'] = array_pad($range['end'], 4, 255);
+
+				if (ip2long(join('.', $range['start'])) <= ip2long($ip) && ip2long(join('.', $range['end'])) >= ip2long($ip)) {
+					return array($fmdb->last_result[$i]->domain_id, null);
+				}
+			}
+		}
+	}
+	
+	/** No match so auto create if allowed */
+	if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+		return autoCreatePTRZone($zone, $domain_id);
+	}
+	return array(null, __('Reverse zone does not exist.'));
+}
+
+/**
+ * Create the reverse zone if it does not exist
+ *
+ * @since 3.2
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $new_zones Zone names to check
+ * @param integer $fwd_domain_id Forward domain ID to link to
+ * @return array
+ */
+function autoCreatePTRZone($new_zones, $fwd_domain_id) {
+	global $__FM_CONFIG, $fmdb;
+
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $fwd_domain_id, 'domain_', 'domain_id');
+	if ($fmdb->num_rows) {
+		$result = $fmdb->last_result;
+
+		$new_zone = explode(",", $new_zones);
+
+		$ptr_array['domain_id'] = 0;
+		$ptr_array['domain_name'] = trim($new_zone[0], "'");
+		$ptr_array['domain_mapping'] = 'reverse';
+		$ptr_array['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
+
+		$copy_fields = array('soa_id', 'domain_view', 'domain_type');
+		foreach ($copy_fields as $field) {
+			$ptr_array[$field] = $result[0]->$field;
+		}
+
+		global $fm_dns_zones;
+
+		if (!class_exists('fm_dns_zones')) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+		}
+		$retval = $fm_dns_zones->add($ptr_array);
+
+		return !is_int($retval) ? array(null, $retval) : array($retval, __('Created reverse zone.'));
+	}
+
+	return array(null, __('Forward domain not found.'));
+}
+
+
 ?>

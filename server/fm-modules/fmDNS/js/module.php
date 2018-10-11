@@ -435,6 +435,16 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#manage_item_contents").delegate(".import_skip", "click", function(e) {
+		if ($(this).is(":checked")) {
+			$(this).parent().parent().parent().addClass("disabled");
+			$(this).parent().nextAll().has(":checkbox").first().find(":checkbox").prop("checked", false).prop("disabled", true);
+		} else {
+			$(this).parent().parent().parent().removeClass("disabled");
+			$(this).parent().nextAll().has(":checkbox").first().find(":checkbox").prop("disabled", false);
+		}
+	});
+
 	$("#admin-tools-form").delegate("#zone_import_domain_list", "change", function(e) {
 		if ($(this).val() == 0) {
 			$("#import-records").val("' . __('Import Zones') . '");
