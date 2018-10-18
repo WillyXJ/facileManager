@@ -7,6 +7,7 @@
 * Server - [improvement] User passwords can now be set by users granted with
            the 'User Management' privilege. (Issue #416)
 * Client - [bug] Files are now chgrp'ed if available.
+* Server - [improvement] Added support for noscroll pages.
 
 3.1.1 (2017-12-18)
 ==================

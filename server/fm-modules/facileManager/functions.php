@@ -2193,9 +2193,10 @@ function setOSIcon($server_os) {
  * @param bool $allowed_to_add Whether the user can add new
  * @param string $name Name value of plus sign
  * @param string $rel Rel value of plus sign
+ * @param string $scroll Scroll or noscroll
  * @return string
  */
-function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null) {
+function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null) {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = getPageTitle();
@@ -2205,7 +2206,9 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 		$response = displayResponseClose($response);
 	}
 
-	echo '<div id="body_container">' . "\n";
+	echo '<div id="body_container"';
+	if ($scroll == 'noscroll') echo ' class="fm-noscroll" style="padding-bottom: 0;"';
+	echo '>' . "\n";
 	echo '<div id="response" ' . $style . '>' . $response . "</div>\n";
 	echo '<h2>' . $title;
 	
