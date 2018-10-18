@@ -55,6 +55,7 @@ class fm_dns_zones {
 		$addl_blocks = ($map != 'groups') ? array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention) : null;
 		$fmdb->num_rows = $num_rows;
 		echo displayPagination($page, $total_pages, $addl_blocks);
+		echo '<div class="overflow-container">';
 
 		if (!$result) {
 			$message = ($map == 'groups') ? __('There are no zone groups.') : __('There are no zones.');
@@ -84,6 +85,7 @@ class fm_dns_zones {
 				$title_array = array_merge($checkbox, $title_array);
 			}
 
+			echo '<div class="existing-container" style="bottom: 10em;">';
 			echo displayTableHeader($table_info, $title_array, 'zones');
 			
 			$y = 0;
@@ -110,7 +112,7 @@ class fm_dns_zones {
 				}
 			}
 			
-			echo "</tbody>\n</table>\n";
+			echo "</tbody>\n</table></div></div>\n";
 		}
 	}
 

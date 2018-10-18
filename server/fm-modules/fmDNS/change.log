@@ -10,6 +10,7 @@
 * Server - [improvement] Added support to automatically create PTR records
            during the import wizard. (Issue #402)
 * Server - [bug] Fixed PHP errors.
+* Server - [improvement] Zones page now keeps the page header at the top.
 
 3.1.1 (2017-12-14)
 ==================

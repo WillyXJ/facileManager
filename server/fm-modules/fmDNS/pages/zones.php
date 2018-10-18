@@ -130,7 +130,7 @@ $search_query = createSearchSQL(array('name', 'mapping', 'type'), 'domain_');
 $reload_allowed = reloadAllowed();
 if (!$reload_allowed && !$response) $response = '<p>' . sprintf(__('You currently have no name servers hosting zones. <a href="%s">Click here</a> to manage one or more servers.'), getMenuURL(_('Servers'))) . '</p>';
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_SESSION['module']), $map);
+echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_SESSION['module']), $map, null, 'noscroll');
 
 $sort_direction = null;
 if ($map == 'groups') {
