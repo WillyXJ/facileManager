@@ -173,7 +173,7 @@ VALUES
 ('options', 'peer', NULL, 'mclt', '( seconds )', 'no', 'no', 1, 'forward', NULL),
 ('options', 'peer', NULL, 'split', '( integer )', 'no', 'no', 1, 'forward', NULL),
 ('options', 'peer', NULL, 'hba', '( colon-separated-hex-list )', 'no', 'no', 1, 'forward', NULL),
-('options', 'peer', NULL, 'load balance max secs', '( seconds )', 'no', 'no', 1, 'forward', NULL)
+('options', 'peer', NULL, 'load balance max secs', '( seconds )', 'no', 'no', 1, 'forward', NULL),
 ('options', 'global', 'option', 'host-name', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
 ('options', 'global', 'option', 'routers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
 ('options', 'global', 'option', 'domain-name-servers', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
