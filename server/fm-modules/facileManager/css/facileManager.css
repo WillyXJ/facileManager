@@ -704,6 +704,13 @@ tbody {
 	font-weight: normal;
 }
 
+[data-tooltip]:after {
+	font-weight: normal;
+	white-space: normal;
+	text-transform: none;
+	text-align: initial;
+}
+
 .form-table td.status {
 	margin-bottom: 0;
 	padding-top: 16px;
@@ -1047,7 +1054,7 @@ a {
 	display: none;
 	opacity: 1.0;
 	min-width: 500px;
-	max-width: 70%;
+	max-width: 80%;
 	max-height: 60%;
 	background-color: #ffffff;
 	border: 1px solid #999;
@@ -1069,7 +1076,7 @@ a {
 }
 
 .wide {
-	margin-left: -460px;
+	margin-left: -540px;
 }
 
 .manage_form_container {

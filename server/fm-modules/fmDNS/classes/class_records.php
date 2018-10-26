@@ -66,6 +66,9 @@ class fm_dns_records {
 		if ($record_type != 'SOA') {
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE domain_id=$domain_id AND record_name='{$new_array['record_name']}'
 					AND record_value='{$new_array['record_value']}' AND record_type='$record_type' AND record_status != 'deleted'";
+			if ($record_type == 'NAPTR') {
+				$query .= " AND record_params='{$new_array['record_params']}' AND record_regex='{$new_array['record_regex']}'";
+			}
 			$result = $fmdb->get_results($query);
 			
 			if ($fmdb->num_rows) {
@@ -115,7 +118,7 @@ class fm_dns_records {
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return false;
+		if ($fmdb->sql_errors) return false;
 		$insert_id = $fmdb->insert_id;
 		
 		/** Update domain with SOA ID */
@@ -184,7 +187,7 @@ class fm_dns_records {
 		}
 		$result = $fmdb->query($query);
 		
-		if (!$fmdb->result) return false;
+		if ($fmdb->sql_errors) return false;
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;

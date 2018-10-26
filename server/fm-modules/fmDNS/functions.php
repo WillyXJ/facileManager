@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -303,6 +303,14 @@ function buildModuleHelpFile() {
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			
+			<p><b>Masters</b><br />
+			Masters can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. To define the masters, 
+			go to Config &rarr; <a href="__menu{Masters}">Masters</a>.</p>
+			<p>Masters can then be used when defining zones and defining the <i>masters</i> and <i>also-notify</i> options.</p>
+			<p>Server-level masters always supercede global ones.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage the masters.</i></p>
+			<br />
+			
 			<p><b>Options</b><br />
 			Options can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. Currently, the options 
 			configuration is rudimentary and can be defined at Config &rarr; <a href="__menu{Options}">Options</a>.</p>
@@ -319,7 +327,7 @@ function buildModuleHelpFile() {
 			
 			<p><b>Controls</b><br />
 			Controls can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. 
-			To manage the controls configuration, go to Config &rarr; <a href="__menu{Controls}">Controls</a>.</p>
+			To manage the controls configuration, go to Config &rarr; <a href="__menu{Operations}">Operations</a>.</p>
 			<p>Server-level controls always supercede global ones.</p>
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server controls.</i></p>
 			<br />
@@ -742,6 +750,7 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', __('Views'), __('Views'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-views.php');
 		addSubmenuPage('config-servers.php', __('ACLs'), __('Access Control Lists'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
 		addSubmenuPage('config-servers.php', __('Keys'), __('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
+		addSubmenuPage('config-servers.php', __('Masters'), __('Masters'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-masters.php');
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-servers.php', __('Logging'), __('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
 		addSubmenuPage('config-servers.php', __('Operations'), __('Operations'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
@@ -909,6 +918,14 @@ function getConfigAssoc($id, $type) {
 	/** Controls */
 	$query = "SELECT control_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}controls WHERE account_id='{$_SESSION['user']['account_id']}' AND control_status!='deleted' AND 
 			(control_addresses='{$type}_{$id}' OR control_addresses LIKE '{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id}')";
+	$result = $fmdb->get_results($query);
+	if ($fmdb->num_rows) {
+		return true;
+	}
+
+	/** Masters */
+	$query = "SELECT master_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}masters WHERE account_id='{$_SESSION['user']['account_id']}' AND master_status!='deleted' AND 
+			(master_addresses='{$type}_{$id}' OR master_addresses LIKE '{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id}')";
 	$result = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		return true;
@@ -1138,6 +1155,106 @@ function moduleExplodeGroup($group_id, $capability) {
 	}
 	
 	return $return;
+}
+
+
+/**
+ * Checks the PTR zone for auto-PTR creation
+ *
+ * @since 3.2
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $ip Full IP address to parse
+ * @param integer $domain_id Forward domain ID to link to
+ * @return array
+ */
+function checkPTRZone($ip, $domain_id) {
+	global $fmdb, $__FM_CONFIG;
+
+	$octet = explode('.', $ip);
+	$zone = "'{$octet[2]}.{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[0]}.in-addr.arpa'";
+
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_status!='deleted'");
+	if ($fmdb->num_rows) {
+		$result = $fmdb->last_result;
+		return array($result[0]->domain_id, null);
+	} else {
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_name', 'domain_', "AND domain_mapping='reverse' AND domain_name LIKE '%-%-%'");
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$domain_name = $fmdb->last_result[$i]->domain_name;
+				$range = array();
+				foreach (array_reverse(explode('.', $domain_name)) as $key => $tmp_octect) {
+					if (in_array($key, array(0, 1))) continue;
+					
+					if (strpos($tmp_octect, '-') !== false) {
+						list($start, $end) = explode('-', $tmp_octect);
+						$range['start'][] = $start;
+						$range['end'][] = $end;
+					} else {
+						$range['start'][] = $tmp_octect;
+						$range['end'][] = $tmp_octect;
+					}
+				}
+				$range['start'] = array_pad($range['start'], 4, 0);
+				$range['end'] = array_pad($range['end'], 4, 255);
+
+				if (ip2long(join('.', $range['start'])) <= ip2long($ip) && ip2long(join('.', $range['end'])) >= ip2long($ip)) {
+					return array($fmdb->last_result[$i]->domain_id, null);
+				}
+			}
+		}
+	}
+	
+	/** No match so auto create if allowed */
+	if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+		return autoCreatePTRZone($zone, $domain_id);
+	}
+	return array(null, __('Reverse zone does not exist.'));
+}
+
+/**
+ * Create the reverse zone if it does not exist
+ *
+ * @since 3.2
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $new_zones Zone names to check
+ * @param integer $fwd_domain_id Forward domain ID to link to
+ * @return array
+ */
+function autoCreatePTRZone($new_zones, $fwd_domain_id) {
+	global $__FM_CONFIG, $fmdb;
+
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $fwd_domain_id, 'domain_', 'domain_id');
+	if ($fmdb->num_rows) {
+		$result = $fmdb->last_result;
+
+		$new_zone = explode(",", $new_zones);
+
+		$ptr_array['domain_id'] = 0;
+		$ptr_array['domain_name'] = trim($new_zone[0], "'");
+		$ptr_array['domain_mapping'] = 'reverse';
+		$ptr_array['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
+
+		$copy_fields = array('soa_id', 'domain_view', 'domain_type');
+		foreach ($copy_fields as $field) {
+			$ptr_array[$field] = $result[0]->$field;
+		}
+
+		global $fm_dns_zones;
+
+		if (!class_exists('fm_dns_zones')) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+		}
+		$retval = $fm_dns_zones->add($ptr_array);
+
+		return !is_int($retval) ? array(null, $retval) : array($retval, __('Created reverse zone.'));
+	}
+
+	return array(null, __('Forward domain not found.'));
 }
 
 

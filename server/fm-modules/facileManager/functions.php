@@ -2193,9 +2193,10 @@ function setOSIcon($server_os) {
  * @param bool $allowed_to_add Whether the user can add new
  * @param string $name Name value of plus sign
  * @param string $rel Rel value of plus sign
+ * @param string $scroll Scroll or noscroll
  * @return string
  */
-function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null) {
+function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null) {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = getPageTitle();
@@ -2205,7 +2206,9 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 		$response = displayResponseClose($response);
 	}
 
-	echo '<div id="body_container">' . "\n";
+	echo '<div id="body_container"';
+	if ($scroll == 'noscroll') echo ' class="fm-noscroll" style="padding-bottom: 0;"';
+	echo '>' . "\n";
 	echo '<div id="response" ' . $style . '>' . $response . "</div>\n";
 	echo '<h2>' . $title;
 	
@@ -3594,7 +3597,7 @@ function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $ima
 	if (!file_exists($phpmailer_file)) {
 		return _('Unable to send email - PHPMailer class is missing.');
 	} else {
-		require $phpmailer_file;
+		require_once($phpmailer_file);
 	}
 
 	$mail = new PHPMailer;
@@ -3818,10 +3821,14 @@ HTML;
  * @param string $server_id_type What server ID should be used (serial|id)
  * @return array
  */
-function availableServers($server_id_type = 'serial', $include = array('all')) {
+function availableServers($server_id_type = 'serial', $include = array('all'), $module = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$server_array = null;
+	
+	if (!$module) {
+		$module = $_SESSION['module'];
+	}
 	
 	if (!is_array($include)) {
 		$include = (array) $include;
@@ -3836,7 +3843,7 @@ function availableServers($server_id_type = 'serial', $include = array('all')) {
 	if (in_array('all', $include) || in_array('groups', $include)) {
 		$j = 0;
 		/** Server Groups */
-		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_');
+		$result = basicGetList('fm_' . $__FM_CONFIG[$module]['prefix'] . 'server_groups', 'group_name', 'group_');
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$server_array[__('Groups')][] = null;
 			$results = $fmdb->last_result;
@@ -3850,7 +3857,7 @@ function availableServers($server_id_type = 'serial', $include = array('all')) {
 	if (in_array('all', $include) || in_array('servers', $include)) {
 		$j = 0;
 		/** Server names */
-		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
+		$result = basicGetList('fm_' . $__FM_CONFIG[$module]['prefix'] . 'servers', 'server_name', 'server_');
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$server_array[_('Servers')][] = null;
 			$results = $fmdb->last_result;

@@ -1,3 +1,14 @@
+3.2 (2018-??-??)
+================
+* Server - [improvement] UI enhancements.
+* Server - [bug] Fixed client interaction 500 error codes.
+* Server - [bug] Fixed user additions to include comments.
+* Server - [improvement] Add support to get server list for any module.
+* Server - [improvement] User passwords can now be set by users granted with
+           the 'User Management' privilege. (Issue #416)
+* Client - [bug] Files are now chgrp'ed if available.
+* Server - [improvement] Added support for noscroll pages.
+
 3.1.1 (2017-12-18)
 ==================
 * Server - [bug] Fixed username display in the Admin Logs. (Issue #405)

@@ -94,8 +94,13 @@ if (isset($create) && is_array($create)) {
 			/** Remove double quotes */
 			if (isset($data['record_value'])) $data['record_value'] = str_replace('"', '', $data['record_value']);
 			
-			$fm_dns_records->add($domain_id, $record_type, $data);
+			// Handle bulk import
+			if ($submit == 'Import' && isset($data['PTR'])) {
+				list($data['PTR'], $error_msg) = checkPTRZone($data['record_value'], $domain_id);
+			}
 			
+			$fm_dns_records->add($domain_id, $record_type, $data);
+
 			/** Are we auto-creating a PTR record? */
 			autoManagePTR($domain_id, $record_type, $data);
 			
@@ -157,7 +162,7 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 				if (strpos($domain_pieces[$i], '-')) break;
 				$subnet_ips .= $domain_pieces[$i] . '.';
 			}
-			$record_octets = array_reverse(explode('.', str_replace($subnet_ips, '', $data['record_value'])));
+			$record_octets = array_reverse(explode('.', substr($data['record_value'], strlen($subnet_ips))));
 			$temp_record_value = null;
 			for ($j=0; $j<count($record_octets); $j++) {
 				$temp_record_value .= $record_octets[$j] . '.';
@@ -168,15 +173,16 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 			return;
 		}
 
-		$array['record_status'] = $data['record_status'];
-		if ($data['record_status'] != 'deleted') {
+		if (isset($data['record_status'])) {
+			$array['record_status'] = $data['record_status'];
+		}
+		if (!isset($data['record_status']) || $data['record_status'] != 'deleted') {
 			$array = array(
 					'record_name' => $data['record_value'],
 					'record_ttl' => $data['record_ttl'],
 					'record_class' => $data['record_class'],
 					'record_value' => $data['record_name'] . $domain,
-					'record_comment' => $data['record_comment'],
-					'record_status' => $data['record_status']
+					'record_comment' => $data['record_comment']
 					);
 		}
 
@@ -189,9 +195,11 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 			array_pop($array);
 		}
 		
-		$fm_dns_records->add($data['PTR'], 'PTR', $array, 'replace');
-		if ($fmdb->insert_id != $forward_record_id) {
-			basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $forward_record_id, 'record_ptr_id', $fmdb->insert_id, 'record_id');
+		if (!isset($data['record_status']) || $data['record_status'] != 'deleted') {
+			$fm_dns_records->add($data['PTR'], 'PTR', $array, 'replace');
+			if ($fmdb->insert_id != $forward_record_id) {
+				basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $forward_record_id, 'record_ptr_id', $fmdb->insert_id, 'record_id');
+			}
 		}
 	}
 }

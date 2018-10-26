@@ -200,7 +200,7 @@ class fm_dhcp_objects {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware_address']}\nFixed Address: {$post['fixed_address']}";
+		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware']}\nFixed Address: {$post['fixed-address']}";
 		$log_message .= "\nComment: {$post['config_comment']}";
 		addLogEntry($log_message);
 		return true;
@@ -446,14 +446,16 @@ HTML;
 	 * @param string $action Add or edit
 	 * @return string
 	 */
-	function printForm($data = '', $action = 'add', $type = 'host') {
+	function printForm($data = '', $action = 'add', $type = 'host', $addl_vars = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$allow_deny_ignore = array('', 'allow', 'deny', 'ignore');
 		$on_off = array('', 'on', 'off');
 		$yes_no = array('', 'yes', 'no');
+		$slp_directory_agent = $slp_service_scope = null;
+		$slp_service_scope_only_checked = $slp_directory_agent_only_checked = null;
 		
-		$unique_form = $this->printObjectForm($data, $action, $type, array('on_off' => $on_off, 'allow_deny_ignore' => $allow_deny_ignore, 'yes_no' => $yes_no));
+		$unique_form = $this->printObjectForm($data, $action, $type, array_merge((array) $addl_vars, array('on_off' => $on_off, 'allow_deny_ignore' => $allow_deny_ignore, 'yes_no' => $yes_no)));
 		
 		$config_id = $config_parent_id = 0;
 		$config_name = $config_comment = $children = $config_children = $parents = null;
@@ -480,6 +482,38 @@ HTML;
 		$ddns_hostname = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ddns-hostname'));
 		$unknown_clients = buildSelect('unknown-clients', 'unknown-clients', $allow_deny_ignore, $this->getConfig($config_id, 'unknown-clients'));
 		$client_updates = buildSelect('client-updates', 'client-updates', $allow_deny_ignore, $this->getConfig($config_id, 'client-updates'));
+
+		$host_name = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'host-name'));
+		$routers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'routers'));
+		$subnet_mask = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'subnet-mask'));
+		$domain_name_servers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'domain-name-servers'));
+		$broadcast_address = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'broadcast-address'));
+		$domain_name = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'domain-name'));
+		$domain_search = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'domain-search'));
+		$time_servers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'time-servers'));
+		$log_servers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'log-servers'));
+		$swap_server = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'swap-server'));
+		$root_path = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'root-path'));
+		$nis_domain = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'nis-domain'));
+		$nis_servers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'nis-servers'));
+		$font_servers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'font-servers'));
+		$x_display_manager = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'x-display-manager'));
+		$ntp_servers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ntp-servers'));
+		$netbios_name_servers = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'netbios-name-servers'));
+		$netbios_scope = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'netbios-scope'));
+		$netbios_node_type = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'netbios-node-type'));
+		$time_offset = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'time-offset'));
+		$dhcp_server_identifier = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'dhcp-server-identifier'));
+		$slp_directory_agent_entry = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'slp-directory-agent'));
+		if ($slp_directory_agent_entry) {
+			list($slp_directory_agent_only, $slp_directory_agent) = explode(' ', $slp_directory_agent_entry);
+			$slp_directory_agent_only_checked = ($slp_directory_agent_only == 'true') ? 'checked' : null;
+		}
+		$slp_service_scope_entry = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'slp-service-scope'));
+		if ($slp_service_scope_entry) {
+			list($slp_service_scope_only, $slp_service_scope) = explode(' ', $slp_service_scope_entry);
+			$slp_service_scope_only_checked = ($slp_service_scope_only == 'true') ? 'checked' : null;
+		}
 
 		if ($type != 'shared') {
 			$config_parent_id = buildSelect('config_parent_id', 'config_parent_id', $this->getAssignedOptions($type, 'parents'), $config_parent_id);
@@ -595,6 +629,106 @@ HTML;
 						</table>
 					</div>
 				</div>
+				<div id="tab">
+					<input type="radio" name="tab-group-1" id="tab-3" />
+					<label for="tab-3">%s</label>
+					<div id="tab-content">
+						<table class="form-table">
+							<tr>
+								<th width="33&#37;" scope="row"><label for="host-name">%s</label></th>
+								<td width="67&#37;"><input name="host-name" id="host-name" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="routers">%s</label></th>
+								<td width="67&#37;"><input name="routers" id="routers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="subnet-mask">%s</label></th>
+								<td width="67&#37;"><input name="subnet-mask" id="subnet-mask" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="broadcast-address">%s</label></th>
+								<td width="67&#37;"><input name="broadcast-address" id="broadcast-address" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="domain-name">%s</label></th>
+								<td width="67&#37;"><input name="domain-name" id="domain-name" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="domain-name-servers">%s</label></th>
+								<td width="67&#37;"><input name="domain-name-servers" id="domain-name-servers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="domain-search">%s</label></th>
+								<td width="67&#37;"><input name="domain-search" id="domain-search" type="text" value="%s" /> <a href="#" class="tooltip-left" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="time-servers">%s</label></th>
+								<td width="67&#37;"><input name="time-servers" id="time-servers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="ntp-servers">%s</label></th>
+								<td width="67&#37;"><input name="ntp-servers" id="ntp-servers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="log-servers">%s</label></th>
+								<td width="67&#37;"><input name="log-servers" id="log-servers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="swap-server">%s</label></th>
+								<td width="67&#37;"><input name="swap-server" id="swap-server" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="root-path">%s</label></th>
+								<td width="67&#37;"><input name="root-path" id="root-path" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="nis-domain">%s</label></th>
+								<td width="67&#37;"><input name="nis-domain" id="nis-domain" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="nis-servers">%s</label></th>
+								<td width="67&#37;"><input name="nis-servers" id="nis-servers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="font-servers">%s</label></th>
+								<td width="67&#37;"><input name="font-servers" id="font-servers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="x-display-manager">%s</label></th>
+								<td width="67&#37;"><input name="x-display-manager" id="x-display-manager" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="netbios-name-servers">%s</label></th>
+								<td width="67&#37;"><input name="netbios-name-servers" id="netbios-name-servers" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="netbios-scope">%s</label></th>
+								<td width="67&#37;"><input name="netbios-scope" id="netbios-scope" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="netbios-node-type">%s</label></th>
+								<td width="67&#37;"><input name="netbios-node-type" id="netbios-node-type" type="text" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="time-offset">%s</label></th>
+								<td width="67&#37;"><input name="time-offset" id="time-offset" type="text" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="dhcp-server-identifier">%s</label></th>
+								<td width="67&#37;"><input name="dhcp-server-identifier" id="dhcp-server-identifier" type="text" value="%s" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="slp-directory-agent">%s</label></th>
+								<td width="67&#37;" nowrap><input name="slp-directory-agent" id="slp-directory-agent" type="text" value="%s" /> <input name="slp-directory-agent-only" id="slp-directory-agent-only" type="checkbox" value="on" %s /> <label for="slp-directory-agent-only">%s</label></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="slp-service-scope">%s</label></th>
+								<td width="67&#37;" nowrap><input name="slp-service-scope" id="slp-service-scope" type="text" value="%s" /> <input name="slp-service-scope-only" id="slp-service-scope-only" type="checkbox" value="on" %s /> <label for="slp-service-scope-only">%s</label></td>
+							</tr>
+						</table>
+					</div>
+				</div>
 			</div>
 		%s
 		</form>
@@ -625,6 +759,30 @@ HTML;
 				__('Dynamic DNS hostname'), $ddns_hostname,
 				__('Allow unknown clients'), $unknown_clients,
 				__('Client updates'), $client_updates,
+				__('Options'),
+				__('Host name'), $host_name,
+				__('Default routers'), $routers,
+				__('Subnet mask'), $subnet_mask,
+				__('Broadcast address'), $broadcast_address,
+				__('Domain name'), $domain_name,
+				__('Domain name servers'), $domain_name_servers,
+				__('Domains to search'), $domain_search, __('List the domains to search comma-delimited'),
+				__('Time servers'), $time_servers,
+				__('NTP servers'), $ntp_servers,
+				__('Log servers'), $log_servers,
+				__('Swap servers'), $swap_server,
+				__('Root disk path'), $root_path,
+				__('NIS domain'), $nis_domain,
+				__('NIS servers'), $nis_servers,
+				__('Font servers'), $font_servers,
+				__('XDM servers'), $x_display_manager,
+				__('NetBIOS name servers'), $netbios_name_servers,
+				__('NetBIOS scope'), $netbios_scope,
+				__('NetBIOS node type'), $netbios_node_type,
+				__('Time offset'), $time_offset,
+				__('DHCP server identifier'), $dhcp_server_identifier,
+				__('SLP directory agent IPs'), $slp_directory_agent, $slp_directory_agent_only_checked, __('These IPs only?'),
+				__('SLP service scope'), $slp_service_scope, $slp_service_scope_only_checked, __('This scope only?'),
 				$popup_footer
 			);
 
@@ -677,7 +835,7 @@ HTML;
 			if ($type != 'subnets') {
 				$members[] = 'subnet';
 			}
-			if ($type == 'hosts') {
+			if (in_array($type, array('hosts', 'host'))) {
 				$members = array('group');
 			}
 		} elseif ($relation == 'children') {
@@ -852,15 +1010,30 @@ HTML;
 		if (array_key_exists('config_data', $post)) {
 			$post_tmp['config_data'] = $post['config_data'];
 		}
+		
 		foreach ($post as $key => $val) {
 			if (!$val) continue;
+			if (in_array($key, array('slp-directory-agent-only', 'slp-service-scope-only'))) {
+				unset($post[$key]);
+				continue;
+			}
 			$post['config_name'] = $key;
 			$post['config_data'] = $val;
 			$post2 = $fm_module_options->validateDefType($post);
 			if (!is_array($post2)) {
 				return $post2;
 			} else {
-				$post[$key] = $post2['config_data'];
+				if ($key == 'slp-directory-agent') {
+					$true_false = (array_key_exists('slp-directory-agent-only', $post)) ? 'true' : 'false';
+					$post[$key] = $true_false . ' ' . $post2['config_data'];
+				} elseif ($key == 'slp-service-scope') {
+					$true_false = (array_key_exists('slp-service-scope-only', $post)) ? 'true' : 'false';
+					$post[$key] = $true_false . ' ' . $post2['config_data'];
+				} elseif ($key == 'domain-search') {
+					$post[$key] = str_replace(',', '","', $post2['config_data']);
+				} else {
+					$post[$key] = $post2['config_data'];
+				}
 			}
 		}
 		if (array_key_exists('config_name', $post_tmp)) {

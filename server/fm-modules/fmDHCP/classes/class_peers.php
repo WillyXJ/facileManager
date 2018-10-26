@@ -113,7 +113,7 @@ HTML;
 	 * @param string $action Add or edit
 	 * @return string
 	 */
-	function printForm($data = '', $action = 'add', $type = 'host') {
+	function printForm($data = '', $action = 'add', $type = 'host', $addl_vars = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$config_id = $config_parent_id = 0;

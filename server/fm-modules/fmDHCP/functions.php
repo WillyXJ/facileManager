@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -59,7 +59,6 @@ function buildModuleDashboard() {
 	return <<<HTML
 	<p>Features still to implement in {$_SESSION['module']} for v1.0 include:</p>
 	<ul>
-		<li>Delete leases from the UI (currently supported via CLI)</li>
 		<li>Server override configurations</li>
 		<li>Configuration import tool</li>
 		<li>IPv6</li>
@@ -86,8 +85,6 @@ HTML;
  */
 function buildModuleHelpFile() {
 	global $__FM_CONFIG;
-	
-	return null;
 	
 	$body = <<<HTML
 <h3>{$_SESSION['module']}</h3>

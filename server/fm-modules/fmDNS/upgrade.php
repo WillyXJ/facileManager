@@ -32,7 +32,11 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
+<<<<<<< HEAD
 	$success = version_compare($running_version, '3.1.2', '<') ? upgradefmDNS_312($__FM_CONFIG, $running_version) : true;
+=======
+	$success = version_compare($running_version, '3.2', '<') ? upgradefmDNS_320($__FM_CONFIG, $running_version) : true;
+>>>>>>> 3.0-unstable-dev
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2041,14 +2045,43 @@ TABLE;
 	return true;
 }
 
+<<<<<<< HEAD
 /** 3.1.2 */
 function upgradefmDNS_312($__FM_CONFIG, $running_version) {
+=======
+/** 3.2.0 */
+function upgradefmDNS_320($__FM_CONFIG, $running_version) {
+>>>>>>> 3.0-unstable-dev
 	global $fmdb;
 	
 	$success = version_compare($running_version, '3.1', '<') ? upgradefmDNS_310($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
+<<<<<<< HEAD
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domain_groups` CHANGE `group_id` `group_id` INT(11) NOT NULL AUTO_INCREMENT";
+=======
+	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` (
+  `master_id` INT(11) NOT NULL AUTO_INCREMENT ,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `master_parent_id` INT NOT NULL DEFAULT '0',
+  `master_name` VARCHAR(255) NULL DEFAULT NULL,
+  `master_addresses` TEXT NULL DEFAULT NULL,
+  `master_port` INT(5) NULL DEFAULT NULL,
+  `master_dscp` INT(5) NULL DEFAULT NULL,
+  `master_key_id` INT(11) NOT NULL DEFAULT '0',
+  `master_comment` text,
+  `master_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active',
+  PRIMARY KEY (`master_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+TABLE;
+
+	$inserts[] = <<<INSERT
+UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data=REPLACE(cfg_data, '; ', ',') WHERE (cfg_name='also-notify' OR cfg_name='masters') AND cfg_data LIKE '%; %';
+UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data=REPLACE(cfg_data, ';', ',') WHERE (cfg_name='also-notify' OR cfg_name='masters') AND cfg_data LIKE '%;%';
+INSERT;
+>>>>>>> 3.0-unstable-dev
 
 	/** Run queries */
 	if (count($table) && $table[0]) {
@@ -2058,7 +2091,19 @@ function upgradefmDNS_312($__FM_CONFIG, $running_version) {
 		}
 	}
 
+<<<<<<< HEAD
 	setOption('version', '3.1.2', 'auto', false, 0, 'fmDNS');
+=======
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.2', 'auto', false, 0, 'fmDNS');
+>>>>>>> 3.0-unstable-dev
 	
 	return true;
 }

@@ -192,20 +192,21 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							if ($child_result[$j]->config_data) {
 								$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions` WHERE `def_option`='{$child_result[$j]->config_name}'");
 								$direction = $fmdb->num_rows ? $fmdb->last_result[0]->def_direction : null;
+								$option_prefix = ($fmdb->last_result[0]->def_prefix) ? $fmdb->last_result[0]->def_prefix . ' ' : null;
 								if (strpos($child_result[$j]->config_data, ';') !== false) {
 									$lines = explode(';', $child_result[$j]->config_data);
 									foreach ($lines as $line) {
-										$config .= "$tab\t" . $child_result[$j]->config_name . ' ' . trim($line) . ";\n";
+										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ' ' . trim($line) . ";\n";
 									}
 								} elseif ($direction == 'reverse') {
-									$config .= "$tab\t" . $child_result[$j]->config_data . ' ' . $child_result[$j]->config_name . ";\n";
+									$config .= "$tab\t$option_prefix" . $child_result[$j]->config_data . ' ' . $child_result[$j]->config_name . ";\n";
 								} elseif ($direction == 'empty') {
 									if ($child_result[$j]->config_data == 'on') {
-										$config .= "$tab\t" . $child_result[$j]->config_name . ";\n";
+										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ";\n";
 									}
 								} elseif ($type == 'peer' && $child_result[$j]->config_name == 'load-balancing') {
 									if ($peer_type == 'primary') {
-										$config .= "$tab\t" . $child_result[$j]->config_data . ";\n";
+										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_data . ";\n";
 									}
 								} else {
 									if ($peer_type == 'secondary') {
@@ -234,7 +235,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 									if ($child_result[$j]->config_name == 'failover peer') {
 										$child_result[$j]->config_data = '"' . getNameFromID($child_result[$j]->config_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') . '"';
 									}
-									$config .= "$tab\t" . $child_result[$j]->config_name . ' ' . $child_result[$j]->config_data . ";\n";
+									$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ' ' . $child_result[$j]->config_data . ";\n";
 								}
 							}
 						}

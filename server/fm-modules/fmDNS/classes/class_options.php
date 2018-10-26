@@ -128,7 +128,9 @@ class fm_module_options {
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false || strpos($post['cfg_data'], 'key_') !== false || \
+			strpos($post['cfg_data'], 'domain_') !== false || \
+			strpos($post['cfg_data'], 'master_') !== false) ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Added option:\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -192,7 +194,9 @@ class fm_module_options {
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = strpos($post['cfg_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false || strpos($post['cfg_data'], 'key_') !== false || \
+			strpos($post['cfg_data'], 'domain_') !== false || \
+			strpos($post['cfg_data'], 'master_') !== false) ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -572,6 +576,21 @@ HTML;
 		
 		if (is_array($post['cfg_data'])) $post['cfg_data'] = join(' ', $post['cfg_data']);
 		
+		/** Handle masters and also-notify formats */
+		if ($post['cfg_data_port']) {
+			$tmp_cfg_data[] = 'port ' . $post['cfg_data_port'];
+		}
+		if (!empty($post['cfg_data_dscp'])) {
+			$tmp_cfg_data[] = 'dscp ' . $post['cfg_data_dscp'];
+		}
+		if (is_array($tmp_cfg_data)) {
+			$tmp_cfg_data[] = '{ ' . $post['cfg_data'] . ',}';
+			$post['cfg_data'] = join(' ', $tmp_cfg_data);
+			unset($tmp_cfg_data);
+		}
+		unset($post['cfg_data_port'], $post['cfg_data_dscp']);
+		$post['cfg_data'] = str_replace(',,', ',', $post['cfg_data']);
+		
 		if (isset($post['cfg_name'])) {
 			$def_option = "'{$post['cfg_name']}'";
 		} elseif (isset($post['cfg_id'])) {
@@ -664,6 +683,7 @@ HTML;
 		
 		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \
 			strpos($cfg_data, 'domain_') !== false || strpos($def_type, 'address_match_element') !== false || \
+			strpos($cfg_data, 'master_') !== false || \
 			strpos($def_type, 'domain_name') !== false) ? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
 	}
 	

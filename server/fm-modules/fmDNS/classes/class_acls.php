@@ -476,6 +476,13 @@ HTML;
 			} elseif (strpos($address, 'domain_') !== false) {
 				$domain_id = str_replace('domain_', '', $address);
 				$formatted_acls[] = getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active');
+			} elseif (strpos($address, 'master_') !== false) {
+				$master_id = str_replace('master_', '', $address);
+				$master_name = getNameFromID($master_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}masters", 'master_', 'master_id', 'master_name', null, 'active');
+				if (strpos($master_name, ' ') !== false) {
+					$master_name = "\"$master_name\"";
+				}
+				$formatted_acls[] = $master_name;
 			} else {
 				$formatted_acls[] = str_replace(';', '', $address);
 			}

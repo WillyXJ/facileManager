@@ -71,8 +71,18 @@ echo '$(document).ready(function() {
 		else $("#scroll-to-top").removeClass("displayed");
 	} );
 	
+	$(".existing-container").scroll( function(){
+		if($(".existing-container").scrollTop() > 150) $("#scroll-to-top").addClass("displayed");
+		else $("#scroll-to-top").removeClass("displayed");
+	} );
+	
 	$("#scroll-to-top").click( function(){
 		$("html, body").animate( { scrollTop: "0px" } );
+		return false;
+	} );
+	
+	$("#scroll-to-top").click( function(){
+		$(".existing-container").animate( { scrollTop: "0px" } );
 		return false;
 	} );
 	
@@ -411,6 +421,11 @@ echo '$(document).ready(function() {
 		}
 	});
 
+	/* Form submits */
+	$("#manage_item_contents").delegate("form", "submit", function() {
+		$("#primary_button").parent().html("' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i>");
+	});
+	
     /* Cancel button */
     $("#manage_item_contents").delegate("#cancel_button, .close", "click tap", function(e) {
 		e.preventDefault();

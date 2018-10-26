@@ -159,6 +159,23 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}keys
 TABLE;
 
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}masters` (
+  `master_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `master_parent_id` int(11) NOT NULL DEFAULT '0',
+  `master_name` varchar(255) DEFAULT NULL,
+  `master_addresses` text,
+  `master_port` int(5) DEFAULT NULL,
+  `master_dscp` int(5) DEFAULT NULL,
+  `master_key_id` int(11) NOT NULL DEFAULT '0',
+  `master_comment` text,
+  `master_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`master_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+TABLE;
+
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}records` (
   `record_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',

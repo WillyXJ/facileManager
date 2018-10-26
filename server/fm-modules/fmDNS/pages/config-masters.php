@@ -14,81 +14,77 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmDHCP: Easily manage one or more ISC DHCP servers                      |
+ | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | http://www.facilemanager.com/modules/fmdns/                             |
+ +-------------------------------------------------------------------------+
+ | Processes server masters management page                                |
+ | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
-if (!isset($type)) header('Location: object-hosts.php');
-//if (isset($_GET['type'])) header('Location: config-' . sanitize(strtolower($_GET['type'])) . '.php');
+if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-/** Ensure user can use this page */
-if (!currentUserCan(array_merge($required_permission, array('view_all')), $_SESSION['module'])) unAuth();
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-if (!isset($display_type)) $display_type = null;
-if (!isset($avail_types)) $avail_types = null;
-if (!isset($include_submenus)) $include_submenus = true;
 
-if (currentUserCan($required_permission, $_SESSION['module'])) {
+if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'server_serial_no'), 'include');
-	
+	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			$result = $fm_dhcp_item->add($_POST, $type);
+			$result = $fm_dns_masters->add($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
 			}
 		}
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_dhcp_item->update($_POST, $type);
+			$result = $fm_dns_masters->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
 			}
 		}
-		break;
 	}
 }
 
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']), $type);
+$avail_servers = buildServerSubMenu($server_serial_no);
 
-if ($include_submenus === true) {
-//	$avail_servers = buildServerSubMenu($server_serial_no);
-	echo <<<HTML
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
 	<div class="stretch"></div>
-	$avail_types
 	$avail_servers
 	</div>
 </div>
 
 HTML;
-}
 	
-/** Get server listing */
 $sort_direction = null;
-$sort_field = 'config_data';
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array($sort_field, 'config_data'), 'config_', 'AND config_type="' . rtrim($type, 's') . '" AND config_name="' . rtrim($type, 's') . '" AND server_serial_no="' . $server_serial_no. '"', null, false, $sort_direction);
+$sort_field = 'master_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', array($sort_field, 'master_name'), 'master_', "AND master_parent_id=0 AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_dhcp_item->rows($result, $page, $total_pages, $type);
+$fm_dns_masters->rows($result, $page, $total_pages);
 
 printFooter();
 
