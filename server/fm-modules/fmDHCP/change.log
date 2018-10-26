@@ -1,4 +1,4 @@
-0.2 (2018-??-??)
+0.2 (2018-10-26)
 ================
 * Both   - [feature] Added support to delete active leases and to convert a lease
            into a fixed address (host entry/reservation).

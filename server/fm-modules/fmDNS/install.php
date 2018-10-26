@@ -110,7 +110,7 @@ TABLE;
 
 	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}domain_groups` (
-  `group_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
   `group_name` varchar(128) NOT NULL,
   `group_comment` text NOT NULL,

@@ -134,7 +134,7 @@ class fm_dns_zones {
 
 			$post['account_id'] = $_SESSION['user']['account_id'];
 			
-			$exclude = array('submit', 'action', 'group_domain_ids');
+			$exclude = array('submit', 'action', 'group_domain_ids', 'group_id');
 		
 			$log_message_domains = $this->getZoneLogDomainNames($post['group_domain_ids']);
 
