@@ -1,3 +1,7 @@
+3.2.1 (2018-??-??)
+==================
+* Server - [bug] Properly support the OS icon for Raspbian.
+
 3.2 (2018-10-26)
 ================
 * Server - [improvement] UI enhancements.
