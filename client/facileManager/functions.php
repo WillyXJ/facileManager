@@ -1436,4 +1436,87 @@ function versionCheck($app_version, $serverhost, $compress) {
 }
 
 
+/**
+ * Gets the network interface names
+ *
+ * @since 3.2.1
+ * @package facileManager
+ *
+ * @param string $os Detected operating system
+ * @return string
+ */
+function getInterfaceNames($os) {
+	$interfaces = null;
+	
+	switch(PHP_OS) {
+		case 'Linux':
+			if ($ifcfg = findProgram('ip')) {
+				$command = $ifcfg . ' maddr | grep "^[0-9]*:" | awk \'{print $2}\'';
+			} elseif ($ifcfg = findProgram('ifconfig')) {
+				$command = $ifcfg . ' | grep "Link "';
+			}
+			break;
+		case 'Darwin':
+		case 'FreeBSD':
+		case 'OpenBSD':
+		case 'NetBSD':
+			$command = findProgram('netstat') . ' -i | grep Link';
+			break;
+		case 'SunOS':
+			$command = findProgram('ifconfig') . ' -a | grep flags | sed -e \'s/://g\'';
+			break;
+		default:
+			return null;
+			break;
+	}
+	
+	exec($command . ' | awk "{print \$1}" | sort | uniq', $interfaces);
+	
+	return $interfaces;
+}
+
+
+/**
+ * Attempts to install packages
+ *
+ * @since 3.2.1
+ * @package facileManager
+ *
+ * @param string|array $packages Package names to install
+ * @return array
+ */
+function installPackage($packages) {
+	if (!is_array($packages)) {
+		$packages = array($packages);
+	}
+	
+	/** Get package manager */
+	$package_managers = array('apt-get', 'yum');
+	foreach ($package_managers as $app) {
+		if ($package_manager = findProgram($app)) {
+			break;
+		}
+	}
+	if (!$package_manager) {
+		echo fM("OS is not supported for automated package installations. Aborting.\n");
+		exit(1);
+	}
+	
+	/** Install the packages */
+	foreach ($packages as $app) {
+		echo fM(sprintf('Installing the %s package...', $app));
+		exec($package_manager . ' -y install ' . $app, $output, $rc);
+
+		if ($rc) {
+			echo fM("failed. Please install it manually.\n");
+			exit(1);
+		}
+
+		echo "done\n";
+	}
+	
+	return true;
+}
+
+
 ?>

@@ -198,35 +198,4 @@ function getStartupScript($fw) {
 }
 
 
-function getInterfaceNames($os) {
-	$interfaces = null;
-	
-	switch(PHP_OS) {
-		case 'Linux':
-			if ($ifcfg = findProgram('ifconfig')) {
-				$command = $ifcfg . ' | grep "Link "';
-			} elseif ($ifcfg = findProgram('ip')) {
-				$command = $ifcfg . ' maddr | grep "^[0-9]*:" | awk \'{print $2}\'';
-			}
-			break;
-		case 'Darwin':
-		case 'FreeBSD':
-		case 'OpenBSD':
-		case 'NetBSD':
-			$command = findProgram('netstat') . ' -i | grep Link';
-			break;
-		case 'SunOS':
-			$command = findProgram('ifconfig') . ' -a | grep flags | sed -e \'s/://g\'';
-			break;
-		default:
-			return null;
-			break;
-	}
-	
-	exec($command . ' | awk "{print \$1}" | sort | uniq', $interfaces);
-	
-	return $interfaces;
-}
-
-
 ?>
