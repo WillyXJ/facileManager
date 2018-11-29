@@ -3836,7 +3836,7 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
 	
 	if (in_array('all', $include)) {
 		$server_array[0][] = null;
-		$server_array[0][0][] = __('All Servers');
+		$server_array[0][0][] = _('All Servers');
 		$server_array[0][0][] = '0';
 	}
 	
@@ -3845,11 +3845,11 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
 		/** Server Groups */
 		$result = basicGetList('fm_' . $__FM_CONFIG[$module]['prefix'] . 'server_groups', 'group_name', 'group_');
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
-			$server_array[__('Groups')][] = null;
+			$server_array[_('Groups')][] = null;
 			$results = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$server_array[__('Groups')][$j][] = $results[$i]->group_name;
-				$server_array[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+				$server_array[_('Groups')][$j][] = $results[$i]->group_name;
+				$server_array[_('Groups')][$j][] = 'g_' . $results[$i]->group_id;
 				$j++;
 			}
 		}

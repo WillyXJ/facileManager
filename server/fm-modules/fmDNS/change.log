@@ -1,3 +1,7 @@
+3.2.1 (2018-??-??)
+==================
+* Server - [bug] Fixed text.
+
 3.2 (2018-10-26)
 ================
 * Server - [bug] Fixed a fatal error during client interactions.
