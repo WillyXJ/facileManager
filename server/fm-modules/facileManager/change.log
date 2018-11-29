@@ -3,6 +3,7 @@
 * Server - [bug] Properly support the OS icon for Raspbian.
 * Client - [improvement] Moved getInterfaceNames() to core.
 * Server - [improvement] CSS changes.
+* Server - [bug] Added missing select2 image.
 
 3.2 (2018-10-26)
 ================
