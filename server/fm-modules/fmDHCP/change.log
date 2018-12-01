@@ -2,6 +2,7 @@
 ================
 * Server - [improvement] CSS changes.
 * Server - [bug] Fixed text.
+* Server - [bug] Fixed peer address and peer port configuration. (Issue #421)
 
 0.2 (2018-10-26)
 ================
