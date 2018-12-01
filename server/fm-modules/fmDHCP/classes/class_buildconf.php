@@ -249,8 +249,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					if (!in_array($type, array('host', 'peer'))) {
 						$nested_items[] = 'host';
 						if (!in_array($type, array('host', 'group'))) $nested_items[] = 'group';
-						if (!in_array($type, array('host', 'subnet'))) $nested_items[] = 'subnet';
 						if (!in_array($type, array('host', 'pool'))) $nested_items[] = 'pool';
+						if (!in_array($type, array('host', 'subnet'))) $nested_items[] = 'subnet';
 						foreach (array_reverse(array_unique($nested_items)) as $subitem) {
 							$sub_config = $this->dhcpdBuildConfigItems($subitem, $config_result[$i]->config_id, $newtab);
 							if (trim($sub_config)) {
