@@ -298,7 +298,7 @@ HTML;
 			});
 		</script>', $popup_header, $action, $group_id, $group_type, __('Group Name'),
 				$group_name, $group_name_length, $uc_group_type, $group_items,
-				__('Comment'), $group_comment, $popup_footer);
+				_('Comment'), $group_comment, $popup_footer);
 
 		return $return_form;
 	}

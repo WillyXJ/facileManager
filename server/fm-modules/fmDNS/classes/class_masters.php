@@ -44,7 +44,7 @@ class fm_dns_masters {
 						);
 
 			$title_array = array(array('title' => __('Name'), 'rel' => 'master_name'), 
-				array('title' => __('Comment'), 'class' => 'header-nosort'));
+				array('title' => _('Comment'), 'class' => 'header-nosort'));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array, 'masters');
@@ -296,7 +296,7 @@ HTML;
 				$action, $master_id, $server_serial_no,
 				__('Master Name'), $master_name, __('master-ips-name'), $master_name_length,
 				__('Port'), $master_port, __('DSCP'), __('This option requires BIND 9.9 or greater.'), $master_dscp,
-				__('Comment'), $master_comment,
+				_('Comment'), $master_comment,
 				$popup_footer
 			);
 		} else {
@@ -360,7 +360,7 @@ HTML;
 				$action, $master_id, $parent_id, $server_serial_no,
 				__('master Name'), getNameFromID($parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name'),
 				__('Matched Address List'), __('Choose an existing master or type a new one.'), $master_addresses, __('Port'), $master_port, $disabled,
-				__('Key'), $master_keys, __('Comment'), $master_comment,
+				__('Key'), $master_keys, _('Comment'), $master_comment,
 				$popup_footer,
 				$this->getPredefinedMasters('JSON', $master_addresses)
 			);

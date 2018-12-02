@@ -68,7 +68,7 @@ class fm_dns_keys {
 					array('title' => __('Bits'), 'class' => 'header-nosort'),
 					array('title' => __('Created'), 'rel' => 'key_created')));
 			}
-			$title_array[] = array('title' => __('Comment'), 'class' => 'header-nosort');
+			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -442,7 +442,7 @@ HTML;
 		</form>',
 				$popup_header,
 				$action, $key_id, $type, $key_options,
-				__('Comment'), $key_comment,
+				_('Comment'), $key_comment,
 				$popup_footer
 			);
 		$return_form .= <<< HTML

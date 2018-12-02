@@ -46,7 +46,7 @@ class fm_dns_controls {
 
 			$title_array = array(__('IP Address'), __('Port'), __('Address List'));
 			if ($type == 'controls') $title_array[] = __('Keys');
-			$title_array[] = __('Comment');
+			$title_array[] = _('Comment');
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -102,7 +102,7 @@ class fm_dns_controls {
 		}
 
 		$control_addresses = strpos($post['control_addresses'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['control_addresses']) : $post['control_addresses'];
-		addLogEntry(__('Added control') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . __('Comment') . ": {$post['control_comment']}");
+		addLogEntry(__('Added control') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . _('Comment') . ": {$post['control_comment']}");
 		return true;
 	}
 
@@ -148,7 +148,7 @@ class fm_dns_controls {
 		if (!$fmdb->rows_affected) return true;
 
 		$control_addresses = strpos($post['control_addresses'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['control_addresses']) : $post['control_addresses'];
-		addLogEntry(__('Updated control to the following') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . __('Comment') . ": {$post['control_comment']}");
+		addLogEntry(__('Updated control to the following') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . _('Comment') . ": {$post['control_comment']}");
 		return true;
 	}
 	
@@ -309,7 +309,7 @@ HTML;
 				__('Port'), $control_port,
 				__('Allowed Address List'), __('Define allowed hosts'), $control_addresses,
 				$control_key_form,
-				__('Comment'), $control_comment,
+				_('Comment'), $control_comment,
 				$popup_footer, $available_acls
 			);
 

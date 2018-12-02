@@ -53,7 +53,7 @@ class fm_module_services {
 									'class' => 'header-tiny header-nosort'
 								);
 			}
-			$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), __('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), __('Comment')));
+			$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), _('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
 			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -358,7 +358,7 @@ HTML;
 				__('Destination Port Range'), __('Start'), $port_dest_start, __('End'), $port_dest_end,
 				$tcp_option, __('TCP Flags'), $tcp_flags_head, __('Only iptables uses the Mask bit'), __('Mask'),
 				$tcp_flags_mask_form, __('Settings'), $tcp_flags_settings_form,
-				__('Comment'), $service_comment,
+				_('Comment'), $service_comment,
 				$popup_footer
 			);
 

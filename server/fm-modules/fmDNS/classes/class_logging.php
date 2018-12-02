@@ -45,7 +45,7 @@ class fm_module_logging {
 
 			$title_array[] = array('title' => __('Name'), 'rel' => 'cfg_data');
 			if ($channel_category == 'category') $title_array[] = array('title' => __('Channels'), 'class' => 'header-nosort');
-			$title_array[] = array('title' => __('Comment'), 'class' => 'header-nosort');
+			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -609,7 +609,7 @@ FORM;
 				__('Print Category (optional)'), $cfg_print_category,
 				__('Print Severity (optional)'), $cfg_print_severity,
 				__('Print Time (optional)'), $cfg_print_time,
-				__('Comment'), $cfg_comment,
+				_('Comment'), $cfg_comment,
 				$popup_footer
 			);
 		} elseif ($type == 'category') {
@@ -643,7 +643,7 @@ FORM;
 		</script>',
 				__('Category'), $cfg_name,
 				__('Channels'), $cfg_data,
-				__('Comment'), $cfg_comment,
+				_('Comment'), $cfg_comment,
 				$popup_footer
 			);
 		} else {

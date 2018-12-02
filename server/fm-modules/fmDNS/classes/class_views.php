@@ -43,7 +43,7 @@ class fm_dns_views {
 							'name' => 'views'
 						);
 
-			$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => __('Comment'), 'class' => 'header-nosort'));
+			$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => _('Comment'), 'class' => 'header-nosort'));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 				if ($num_rows > 1) $table_info['class'] .= ' grab1';
@@ -297,7 +297,7 @@ HTML;
 				$popup_header,
 				$action, $view_id, $view_order_id, $server_serial_no,
 				__('View Name'), $view_name, $view_name_length,
-				__('Comment'), $view_comment, $popup_footer
+				_('Comment'), $view_comment, $popup_footer
 			);
 
 		return $return_form;

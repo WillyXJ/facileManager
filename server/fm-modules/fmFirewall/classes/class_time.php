@@ -53,7 +53,7 @@ class fm_module_time {
 									'class' => 'header-tiny header-nosort'
 								);
 			}
-			$title_array = array_merge((array) $title_array, array(__('Restriction Name'), __('Date Range'), __('Time'), __('Weekdays'), array('title' => __('Comment'), 'style' => 'width: 30%;')));
+			$title_array = array_merge((array) $title_array, array(__('Restriction Name'), __('Date Range'), __('Time'), __('Weekdays'), array('title' => _('Comment'), 'style' => 'width: 30%;')));
 			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -375,7 +375,7 @@ HTML;
 				__('Monthdays'), $monthdays_not_check, __('not'), __('Use this option to invert the match'), $monthdays_form,
 				__('Options'), $time_options,
 				$time_zone_form,
-				__('Comment'), $time_comment,
+				_('Comment'), $time_comment,
 				$popup_footer
 			);
 

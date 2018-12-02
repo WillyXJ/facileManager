@@ -56,7 +56,7 @@ class fm_module_options {
 			}
 			$title_array[] = array('title' => __('Option'), 'rel' => 'cfg_name');
 			$title_array[] = array('title' => __('Value'), 'rel' => 'cfg_data');
-			$title_array[] = array('title' => __('Comment'), 'class' => 'header-nosort');
+			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -442,7 +442,7 @@ HTML;
 				$action, $cfg_id, $cfg_type, $cfg_id_name, $cfg_type_id, $server_serial_no_field,
 				$addl_options,
 				__('Option Name'), $cfg_avail_options,
-				__('Comment'), $cfg_comment,
+				_('Comment'), $cfg_comment,
 				$popup_footer
 			);
 

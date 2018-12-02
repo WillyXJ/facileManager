@@ -55,7 +55,7 @@ class fm_module_objects {
 			}
 			$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address')));
 			if ($type != 'host') $title_array[] = __('Netmask');
-			$title_array[] = array('title' => __('Comment'), 'style' => 'width: 40%;');
+			$title_array[] = array('title' => _('Comment'), 'style' => 'width: 40%;');
 			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -284,7 +284,7 @@ HTML;
 				__('Object Type'), $object_type,
 				__('Address'), $object_address, $object_address_length,
 				$netmask_option, __('Netmask'), $object_mask, $object_mask_length,
-				__('Comment'), $object_comment,
+				_('Comment'), $object_comment,
 				$popup_footer
 			);
 

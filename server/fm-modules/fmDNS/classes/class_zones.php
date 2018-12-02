@@ -70,7 +70,7 @@ class fm_dns_zones {
 			if ($map == 'groups') {
 				$title_array = array(array('title' => __('Group Name'), 'rel' => 'group_name'),
 					array('title' => __('Associated Domains')),
-					array('title' => __('Comment'))
+					array('title' => _('Comment'))
 					);
 			} else {
 				$title_array = array(array('title' => __('ID'), 'class' => 'header-small header-nosort'), 
@@ -162,7 +162,7 @@ class fm_dns_zones {
 				return $retval;
 			}
 			
-			addLogEntry(__('Added a zone group with the following details') . ":\n" . __('Name') . ": {$post['group_name']}\n" . __('Associated Zones') . ": $log_message_domains\n" . __('Comment') . ": {$post['group_comment']}");
+			addLogEntry(__('Added a zone group with the following details') . ":\n" . __('Name') . ": {$post['group_name']}\n" . __('Associated Zones') . ": $log_message_domains\n" . _('Comment') . ": {$post['group_comment']}");
 			
 			return $insert_id;
 		}
@@ -375,7 +375,7 @@ class fm_dns_zones {
 
 			$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups', 'group_', 'group_id', 'group_name');
 			$log_message = sprintf(__('Updated a zone group (%s) with the following details'), $old_name) . "\n";
-			addLogEntry($log_message . __('Name') . ": {$post['group_name']}\n" . __('Associated Zones') . ": " . $this->getZoneLogDomainNames($new_domain_ids) . "\n" . __('Comment') . ": {$post['group_comment']}");
+			addLogEntry($log_message . __('Name') . ": {$post['group_name']}\n" . __('Associated Zones') . ": " . $this->getZoneLogDomainNames($new_domain_ids) . "\n" . _('Comment') . ": {$post['group_comment']}");
 			return true;
 		}
 
@@ -2148,7 +2148,7 @@ HTML;
 				$popup_header, $action, $group_id,
 				__('Group Name'), $group_name, $group_name_length,
 				__('Associated Zones'), $group_domain_ids,
-				__('Comment'), $group_comment,
+				_('Comment'), $group_comment,
 				$popup_footer);
 		
 		

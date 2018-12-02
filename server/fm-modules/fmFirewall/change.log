@@ -1,6 +1,7 @@
 1.5.1 (2018-??-??)
 ==================
 * Client - [improvement] Moved getInterfaceNames() to core.
+* Server - [bug] Language fix.
 
 1.5 (2017-12-13)
 ================
