@@ -47,12 +47,12 @@ input[type="checkbox"] {
 	-webkit-transition: .05s border-color ease-in-out;
 	transition: .05s border-color ease-in-out;
 }
-input[type=checkbox]:checked:before {
+input[type="checkbox"]:checked:before {
 	content: "\f00c";
 	margin: 0px 0 0 -1px;
 	color: #496e99;
 }
-input[type=checkbox]:checked:before {
+input[type="checkbox"]:checked:before {
 	float: left;
 	display: inline-block;
 	vertical-align: middle;
@@ -62,7 +62,7 @@ input[type=checkbox]:checked:before {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
-input[type=checkbox].modules {
+input[type="checkbox"].modules {
 	margin-top: 12px;
 }
 #tophead {
@@ -734,6 +734,19 @@ tbody {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	font-size: 12px;
+}
+
+.form-table input:not([type="image"]):not([type="checkbox"]):not(.select2-input):not(.button),
+input.text_icon {
+	padding-right: 24px;
+}
+
+i.text_icon {
+	cursor: pointer;
+	position: relative;
+	display: inline-block;
+	left: -24px;
+	top: 1px;
 }
 
 #fm_user_profile .form-table td {
@@ -1727,11 +1740,7 @@ div.fm-table > div > div.fm-half {
 }
 
 #search_form_container .search_remove {
-	cursor: pointer;
-	position: absolute;
-	display: inline-block;
-	right: -1.5em;
-	top: 4px;
+	top: -1px;
 }
 
 .highlighted {

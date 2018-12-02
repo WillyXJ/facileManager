@@ -3034,7 +3034,7 @@ function countServerUpdates() {
 function displaySearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
 		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
-		$search_remove = '<i class="search_remove fa fa-remove fa-lg" title="' . _('Clear this search') . '"></i>';
+		$search_remove = '<i class="search_remove fa fa-remove fa-lg text_icon" title="' . _('Clear this search') . '"></i>';
 		$display = ' style="display:block"';
 	} else {
 		$placeholder = _('Search this page by keyword');
@@ -3046,7 +3046,7 @@ function displaySearchForm($page_params = null) {
 		<div>
 			<div id="search_form">
 				<form id="search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
-					<input type="text" placeholder="$placeholder" value="{$_GET['q']}" />
+					<input type="text" class="text_icon" placeholder="$placeholder" value="{$_GET['q']}" />
 					$search_remove
 				</form>
 			</div>
