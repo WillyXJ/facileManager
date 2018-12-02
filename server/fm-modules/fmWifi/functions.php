@@ -195,8 +195,9 @@ function buildModuleMenu() {
 
 	addObjectPage(__('WLAN'), __('Manage WLANs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-wlans.php');
 		addSubmenuPage('config-wlans.php', _('Manage'), _('Manage WLANs'), array('manage_wlans', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-wlans.php');
-		addSubmenuPage('config-wlans.php', __('Options'), __('Options'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-options.php');
+//		addSubmenuPage('config-wlans.php', __('Options'), __('Options'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-wlans.php', __('Users'), __('Users'), array('manage_wlan_users', 'view_all'), $_SESSION['module'], 'config-users.php');
+		addSubmenuPage('config-wlans.php', __('ACLs'), __('ACLs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-acls.php');
 	
 	addSettingsPage($_SESSION['module'], sprintf(__('%s Settings'), $_SESSION['module']), array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }

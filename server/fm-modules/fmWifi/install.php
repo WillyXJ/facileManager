@@ -28,6 +28,21 @@ function installfmWifiSchema($database, $module, $noisy = 'noisy') {
 	
 	/** Create fmWifi tables **/
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}acls` (
+  `acl_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` int(10) NOT NULL,
+  `wlan_ids` varchar(255) NOT NULL DEFAULT '0',
+  `acl_mac` varchar(20) NOT NULL,
+  `acl_action` enum('accept','deny') NOT NULL DEFAULT 'accept',
+  `acl_comment` text,
+  `acl_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`acl_id`),
+  UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
+) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
+TABLE;
+
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (
   `config_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',

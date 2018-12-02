@@ -162,8 +162,22 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 										$config[] = sprintf('%s=%s', $child_result[$j]->config_name, trim($line));
 									}
 								} else {
+									/** WPA2 */
 									if ($child_result[$j]->config_name == 'auth_algs' && $child_result[$j]->config_data == '1') {
 										$child_result[$j]->config_data = "1\nwpa=2";
+									}
+								
+									/** MAC filtering */
+									if ($child_result[$j]->config_name == 'macaddr_acl') {
+										$dirname = dirname($server_data->server_config_file);
+										$mac_files = array('accept' => $dirname . '/hostapd-accept-' . $_SESSION['module'] . '-' . sanitize($ssid, '_'),
+											'deny' => $dirname . '/hostapd-deny-' . $_SESSION['module'] . '-' . sanitize($ssid, '_'));
+
+										$child_result[$j]->config_data = sprintf("%s\naccept_mac_file=%s\ndeny_mac_file=%s",
+												$child_result[$j]->config_data,
+												$mac_files['accept'], $mac_files['deny']);
+										
+										$server_data->files = array_merge($server_data->files, $this->buildACLFiles($header, $server_data, $config_result[$i]->config_id, $mac_files));
 									}
 									$config[] = sprintf('%s=%s', $child_result[$j]->config_name, $child_result[$j]->config_data);
 								}
@@ -279,6 +293,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @since 0.1
 	 * @package fmWifi
 	 *
+	 * @param string $header Header message for the file
 	 * @param object $server_info Server information
 	 * @param string $wlan_id SSID
 	 * @return boolean
@@ -306,6 +321,50 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		
 		return join("\n", $config);
+	}
+
+
+	/**
+	 * Populates the ACL accept/deny files for the server
+	 *
+	 * @since 0.1
+	 * @package fmWifi
+	 *
+	 * @param string $header Header message for the file
+	 * @param object $server_info Server information
+	 * @param string $wlan_id SSID
+	 * @param array $mac_files MAC accept/deny filenames
+	 * @return boolean
+	 */
+	function buildACLFiles($header, $server_info, $wlan_id, $mac_files) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$config['accept'][] = $config['deny'][] = $header;
+		$config['accept'][] = sprintf("# %s\n", wordwrap(__('This file contains a list of MAC addresses that are allowed to authenticate with the AP.'), 60, "\n# "));
+		$config['deny'][] = sprintf("# %s\n", wordwrap(__('This file contains a list of MAC addresses that are not allowed to authenticate with the AP.'), 60, "\n# "));
+		
+		/** Get user list for SSID */
+		$wlan_sql = " AND (wlan_ids='0' OR wlan_ids='$wlan_id' OR wlan_ids LIKE '$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id')";
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_id', 'wlan_user_', 'AND wlan_user_status="active"' . $wlan_sql);
+		if ($fmdb->num_rows) {
+			for ($k=0; $k<$fmdb->num_rows; $k++) {
+				$comment = ($fmdb->last_result[$k]->wlan_user_comment) ? ' (' . $fmdb->last_result[$k]->wlan_user_comment . ')' : null;
+				$config['accept'][] = '# ' . $fmdb->last_result[$k]->wlan_user_login . $comment;
+				$config['accept'][] = $fmdb->last_result[$k]->wlan_user_mac;
+			}
+		}
+		
+		/** Get MAC ACLs for SSID */
+		$wlan_sql = " AND (wlan_ids='0' OR wlan_ids='$wlan_id' OR wlan_ids LIKE '$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id')";
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active"' . $wlan_sql);
+		if ($fmdb->num_rows) {
+			for ($k=0; $k<$fmdb->num_rows; $k++) {
+				if ($fmdb->last_result[$k]->acl_comment) $config[$fmdb->last_result[$k]->acl_action][] = '# ' . $fmdb->last_result[$k]->acl_comment;
+				$config[$fmdb->last_result[$k]->acl_action][] = $fmdb->last_result[$k]->acl_mac;
+			}
+		}
+		
+		return array($mac_files['accept'] => join("\n", $config['accept']), $mac_files['deny'] => join("\n", $config['deny']));
 	}
 
 

@@ -60,7 +60,7 @@ class fm_wifi_wlans {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = array_merge((array) $title_array, array(__('SSID'), __('Security'), __('Associated APs'), __('Comment')));
+		$title_array = array_merge((array) $title_array, array(__('SSID'), __('Security'), __('Associated APs'), _('Comment')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 		echo displayTableHeader($table_info, $title_array);
@@ -376,7 +376,7 @@ class fm_wifi_wlans {
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
 		}
-		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
+//		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
 		
 		$edit_status = $edit_actions . $edit_status;
 		
@@ -449,9 +449,14 @@ HTML;
 			array('802.11g (2.4 GHz)', 'g'),
 			array('802.11ad (60 GHz)', 'ad')
 		);
+		$macaddr_acl_options = array(
+			array(__('Accept unless in deny list'), '0'),
+			array(__('Deny unless in accept list'), '1'),
+			array(__('Use external RADIUS server'), '2')
+		);
 		
 		$ignore_broadcast_ssid_checked = $ieee80211n_checked = $ieee80211ac_checked = $ieee80211d_checked = null;
-		$wmm_enabled_checked = $auth_algs_checked = null;
+		$wmm_enabled_checked = $auth_algs_checked = $macaddr_acl_checked = null;
 		
 		$config_id = $config_parent_id = $config_aps = 0;
 		$config_name = $config_comment = $config_data = $channel = null;
@@ -477,6 +482,7 @@ HTML;
 		$hw_mode = $this->getConfig($config_id, 'hw_mode');
 		$hw_mode_options = buildSelect('hw_mode', 'hw_mode', $hw_mode_options, $hw_mode);
 		$auth_algs_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'auth_algs'))) ? 'checked' : null;
+		$macaddr_acl_options = buildSelect('macaddr_acl', 'macaddr_acl', $macaddr_acl_options, $this->getConfig($config_id, 'macaddr_acl'));
 
 		$wpa_passphrase = $this->getConfig($config_id, 'wpa_passphrase');
 		$wpa_key_mgmt = $fm_module_options->populateDefTypeDropdown($fm_module_options->parseDefType('wpa_key_mgmt'), $this->getConfig($config_id, 'wpa_key_mgmt'), 'wpa_key_mgmt');
@@ -529,9 +535,11 @@ HTML;
 								</td>
 							</tr>
 							<tr>
-								<th width="33&#37;" scope="row">%s</th>
+								<th width="33&#37;" scope="row" style="padding-top:0;">%s</th>
 								<td width="67&#37;">
-									<input name="auth_algs" id="auth_algs" type="checkbox" value="on" %s /> <label for="auth_algs">%s</label>
+									<input name="auth_algs" id="auth_algs" type="checkbox" value="on" %s /> <label for="auth_algs">%s</label><br />
+									<h4>%s:</h4>
+									%s
 								</td>
 							</tr>
 							<tr>
@@ -548,7 +556,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="wpa_passphrase">%s</label></th>
-								<td width="67&#37;"><input name="wpa_passphrase" id="wpa_passphrase" type="password" value="%s" /> <i id="show_password" class="fa fa-eye eye-attention grey" title="%s"></i></td>
+								<td width="67&#37;"><input name="wpa_passphrase" id="wpa_passphrase" class="text_icon" type="password" value="%s" /> <i id="show_password" class="fa fa-eye eye-attention grey text_icon" title="%s"></i></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="wpa_key_mgmt">%s</label></th>
@@ -594,8 +602,8 @@ HTML;
 				__('Associated APs'), $config_aps,
 				__('Hardware Mode'), $hw_mode_options,
 				$hw_mode_option_style, $ieee80211n_checked, __('Enable 802.11n'), $ieee80211ac_style, $ieee80211ac_checked, __('Enable 802.11ac'), $wmm_enabled_checked, __('Enable QoS Support'),
-				__('Security'), $auth_algs_checked, __('Enable WPA2'),
-				__('Comment'), $config_comment,
+				__('Security'), $auth_algs_checked, __('Enable WPA2'), __('MAC address filtering'), $macaddr_acl_options,
+				_('Comment'), $config_comment,
 				$security_options_style, __('Security'),
 				__('WPA Passphrase'), $wpa_passphrase, __('Show'),
 				__('Encryption Key'), $wpa_key_mgmt,
@@ -767,7 +775,6 @@ HTML;
 		return $post;
 	}
 	
-	
 	/**
 	 * Gets WLAN listing
 	 *
@@ -807,6 +814,31 @@ HTML;
 		
 		return $list;
 	}
+	
+	/**
+	 * Gets WLAN listing
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param array $wlan_ids WLAN IDs to translate
+	 * @return array
+	 */
+	function getWLANLoggingNames($wlan_ids) {
+		global $__FM_CONFIG, $fmdb;
+		
+		foreach ((array) $wlan_ids as $id) {
+			if (!$id) {
+				return __('All WLANs');
+			}
+			$name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
+			(string) $wlan_names .= "$name; ";
+		}
+		
+		return rtrim((string) $wlan_names, '; ');
+	}
+	
 }
 
 if (!isset($fm_wifi_wlans))

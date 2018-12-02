@@ -39,6 +39,7 @@ $unpriv_message = __('You do not have sufficient privileges.');
 $checks_array = @array('servers' => 'manage_servers',
 					'wlans' => 'manage_wlans',
 					'wlan_users' => 'manage_wlan_users',
+					'acls' => 'manage_wlans',
 					'options' => 'manage_servers'
 				);
 
@@ -82,12 +83,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$object = rtrim($item, 's');
 			$field = $prefix . 'id';
 			$field_data = $prefix . 'data';
+			$name = 'data';
 			break;
 		case 'wlan_users':
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$field_data = $prefix . 'login';
 			$item = rtrim($_POST['item_type'], 's') . 's';
 			$object = rtrim($item, 's');
+			$name = 'login';
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
@@ -99,9 +102,15 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$item = rtrim($_POST['item_type'], 's') . 's';
 			$object = rtrim($item, 's');
 			break;
+		case 'acls':
+			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
+			$object = substr($item_type, 0, -1);
+			$name = 'mac';
+			break;
 		default:
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$object = substr($item_type, 0, -1);
+			$name = 'name';
 	}
 
 	switch ($_POST['action']) {
@@ -127,6 +136,30 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
 					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
 					exit('Success');
+				}
+			}
+			break;
+		case 'bulk':
+			if (array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('enable', 'disable', 'delete'))) {
+				switch($_POST['bulk_action']) {
+					case 'enable':
+					case 'disable':
+					case 'delete':
+						$status = sanitize($_POST['bulk_action']) . 'd';
+						if ($status == 'enabled') $status = 'active';
+						foreach ((array) $_POST['item_id'] as $id) {
+							$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . $name);
+							if (updateStatus('fm_' . $table, $id, $prefix, $status, $prefix . 'id')) {
+								setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+								addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, $status));
+							}
+						}
+
+						echo buildPopup('header', __('Bulk Action Results'));
+						echo '<p>' . sprintf('%s action is complete.', ucfirst($_POST['bulk_action'])) . '</p>';
+						echo $fmdb->last_error;
+						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), sanitize($_POST['rel_url']));
+						break;
 				}
 			}
 			break;

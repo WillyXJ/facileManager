@@ -148,7 +148,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			$insert_id = $fmdb->insert_id;
 			
-			addLogEntry(__('Added an access point group with the following details') . ":\n" . __('Name') . ": {$post['group_name']}\n" . __('Associated APs') . ": ${post['log_message_member_servers']}\n" . __('Comment') . ": {$post['group_comment']}");
+			addLogEntry(__('Added an access point group with the following details') . ":\n" . __('Name') . ": {$post['group_name']}\n" . __('Associated APs') . ": ${post['log_message_member_servers']}\n" . _('Comment') . ": {$post['group_comment']}");
 			
 			return true;
 		}
@@ -236,7 +236,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups', 'group_', 'group_id', 'group_name');
 			$log_message = sprintf(__('Updated a zone group (%s) with the following details'), $old_name) . "\n";
-			addLogEntry($log_message . __('Name') . ": {$post['group_name']}\n" . __('Associated Zones') . ": " . $this->getZoneLogDomainNames($new_domain_ids) . "\n" . __('Comment') . ": {$post['group_comment']}");
+			addLogEntry($log_message . __('Name') . ": {$post['group_name']}\n" . __('Associated Zones') . ": " . $this->getZoneLogDomainNames($new_domain_ids) . "\n" . _('Comment') . ": {$post['group_comment']}");
 			return true;
 		}
 
@@ -602,7 +602,7 @@ HTML;
 		</script>', 
 					__('Group Name'), $group_name, $group_name_length,
 					__('Member APs'), $group_members, 
-					__('Comment'), $group_comment,
+					_('Comment'), $group_comment,
 					$popup_footer);
 		} else {
 			$return_form = buildPopup('header', _('Error'));

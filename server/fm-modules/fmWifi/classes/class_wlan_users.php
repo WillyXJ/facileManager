@@ -59,7 +59,7 @@ class fm_wifi_wlan_users {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = array_merge((array) $title_array, array(_('Login'), __('MAC Address'), __('Associated WLANs'), __('Comment')));
+		$title_array = array_merge((array) $title_array, array(_('Login'), __('MAC Address'), __('Associated WLANs'), _('Comment')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 		echo displayTableHeader($table_info, $title_array);
@@ -222,7 +222,7 @@ class fm_wifi_wlan_users {
 		
 		$edit_status = $edit_actions . $edit_status;
 		
-		$associated_wlans = _('All WLANs');
+		$associated_wlans = __('All WLANs');
 		if ($row->wlan_ids) {
 			$associated_wlans = null;
 			foreach (explode(';', $row->wlan_ids) as $id) {
@@ -280,7 +280,6 @@ HTML;
 		
 		$assoc_wlans = buildSelect('wlan_ids', 'wlan_ids', $fm_wifi_wlans->getWLANList('wpa2'), $wlan_ids, 1, null, true);
 		
-		
 		$popup_title = ($action == 'add') ? _('Add User') : _('Edit User');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
@@ -291,10 +290,10 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="wlan_user_mac">%s</label></th>
-								<td width="67&#37;" nowrap><input name="wlan_user_mac" id="wlan_user_mac" type="text" value="%s" /></td>
+								<td width="67&#37;" nowrap><input name="wlan_user_mac" id="wlan_user_mac" type="text" value="%s" maxlength="17" /></td>
 							</tr>
 							<tr>
-								<th width="33&#37;" scope="row"><label for="wlan_user_mac">%s</label></th>
+								<th width="33&#37;" scope="row"><label for="wlan_ids">%s</label></th>
 								<td width="67&#37;" nowrap>%s</td>
 							</tr>
 							<tr>
@@ -316,7 +315,7 @@ HTML;
 				$fm_users->printUsersForm($data, $action, array('user_login', 'user_password' => $GLOBALS['PWD_STRENGTH']), 'wlan_users', null, null, null, false, 'embed'),
 				__('MAC Address'), $wlan_user_mac,
 				__('Associated WLANs'), $assoc_wlans,
-				__('Comment'), $wlan_user_comment,
+				_('Comment'), $wlan_user_comment,
 				$popup_footer
 			);
 

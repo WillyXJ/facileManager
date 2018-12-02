@@ -49,6 +49,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
 $__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Access Points'), 'groups' => _('AP Groups'));
+$__FM_CONFIG['acls']['actions']           = array('accept' => __('Allow'), 'deny' => __('Deny'));
 
 /** Cleanup options */
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'table'=>'prefix');

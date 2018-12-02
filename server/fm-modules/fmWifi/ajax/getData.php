@@ -80,6 +80,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 $checks_array = @array('servers' => 'manage_servers',
 					'wlans' => 'manage_wlans',
 					'wlan_users' => 'manage_wlan_users',
+					'acls' => 'manage_wlans',
 					'options' => 'manage_servers'
 				);
 
@@ -127,6 +128,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'wlan_users':
 			$post_class = $fm_wifi_wlan_users;
+			break;
+		case 'acls':
+			$post_class = $fm_wifi_acls;
 			break;
 		case 'options':
 			$post_class = $fm_module_options;

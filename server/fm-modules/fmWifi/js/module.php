@@ -7,6 +7,15 @@ header("Content-Type: text/javascript");
 echo '
 $(document).ready(function() {
 	
+	if (onPage("config-acls.php")) {
+		$(function() {
+			$("#pagination_container #wlan_ids").select2({
+				containerCss: { "min-width": "180px", "max-width": "300px" },
+				minimumResultsForSearch: 10
+			});
+		});
+	}
+
 	$("#manage_item_contents").delegate("#hw_mode", "change", function(e) {
 		if (jQuery.inArray($(this).val(), ["a", "g"]) !== -1) {
 			$("#hw_mode_option").show("slow");
