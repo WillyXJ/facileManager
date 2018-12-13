@@ -461,7 +461,7 @@ class fm_dns_records {
 				}
 
 				/** Linked PTR */
-				if ($record_ptr_id) {
+				if (isset($record_ptr_id) && $record_ptr_id) {
 					$field_values['data']['Value'] .= ' <a href="#" class="tooltip-right" data-tooltip="' . __('Linked PTR exists') . '"><i class="mini-icon fa fa-exchange"></i></a>';
 				}
 			}

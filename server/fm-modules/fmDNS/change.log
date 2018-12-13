@@ -3,6 +3,7 @@
 * Server - [bug] Fixed text.
 * Server - [bug] Language fix.
 * Server - [bug] Fixed zone filters to include "All Zones" and "All Groups".
+* Server - [bug] Fixed PHP error. (Issue #423)
 
 3.2 (2018-10-26)
 ================
