@@ -150,7 +150,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 	exit($server_zone_data);
 }
 
-if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
+if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == 'display-process-all') {
 	$update_count = countServerUpdates();
 	$update_count += getZoneReloads('count');
 	

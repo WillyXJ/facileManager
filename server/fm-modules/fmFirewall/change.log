@@ -2,6 +2,7 @@
 ==================
 * Client - [improvement] Moved getInterfaceNames() to core.
 * Server - [bug] Language fix.
+* Server - [bug] Fixed display-process-all functionality.
 
 1.5 (2017-12-13)
 ================

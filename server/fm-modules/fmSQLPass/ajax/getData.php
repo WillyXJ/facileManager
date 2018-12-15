@@ -29,7 +29,7 @@ require_once('../../../fm-init.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 
-if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
+if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == 'display-process-all') {
 	echo 0;
 	exit;
 }

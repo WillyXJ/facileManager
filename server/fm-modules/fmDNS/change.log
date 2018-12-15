@@ -4,6 +4,7 @@
 * Server - [bug] Language fix.
 * Server - [bug] Fixed zone filters to include "All Zones" and "All Groups".
 * Server - [bug] Fixed PHP error. (Issue #423)
+* Server - [bug] Fixed display-process-all functionality.
 
 3.2 (2018-10-26)
 ================

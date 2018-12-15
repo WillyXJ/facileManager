@@ -69,7 +69,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 		if ($result[0]->def_minimum_version) printf('<br /><span class="note">%s</span></td>', sprintf(__('This option requires DHCPD %s or later.'), $result[0]->def_minimum_version));
 	}
 	exit;
-} elseif (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
+} elseif (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == 'display-process-all') {
 	$update_count = countServerUpdates();
 	
 	echo $update_count;

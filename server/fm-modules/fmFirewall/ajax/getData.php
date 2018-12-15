@@ -32,7 +32,7 @@ foreach (scandir($class_dir) as $class_file) {
 	include($class_dir . $class_file);
 }
 
-if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
+if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == 'display-process-all') {
 	$update_count = countServerUpdates();
 	
 	echo $update_count;
