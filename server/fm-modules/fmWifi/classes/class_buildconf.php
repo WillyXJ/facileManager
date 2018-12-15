@@ -150,7 +150,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								if ($child_result[$j]->config_name == 'wpa_key_mgmt' && strpos($child_result[$j]->config_data, 'WPA-PSK') !== false) {
 									$psk_filename = $this->getPSKFilename($server_data, $ssid);
 									$config[] = sprintf('wpa_psk_file=%s', $psk_filename);
-									$server_data->files[$psk_filename] = $this->buildPSKFile($header, $server_data, $config_result[$i]->config_id);
+									$server_data->files[$psk_filename] = array('contents' => $this->buildPSKFile($header, $server_data, $config_result[$i]->config_id), 'mode' => 0400);
 								}
 								if ($child_result[$j]->config_name == 'wpa_passphrase') continue;
 								

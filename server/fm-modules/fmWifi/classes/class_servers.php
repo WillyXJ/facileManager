@@ -112,7 +112,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @param array $post $_POST data
 	 * @return boolean or string
 	 */
-	function add($post, $type) {
+	function add($post) {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		/** Validate entries */
@@ -202,7 +202,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @param array $post $_POST data
 	 * @return boolean or string
 	 */
-	function update($post, $type) {
+	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Validate entries */
@@ -715,13 +715,15 @@ HTML;
 	function getServerGroups($server_id, $field = 'group_id') {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = false;
+		$array = false;
 		
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND `group_status`='active'
 			AND (group_members='s_$server_id' OR group_members LIKE 's_$server_id;%' OR group_members LIKE '%;s_$server_id;%' OR group_members LIKE '%;s_$server_id')";
 		$fmdb->get_results($query);
-		foreach ($fmdb->last_result as $group_info) {
-			$array[] = $group_info->$field;
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $group_info) {
+				$array[] = $group_info->$field;
+			}
 		}
 		
 		return $array;

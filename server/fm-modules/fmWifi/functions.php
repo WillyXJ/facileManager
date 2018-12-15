@@ -77,8 +77,8 @@ function buildModuleDashboard() {
 
 	$return = displayTableHeader($table_info, $title_array);
 
+	$ap_clients = array();
 	if ($apstats_result) {
-		$ap_clients = array();
 		foreach ($apstats_result as $server) {
 			$ap_info = unserialize($server->stat_info);
 			foreach((array) $ap_info['interfaces'] as $iface_info) {
@@ -135,8 +135,7 @@ HTML;
 	/** Show AP Stats */
 	$return .= sprintf("<br /><br /><br /><h2>%s</h2>", __('Access Points'));
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
-	$num_rows = $fmdb->num_rows;
-	$result = $fmdb->last_result;
+	$result = ($fmdb->num_rows) ? $fmdb->last_result : null;
 	$table_info = array(
 					'class' => 'display_results',
 					'name' => 'servers'
@@ -158,6 +157,7 @@ HTML;
 			if (is_array($ap_groups)) {
 				$ap_groups = join('; ', $ap_groups);
 			}
+			$ap_uptime = secondsToTime(0);
 			if ($apstats_result) {
 				foreach ($apstats_result as $apstats) {
 					$ap_uptime = secondsToTime(0);

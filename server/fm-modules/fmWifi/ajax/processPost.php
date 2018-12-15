@@ -71,6 +71,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				$prefix = 'group_';
 				$object = __('server group');
 			}
+			$field_data = $prefix . 'name';
 			$server_serial_no = $type;
 			break;
 		case 'wlans':
@@ -105,12 +106,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'acls':
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$object = substr($item_type, 0, -1);
+			$field_data = $prefix . 'name';
 			$name = 'mac';
 			break;
 		default:
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$object = substr($item_type, 0, -1);
 			$name = 'name';
+			$field_data = $prefix . 'name';
 	}
 
 	switch ($_POST['action']) {

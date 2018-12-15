@@ -79,7 +79,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 	}
 	$ap_status = $fm_module_servers->getAPStats(sanitize($_POST['ap_id']), 'status -o web');
-	if ($ap_status == true) {
+	if (is_int($ap_status) && $ap_status == true) {
 		exit(str_replace(_('OK'), __('AP is up'), $__FM_CONFIG['module']['icons']['ok']));
 	} elseif ($ap_status == false) {
 		exit(str_replace(_('Failed'), __('AP is down'), $__FM_CONFIG['module']['icons']['fail']));
