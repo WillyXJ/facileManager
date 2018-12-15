@@ -5,6 +5,10 @@
 * Server - [improvement] CSS changes.
 * Server - [bug] Added missing select2 image.
 * Server - [bug] Fixed text.
+* Client - [improvement] Added function to detect if the client is a
+           Debian-based system.
+* Client - [bug] Suppressed crontab error during installation if the user
+           crontab does not exist.
 
 3.2 (2018-10-26)
 ================

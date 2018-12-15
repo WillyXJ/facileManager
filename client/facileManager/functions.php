@@ -813,7 +813,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 		/** cron */
 		case 'c':
 			$tmpfile = sys_get_temp_dir() . '/crontab.facileManager';
-			$dump = shell_exec('crontab -l | grep -v ' . $module_name . '> ' . $tmpfile . ' 2>/dev/null');
+			$dump = shell_exec('crontab -l 2>/dev/null | grep -v ' . $module_name . '> ' . $tmpfile . ' 2>/dev/null');
 			
 			/** Handle special cases */
 			if (PHP_OS == 'SunOS') {
@@ -1518,5 +1518,18 @@ function installPackage($packages) {
 	return true;
 }
 
+
+/**
+ * Returns if the OS is debian-based or not
+ *
+ * @since 3.3
+ * @package facileManager
+ *
+ * @param string $os OS to check
+ * @return boolean
+ */
+function isDebianSystem($os) {
+	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu', 'raspbian'));
+}
 
 ?>
