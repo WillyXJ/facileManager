@@ -14,6 +14,7 @@
 * Server - [improvement] Added Raspbian as a valid Debian-based system.
 * Server - [improvement] Added function to run remote commands via SSH or HTTP/S
            as the server configuration case may be.
+* Client - [bug] Fixed support for non-standard server ports.
 
 3.2 (2018-10-26)
 ================

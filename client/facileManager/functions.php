@@ -281,6 +281,11 @@ function installFM($proto, $compress) {
 		}
 	}
 	
+	if (!in_array($port, array(80, 443))) {
+		$hostname .= ':' . $port;
+		$server_location['hostname'] = $hostname;
+	}
+	
 	$data['config'][] = array('FMHOST', 'facileManager server', $hostname . '/' . $path);
 	
 	/** Account key **/
