@@ -3274,7 +3274,7 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
  * @return boolean
  */
 function isDebianSystem($os) {
-	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu'));
+	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu', 'raspbian'));
 }
 
 
@@ -3914,6 +3914,77 @@ function getBrandLogo($size = 'sm_brand_img') {
 	}
 	
 	return $branding_logo;
+}
+
+
+/**
+ * Returns the branding logo
+ *
+ * @since 3.3
+ * @package facileManager
+ *
+ * @param object $server_info Server info object from db query
+ * @param array $command_args Action and command arguments
+ * @param string $output_type Return as popup or something else (popup|return)
+ * @return string
+ */
+function autoRunRemoteCommand($server_info, $command_args, $output_type = 'popup') {
+	extract(get_object_vars($server_info), EXTR_SKIP);
+
+	/** Disabled server */
+	if ($server_status != 'active') {
+		return null;
+	}
+	
+	if (is_array($command_args)) {
+		list($action, $command_args) = $command_args;
+	}
+
+	/** Get zone data via ssh */
+	if ($server_update_method == 'ssh') {
+		$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/' . $_SESSION['module'] . '/client.php ' . $command_args, 'return', $server_update_port, 'include', 'plaintext');
+	} elseif (in_array($server_update_method, array('http', 'https'))) {
+		/** Get data via http(s) */
+		/** Test the port first */
+		if (socketTest($server_name, $server_update_port, 10)) {
+			/** Remote URL to use */
+			$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
+
+			/** Data to post to $url */
+			$post_data = array('action' => $action,
+				'serial_no' => $server_serial_no,
+				'module' => $_SESSION['module'],
+				'command_args' => $command_args
+			);
+
+			$server_remote = getPostData($url, $post_data);
+			if (isSerialized($server_remote)) {
+				$server_remote = unserialize($server_remote);
+			}
+		}
+	}
+
+	if (isset($server_remote) && $server_remote !== false) {
+		if (is_array($server_remote)) {
+			if (isset($server_remote['failures']) && !$server_remote['failures']) {
+				if (@isSerialized($server_remote['output'][0])) {
+					$server_remote['output'] = unserialize($server_remote['output'][0]);
+				}
+				return $server_remote['output'];
+			}
+		} else {
+			return (strpos($server_remote, 'popup') === false || $output_type != 'popup') ? $server_remote : buildPopup('header', _('Error')) . '<p>' . $server_remote . '</p>' . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+		}
+	} else {
+		/** Return if the leases did not get dumped from the server */
+		if (!isset($server_remote['output'])) {
+			$return = sprintf('<p>%s</p>', __('The leases from the DHCP server could not be retrieved or managed. Possible causes include:'));
+			$return .= sprintf('<ul><li>%s</li><li>%s</li></ul>',
+					__('The update ports on the server are not accessible'),
+					__('This server is updated via cron (only SSH and http/https are supported)'));
+			return $return;
+		}
+	}
 }
 
 

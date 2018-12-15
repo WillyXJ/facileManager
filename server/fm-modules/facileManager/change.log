@@ -11,6 +11,9 @@
            crontab does not exist.
 * Server - [improvement] Clears database result variable before use to provide
            more accurate results.
+* Server - [improvement] Added Raspbian as a valid Debian-based system.
+* Server - [improvement] Added function to run remote commands via SSH or HTTP/S
+           as the server configuration case may be.
 
 3.2 (2018-10-26)
 ================
