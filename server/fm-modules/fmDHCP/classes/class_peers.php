@@ -142,7 +142,7 @@ HTML;
 		$max_response_delay = $this->getConfig($config_id, 'max-response-delay');
 		$max_unacked_updates = $this->getConfig($config_id, 'max-unacked-updates');
 		$mclt = $this->getConfig($config_id, 'mclt');
-		$load_balance_max_secs = $this->getConfig($config_id, 'load balance max secs');
+		$load_balance_max_seconds = $this->getConfig($config_id, 'load balance max seconds');
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s
@@ -200,8 +200,8 @@ HTML;
 								<td width="67&#37;"><input name="max-unacked-updates" id="max-unacked-updates" type="number" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
 							</tr>
 							<tr>
-								<th width="33&#37;" scope="row"><label for="load balance max secs">%s</label></th>
-								<td width="67&#37;"><input name="load balance max secs" id="load balance max secs" type="number" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
+								<th width="33&#37;" scope="row"><label for="load balance max seconds">%s</label></th>
+								<td width="67&#37;"><input name="load balance max seconds" id="load balance max seconds" type="number" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
 							</tr>
 						</table>
 					</div>
@@ -233,7 +233,7 @@ HTML;
 				__('Advanced'),
 				__('Maximum Response Delay'), $max_response_delay,
 				__('Maximum Unacknowledges Updates'), $max_unacked_updates,
-				__('Load Balance Max Seconds'), $load_balance_max_secs,
+				__('Load Balance Max Seconds'), $load_balance_max_seconds,
 				$popup_footer
 			);
 

@@ -30,7 +30,7 @@ function upgradefmDHCPSchema($module_name) {
 	$running_version = getOption('version', 0, 'fmDHCP');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.2', '<') ? upgradefmDHCP_02($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.3.1', '<') ? upgradefmDHCP_031($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false, 0, 'fmDHCP');
@@ -120,17 +120,12 @@ VALUES
 	return true;
 }
 
-/** 1.1.1 */
-function upgradefmDHCP_111($__FM_CONFIG, $running_version) {
+/** 0.3.1 */
+function upgradefmDHCP_031($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
-	/** Check if previous upgrades have run (to support n+1) **/
-	$success = version_compare($running_version, '1.0.1', '<') ? upgradefmDHCP_101($__FM_CONFIG, $running_version) : true;
-	if (!$success) return false;
-	
 	/** Insert upgrade steps here **/
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}table` ...";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}table` ...";
+	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` SET `config_name`='load balance max seconds' WHERE `config_name`='load balance max secs'";
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -139,16 +134,16 @@ function upgradefmDHCP_111($__FM_CONFIG, $running_version) {
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
-
+	
 	if (count($inserts) && $inserts[0]) {
 		foreach ($inserts as $query) {
 			$fmdb->query($query);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
-
+	
 	/** Handle updating table with module version **/
-	setOption('version', '1.1.1', 'auto', false, 0, 'fmDHCP');
+	setOption('version', '0.3.1', 'auto', false, 0, 'fmDHCP');
 	
 	return true;
 }
