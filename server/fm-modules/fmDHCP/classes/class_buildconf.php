@@ -191,6 +191,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						for ($j=0; $j < $count2; $j++) {
 							if ($child_result[$j]->config_data) {
 								$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions` WHERE `def_option`='{$child_result[$j]->config_name}'");
+								if (in_array($child_result[$j]->config_name, array('peer-address', 'peer-port'))) {
+									$child_result[$j]->config_name = str_replace('-', ' ', $child_result[$j]->config_name);
+								}
 								$direction = $fmdb->num_rows ? $fmdb->last_result[0]->def_direction : null;
 								$option_prefix = ($fmdb->last_result[0]->def_prefix) ? $fmdb->last_result[0]->def_prefix . ' ' : null;
 								if (strpos($child_result[$j]->config_data, ';') !== false) {
@@ -246,8 +249,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					if (!in_array($type, array('host', 'peer'))) {
 						$nested_items[] = 'host';
 						if (!in_array($type, array('host', 'group'))) $nested_items[] = 'group';
-						if (!in_array($type, array('host', 'subnet'))) $nested_items[] = 'subnet';
 						if (!in_array($type, array('host', 'pool'))) $nested_items[] = 'pool';
+						if (!in_array($type, array('host', 'subnet'))) $nested_items[] = 'subnet';
 						foreach (array_reverse(array_unique($nested_items)) as $subitem) {
 							$sub_config = $this->dhcpdBuildConfigItems($subitem, $config_result[$i]->config_id, $newtab);
 							if (trim($sub_config)) {

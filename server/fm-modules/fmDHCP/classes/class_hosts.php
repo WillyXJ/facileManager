@@ -220,7 +220,7 @@ HTML;
 	 * @return array
 	 */
 	function getTableHeader() {
-		return array(__('Hostname'), __('Fixed Address'), __('Comment'));
+		return array(__('Hostname'), __('Fixed Address'), _('Comment'));
 	}
 	
 	/**

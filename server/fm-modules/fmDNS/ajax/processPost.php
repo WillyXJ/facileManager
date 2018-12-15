@@ -121,7 +121,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'add':
 			if (!empty($_POST[$table . '_name'])) {
 				if (!$post_class->add($_POST)) {
-					echo '<div class="error"><p>This ' . $table . ' could not be added.</p></div>'. "\n";
+					printf('<div class="error"><p>%s</p></div>' . "\n", __('This item could not be added.'));
 					$form_data = $_POST;
 				} else exit('Success');
 			}

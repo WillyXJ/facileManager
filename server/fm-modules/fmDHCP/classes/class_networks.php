@@ -299,7 +299,7 @@ HTML;
 	 * @return array
 	 */
 	function getTableHeader() {
-		return array(__('Name'), __('Comment'));
+		return array(__('Name'), _('Comment'));
 	}
 	
 	/**

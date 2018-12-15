@@ -744,7 +744,7 @@ HTML;
 				__('Basic'),
 				$unique_form,
 				$parents, $children,
-				__('Comment'), $config_comment,
+				_('Comment'), $config_comment,
 				__('Advanced'),
 				__('Default lease time'), $lease_time, __('seconds'),
 				__('Maximum lease time'), $max_lease_time, __('seconds'),

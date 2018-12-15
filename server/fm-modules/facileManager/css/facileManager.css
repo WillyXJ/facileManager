@@ -47,12 +47,12 @@ input[type="checkbox"] {
 	-webkit-transition: .05s border-color ease-in-out;
 	transition: .05s border-color ease-in-out;
 }
-input[type=checkbox]:checked:before {
+input[type="checkbox"]:checked:before {
 	content: "\f00c";
 	margin: 0px 0 0 -1px;
 	color: #496e99;
 }
-input[type=checkbox]:checked:before {
+input[type="checkbox"]:checked:before {
 	float: left;
 	display: inline-block;
 	vertical-align: middle;
@@ -62,7 +62,7 @@ input[type=checkbox]:checked:before {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
-input[type=checkbox].modules {
+input[type="checkbox"].modules {
 	margin-top: 12px;
 }
 #tophead {
@@ -736,6 +736,19 @@ tbody {
 	font-size: 12px;
 }
 
+.form-table input:not([type="image"]):not([type="checkbox"]):not(.select2-input):not(.button),
+input.text_icon {
+	padding-right: 24px;
+}
+
+i.text_icon {
+	cursor: pointer;
+	position: relative;
+	display: inline-block;
+	left: -24px;
+	top: 1px;
+}
+
 #fm_user_profile .form-table td {
 	vertical-align: middle;
 }
@@ -1308,7 +1321,7 @@ i.star {
 	color: #e8a412;
 }
 #edit_delete_img i.ok,
-i.ok
+i.ok,
 i.secure {
 	color: #09a30c;
 }
@@ -1727,11 +1740,7 @@ div.fm-table > div > div.fm-half {
 }
 
 #search_form_container .search_remove {
-	cursor: pointer;
-	position: absolute;
-	display: inline-block;
-	right: -1.5em;
-	top: 4px;
+	top: -1px;
 }
 
 .highlighted {
@@ -1933,6 +1942,55 @@ a.subelement_edit img {
 	margin-left: 6.5em;
 	padding: 0;
 	font-size: 9pt;
+}
+
+#tabs {
+	position: relative;
+	min-height: 300px;
+	clear: both;
+	margin: 25px 0;
+}
+#tab {
+	float: left;
+	padding: 0 3px;
+}
+#tab [type=radio] {
+	display: none;
+}
+#tab [type=radio] ~ label{
+	padding: 2px 5px;
+	border: 1px solid #fff;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	background-color: #fff;
+	color: #000;
+}
+#tab [type=radio] ~ label:hover {
+	border: 1px solid #4F4F4F;
+	background-color: #666;
+	color: #fff;
+}
+#tab [type=radio]:checked ~ label {
+	z-index: 2;
+	border: 1px solid #4F4F4F;
+	background-color: #666;
+	color: #fff;
+}
+#tab [type=radio] ~ label ~ #tab-content {
+	display: none;
+}
+#tab [type=radio]:checked ~ label ~ #tab-content {
+	z-index: 1;
+	display: block;
+}
+#tab-content {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #fff;
+	border-top: 1px #ccc solid;
+	margin-top: 5px;
 }
 
 /** Firefox hacks :( */

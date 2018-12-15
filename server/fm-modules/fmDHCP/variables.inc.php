@@ -31,7 +31,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmDHCP'] = array(
-		'version'							=> '0.2',
+		'version'							=> '0.3',
 		'client_version'					=> '0.1',
 		'description'						=> __('Easily manage one or more ISC DHCP servers through a web interface. No longer edit configuration files manually.', 'fmDHCP'),
 		'prefix'							=> 'dhcp_',
@@ -48,7 +48,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
-$__FM_CONFIG['networks']['avail_types']    = array('subnets' => _('Subnets'), 'shared' => _('Shared Networks'));
+$__FM_CONFIG['networks']['avail_types']    = array('subnets' => __('Subnets'), 'shared' => __('Shared Networks'));
 
 /** Cleanup options */
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmDHCP']['prefix'] . 'config'=>'config', 'fm_' . $__FM_CONFIG['fmDHCP']['prefix'] . 'servers'=>'server'

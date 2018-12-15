@@ -229,7 +229,7 @@ HTML;
 				__('Secondary Host : Port'), $secondary, $secondary_port,
 				__('Load Balancing'), $load_balancing, $load_balancing_hash,
 				__('Minimum Client Lead Time'), $mclt,
-				__('Comment'), $config_comment,
+				_('Comment'), $config_comment,
 				__('Advanced'),
 				__('Maximum Response Delay'), $max_response_delay,
 				__('Maximum Unacknowledges Updates'), $max_unacked_updates,
@@ -290,7 +290,7 @@ HTML;
 	 * @return array
 	 */
 	function getTableHeader() {
-		return array(__('Name'), __('Primary'), __('Secondary'), __('Comment'));
+		return array(__('Name'), __('Primary'), __('Secondary'), _('Comment'));
 	}
 	
 	/**

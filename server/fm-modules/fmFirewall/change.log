@@ -1,3 +1,9 @@
+1.6 (2018-12-15)
+================
+* Client - [improvement] Moved getInterfaceNames() to core.
+* Server - [bug] Language fix.
+* Server - [bug] Fixed display-process-all functionality.
+
 1.5 (2017-12-13)
 ================
 * Server - [improvement] Moved the grab CSS/JS to the core for other modules to use.

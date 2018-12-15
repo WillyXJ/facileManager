@@ -261,7 +261,7 @@ HTML;
 		</script>',
 				$popup_header, $ip, $server_serial_no,
 				$fm_dhcp_item->printForm(null, 'add', 'host', array('config_data' => $hostname, 'fixed_address' => $ip, 'hardware_address_entry' => array('ethernet', $hardware))),
-				__('Comment'),
+				_('Comment'),
 				$popup_footer
 			);
 
@@ -291,7 +291,7 @@ HTML;
 			});
 		</script>',
 				$popup_header, sanitize($_POST['item_id']), $server_serial_no,
-				__('Comment'), $config_comment,
+				_('Comment'), $config_comment,
 				$popup_footer
 			);
 

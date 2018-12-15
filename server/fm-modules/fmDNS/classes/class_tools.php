@@ -356,7 +356,7 @@ HTML;
 						'name' => 'views'
 					);
 
-		$title_array = array(__('Action'), __('Record'), __('TTL'), __('Class'), __('Type'), __('Priority'), __('Value'), __('Weight'), __('Port'), __('Comment'));
+		$title_array = array(__('Action'), __('Record'), __('TTL'), __('Class'), __('Type'), __('Priority'), __('Value'), __('Weight'), __('Port'), _('Comment'));
 		$title_array[] = array('title' => __('Append Domain'), 'style' => 'text-align: center;', 'nowrap' => null);
 		$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 		

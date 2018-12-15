@@ -1,0 +1,868 @@
+<?php
+/*
+ +-------------------------------------------------------------------------+
+ | Copyright (C) 2013-2018 The facileManager Team                               |
+ |                                                                         |
+ | This program is free software; you can redistribute it and/or           |
+ | modify it under the terms of the GNU General Public License             |
+ | as published by the Free Software Foundation; either version 2          |
+ | of the License, or (at your option) any later version.                  |
+ |                                                                         |
+ | This program is distributed in the hope that it will be useful,         |
+ | but WITHOUT ANY WARRANTY; without even the implied warranty of          |
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           |
+ | GNU General Public License for more details.                            |
+ +-------------------------------------------------------------------------+
+ | facileManager: Easy System Administration                               |
+ | fmWifi: Easily manage one or more access points                         |
+ +-------------------------------------------------------------------------+
+ | http://www.facilemanager.com/modules/fmwifi/                            |
+ +-------------------------------------------------------------------------+
+*/
+
+class fm_wifi_wlans {
+	
+	/**
+	 * Displays the item list
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param array $result Record rows of all items
+	 * @return null
+	 */
+	function rows($result, $page, $total_pages, $type = 'wlans') {
+		global $fmdb;
+		
+		$num_rows = $fmdb->num_rows;
+		$results = $fmdb->last_result;
+		
+		$permission_type = (in_array($type, array('subnets', 'shared'))) ? 'networks' : $type;
+		if (currentUserCan('manage_' . $permission_type, $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
+
+		$fmdb->num_rows = $num_rows;
+
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => $type
+					);
+
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		}
+		$title_array = array_merge((array) $title_array, array(__('SSID'), __('Security'), __('Associated APs'), _('Comment')));
+		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+
+		echo displayTableHeader($table_info, $title_array);
+
+		if ($result) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
+				$this->displayRow($results[$x]);
+				$y++;
+			}
+		}
+
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no items.'));
+		}
+	}
+
+	/**
+	 * Adds the new object
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param array $post $_POST data
+	 * @return boolean or string
+	 */
+	function add($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Validate entries */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
+//		echo '<pre>';print_r($post); exit;
+		
+		/** Insert the parent */
+		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
+		$sql_fields = '(';
+		$sql_values = null;
+		
+		$post['account_id'] = $_SESSION['user']['account_id'];
+		$post['config_is_parent'] = 'yes';
+		$name = $post['config_name'];
+		$post['config_comment'] = trim($post['config_comment']);
+		
+		if (empty($name)) return __('No name defined.');
+		
+//		/** Ensure unique channel names */
+//		if (!$this->validateChannel($post)) return __('This channel already exists.');
+		
+//		if ($post['config_destination'] == 'file') {
+//			if (empty($post['config_file_path'][0])) return __('No file path defined.');
+//		}
+		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps'));
+		
+		/** Insert the category parent */
+		foreach ($post as $key => $data) {
+			if (in_array($key, $include)) {
+				$clean_data = sanitize($data);
+				if ($clean_data) {
+					$sql_fields .= $key . ', ';
+					$sql_values .= "'$clean_data', ";
+				}
+			}
+		}
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', ');
+		
+		$query = "$sql_start $sql_fields VALUES ($sql_values)";
+		$result = $fmdb->query($query);
+		
+		$insert_id = $fmdb->insert_id;
+
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
+		}
+
+		
+		/** Insert config children */
+		$child['config_is_parent'] = 'no';
+		$child['config_parent_id'] = $fmdb->insert_id;
+		$child['config_data'] = $child['config_name'] = null;
+		$child['account_id'] = $post['account_id'];
+		
+		if (isset($post['hardware-type'])) {
+			$post['hardware'] = $post['hardware-type'] . ' ' . $post['hardware'];
+			unset($post['hardware-type']);
+		}
+		
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit'));
+		
+		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
+		$sql_fields = '(';
+		$sql_values = '(';
+		
+		$i = 1;
+		foreach ($include as $handler) {
+//			$post['config_data'] = $post[$handler];
+//			/** Logic checking */
+//			if ($handler == 'config_destination' && $post[$handler] == 'syslog') {
+//				$post['config_data'] = $post['config_syslog'];
+//			} elseif ($handler == 'config_destination' && $post[$handler] == 'file') {
+//				list($file_path, $file_versions, $file_size, $file_size_spec) = $post['config_file_path'];
+//				$filename = str_replace('"', '', $file_path);
+//				$post['config_data'] = '"' . $filename . '"';
+//				if ($file_versions) $post['config_data'] .= ' versions ' . $file_versions;
+//				if (!empty($file_size) && $file_size > 0) $post['config_data'] .= ' size ' . $file_size . $file_size_spec;
+//			}
+//			if ($handler == 'config_destination') {
+//				$post['config_name'] = $post['config_destination'];
+//			} elseif (in_array($handler, array('print-category', 'print-severity', 'print-time')) && !sanitize($post['config_data'])) {
+//				continue;
+//			} else {
+				$child['config_name'] = $handler;
+				$child['config_data'] = $post[$handler];
+//			}
+			
+			foreach ($child as $key => $data) {
+				$clean_data = sanitize($data);
+				if ($i) $sql_fields .= $key . ', ';
+				
+				$sql_values .= "'$clean_data', ";
+			}
+			$i = 0;
+			$sql_values = rtrim($sql_values, ', ') . '), (';
+		}
+		$sql_fields = rtrim($sql_fields, ', ') . ')';
+		$sql_values = rtrim($sql_values, ', (');
+		
+		$query = "$sql_start $sql_fields VALUES $sql_values";
+		$result = $fmdb->query($query);
+		
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
+		}
+		
+		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware']}\nFixed Address: {$post['fixed-address']}";
+		$log_message .= "\nComment: {$post['config_comment']}";
+		addLogEntry($log_message);
+		
+		setBuildUpdateConfigFlag(getWLANServers($insert_id), 'yes', 'build');
+		
+		return true;
+	}
+
+	/**
+	 * Updates the selected host
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param array $post $_POST data
+	 * @return boolean or string
+	 */
+	function update($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Validate entries */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
+//		echo '<pre>';print_r($post);exit;
+		
+		/** Update the parent */
+		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
+		$sql_values = null;
+		
+		$post['account_id'] = $_SESSION['user']['account_id'];
+		$post['config_is_parent'] = 'yes';
+		$name = $post['config_name'];
+		$post['config_comment'] = trim($post['config_comment']);
+		
+		if (empty($name)) return __('No name defined.');
+		
+		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps'));
+		
+		/** Insert the category parent */
+		foreach ($post as $key => $data) {
+			if (in_array($key, $include)) {
+				$clean_data = sanitize($data);
+				if ($clean_data) {
+					$sql_values .= "$key='$clean_data', ";
+				}
+			}
+		}
+		$sql_values = rtrim($sql_values, ', ');
+		
+		$item_id = $post['config_id'];
+		
+		$query = "$sql_start $sql_values WHERE config_id={$post['config_id']} LIMIT 1";
+		$result = $fmdb->query($query);
+		
+		if ($fmdb->sql_errors) {
+			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
+		}
+		
+		/** Update config children */
+		$child['config_is_parent'] = 'no';
+		$child['config_data'] = $child['config_name'] = null;
+		
+		if (isset($post['hardware-type'])) {
+			$post['hardware'] = $post['hardware-type'] . ' ' . $post['hardware'];
+			unset($post['hardware-type']);
+		}
+		
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'account_id', 'config_children'));
+		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
+		
+		foreach ($include as $handler) {
+			$sql_values = null;
+//			$post['config_data'] = $post[$handler];
+//			/** Logic checking */
+//			if ($handler == 'config_destination' && $post[$handler] == 'syslog') {
+//				$post['config_data'] = $post['config_syslog'];
+//			} elseif ($handler == 'config_destination' && $post[$handler] == 'file') {
+//				list($file_path, $file_versions, $file_size, $file_size_spec) = $post['config_file_path'];
+//				$filename = str_replace('"', '', $file_path);
+//				$post['config_data'] = '"' . $filename . '"';
+//				if ($file_versions) $post['config_data'] .= ' versions ' . $file_versions;
+//				if (!empty($file_size) && $file_size > 0) $post['config_data'] .= ' size ' . $file_size . $file_size_spec;
+//			}
+//			if ($handler == 'config_destination') {
+//				$post['config_name'] = $post['config_destination'];
+//			} elseif (in_array($handler, array('print-category', 'print-severity', 'print-time')) && !sanitize($post['config_data'])) {
+//				continue;
+//			} else {
+				$child['config_name'] = $handler;
+				$child['config_data'] = $post[$handler];
+//			}
+			
+			foreach ($child as $key => $data) {
+				$clean_data = sanitize($data);
+				$sql_values .= "$key='$clean_data', ";
+			}
+			$sql_values = rtrim($sql_values, ', ');
+			
+			$query = "$sql_start $sql_values WHERE config_parent_id={$post['config_id']} AND config_name='$handler' LIMIT 1";
+			$result = $fmdb->query($query);
+
+			if ($fmdb->sql_errors) {
+				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
+			}
+		}
+		
+		/** Reassigned children */
+		$query = "$sql_start config_parent_id=0 WHERE config_parent_id={$post['config_id']} AND config_is_parent='yes'";
+		$result = $fmdb->query($query);
+		$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
+		$result = $fmdb->query($query);
+
+		/** Server changed so configuration needs to be built */
+		setBuildUpdateConfigFlag(getWLANServers($item_id), 'yes', 'build');
+		
+		return true;
+	}
+	
+	/**
+	 * Deletes the selected server
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param integer $id ID to delete
+	 * @return boolean or string
+	 */
+	function delete($id, $server_serial_no = 0) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
+
+		/** Delete associated children */
+		updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'config_', 'deleted', 'config_parent_id');
+		
+		/** Delete item */
+		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'config_', 'deleted', 'config_id') === false) {
+			return formatError(__('This host could not be deleted because a database error occurred.'), 'sql');
+		} else {
+			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+			addLogEntry(sprintf(__("Host '%s' was deleted."), $tmp_name));
+			return true;
+		}
+	}
+
+
+	/**
+	 * Displays the server entry table row
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param object $row Single data row from $results
+	 * @return null
+	 */
+	function displayRow($row) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$class = ($row->config_status == 'disabled') ? 'disabled' : null;
+		
+		$edit_status = $edit_actions = $checkbox = $icons = null;
+		
+		if (currentUserCan('manage_hosts', $_SESSION['module'])) {
+			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status .= '<a class="status_form_link" href="#" rel="';
+			$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';
+			$edit_status .= '">';
+			$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+			$edit_status .= '</a>';
+			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
+			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+		}
+//		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
+		
+		$edit_status = $edit_actions . $edit_status;
+		
+		if ($class) $class = 'class="' . $class . '"';
+		if (is_array($icons)) {
+			$icons = implode(' ', $icons);
+		}
+		
+		/** Display fixed address */
+		$query = 'SELECT * FROM `fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config` WHERE `config_status`!="deleted" AND `account_id`="' . $_SESSION['user']['account_id'] . '" AND 
+			`config_name`="ssid" AND `config_data`="' . $row->config_data . '"';
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			$query = 'SELECT * FROM `fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config` WHERE `config_status`!="deleted" AND `account_id`="' . $_SESSION['user']['account_id'] . '" AND 
+				`config_name`="wpa_key_mgmt" AND `config_parent_id`="' . $fmdb->last_result[0]->config_id . '"';
+			$fmdb->get_results($query);
+			$security_type = $fmdb->last_result[0]->config_data;
+		}
+		
+		if (!$security_type) {
+			$security_type = _('None');
+		}
+		
+		$associated_aps = _('All Servers');
+		if ($row->config_aps) {
+			$associated_aps = null;
+			foreach (explode(';', $row->config_aps) as $server_id) {
+				if ($server_id[0] == 'g') {
+					$table = 'server_groups';
+					$prefix = 'group_';
+				} else {
+					$table = 'servers';
+					$prefix = 'server_';
+				}
+				$associated_aps[] = getNameFromID(str_replace(array('s_', 'g_'), '', $server_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table, $prefix, $prefix . 'id', $prefix . 'name');
+			}
+			$associated_aps = join('; ', $associated_aps);
+		}
+		
+		echo <<<HTML
+		<tr id="$row->config_id" name="$row->config_data" $class>
+			$checkbox
+			<td>$row->config_data $icons</td>
+			<td>$security_type</td>
+			<td>$associated_aps</td>
+			<td>$row->config_comment</td>
+			$edit_status
+		</tr>
+
+HTML;
+	}
+
+	/**
+	 * Displays the add/edit form
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param array $data Either $_POST data or returned SQL results
+	 * @param string $action Add or edit
+	 * @return string
+	 */
+	function printForm($data = '', $action = 'add', $type = 'host', $addl_vars = null) {
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
+		
+		$hw_mode_options = array(
+			array('802.11a (5 GHz)', 'a'),
+			array('802.11b (2.4 GHz)', 'b'),
+			array('802.11g (2.4 GHz)', 'g'),
+			array('802.11ad (60 GHz)', 'ad')
+		);
+		$macaddr_acl_options = array(
+			array(__('Accept unless in deny list'), '0'),
+			array(__('Deny unless in accept list'), '1'),
+			array(__('Use external RADIUS server'), '2')
+		);
+		
+		$ignore_broadcast_ssid_checked = $ieee80211n_checked = $ieee80211ac_checked = $ieee80211d_checked = null;
+		$wmm_enabled_checked = $auth_algs_checked = $macaddr_acl_checked = null;
+		
+		$config_id = $config_parent_id = $config_aps = 0;
+		$config_name = $config_comment = $config_data = $channel = null;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
+		$country_code = 'US';
+		
+		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
+			if (is_array($_POST))
+				extract($_POST);
+		} elseif (@is_object($data[0])) {
+			extract(get_object_vars($data[0]));
+		}
+		
+		$config_name = $config_data;
+		
+		/** Get child elements */
+		$ignore_broadcast_ssid_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ignore_broadcast_ssid'))) ? 'checked' : null;
+		$ieee80211n_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ieee80211n'))) ? 'checked' : null;
+		$ieee80211ac_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ieee80211ac'))) ? 'checked' : null;
+		$ieee80211d_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ieee80211d'))) ? 'checked' : null;
+		$wmm_enabled_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'wmm_enabled'))) ? 'checked' : null;
+		$config_aps = buildSelect('config_aps', 'config_aps', availableServers('id'), explode(';', $config_aps), 1, null, true);
+		$hw_mode = $this->getConfig($config_id, 'hw_mode');
+		$hw_mode_options = buildSelect('hw_mode', 'hw_mode', $hw_mode_options, $hw_mode);
+		$auth_algs_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'auth_algs'))) ? 'checked' : null;
+		$macaddr_acl_options = buildSelect('macaddr_acl', 'macaddr_acl', $macaddr_acl_options, $this->getConfig($config_id, 'macaddr_acl'));
+		$macaddr_note = sprintf(' <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('The ACL functionality of hostapd (macaddr_acl) does not seem to work with Raspbian. Therefore, the use of ebtables is recommended to deny clients.'));
+
+		$wpa_passphrase = $this->getConfig($config_id, 'wpa_passphrase');
+		$wpa_key_mgmt = $fm_module_options->populateDefTypeDropdown($fm_module_options->parseDefType('wpa_key_mgmt'), $this->getConfig($config_id, 'wpa_key_mgmt'), 'wpa_key_mgmt');
+		$wpa_pairwise = $fm_module_options->populateDefTypeDropdown($fm_module_options->parseDefType('wpa_pairwise'), $this->getConfig($config_id, 'wpa_pairwise'), 'wpa_pairwise');
+
+		$channel = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'channel'));		
+		$country_code = ($config_id) ? $this->getConfig($config_id, 'country_code') : $country_code;
+		$country_code = $this->buildConfigOptions('country_code', $country_code);
+
+		if (in_array($hw_mode, array('', 'a', 'g'))) {
+			$hw_mode_option_style = 'block';
+			$ieee80211ac_style = (in_array($hw_mode, array('', 'a'))) ? 'inline' : 'none';
+		} else {
+			$hw_mode_option_style = 'none';
+		}
+		
+		$security_options_style = ($auth_algs_checked) ? 'block' : 'none';
+
+		$popup_title = ($action == 'add') ? __('Add Item') : __('Edit Item');
+		$popup_header = buildPopup('header', $popup_title);
+		$popup_footer = buildPopup('footer');
+		
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		%s
+			<input type="hidden" name="action" value="%s" />
+			<input type="hidden" name="config_id" value="%d" />
+			<input type="hidden" name="server_serial_no" value="%s" />
+			<input type="hidden" name="ctrl_interface" value="/var/run/hostapd" />
+			<input type="hidden" name="ctrl_interface_group" value="0" />
+			<div id="tabs">
+				<div id="tab">
+					<input type="radio" name="tab-group-1" id="tab-1" checked />
+					<label for="tab-1">%s</label>
+					<div id="tab-content">
+						<table class="form-table">
+							<tr>
+								<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
+								<td width="67&#37;" nowrap><input name="config_name" id="config_name" type="text" value="%s" /><br /><input name="ignore_broadcast_ssid" id="ignore_broadcast_ssid" type="checkbox" value="on" %s /> <label for="ignore_broadcast_ssid">%s</label></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="config_aps">%s</label></th>
+								<td width="67&#37;">%s</td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="hw_mode">%s</label></th>
+								<td width="67&#37;">%s
+									<div id="hw_mode_option" style="display: %s;">
+										<input name="ieee80211n" id="ieee80211n" type="checkbox" value="on" %s /> <label for="ieee80211n">%s</label>
+										<span id="ieee80211ac_entry" style="display: %s;"><input name="ieee80211ac" id="ieee80211ac" type="checkbox" value="on" %s /> <label for="ieee80211ac">%s</label></span>
+										<br /><input name="wmm_enabled" id="wmm_enabled" type="checkbox" value="on" %s /> <label for="wmm_enabled">%s</label>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row" style="padding-top:0;">%s</th>
+								<td width="67&#37;">
+									<input name="auth_algs" id="auth_algs" type="checkbox" value="on" %s /> <label for="auth_algs">%s</label><br />
+									<h4>%s: %s</h4>
+									%s
+								</td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="config_comment">%s</label></th>
+								<td width="67&#37;"><textarea id="config_comment" name="config_comment" rows="4" cols="30">%s</textarea></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div id="tab" class="security_options" style="display: %s;">
+					<input type="radio" name="tab-group-1" id="tab-2" />
+					<label for="tab-2">%s</label>
+					<div id="tab-content">
+						<table class="form-table">
+							<tr>
+								<th width="33&#37;" scope="row"><label for="wpa_passphrase">%s</label></th>
+								<td width="67&#37;"><input name="wpa_passphrase" id="wpa_passphrase" class="text_icon" type="password" value="%s" /> <i id="show_password" class="fa fa-eye eye-attention grey text_icon" title="%s"></i></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="wpa_key_mgmt">%s</label></th>
+								<td width="67&#37;">%s</td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="wpa_pairwise">%s</label></th>
+								<td width="67&#37;">%s</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div id="tab">
+					<input type="radio" name="tab-group-1" id="tab-3" />
+					<label for="tab-3">%s</label>
+					<div id="tab-content">
+						<table class="form-table">
+							<tr>
+								<th width="33&#37;" scope="row"><label for="channel">%s</label></th>
+								<td width="67&#37;"><input name="channel" id="channel" type="text" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="country_code">%s</label></th>
+								<td width="67&#37;">%s<br /><input name="ieee80211d" id="ieee80211d" type="checkbox" value="on" %s /> <label for="ieee80211d">%s</label></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		%s
+		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					width: "200px",
+					minimumResultsForSearch: 10
+				});
+			});
+		</script>',
+				$popup_header, $action, $config_id, $server_serial_no,
+				__('Basic'),
+				__('SSID'), $config_name, $ignore_broadcast_ssid_checked, __('Do not broadcast SSID'),
+				__('Associated APs'), $config_aps,
+				__('Hardware Mode'), $hw_mode_options,
+				$hw_mode_option_style, $ieee80211n_checked, __('Enable 802.11n'), $ieee80211ac_style, $ieee80211ac_checked, __('Enable 802.11ac'), $wmm_enabled_checked, __('Enable QoS Support'),
+				__('Security'), $auth_algs_checked, __('Enable WPA2'), __('MAC address filtering'), $macaddr_note, $macaddr_acl_options,
+				_('Comment'), $config_comment,
+				$security_options_style, __('Security'),
+				__('WPA Passphrase'), $wpa_passphrase, __('Show'),
+				__('Encryption Key'), $wpa_key_mgmt,
+				__('Pairwise Cipher Suite'), $wpa_pairwise,
+				__('Advanced'),
+				__('Channel'), $channel,
+				__('Country'), $country_code, $ieee80211d_checked, __('Limit the frequencies to regulatory limits'),
+				$popup_footer
+			);
+
+		return $return_form;
+	}
+	
+	/**
+	 * Gets config item data from key
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param integer $config_id Config parent ID to retrieve children for
+	 * @param string $config_opt Config option to retrieve
+	 * @return string
+	 */
+	function getConfig($config_id, $config_opt = null) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return = null;
+		
+		/** Get the data from $config_opt */
+		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND config_parent_id='{$config_id}' AND config_name='$config_opt' ORDER BY config_id ASC";
+		$result = $fmdb->get_results($query);
+		if (!$fmdb->sql_errors && $fmdb->num_rows) {
+			return $fmdb->last_result[0]->config_data;
+		}
+		
+		return $return;
+	}
+	
+	/**
+	 * Gets config item data from key
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param string $config_name Config name to get options for
+	 * @param string $config_data Current config data for selection
+	 * @return string
+	 */
+	private function buildConfigOptions($config_name, $config_data) {
+		global $__FM_CONFIG, $fmdb, $fm_module_options;
+		
+		$query = "SELECT def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '$config_name'";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			/** Build array of possible values */
+			if (!class_exists('fm_module_options')) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+			}
+			return $fm_module_options->populateDefTypeDropdown($fmdb->last_result[0]->def_type, $config_data, $config_name);
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Validates the user-submitted data (for add and edit)
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param array $post Posted data to validate
+	 * @return array
+	 */
+	function validatePost($post) {
+		global $__FM_CONFIG;
+		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+		if (array_key_exists('config_name', $post)) {
+			$post_tmp['config_data'] = $post['config_name'];
+			$post_tmp['config_name'] = 'ssid';
+		}
+		if (array_key_exists('config_data', $post)) {
+			$post_tmp['config_data'] = $post['config_data'];
+		}
+		$post['ignore_broadcast_ssid'] = array_key_exists('ignore_broadcast_ssid', $post) ? 1 : 0;
+		$post['ieee80211n'] = array_key_exists('ieee80211n', $post) ? 1 : null;
+		$post['ieee80211ac'] = array_key_exists('ieee80211ac', $post) ? 1 : null;
+		$post['ieee80211d'] = array_key_exists('ieee80211d', $post) ? 1 : null;
+		$post['wmm_enabled'] = array_key_exists('wmm_enabled', $post) ? 1 : null;
+		$post['auth_algs'] = array_key_exists('auth_algs', $post) ? 1 : null;
+		
+		$security_fields_to_null = array('wpa_key_mgmt', 'wpa_pairwise');
+		if (!$post['auth_algs']) {
+			foreach ($security_fields_to_null as $field) {
+				$post[$field] = null;
+			}
+		}
+	
+		foreach ($post as $key => $val) {
+			if (!$val) continue;
+			if (in_array($key, array('slp-directory-agent-only', 'slp-service-scope-only'))) {
+				unset($post[$key]);
+				continue;
+			}
+			if ($key == 'config_aps') {
+				if (in_array('0', $val)) $val = 0;
+			}
+			if (is_array($val)) {
+				$val = join(';', $val);
+			}
+
+			$post['config_name'] = $key;
+			$post['config_data'] = $val;
+			$post2 = $fm_module_options->validateDefType($post);
+			if (!is_array($post2)) {
+				return $post2;
+			} else {
+				if ($key == 'slp-directory-agent') {
+					$true_false = (array_key_exists('slp-directory-agent-only', $post)) ? 'true' : 'false';
+					$post[$key] = $true_false . ' ' . $post2['config_data'];
+				} elseif ($key == 'slp-service-scope') {
+					$true_false = (array_key_exists('slp-service-scope-only', $post)) ? 'true' : 'false';
+					$post[$key] = $true_false . ' ' . $post2['config_data'];
+				} elseif ($key == 'domain-search') {
+					$post[$key] = str_replace(',', '","', $post2['config_data']);
+				} else {
+					$post[$key] = $post2['config_data'];
+				}
+			}
+		}
+		if (array_key_exists('config_name', $post_tmp)) {
+			$post['config_name'] = $post_tmp['config_name'];
+		} else {
+			unset($post['config_name']);
+		}
+		if (array_key_exists('config_data', $post_tmp)) {
+			$post['config_data'] = $post_tmp['config_data'];
+		} else {
+			unset($post['config_data']);
+		}
+
+		if (empty($post['config_name'])) return __('No name is defined.');
+		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_name');
+		if ($field_length !== false && strlen($post['config_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Host name is too long (maximum %d characters).', $field_length), $field_length);
+		
+		/** Does the record already exist for this account? */
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_name='wlan' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
+		if ($fmdb->num_rows) return __('This host already exists.');
+		
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['fixed-address'], 'config_', 'config_data', "AND config_name='fixed-address' AND config_is_parent='no' AND config_parent_id!='{$post['config_id']}'");
+		if ($fmdb->num_rows) return __('This address already exists.');
+		
+		/** Valid MAC address? */
+		if ($post['hardware-type'] == 'ethernet' && version_compare(PHP_VERSION, '5.5.0', '>=') && !verifySimpleVariable($post['hardware'], FILTER_VALIDATE_MAC)) {
+			return __('The hardware address is invalid.');
+		}
+		
+		/** Valid IP address? */
+		if ($post['hardware-type'] == 'ethernet' && !verifyIPAddress($post['fixed-address'])) {
+			return __('The IP address is invalid.');
+		}
+
+		return $post;
+	}
+	
+	/**
+	 * Gets WLAN listing
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param string $security What security to include
+	 * @return array
+	 */
+	function getWLANList($security = 'open') {
+		global $__FM_CONFIG, $fmdb;
+		
+		$include = true;
+		
+		$list[0][] = __('All WLANs');
+		$list[0][] = '0';
+		
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', " AND config_is_parent='yes' AND config_parent_id=0 AND config_name='ssid' AND config_status='active'");
+		if ($fmdb->num_rows) {
+			$last_result = $fmdb->last_result;
+			$count = $fmdb->num_rows;
+			$i = 1;
+			for ($j=0; $j<$count; $j++) {
+				if ($security != 'open') {
+					$query = "SELECT config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE config_status='active' AND account_id='{$_SESSION['user']['account_id']}' AND config_parent_id={$last_result[$j]->config_id} AND config_name='auth_algs' AND config_data='1' LIMIT 1";
+					$fmdb->query($query);
+					$include = ($fmdb->num_rows) ? true : false;
+				}
+				if ($include) {
+					$list[$i][] = $last_result[$j]->config_data;
+					$list[$i][] = $last_result[$j]->config_id;
+					$i++;
+				}
+			}
+		}
+		
+		return $list;
+	}
+	
+	/**
+	 * Gets WLAN listing
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param array $wlan_ids WLAN IDs to translate
+	 * @return array
+	 */
+	function getWLANLoggingNames($wlan_ids) {
+		global $__FM_CONFIG, $fmdb;
+		
+		foreach ((array) $wlan_ids as $id) {
+			if (!$id) {
+				return __('All WLANs');
+			}
+			$name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
+			(string) $wlan_names .= "$name; ";
+		}
+		
+		return rtrim((string) $wlan_names, '; ');
+	}
+	
+	/**
+	 * Updates WLAN stats
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param integer $server_serial_no Server serial number to update
+	 * @return array
+	 */
+	function updateWLANInfo($server_serial_no) {
+		global $__FM_CONFIG, $fmdb;
+		
+		$ap_info = serialize($_POST['ap-info']);
+		
+		$query = "REPLACE INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}stats` (`account_id`, `server_serial_no`, `stat_last_report`, `stat_info`) VALUES ('" . getAccountID($_POST['AUTHKEY']) . "', '$server_serial_no', '" . strtotime('now') . "', '$ap_info')";
+		$fmdb->query($query);
+	}
+	
+}
+
+if (!isset($fm_wifi_wlans))
+	$fm_wifi_wlans = new fm_wifi_wlans();
+
+?>

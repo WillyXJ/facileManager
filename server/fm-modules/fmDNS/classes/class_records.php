@@ -325,7 +325,7 @@ class fm_dns_records {
 		}
 		
 		if (!in_array($type, array('SOA', 'DOMAIN'))) {
-			$title_array[] = array('title' => __('Comment'), 'rel' => 'record_comment');
+			$title_array[] = array('title' => _('Comment'), 'rel' => 'record_comment');
 		}
 		
 		if (in_array($type, $append)) $title_array[] = array('title' => __('Append Domain'), 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null, 'rel' => 'record_append');
@@ -461,7 +461,7 @@ class fm_dns_records {
 				}
 
 				/** Linked PTR */
-				if ($record_ptr_id) {
+				if (isset($record_ptr_id) && $record_ptr_id) {
 					$field_values['data']['Value'] .= ' <a href="#" class="tooltip-right" data-tooltip="' . __('Linked PTR exists') . '"><i class="mini-icon fa fa-exchange"></i></a>';
 				}
 			}

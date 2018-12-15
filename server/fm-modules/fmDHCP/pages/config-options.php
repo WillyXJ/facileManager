@@ -25,7 +25,8 @@ if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) u
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
 $option_type = (isset($_GET['type'])) ? sanitize(ucfirst($_GET['type'])) : 'Global';
-$display_option_type = $__FM_CONFIG['options']['avail_types'][strtolower($option_type)];
+//$display_option_type = $__FM_CONFIG['options']['avail_types'][strtolower($option_type)];
+$display_option_type = $option_type;
 $display_option_type_sql = strtolower($option_type);
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 

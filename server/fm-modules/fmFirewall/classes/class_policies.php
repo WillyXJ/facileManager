@@ -56,7 +56,7 @@ class fm_module_policies {
 				$title_array[] = array('class' => 'header-tiny');
 			}
 			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Source'), __('Destination'), __('Service'), __('Interface'),
-									__('Direction'), __('Time'), array('title' => __('Comment'), 'style' => 'width: 20%;')));
+									__('Direction'), __('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;')));
 			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 			echo displayTableHeader($table_info, $title_array);
@@ -450,7 +450,7 @@ FORM;
 					$policy_time_form,
 					__('Action'), $policy_action, $policy_packet_state_form,
 					__('Options'), $options,
-					__('Comment'), $policy_comment
+					_('Comment'), $policy_comment
 				);
 		}
 		

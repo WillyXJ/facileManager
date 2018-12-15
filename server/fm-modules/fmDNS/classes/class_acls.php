@@ -44,7 +44,7 @@ class fm_dns_acls {
 						);
 
 			$title_array = array(array('title' => __('Name'), 'rel' => 'acl_name'), 
-				array('title' => __('Comment'), 'class' => 'header-nosort'));
+				array('title' => _('Comment'), 'class' => 'header-nosort'));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array, 'acls');
@@ -321,7 +321,7 @@ HTML;
 				$popup_header,
 				$action, $acl_id, $server_serial_no,
 				__('ACL Name'), $acl_name, __('internal'), $acl_name_length,
-				__('Comment'), $acl_comment,
+				_('Comment'), $acl_comment,
 				$popup_footer
 			);
 		} else {
@@ -372,7 +372,7 @@ HTML;
 				$action, $acl_id, $acl_parent_id, $server_serial_no,
 				__('ACL Name'), getNameFromID($acl_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'),
 				__('Matched Address List'), $acl_addresses,
-				__('Comment'), $acl_comment,
+				_('Comment'), $acl_comment,
 				$popup_footer,
 				$this->getPredefinedACLs('JSON', $acl_addresses)
 			);

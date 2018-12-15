@@ -235,6 +235,7 @@ class fmdb {
 			$return_val = $this->rows_affected;
 		} else {
 			$num_rows = 0;
+			unset($this->last_result);
 			if ($this->use_mysqli && $this->result instanceof mysqli_result) {
 				while ($row = mysqli_fetch_object($this->result)) {
 					$this->last_result[$num_rows] = $row;

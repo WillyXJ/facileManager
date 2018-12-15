@@ -1,3 +1,12 @@
+0.3 (2018-12-15)
+================
+* Server - [improvement] CSS changes.
+* Server - [bug] Fixed text.
+* Server - [bug] Fixed peer address and peer port configuration. (Issue #421)
+* Server - [bug] Fixed subnet/pool ordering. (Issue #422)
+* Server - [bug] Language fix.
+* Server - [bug] Fixed display-process-all functionality.
+
 0.2 (2018-10-26)
 ================
 * Both   - [feature] Added support to delete active leases and to convert a lease

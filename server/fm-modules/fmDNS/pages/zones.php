@@ -153,7 +153,7 @@ if ($map == 'groups') {
 
 	/** Process domain_view filtering */
 	if (isset($_GET['domain_view']) && !in_array(0, $_GET['domain_view'])) {
-		foreach ((array) $_GET['domain_view'] as $view_id) {
+		foreach (array_merge(array(0), (array) $_GET['domain_view']) as $view_id) {
 			$view_id = sanitize($view_id);
 			(string) $domain_view_sql .= " (domain_view='$view_id' OR domain_view LIKE '$view_id;%' OR domain_view LIKE '%;$view_id;%' OR domain_view LIKE '%;$view_id') OR";
 		}
@@ -164,7 +164,7 @@ if ($map == 'groups') {
 
 	/** Process domain_group filtering */
 	if (isset($_GET['domain_group']) && !in_array(0, $_GET['domain_group'])) {
-		foreach ((array) $_GET['domain_group'] as $group_id) {
+		foreach (array_merge(array(0), (array) $_GET['domain_group']) as $group_id) {
 			$group_id = sanitize($group_id);
 			(string) $domain_view_sql .= " (domain_groups='$group_id' OR domain_groups LIKE '$group_id;%' OR domain_groups LIKE '%;$group_id;%' OR domain_groups LIKE '%;$group_id') OR";
 		}
