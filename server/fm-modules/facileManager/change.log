@@ -1,4 +1,4 @@
-3.3 (2018-??-??)
+3.3 (2018-12-15)
 ================
 * Server - [bug] Properly support the OS icon for Raspbian.
 * Client - [improvement] Moved getInterfaceNames() to core.
