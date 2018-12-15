@@ -9,6 +9,8 @@
            Debian-based system.
 * Client - [bug] Suppressed crontab error during installation if the user
            crontab does not exist.
+* Server - [improvement] Clears database result variable before use to provide
+           more accurate results.
 
 3.2 (2018-10-26)
 ================
