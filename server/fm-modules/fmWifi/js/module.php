@@ -7,6 +7,116 @@ header("Content-Type: text/javascript");
 echo '
 $(document).ready(function() {
 	
+	/** Dashboard auto-reload */
+	if (onPage("index.php") || onPage("")) {
+		$(function loadDashboard() {
+			var form_data = {
+				action: "get-dashboard"
+			};
+
+			$.ajax({
+				type: "GET",
+				url: "fm-modules/facileManager/ajax/getData.php",
+				timeout: 2000,
+				data: form_data,
+				success: function(response) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+						doLogout();
+						return false;
+					}
+
+					$("div.fm-table").html("<div>" + response + "</div>");
+					window.setTimeout(loadDashboard, 20000 + Math.random() * (60 - 20) * 1000);
+				}
+			});
+		});
+	}
+	
+	/* Block client */
+	$("#body_container").delegate("#block-wifi-client", "click", function(e) {
+		var $this 		= $(this);
+		var $row_id		= $this.parent().parent();
+		item_id				= $row_id.attr("id");
+		ssid			= $row_id.attr("rel");
+		item_type		= $("#table_edits").attr("name");
+		mac	= $this.attr("rel");
+
+		var form_data = {
+			item_id: item_id,
+			ssid: ssid,
+			item_type: item_type,
+			action: "block-wifi-client",
+			is_ajax: 1
+		};
+
+		if (confirm("' . _('Are you sure you want to block this client?') . ' ("+ item_id +")")) {
+			var orig_html = $(this).parent().html();
+			$(this).addClass("hidden");
+			$(this).parent().append("<i class=\"fa fa-circle-o-notch fa-spin grey\" aria-hidden=\"true\"></i>");
+			$.ajax({
+				type: "POST",
+				url: "fm-modules/facileManager/ajax/processPost.php",
+				data: form_data,
+				success: function(response) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+						doLogout();
+						return false;
+					} else if (response == "' . _('Success') . '") {
+						$row_id.css({"background-color":"#D98085"});
+						$row_id.fadeOut("slow", function() {
+							$row_id.remove();
+						});
+					} else {
+						$this.parent().html(orig_html);
+						var eachLine = response.split("\n");
+						if (eachLine.length <= 2) {
+							$("#response").html("<p class=\"error\">"+response+"</p>");
+							$("#response")
+								.css("opacity", 0)
+								.slideDown(400, function() {
+									$("#response").animate(
+										{ opacity: 1 },
+										{ queue: false, duration: 200 }
+									);
+								});
+							if (response.toLowerCase().indexOf("response_close") == -1) {
+								$("#response").delay(3000).fadeTo(200, 0.00, function() {
+									$("#response").slideUp(400);
+								});
+							}
+						} else {
+							$("#manage_item").fadeIn(200);
+							$("#manage_item_contents").fadeIn(200);
+							$("#manage_item_contents").html(response);
+							if ($("#manage_item_contents").width() >= 700) {
+								$("#manage_item_contents").addClass("wide");
+							}
+						}
+					}
+				}
+			});
+		}
+
+		return false;
+	});
+
+	if (onPage("config-servers.php")) {
+		$(function checkAPStatus() {
+			var item_type = getUrlVars()["type"];
+			if (item_type == "servers" || item_type == undefined) {
+				$(function() {
+					$("#table_edits tr").each(function() {
+						ap_id = this.id;
+						if (ap_id && !$(this).hasClass("disabled")) {
+							loadAPStatus(ap_id);
+						}
+					});
+				});
+				window.setTimeout(checkAPStatus, 10000);
+			}
+		});
+	}
+
 	if (onPage("config-acls.php")) {
 		$(function() {
 			$("#pagination_container #wlan_ids").select2({
@@ -83,6 +193,29 @@ function displayOptionPlaceholder(option_value) {
 					minimumResultsForSearch: 10
 				});
 			}
+		}
+	});
+}
+
+function loadAPStatus(APid) {
+	var form_data = {
+		get_ap_status: true,
+		ap_id: APid,
+		is_ajax: 1
+	};
+
+	$.ajax({
+		type: "POST",
+		url: "fm-modules/facileManager/ajax/getData.php",
+		data: form_data,
+		success: function(response)
+		{
+			if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+				doLogout();
+				return false;
+			}
+			
+			$("#table_edits tr#" + APid + " > td#ap_status").html(response);
 		}
 	});
 }

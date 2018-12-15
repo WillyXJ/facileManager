@@ -13,16 +13,28 @@
  | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           |
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
- | facileManager: Easy System Administration                               |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://URL                                                              |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
 /** Process action */
 if (array_key_exists('action', $_POST)) {
 	/** Include any additional module-specific build config actions */
-	
+	if ($_POST['action'] == 'status') {
+		if (!class_exists('fm_module_servers')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+		}
+		$data = $fm_module_servers->getServerInfo($_POST['SERIALNO']);
+	}	
+	if ($_POST['action'] == 'status-upload') {
+		if (!class_exists('fm_wifi_wlans')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_wlans.php');
+		}
+		$fm_wifi_wlans->updateWLANInfo($_POST['SERIALNO']);
+		exit;
+	}	
 }
 
 ?>

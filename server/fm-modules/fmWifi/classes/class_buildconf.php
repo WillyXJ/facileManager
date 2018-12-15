@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Brief module description                                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://URL                                                              |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -97,19 +97,22 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	private function hostapdBuildConfig($header, $server_data, $type = 'global') {
 		global $fmdb, $__FM_CONFIG, $fm_module_servers;
 		
+		if (@is_object($server_data)) {
+			extract(get_object_vars($server_data));
+		}
 		$server_data->files[$server_data->server_config_file] = $header;
 		
 		/** Set interface name */
 		if ($server_wlan_interface) {
-			$config[] = sprintf("interface=%s\n", $server_wlan_interface);
+			$config[] = sprintf("interface=%s", $server_wlan_interface);
 		}
 		/** Set bridge */
 		if ($server_mode == 'bridge') {
-			$config[] = sprintf("bridge=%s\n", $server_bridge_interface);
+			$config[] = sprintf("bridge=%s", $server_bridge_interface);
 		}
 		/** Set interface driver */
 		if ($server_wlan_driver && $server_mode == 'router') {
-			$config[] = sprintf("driver=%s\n", $server_wlan_driver);
+			$config[] = sprintf("driver=%s", $server_wlan_driver);
 		}
 
 		$parent = ($type == 'global') ? 'no' : 'yes';
@@ -119,16 +122,16 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			}
 		}
 
-		if ($assoc_group_ids = ($fm_module_servers->getServerGroupIDs($server_data->server_id))) {
-			$config_aps_group_sql = ' OR ';
-		}
+		$assoc_group_ids = $fm_module_servers->getServerGroups($server_data->server_id);
+		$config_aps_group_sql = null;
+		
 		foreach(preg_filter('/^/', 'g_', $assoc_group_ids) as $group_id) {
-			$config_aps_group_sql .= "config_aps='$group_id' OR config_aps LIKE '$group_id;%' OR config_aps LIKE '%;$group_id;%' OR config_aps LIKE '%;$group_id'";
+			$config_aps_group_sql .= " OR config_aps='$group_id' OR config_aps LIKE '$group_id;%' OR config_aps LIKE '%;$group_id;%' OR config_aps LIKE '%;$group_id'";
 		}
 		$config_aps_sql = " AND (config_aps='0' OR config_aps='s_{$server_data->server_id}' OR config_aps LIKE 's_{$server_data->server_id};%' OR config_aps LIKE '%;s_{$server_data->server_id};%' OR config_aps LIKE '%;s_{$server_data->server_id}' $config_aps_group_sql)";
 		
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="yes" AND config_parent_id=0 AND config_status="active" AND server_serial_no="0"' . $config_aps_sql);
-		if ($fmdb->num_rows) {
+		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$config_result = $fmdb->last_result;
 			$count = $fmdb->num_rows;
 			for ($i=0; $i < $count; $i++) {
@@ -306,13 +309,12 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		/** Get user list for SSID */
 		$wlan_sql = " AND (wlan_ids='0' OR wlan_ids='$wlan_id' OR wlan_ids LIKE '$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id')";
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_id', 'wlan_user_', 'AND wlan_user_status="active"' . $wlan_sql);
-		if ($fmdb->num_rows) {
-			for ($k=0; $k<$fmdb->num_rows; $k++) {
-				$comment = ($fmdb->last_result[$k]->wlan_user_comment) ? ' (' . $fmdb->last_result[$k]->wlan_user_comment . ')' : null;
-				$config[] = '# ' . $fmdb->last_result[$k]->wlan_user_login . $comment;
-				$config[] = $fmdb->last_result[$k]->wlan_user_mac . ' ' . $fmdb->last_result[$k]->wlan_user_password;
-			}
-		} else {
+		foreach ($fmdb->last_result as $wlan_user) {
+			$comment = ($wlan_user->wlan_user_comment) ? ' (' . $wlan_user->wlan_user_comment . ')' : null;
+			$config[] = '# ' . $wlan_user->wlan_user_login . $comment;
+			$config[] = $wlan_user->wlan_user_mac . ' ' . $wlan_user->wlan_user_password;
+		}
+		if (!$fmdb->num_rows || getOption('include_wlan_psk', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
 			$query = "SELECT config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE config_status='active' AND account_id='{$_SESSION['user']['account_id']}' AND config_parent_id=$wlan_id AND config_name='wpa_passphrase' LIMIT 1";
 			$fmdb->query($query);
 			if ($fmdb->num_rows) {
@@ -346,22 +348,18 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		/** Get user list for SSID */
 		$wlan_sql = " AND (wlan_ids='0' OR wlan_ids='$wlan_id' OR wlan_ids LIKE '$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id')";
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_id', 'wlan_user_', 'AND wlan_user_status="active"' . $wlan_sql);
-		if ($fmdb->num_rows) {
-			for ($k=0; $k<$fmdb->num_rows; $k++) {
-				$comment = ($fmdb->last_result[$k]->wlan_user_comment) ? ' (' . $fmdb->last_result[$k]->wlan_user_comment . ')' : null;
-				$config['accept'][] = '# ' . $fmdb->last_result[$k]->wlan_user_login . $comment;
-				$config['accept'][] = $fmdb->last_result[$k]->wlan_user_mac;
-			}
+		foreach ($fmdb->last_result as $wlan_user) {
+			$comment = ($wlan_user->wlan_user_comment) ? ' (' . $wlan_user->wlan_user_comment . ')' : null;
+			$config['accept'][] = '# ' . $wlan_user->wlan_user_login . $comment;
+			$config['accept'][] = $wlan_user->wlan_user_mac;
 		}
 		
 		/** Get MAC ACLs for SSID */
 		$wlan_sql = " AND (wlan_ids='0' OR wlan_ids='$wlan_id' OR wlan_ids LIKE '$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id;%' OR wlan_ids LIKE '%;$wlan_id')";
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_status="active"' . $wlan_sql);
-		if ($fmdb->num_rows) {
-			for ($k=0; $k<$fmdb->num_rows; $k++) {
-				if ($fmdb->last_result[$k]->acl_comment) $config[$fmdb->last_result[$k]->acl_action][] = '# ' . $fmdb->last_result[$k]->acl_comment;
-				$config[$fmdb->last_result[$k]->acl_action][] = $fmdb->last_result[$k]->acl_mac;
-			}
+		foreach ($fmdb->last_result as $wlan_acl) {
+			if ($wlan_acl->acl_comment) $config[$wlan_acl->acl_action][] = '# ' . $wlan_acl->acl_comment;
+			$config[$wlan_acl->acl_action][] = $wlan_acl->acl_mac;
 		}
 		
 		return array($mac_files['accept'] => join("\n", $config['accept']), $mac_files['deny'] => join("\n", $config['deny']));

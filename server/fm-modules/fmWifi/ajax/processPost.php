@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Brief module description                                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://URL                                                              |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -39,7 +39,7 @@ $unpriv_message = __('You do not have sufficient privileges.');
 $checks_array = @array('servers' => 'manage_servers',
 					'wlans' => 'manage_wlans',
 					'wlan_users' => 'manage_wlan_users',
-					'acls' => 'manage_wlans',
+					'acls' => 'manage_wlan_wlan_users',
 					'options' => 'manage_servers'
 				);
 
@@ -59,7 +59,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	$type_map = null;
 	$id = sanitize($_POST['item_id']);
 	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
-	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
+	$type = array_key_exists('item_sub_type', $_POST) ? sanitize($_POST['item_sub_type']) : null;
 
 	/* Determine which class we need to deal with */
 	switch($_POST['item_type']) {
@@ -162,6 +162,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 						break;
 				}
 			}
+			break;
+		case 'block-wifi-client':
+			echo $fm_wifi_acls->blockClient(sanitize($_POST['ssid']), sanitize($_POST['item_id']));
 			break;
 	}
 

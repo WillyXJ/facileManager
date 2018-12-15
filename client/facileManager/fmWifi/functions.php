@@ -41,11 +41,15 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-    -l           Specify what to do with the leases (dump|delete)
-                   Examples: client.php -l dump
-                             client.php -l delete=10.1.1.100
-    -o           Specify the output type (human|web) (default: human)
+     block=XX    Specify the MAC address to block (option may be used more than once)
+	               Example: client.php block=00:11:22:aa:bb:cc
+  -e|ebtables    Block the MAC with ebtables
+	               Example: client.php block=00:11:22:aa:bb:cc -e
+  -o             Specify the output type (human|web) (default: human)
                    Example: client.php -l dump -o human
+     show-clients  Show connected clients
+     status      Get status of access point
+     status-all  Get full status of access point
 
 HELP;
 }
@@ -94,6 +98,9 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 		}
 		
 		installPackage(array('hostapd', 'iw'));
+		if (isDebianSystem($data['server_os_distro'])) {
+			shell_exec('update-rc.d hostapd enable');
+		}
 		return installFMModule($module_name, $proto, $compress, $data, $server_location, $url);
 	}
 	
@@ -113,10 +120,10 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	
 	/** Configure AP mode */
 	while (!$ap_mode) {
-		echo fM('Will this access point be a router or bridge? [R/b] ');
+		echo fM('Will this access point be a bridge (recommended) or router? [B/r] ');
 		$ap_mode = strtolower(trim(fgets(STDIN)));
 		if (!$ap_mode) {
-			$ap_mode = 'r';
+			$ap_mode = 'b';
 		}
 
 		/** Ensure a valid selection was made */
@@ -153,6 +160,20 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	
+	/** Add AP status cron */
+	$tmpfile = sys_get_temp_dir() . '/crontab.' . $module_name;
+	$entry_exists = intval(trim(shell_exec('crontab -l 2>/dev/null | grep ' . $module_name . ' | grep -c status-all')));
+	
+	if (!$entry_exists) {
+		$dump = shell_exec('crontab -l > ' . $tmpfile . ' 2>/dev/null');
+
+		$cmd = "echo '* * * * * " . findProgram('php') . ' ' . $argv[0] . " status-all' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
+		$cron_update = system($cmd, $retval);
+		unlink($tmpfile);
+		
+		if ($retval) echo fM("  --> The crontab cannot be created.\n  --> $cmd\n");
+	}
 	
 	return $data;
 }
@@ -193,6 +214,13 @@ function buildConf($url, $data) {
 	/** Install the new files */
 	installFiles($files, $data['dryrun']);
 	
+	/** Set DAEMONCONF */
+	if (file_exists('/etc/default/hostapd')) {
+		$daemon_conf = file_get_contents('/etc/default/hostapd');
+		$daemon_conf = preg_replace('/(.*)DAEMON_CONF=(.*)/', 'DAEMON_CONF="' . $server_config_file . '"', $daemon_conf);
+		file_put_contents('/etc/default/hostapd', $daemon_conf);
+	}
+	
 	$message = "Reloading the server\n";
 	if ($debug) echo fM($message);
 
@@ -203,13 +231,19 @@ function buildConf($url, $data) {
 		$rc_script = getStartupScript($server['app']);
 		if ($rc_script === false) {
 			$last_line = "Cannot locate the init script\n";
-			addLogEntry($last_line);
 			$retval = true;
 		} else {
-			$last_line = system($rc_script . ' 2>&1', $retval);
-			addLogEntry($last_line);
+			if (isDaemonRunning($server['app'])) {
+				$last_line = system(str_replace('restart', 'reload', $rc_script) . ' 2>&1', $retval);
+			} else {
+				$message = "The server is not running - attempting to start it\n";
+				if ($debug) echo fM($message);
+				addLogEntry($message);
+				$last_line = system($rc_script . ' 2>&1', $retval);
+			}
 		}
-		
+		addLogEntry($last_line);
+	
 		if ($retval) {
 			$message = "There was an error reloading the server - please check the logs for details\n";
 			if ($debug) echo fM($message);
@@ -221,6 +255,10 @@ function buildConf($url, $data) {
 			$raw_update = getPostData($url, $data);
 			$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
 		}
+		
+		/** Update the status */
+		sleep(1);
+		apStatus('all');
 	}
 	
 	return true;
@@ -354,9 +392,9 @@ function getStartupScript($app) {
 			'Slackware' => '/etc/rc.d/rc.dnsmasq restart'
 		)
 	);
-	$distros['hostapd']['Ubuntu'] = $distros['hostapd']['Fubuntu'] = $distros['hostapd']['Debian'];
-	$distros['dhcpcd']['Ubuntu'] = $distros['dhcpcd']['Fubuntu'] = $distros['dhcpcd']['Debian'];
-	$distros['dnsmasq']['Ubuntu'] = $distros['dnsmasq']['Fubuntu'] = $distros['dnsmasq']['Debian'];
+	$distros['hostapd']['Raspbian'] = $distros['hostapd']['Ubuntu'] = $distros['hostapd']['Fubuntu'] = $distros['hostapd']['Debian'];
+	$distros['dhcpcd']['Raspbian'] = $distros['dhcpcd']['Ubuntu'] = $distros['dhcpcd']['Fubuntu'] = $distros['dhcpcd']['Debian'];
+	$distros['dnsmasq']['Raspbian'] = $distros['dnsmasq']['Ubuntu'] = $distros['dnsmasq']['Fubuntu'] = $distros['dnsmasq']['Debian'];
 	
 	$distros['hostapd']['Fedora'] = $distros['hostapd']['CentOS'] = $distros['hostapd']['ClearOS'] = $distros['hostapd']['Oracle'] = $distros['hostapd']['Redhat'];
 	$distros['dhcpcd']['Fedora'] = $distros['dhcpcd']['CentOS'] = $distros['dhcpcd']['ClearOS'] = $distros['dhcpcd']['Oracle'] = $distros['dhcpcd']['Redhat'];
@@ -384,123 +422,6 @@ function getStartupScript($app) {
 	}
 	
 	return false;
-}
-
-
-/**
- * Dumps the lease file to STDOUT
- *
- * @since 0.1
- * @package fmDNS
- *
- * @param string $leasefile Filename of lease file
- * @return boolean
- */
-function dumpLeases($leasefile) {
-	global $debug, $output_type;
-	
-	if ($debug) {
-		echo "Dumping $leasefile\n";
-	}
-	$pattern = '/^lease(.*?)}$/sm';
-//	$pattern = '/^\s+([\.\d]+)\s+{.*starts \d+ ([\/\d\ \:]+);.*ends \d+ ([\/\d\ \:]+);.*ethernet ([a-f0-9:]+);(.*client-hostname \"(\S+)\";)*/sm';
-	preg_match_all($pattern, file_get_contents($leasefile), $leases);
-	
-	/** Pretty display */
-	if ($output_type == 'human') {
-		echo "MAC\t\t\tIP\t\tHostname\tState\tExpires\n";
-		echo str_repeat('=', 80) . "\n";
-	}
-	
-	/** Break up each lease into a multidimensional array */
-	$new_leases = null;
-	foreach ($leases[0] as $lease_data) {
-		$pattern = '/^lease\s+(.*?)\s+{.*starts \d+ (.*?);.*ends \d+ (.*?);.*binding state (.*?);.*ethernet (.*?);(.*client-hostname "(.*?)";)/s';
-		$pattern = '/^lease\s+(.*?)\s+{.*starts \d+ (.*?);.*ends \d+ (.*?);.*  binding state (.*?);.*ethernet (.*?);/s';
-		if (preg_match($pattern, $lease_data, $match)) {
-			$ip = $match[1];
-			$new_leases[$ip] = array('starts' => $match[2], 'ends' => $match[3], 'state' => $match[4], 'hardware' => $match[5]);
-		}
-		
-		$new_leases[$ip]['hostname'] = 'N/A';
-		if (preg_match('/.*client-hostname "(.*?)";/s', $lease_data, $match)) {
-			$new_leases[$ip]['hostname'] = $match[1];
-		}
-		
-		/** Pretty display */
-		if ($output_type == 'human') {
-			/** Skip expired */
-			if (strtotime($new_leases[$ip]['ends']) < strtotime('now')) continue;
-			
-			echo "{$new_leases[$ip]['hardware']}\t$ip\t{$new_leases[$ip]['hostname']}\t\t{$new_leases[$ip]['state']}\t{$new_leases[$ip]['ends']}\n";
-		}
-	}
-	
-	if ($output_type == 'web') {
-		echo serialize($new_leases);
-	}
-	
-	exit;
-}
-
-
-/**
- * Deletes the lease from the file
- *
- * @since 0.1
- * @package fmDNS
- *
- * @param string $leasefile Filename of lease file
- * @param string $remove_lease IP address to delete
- * @return boolean
- */
-function deleteLease($leasefile, $remove_lease) {
-	global $debug, $output_type;
-	
-	if ($debug) {
-		echo fM("Deleting $remove_lease from $leasefile...\n");
-	}
-	$pattern = '/^lease ' . $remove_lease . '(.*?)}$/sm';
-	$current_content = file_get_contents($leasefile);
-	$new_content = preg_replace($pattern, '', $current_content);
-	
-	if ($new_content == $current_content) {
-		echo fM("$remove_lease is not a valid lease.\n");
-		exit(1);
-	}
-	
-	$server = detectServerType();
-	$rc_script = getStartupScript($server['app']);
-	if ($rc_script === false) {
-		$last_line = "Cannot locate the init script\n";
-		addLogEntry($last_line);
-		$retval = true;
-	} else {
-		foreach (array('stop', 'start') as $control) {
-			$last_line = system(str_replace('restart', $control, $rc_script) . ' 2>&1', $retval);
-			addLogEntry($last_line);
-			if ($control == 'stop') {
-				addLogEntry("Deleting $remove_lease from $leasefile\n");
-				file_put_contents($leasefile, $new_content);
-			}
-		}
-		
-		$last_line = system($rc_script . ' 2>&1', $retval);
-		addLogEntry($last_line);
-	}
-
-	if ($retval) {
-		$message = "There was an error reloading the server - please check the logs for details\n";
-		if ($debug) echo fM($message);
-		addLogEntry($message);
-		exit(1);
-	} else {
-		$message = "$remove_lease has been removed from $leasefile.\n";
-		if ($debug) echo fM($message);
-		addLogEntry($message);
-	}
-
-	exit;
 }
 
 
@@ -576,7 +497,7 @@ function configureAPBridge($wdev) {
 	/** Get interface or create new */
 	echo fM("\nYou currently have the following interfaces for default routes:\n");
 	exec('netstat -rn | awk \'$1=="0.0.0.0"{print $NF}\'', $interfaces, $rc);
-	unset($interfaces[array_search($wdev, $interfaces)]);
+//	unset($interfaces[array_search($wdev, $interfaces)]);
 	echo join("\n", $interfaces) . "\n";
 	while (!$default_interface) {
 		echo fM("\nEnter the name of the interface you want to use as the default route for your bridge (or leave blank to define a new virtual interface): ");
@@ -747,7 +668,7 @@ function configureAPRouter($wdev) {
 	$wdev_dhcp_range = explode('-', $wdev_dhcp_range);
 	$wdev_dhcp_range['net'] = explode('.', $wdev_dhcp_range[0]);
 	$wdev_dhcp_range['start'] = $wdev_dhcp_range[0];
-	$wdev_dhcp_range['net'][count($wdev_dhcp_range['net'])] = $wdev_dhcp_range[1];
+	$wdev_dhcp_range['net'][count($wdev_dhcp_range['net'])-1] = $wdev_dhcp_range[1];
 	$wdev_dhcp_range['end'] = join('.', $wdev_dhcp_range['net']);
 	
 	echo fM(sprintf('Enter DHCP pool lease time for %s: (default: 24h) ', $wdev));
@@ -786,7 +707,7 @@ interface=%s
 		$wdev_conf = sprintf('
 
 # This section was built using %s v%s
-interface=%s
+interface %s
     static ip_address=%s
     nohook wpa_supplicant
 # End %s section
@@ -805,6 +726,7 @@ interface=%s
 		echo fM('  --> Configuring sysctl...');
 		$sysctl_conf = '/etc/sysctl.d/01-fmWifi.conf';
 		file_put_contents($sysctl_conf, 'net.ipv4.ip_forward=1');
+		shell_exec("sysctl -q -p $sysctl_conf");
 		echo "done\n";
 		
 		echo fM('  --> Configuring iptables NAT rule...');
@@ -821,6 +743,241 @@ interface=%s
 	}
 	
 	return array($wdev, null);
+}
+
+
+/**
+ * Gets AP status
+ *
+ * @since 0.1
+ * @package facileManager
+ * @subpackage fmWifi
+ *
+ * @param string $info What type of status to get
+ * @return string
+ */
+function apStatus($info = 'daemon') {
+	global $url, $data, $output_type, $debug;
+	
+	$data['action'] = 'status';
+	$raw_data = getPostData($url, $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	if (!is_array($raw_data)) {
+		echo fM($raw_data);
+		exit(1);
+	}
+	extract($raw_data, EXTR_SKIP);
+	
+	$status = isDaemonRunning($server_type);
+	
+	if ($info == 'daemon' && $output_type == 'web') {
+		echo serialize(intval($status));
+		exit;
+	}
+
+	if ($info == 'daemon') {
+		$status_display = (intval($status)) ? 'up' : 'down';
+		printf("%s is currently %s.\n", $server_type, $status_display);
+		exit;
+	}
+	
+	$aplist = apGetAPList();
+	foreach ($aplist as $dev => $dev_stats) {
+		$aplist[$dev]['clients'] = apGetClients('quiet', $dev);
+	}
+	
+	$aplist = array_merge(array('status' => intval($status), $server_type . '-uptime' => trim(shell_exec("ps -eo comm,etimes | grep $server_type | awk '{print \$NF}'"))), array('interfaces' => $aplist));
+
+	$data['action'] = 'status-upload';
+	$data['ap-info'] = $aplist;
+	if ($debug) print_r($data);
+	$raw_data = getPostData($url, $data);
+	
+	exit;
+}
+
+
+/**
+ * Gets the list of AP devices and SSIDs
+ *
+ * @since 0.1
+ * @package facileManager
+ * @subpackage fmWifi
+ *
+ * @param string $style Style of output (quiet, verbose)
+ * @return string
+ */
+function apGetAPList($style = 'quiet') {
+	exec(findProgram('iw') . ' dev', $output, $rc);
+	if ($rc) {
+		if ($style = 'verbose') {
+			exit("Could not retrieve device information.\n");
+		}
+		return null;
+	}
+	
+	foreach ($output as $line) {
+		if (strpos($line, 'phy') === false) {
+			if (preg_match('/Interface/', $line) == true) {
+				$iface_line = explode(' ', $line);
+				$iface = $iface_line[1];
+				$array[$iface] = array();
+			} else {
+				$split_line = explode(' ', $line);
+				list($key, $val) = $split_line;
+				if (trim($key) == 'channel') {
+					$band = ($split_line[2][1] == 5) ? '5 GHz' : '2.4 GHz';
+					$array[$iface] = array_merge($array[$iface], array('band' => $band));
+				}
+				
+				$array[$iface] = array_merge($array[$iface], array(trim($key) => trim($val)));
+			}
+		}
+	}
+	
+	return $array;
+}
+
+
+/**
+ * Shows connection client stats
+ *
+ * @since 0.1
+ * @package facileManager
+ * @subpackage fmWifi
+ *
+ * @return string
+ */
+function apClientStats() {
+	global $output_type;
+	
+	$array = apGetClients('verbose');
+	
+	if ($output_type == 'web') {
+		echo serialize($array);
+		exit;
+	}
+
+	/** Pretty display */
+	if ($output_type == 'human') {
+		echo "MAC\t\t\tConnTime\tRxBytes\tTxBytes\n";
+		echo str_repeat('=', 80) . "\n";
+	}
+
+	foreach ($array as $mac => $info) {
+		echo "$mac\t{$info['connected_time']}\t\t{$info['rx_bytes']}\t{$info['tx_bytes']}\n";
+	}
+	
+	exit;
+}
+
+
+/**
+ * Shows connection client stats
+ *
+ * @since 0.1
+ * @package facileManager
+ * @subpackage fmWifi
+ *
+ * @param string $style Style of output (quiet, verbose)
+ * @param string $dev Device the clients are on
+ * @return string
+ */
+function apGetClients($style = 'quiet', $dev) {
+	if (!$dev) {
+		return null;
+	}
+	
+	exec(findProgram('iw') . ' dev ' . $dev . ' station dump', $output, $rc);
+	if ($rc) {
+		if ($style = 'verbose') {
+			exit("Could not retrieve station information.\n");
+		}
+		return null;
+	}
+	
+	foreach ($output as $line) {
+		if (strpos($line, 'Selected interface') === false) {
+			if (preg_match('/^Station ([a-fA-F0-9]{2}[:|\-]?){6}/', $line) == true) {
+				$mac_line = explode(' ', $line);
+				$mac = $mac_line[1];
+				$arp = explode(' ', trim(shell_exec(findProgram('arp') . " -a | grep $mac")));
+				$array[$mac]['ip-address'] = ($arp[0] == '?') ? str_replace(array('(', ')'), '', $arp[1]) : $arp[0] . ' ' . $arp[1];
+			} else {
+				list($key, $val) = explode(':', $line);
+				$array[$mac] = array_merge($array[$mac], array(trim($key) => trim($val)));
+			}
+		}
+	}
+	
+	return $array;
+}
+
+
+/**
+ * Shows connection client stats
+ *
+ * @since 0.1
+ * @package facileManager
+ * @subpackage fmWifi
+ *
+ * @param array $bad_macs Array of MAC address to block
+ * @param boolena $ebtables Additionally block with ebtables
+ * @return string
+ */
+function apBlockClient($bad_macs, $ebtables = false) {
+	global $url, $data, $output_type;
+	
+	$hostapd_cli = findProgram('hostapd_cli');
+	$ebtables_bin = findProgram('ebtables');
+	
+	if ($ebtables && !$ebtables_bin) {
+		installPackage('ebtables');
+		$ebtables_bin = findProgram('ebtables');
+		if (!$ebtables_bin) {
+			$ebtables = false;
+		}
+	}
+	
+	foreach ($bad_macs as $mac) {
+		if ($output_type == 'human') echo "Blocking $mac...";
+		exec($hostapd_cli . ' deauthenticate ' . $mac, $output, $rc);
+		if ($rc) {
+			if ($output_type == 'human') echo "failed\n";
+			break;
+		}
+		exec($hostapd_cli . ' disassociate ' . $mac, $output, $rc);
+		if ($rc) {
+			if ($output_type == 'human') echo "failed\n";
+			break;
+		}
+		
+		if ($ebtables) {
+			exec("$ebtables_bin -F | grep -c '-d $mac -j DROP' 2>&1", $output, $rc);
+			if ($rc) {
+				system($ebtables_bin . ' -A INPUT -s ' . $mac . ' -j DROP', $rc);
+			}
+			if ($rc) {
+				if ($output_type == 'human') echo "failed\n";
+				break;
+			}
+		}
+		
+		if ($output_type == 'human') echo "done\n";
+	}
+	
+	if ($output_type == 'web') {
+		echo $rc;
+	} else {
+		if ($rc) {
+			echo fM("Blocking $mac failed.\n");
+			exit(1);
+		}
+	}
+	
+	apStatus('all');
+	
+	exit;
 }
 
 

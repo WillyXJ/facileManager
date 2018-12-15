@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Easily manage one or more ISC DHCP servers                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -320,60 +320,6 @@ HTML;
 			);
 
 		return $return_form;
-	}
-	
-	/**
-	 * Gets config item data from key
-	 *
-	 * @since 0.1
-	 * @package facileManager
-	 * @subpackage fmWifi
-	 *
-	 * @param integer $config_id Config parent ID to retrieve children for
-	 * @param string $config_opt Config option to retrieve
-	 * @return string
-	 */
-	function getConfig($config_id, $config_opt = null) {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return = null;
-		
-		/** Get the data from $config_opt */
-		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND config_parent_id='{$config_id}' AND config_name='$config_opt' ORDER BY config_id ASC";
-		$result = $fmdb->get_results($query);
-		if (!$fmdb->sql_errors && $fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			$return = $results[0]->config_data;
-		}
-		
-		return $return;
-	}
-	
-	/**
-	 * Gets config item data from key
-	 *
-	 * @since 0.1
-	 * @package facileManager
-	 * @subpackage fmWifi
-	 *
-	 * @param string $config_name Config name to get options for
-	 * @param string $config_data Current config data for selection
-	 * @return string
-	 */
-	private function buildConfigOptions($config_name, $config_data) {
-		global $__FM_CONFIG, $fmdb, $fm_module_options;
-		
-		$query = "SELECT def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '$config_name'";
-		$fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			/** Build array of possible values */
-			if (!class_exists('fm_module_options')) {
-				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
-			}
-			return $fm_module_options->populateDefTypeDropdown($fmdb->last_result[0]->def_type, $config_data, $config_name);
-		}
-		
-		return null;
 	}
 	
 	/**

@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Brief module description                                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://URL                                                              |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -69,8 +69,10 @@ class fm_module_servers extends fm_shared_module_servers {
 			$title_array[] = array('class' => 'header-tiny header-nosort');
 			$title_array = array_merge($title_array, array(array('title' => __('Hostname'), 'rel' => 'server_name'),
 				array('title' => __('Method'), 'rel' => 'server_update_method'),
+				array('title' => __('Software'), 'class' => 'header-nosort'),
 				array('title' => __('Version'), 'class' => 'header-nosort'),
 				array('title' => __('Config File'), 'rel' => 'server_config_file'),
+				array('title' => __('Status'), 'class' => 'header-nosort'),
 				));
 		} elseif ($type == 'groups') {
 			$title_array = array_merge((array)$title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
@@ -372,6 +374,13 @@ class fm_module_servers extends fm_shared_module_servers {
 			$edit_status = $edit_actions . $edit_status;
 
 			$port = ($row->server_update_method != 'cron') ? '(tcp/' . $row->server_update_port . ')' : null;
+			
+			/** AP status */
+			if ($row->server_installed == 'yes' && $row->server_status == 'active') {
+				$ap_status = sprintf('<i class="fa fa-circle-o-notch fa-spin grey" title="%s" aria-hidden="true"></i>', __('Retrieving status'));
+			} else {
+				$ap_status = null;
+			}
 
 			if ($class) $class = 'class="' . $class . '"';
 
@@ -381,8 +390,10 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$row->server_name</td>
 			<td>$row->server_update_method $port</td>
+			<td>$row->server_type</td>
 			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>
+			<td id="ap_status">$ap_status</td>
 			<td id="edit_delete_img">$edit_status</td>
 		</tr>
 
@@ -698,22 +709,105 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $server_id Server ID to lookup
+	 * @param string $field WHat field to return
 	 * @return array
 	 */
-	function getServerGroupIDs($server_id) {
+	function getServerGroups($server_id, $field = 'group_id') {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT group_id FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND `group_status`='active'
+		$return = false;
+		
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND `group_status`='active'
 			AND (group_members='s_$server_id' OR group_members LIKE 's_$server_id;%' OR group_members LIKE '%;s_$server_id;%' OR group_members LIKE '%;s_$server_id')";
 		$fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$array[] = $fmdb->last_result[$i]->group_id;
-			}
-			return $array;
+		foreach ($fmdb->last_result as $group_info) {
+			$array[] = $group_info->$field;
 		}
 		
-		return false;
+		return $array;
+	}
+
+	/**
+	 * Looks up the server information
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param integer $server_serial_no Server serial number to lookup
+	 * @return array
+	 */
+	function getServerInfo($server_serial_no) {
+		global $fmdb, $__FM_CONFIG;
+		$data = null;
+		
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
+		if ($fmdb->num_rows) {
+			$server_result = $fmdb->last_result;
+			$data = $server_result[0];
+			extract(get_object_vars($data), EXTR_SKIP);
+			
+			/** Disabled server */
+			if ($server_status != 'active') {
+				return "Server is $server_status.\n";
+			}
+			
+			return get_object_vars($data);
+		}
+		
+		/** Bad server */
+		return "Server is not found.\n";
+	}
+
+	/**
+	 * Gets the AP status
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param integer $server_id Server ID to query
+	 * @return array
+	 */
+	function getAPStats($server_id, $command_args) {
+		global $fmdb, $__FM_CONFIG;
+		$data = null;
+		
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_id, 'server_', 'server_id');
+		if ($fmdb->num_rows) {
+			return autoRunRemoteCommand($fmdb->last_result[0], $command_args, 'return');
+		}
+	}
+
+	/**
+	 * Looks up the server names for a WLAN
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param integer $server_id Server ID to lookup
+	 * @return array
+	 */
+	function getServerNames($server_id) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$ap_names = array();
+		
+		if ($server_id[0] == 'g') {
+			$group_members = getNameFromID(str_replace('g_', '', $server_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_members');
+			foreach (explode(';', $group_members) as $server_id) {
+				$ap_names = array_merge($ap_names, $this->getServerNames($server_id));
+			}
+			return $ap_names;
+		} else {
+			$table = 'servers';
+			$prefix = 'server_';
+		}
+		
+		$ap_names[] = getNameFromID(str_replace('s_', '', $server_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+		
+		return $ap_names;
 	}
 
 }

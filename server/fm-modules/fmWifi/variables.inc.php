@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Brief module description                                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://URL                                                              |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -35,9 +35,9 @@ $__FM_CONFIG['fmWifi'] = array(
 		'client_version'					=> '0.1',
 		'description'						=> __('Manage wifi access points with hostapd.', 'fmWifi'),
 		'prefix'							=> 'wifi_',
-		'required_fm_version'				=> '3.2',
+		'required_fm_version'				=> '3.3',
 		'required_daemon_version'			=> '2.4',
-		'min_client_auto_upgrade_version'	=> '1.0'
+		'min_client_auto_upgrade_version'	=> '0.1'
 	);
 
 /** Module-specific Images */
@@ -45,6 +45,10 @@ if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['active']		= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';
 	$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action___d.png" border="0" alt="__Action__ (' . __('disabled') . ')" title="__Action__ (' . __('disabled') . ')" width="12" />';
 }
+$__FM_CONFIG['module']['icons']['fail']			= sprintf('<i class="fa fa-times-circle fa-lg fail" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Failed'));
+$__FM_CONFIG['module']['icons']['ok']			= sprintf('<i class="fa fa-check-circle fa-lg ok" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
+$__FM_CONFIG['module']['icons']['notice']		= sprintf('<i class="fa fa-question-circle fa-lg notice" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
+$__FM_CONFIG['module']['icons']['block']		= sprintf('<i class="fa fa-ban fa-lg" alt="%1$s" title="%1$s" aria-hidden="true"></i>', __('Block Client'));
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
 
@@ -58,9 +62,15 @@ $__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefix
 
 /** Module settings */
 $__FM_CONFIG['fmWifi']['default']['options'] = @array(
-		'use_ebtables' => array(
-				'description' => array(__('Use ebtables'), __('Block clients with ebtables in addition to deny list. The ebtables package is required on the access point.')),
+		'include_wlan_psk' => array(
+				'description' => array(__('Include WLAN PSK'), __('Always include the WLAN PSK even when users are defined.')),
 				'default_value' => 'no',
+				'type' => 'checkbox'),
+		'use_ebtables' => array(
+				'description' => array(__('Use ebtables'), 
+					str_replace('ebtables', '<a href="http://ebtables.netfilter.org/" target="_blank">ebtables</a>', __('Block clients with ebtables in addition to deny list. The ebtables package is required on the access point (AP) and the AP must be configured as a bridge.<p>This option is recommended for Raspbian systems.')) .
+					sprintf(' <a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></p>', __('The ACL functionality of hostapd (macaddr_acl) does not seem to work with Raspbian. Therefore, the use of ebtables is recommended to deny clients.'))),
+				'default_value' => 'yes',
 				'type' => 'checkbox')
 	);
 

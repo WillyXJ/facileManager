@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Easily manage one or more ISC DHCP servers                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -483,6 +483,7 @@ HTML;
 		$hw_mode_options = buildSelect('hw_mode', 'hw_mode', $hw_mode_options, $hw_mode);
 		$auth_algs_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'auth_algs'))) ? 'checked' : null;
 		$macaddr_acl_options = buildSelect('macaddr_acl', 'macaddr_acl', $macaddr_acl_options, $this->getConfig($config_id, 'macaddr_acl'));
+		$macaddr_note = sprintf(' <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('The ACL functionality of hostapd (macaddr_acl) does not seem to work with Raspbian. Therefore, the use of ebtables is recommended to deny clients.'));
 
 		$wpa_passphrase = $this->getConfig($config_id, 'wpa_passphrase');
 		$wpa_key_mgmt = $fm_module_options->populateDefTypeDropdown($fm_module_options->parseDefType('wpa_key_mgmt'), $this->getConfig($config_id, 'wpa_key_mgmt'), 'wpa_key_mgmt');
@@ -510,6 +511,8 @@ HTML;
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="config_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
+			<input type="hidden" name="ctrl_interface" value="/var/run/hostapd" />
+			<input type="hidden" name="ctrl_interface_group" value="0" />
 			<div id="tabs">
 				<div id="tab">
 					<input type="radio" name="tab-group-1" id="tab-1" checked />
@@ -538,7 +541,7 @@ HTML;
 								<th width="33&#37;" scope="row" style="padding-top:0;">%s</th>
 								<td width="67&#37;">
 									<input name="auth_algs" id="auth_algs" type="checkbox" value="on" %s /> <label for="auth_algs">%s</label><br />
-									<h4>%s:</h4>
+									<h4>%s: %s</h4>
 									%s
 								</td>
 							</tr>
@@ -602,7 +605,7 @@ HTML;
 				__('Associated APs'), $config_aps,
 				__('Hardware Mode'), $hw_mode_options,
 				$hw_mode_option_style, $ieee80211n_checked, __('Enable 802.11n'), $ieee80211ac_style, $ieee80211ac_checked, __('Enable 802.11ac'), $wmm_enabled_checked, __('Enable QoS Support'),
-				__('Security'), $auth_algs_checked, __('Enable WPA2'), __('MAC address filtering'), $macaddr_acl_options,
+				__('Security'), $auth_algs_checked, __('Enable WPA2'), __('MAC address filtering'), $macaddr_note, $macaddr_acl_options,
 				_('Comment'), $config_comment,
 				$security_options_style, __('Security'),
 				__('WPA Passphrase'), $wpa_passphrase, __('Show'),
@@ -637,8 +640,7 @@ HTML;
 		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND config_parent_id='{$config_id}' AND config_name='$config_opt' ORDER BY config_id ASC";
 		$result = $fmdb->get_results($query);
 		if (!$fmdb->sql_errors && $fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			$return = $results[0]->config_data;
+			return $fmdb->last_result[0]->config_data;
 		}
 		
 		return $return;
@@ -837,6 +839,25 @@ HTML;
 		}
 		
 		return rtrim((string) $wlan_names, '; ');
+	}
+	
+	/**
+	 * Updates WLAN stats
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param integer $server_serial_no Server serial number to update
+	 * @return array
+	 */
+	function updateWLANInfo($server_serial_no) {
+		global $__FM_CONFIG, $fmdb;
+		
+		$ap_info = serialize($_POST['ap-info']);
+		
+		$query = "REPLACE INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}stats` (`account_id`, `server_serial_no`, `stat_last_report`, `stat_info`) VALUES ('" . getAccountID($_POST['AUTHKEY']) . "', '$server_serial_no', '" . strtotime('now') . "', '$ap_info')";
+		$fmdb->query($query);
 	}
 	
 }

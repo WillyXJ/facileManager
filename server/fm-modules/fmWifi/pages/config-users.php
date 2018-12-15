@@ -14,7 +14,7 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Easily manage one or more hostapd servers                       |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+

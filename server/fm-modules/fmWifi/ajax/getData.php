@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Brief module description                                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://URL                                                              |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -69,18 +69,32 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 		if ($result[0]->def_minimum_version) printf('<br /><span class="note">%s</span></td>', sprintf(__('This option requires DHCPD %s or later.'), $result[0]->def_minimum_version));
 	}
 	exit;
-} elseif (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] = 'display-process-all') {
+} elseif (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == 'display-process-all') {
 	$update_count = countServerUpdates();
 	
 	echo $update_count;
 	exit;
+} elseif (is_array($_POST) && array_key_exists('get_ap_status', $_POST)) {
+	if (!class_exists('fm_module_servers')) {
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+	}
+	$ap_status = $fm_module_servers->getAPStats(sanitize($_POST['ap_id']), 'status -o web');
+	if ($ap_status == true) {
+		exit(str_replace(_('OK'), __('AP is up'), $__FM_CONFIG['module']['icons']['ok']));
+	} elseif ($ap_status == false) {
+		exit(str_replace(_('Failed'), __('AP is down'), $__FM_CONFIG['module']['icons']['fail']));
+	}
+	
+	exit(str_replace(_('OK'), __('Cannot determine the state'), $__FM_CONFIG['module']['icons']['notice']));
+} elseif (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == 'get-dashboard') {
+	exit(buildModuleDashboard());
 }
 
 /** Array based on permissions in capabilities.inc.php */
 $checks_array = @array('servers' => 'manage_servers',
 					'wlans' => 'manage_wlans',
 					'wlan_users' => 'manage_wlan_users',
-					'acls' => 'manage_wlans',
+					'acls' => 'manage_wlan_wlan_users',
 					'options' => 'manage_servers'
 				);
 

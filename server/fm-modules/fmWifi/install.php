@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Brief module description                                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://URL                                                              |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -115,6 +115,16 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
 TABLE;
 
 	$table[] = <<<TABLE
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}stats` (
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` int(10) NOT NULL,
+  `stat_last_report` INT(10) NOT NULL DEFAULT '0',
+  `stat_info` TEXT,
+  PRIMARY KEY (`server_serial_no`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+TABLE;
+	
+	$table[] = <<<TABLE
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}wlan_users` (
   `wlan_user_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -172,6 +182,15 @@ VALUES
 ('country_code', '( AD | AE | AF | AG | AI | AL | AM | AO | AQ | AR | AS | AT | AU | AW | AX | AZ | BA | BB | BD | BE | BF | BG | BH | BI | BJ | BL | BM | BN | BO | BQ | BR | BS | BT | BV | BW | BY | BZ | CA | CC | CD | CF | CG | CH | CI | CK | CL | CM | CN | CO | CR | CU | CV | CW | CX | CY | CZ | DE | DJ | DK | DM | DO | DZ | EC | EE | EG | EH | ER | ES | ET | FI | FJ | FK | FM | FO | FR | GA | GB | GD | GE | GF | GG | GH | GI | GL | GM | GN | GP | GQ | GR | GS | GT | GU | GW | GY | HK | HM | HN | HR | HT | HU | ID | IE | IL | IM | IN | IO | IQ | IR | IS | IT | JE | JM | JO | JP | KE | KG | KH | KI | KM | KN | KP | KR | KW | KY | KZ | LA | LB | LC | LI | LK | LR | LS | LT | LU | LV | LY | MA | MC | MD | ME | MF | MG | MH | MK | ML | MM | MN | MO | MP | MQ | MR | MS | MT | MU | MV | MW | MX | MY | MZ | NA | NC | NE | NF | NG | NI | NL | NO | NP | NR | NU | NZ | OM | PA | PE | PF | PG | PH | PK | PL | PM | PN | PR | PS | PT | PW | PY | QA | RE | RO | RS | RU | RW | SA | SB | SC | SD | SE | SG | SH | SI | SJ | SK | SL | SM | SN | SO | SR | SS | ST | SV | SX | SY | SZ | TC | TD | TF | TG | TH | TJ | TK | TL | TM | TN | TO | TR | TT | TV | TW | TZ | UA | UG | UM | US | UY | UZ | VA | VC | VE | VG | VI | VN | VU | WF | WS | YE | YT | ZA | ZM | ZW )', 'no', 'yes', NULL)
 INSERT;
 
+	$option_name = 'use_ebtables';
+	$inserts[] = <<<INSERT
+INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
+	SELECT '$option_name', '{$__FM_CONFIG[$module]['default']['options'][$option_name]['default_value']}', '$module' FROM DUAL
+WHERE NOT EXISTS
+	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = '$option_name'
+		AND module_name='$module');
+INSERT;
+	
 	/** Create table schema */
 	foreach ($table as $schema) {
 		$result = $fmdb->query($schema);

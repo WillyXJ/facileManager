@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Easily manage one or more ISC DHCP servers                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -373,7 +373,7 @@ HTML;
 	 * @return array
 	 */
 	function validatePost($post) {
-		global $__FM_CONFIG, $fm_wifi_wlans;
+		global $fmdb, $__FM_CONFIG, $fm_wifi_wlans;
 		
 		if (in_array('0', $post['wlan_ids']) || !isset($post['wlan_ids'])) {
 			$post['wlan_ids'] = 0;
@@ -420,24 +420,6 @@ HTML;
 		$post['wlan_ids'] = rtrim($wlan_members, ';');
 
 		return $post;
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_name');
-		if ($field_length !== false && strlen($post['config_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Host name is too long (maximum %d characters).', $field_length), $field_length);
-		
-		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_name='wlan' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
-		if ($fmdb->num_rows) return __('This host already exists.');
-		
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['fixed-address'], 'config_', 'config_data', "AND config_name='fixed-address' AND config_is_parent='no' AND config_parent_id!='{$post['config_id']}'");
-		if ($fmdb->num_rows) return __('This address already exists.');
-		
-		/** Valid IP address? */
-		if ($post['hardware-type'] == 'ethernet' && !verifyIPAddress($post['fixed-address'])) {
-			return __('The IP address is invalid.');
-		}
-
-		return $post;
 	}
 	
 	
@@ -467,6 +449,90 @@ HTML;
 		return $filters;
 	}
 
+	
+	/**
+	 * Blocks client from WLAN
+	 *
+	 * @since 0.1
+	 * @package facileManager
+	 * @subpackage fmWifi
+	 *
+	 * @param string $wlan WLAN to block the client from
+	 * @param string $mac MAC address of the client to block
+	 */
+	function blockClient($wlan, $mac) {
+		global $__FM_CONFIG, $fmdb, $fm_module_servers;
+		
+		$post = array(
+			'action' => 'add',
+			'acl_id' => 0,
+			'server_serial_no' => 0,
+			'wlan_ids' => array(0),
+			'acl_mac' => $mac,
+			'acl_action' => 'deny',
+			'acl_comment' => __('Blocked from the dashboard')
+		);
+		
+		/** Add the deny to the ACL database */
+		$add_acl = $this->add($post);
+		
+//		sleep(2);
+		
+		
+		// foreach ap hosting the ssid do
+		//   client.php buildconf
+		//   client.php block=mac
+		
+		/** Get APs hosting $wlan */
+		$wlan_ap_ids = getNameFromID($wlan, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_data', 'config_aps', null, 'AND config_name="ssid" AND config_status="active"');
+		$wlan_aps = array();
+		
+		if (!class_exists('fm_module_servers')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+		}
+		
+		/** Function to get all AP server_names from IDs (including from groups) */
+		if (!$wlan_ap_ids) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_');
+			foreach ($fmdb->last_result as $server_info) {
+				$wlan_aps[] = $server_info->server_name;
+			}
+		} else {
+			$associated_aps = null;
+			foreach (explode(';', $wlan_ap_ids) as $server_id) {
+				$wlan_aps = array_merge($wlan_aps, $fm_module_servers->getServerNames($server_id));
+			}
+		}
+		$wlan_aps = array_unique($wlan_aps);
+		
+//		echo '<pre>';
+//		var_dump($wlan_aps); exit;
+		
+		$block = false;
+		$ebtables = getOption('use_ebtables', $_SESSION['user']['account_id'], $_SESSION['module']);
+		if ($ebtables === false) {
+			$ebtables = getOption('use_ebtables');
+		}
+		$ebtables = ($ebtables == 'yes') ? 'ebtables' : null;
+		
+		foreach ($wlan_aps as $ap) {
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $ap, 'server_', 'server_name');
+			if ($fmdb->num_rows) {
+				$server_info = $fmdb->last_result[0];
+				/** Buildconf each server to add client to deny list */
+				$command_args = array('buildconf', 'buildconf');
+				$build_conf = autoRunRemoteCommand($server_info, $command_args, 'return');
+				
+				/** Block current client connection */
+				$command_args = array('block-wifi-client', '-o web block=' . $mac . ' ' . $ebtables);
+				$block = autoRunRemoteCommand($server_info, $command_args, 'return');
+			}
+		}
+		
+		/** Add error detection */
+		
+		echo 'Success';
+	}
 	
 }
 

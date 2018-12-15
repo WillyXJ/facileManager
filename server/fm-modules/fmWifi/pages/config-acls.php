@@ -14,9 +14,9 @@
  | GNU General Public License for more details.                            |
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
- | fmWifi: Easily manage one or more ISC DHCP servers                      |
+ | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -27,7 +27,7 @@ if (!isset($fm_wifi_acls)) {
 }
 
 /** Ensure user can use this page */
-$required_permission[] = 'manage_acls';
+$required_permission[] = 'manage_wlan_wlan_users';
 
 $include_submenus = false;
 

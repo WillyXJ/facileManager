@@ -36,8 +36,11 @@ error_reporting(0);
 $module_name = basename(dirname(__FILE__));
 
 /** Check for options */
-$dump_leases = $delete_lease = false;
-$lease = null;
+$get_status = in_array('status', $argv) ? true : false;
+$get_status_all = in_array('status-all', $argv) ? true : false;
+$show_clients = in_array('show-clients', $argv) ? true : false;
+$ebtables = (in_array('-e', $argv) || in_array('ebtables', $argv)) ? true : false;
+
 $output_type = 'human';
 
 /** Include shared client functions */
@@ -51,30 +54,71 @@ if (file_exists($fm_client_functions)) {
 
 /** Get long options */
 for ($i=0; $i < count($argv); $i++) {
-	if ($argv[$i] == '-l') {
-		if ($argv[$i+1] == 'dump') {
-			$dump_leases = true;
-		}
-		if ($argv[$i+1] == 'delete') {
-			$delete_lease = true;
-		}
-		if (strncmp(strtolower($argv[$i+1]), 'delete=', 7) == 0) {
-			$delete_lease = true;
-			$lease = substr($argv[$i+1], 7);
-		}
-		$i++;
-	}
 	if ($argv[$i] == '-o') {
 		$output_type = $argv[$i+1];
+		$i++;
+	}
+	if (strncmp(strtolower($argv[$i+1]), 'block=', 6) == 0) {
+		$block = true;
+		$mac = substr($argv[$i+1], 6);
+		if ($mac) {
+			$bad_macs[] = $mac;
+		}
 		$i++;
 	}
 }
 
 /** Ensure options meet requirements */
+if (($block && !count((array) $bad_macs)) || ($ebtables && !$block)) {
+	if ($output_type == 'human') echo fM("You must specify a MAC address (block=00:11:22:aa:bb:cc) to block.\n");
+	exit(1);
+}
 
+if ($ebtables && $block) {
+	/** Ensure ebtables is installed */
+	$program = 'ebtables';
+	if (!findProgram($program)) {
+		if ($output_type == 'human') {
+			echo fM(sprintf('Would you like me to try installing %s? [Y/n] ', $program));
+			$auto_install = strtolower(trim(fgets(STDIN)));
+			if (!$auto_install) {
+				$auto_install = 'y';
+			}
+
+			if ($auto_install == 'y') {
+				installPackage($program);
+			} else {
+				$ebtables = false;
+				echo fM("Will not use ebtables to additionally block the MAC addresses.\n");
+			}
+		} else {
+			$ebtables = false;
+		}
+	}
+}
 
 /** Check if running supported version */
 $data['server_version'] = detectDaemonVersion();
+
+/** Get system status */
+if ($get_status) {
+	apStatus();
+}
+
+/** Get full system status */
+if ($get_status_all) {
+	apStatus('all');
+}
+
+/** Show client connections and stats */
+if ($show_clients) {
+	apClientStats();
+}
+
+/** Block clients */
+if ($block) {
+	apBlockClient($bad_macs, $ebtables);
+}
 
 /** Build the configs provided by $url */
 $retval = buildConf($url, $data);
