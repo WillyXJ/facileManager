@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed peer address and peer port configuration for the
            failover peers. (Issue #425)
+* Server - [bug] Fixed "load balance max seconds" peer option. (Issue #424)
 
 0.3.1 (2018-12-15)
 ==================

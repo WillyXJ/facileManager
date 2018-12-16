@@ -274,8 +274,8 @@ HTML;
 		}
 		
 		$post['load-balancing'] = $post['load-balancing'] . ' ' . $post['load-balancing-hash'];
-		$post['load balance max secs'] = $post['load_balance_max_secs'];
-		unset($post['load-balancing-hash'], $post['load_balance_max_secs']);
+		$post['load balance max seconds'] = $post['load_balance_max_seconds'];
+		unset($post['load-balancing-hash'], $post['load_balance_max_seconds']);
 		
 		return $post;
 	}
