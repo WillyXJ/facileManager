@@ -219,7 +219,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 										if (strpos($child_result[$j]->config_name, 'peer') !== false) {
 											$child_result[$j]->config_name = substr($child_result[$j]->config_name, 5);
 										} elseif (in_array($child_result[$j]->config_name, array('address', 'port'))) {
-											$child_result[$j]->config_name = 'peer-' . $child_result[$j]->config_name;
+											$child_result[$j]->config_name = 'peer ' . $child_result[$j]->config_name;
 										}
 									}
 									if ($type == 'peer' && strpos($child_result[$j]->config_name, 'address') !== false) {
