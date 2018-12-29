@@ -134,8 +134,8 @@ function isUpgradeAvailable() {
 	$fmdb->get_results("SELECT module_name,option_value FROM fm_options WHERE option_name='version'");
 	for ($x=0; $x<$fmdb->num_rows; $x++) {
 		$module_name = $fmdb->last_result[$x]->module_name;
-		include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
-		if (version_compare($fmdb->last_result[$x]->option_value, $__FM_CONFIG[$module_name]['version'], '<')) return true;
+		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+		if (isset($__FM_CONFIG[$module_name]) && version_compare($fmdb->last_result[$x]->option_value, $__FM_CONFIG[$module_name]['version'], '<')) return true;
 	}
 	
 	return false;
