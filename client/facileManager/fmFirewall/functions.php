@@ -163,13 +163,7 @@ function getStartupScript($fw) {
 		'iptables' => array(
 			'Arch'      => findProgram('systemctl') . ' reload iptables',
 			'Debian'    => findProgram('iptables-restore') . ' < __FILE__',
-			'Ubuntu'    => findProgram('iptables-restore') . ' < __FILE__',
-			'Fubuntu'   => findProgram('iptables-restore') . ' < __FILE__',
-			'Fedora'    => '/etc/init.d/iptables restart',
 			'Redhat'    => '/etc/init.d/iptables restart',
-			'CentOS'    => '/etc/init.d/iptables restart',
-			'ClearOS'   => '/etc/init.d/iptables restart',
-			'Oracle'    => '/etc/init.d/iptables restart',
 			'SUSE'      => findProgram('service') . ' SuSEfirewall2 restart',
 			'Gentoo'    => findProgram('iptables-restore') . ' < __FILE__',
 			'Slackware' => '/etc/rc.d/rc.iptables restart'
@@ -188,6 +182,12 @@ function getStartupScript($fw) {
 		)
 	);
 	
+	/** Debian-based distros */
+	$distros['iptables']['Raspbian'] = $distros['iptables']['Ubuntu'] = $distros['iptables']['Fubuntu'] = $distros['iptables']['Debian'];
+	
+	/** Redhat-based distros */
+	$distros['iptables']['Fedora'] = $distros['iptables']['CentOS'] = $distros['iptables']['ClearOS'] = $distros['iptables']['Oracle'] = $distros['iptables']['Redhat'];
+
 	$os = detectOSDistro();
 	
 	if (array_key_exists($os, $distros[$fw])) {

@@ -259,13 +259,7 @@ function getStartupScript($chroot_environment = false) {
 	$distros = array(
 		'Arch'      => array('/etc/rc.d/named start', findProgram('systemctl') . ' start named.service'),
 		'Debian'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
-		'Ubuntu'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
-		'Fubuntu'   => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
-		'Fedora'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
 		'Redhat'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
-		'CentOS'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
-		'ClearOS'   => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
-		'Oracle'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
 		'SUSE'      => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
 		'Gentoo'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
 		'Slackware' => array('/etc/rc.d/rc.bind start', findProgram('systemctl') . ' start bind.service'),
@@ -274,6 +268,12 @@ function getStartupScript($chroot_environment = false) {
 		'Apple'     => findProgram('launchctl') . ' start org.isc.named'
 		);
 	
+	/** Debian-based distros */
+	$distros['Raspbian'] = $distros['Ubuntu'] = $distros['Fubuntu'] = $distros['Debian'];
+	
+	/** Redhat-based distros */
+	$distros['Fedora'] = $distros['CentOS'] = $distros['ClearOS'] = $distros['Oracle'] = $distros['Redhat'];
+
 	$os = detectOSDistro();
 	
 	if (array_key_exists($os, $distros)) {

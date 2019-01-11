@@ -275,19 +275,19 @@ function getStartupScript($app) {
 		'dhcpd' => array(
 			'Arch'      => findProgram('systemctl') . ' restart dhcpd.service',
 			'Debian'    => array(findProgram('service') . ' isc-dhcp-server restart', findProgram('systemctl') . ' restart isc-dhcp-server.service'),
-			'Ubuntu'    => array(findProgram('service') . ' isc-dhcp-server restart', findProgram('systemctl') . ' restart isc-dhcp-server.service'),
-			'Fubuntu'   => array(findProgram('service') . ' isc-dhcp-server restart', findProgram('systemctl') . ' restart isc-dhcp-server.service'),
-			'Fedora'    => array('/etc/init.d/dhcpd restart', findProgram('systemctl') . ' restart dhcpd.service'),
 			'Redhat'    => array('/etc/init.d/dhcpd restart', findProgram('systemctl') . ' restart dhcpd.service'),
-			'CentOS'    => array('/etc/init.d/dhcpd restart', findProgram('systemctl') . ' restart dhcpd.service'),
-			'ClearOS'   => array('/etc/init.d/dhcpd restart', findProgram('systemctl') . ' restart dhcpd.service'),
-			'Oracle'    => array('/etc/init.d/dhcpd restart', findProgram('systemctl') . ' restart dhcpd.service'),
 			'SUSE'      => findProgram('rcdhcpd') . ' restart',
 			'Gentoo'    => '/etc/init.d/dhcpd restart',
 			'Slackware' => '/etc/rc.d/rc.dhcpd restart'
 		)
 	);
+
+	/** Debian-based distros */
+	$distros['dhcpd']['Raspbian'] = $distros['dhcpd']['Ubuntu'] = $distros['dhcpd']['Fubuntu'] = $distros['dhcpd']['Debian'];
 	
+	/** Redhat-based distros */
+	$distros['dhcpd']['Fedora'] = $distros['dhcpd']['CentOS'] = $distros['dhcpd']['ClearOS'] = $distros['dhcpd']['Oracle'] = $distros['dhcpd']['Redhat'];
+
 	$os = detectOSDistro();
 
 	if (array_key_exists($os, $distros[$app])) {
