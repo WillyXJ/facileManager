@@ -60,14 +60,17 @@ function buildModuleDashboard() {
 	/** Prevent a double-load */
 	if (!count($_GET)) return null;
 	
+	$apstats_result = null;
+	
 	/** Get AP Stats results */
 	$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}stats";
-	$fmdb->query($query);
-	$apstats_result = $fmdb->num_rows ? $fmdb->last_result : null;
+	if ($fmdb->query($query)) {
+		$apstats_result = $fmdb->num_rows ? $fmdb->last_result : null;
+	}
 	
 	/** Show WLAN Stats */
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_data', 'config_', 'AND config_name="ssid"');
-	$result = $fmdb->last_result;
+	$result = ($fmdb->num_rows) ? $fmdb->last_result : null;
 	$table_info = array(
 					'class' => 'display_results',
 					'name' => 'wlans'
