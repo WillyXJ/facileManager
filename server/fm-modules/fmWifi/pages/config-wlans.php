@@ -29,15 +29,10 @@ if (!isset($fm_wifi_wlans)) {
 /** Ensure user can use this page */
 $required_permission[] = 'manage_wlans';
 
-$include_submenus = false;
-
 /** Ensure user can use this page */
 if (!currentUserCan(array_merge($required_permission, array('view_all')), $_SESSION['module'])) unAuth();
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-if (!isset($display_type)) $display_type = null;
-if (!isset($avail_types)) $avail_types = null;
-if (!isset($include_submenus)) $include_submenus = true;
 
 if (currentUserCan($required_permission, $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -74,22 +69,8 @@ if (currentUserCan($required_permission, $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan($required_permission, $_SESSION['module']));
 
-if ($include_submenus === true) {
-//	$avail_servers = buildServerSubMenu($server_serial_no);
-	echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	$avail_servers
-	</div>
-</div>
-
-HTML;
-}
-	
 /** Get server listing */
 $sort_direction = null;
 $sort_field = 'config_data';

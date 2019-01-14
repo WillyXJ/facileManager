@@ -127,12 +127,23 @@ $(document).ready(function() {
 	}
 
 	$("#manage_item_contents").delegate("#hw_mode", "change", function(e) {
-		if (jQuery.inArray($(this).val(), ["a", "g"]) !== -1) {
+		if (jQuery.inArray($(this).val(), ["a", "b", "g"]) !== -1) {
 			$("#hw_mode_option").show("slow");
 			if ($(this).val() == "a") {
+				$("#ieee80211n_entry").show("slow");
 				$("#ieee80211ac_entry").show("slow");
-			} else {
+				$("#wmm_entry").show("slow");
+				$("#preamble_entry").hide();
+			} else if ($(this).val() == "b") {
+				$("#preamble_entry").show("slow");
 				$("#ieee80211ac_entry").hide();
+				$("#ieee80211n_entry").hide();
+				$("#wmm_entry").hide();
+			} else {
+				$("#preamble_entry").hide();
+				$("#ieee80211ac_entry").hide();
+				$("#ieee80211n_entry").show("slow");
+				$("#wmm_entry").show("slow");
 			}
 		} else {
 			$("#hw_mode_option").slideUp();

@@ -130,7 +130,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		$config_aps_sql = " AND (config_aps='0' OR config_aps='s_{$server_data->server_id}' OR config_aps LIKE 's_{$server_data->server_id};%' OR config_aps LIKE '%;s_{$server_data->server_id};%' OR config_aps LIKE '%;s_{$server_data->server_id}' $config_aps_group_sql)";
 		
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="yes" AND config_parent_id=0 AND config_status="active" AND server_serial_no="0"' . $config_aps_sql);
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="wlan" AND config_is_parent="yes" AND config_parent_id=0 AND config_status="active" AND server_serial_no="0"' . $config_aps_sql);
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$config_result = $fmdb->last_result;
 			$count = $fmdb->num_rows;
@@ -140,7 +140,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				if ($config_result[$i]->config_is_parent == 'yes') {
 					/** Get details */
 					$ssid = $config_result[$i]->config_data;
-					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id` ASC,`config_name`,`config_data', 'config_', 'AND config_type="' . $type . '" AND config_parent_id="' . $config_result[$i]->config_id . '" AND config_status="active"');
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id` ASC,`config_name`,`config_data', 'config_', 'AND config_type="' . $config_result[$i]->config_type . '" AND config_parent_id="' . $config_result[$i]->config_id . '" AND config_status="active"');
 					if ($fmdb->num_rows) {
 						$child_result = $fmdb->last_result;
 						$count2 = $fmdb->num_rows;
@@ -189,9 +189,85 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 				}
 			}
+			$first_ssid = $config_result[0]->config_id;
 			unset($config_result, $count, $child_result, $count2);
 		}
 		
+		/** Build global configs */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="no" AND config_parent_id=0 AND config_status="active" AND server_serial_no="0"' . $config_aps_sql);
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $config_result) {
+				$global_config[$config_result->config_name] = array($config_result->config_data, $config_result->config_comment);
+			}
+		} else $global_config = array();
+
+		$server_config = array();
+		/** Override with group-specific configs */
+		if (is_array($assoc_group_ids)) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="no" AND config_parent_id=0 AND config_status="active" AND server_serial_no IN ("g_' . implode('","g_', $assoc_group_ids) . '")' . $config_aps_sql);
+			if ($fmdb->num_rows) {
+				foreach ($fmdb->last_result as $server_config_result) {
+					$server_config[$server_config_result->config_name] = @array($server_config_result->config_data, $server_config_result->config_comment);
+				}
+			}
+		}
+
+		/** Override with server-specific configs */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="no" AND config_parent_id=0 AND config_status="active" AND server_serial_no="' . $server_serial_no . '"' . $config_aps_sql);
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $server_config_result) {
+				$server_config[$server_config_result->config_name] = @array($server_config_result->config_data, $server_config_result->config_comment);
+			}
+		}
+
+		/** Merge arrays */
+		$config_array = array_merge($global_config, $server_config);
+		unset($global_config, $server_config);
+
+		/** Override with WLAN configs */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="no" AND config_parent_id=' . $first_ssid . ' AND config_status="active" AND server_serial_no="0"' . $config_aps_sql);
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $config_result) {
+				$global_config[$config_result->config_name] = array($config_result->config_data, $config_result->config_comment);
+			}
+		} else $global_config = array();
+
+		$server_config = array();
+		/** Override with group-specific configs */
+		if (is_array($assoc_group_ids)) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="no" AND config_parent_id=' . $first_ssid . ' AND config_status="active" AND server_serial_no IN ("g_' . implode('","g_', $assoc_group_ids) . '")' . $config_aps_sql);
+			if ($fmdb->num_rows) {
+				foreach ($fmdb->last_result as $server_config_result) {
+					$server_config[$server_config_result->config_name] = @array($server_config_result->config_data, $server_config_result->config_comment);
+				}
+			}
+		}
+
+		/** Override with server-specific configs */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id', 'config_', 'AND config_type="' . $type . '" AND config_is_parent="no" AND config_parent_id=' . $first_ssid . ' AND config_status="active" AND server_serial_no="' . $server_serial_no . '"' . $config_aps_sql);
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $server_config_result) {
+				$server_config[$server_config_result->config_name] = @array($server_config_result->config_data, $server_config_result->config_comment);
+			}
+		}
+
+		/** Merge arrays */
+		$config_array = array_merge($global_config, $server_config);
+		unset($global_config, $server_config);
+
+		/** Format global config */
+		$config[] = null;
+		foreach ($config_array as $cfg_name => $cfg_data) {
+			list($cfg_info, $cfg_comment) = $cfg_data;
+			if ($cfg_comment) {
+				$comment = wordwrap($cfg_comment, 50, "\n");
+				$config[] = '# ' . str_replace("\n", "\n# ", $comment);
+				unset($comment);
+			}
+			$config[] = "$cfg_name=$cfg_info";
+		}
+		unset($config_array);
+
 		$server_data->files[$server_data->server_config_file] .= join("\n", $config);
 		
 		return $server_data;

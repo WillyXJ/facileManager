@@ -1,3 +1,6 @@
 #ieee80211ac_entry {
 	padding-left: 5px;
 }
+#hw_mode_option > div {
+	display: table-row;
+}

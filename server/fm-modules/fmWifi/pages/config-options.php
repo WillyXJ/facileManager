@@ -38,15 +38,19 @@ if (array_key_exists('item_id', $_GET)) {
 	}
 	
 	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $item_id, 'config_', 'config_id');
-	$item_info = $fmdb->last_result;
+	$item_info = $fmdb->last_result[0];
+	if ($item_info->config_is_parent != 'yes') {
+		header('Location: ' . $GLOBALS['basename']);
+		exit;
+	}
 	
-	$display_option_type = ucfirst($item_info[0]->config_data);
-	$display_option_type_sql = "{$item_info[0]->config_type}' AND config_parent_id='$item_id' AND config_data!='";
+	$display_option_type = ucfirst($item_info->config_data);
+	$display_option_type_sql = "{$item_info->config_type}', 'global') AND config_parent_id='$item_id' AND config_data!='";
 	
-	$name = $item_info[0]->config_type;
+	$name = 'config_parent_id';
 	$rel = $item_id;
 } else {
-	$display_option_type_sql .= "' AND config_parent_id='0' AND config_is_parent='no'";
+	$display_option_type_sql .= "') AND config_parent_id='0' AND config_is_parent='no";
 }
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -84,8 +88,7 @@ printHeader();
 @printMenu();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
-//$avail_servers = null;
-//$avail_objects = buildObjectsSubMenu($item_id);
+$avail_wlans = buildWLANSubMenu($item_id);
 
 $sort_direction = null;
 $sort_field = 'config_name';
@@ -99,14 +102,14 @@ echo <<<HTML
 	<div>
 	<div class="stretch"></div>
 	<div id="configtypesmenu"></div>
-	$avail_objects
+	$avail_wlans
 	$avail_servers
 	</div>
 </div>
 
 HTML;
 	
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('config_id', $sort_field, 'config_name'), 'config_', "AND config_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('config_id', $sort_field, 'config_name'), 'config_', "AND config_type IN ('$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_module_options->rows($result, $page, $total_pages);

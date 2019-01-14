@@ -461,7 +461,7 @@ function buildModuleMenu() {
 
 	addObjectPage(__('WLAN'), __('Manage WLANs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-wlans.php');
 		addSubmenuPage('config-wlans.php', _('Manage'), _('Manage WLANs'), array('manage_wlans', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-wlans.php');
-//		addSubmenuPage('config-wlans.php', __('Options'), __('Options'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-options.php');
+		addSubmenuPage('config-wlans.php', __('Options'), __('Options'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-wlans.php', __('Users'), __('Users'), array('manage_wlan_users', 'view_all'), $_SESSION['module'], 'config-users.php');
 		addSubmenuPage('config-wlans.php', __('ACLs'), __('ACLs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-acls.php');
 
@@ -570,6 +570,72 @@ function secondsToTime($seconds) {
 	$dtF = new \DateTime('@0');
 	$dtT = new \DateTime("@$seconds");
 	return $dtF->diff($dtT)->format('%ad %hh %im %ss');
+}
+
+
+/**
+ * Builds the wlan listing in a dropdown menu
+ *
+ * @since 0.2
+ * @package facileManager
+ * @subpackage fmWifi
+ *
+ * @param integer $item_id WLAN ID to select
+ * $param string $class Class name to apply to the div
+ * @return string
+ */
+function buildWLANSubMenu($item_id = 0, $server_serial_no = 0, $class = null) {
+	$list = buildSelect('item_id', 'item_id', availableWLANs(), $item_id, 1, null, false, 'this.form.submit()');
+	
+	$hidden_inputs = null;
+	foreach ($GLOBALS['URI'] as $param => $value) {
+		if ($param == 'item_id') continue;
+		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
+	}
+	
+	$class = $class ? 'class="' . $class . '"' : null;
+
+	$return = <<<HTML
+	<div id="configtypesmenu" $class>
+		<form action="{$GLOBALS['basename']}" method="GET">
+		$hidden_inputs
+		$list
+		</form>
+	</div>
+HTML;
+
+	return $return;
+}
+
+
+/**
+ * Returns an array of wlans
+ *
+ * @since 0.2
+ * @package facileManager
+ * @subpackage fmWifi
+ *
+ * @return array
+ */
+function availableWLANs() {
+	global $fmdb, $__FM_CONFIG;
+	
+	$array[0][] = __('All WLANs');
+	$array[0][] = '0';
+	
+	$j = 0;
+	/** WLANs */
+	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_name', 'config_', 'AND config_name="ssid"');
+	if ($fmdb->num_rows) {
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$array[$j+1][] = $results[$i]->config_data;
+			$array[$j+1][] = $results[$i]->config_id;
+			$j++;
+		}
+	}
+	
+	return $array;
 }
 
 

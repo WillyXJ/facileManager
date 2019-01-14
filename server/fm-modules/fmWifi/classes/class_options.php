@@ -225,7 +225,7 @@ class fm_module_options {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		if (!class_exists('fm_dns_acls')) {
-			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
 		
 		$disabled_class = ($row->config_status == 'disabled') ? ' class="disabled"' : null;
@@ -251,18 +251,11 @@ class fm_module_options {
 		/** Parse address_match_element configs */
 		$config_data = $this->parseDefType($row->config_name, $row->config_data);
 		
-		$zone_row = null;
-		if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
-			$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : '<span>All Zones</span>';
-			$zone_row = '<td>' . $domain_name . '</td>';
-			unset($domain_name);
-		}
 		$config_name = ($row->config_in_clause == 'yes') ? $row->config_name : '<b>' . $row->config_name . '</b>';
 
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_name"$disabled_class>
 			$checkbox
-			$zone_row
 			<td>$config_name</td>
 			<td>$config_data</td>
 			<td>$comments</td>
@@ -450,17 +443,14 @@ HTML;
 		}
 		$query .= " ORDER BY def_option ASC";
 		
-		$fmdb->get_results($query);
-		$def_avail_result = $fmdb->last_result;
+		$def_avail_result = $fmdb->get_results($query);
 		$def_avail_result_count = $fmdb->num_rows;
 		
 		if ($def_avail_result_count) {
 			$j=0;
 			for ($i=0; $i<$def_avail_result_count; $i++) {
-				$array_count_values = @array_count_values($temp_array);
 				if ((is_array($temp_array) && array_search($def_avail_result[$i]->def_option, $temp_array) === false) ||
-						!isset($temp_array) || $array_count_values[$def_avail_result[$i]->def_option] < $def_avail_result[$i]->def_max_parameters || 
-						$def_avail_result[$i]->def_max_parameters < 0) {
+						!isset($temp_array)) {
 					$return[$j] = $def_avail_result[$i]->def_option;
 					$j++;
 				}
@@ -493,24 +483,6 @@ HTML;
 			}
 		}
 		
-		if (isset($post['subnet'])) {
-			$post['config_parent_id'] = $post['subnet'];
-			$post['config_type'] = 'subnet';
-			unset($post['subnet']);
-		} elseif (isset($post['shared'])) {
-			$post['config_parent_id'] = $post['shared'];
-			$post['config_type'] = 'shared';
-			unset($post['shared']);
-		} elseif (isset($post['group'])) {
-			$post['config_parent_id'] = $post['group'];
-			$post['config_type'] = 'group';
-			unset($post['group']);
-		} elseif (isset($post['host'])) {
-			$post['config_parent_id'] = $post['host'];
-			$post['config_type'] = 'host';
-			unset($post['host']);
-		}
-		
 		$post = $this->validateDefType($post, $def_option);
 		
 		return $post;
@@ -529,7 +501,7 @@ HTML;
 	function validateDefType($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$post['config_name']}'";
+		$query = "SELECT def_type,def_dropdown,def_int_range FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$post['config_name']}'";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
@@ -540,10 +512,14 @@ HTML;
 					case 'integer':
 					case 'seconds':
 					case 'minutes':
-						if (!verifyNumber($post['config_data'])) return $post['config_data'] . ' is an invalid number.';
+						if (!verifyNumber($post['config_data'])) return sprintf(__('%s is an invalid number.'), $post['config_data']);
+						if ($result[0]->def_int_range) {
+							list($start, $end) = explode(':', $result[0]->def_int_range);
+							if (!verifyNumber($post['config_data'], $start, $end)) return sprintf(__('%s is not in the valid range (%s).'), $post['config_data'], $start . '-' . $end);
+						}
 						break;
 					case 'port':
-						if (!verifyNumber($post['config_data'], 0, 65535)) return $post['config_data'] . ' is an invalid port number.';
+						if (!verifyNumber($post['config_data'], 0, 65535)) return sprintf(__('%s is an invalid port number.'), $post['config_data']);
 						break;
 					case 'quoted_string':
 						$post['config_data'] = '"' . str_replace(array('"', "'"), '', $post['config_data']) . '"';
@@ -553,12 +529,12 @@ HTML;
 						
 						break;
 					case 'ipv4_address | ipv6_address':
-						if (!verifyIPAddress($post['config_data'])) return $post['config_data'] . ' is an invalid IP address.';
+						if (!verifyIPAddress($post['config_data'])) return sprintf(__('%s is an invalid IP address.'), $post['config_data']);
 						break;
 					case 'ipv4_address | *':
 					case 'ipv6_address | *':
 						if ($post['config_data'] != '*') {
-							if (!verifyIPAddress($post['config_data'])) return $post['config_data'] . ' is an invalid IP address.';
+							if (!verifyIPAddress($post['config_data'])) return sprintf(__('%s is an invalid IP address.'), $post['config_data']);
 						}
 						break;
 				}
@@ -582,14 +558,14 @@ HTML;
 	function parseDefType($config_name, $config_data = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (!$config_data) {
-			$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$config_name}'";
-			$fmdb->get_results($query);
-			if ($fmdb->num_rows) {
-				$result = $fmdb->last_result;
-				if (isset($result[0]->def_type)) $config_data = $result[0]->def_type;
-			} else $config_data = null;
-		}
+//		if (!$config_data) {
+//			$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$config_name}'";
+//			$fmdb->get_results($query);
+//			if ($fmdb->num_rows) {
+//				$result = $fmdb->last_result;
+//				if (isset($result[0]->def_type)) $config_data = $result[0]->def_type;
+//			} else $config_data = null;
+//		}
 		
 		return str_replace(',', '; ', $config_data);
 	}

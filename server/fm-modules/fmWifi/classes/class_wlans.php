@@ -116,7 +116,7 @@ class fm_wifi_wlans {
 //		if ($post['config_destination'] == 'file') {
 //			if (empty($post['config_file_path'][0])) return __('No file path defined.');
 //		}
-		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps'));
+		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps', 'config_type'));
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
@@ -146,6 +146,7 @@ class fm_wifi_wlans {
 		$child['config_parent_id'] = $fmdb->insert_id;
 		$child['config_data'] = $child['config_name'] = null;
 		$child['account_id'] = $post['account_id'];
+		$child['config_type'] = $post['config_type'];
 		
 		if (isset($post['hardware-type'])) {
 			$post['hardware'] = $post['hardware-type'] . ' ' . $post['hardware'];
@@ -376,7 +377,7 @@ class fm_wifi_wlans {
 			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
 		}
-//		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
+		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
 		
 		$edit_status = $edit_actions . $edit_status;
 		
@@ -478,6 +479,7 @@ HTML;
 		$ieee80211ac_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ieee80211ac'))) ? 'checked' : null;
 		$ieee80211d_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'ieee80211d'))) ? 'checked' : null;
 		$wmm_enabled_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'wmm_enabled'))) ? 'checked' : null;
+		$preamble_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'preamble'))) ? 'checked' : null;
 		$config_aps = buildSelect('config_aps', 'config_aps', availableServers('id'), explode(';', $config_aps), 1, null, true);
 		$hw_mode = $this->getConfig($config_id, 'hw_mode');
 		$hw_mode_options = buildSelect('hw_mode', 'hw_mode', $hw_mode_options, $hw_mode);
@@ -492,12 +494,22 @@ HTML;
 		$channel = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'channel'));		
 		$country_code = ($config_id) ? $this->getConfig($config_id, 'country_code') : $country_code;
 		$country_code = $this->buildConfigOptions('country_code', $country_code);
+		$max_num_sta = $this->getConfig($config_id, 'max_num_sta');
+		$max_num_sta_note = sprintf(' <a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('Limit the number of clients that can connect or leave empty for the maximum (2007). In addition, you can choose to ignore broadcast Probe Request frames from unassociated clients if the maximum client count has been reached which would discourage clients from trying to associate with this AP if the association would be rejected due to the maximum client limit.'));
+		$no_probe_resp_if_max_sta_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'no_probe_resp_if_max_sta'))) ? 'checked' : null;
 
-		if (in_array($hw_mode, array('', 'a', 'g'))) {
+		if (in_array($hw_mode, array('', 'a', 'b', 'g'))) {
 			$hw_mode_option_style = 'block';
 			$ieee80211ac_style = (in_array($hw_mode, array('', 'a'))) ? 'inline' : 'none';
+			if ($hw_mode == 'b') {
+				$preamble_style = 'inline';
+				$ieee80211n_entry = 'none';
+			} else {
+				$preamble_style = 'none';
+				$ieee80211n_entry = 'inline';
+			}
 		} else {
-			$hw_mode_option_style = 'none';
+			$hw_mode_option_style = $ieee80211ac_style = $preamble_style = 'none';
 		}
 		
 		$security_options_style = ($auth_algs_checked) ? 'block' : 'none';
@@ -531,9 +543,16 @@ HTML;
 								<th width="33&#37;" scope="row"><label for="hw_mode">%s</label></th>
 								<td width="67&#37;">%s
 									<div id="hw_mode_option" style="display: %s;">
-										<input name="ieee80211n" id="ieee80211n" type="checkbox" value="on" %s /> <label for="ieee80211n">%s</label>
-										<span id="ieee80211ac_entry" style="display: %s;"><input name="ieee80211ac" id="ieee80211ac" type="checkbox" value="on" %s /> <label for="ieee80211ac">%s</label></span>
-										<br /><input name="wmm_enabled" id="wmm_enabled" type="checkbox" value="on" %s /> <label for="wmm_enabled">%s</label>
+										<div>
+											<span id="preamble_entry" style="display: %s;"><input name="preamble" id="preamble" type="checkbox" value="on" %s /> <label for="preamble">%s</label></span>
+										</div>
+										<div>
+											<span id="ieee80211n_entry" style="display: %s;"><input name="ieee80211n" id="ieee80211n" type="checkbox" value="on" %s /> <label for="ieee80211n">%s</label></span>
+											<span id="ieee80211ac_entry" style="display: %s;"><input name="ieee80211ac" id="ieee80211ac" type="checkbox" value="on" %s /> <label for="ieee80211ac">%s</label></span>
+										</div>
+										<div>
+											<span id="wmm_entry" style="display: %s;"><input name="wmm_enabled" id="wmm_enabled" type="checkbox" value="on" %s /> <label for="wmm_enabled">%s</label></span>
+										</div>
 									</div>
 								</td>
 							</tr>
@@ -585,6 +604,13 @@ HTML;
 								<th width="33&#37;" scope="row"><label for="country_code">%s</label></th>
 								<td width="67&#37;">%s<br /><input name="ieee80211d" id="ieee80211d" type="checkbox" value="on" %s /> <label for="ieee80211d">%s</label></td>
 							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="max_num_sta">%s</label> %s</th>
+								<td width="67&#37;">
+									<input name="max_num_sta" id="max_num_sta" type="text" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" />
+									<br /><input name="no_probe_resp_if_max_sta" id="no_probe_resp_if_max_sta" type="checkbox" value="on" %s /> <label for="no_probe_resp_if_max_sta">%s</label>
+								</td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -604,7 +630,7 @@ HTML;
 				__('SSID'), $config_name, $ignore_broadcast_ssid_checked, __('Do not broadcast SSID'),
 				__('Associated APs'), $config_aps,
 				__('Hardware Mode'), $hw_mode_options,
-				$hw_mode_option_style, $ieee80211n_checked, __('Enable 802.11n'), $ieee80211ac_style, $ieee80211ac_checked, __('Enable 802.11ac'), $wmm_enabled_checked, __('Enable QoS Support'),
+				$hw_mode_option_style, $preamble_style, $preamble_checked, __('Enable short preamble'), $ieee80211n_entry, $ieee80211n_checked, __('Enable 802.11n'), $ieee80211ac_style, $ieee80211ac_checked, __('Enable 802.11ac'), $ieee80211n_entry, $wmm_enabled_checked, __('Enable QoS Support'),
 				__('Security'), $auth_algs_checked, __('Enable WPA2'), __('MAC address filtering'), $macaddr_note, $macaddr_acl_options,
 				_('Comment'), $config_comment,
 				$security_options_style, __('Security'),
@@ -614,6 +640,7 @@ HTML;
 				__('Advanced'),
 				__('Channel'), $channel,
 				__('Country'), $country_code, $ieee80211d_checked, __('Limit the frequencies to regulatory limits'),
+				__('Client Limit'), $max_num_sta_note, $max_num_sta, $no_probe_resp_if_max_sta_checked, __('Ignore broadcast Probe Request frames'),
 				$popup_footer
 			);
 
@@ -699,7 +726,9 @@ HTML;
 		$post['ieee80211ac'] = array_key_exists('ieee80211ac', $post) ? 1 : null;
 		$post['ieee80211d'] = array_key_exists('ieee80211d', $post) ? 1 : null;
 		$post['wmm_enabled'] = array_key_exists('wmm_enabled', $post) ? 1 : null;
+		$post['preamble'] = array_key_exists('preamble', $post) ? 1 : null;
 		$post['auth_algs'] = array_key_exists('auth_algs', $post) ? 1 : null;
+		$post['no_probe_resp_if_max_sta'] = array_key_exists('no_probe_resp_if_max_sta', $post) ? 1 : null;
 		
 		$security_fields_to_null = array('wpa_key_mgmt', 'wpa_pairwise');
 		if (!$post['auth_algs']) {
@@ -774,6 +803,8 @@ HTML;
 			return __('The IP address is invalid.');
 		}
 
+		$post['config_type'] = 'wlan';
+		
 		return $post;
 	}
 	
