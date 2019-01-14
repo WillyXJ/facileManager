@@ -487,6 +487,9 @@ function printMenu() {
 		if (!is_array($classes)) {
 			$classes = !empty($classes) ? array_fill(0, 1, $classes) : array();
 		}
+		if ($badge_count > 100) {
+			$badge_count = '99+';
+		}
 		
 		/** Check if menu item is current page */
 		if ($slug == findTopLevelMenuSlug($filtered_submenu)) {
@@ -498,7 +501,12 @@ function printMenu() {
 				foreach ($filtered_submenu[$slug] as $submenu_array) {
 					if (!empty($submenu_array[0])) {
 						$submenu_class = ($submenu_array[4] == $GLOBALS['basename']) ? ' class="current"' : null;
-						if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
+						if ($submenu_array[6]) {
+							if ($submenu_array[6] > 100) {
+								$submenu_array[6] = '99+';
+							}
+							$submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%s</p></span>', $submenu_array[6]);
+						}
 						$sub_menu_html .= sprintf('<li%s><a href="%s">%s</a></li>' . "\n", $submenu_class, $submenu_array[4], $submenu_array[0]);
 					} elseif (!$k) {
 						$show_top_badge_count = true;
@@ -524,7 +532,12 @@ HTML;
 			array_push($classes, 'has-sub');
 			foreach ($filtered_submenu[$slug] as $submenu_array) {
 				if (!empty($submenu_array[0])) {
-					if ($submenu_array[6]) $submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%d</p></span>', $submenu_array[6]);
+					if ($submenu_array[6]) {
+						if ($submenu_array[6] > 100) {
+							$submenu_array[6] = '99+';
+						}
+						$submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%s</p></span>', $submenu_array[6]);
+					}
 					$sub_menu_html .= sprintf('<li><a href="%s">%s</a></li>' . "\n", $submenu_array[4], $submenu_array[0]);
 				}
 			}
@@ -553,7 +566,7 @@ HTML;
 		} else {
 			/** Display the menu item if allowed */
 			if (currentUserCan($capability, $module)) {
-				if ($badge_count && $show_top_badge_count) $menu_title = sprintf($menu_title . ' <span class="menu_badge"><p>%d</p></span>', $badge_count);
+				if ($badge_count && $show_top_badge_count) $menu_title = sprintf($menu_title . ' <span class="menu_badge"><p>%s</p></span>', $badge_count);
 				$main_menu_html .= sprintf('<li%s><a href="%s">%s</a>%s%s' . "\n", $class, $slug, $menu_title, $arrow, $sub_menu_html);
 			}
 		}
