@@ -2,6 +2,8 @@
 ==================
 * Client - [bug] Fixed start-up script location for Debian-based and Redhat-based
            systems. (Issue #426)
+* Server - [bug] Fixed issue where TSIG keys could be selected in certain
+           options. (Issue #429)
 
 3.2.1 (2018-12-15)
 ==================

@@ -413,10 +413,13 @@ HTML;
 			
 			/** Keys */
 			$view_id = (isset($_POST['view_id']) && is_numeric(sanitize($_POST['view_id']))) ? sanitize($_POST['view_id']) : 0;
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view=' . $view_id . ' AND key_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view IN (0, ' . $view_id . ') AND key_status="active"');
 			for ($j=0; $j<$fmdb->num_rows; $j++) {
 				$acl_list[$i]['id'] = 'key_' . $fmdb->last_result[$j]->key_id;
 				$acl_list[$i]['text'] = 'key "' . $fmdb->last_result[$j]->key_name . '"';
+				$i++;
+				$acl_list[$i]['id'] = '!key_' . $fmdb->last_result[$j]->key_id;
+				$acl_list[$i]['text'] = '!key "' . $fmdb->last_result[$j]->key_name . '"';
 				$i++;
 			}
 		}
@@ -459,7 +462,13 @@ HTML;
 				if (!class_exists('fm_dns_keys')) {
 					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 				}
-				$formatted_acls[] = 'key "' . $fm_dns_keys->parseKey($address, '') . '"';
+				if ($address[0] == '!') {
+					$address = str_replace('!', '', $address);
+					$negate = '!';
+				} else {
+					$negate = null;
+				}
+				$formatted_acls[] = $negate . 'key "' . $fm_dns_keys->parseKey($address, '') . '"';
 			} elseif (strpos($address, 'acl_') !== false) {
 				$acl_id = str_replace('acl_', '', $address);
 				if ($acl_id[0] == '!') {
