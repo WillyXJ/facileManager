@@ -146,7 +146,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$count2 = $fmdb->num_rows;
 						for ($j=0; $j < $count2; $j++) {
 							if ($child_result[$j]->config_data != '') {
-								$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions` WHERE `def_option`='{$child_result[$j]->config_name}'");
+//								$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions` WHERE `def_option`='{$child_result[$j]->config_name}'");
 								if ($child_result[$j]->config_name == 'wpa_key_mgmt' && strpos($child_result[$j]->config_data, 'WPA-PSK') !== false) {
 									$psk_filename = $this->getPSKFilename($server_data, $ssid);
 									$config[] = sprintf('wpa_psk_file=%s', $psk_filename);

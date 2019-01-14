@@ -2,6 +2,7 @@
 ==================
 * Client - [bug] Fixed start-up script location for Debian-based and Redhat-based
            systems. (Issue #426)
+* Server - [improvement] Cleaned up redundant code.
 
 1.6 (2018-12-15)
 ================

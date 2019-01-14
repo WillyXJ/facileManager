@@ -188,9 +188,8 @@ class fm_tools {
 		$record_count = 0;
 		
 		/** Remove deleted items */
-		$fmdb->get_results("SHOW TABLES");
+		$raw_table_list = $fmdb->get_results("SHOW TABLES");
 		
-		$raw_table_list = $fmdb->last_result;
 		foreach ($raw_table_list as $table_object) {
 			$table_array = get_object_vars($table_object);
 			$array_keys = array_keys($table_array);

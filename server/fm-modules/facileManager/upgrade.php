@@ -62,9 +62,8 @@ function fmUpgrade($database) {
 	
 	/** Upgrade any necessary modules */
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_tools.php');
-	$fmdb->get_results("SELECT module_name FROM fm_options WHERE option_name='version'");
+	$module_list = $fmdb->get_results("SELECT module_name FROM fm_options WHERE option_name='version'");
 	$num_rows = $fmdb->num_rows;
-	$module_list = $fmdb->last_result;
 	for ($x=0; $x<$num_rows; $x++) {
 		$module_name = $module_list[$x]->module_name;
 		$success = $fm_tools->upgradeModule($module_name, 'quiet', $module_list[$x]->option_value);
@@ -186,9 +185,8 @@ INSERT;
 		if ($GLOBALS['running_db_version'] < 18) {
 			if ($GLOBALS['running_db_version'] >= 15) {
 				$query = "SELECT * FROM `$database`.`fm_preferences`";
-				$fmdb->get_results($query);
+				$all_prefs = $fmdb->get_results($query);
 				$count = $fmdb->num_rows;
-				$all_prefs = $fmdb->last_result;
 				for ($i=0; $i<$count; $i++) {
 					$inserts[] = <<<INSERT
 						INSERT INTO `fm_options` (`option_name`, `option_value`) 
@@ -202,9 +200,8 @@ INSERT;
 			$default_timezone = date_default_timezone_get() ? date_default_timezone_get() : 'Europe/London';
 			
 			$query = "SELECT account_id FROM `$database`.`fm_accounts`";
-			$fmdb->get_results($query);
+			$all_accounts = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
-			$all_accounts = $fmdb->last_result;
 			for ($j=0; $j<$count; $j++) {
 				$inserts[] = <<<INSERT
 			INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
@@ -243,9 +240,8 @@ INSERT;
 			/** Update timestamp fields with unix epoch seconds */
 			$table[] = "ALTER TABLE  `$database`.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM `$database`.`fm_logs`";
-			$fmdb->get_results($query);
+			$all_results = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
-			$all_results = $fmdb->last_result;
 			for ($k=0; $k<$count; $k++) {
 				$timestamp = strtotime($all_results[$k]->log_timestamp . ' ' . 'America/Denver');
 				$updates[] = "UPDATE `$database`.`fm_logs` SET log_timestamp='$timestamp' WHERE log_id={$all_results[$k]->log_id}";
@@ -254,9 +250,8 @@ INSERT;
 			
 			$table[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_last_login`  `user_last_login` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM `$database`.`fm_users`";
-			$fmdb->get_results($query);
+			$all_results = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
-			$all_results = $fmdb->last_result;
 			for ($k=0; $k<$count; $k++) {
 				$timestamp = strtotime($all_results[$k]->user_last_login . ' ' . 'America/Denver');
 				$updates[] = "UPDATE `$database`.`fm_users` SET user_last_login='$timestamp' WHERE user_id={$all_results[$k]->user_id}";
@@ -265,9 +260,8 @@ INSERT;
 			
 			$table[] = "ALTER TABLE  `$database`.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM `$database`.`fm_pwd_resets`";
-			$fmdb->get_results($query);
+			$all_results = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
-			$all_results = $fmdb->last_result;
 			for ($k=0; $k<$count; $k++) {
 				$timestamp = strtotime($all_results[$k]->pwd_timestamp . ' ' . 'America/Denver');
 				$updates[] = "UPDATE `$database`.`fm_pwd_resets` SET pwd_timestamp='$timestamp' WHERE pwd_id='{$all_results[$k]->pwd_id}'";
@@ -483,10 +477,9 @@ function fmUpgrade_1201($database) {
 			);
 		if (!setOption('fm_user_caps', $fm_user_caps)) return false;
 		
-		$fmdb->get_results("SELECT * FROM `fm_users`");
+		$result = $fmdb->get_results("SELECT * FROM `fm_users`");
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
-			$result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				$user_caps = null;
 				/** Update user capabilities */
@@ -503,10 +496,9 @@ function fmUpgrade_1201($database) {
 		if (!$fmdb->result || $fmdb->sql_errors) return false;
 		
 		/** Temporarily move the module user capabilities to fm_users */
-		$fmdb->get_results("SELECT * FROM `fm_perms`");
+		$result = $fmdb->get_results("SELECT * FROM `fm_perms`");
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
-			$result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				if (!$user_info = getUserInfo($result[$i]->user_id)) continue;
 				/** Update user capabilities */
@@ -694,10 +686,9 @@ function fmUpgrade_310($database) {
 		}
 		
 		/** Update fm_logs with user_login from user_id */
-		$fmdb->get_results("SELECT * FROM `fm_users`");
+		$result = $fmdb->get_results("SELECT * FROM `fm_users`");
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
-			$result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				$fmdb->query("UPDATE fm_logs SET user_login = '" . $result[$i]->user_login . "' WHERE user_login='" . $result[$i]->user_id . "'");
 				if ($fmdb->sql_errors) return false;
@@ -726,10 +717,9 @@ function fmUpgrade_311($database) {
 	
 	if ($success) {
 		/** Update fm_logs with user_login from user_id */
-		$fmdb->get_results("SELECT * FROM `fm_users`");
+		$result = $fmdb->get_results("SELECT * FROM `fm_users`");
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
-			$result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				$fmdb->query("UPDATE fm_logs SET user_login = '" . $result[$i]->user_login . "' WHERE user_login='" . $result[$i]->user_id . "'");
 				if ($fmdb->sql_errors) return false;

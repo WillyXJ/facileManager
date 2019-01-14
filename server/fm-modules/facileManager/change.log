@@ -3,6 +3,7 @@
 * Server - [improvement] Menu badge counts become 99+ when greater than 100.
 * Server - [improvement] Updating the core via the web interface no longer
            requires config.inc.php to be writeable by the web server user.
+* Server - [improvement] Cleaned up redundant code.
 
 3.3 (2018-12-15)
 ================

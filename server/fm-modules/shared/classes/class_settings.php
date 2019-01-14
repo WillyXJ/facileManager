@@ -109,10 +109,9 @@ class fm_module_settings {
 		$save_button = currentUserCan('manage_settings', $_SESSION['module']) ? sprintf('<input type="submit" name="save" id="save_module_settings" value="%s" class="button primary" />', _('Save')) : null;
 		
 		$query = "SELECT * FROM fm_options WHERE account_id={$_SESSION['user']['account_id']} AND module_name='{$_SESSION['module']}'";
-		$fmdb->get_results($query);
+		$result = $fmdb->get_results($query);
 		
 		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$saved_options[$result[$i]->option_name] = unserialize($result[$i]->option_value);
 			}

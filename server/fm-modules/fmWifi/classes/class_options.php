@@ -311,11 +311,9 @@ HTML;
 		} else {
 			$query .= "'{$avail_options_array[0]}'";
 		}
-		$fmdb->get_results($query);
+		$results = $fmdb->get_results($query);
 		
 		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			
 			$data_holder = $results[0]->def_type;
 		}
 		
@@ -417,9 +415,8 @@ HTML;
 					) AND account_id='{$_SESSION['user']['account_id']}' AND (
 						(server_serial_no='$server_serial_no' $config_id_sql)
 					)";
-			$fmdb->get_results($query);
+			$def_result = $fmdb->get_results($query);
 			if ($fmdb->num_rows) {
-				$def_result = $fmdb->last_result;
 				$def_result_count = $fmdb->num_rows;
 				for ($i=0; $i<$def_result_count; $i++) {
 					$temp_array[$i] = $def_result[$i]->config_name;
@@ -502,9 +499,8 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$query = "SELECT def_type,def_dropdown,def_int_range FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$post['config_name']}'";
-		$fmdb->get_results($query);
+		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
 			if ($result[0]->def_dropdown == 'no') {
 				$valid_types = trim(str_replace(array('(', ')'), '', $result[0]->def_type));
 				
@@ -560,9 +556,8 @@ HTML;
 		
 //		if (!$config_data) {
 //			$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$config_name}'";
-//			$fmdb->get_results($query);
+//			$result = $fmdb->get_results($query);
 //			if ($fmdb->num_rows) {
-//				$result = $fmdb->last_result;
 //				if (isset($result[0]->def_type)) $config_data = $result[0]->def_type;
 //			} else $config_data = null;
 //		}

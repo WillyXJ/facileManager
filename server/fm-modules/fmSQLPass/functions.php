@@ -158,11 +158,9 @@ function getServerCredentials($account_id = 0, $server_serial_no) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$query = "SELECT * FROM fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers WHERE server_serial_no=$server_serial_no AND account_id=$account_id";
-	$fmdb->get_results($query);
+	$results = $fmdb->get_results($query);
 	
 	if ($fmdb->num_rows) {
-		$results = $fmdb->last_result;
-		
 		if (isSerialized($results[0]->server_credentials)) {
 			return unserialize($results[0]->server_credentials);
 		}

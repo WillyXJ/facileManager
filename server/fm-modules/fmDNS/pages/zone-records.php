@@ -98,9 +98,7 @@ if ($record_type == 'SOA') {
 	$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
 		`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
 		`soa_status`='active'";
-	$fmdb->get_results($soa_query);
-	if ($fmdb->num_rows) $result = $fmdb->last_result;
-	else $result = null;
+	$result = $fmdb->get_results($soa_query);
 	$body .= $form . $fm_dns_records->buildSOA($result);
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
@@ -172,10 +170,9 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 		$domain_id = $all_domain_ids[0];
 		$query = "SELECT DISTINCT `record_type` FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE `record_status`!='deleted' AND
 			`account_id`={$_SESSION['user']['account_id']} AND `domain_id` IN (" . implode(',', $all_domain_ids) . ") $search_query";
-		$fmdb->get_results($query);
+		$type_result = $fmdb->get_results($query);
 		$used_record_types = array();
 		if ($fmdb->num_rows) {
-			$type_result = $fmdb->last_result;
 			for ($i=0; $i < $fmdb->num_rows; $i++) {
 				$used_record_types[] = $type_result[$i]->record_type;
 			}

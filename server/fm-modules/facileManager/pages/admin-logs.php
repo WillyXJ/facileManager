@@ -149,9 +149,8 @@ function buildModuleList() {
 	$array[0] = array_fill(0, 2, _('All Modules'));
 	
 	$query = "SELECT DISTINCT log_module FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']})";
-	$fmdb->get_results($query);
+	$list = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
-		$list = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
 			$array[$i+1] = array_fill(0, 2, $list[$i]->log_module);
 		}
@@ -166,9 +165,8 @@ function buildUserList() {
 	$array[0] = array(_('All Users'), '0');
 	
 	$query = "SELECT user_id,user_login FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} ORDER BY user_login";
-	$fmdb->get_results($query);
+	$list = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
-		$list = $fmdb->last_result;
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
 			$array[$i+1][] = $list[$i]->user_login;
 			$array[$i+1][] = $list[$i]->user_login;

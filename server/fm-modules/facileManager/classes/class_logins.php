@@ -324,7 +324,7 @@ class fm_login {
 		global $fmdb;
 		
 		$query = "UPDATE fm_users set user_ipaddr='{$_SESSION['user']['ipaddr']}', user_last_login=" . time() . " WHERE `user_login`='". $fm_login ."' AND `user_status`!='deleted'";
-		$fmdb->get_results($query);
+		$fmdb->query($query);
 	}
 
 

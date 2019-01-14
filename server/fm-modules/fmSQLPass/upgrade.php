@@ -106,10 +106,9 @@ function upgradefmSQLPass_01008($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	/** Move module options */
-	$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}options`");
+	$result = $fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}options`");
 	if ($fmdb->num_rows) {
 		$count = $fmdb->num_rows;
-		$result = $fmdb->last_result;
 		for ($i=0; $i<$count; $i++) {
 			if (!setOption($result[$i]->option_name, $result[$i]->option_value, 'auto', true, $result[$i]->account_id, 'fmSQLPass')) return false;
 		}
@@ -128,10 +127,9 @@ function upgradefmSQLPass_01008($__FM_CONFIG, $running_version) {
 		);
 	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
 	
-	$fmdb->get_results("SELECT * FROM `fm_users`");
+	$result = $fmdb->get_results("SELECT * FROM `fm_users`");
 	if ($fmdb->num_rows) {
 		$count = $fmdb->num_rows;
-		$result = $fmdb->last_result;
 		for ($i=0; $i<$count; $i++) {
 			$user_caps = null;
 			/** Update user capabilities */
@@ -180,10 +178,9 @@ function upgradefmSQLPass_01009($__FM_CONFIG, $running_version) {
 		);
 	if (!setOption('fm_user_caps', $fm_user_caps)) return false;
 	
-	$fmdb->get_results("SELECT * FROM `fm_users`");
+	$result = $fmdb->get_results("SELECT * FROM `fm_users`");
 	if ($fmdb->num_rows) {
 		$count = $fmdb->num_rows;
-		$result = $fmdb->last_result;
 		for ($i=0; $i<$count; $i++) {
 			$user_caps = null;
 			/** Update user capabilities */

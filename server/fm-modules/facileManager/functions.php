@@ -1052,11 +1052,10 @@ function getUserInfo($fm_login, $field = 'user_id') {
 	global $fmdb;
 	
 	$query = "SELECT * FROM `fm_users` WHERE $field='$fm_login' AND `user_status`!='deleted' LIMIT 1";
-	$fmdb->get_results($query);
+	$user_results = $fmdb->get_results($query);
 	
 	/** Matching results returned as an array */
 	if ($fmdb->num_rows) {
-		$user_results = $fmdb->last_result;
 		$user_info = get_object_vars($user_results[0]);
 		
 		return $user_info;
@@ -1388,11 +1387,9 @@ function getOption($option = null, $account_id = 0, $module_name = null) {
 	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;
 
 	$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql LIMIT 1";
-	$fmdb->get_results($query);
+	$results = $fmdb->get_results($query);
 	
 	if ($fmdb->num_rows && !$fmdb->sql_errors) {
-		$results = $fmdb->last_result;
-		
 		if (isSerialized($results[0]->option_value)) {
 			return unserialize($results[0]->option_value);
 		}
@@ -1648,18 +1645,16 @@ function generateSerialNo($module = null) {
 		while(1) {
 			if (array_key_exists('server_name', $_POST) && defined('CLIENT')) {
 				$get_query = "SELECT * FROM `fm_{$__FM_CONFIG[$module]['prefix']}servers` WHERE `server_status`!='deleted' AND account_id='" . getAccountID(sanitize($_POST['AUTHKEY'])) . "' AND `server_name`='" . sanitize($_POST['server_name']) . "'";
-				$fmdb->get_results($get_query);
+				$array = $fmdb->get_results($get_query);
 				if ($fmdb->num_rows) {
-					$array = $fmdb->last_result;
 					return $array[0]->server_serial_no;
 				}
 			}
 			$serialno = rand(100000000, 999999999);
 			
 			/** Ensure the serial number does not exist in any of the server tables */
-			$all_tables = $fmdb->get_results("SELECT table_name FROM information_schema.tables t WHERE t.table_schema = '{$__FM_CONFIG['db']['name']}' AND t.table_name LIKE 'fm_%_servers'");
+			$result = $fmdb->get_results("SELECT table_name FROM information_schema.tables t WHERE t.table_schema = '{$__FM_CONFIG['db']['name']}' AND t.table_name LIKE 'fm_%_servers'");
 			$table_count = $fmdb->num_rows;
-			$result = $fmdb->last_result;
 			$taken = true;
 			for ($i=0; $i<$table_count; $i++) {
 				basicGet($result[$i]->table_name, $serialno, 'server_', 'server_serial_no', null, 1);
@@ -2002,7 +1997,6 @@ function getColumnLength($tbl_name, $column_name) {
 	$query = "SHOW COLUMNS FROM $tbl_name LIKE '$column_name'";
 	$result = $fmdb->get_results($query);
 	
-	$result = $fmdb->last_result;
 	$thisrow = $result[0];
 	$valuestring = $thisrow->Type;
 	

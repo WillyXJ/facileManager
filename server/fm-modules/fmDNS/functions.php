@@ -1034,9 +1034,8 @@ function buildSQLRecords($record_type, $domain_id) {
 		$soa_query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND
 			`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
 			`soa_template`='no' AND `soa_status`='active'";
-		$fmdb->get_results($soa_query);
-		if ($fmdb->num_rows) $result = $fmdb->last_result;
-		else return null;
+		$result = $fmdb->get_results($soa_query);
+		if (!$fmdb->num_rows) return null;
 		
 		foreach (get_object_vars($result[0]) as $key => $val) {
 			$sql_results[$result[0]->soa_id][$key] = $val;
