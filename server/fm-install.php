@@ -221,7 +221,7 @@ function processSetup() {
 			exit(displaySetup($fmdb->last_error));
 		}
 		if ($db_selected) {
-			$tables = $fmdb->query(sanitize('SHOW TABLES FROM `' . $dbname . '`;'));
+			$tables = $fmdb->query('SHOW TABLES FROM `' . $dbname . '`;');
 			if ($fmdb->num_rows) {
 				exit(displaySetup(_('Database already exists and contains one or more tables.<br />Please choose a different name.')));
 			}
