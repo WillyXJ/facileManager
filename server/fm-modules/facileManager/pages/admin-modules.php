@@ -58,7 +58,7 @@ $fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version);
 if (!empty($fm_new_version_available)) {
 	list($fm_temp_directory, $allow_update_core) = clearUpdateDir();
 	
-	if (!is_writable_r(ABSPATH)) $allow_update_core = false;
+	if (!is_writable_r(ABSPATH, 'config.inc.php')) $allow_update_core = false;
 	
 	extract($fm_new_version_available);
 

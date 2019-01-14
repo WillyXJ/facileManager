@@ -3444,15 +3444,19 @@ function addSyslogEntry($message, $module) {
  * @package facileManager
  *
  * @param string $dir Top level directory to check
+ * @param string|array $exclude Filenames to exclude
  * @return boolean
  */
-function is_writable_r($dir) {
+function is_writable_r($dir, $exclude = array()) {
+	if (!is_array($exclude)) {
+		$exclude = array($exclude);
+	}
 	if (is_dir($dir)) {
 		if (is_writable($dir)) {
 			$objects = scandir($dir);
 			foreach ($objects as $object) {
 				if ($object != '.' && $object != '..') {
-					if (!is_writable_r($dir . DIRECTORY_SEPARATOR . $object)) return false;
+					if (!is_writable_r($dir . DIRECTORY_SEPARATOR . $object) && !in_array($object, $exclude)) return false;
 					else continue;
 				}
 			}    
