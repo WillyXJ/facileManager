@@ -2,6 +2,7 @@
 ================
 * Server - [bug] Fixed PHP errors.
 * Server - [feature] - Added support to configure additional options.
+* Server - [bug] Fixed database cleanup routine.
 
 0.1 (2018-12-15)
 ================

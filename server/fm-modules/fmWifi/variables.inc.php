@@ -31,7 +31,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmWifi'] = array(
-		'version'							=> '0.1',
+		'version'							=> '0.2',
 		'client_version'					=> '0.1',
 		'description'						=> __('Manage wifi access points with hostapd.', 'fmWifi'),
 		'prefix'							=> 'wifi_',
@@ -56,7 +56,9 @@ $__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Access Points'
 $__FM_CONFIG['acls']['actions']           = array('accept' => __('Allow'), 'deny' => __('Deny'));
 
 /** Cleanup options */
-$__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'table'=>'prefix');
+$__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'acls'=>'acl', 'fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'config'=>'config',
+											'fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'servers'=>'server', 'fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'server_groups'=>'group',
+											'fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'wlan_users'=>'wlan_user',);
 
 $__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
 
