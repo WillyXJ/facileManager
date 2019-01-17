@@ -7,6 +7,9 @@
 * Server - [bug] Fixed an issue where the installer would display a blank
            grey screen. (Issue #417)
 * Server - [improvement] Added tooltip-copy CSS.
+* Server - [improvement] fM core and module server upgrade packages now use
+           the proxy server settings. (Issue #388)
+* Client - [feature] Added support for using a proxy server. (Issue #388)
 
 3.3 (2018-12-15)
 ================

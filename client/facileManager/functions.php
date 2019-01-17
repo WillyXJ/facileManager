@@ -393,11 +393,11 @@ function upgradeFM($url, $data) {
 	
 	/** Download latest core files */
 	$core_file = 'facilemanager-core-' . $latest_core_version . '.tar.gz';
-	downloadfMFile($core_file);
+	downloadfMFile($core_file, $proxy_info);
 	
 	/** Download latest module files */
 	$module_file = strtolower($module_name) . '-' . $latest_module_version . '.tar.gz';
-	downloadfMFile($module_file, true);
+	downloadfMFile($module_file, $proxy_info, true);
 	
 	/** Extract client files */
 	$message = "Extracting client files\n";
@@ -1103,9 +1103,10 @@ function fM($message) {
  * @package facileManager
  *
  * @param string $file File to download
+ * @param array $proxy_info Proxy server information
  * @param boolean $module Whether or not this is a module download
  */
-function downloadfMFile($file, $module = false) {
+function downloadfMFile($file, $proxy_info, $module = false) {
 	$base_url = 'http://www.facilemanager.com/download/';
 	if ($module) $base_url .= 'module/';
 	$base_url .= $file;
@@ -1127,7 +1128,7 @@ function downloadfMFile($file, $module = false) {
 		CURLOPT_SSL_VERIFYPEER  => false,
 		CURLOPT_RETURNTRANSFER  => true
 	);
-	@curl_setopt_array($ch, $options);
+	@curl_setopt_array($ch, ($options + $proxy_info));
 	$result = curl_exec($ch);
 	@fputs($fh, $result);
 	@fclose($fh);

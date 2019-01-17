@@ -2,7 +2,7 @@
 ================
 * Client - [bug] Fixed start-up script location for Debian-based and Redhat-based
            systems. (Issue #426)
-* Server - [bug] Fixed issue where TSIG keys could be selected in certain
+* Server - [bug] Fixed issue where TSIG keys could not be selected in certain
            options. (Issue #429)
 * Server - [improvement] Cleaned up redundant code.
 * Server - [improvement] Made the DS RRset available to view and copy. (Issue #419)

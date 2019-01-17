@@ -3487,7 +3487,6 @@ function downloadfMFile($file) {
 	@unlink($local_file);
 	
 	$fh = fopen($local_file, 'w+');
-	$ch = curl_init();
 	$options = array(
 		CURLOPT_URL				=> $file,
 		CURLOPT_TIMEOUT			=> 3600,
@@ -3496,7 +3495,18 @@ function downloadfMFile($file) {
 		CURLOPT_SSL_VERIFYPEER  => false,
 		CURLOPT_RETURNTRANSFER  => true
 	);
-	@curl_setopt_array($ch, $options);
+	
+	$proxy = array();
+	if (getOption('proxy_enable')) {
+		$proxyauth = getOption('proxy_user') . ':' . getOption('proxy_pass');
+		if ($proxyauth == ':') $proxyauth = null;
+		$proxy = array(
+			CURLOPT_PROXY => getOption('proxy_host') . ':' . getOption('proxy_port'),
+			CURLOPT_PROXYUSERPWD => $proxyauth
+		);
+	}
+	$ch = curl_init();
+	curl_setopt_array($ch, ($options + $proxy));
 	$result = curl_exec($ch);
 	@fputs($fh, $result);
 	@fclose($fh);
