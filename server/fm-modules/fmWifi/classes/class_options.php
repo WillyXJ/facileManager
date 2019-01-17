@@ -554,13 +554,13 @@ HTML;
 	function parseDefType($config_name, $config_data = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-//		if (!$config_data) {
-//			$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$config_name}'";
-//			$result = $fmdb->get_results($query);
-//			if ($fmdb->num_rows) {
-//				if (isset($result[0]->def_type)) $config_data = $result[0]->def_type;
-//			} else $config_data = null;
-//		}
+		if ($config_data == null) {
+			$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$config_name}'";
+			$result = $fmdb->get_results($query);
+			if ($fmdb->num_rows) {
+				if (isset($result[0]->def_type)) $config_data = $result[0]->def_type;
+			} else $config_data = null;
+		}
 		
 		return str_replace(',', '; ', $config_data);
 	}
