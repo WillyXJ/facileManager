@@ -1993,6 +1993,64 @@ a.subelement_edit img {
 	margin-top: 5px;
 }
 
+.nowrap {
+	white-space: nowrap;
+}
+
+.tooltip-copy {
+	z-index: 1000;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+
+/* Tooltip text */
+.tooltip-copy span {
+	z-index: 1001;
+	visibility: hidden;
+	min-width: 120px;
+	bottom: 100%;
+	left: 50%;
+	margin-left: -120px;
+	margin-bottom: 12px;
+	background-color: #D0D0D0;
+	color: #000;
+	text-align: left;
+	padding: 7px 10px;
+	border-radius: 3px;
+
+	/* Position the tooltip text - see examples below! */
+	position: absolute;
+	cursor: text;
+	opacity: 0;
+	transition: opacity .5s;
+}
+
+.tooltip-copy span::after {
+	content: " ";
+	position: absolute;
+	top: 100%; /* At the bottom of the tooltip */
+	left: 115px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: #D0D0D0 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip-copy:hover span {
+	visibility: visible;
+	opacity: 1;
+}
+
+.tooltip-copy p {
+	margin-bottom: 0;
+	font-size: 10px;
+}
+.tooltip-copy textarea {
+	white-space: nowrap;
+	min-width: 40em;
+}
+
 /** Firefox hacks :( */
 @-moz-document url-prefix() {
 	#search_form_container {
