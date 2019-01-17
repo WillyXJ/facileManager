@@ -1,11 +1,12 @@
-3.2.2 (2019-??-??)
-==================
+3.3 (2019-??-??)
+================
 * Client - [bug] Fixed start-up script location for Debian-based and Redhat-based
            systems. (Issue #426)
 * Server - [bug] Fixed issue where TSIG keys could be selected in certain
            options. (Issue #429)
 * Server - [improvement] Cleaned up redundant code.
 * Server - [improvement] Made the DS RRset available to view and copy. (Issue #419)
+* Server - [bug] Fixed zone filtering. (Issue #430)
 
 3.2.1 (2018-12-15)
 ==================

@@ -158,27 +158,27 @@ if ($map == 'groups') {
 			(string) $domain_view_sql .= " (domain_view='$view_id' OR domain_view LIKE '$view_id;%' OR domain_view LIKE '%;$view_id;%' OR domain_view LIKE '%;$view_id') OR";
 		}
 		if ($domain_view_sql) {
-			$domain_view_sql = 'AND (' . rtrim($domain_view_sql, ' OR') . ')';
+			$domain_view_sql = ' AND (' . rtrim($domain_view_sql, ' OR') . ')';
 		}
 	}
 
 	/** Process domain_group filtering */
 	if (isset($_GET['domain_group']) && !in_array(0, $_GET['domain_group'])) {
-		foreach (array_merge(array(0), (array) $_GET['domain_group']) as $group_id) {
+		foreach (array_merge((array) $_GET['domain_group']) as $group_id) {
 			$group_id = sanitize($group_id);
-			(string) $domain_view_sql .= " (domain_groups='$group_id' OR domain_groups LIKE '$group_id;%' OR domain_groups LIKE '%;$group_id;%' OR domain_groups LIKE '%;$group_id') OR";
+			(string) $domain_group_sql .= " (domain_groups='$group_id' OR domain_groups LIKE '$group_id;%' OR domain_groups LIKE '%;$group_id;%' OR domain_groups LIKE '%;$group_id') OR";
 		}
-		if ($domain_view_sql) {
-			$domain_view_sql = 'AND (' . rtrim($domain_view_sql, ' OR') . ')';
+		if ($domain_group_sql) {
+			$domain_group_sql = ' AND (' . rtrim($domain_group_sql, ' OR') . ')';
 		}
 		$limited_domain_ids = "OR domain_clone_domain_id>0)";
 	}
 
 	if (getOption('zone_sort_hierarchical', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
-		$query = "SELECT *,SUBSTRING_INDEX(`domain_name`, '.', -2) AS a,SUBSTRING_INDEX(`domain_name`, '.', 2) AS b FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`!='deleted' AND account_id='1' AND domain_template='no' AND domain_mapping='{$map}' AND (domain_clone_domain_id='0' " . $limited_domain_ids . (string) $domain_view_sql . (string) $search_query . " ORDER BY a $sort_direction, b $sort_direction, `domain_name` $sort_direction";
+		$query = "SELECT *,SUBSTRING_INDEX(`domain_name`, '.', -2) AS a,SUBSTRING_INDEX(`domain_name`, '.', 2) AS b FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`!='deleted' AND account_id='1' AND domain_template='no' AND domain_mapping='{$map}' AND (domain_clone_domain_id='0' " . $limited_domain_ids . (string) $domain_view_sql . (string) $domain_group_sql . (string) $search_query . " ORDER BY a $sort_direction, b $sort_direction, `domain_name` $sort_direction";
 		$result = $fmdb->query($query);
 	} else {
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND (domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql . (string) $search_query, null, false, $sort_direction, false, "SUBSTRING_INDEX(`domain_name`, '.', -2),SUBSTRING_INDEX(`domain_name`, '.', 2),`domain_name`");
+		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', array($sort_field, 'domain_name'), 'domain_', "AND domain_template='no' AND domain_mapping='$map' AND (domain_clone_domain_id='0' $limited_domain_ids " . (string) $domain_view_sql . (string) $domain_group_sql . (string) $search_query, null, false, $sort_direction, false, "SUBSTRING_INDEX(`domain_name`, '.', -2),SUBSTRING_INDEX(`domain_name`, '.', 2),`domain_name`");
 	}
 }
 
