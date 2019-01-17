@@ -292,6 +292,17 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	/* View Zone DNSSEC DS RRset */
+	$("#table_edits").delegate(".tooltip-copy", "click tap", function(e) {
+		copyText = $(this).find("textarea").select();
+		
+		document.execCommand("copy");
+		
+		$(this).find("p").html("' . __('Copied to clipboard') . '");
+		
+		return false;
+	});
+	
 	$(".existing-container .display_results").delegate("input:not([id^=\'record_delete_\']), select", "change", function(e) {
 		if ($(this).attr("type") == "checkbox") {
 			$(this).parent().parent().parent().addClass("build");

@@ -5,6 +5,7 @@
 * Server - [bug] Fixed issue where TSIG keys could be selected in certain
            options. (Issue #429)
 * Server - [improvement] Cleaned up redundant code.
+* Server - [improvement] Made the DS RRset available to view and copy. (Issue #419)
 
 3.2.1 (2018-12-15)
 ==================

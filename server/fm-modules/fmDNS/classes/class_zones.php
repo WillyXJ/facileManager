@@ -756,7 +756,7 @@ class fm_dns_zones {
 			if (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') {
 				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_id', 'key_', 'AND domain_id=' . $row->domain_id);
 				if ($fmdb->num_rows) {
-					$icons[] = sprintf('<i class="mini-icon fa fa-lock secure" title="%s"></i>', __('Zone is secured with DNSSEC'));
+					$icons[] = sprintf('<div class="mini-icon tooltip-copy nowrap"><span><b>%s:</b><br /><textarea>' . trim($row->domain_dnssec_ds_rr) . '</textarea><p>%s</p></span><i class="fa fa-lock secure" title="%s"></i></div>', __('Zone DS RRset'), __('Click to copy'), __('Zone is secured with DNSSEC'));
 				} else {
 					$icons[] = sprintf('<i class="mini-icon fa fa-lock insecure" title="%s"></i>', __('Zone is configured but not secured with DNSSEC'));
 					$response = __('There are no DNSSEC keys defined for this zone.');
