@@ -988,10 +988,11 @@ HTML;
 		</tr>', $template_name_show_hide, $default_checked, __('Make Default Template'));
 		} else {
 			$dynamic_checked = ($domain_dynamic == 'yes') ? 'checked' : null;
-			$addl_zone_options = sprintf('<tr class="include-with-template" id="dynamic_updates">
+			$dynamic_show = ($domain_type == 'master' || $domain_template_id) ? 'table-row' : 'none';
+			$addl_zone_options = sprintf('<tr class="include-with-template" id="dynamic_updates" style="display: %s">
 			<th>%s</th>
 			<td><input type="checkbox" id="domain_dynamic" name="domain_dynamic" value="yes" %s /><label for="domain_dynamic"> %s</label></td>
-		</tr>', __('Support Dynamic Updates'), $dynamic_checked, __('yes (experimental)'));
+		</tr>', $dynamic_show, __('Support Dynamic Updates'), $dynamic_checked, __('yes (experimental)'));
 			
 			if ($domain_dnssec == 'yes') {
 				$dnssec_checked = 'checked';
@@ -1012,8 +1013,9 @@ HTML;
 			$available_zones = array_reverse($this->availableZones('all', 'master', 'restricted'));
 			$available_zones[] = array(null, 0);
 			$available_zones = buildSelect('domain_dnssec_parent_domain_id', 'domain_dnssec_parent_domain_id', array_reverse($available_zones), $domain_dnssec_parent_domain_id);
+			$dnssec_show = ($domain_type == 'master' || $domain_template_id) ? 'table-row' : 'none';
 
-			$addl_zone_options .= sprintf('<tr class="include-with-template" id="enable_dnssec">
+			$addl_zone_options .= sprintf('<tr class="include-with-template" id="enable_dnssec" style="display: %s">
 			<th>%s</th>
 			<td>
 				<input type="checkbox" id="domain_dnssec" name="domain_dnssec" value="yes" %s /><label for="domain_dnssec"> %s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
@@ -1028,7 +1030,7 @@ HTML;
 					%s
 				</div>
 			</td>
-		</tr>', __('Enable DNSSEC'), $dnssec_checked, __('yes (experimental)'), 
+		</tr>', $dnssec_show, __('Enable DNSSEC'), $dnssec_checked, __('yes (experimental)'), 
 				sprintf(__('The dnssec-signzone and dnssec-keygen utilities must be installed on %s in order for this to work.'), php_uname('n')), $dnssec_style,
 				__('Signature Expiry Override (optional)'), __('Days'), $domain_dnssec_sig_expire, getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']),
 				sprintf(__('Enter the number of days to expire the signature if different from what is defined in the %s.'), _('Settings')),
