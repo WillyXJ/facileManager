@@ -10,6 +10,7 @@
 * Server - [bug] Fixed the display of dynamic zone and dnssec options while
            editing zone details.
 * Server - [improvement] Updated default named.root file.
+* Server - [improvement] Minor UI changes for more consistency.
 
 3.2.1 (2018-12-15)
 ==================

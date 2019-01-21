@@ -220,9 +220,8 @@ class fm_dns_views {
 		$disabled_class = ($row->view_status == 'disabled') ? ' class="disabled"' : null;
 		$bars_title = __('Click and drag to reorder');
 		
-		$edit_name = '<a href="config-options.php?view_id=' . $row->view_id;
-		$edit_name .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
-		$edit_name .= '">' . $row->view_name . '</a>';
+		$server_serial_no .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
+		$icons = sprintf('<a href="config-options.php?view_id=%d%s" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s"></i></a>', $row->view_id, $server_serial_no, __('Configure Additional Options'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="edit_delete_img">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -243,7 +242,7 @@ class fm_dns_views {
 		echo <<<HTML
 		<tr id="$row->view_id" name="$row->view_name"$disabled_class>
 			$grab_bars
-			<td>$edit_name</td>
+			<td>$row->view_name $icons</td>
 			<td>$comments</td>
 			$edit_status
 		</tr>
