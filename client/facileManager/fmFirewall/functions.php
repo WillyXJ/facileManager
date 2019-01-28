@@ -186,7 +186,7 @@ function getStartupScript($fw) {
 	$distros['iptables']['Raspbian'] = $distros['iptables']['Ubuntu'] = $distros['iptables']['Fubuntu'] = $distros['iptables']['Debian'];
 	
 	/** Redhat-based distros */
-	$distros['iptables']['Fedora'] = $distros['iptables']['CentOS'] = $distros['iptables']['ClearOS'] = $distros['iptables']['Oracle'] = $distros['iptables']['Redhat'];
+	$distros['iptables']['Fedora'] = $distros['iptables']['CentOS'] = $distros['iptables']['ClearOS'] = $distros['iptables']['Oracle'] = $distros['iptables']['Scientific'] = $distros['iptables']['Redhat'];
 
 	$os = detectOSDistro();
 	

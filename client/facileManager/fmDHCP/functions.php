@@ -286,7 +286,7 @@ function getStartupScript($app) {
 	$distros['dhcpd']['Raspbian'] = $distros['dhcpd']['Ubuntu'] = $distros['dhcpd']['Fubuntu'] = $distros['dhcpd']['Debian'];
 	
 	/** Redhat-based distros */
-	$distros['dhcpd']['Fedora'] = $distros['dhcpd']['CentOS'] = $distros['dhcpd']['ClearOS'] = $distros['dhcpd']['Oracle'] = $distros['dhcpd']['Redhat'];
+	$distros['dhcpd']['Fedora'] = $distros['dhcpd']['CentOS'] = $distros['dhcpd']['ClearOS'] = $distros['dhcpd']['Oracle'] = $distros['dhcpd']['Scientific'] = $distros['dhcpd']['Redhat'];
 
 	$os = detectOSDistro();
 

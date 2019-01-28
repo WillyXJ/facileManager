@@ -396,9 +396,9 @@ function getStartupScript($app) {
 	$distros['dhcpcd']['Raspbian'] = $distros['dhcpcd']['Ubuntu'] = $distros['dhcpcd']['Fubuntu'] = $distros['dhcpcd']['Debian'];
 	$distros['dnsmasq']['Raspbian'] = $distros['dnsmasq']['Ubuntu'] = $distros['dnsmasq']['Fubuntu'] = $distros['dnsmasq']['Debian'];
 	
-	$distros['hostapd']['Fedora'] = $distros['hostapd']['CentOS'] = $distros['hostapd']['ClearOS'] = $distros['hostapd']['Oracle'] = $distros['hostapd']['Redhat'];
-	$distros['dhcpcd']['Fedora'] = $distros['dhcpcd']['CentOS'] = $distros['dhcpcd']['ClearOS'] = $distros['dhcpcd']['Oracle'] = $distros['dhcpcd']['Redhat'];
-	$distros['dnsmasq']['Fedora'] = $distros['dnsmasq']['CentOS'] = $distros['dnsmasq']['ClearOS'] = $distros['dnsmasq']['Oracle'] = $distros['dnsmasq']['Redhat'];
+	$distros['hostapd']['Fedora'] = $distros['hostapd']['CentOS'] = $distros['hostapd']['ClearOS'] = $distros['hostapd']['Oracle'] = $distros['hostapd']['Scientific'] = $distros['hostapd']['Redhat'];
+	$distros['dhcpcd']['Fedora'] = $distros['dhcpcd']['CentOS'] = $distros['dhcpcd']['ClearOS'] = $distros['dhcpcd']['Oracle'] = $distros['dhcpcd']['Scientific'] = $distros['dhcpcd']['Redhat'];
+	$distros['dnsmasq']['Fedora'] = $distros['dnsmasq']['CentOS'] = $distros['dnsmasq']['ClearOS'] = $distros['dnsmasq']['Oracle'] = $distros['dnsmasq']['Scientific'] = $distros['dnsmasq']['Redhat'];
 	
 	$os = detectOSDistro();
 

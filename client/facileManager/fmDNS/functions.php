@@ -272,7 +272,7 @@ function getStartupScript($chroot_environment = false) {
 	$distros['Raspbian'] = $distros['Ubuntu'] = $distros['Fubuntu'] = $distros['Debian'];
 	
 	/** Redhat-based distros */
-	$distros['Fedora'] = $distros['CentOS'] = $distros['ClearOS'] = $distros['Oracle'] = $distros['Redhat'];
+	$distros['Fedora'] = $distros['CentOS'] = $distros['ClearOS'] = $distros['Oracle'] = $distros['Scientific'] = $distros['Redhat'];
 
 	$os = detectOSDistro();
 	
@@ -303,7 +303,7 @@ function detectChrootDir() {
 	switch (PHP_OS) {
 		case 'Linux':
 			$os = detectOSDistro();
-			if (in_array($os, array('Redhat', 'CentOS', 'ClearOS', 'Oracle'))) {
+			if (in_array($os, array('Redhat', 'CentOS', 'ClearOS', 'Oracle', 'Scientific'))) {
 				if ($chroot_dir = getParameterValue('^ROOTDIR', '/etc/sysconfig/named')) return $chroot_dir;
 				/** systemd unit file */
 				addChrootFiles();

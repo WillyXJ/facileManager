@@ -4,6 +4,7 @@
 * Server - [feature] - Added support to configure additional options.
 * Server - [bug] Fixed database cleanup routine.
 * Server - [improvement] Cleaned up redundant code.
+* Client - [improvement] Added support for Scientific Linux. (Issue #431)
 
 0.1 (2018-12-15)
 ================
