@@ -549,8 +549,8 @@ HTML;
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $acl_parent_id, 'acl_', 'acl_parent_id', 'ORDER BY acl_id');
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
+			$element_array = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
-				$element_array = $fmdb->last_result;
 				$element_id = $element_array[$i]->acl_id;
 				$return[$element_id]['element_addresses'] = $element_array[$i]->acl_addresses;
 				

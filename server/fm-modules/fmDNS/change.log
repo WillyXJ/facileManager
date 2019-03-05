@@ -12,6 +12,7 @@
 * Server - [improvement] Updated default named.root file.
 * Server - [improvement] Minor UI changes for more consistency.
 * Client - [improvement] Added support for Scientific Linux. (Issue #431)
+* Server - [bug] Fixed ACL display and ability to edit the entries. (Issue #432)
 
 3.2.1 (2018-12-15)
 ==================
