@@ -58,7 +58,7 @@ function fmUpgrade($database) {
 		$errors = true;
 	}
 	
-	displayProgress(_('Upgrading Core Schema'), $success);
+	displayProgress(sprintf(_('Upgrading Core v%s Schema'), $fm_version), $success);
 	
 	/** Upgrade any necessary modules */
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_tools.php');

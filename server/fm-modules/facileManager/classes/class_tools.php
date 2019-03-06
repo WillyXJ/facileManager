@@ -63,7 +63,7 @@ class fm_tools {
 	 * @package facileManager
 	 */
 	function upgradeModule($module_name = null, $process = 'noisy', $running_version = null) {
-		global $fmdb;
+		global $fmdb, $fm_name;
 		
 		if (!$module_name) {
 			return sprintf('<p>%s</p>', _('No module was selected to be upgraded.'));
@@ -74,7 +74,15 @@ class fm_tools {
 			include($upgrade_file);
 			
 			/** Include module variables */
+			require(ABSPATH . 'fm-includes/version.php');
 			@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+			
+			/** Ensure the minimum core version is installed */
+			if (version_compare($__FM_CONFIG[$module_name]['required_fm_version'], $fm_version, '<=') === false) {
+				$fmdb->last_error = sprintf(_('%s v%s requires %s v%s or later.'), $module_name, $__FM_CONFIG[$module_name]['version'], $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
+				if ($process == 'quiet') return false;
+				return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $fmdb->last_error);
+			}
 			
 			$function = 'upgrade' . $module_name . 'Schema';
 			if (function_exists($function)) {
