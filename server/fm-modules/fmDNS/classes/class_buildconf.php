@@ -212,9 +212,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$global_master_array[$master_result[$i]->master_name] = $global_master_ports = null;
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $master_result[$i]->master_id . ' AND master_status="active" AND server_serial_no="0"');
 					$master_child_result = $fmdb->last_result;
-					for ($j=0; $j < $fmdb->num_rows; $j++) {
+					$child_count = $fmdb->num_rows;
+					for ($j=0; $j < $child_count; $j++) {
 						foreach(explode(',', $master_child_result[$j]->master_addresses) as $address) {
-							if ($master_child_result[$i]->master_comment) $global_master_array[$master_result[$i]->master_name] .= "\t// " . $master_child_result[$i]->master_comment . "\n";
+							if ($master_child_result[$j]->master_comment) $global_master_array[$master_result[$i]->master_name] .= "\t// " . $master_child_result[$j]->master_comment . "\n";
 							if (trim($address)) $global_master_array[$master_result[$i]->master_name] .= "\t" . $fm_dns_acls->parseACL($address);
 							if ($master_child_result[$j]->master_port) $global_master_array[$master_result[$i]->master_name] .= ' port ' . $master_child_result[$j]->master_port;
 							if ($master_child_result[$j]->master_key_id) $global_master_array[$master_result[$i]->master_name] .= ' key "' . $fm_dns_keys->parseKey('key_' . $master_child_result[$j]->master_key_id) . '"';
