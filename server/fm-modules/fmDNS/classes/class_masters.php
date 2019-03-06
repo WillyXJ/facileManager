@@ -467,8 +467,8 @@ HTML;
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 			}
 			$count = $fmdb->num_rows;
+			$element_array = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
-				$element_array = $fmdb->last_result;
 				$element_id = $element_array[$i]->master_id;
 				$return[$element_id]['element_addresses'] = $fm_dns_acls->parseACL($element_array[$i]->master_addresses);
 				
