@@ -45,15 +45,15 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 $__FM_CONFIG['icons']['fail']			= sprintf('<i class="fa fa-times fa-lg fail" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Failed'));
 $__FM_CONFIG['icons']['caution']		= sprintf('<img src="fm-modules/%1$s/images/orangequestion.jpg" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Caution'));
 $__FM_CONFIG['icons']['ok']				= sprintf('<i class="fa fa-check fa-lg ok" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
-$__FM_CONFIG['icons']['edit']			= sprintf('<img src="fm-modules/%1$s/images/edit24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit'));
-$__FM_CONFIG['icons']['delete']			= sprintf('<img src="fm-modules/%1$s/images/delete24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Delete'));
-$__FM_CONFIG['icons']['copy']			= sprintf('<img src="fm-modules/%1$s/images/copy24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Duplicate'));
-$__FM_CONFIG['icons']['enable']			= sprintf('<img src="fm-modules/%1$s/images/enable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Enable'));
-$__FM_CONFIG['icons']['disable']		= sprintf('<img src="fm-modules/%1$s/images/disable24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Disable'));
+$__FM_CONFIG['icons']['edit']			= sprintf('<i class="fa fa-pencil-square-o preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Edit'));
+$__FM_CONFIG['icons']['delete']			= sprintf('<i class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
+$__FM_CONFIG['icons']['copy']			= sprintf('<i class="fa fa-copy" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Duplicate'));
+$__FM_CONFIG['icons']['enable']			= sprintf('<i class="fa fa-toggle-off toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Enable (currently disabled)'));
+$__FM_CONFIG['icons']['disable']		= sprintf('<i class="fa fa-toggle-on toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Disable (currently enabled)'));
 $__FM_CONFIG['icons']['popout']			= sprintf('<i class="fa fa-external-link-square fa-lg popout" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Popout'));
 $__FM_CONFIG['icons']['close']			= sprintf('<i class="fa fa-window-close fa-lg close" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Close'));
-$__FM_CONFIG['icons']['pwd_change']		= sprintf('<img src="fm-modules/%1$s/images/profile24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Edit Profile'));
-$__FM_CONFIG['icons']['pwd_reset']		= sprintf('<img src="fm-modules/%1$s/images/password-change24.png" border="0" alt="%2$s" title="%2$s" height="20" />', $fm_name, _('Send Password Reset Email'));
+$__FM_CONFIG['icons']['pwd_change']		= sprintf('<i class="fa fa-user preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Edit Profile'));
+$__FM_CONFIG['icons']['pwd_reset']		= sprintf('<i class="fa fa-unlock-alt" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Send Password Reset Email'));
 $__FM_CONFIG['icons']['account']		= sprintf('<img src="fm-modules/%1$s/images/account24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Account Settings'));
 $__FM_CONFIG['icons']['star']			= sprintf('<i class="fa fa-star star" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Super Admin'));
 $__FM_CONFIG['icons']['template_user']	= sprintf('<i class="fa fa-user" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Template Account'));
@@ -61,15 +61,9 @@ $__FM_CONFIG['icons']['shield_error']	= sprintf('<img src="fm-modules/%1$s/image
 $__FM_CONFIG['icons']['shield_info']	= sprintf('<img src="fm-modules/%1$s/images/yellowshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('Information'));
 $__FM_CONFIG['icons']['shield_ok']		= sprintf('<img src="fm-modules/%1$s/images/greenshield64.png" border="0" alt="%2$s" title="%2$s" />', $fm_name, _('OK'));
 
-//$__FM_CONFIG['icons']['edit']			= sprintf('<i class="fa fa-pencil-square-o" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Edit'));
-//$__FM_CONFIG['icons']['delete']			= sprintf('<i class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
-//$__FM_CONFIG['icons']['enable']			= sprintf('<i class="fa fa-toggle-off toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Enable'));
-//$__FM_CONFIG['icons']['disable']		= sprintf('<i class="fa fa-toggle-on toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Disable'));
-
 /** Module variables */
-$__FM_CONFIG['module']['icons']['preview'] = sprintf('<img src="fm-modules/%1$s/images/preview24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Preview Config'));
-//$__FM_CONFIG['module']['icons']['preview'] = sprintf('<i class="fa fa-eye preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Preview Config'));
-$__FM_CONFIG['module']['icons']['build']   = sprintf('<input type="image" id="build" src="fm-modules/%1$s/images/build24.png" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Build Config'));
+$__FM_CONFIG['module']['icons']['preview'] = sprintf('<i class="fa fa-search preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Preview Config'));
+$__FM_CONFIG['module']['icons']['build']   = sprintf('<i class="fa fa-wrench preview" id="build" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Build Config'));
 if (isset($_SESSION['module'])) {
 	foreach (array('ajax', 'classes', 'css', 'extra', 'images', 'js') as $dir) {
 		$__FM_CONFIG['module']['path'][$dir]   = sprintf('fm-modules/%s/%s', $_SESSION['module'], $dir);

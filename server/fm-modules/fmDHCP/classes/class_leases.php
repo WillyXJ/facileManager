@@ -128,7 +128,7 @@ class fm_dhcp_leases {
 		if (currentUserCan('manage_leases', $_SESSION['module'])) {
 			$edit_status .= '<a href="#" class="edit_form_link" name="reserve_address" title="' . __('Tag as a fixed address (reservation)') . '"><i class="fa fa-tag" aria-hidden="true"></i></a> ';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
+			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $ip .'" /></td>';
 		}
 		

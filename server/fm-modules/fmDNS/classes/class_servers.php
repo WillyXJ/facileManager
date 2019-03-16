@@ -525,7 +525,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_config_file</td>
 			<td>$row->server_root_dir</td>
 			<td>$row->server_zones_dir</td>
-			<td id="edit_delete_img">$edit_status</td>
+			<td id="row_actions">$edit_status</td>
 		</tr>
 
 HTML;
@@ -575,7 +575,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$group_masters</td>
 			<td>$group_slaves</td>
-			<td id="edit_delete_img">$edit_status</td>
+			<td id="row_actions">$edit_status</td>
 		</tr>
 
 HTML;

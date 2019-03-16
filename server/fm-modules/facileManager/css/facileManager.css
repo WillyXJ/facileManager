@@ -749,6 +749,29 @@ i.text_icon {
 	top: 1px;
 }
 
+.overflow-container {
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
+.existing-container {
+	position: absolute;
+	overflow: auto;
+	bottom: 34.8em;
+	top: 0;
+	width: 100%;
+}
+.new-container {
+	position: absolute;
+	width: 100%;
+	bottom: 11em;
+	max-height: 313px;
+	overflow: auto;
+}
+.no-bottom-margin {
+	bottom: 10em;
+}
+
 #fm_user_profile .form-table td {
 	vertical-align: middle;
 }
@@ -967,59 +990,29 @@ a {
 	text-decoration: none;
 }
 
-#edit_delete a, #edit_delete a.delete, #edit_delete a:hover, #edit_delete a.delete:hover {
-	width: 70px;
-	padding: 5px 0;
-	text-align: center;
-	line-height: 18pt;
-	padding: 5px 12px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-}
-
-#edit_delete a:hover {
-	background: #ccc;
-	color: #036;
-}
-
-#edit_delete a.delete:hover {
-	background: #c00;
-	color: #fff;
-}
-
-#edit_delete {
+#row_actions {
 	width: 55px;
 	text-align: center;
 	white-space: nowrap;
 }
-
-#edit_delete_img {
-	width: 55px;
-	text-align: center;
-	white-space: nowrap;
-}
-#edit_delete_img i {
+#row_actions i {
 	padding: 4px;
 	font-size: 18px;
 	color: #c0c0c0;
 }
-#edit_delete_img i.delete {
+#row_actions i.delete,
+i.delete {
 	color: #c11515;
 }
-#edit_delete_img i.preview {
+#row_actions i.preview {
 	color: #8ba7d6;
 }
-#edit_delete_img i.toggle {
+#row_actions i.toggle {
 	color: #569b42;
 }
-#edit_delete_img img {
+#row_actions img {
 	padding: 0 5px;
 	margin-top: 2px;
-}
-
-#edit_delete span.user_text {
-	padding-left: 5px;
-	margin-right: 1em;
 }
 
 .reload {
@@ -1318,19 +1311,22 @@ input.disabled {
 
 i.star {
 	padding-right: 2px;
+}
+i.star,
+#row_actions i.fa-unlock-alt {
 	color: #e8a412;
 }
-#edit_delete_img i.ok,
+#row_actions i.ok,
 i.ok,
 i.secure {
 	color: #09a30c;
 }
-#edit_delete_img i.fail,
+#row_actions i.fail,
 i.fail,
 i.insecure {
 	color: #CB3739;
 }
-#edit_delete_img i.notice,
+#row_actions i.notice,
 i.notice {
 	color: #E2A93C;
 }
@@ -1587,7 +1583,7 @@ div.fm-table {
 #pagination_container,
 #search_form_container {
 	white-space: nowrap;
-	margin-bottom: -2px;
+	margin-bottom: 2px;
 	position: relative;
 }
 #pagination_container > div,
@@ -1897,12 +1893,10 @@ p[class^=subelement] span:first-child {
 	margin-right: 7px;
 }
 
-img.subelement_remove,
+i.subelement_remove,
+i#build,
 a.subelement_edit img {
-	position: relative;
-	top: 2px;
 	cursor: pointer;
-	width: 12px;
 }
 
 .tooltip-top, .tooltip-bottom, .tooltip-left, .tooltip-right {

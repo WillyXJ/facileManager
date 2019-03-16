@@ -788,7 +788,7 @@ class fm_dns_zones {
 				$clone_views</td>
 			<td align="center">$record_count
 				$clone_counts</td>
-			<td id="edit_delete_img">
+			<td id="row_actions">
 				$reload_zone
 				$edit_status
 			</td>
@@ -823,7 +823,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$domain_names</td>
 			<td>$row->group_comment</td>
-			<td id="edit_delete_img">$edit_status</td>
+			<td id="row_actions">$edit_status</td>
 		</tr>
 
 HTML;

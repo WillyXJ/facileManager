@@ -12,6 +12,7 @@
 * Client - [feature] Added support for using a proxy server. (Issue #388)
 * Server - [improvement] Modules can no longer be upgraded if the minimum core
            version is not installed.
+* Server - [improvement] CSS and icon changes.
 
 3.3 (2018-12-15)
 ================

@@ -231,7 +231,7 @@ class fm_dns_keys {
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$checkbox = '<td></td>';
-			$edit_status = '<td id="edit_delete_img">';
+			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" name="' . $row->key_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->key_id, 'key')) {
 				if ($row->key_status != 'revoked') {

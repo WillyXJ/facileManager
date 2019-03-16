@@ -203,7 +203,7 @@ class fm_module_time {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
+			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
 		
 		/** Format date range */

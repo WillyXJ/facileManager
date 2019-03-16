@@ -223,7 +223,7 @@ class fm_dns_views {
 		$server_serial_no .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		$icons = sprintf('<a href="config-options.php?view_id=%d%s" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s"></i></a>', $row->view_id, $server_serial_no, __('Configure Additional Options'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_status = '<td id="edit_delete_img">';
+			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->view_status == 'active') ? 'disabled' : 'active';

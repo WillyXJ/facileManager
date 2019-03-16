@@ -65,7 +65,7 @@ class fm_module_templates {
 		global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 		
 		if (currentUserCan('manage_zones', $_SESSION['module'])) {
-			$edit_status = '<td id="edit_delete_img">';
+			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$show_delete = true;
 			

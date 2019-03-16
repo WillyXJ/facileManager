@@ -429,7 +429,7 @@ class fm_dhcp_objects {
 			<td>$row->config_data $icons</td>
 			<td></td>
 			<td>$row->config_comment</td>
-			<td id="edit_delete_img">$edit_status</td>
+			<td id="row_actions">$edit_status</td>
 		</tr>
 
 HTML;

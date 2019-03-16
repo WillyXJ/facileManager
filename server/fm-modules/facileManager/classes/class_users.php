@@ -476,7 +476,7 @@ class fm_users {
 		echo <<<HTML
 		<tr id="$id" name="$name"$disabled_class>
 			$column
-			<td id="edit_delete_img">$edit_status</td>
+			<td id="row_actions">$edit_status</td>
 		</tr>
 
 HTML;

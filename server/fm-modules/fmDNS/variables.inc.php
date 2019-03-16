@@ -43,11 +43,10 @@ $__FM_CONFIG['fmDNS'] = array(
 /** Images */
 if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['export']		= '<input type="image" src="' . $__FM_CONFIG['module']['path']['images'] . '/export24.png" border="0" alt="Export Config" title="Export Config" width="20" />';
-	$__FM_CONFIG['module']['icons']['reload']		= '<input type="image" src="' . $__FM_CONFIG['module']['path']['images'] . '/reload256.png" border="0" alt="Reload Zone" title="Reload Zone" width="20" />';
+	$__FM_CONFIG['module']['icons']['reload']		= sprintf('<i class="fa fa-refresh preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Reload Zone'));
 }
 if (isset($fm_name)) {
-	$__FM_CONFIG['module']['icons']['sub_delete']	= '<img class="subelement_remove" id="__ID__" src="fm-modules/' . $fm_name . '/images/error24.png" border="0" alt="Delete" title="Delete" width="12" />';
-//	$__FM_CONFIG['module']['icons']['sub_delete']	= sprintf('<i id="__ID__" class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
+	$__FM_CONFIG['module']['icons']['sub_delete']	= sprintf('<i id="__ID__" class="fa fa-window-close delete subelement_remove" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
 }
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);

@@ -191,7 +191,7 @@ class fm_module_groups {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
+			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
 		
 		/** Process group items */

@@ -374,7 +374,7 @@ class fm_wifi_wlans {
 			$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status = '<td id="edit_delete_img">' . $edit_status . '</td>';
+			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
 		}
 		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
@@ -491,7 +491,7 @@ HTML;
 		$wpa_key_mgmt = $fm_module_options->populateDefTypeDropdown($fm_module_options->parseDefType('wpa_key_mgmt'), $this->getConfig($config_id, 'wpa_key_mgmt'), 'wpa_key_mgmt');
 		$wpa_pairwise = $fm_module_options->populateDefTypeDropdown($fm_module_options->parseDefType('wpa_pairwise'), $this->getConfig($config_id, 'wpa_pairwise'), 'wpa_pairwise');
 
-		$channel = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'channel'));		
+		$channel = str_replace(array('"', "'"), '', $this->getConfig($config_id, 'channel'));
 		$country_code = ($config_id) ? $this->getConfig($config_id, 'country_code') : $country_code;
 		$country_code = $this->buildConfigOptions('country_code', $country_code);
 		$max_num_sta = $this->getConfig($config_id, 'max_num_sta');

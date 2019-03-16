@@ -218,7 +218,7 @@ class fm_dns_acls {
 		if ($row->acl_status == 'disabled') $classes[] = 'disabled';
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_status = '<td id="edit_delete_img">';
+			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->acl_id, 'acl')) {
 				$edit_status .= '<a class="status_form_link" href="#" rel="';

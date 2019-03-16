@@ -1,4 +1,5 @@
-tr.import_swap span {
+tr.import_swap span,
+td#row_actions > .fa-refresh {
 	cursor: pointer;
 	color: #3a62a3;
 }
@@ -105,29 +106,6 @@ p.soa_import span {
 	margin-right: 5px;
 	position: relative;
 	top: 2px;
-}
-
-.overflow-container {
-	position: relative;
-	height: 100%;
-	width: 100%;
-}
-.existing-container {
-	position: absolute;
-	overflow: auto;
-	bottom: 34.8em;
-	top: 0;
-	width: 100%;
-}
-.new-container {
-	position: absolute;
-	width: 100%;
-	bottom: 11em;
-	max-height: 326px;
-	overflow: auto;
-}
-.no-bottom-margin {
-	bottom: 10em;
 }
 
 .display_results > tbody > tr > td > span {

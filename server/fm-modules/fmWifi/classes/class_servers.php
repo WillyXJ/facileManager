@@ -394,7 +394,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>
 			<td id="ap_status">$ap_status</td>
-			<td id="edit_delete_img">$edit_status</td>
+			<td id="row_actions">$edit_status</td>
 		</tr>
 
 HTML;
@@ -435,7 +435,7 @@ HTML;
 			$checkbox
 			<td>$row->group_name</td>
 			<td>$group_members</td>
-			<td id="edit_delete_img">$edit_status</td>
+			<td id="row_actions">$edit_status</td>
 		</tr>
 
 HTML;

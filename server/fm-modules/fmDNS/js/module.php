@@ -43,6 +43,7 @@ $(document).ready(function() {
 		var $this 	= $(this);
 		domain_id	= $this.attr("id");
 
+		$(this).addClass("fa-spin");
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
 		$("#manage_item_contents").fadeIn(200);
@@ -64,6 +65,7 @@ $(document).ready(function() {
 					return false;
 				}
 				$("#manage_item_contents").html(response);
+				$this.removeClass("fa-spin");
 
 				if (response.toLowerCase().indexOf("' . _('failed') . '") == -1 && response.toLowerCase().indexOf("' . __('you are not authorized') . '") == -1) {
 					$this.fadeOut(400);
@@ -197,7 +199,7 @@ $(document).ready(function() {
 	});
 
 	/* Zone subelement deletes */
-	$("#table_edits").delegate("img.subelement_remove", "click tap", function(e) {
+	$("#table_edits").delegate("i.subelement_remove", "click tap", function(e) {
 		var $this 		= $(this);
 		var $subelement		= $this.parent().attr("class");
 		item_type		= $("#table_edits").attr("name");

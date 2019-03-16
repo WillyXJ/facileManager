@@ -263,7 +263,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$timezone = date("T");
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_status = '<td id="edit_delete_img">';
+			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->server_status == 'active') ? 'disabled' : 'active';

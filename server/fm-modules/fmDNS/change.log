@@ -21,6 +21,7 @@
 * Server - [improvement] Added record import for additional RR types.
 * Server - [bug] Fixed dynamic zone imports. (Issue #433)
 * Server - [feature] Added full support for the servers clause. (Issue #218)
+* Server - [improvement] CSS and icon changes.
 
 3.2.1 (2018-12-15)
 ==================

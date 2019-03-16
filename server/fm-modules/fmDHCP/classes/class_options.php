@@ -232,7 +232,7 @@ class fm_module_options {
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
-			$edit_status = '<td id="edit_delete_img">';
+			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';
