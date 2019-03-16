@@ -321,11 +321,11 @@ HTML;
 		/** Build groups options */
 		basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_');
 		$group_options = null;
-		$group_count = $fmdb->num_rows;
-		$group_results = $fmdb->last_result;
-		for ($i=0; $i<$group_count; $i++) {
-			$group_options[$i][] = $group_results[$i]->group_name;
-			$group_options[$i][] = $group_results[$i]->group_id;
+		if ($fmdb->num_rows) {
+			for ($i=0; $i<$fmdb->num_rows; $i++) {
+				$group_options[$i][] = $fmdb->last_result[$i]->group_name;
+				$group_options[$i][] = $fmdb->last_result[$i]->group_id;
+			}
 		}
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
