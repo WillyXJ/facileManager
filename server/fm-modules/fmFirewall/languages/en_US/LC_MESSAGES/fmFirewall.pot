@@ -8,10 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-29 16:33-0700\n"
+"POT-Creation-Date: 2019-03-16 16:51-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -247,18 +248,6 @@ msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_groups.php:299
 msgid "Group Name"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_groups.php:301
-#: server/fm-modules/fmFirewall/classes/class_objects.php:58
-#: server/fm-modules/fmFirewall/classes/class_objects.php:287
-#: server/fm-modules/fmFirewall/classes/class_policies.php:59
-#: server/fm-modules/fmFirewall/classes/class_policies.php:453
-#: server/fm-modules/fmFirewall/classes/class_services.php:56
-#: server/fm-modules/fmFirewall/classes/class_services.php:361
-#: server/fm-modules/fmFirewall/classes/class_time.php:56
-#: server/fm-modules/fmFirewall/classes/class_time.php:378
-msgid "Comment"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_groups.php:314
