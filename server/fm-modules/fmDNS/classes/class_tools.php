@@ -293,7 +293,7 @@ HTML;
 						list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
 						break;
 					case 2:
-						if (is_numeric($parts[0])) {
+						if (is_numeric($parts[0]) && $parts[0] > 255) {
 							$array['record_name'] = isset($current_name) ? $current_name : '@';
 							list($array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_value']) = $parts;
 						} else {

@@ -16,6 +16,8 @@
 * Server - [bug] Fixed Masters display and ability to edit the entries.
 * Server - [bug] Fixed the masters config when an address list is another
            masters list.
+* Server - [bug] Fixed zone imports where delegated NS records are used in
+           reverse zones. (Issue #378)
 
 3.2.1 (2018-12-15)
 ==================
