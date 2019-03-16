@@ -1181,15 +1181,15 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Host addresses';
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
-					case 'CERT':
-						$record_array[$record_result[$i]->record_type]['Version'] = '9.7.0';
-						$record_array[$record_result[$i]->record_type]['Description'] = 'Certificates';
-						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
-						break;
 					case 'CAA':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.9.6';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Certification Authority Authorizations';
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . '0 ' . $record_result[$i]->record_params . ' "' . $record_result[$i]->record_value . '"' . $record_comment . "\n";
+						break;
+					case 'CERT':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.7.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Certificates';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_cert_type . ' ' . $record_result[$i]->record_key_tag . ' ' . $record_result[$i]->record_algorithm . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
 						break;
 					case 'CNAME':
 					case 'DNAME':

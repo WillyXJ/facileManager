@@ -18,6 +18,8 @@
            masters list.
 * Server - [bug] Fixed zone imports where delegated NS records are used in
            reverse zones. (Issue #378)
+* Server - [improvement] Added record import for additional RR types.
+* Server - [bug] Fixed dynamic zone imports. (Issue #433)
 
 3.2.1 (2018-12-15)
 ==================

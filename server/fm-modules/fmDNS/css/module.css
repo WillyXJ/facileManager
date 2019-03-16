@@ -1,5 +1,6 @@
 tr.import_swap span {
 	cursor: pointer;
+	color: #3a62a3;
 }
 
 tr.import_swap input:not([type="checkbox"]) {
