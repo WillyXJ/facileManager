@@ -393,34 +393,45 @@ HTML;
 		$i = 0;
 		$serial_sql = $server_serial_no ? "AND server_serial_no IN ('0','$server_serial_no')" : "AND server_serial_no='0'";
 		
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_parent_id=0 AND acl_status='active'");
-		if ($fmdb->num_rows) {
-			$last_result = $fmdb->last_result;
-			for ($j=0; $j<$fmdb->num_rows; $j++) {
-				$acl_list[$i]['id'] = 'acl_' . $last_result[$j]->acl_id;
-				$acl_list[$i]['text'] = $last_result[$j]->acl_name;
-				$i++;
-				$acl_list[$i]['id'] = '!acl_' . $last_result[$j]->acl_id;
-				$acl_list[$i]['text'] = '!' . $last_result[$j]->acl_name;
-				$i++;
+		if (in_array($include, array('all', 'acl'))) {
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_parent_id=0 AND acl_status='active'");
+			if ($fmdb->num_rows) {
+				$last_result = $fmdb->last_result;
+				for ($j=0; $j<$fmdb->num_rows; $j++) {
+					$acl_list[$i]['id'] = 'acl_' . $last_result[$j]->acl_id;
+					$acl_list[$i]['text'] = $last_result[$j]->acl_name;
+					$i++;
+					$acl_list[$i]['id'] = '!acl_' . $last_result[$j]->acl_id;
+					$acl_list[$i]['text'] = '!' . $last_result[$j]->acl_name;
+					$i++;
+				}
 			}
 		}
 		
-		if ($include == 'all') {
-			/** Predefined ACLs */
-			$acl_list = array_merge($acl_list, $this->getPredefinedACLs());
-			$i = count($acl_list);
+		if (in_array($include, array('all', 'tsig-keys'))) {
+			if ($include == 'all') {
+				/** Predefined ACLs */
+				$acl_list = array_merge($acl_list, $this->getPredefinedACLs());
+				$i = count($acl_list);
+			}
 			
 			/** Keys */
-			$view_id = (isset($_POST['view_id']) && is_numeric(sanitize($_POST['view_id']))) ? sanitize($_POST['view_id']) : 0;
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', 'AND key_view IN (0, ' . $view_id . ') AND key_status="active"');
+			if ($include == 'tsig-keys') {
+				$key_type = ' AND key_type="tsig"';
+			} else {
+				$view_id = (isset($_POST['view_id']) && is_numeric(sanitize($_POST['view_id']))) ? sanitize($_POST['view_id']) : 0;
+				$key_type = 'AND key_view IN (0, ' . $view_id . ')';
+			}
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', $key_type . ' AND key_status="active"');
 			for ($j=0; $j<$fmdb->num_rows; $j++) {
 				$acl_list[$i]['id'] = 'key_' . $fmdb->last_result[$j]->key_id;
 				$acl_list[$i]['text'] = 'key "' . $fmdb->last_result[$j]->key_name . '"';
 				$i++;
-				$acl_list[$i]['id'] = '!key_' . $fmdb->last_result[$j]->key_id;
-				$acl_list[$i]['text'] = '!key "' . $fmdb->last_result[$j]->key_name . '"';
-				$i++;
+				if ($include != 'tsig-keys') {
+					$acl_list[$i]['id'] = '!key_' . $fmdb->last_result[$j]->key_id;
+					$acl_list[$i]['text'] = '!key "' . $fmdb->last_result[$j]->key_name . '"';
+					$i++;
+				}
 			}
 		}
 		

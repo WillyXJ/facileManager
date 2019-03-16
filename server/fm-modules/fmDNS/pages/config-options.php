@@ -33,7 +33,7 @@ $display_option_type_sql = strtolower($option_type);
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 
 /* Configure options for a view */
-if (array_key_exists('view_id', $_GET)) {
+if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET)) {
 	$view_id = (isset($_GET['view_id'])) ? sanitize($_GET['view_id']) : null;
 	if (!$view_id) {
 		header('Location: ' . $GLOBALS['basename']);
@@ -63,15 +63,29 @@ if (array_key_exists('view_id', $_GET)) {
 	
 	$name = 'domain_id';
 	$rel = $domain_id;
+/* Configure options for a server */
+} elseif (array_key_exists('server_id', $_GET)) {
+	$server_id = (isset($_GET['server_id'])) ? sanitize($_GET['server_id']) : null;
+	if (!$server_id) header('Location: ' . $GLOBALS['basename']);
+	
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_id, 'server_', 'server_id');
+	if (!$fmdb->num_rows) header('Location: config-servers.php');
+	$server_info = $fmdb->last_result;
+	
+	$display_option_type = $server_info[0]->server_name;
+	$display_option_type_sql .= "' AND server_id='$server_id";
+	
+	$name = 'server_id';
+	$rel = $server_id;
 } else {
 	$view_id = $domain_id = $name = $rel = null;
 	$display_option_type_sql .= "' AND view_id='0";
-	if ($option_type == 'Global') $display_option_type_sql .= "' AND domain_id='0";
+	if ($option_type == 'Global') $display_option_type_sql .= "' AND domain_id='0' AND server_id='0";
 }
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'view_id', 'domain_id', 'server_serial_no'), 'include');
+	$uri_params = generateURIParams(array('type', 'view_id', 'domain_id', 'server_id', 'server_serial_no'), 'include');
 	
 	switch ($action) {
 	case 'add':
@@ -103,9 +117,15 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
+if (array_key_exists('server_id', $_GET)) {
+	array_pop($__FM_CONFIG['options']['avail_types']);
+	array_pop($__FM_CONFIG['options']['avail_types']);
+	$avail_views = null;
+} else {
+	$avail_views = buildViewSubMenu($view_id);
+}
 $avail_types = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
 $avail_servers = buildServerSubMenu($server_serial_no);
-$avail_views = buildViewSubMenu($view_id);
 
 $sort_direction = null;
 $sort_field = 'cfg_name';

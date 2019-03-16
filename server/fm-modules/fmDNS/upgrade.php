@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '3.2', '<') ? upgradefmDNS_320($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '3.3', '<') ? upgradefmDNS_330($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2104,6 +2104,61 @@ TABLE;
 	}
 
 	setOption('version', '3.2', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
+/** 3.3.0 */
+function upgradefmDNS_330($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '3.2', '<') ? upgradefmDNS_320($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_type` `server_type` ENUM('bind9','remote') NOT NULL DEFAULT 'bind9'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `server_id` INT(11) NOT NULL DEFAULT '0' AFTER `cfg_type`";
+
+	/** Move the server_key to the config table */
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers`";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		$config_opts = array('bogus', 'edns', 'provide-ixfr', 'request-ixfr',
+			'transfers', 'transfer-format');
+		
+		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
+		$sql_fields = '(`cfg_type`, `server_id`, `cfg_name`, `cfg_data`, `cfg_status`)';
+		$sql_values = null;
+		foreach ($fmdb->last_result as $server_info) {
+			$server_key = ($server_info->server_key) ? $server_info->server_key : '';
+			$sql_values .= "('global', '{$server_info->server_id}', 'keys', '$server_key', '{$server_info->server_status}'), ";
+			foreach ($config_opts as $option) {
+				$sql_values .= "('global', '{$server_info->server_id}', '$option', '', '{$server_info->server_status}'), ";
+			}
+		}
+
+		$sql_values = rtrim($sql_values, ', ');
+
+		$inserts[] = "$sql_insert $sql_fields VALUES $sql_values";
+	}
+	$inserts[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` DROP `server_key`";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	/** Run queries */
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.3', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }

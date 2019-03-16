@@ -108,8 +108,8 @@ HTML;
 
 if ($type == 'groups') {
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_', null, null, false, $sort_direction);
-} else {
-	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name', 'server_', null, null, false, $sort_direction);
+} elseif ($type == 'servers') {
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', array('server_type', 'server_name'), 'server_', null, null, false, $sort_direction);
 }
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;

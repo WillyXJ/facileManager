@@ -85,7 +85,7 @@ class fm_module_options {
 		if (empty($post['cfg_name'])) return false;
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}' AND server_id='{$post['server_id']}'");
 		if ($fmdb->num_rows) {
 			$num_same_config = $fmdb->num_rows;
 			$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
@@ -150,7 +150,7 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_id!={$post['cfg_id']} AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_id!={$post['cfg_id']} AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}' AND server_id='{$post['server_id']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->cfg_id != $post['cfg_id']) {
@@ -533,6 +533,9 @@ HTML;
 					case 'domain_id':
 						$query .= 'Z';
 						break;
+					case 'server_id':
+						$query .= 'S';
+						break;
 				}
 			} else {
 				$query .= 'O';
@@ -690,9 +693,11 @@ HTML;
 	 *
 	 * @param string $cfg_name Config name to query
 	 * @param string $cfg_data Data to parse/format
+	 * @param string $select_name Name of the select object
+	 * @param string $options Additional options
 	 * @return string Return formated data
 	 */
-	function populateDefTypeDropdown($def_type, $cfg_data, $select_name = 'cfg_data') {
+	function populateDefTypeDropdown($def_type, $cfg_data, $select_name = 'cfg_data', $options = null) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		$raw_def_type_array = explode(')', str_replace('(', '', $def_type));
@@ -703,6 +708,9 @@ HTML;
 			$def_type_items = null;
 			if (strlen(trim($raw_def_type))) {
 				$raw_items = explode('|', $raw_def_type);
+				if ($options == 'include-blank') {
+					array_unshift($raw_items, '');
+				}
 				foreach ($raw_items as $item) {
 					$def_type_items[] = trim($item);
 				}

@@ -61,7 +61,7 @@ function buildModuleDashboard() {
 	
 	/** Name server stats */
 	if (currentUserCan('manage_servers', $_SESSION['module'])) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_');
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'AND server_type!="remote"');
 		$server_count = $fmdb->num_rows;
 		$server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {

@@ -473,6 +473,16 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#manage_item_contents").delegate("#server_type", "change", function(e) {
+		if ($(this).val() == "remote") {
+			$(".local_server_options").slideUp();
+			$("#alternative_help").slideUp();
+		} else {
+			$(".local_server_options").show("slow");
+			$("#alternative_help").show("slow");
+		}
+	});
+
 });
 
 function displayOptionPlaceholder(option_value) {

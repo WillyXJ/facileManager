@@ -87,7 +87,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 				unset($port_key, $dscp_key);
 			}
 			$cfg_data = str_replace(array('{', '}'), '', $cfg_data);
-			$available_acls = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no);
+			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;">
@@ -108,7 +108,27 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 						tokenSeparators: [",", ";"],
 						data: %s
 					});
-					</script>', __('Option Value'), sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_port, sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_dscp, $cfg_data, $result[0]->def_type, $available_acls);
+					</script>', __('Option Value'), sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_port, sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_dscp, $cfg_data, $result[0]->def_type, $available_masters);
+		} elseif (strpos($result[0]->def_type, 'key_id') !== false) {
+			$available_items = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no, 'tsig-keys');
+
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
+					%s
+					<script>
+					$(".address_match_element").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: true,
+						width: "200px",
+						tokenSeparators: [",", " ", ";"],
+						data: %s
+					});
+					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_items);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			$checkbox = null;
 			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST)) {

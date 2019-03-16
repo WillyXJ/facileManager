@@ -3840,6 +3840,8 @@ HTML;
  * @package facileManager
  *
  * @param string $server_id_type What server ID should be used (serial|id)
+ * @param array $include What items to include
+ * @param string $module Module name to limit list to
  * @return array
  */
 function availableServers($server_id_type = 'serial', $include = array('all'), $module = null) {
@@ -3867,10 +3869,9 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
 		$result = basicGetList('fm_' . $__FM_CONFIG[$module]['prefix'] . 'server_groups', 'group_name', 'group_');
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$server_array[_('Groups')][] = null;
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$server_array[_('Groups')][$j][] = $results[$i]->group_name;
-				$server_array[_('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+			foreach ($fmdb->last_result as $results) {
+				$server_array[_('Groups')][$j][] = $results->group_name;
+				$server_array[_('Groups')][$j][] = 'g_' . $results->group_id;
 				$j++;
 			}
 		}
@@ -3881,13 +3882,13 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
 		$result = basicGetList('fm_' . $__FM_CONFIG[$module]['prefix'] . 'servers', 'server_name', 'server_');
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$server_array[_('Servers')][] = null;
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$server_array[_('Servers')][$j][] = $results[$i]->server_name;
+			foreach ($fmdb->last_result as $results) {
+				if (property_exists($results, 'server_type') && $results->server_type == 'remote') continue;
+				$server_array[_('Servers')][$j][] = $results->server_name;
 				if ($server_id_type == 'serial') {
-					$server_array[_('Servers')][$j][] = $results[$i]->server_serial_no;
+					$server_array[_('Servers')][$j][] = $results->server_serial_no;
 				} elseif ($server_id_type == 'id') {
-					$server_array[_('Servers')][$j][] = 's_' . $results[$i]->server_id;
+					$server_array[_('Servers')][$j][] = 's_' . $results->server_id;
 				}
 				$j++;
 			}
