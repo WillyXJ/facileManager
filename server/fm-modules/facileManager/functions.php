@@ -574,6 +574,8 @@ HTML;
 		$i++;
 	}
 	
+	$donate_text = _('Donate');
+	
 	echo <<<MENU
 	<div id="menuback"></div>
 	<div id="menu">
@@ -581,6 +583,9 @@ HTML;
 			<ul>
 $main_menu_html
 			</ul>
+		</div>
+		<div id="donate" class="grey">
+			<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NGSWSA7ZQ7J9S&source=url" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
 		</div>
 	</div>
 
