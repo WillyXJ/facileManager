@@ -1,4 +1,4 @@
-3.3 (2019-??-??)
+3.3 (2019-03-16)
 ================
 * Client - [bug] Fixed start-up script location for Debian-based and Redhat-based
            systems. (Issue #426)

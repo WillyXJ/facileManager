@@ -176,7 +176,7 @@ INSERT;
 			foreach (array('max_num_sta', 'no_probe_resp_if_max_sta', 'preamble') as $option) {
 				$table[] = <<<INSERT
 INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}config` VALUES (
-NULL, {$wlan->account_id}, {$wlan->server_serial_no}, 'wlan', 'no', {$wlan->config_id}, '$option', '', {$wlan->config_aps}, NULL, '{$wlan->config_status}'
+NULL, {$wlan->account_id}, {$wlan->server_serial_no}, 'wlan', 'no', {$wlan->config_id}, '$option', '', '{$wlan->config_aps}', NULL, '{$wlan->config_status}'
 )
 INSERT;
 			}

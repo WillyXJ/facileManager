@@ -1,4 +1,4 @@
-3.4 (2019-??-??)
+3.4 (2019-03-16)
 ================
 * Server - [improvement] Menu badge counts become 99+ when greater than 100.
 * Server - [improvement] Updating the core via the web interface no longer
