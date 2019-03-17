@@ -191,6 +191,7 @@ input[type="checkbox"].modules {
 	position: fixed;
 	bottom: 0;
 	left: 1.3em;
+	font-size: 9pt;
 }
 #donate a {
 	color: #000000;
