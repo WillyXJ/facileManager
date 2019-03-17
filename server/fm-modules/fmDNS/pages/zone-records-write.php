@@ -90,7 +90,7 @@ if (isset($create) && is_array($create)) {
 			
 			if (!isset($record_type)) $record_type = null;
 			if (!isset($data['record_comment']) || strtolower($data['record_comment']) == __('none')) $data['record_comment'] = null;
-			if (!isset($data['record_ttl']) || strtolower($data['record_ttl']) == __('default')) $data['record_ttl'] = null;
+			if ($record_type != 'SOA' && (!isset($data['record_ttl']) || strtolower($data['record_ttl']) == __('default'))) $data['record_ttl'] = null;
 			
 			/** Remove double quotes */
 			if (isset($data['record_value'])) $data['record_value'] = str_replace('"', '', $data['record_value']);
