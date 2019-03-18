@@ -1926,8 +1926,11 @@ HTML;
 		$domain_view = isset($_GET['domain_view']) ? $_GET['domain_view'] : 0;
 		$domain_group = isset($_GET['domain_group']) ? $_GET['domain_group'] : 0;
 		
+		/** Get zones based on access */
+		$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
+
 		$available_views = $this->availableViews();
-		if (currentUserCan('do_everything', $_SESSION['module'])) $available_groups = $this->availableGroups();
+		if (currentUserCan('do_everything', $_SESSION['module']) || (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0] == '0')) $available_groups = $this->availableGroups();
 		$filters = null;
 		
 		if (count($available_views) > 1) {

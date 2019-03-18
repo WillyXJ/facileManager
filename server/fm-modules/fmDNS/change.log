@@ -2,6 +2,8 @@
 ==================
 * Server - [bug] Fixed server menu badge counts with respect to remote
            servers. (Issue #218)
+* Server - [bug] Fixed an issue where zone filtering was not available to
+           users without the super-admin privilege. (Issue #436)
 
 3.3.1 (2019-03-17)
 ==================
