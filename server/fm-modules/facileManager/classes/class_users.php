@@ -418,9 +418,11 @@ class fm_users {
 				$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				if ($row->user_template_only == 'no') {
 					if ($row->user_id != $_SESSION['user']['id']) {
-						$edit_status .= '<a class="status_form_link" href="#" rel="';
-						$edit_status .= ($row->user_status == 'active') ? 'disabled">' . $__FM_CONFIG['icons']['disable'] : 'active">' . $__FM_CONFIG['icons']['enable'];
-						$edit_status .= '</a>';
+						if ((currentUserCan('do_everything') || !userCan($row->user_id, 'do_everything')) && $row->user_id != 1) {
+							$edit_status .= '<a class="status_form_link" href="#" rel="';
+							$edit_status .= ($row->user_status == 'active') ? 'disabled">' . $__FM_CONFIG['icons']['disable'] : 'active">' . $__FM_CONFIG['icons']['enable'];
+							$edit_status .= '</a>';
+						}
 
 						/** Cannot change password without mail_enable defined */
 						if (getOption('mail_enable') && $row->user_auth_type != 2 && $row->user_template_only == 'no') {
@@ -430,7 +432,7 @@ class fm_users {
 						$edit_status .= sprintf('<center>%s</center>', _('Enabled'));
 					}
 				}
-				if ($row->user_id != 1) {
+				if ((currentUserCan('do_everything') || !userCan($row->user_id, 'do_everything')) && $row->user_id != 1) {
 					$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				}
 			} else {
@@ -668,12 +670,15 @@ HTML;
 			$i = 1;
 			$fm_user_caps = getAvailableUserCapabilities();
 			foreach ($fm_user_caps[$fm_name] as $key => $title) {
+				if ($key == 'do_everything') {
+					if (!currentUserCan('do_everything')) continue;
+					$title = "<b>$title</b>";
+				}
 				if ($key != 'do_everything' && $user_is_super_admin) {
 					$checked = null;
 				} else {
 					$checked = ($perm_function($id, $key)) ? 'checked' : null;
 				}
-				if ($key == 'do_everything') $title = "<b>$title</b>";
 				$fm_perm_boxes .= ' <input name="user_caps[' . $fm_name . '][' . $key . ']" id="fm_perm_' . $key . '" type="checkbox" value="1" ' . $checked . '/> <label for="fm_perm_' . $key . '">' . $title . '</label>' . "\n";
 				/** Display checkboxes three per row */
 				if ($i == 3) {
@@ -792,7 +797,7 @@ PERM;
 		$user_list = null;
 		
 		if ($group_id == null) {
-			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND (user_caps IS NULL OR user_caps NOT LIKE '%do_everything%')");
+			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND user_id!={$_SESSION['user']['id']} AND (user_caps IS NULL OR user_caps NOT LIKE '%do_everything%')");
 		} else {
 			$query = "SELECT user_id FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} AND user_status!='deleted' AND user_template_only='no' AND user_group=$group_id";
 			$fmdb->get_results($query);

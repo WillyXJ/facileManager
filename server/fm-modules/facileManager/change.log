@@ -1,3 +1,7 @@
+3.4.1 (2019-03-??)
+==================
+* Server - [security] Users without the super-admin privilege can no longer
+           create or edit super-admin user or group privileges. (Issue #436)
 3.4 (2019-03-16)
 ================
 * Server - [improvement] Menu badge counts become 99+ when greater than 100.
