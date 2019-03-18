@@ -2,6 +2,8 @@
 ==================
 * Server - [security] Users without the super-admin privilege can no longer
            create or edit super-admin user or group privileges. (Issue #436)
+* Server - [bug] Fixed an issue where user groups could not be deleted.
+
 3.4 (2019-03-16)
 ================
 * Server - [improvement] Menu badge counts become 99+ when greater than 100.

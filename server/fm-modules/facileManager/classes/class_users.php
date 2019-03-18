@@ -382,7 +382,7 @@ class fm_users {
 			$field = 'user_login';
 		} elseif ($type == 'group') {
 			$field = 'group_name';
-			if (basicUpdate('fm_users', $id, 'user_group', null, 'user_group') === false) {
+			if (basicUpdate('fm_users', $id, 'user_group', 0, 'user_group') === false) {
 				return formatError(_('This group could not be removed from the associated users.'), 'sql');
 			}
 		}
