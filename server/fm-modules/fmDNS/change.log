@@ -1,3 +1,8 @@
+3.3.2 (2019-03-??)
+==================
+* Server - [bug] Fixed server menu badge counts with respect to remote
+           servers. (Issue #218)
+
 3.3.1 (2019-03-17)
 ==================
 * Server - [bug] Fixed SOA creations. (Issue #435)

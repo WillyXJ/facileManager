@@ -616,14 +616,14 @@ function getModuleBadgeCounts($type) {
 		$server_builds = array();
 		
 		/** Servers */
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes')");
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', " AND `server_type`!='remote' AND (`server_installed`!='yes' OR (`server_status`='active' AND `server_build_config`='yes'))");
 		$server_count = $fmdb->num_rows;
 		if ($server_count) $server_results = $fmdb->last_result;
 		for ($i=0; $i<$server_count; $i++) {
 			$server_builds[] = $server_results[$i]->server_name;
 		}
 		if (version_compare(getOption('version', 0, $_SESSION['module']), '1.1', '>=')) {
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_client_version`!='" . getOption('client_version', 0, $_SESSION['module']) . "'");
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', "AND `server_type`!='remote' AND `server_client_version`!='" . getOption('client_version', 0, $_SESSION['module']) . "'");
 			$server_count = $fmdb->num_rows;
 			if ($server_count) $server_results = $fmdb->last_result;
 			for ($i=0; $i<$server_count; $i++) {
