@@ -232,7 +232,7 @@ class fm_dns_views {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
-			$grab_bars = '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>';
+			$grab_bars = '<i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i>';
 		} else {
 			$edit_status = $grab_bars = null;
 		}
@@ -241,7 +241,7 @@ class fm_dns_views {
 
 		echo <<<HTML
 		<tr id="$row->view_id" name="$row->view_name"$disabled_class>
-			$grab_bars
+			<td>$grab_bars</td>
 			<td>$row->view_name $icons</td>
 			<td>$comments</td>
 			$edit_status

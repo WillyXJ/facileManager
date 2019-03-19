@@ -6,6 +6,7 @@
            users without the super-admin privilege. (Issue #436)
 * Server - [bug] Fixed an issue where users with zone-management privileges
            could not modify additional zone options.
+* Server - [bug] Fixed table formatting for users with view-only privilege.
 
 3.3.1 (2019-03-17)
 ==================
