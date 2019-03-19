@@ -30,7 +30,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 
-if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
+if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
 	$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
@@ -200,9 +200,17 @@ $checks_array = array('servers' => 'manage_servers',
 				);
 
 if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
-	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
+	$perms = checkUserPostPerms($checks_array, $_POST['item_type']);
+	
+	if ($_POST['item_type'] == 'options' && !$perms) {
+		if (array_key_exists('item_sub_type', $_POST) && $_POST['item_sub_type'] == 'domain_id') {
+			$perms = zoneAccessIsAllowed(array($_POST['item_id']), 'manage_zones');
+		} elseif ($_POST['item_type'] == 'options') {
+			$perms = zoneAccessIsAllowed(array(getNameFromID(sanitize($_POST['item_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'domain_id')), 'manage_zones');
+		}
+	}
+	if (!$perms) {
 		returnUnAuth();
-		exit;
 	}
 	
 	if (array_key_exists('add_form', $_POST)) {
@@ -277,6 +285,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$edit_form = $post_class->printForm(null, $action, $type_map, $id);
 		}
 	} else {
+		if ($_POST['item_type'] == 'domains' && !zoneAccessIsAllowed(array($id))) returnUnAuth();
+		
 		basicGet('fm_' . $table, $id, $prefix, $prefix . 'id');
 		if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
 		
