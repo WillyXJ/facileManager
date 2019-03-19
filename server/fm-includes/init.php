@@ -146,7 +146,7 @@ RewriteRule . index.php [L]
 	
 	/** Test rewrites */
 	if (!defined('INSTALL')) {
-		if (dns_get_record($_SERVER['SERVER_NAME'], DNS_A + DNS_AAAA)) {
+		if (@dns_get_record($_SERVER['SERVER_NAME'], DNS_A + DNS_AAAA)) {
 			$test_output = getPostData($GLOBALS['FM_URL'] . 'admin-accounts.php?verify', array('module_type' => 'CLIENT'));
 			$test_output = isSerialized($test_output) ? unserialize($test_output) : $test_output;
 			if (strpos($test_output, 'Account is not found.') === false) {
