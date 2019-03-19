@@ -26,7 +26,7 @@ function installfmDNSSchema($database, $module, $noisy = 'noisy') {
 	/** Include module variables */
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}acls` (
   `acl_id` INT(11) NOT NULL AUTO_INCREMENT ,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}acls
   `acl_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active',
   PRIMARY KEY (`acl_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (
   `cfg_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}conf
   PRIMARY KEY (`cfg_id`),
   KEY `idx_domain_id` (`domain_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}controls` (
   `control_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -74,9 +74,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}cont
   `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`control_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}domains` (
   `domain_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -106,9 +106,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   PRIMARY KEY (`domain_id`),
   KEY `idx_domain_status` (`domain_status`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}domain_groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
@@ -117,9 +117,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `group_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
   `def_function` enum('options','logging','key','view') NOT NULL,
@@ -135,9 +135,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}func
   PRIMARY KEY (`def_id`),
   KEY `idx_def_option` (`def_option`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}keys` (
   `key_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -156,9 +156,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}keys
   `key_status` enum('active','disabled','revoked','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`key_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}masters` (
   `master_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -173,9 +173,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}mast
   `master_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`master_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}records` (
   `record_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -206,9 +206,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}reco
   KEY `idx_record_status` (`record_status`),
   KEY `idx_record_type` (`record_type`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}records_skipped` (
   `skip_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
@@ -218,9 +218,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}reco
   PRIMARY KEY (`skip_id`),
   KEY `idx_record_id` (`record_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -247,9 +247,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
 ) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}server_groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
@@ -259,9 +259,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}soa` (
   `soa_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -278,23 +278,23 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}soa`
   `soa_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`soa_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}track_builds` (
   `domain_id` int(11) NOT NULL,
   `server_serial_no` int(11) NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}track_reloads` (
   `domain_id` int(11) NOT NULL,
   `server_serial_no` int(11) NOT NULL
 ) ENGINE = INNODB DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}views` (
   `view_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -304,111 +304,111 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}view
   `view_comment` text,
   `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 
 	/** fm_prefix_config inserts */
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '0', '0', 'directory', '\$ROOT', 'hidden' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE account_id = '0');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'version', 'none', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'version' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'hostname', 'none', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'hostname' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'recursion', 'no', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'recursion' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'statistics-file', '"\$ROOT/named.stats"', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'statistics-file' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'zone-statistics', 'yes', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'zone-statistics' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'pid-file', '"\$ROOT/named.pid"', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'pid-file' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'dump-file', '"\$ROOT/named.dump"', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'dump-file' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'auth-nxdomain', 'no', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'auth-nxdomain' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'cleaning-interval', '120', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'cleaning-interval' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'interface-interval', '0', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'interface-interval' AND server_serial_no = '0'
 	);
-INSERT;
+INSERTSQL;
 	
 	
 	
 	/** fm_prefix_functions inserts*/
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_function` ,
 `def_option` ,
@@ -630,9 +630,9 @@ VALUES
 ('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', NULL, 'yes', NULL),
 ('options', 'zone-statistics', '( full | terse | none | yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL)
 ;
-INSERT;
+INSERTSQL;
 	
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_function` ,
 `def_option_type`,
@@ -659,9 +659,9 @@ VALUES
 ('options', 'ratelimit', 'max-table-size', '( integer )', 'no', 'OVZ', 'no', '9.9.4'),
 ('options', 'ratelimit', 'min-table-size', '( integer )', 'no', 'OVZ', 'no', '9.9.4')
 ;
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_function` ,
 `def_option_type`,
@@ -683,40 +683,40 @@ VALUES
 ('options', 'global', 'listen-on-v6', '[ port ( ip_port | * ) ] { ( ipv6_address ) }', 'yes', 'O', 'no', '-1', NULL),
 ('options', 'rrset', 'rrset-order', '( rrset_order_spec )', 'no', 'OV', 'no', '-1', NULL)
 ;
-INSERT;
+INSERTSQL;
 
 	
 	/** fm_options inserts */
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'version'
 		AND module_name='$module');
-INSERT;
-	$inserts[] = <<<INSERT
+INSERTSQL;
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'client_version'
 		AND module_name='$module');
-INSERT;
-	$inserts[] = <<<INSERT
+INSERTSQL;
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'clones_use_dnames', '{$__FM_CONFIG[$module]['default']['options']['clones_use_dnames']['default_value']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'clones_use_dnames'
 		AND module_name='$module');
-INSERT;
+INSERTSQL;
 
 	/** localhost domain and records */
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}domains` (`domain_name`, `domain_mapping`) VALUES 
 	('localhost', 'forward'), 
 	('0.0.127.in-addr.arpa', 'reverse'),
 	('0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa', 'reverse');
-INSERT;
-	$inserts[] = <<<INSERT
+INSERTSQL;
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}records` (`domain_id`, `record_name`, `record_value`, `record_ttl`, `record_type`, `record_append`) VALUES 
 	(1, '@', '127.0.0.1', '', 'A', 'yes'),
 	(1, '@', '::1', '', 'AAAA', 'yes'),
@@ -725,7 +725,7 @@ INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}records` (`domain_i
 	(2, '@', 'localhost.', '', 'NS', 'no'),
 	(3, '1', 'localhost.', '', 'PTR', 'yes'),
 	(3, '@', 'localhost.', '', 'NS', 'no');
-INSERT;
+INSERTSQL;
 
 
 	/** Create table schema */

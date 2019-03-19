@@ -7,6 +7,7 @@
 * Server - [bug] Fixed an issue where users with zone-management privileges
            could not modify additional zone options.
 * Server - [bug] Fixed table formatting for users with view-only privilege.
+* Server - [bug] Fixed installs and upgrades with PHP 7.3.x. (Issue #436)
 
 3.3.1 (2019-03-17)
 ==================

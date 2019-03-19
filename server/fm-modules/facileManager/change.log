@@ -3,6 +3,7 @@
 * Server - [security] Fixed user management privileges so super-admins cannot
            be added, modified, or deleted by less privileged users. (Issue #436)
 * Server - [bug] Fixed an issue where user groups could not be deleted.
+* Server - [bug] Fixed installs and upgrades with PHP 7.3.x. (Issue #436)
 
 3.4 (2019-03-16)
 ================

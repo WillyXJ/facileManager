@@ -27,7 +27,7 @@ function installfmDHCPSchema($database, $module, $noisy = 'noisy') {
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
 	/** Create fmDHCP tables **/
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
 ) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (
   `config_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -66,9 +66,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}conf
   `config_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`config_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
   `def_function` enum('options') NOT NULL DEFAULT 'options',
@@ -84,27 +84,27 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}func
   PRIMARY KEY (`def_id`),
   KEY `idx_def_option` (`def_option`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
 
 	/** Required inserts for module versioning **/
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'version'
 		AND module_name='$module');
-INSERT;
-	$inserts[] = <<<INSERT
+INSERTSQL;
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'client_version'
 		AND module_name='$module');
-INSERT;
+INSERTSQL;
 
 	
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_function`,
 `def_option_type`,
@@ -197,7 +197,7 @@ VALUES
 ('options', 'global', 'option', 'dhcp-server-identifier', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
 ('options', 'global', 'option', 'slp-directory-agent', '( address_match_element )', 'no', 'no', '1', 'forward', NULL),
 ('options', 'global', 'option', 'slp-service-scope', '( quoted_string )', 'no', 'no', '1', 'forward', NULL)
-INSERT;
+INSERTSQL;
 
 
 
