@@ -177,6 +177,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			break;
 		case 'edit':
 			if (isset($_POST['item_status'])) {
+				if ((!currentUserCan('do_everything') && userCan($id, 'do_everything')) || $id == getDefaultAdminID()) {
+					exit(_('You do not have permission to modify the status of this user.'));
+				}
 				if (!updateStatus('fm_users', $id, 'user_', sanitize($_POST['item_status']), 'user_id')) {
 					exit(sprintf(_('This user could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {

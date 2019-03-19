@@ -94,6 +94,11 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 		}
 		$edit_form = $fm_users->printUsersForm($form_data, 'add', $form_bits, $_POST['item_sub_type']);
 	} else {
+		$functionCan = rtrim($_POST['item_sub_type'], 's') . 'Can';
+		
+		if ((!currentUserCan('do_everything') && $functionCan($id, 'do_everything'))) {
+			returnUnAuth();
+		}
 		if ($_POST['item_sub_type'] == 'users') {
 			if (currentUserCan('manage_users')) {
 				basicGet('fm_users', $id, 'user_', 'user_id');
