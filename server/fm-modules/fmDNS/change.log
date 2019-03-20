@@ -8,6 +8,8 @@
            could not modify additional zone options.
 * Server - [bug] Fixed table formatting for users with view-only privilege.
 * Server - [bug] Fixed installs and upgrades with PHP 7.3.x. (Issue #436)
+* Server - [bug] Fixed an issue where serial numbers for servers change after
+           editing the server details. (Issue #437)
 
 3.3.1 (2019-03-17)
 ==================
