@@ -27,7 +27,7 @@ function installfmModuleSchema($database, $module, $noisy = 'noisy') {
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
 	/** Create fmModule tables **/
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -46,24 +46,24 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
 ) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 
 	/** Required inserts for module versioning **/
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'version'
 		AND module_name='$module');
-INSERT;
-	$inserts[] = <<<INSERT
+INSERTSQL;
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'client_version', '{$__FM_CONFIG[$module]['client_version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'client_version'
 		AND module_name='$module');
-INSERT;
+INSERTSQL;
 
 
 

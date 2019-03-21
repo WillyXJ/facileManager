@@ -230,7 +230,6 @@ class fm_dns_keys {
 		if ($row->key_status == 'revoked') $classes[] = 'attention';
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$checkbox = '<td></td>';
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" name="' . $row->key_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->key_id, 'key')) {
@@ -243,7 +242,7 @@ class fm_dns_keys {
 				}
 				if ($row->key_signing == 'no' || $row->key_status == 'revoked') {
 					$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-					$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->key_id .'" /></td>';
+					$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->key_id .'" />';
 				}
 			}
 			$edit_status .= '</td>';
@@ -271,7 +270,7 @@ class fm_dns_keys {
 
 		echo <<<HTML
 		<tr id="$row->key_id" name="$row->key_name" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$star</td>
 			<td>$edit_name</td>
 			$rows

@@ -151,26 +151,26 @@ function fmUpgrade_104($database) {
 			$table[] = "ALTER TABLE `$database`. `fm_perms` ADD  `perm_extra` TEXT NULL ";
 		}
 		if ($GLOBALS['running_db_version'] < 15) {
-			$inserts[] = <<<INSERT
+			$inserts[] = <<<INSERTSQL
 		INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 			SELECT 'auth_method', '1' FROM DUAL
 		WHERE NOT EXISTS
 			(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'auth_method');
-INSERT;
+INSERTSQL;
 
-			$inserts[] = <<<INSERT
+			$inserts[] = <<<INSERTSQL
 		INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 			SELECT 'mail_enable', '1' FROM DUAL
 		WHERE NOT EXISTS
 			(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'mail_enable');
-INSERT;
+INSERTSQL;
 
-			$inserts[] = <<<INSERT
+			$inserts[] = <<<INSERTSQL
 		INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 			SELECT 'mail_smtp_host', 'localhost' FROM DUAL
 		WHERE NOT EXISTS
 			(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'mail_smtp_host');
-INSERT;
+INSERTSQL;
 
 			$inserts[] = "
 		INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
@@ -188,12 +188,12 @@ INSERT;
 				$all_prefs = $fmdb->get_results($query);
 				$count = $fmdb->num_rows;
 				for ($i=0; $i<$count; $i++) {
-					$inserts[] = <<<INSERT
+					$inserts[] = <<<INSERTSQL
 						INSERT INTO `fm_options` (`option_name`, `option_value`) 
 							SELECT '{$all_prefs[$i]->pref_name}', '{$all_prefs[$i]->pref_value}' FROM DUAL
 						WHERE NOT EXISTS
 							(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = '{$all_prefs[$i]->pref_name}');
-INSERT;
+INSERTSQL;
 				}
 			}
 			
@@ -203,33 +203,33 @@ INSERT;
 			$all_accounts = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
 			for ($j=0; $j<$count; $j++) {
-				$inserts[] = <<<INSERT
+				$inserts[] = <<<INSERTSQL
 			INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 				SELECT 'mail_smtp_tls', '0' FROM DUAL
 			WHERE NOT EXISTS
 				(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'mail_smtp_tls');
-INSERT;
+INSERTSQL;
 
-				$inserts[] = <<<INSERT
+				$inserts[] = <<<INSERTSQL
 			INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 				SELECT {$all_accounts[$j]->account_id}, 'timezone', '$default_timezone' FROM DUAL
 			WHERE NOT EXISTS
 				(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'timezone');
-INSERT;
+INSERTSQL;
 
-				$inserts[] = <<<INSERT
+				$inserts[] = <<<INSERTSQL
 			INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 				SELECT {$all_accounts[$j]->account_id}, 'date_format', 'D, d M Y' FROM DUAL
 			WHERE NOT EXISTS
 				(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'date_format');
-INSERT;
+INSERTSQL;
 
-				$inserts[] = <<<INSERT
+				$inserts[] = <<<INSERTSQL
 			INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 				SELECT {$all_accounts[$j]->account_id}, 'time_format', 'H:i:s O' FROM DUAL
 			WHERE NOT EXISTS
 				(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'time_format');
-INSERT;
+INSERTSQL;
 
 			}
 			
@@ -314,12 +314,12 @@ function fmUpgrade_105($database) {
 
 		$tmp = sys_get_temp_dir();
 		/** Schema change */
-		$inserts[] = <<<INSERT
+		$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 	SELECT 'fm_temp_directory', '$tmp' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'fm_temp_directory');
-INSERT;
+INSERTSQL;
 
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {
@@ -374,19 +374,19 @@ function fmUpgrade_107($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$inserts[] = <<<INSERT
+		$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'software_update', 1 FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'software_update');
-INSERT;
+INSERTSQL;
 
-		$inserts[] = <<<INSERT
+		$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'software_update_interval', 'week' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'software_update_interval');
-INSERT;
+INSERTSQL;
 
 		if (count($inserts) && $inserts[0] && $success) {
 			foreach ($inserts as $query) {

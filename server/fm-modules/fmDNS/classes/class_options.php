@@ -57,14 +57,16 @@ class fm_module_options {
 			$title_array[] = array('title' => __('Option'), 'rel' => 'cfg_name');
 			$title_array[] = array('title' => __('Value'), 'rel' => 'cfg_data');
 			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+			
+			$perms = ($results[0]->domain_id) ? zoneAccessIsAllowed(array($results[0]->domain_id), 'manage_zones') : currentUserCan('manage_servers', $_SESSION['module']);
+			if ($perms) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 			echo displayTableHeader($table_info, $title_array);
 			
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
-				$this->displayRow($results[$x]);
+				$this->displayRow($results[$x], $perms);
 				$y++;
 			}
 			
@@ -221,7 +223,7 @@ class fm_module_options {
 	}
 
 
-	function displayRow($row) {
+	function displayRow($row, $perms) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		if (!class_exists('fm_dns_acls')) {
@@ -230,7 +232,7 @@ class fm_module_options {
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
 		
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		if ($perms) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -243,7 +245,8 @@ class fm_module_options {
 			$edit_status .= '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" /></td>';
 		} else {
-			$edit_status = $checkbox = null;
+			$edit_status = null;
+			$checkbox = '<td></td>';
 		}
 		
 		$comments = nl2br($row->cfg_comment);

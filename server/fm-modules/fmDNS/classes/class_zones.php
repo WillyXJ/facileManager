@@ -541,6 +541,10 @@ class fm_dns_zones {
 	function delete($domain_id) {
 		global $fmdb, $__FM_CONFIG;
 		
+		if (!zoneAccessIsAllowed(array($domain_id))) {
+			return __('You do not have permission to delete this zone.');
+		}
+		
 		/** Zone groups */
 		if (isset($_POST['item_sub_type']) && $_POST['item_sub_type'] == 'groups') {
 			$retval = $this->setZoneGroupMembers($domain_id, $this->getZoneGroupMembers($domain_id), 'remove');
@@ -749,7 +753,7 @@ class fm_dns_zones {
 				$record_count = formatNumber($fmdb->last_result[0]->record_count);
 			}
 
-			if (in_array($row->domain_type, array('master', 'slave')) && currentUserCan('manage_servers', $_SESSION['module'])) {
+			if (in_array($row->domain_type, array('master', 'slave')) && (currentUserCan(array('manage_zones', 'view_all'), $_SESSION['module']) || $zone_access_allowed)) {
 				$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s"></i></a>', $row->domain_id, __('Configure Additional Options'));
 			}
 
@@ -1634,7 +1638,7 @@ HTML;
 		}
 		
 		/** Ensure user is allowed to reload zone */
-		$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload');
+		$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload_zones');
 		
 		if (count($response) == 1 && !$zone_access_allowed) {
 			$response[] = ' --> ' . __('Failed: You do not have permission to reload this zone.');
@@ -1683,6 +1687,11 @@ HTML;
 		
 		/** Zones */		
 		if (!$post['domain_id']) unset($post['domain_id']);
+		else {
+			if (!zoneAccessIsAllowed(array($post['domain_id']))) {
+				return __('You do not have permission to modify this zone.');
+			}
+		}
 		
 		/** Empty domain names are not allowed */
 		if (empty($post['domain_name'])) return __('No zone name defined.');
@@ -1926,8 +1935,11 @@ HTML;
 		$domain_view = isset($_GET['domain_view']) ? $_GET['domain_view'] : 0;
 		$domain_group = isset($_GET['domain_group']) ? $_GET['domain_group'] : 0;
 		
+		/** Get zones based on access */
+		$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
+
 		$available_views = $this->availableViews();
-		if (currentUserCan('do_everything', $_SESSION['module'])) $available_groups = $this->availableGroups();
+		if (currentUserCan('do_everything', $_SESSION['module']) || (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0] == '0')) $available_groups = $this->availableGroups();
 		$filters = null;
 		
 		if (count($available_views) > 1) {

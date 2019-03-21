@@ -26,7 +26,7 @@ function installfmSQLPassSchema($database, $module, $noisy = 'noisy') {
 	/** Include module variables */
 	@include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -35,9 +35,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}
   `group_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -50,16 +50,16 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}
   `server_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`server_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value, module_name) 
 	SELECT 'version', '{$__FM_CONFIG[$module]['version']}', '$module' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'version'
 		AND module_name='$module');
-INSERT;
+INSERTSQL;
 
 
 

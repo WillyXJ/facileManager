@@ -289,7 +289,7 @@ function upgradefmDNS_106($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.0-b14', '<') ? upgradefmDNS_105($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}options` (
   `option_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
@@ -297,7 +297,7 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}options` (
   `option_value` varchar(255) NOT NULL,
   PRIMARY KEY (`option_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
 	$inserts[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
@@ -438,7 +438,7 @@ function upgradefmDNS_110($__FM_CONFIG, $running_version) {
 	$fmdb->query("SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions`");
 	$table[] = ($fmdb->num_rows) ? null : "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD  `def_dropdown` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no'";
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
 `def_option` ,
@@ -542,7 +542,7 @@ VALUES
 ('options', 'dnssec-validation', '( yes | no | auto )', 'no', 'yes', 'yes'),
 ('options', 'bindkeys-file', '( quoted_string )', 'no', 'yes', 'no')
 ;
-INSERT;
+INSERTSQL;
 
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -626,7 +626,7 @@ ADD  `record_algorithm` TINYINT NULL AFTER  `record_key_tag`,
 ADD  `record_flags` ENUM(  '0',  '256',  '257' ) NULL AFTER  `record_algorithm`,
 ADD  `record_text` VARCHAR( 255 ) NULL AFTER  `record_flags` ";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_value`  `record_value` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ";
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` (
   `account_id` int(11) NOT NULL,
   `domain_id` int(11) NOT NULL,
@@ -634,7 +634,7 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped`
   `record_status` enum('active','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`record_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 	$inserts = $updates = null;
 	
@@ -854,7 +854,7 @@ function upgradefmDNS_1301($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.2.4', '<') ? upgradefmDNS_124($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
   `control_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -867,7 +867,7 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` (
   `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`control_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE  `record_type`  `record_type` ENUM( 'A',  'AAAA',  'CERT',  'CNAME',  'DNAME',  'DNSKEY', 'KEY',  'KX',  'MX',  'NS',  'PTR',  'RP',  'SRV',  'TXT', 'HINFO', 'SSHFP' ) NOT NULL DEFAULT  'A'";
 
@@ -887,7 +887,7 @@ TABLE;
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` d JOIN `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` s ON d.`domain_id` = s.`domain_id` SET d.`soa_serial_no`=s.`soa_serial_no`";
 	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}soa` DROP `domain_id`, DROP `soa_serial_no`";
 	
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
 `def_option` ,
@@ -1054,7 +1054,7 @@ VALUES
 ('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', 'yes'),
 ('options', 'zone-statistics', '( yes | no )', 'no', 'OVZ', 'yes')
 ;
-INSERT;
+INSERTSQL;
 
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -1238,7 +1238,7 @@ function upgradefmDNS_2002($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0-alpha1', '<') ? upgradefmDNS_2001($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
@@ -1248,14 +1248,14 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` (
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_option_type` ENUM('global','ratelimit') NOT NULL DEFAULT 'global' AFTER `def_function`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_max_parameters` INT(3) NOT NULL DEFAULT '1' ";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` ADD `def_zone_support` VARCHAR(10) NULL DEFAULT NULL AFTER `def_clause_support` ";
 	
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function`,
 `def_option_type`,
@@ -1283,7 +1283,7 @@ VALUES
 ('options', 'ratelimit', 'max-table-size', '( integer )', 'no', 'OV', 'no', '1'),
 ('options', 'ratelimit', 'min-table-size', '( integer )', 'no', 'OV', 'no', '1')
 ;
-INSERT;
+INSERTSQL;
 
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `fm_dns_functions`.`def_clause_support` LIKE '%Z%'";
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'F' WHERE `fm_dns_functions`.`def_option` IN ('forward', 'forwarders')";
@@ -1440,7 +1440,7 @@ function upgradefmDNS_2101($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records_skipped` DROP INDEX record_id, ADD INDEX `idx_record_id` (`record_id`)";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` DROP INDEX server_serial_no, ADD UNIQUE `idx_server_serial_no` (`server_serial_no`)";
 	
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
 `def_option_type`,
@@ -1455,7 +1455,7 @@ VALUES
 ('options', 'global', 'include', '( quoted_string )', 'no', 'OVZ', 'no', '-1'),
 ('options', 'response-policy', '( string )', 'no', 'O', NULL, 'no', '1')
 ;
-INSERT;
+INSERTSQL;
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {
@@ -1772,7 +1772,7 @@ function upgradefmDNS_3002($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_function` ,
 `def_option_type`,
@@ -1846,7 +1846,7 @@ VALUES
 ('options', 'global', 'lwres-clients', '( integer )', 'no', 'R', NULL, 'no', 1, '9.11.0'),
 ('options', 'rrset', 'rrset-order', '( rrset_order_spec )', 'no', 'OV', NULL, 'no', '-1', NULL)
 ;
-INSERT;
+INSERTSQL;
 	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | auto )' WHERE `def_option` = 'dnssec-validation'";
 	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_minimum_version` = '9.9.4', `def_clause_support` = 'OVZ' WHERE `def_option_type` = 'ratelimit'";
 	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( hmac-sha1 | hmac-sha224 | hmac-sha256 | hmac-sha384 | hmac-sha512 | hmac-md5 )', `def_dropdown`='yes' WHERE `def_option` = 'session-keyalg'";
@@ -2004,7 +2004,7 @@ function upgradefmDNS_310($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD `view_order_id` INT(11) NOT NULL AFTER `server_serial_no`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_groups` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `domain_name`";
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}domain_groups` (
   `group_id` int(11) NOT NULL,
   `account_id` int(11) NOT NULL,
@@ -2013,7 +2013,7 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}domain_groups` (
   `group_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 	$inserts[] = "UPDATE `fm_options` SET `option_name` = 'enable_config_checks' WHERE `option_name` = 'enable_named_checks'";
 
@@ -2067,7 +2067,7 @@ function upgradefmDNS_320($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '3.1', '<') ? upgradefmDNS_310($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` (
   `master_id` INT(11) NOT NULL AUTO_INCREMENT ,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -2082,7 +2082,7 @@ CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` (
   `master_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active',
   PRIMARY KEY (`master_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data=REPLACE(cfg_data, '; ', ',') WHERE (cfg_name='also-notify' OR cfg_name='masters') AND cfg_data LIKE '%; %'";
 	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET cfg_data=REPLACE(cfg_data, ';', ',') WHERE (cfg_name='also-notify' OR cfg_name='masters') AND cfg_data LIKE '%;%'";

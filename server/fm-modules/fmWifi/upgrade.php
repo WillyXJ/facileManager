@@ -46,7 +46,7 @@ function upgradefmWifi_02($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` ADD `def_int_range` VARCHAR(5) NULL DEFAULT NULL AFTER `def_dropdown`";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` SET `def_option_type`='wlan'";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmWifi']['prefix']}config` SET `config_type`='wlan'";
-	$table[] = <<<INSERT
+	$table[] = <<<INSERTSQL
 INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` (
 `def_option`,
 `def_type`,
@@ -167,18 +167,18 @@ VALUES
 ('radius_server_acct_port', '( port )', 'no', 'no', NULL, NULL, 'global'),
 ('radius_server_ipv6', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global')
 
-INSERT;
+INSERTSQL;
 	
 	/** Add new options to all WLANs */
 	$fmdb->query("SELECT * FROM fm_{$__FM_CONFIG['fmWifi']['prefix']}config WHERE config_is_parent='yes'");
 	if ($fmdb->num_rows) {
 		foreach ($fmdb->last_result as $wlan) {
 			foreach (array('max_num_sta', 'no_probe_resp_if_max_sta', 'preamble') as $option) {
-				$table[] = <<<INSERT
+				$table[] = <<<INSERTSQL
 INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}config` VALUES (
 NULL, {$wlan->account_id}, {$wlan->server_serial_no}, 'wlan', 'no', {$wlan->config_id}, '$option', '', '{$wlan->config_aps}', NULL, '{$wlan->config_status}'
 )
-INSERT;
+INSERTSQL;
 			}
 		}
 	}

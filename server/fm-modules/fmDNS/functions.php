@@ -856,9 +856,9 @@ function getZoneReloads($return_what) {
  * @return boolean
  */
 function zoneAccessIsAllowed($domain_ids, $included_action = null) {
-	if ($included_action == 'reload') {
+	if ($included_action) {
 		return currentUserCan('access_specific_zones', $_SESSION['module'], array_merge(array(0), $domain_ids)) & 
-			currentUserCan('reload_zones', $_SESSION['module']);
+			currentUserCan($included_action, $_SESSION['module']);
 	} else {
 		return currentUserCan('access_specific_zones', $_SESSION['module'], array_merge(array(0), $domain_ids));
 	}

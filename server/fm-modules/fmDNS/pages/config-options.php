@@ -23,7 +23,10 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
+if (!array_key_exists('domain_id', $_GET)) {
+	$perms = currentUserCan('manage_servers', $_SESSION['module']);
+	if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
+}
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
@@ -54,6 +57,10 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 	$domain_id = (isset($_GET['domain_id'])) ? sanitize($_GET['domain_id']) : null;
 	if (!$domain_id) header('Location: ' . $GLOBALS['basename']);
 	
+	/** Does the user have access? */
+	$perms = zoneAccessIsAllowed(array($domain_id), 'manage_zones');
+	if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();
+
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
 	if (!$fmdb->num_rows) header('Location: zones.php');
 	$domain_info = $fmdb->last_result;
@@ -83,7 +90,7 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 	if ($option_type == 'Global') $display_option_type_sql .= "' AND domain_id='0' AND server_id='0";
 }
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
+if ($perms) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$uri_params = generateURIParams(array('type', 'view_id', 'domain_id', 'server_id', 'server_serial_no'), 'include');
 	
@@ -117,7 +124,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-if (array_key_exists('server_id', $_GET)) {
+if (array_key_exists('server_id', $_GET) || array_key_exists('domain_id', $_GET)) {
 	array_pop($__FM_CONFIG['options']['avail_types']);
 	array_pop($__FM_CONFIG['options']['avail_types']);
 	$avail_views = null;
@@ -133,7 +140,7 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
+echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

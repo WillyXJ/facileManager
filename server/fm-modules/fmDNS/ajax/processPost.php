@@ -59,7 +59,16 @@ $checks_array = array('servers' => 'manage_servers',
 $allowed_capabilities = array_unique($checks_array);
 
 if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
-	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
+	$perms = checkUserPostPerms($checks_array, $_POST['item_type']);
+	
+	if ($_POST['item_type'] == 'options' && !$perms) {
+		if (array_key_exists('item_sub_type', $_POST) && $_POST['item_sub_type'] == 'domain_id') {
+			$perms = zoneAccessIsAllowed(array($_POST['item_id']), 'manage_zones');
+		} elseif ($_POST['item_type'] == 'options') {
+			$perms = zoneAccessIsAllowed(array(getNameFromID(sanitize($_POST['item_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'domain_id')), 'manage_zones');
+		}
+	}
+	if (!$perms) {
 		returnUnAuth();
 	}
 	
