@@ -191,9 +191,6 @@ INSERTSQL;
 		}
 	}
 	
-	/** Handle updating table with client version and module version **/
-	if (!setOption('fmWifi_client_version', $__FM_CONFIG['fmWifi']['client_version'], 'auto', false)) return false;
-	
 	setOption('version', '0.2', 'auto', false, 0, 'fmWifi');
 	
 	return true;
@@ -208,7 +205,7 @@ function upgradefmWifi_021($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	/** Insert upgrade steps here **/
-	$table[] = <<<INSERT
+	$table[] = <<<INSERTSQL
 INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` (
 `def_option`,
 `def_type`,
@@ -221,7 +218,7 @@ INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` (
 VALUES 
 ('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global')
 
-INSERT;
+INSERTSQL;
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -230,9 +227,6 @@ INSERT;
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
-	
-	/** Handle updating table with client version and module version **/
-	if (!setOption('fmWifi_client_version', $__FM_CONFIG['fmWifi']['client_version'], 'auto', false)) return false;
 	
 	setOption('version', '0.2.1', 'auto', false, 0, 'fmWifi');
 	
