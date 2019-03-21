@@ -45,18 +45,20 @@ class fm_users {
 							'id' => 'table_edits',
 							'name' => 'users'
 						);
+			$title_array[] = array('class' => 'header-tiny header-nosort');
 
 			if ($type == 'users') {
-				$title_array[] = array('class' => 'header-tiny header-nosort');
 				$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
 				array_push($title_array,
 						array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
 						array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
 						array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
-						array('title' => _('Super Admin'), 'class' => 'header-nosort'));
+						array('title' => _('Comment'), 'class' => 'header-nosort'));
 			} else {
-				$title_array[] = array('title' => _('Group Name'), 'rel' => 'group_name');
-				$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+				array_push($title_array,
+					array('title' => _('Group Name'), 'rel' => 'group_name'),
+					array('title' => _('Group Members'), 'class' => 'header-nosort'),
+					array('title' => _('Comment'), 'class' => 'header-nosort'));
 			}
 			$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
@@ -353,7 +355,7 @@ class fm_users {
 		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $post['group_users']) . "')";
 		foreach ($queries as $query) {
 			$fmdb->query($query);
-			if (!$fmdb->last_result || $fmdb->sql_errors) {
+			if ($fmdb->sql_errors) {
 				return formatError(_('Could not associate the users with the group.'), 'sql');
 			}
 		}
@@ -373,6 +375,11 @@ class fm_users {
 	function delete($id, $type = 'user') {
 		global $fm_name;
 		
+		$functionCan = $type . 'Can';
+		
+		if ((!currentUserCan('do_everything') && $functionCan($id, 'do_everything')) || ($type == 'user' && $id == getDefaultAdminID())) {
+			return sprintf(_('You do not have permission to delete this %s.'), $type);
+		}
 		if ($type == 'user') {
 			/** Ensure user is not current LDAP template user */
 			if (getOption('auth_method') == 2) {
@@ -382,7 +389,7 @@ class fm_users {
 			$field = 'user_login';
 		} elseif ($type == 'group') {
 			$field = 'group_name';
-			if (basicUpdate('fm_users', $id, 'user_group', null, 'user_group') === false) {
+			if (basicUpdate('fm_users', $id, 'user_group', 0, 'user_group') === false) {
 				return formatError(_('This group could not be removed from the associated users.'), 'sql');
 			}
 		}
@@ -410,17 +417,21 @@ class fm_users {
 
 		if ($type == 'users') {
 			$id = $row->user_id;
+			$default_id = getDefaultAdminID();
 			if (currentUserCan('manage_users') && $_SESSION['user']['id'] != $row->user_id) {
 				$edit_status = null;
-				if ($row->user_template_only == 'yes') {
+				if ($row->user_template_only == 'yes' && (currentUserCan('do_everything') || (!userCan($row->user_id, 'do_everything')))) {
 					$edit_status .= '<a class="copy_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['copy'] . '</a>';
+					$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				}
-				$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				if ($row->user_template_only == 'no') {
 					if ($row->user_id != $_SESSION['user']['id']) {
-						$edit_status .= '<a class="status_form_link" href="#" rel="';
-						$edit_status .= ($row->user_status == 'active') ? 'disabled">' . $__FM_CONFIG['icons']['disable'] : 'active">' . $__FM_CONFIG['icons']['enable'];
-						$edit_status .= '</a>';
+						if ((currentUserCan('do_everything') || !userCan($row->user_id, 'do_everything')) && $row->user_id != $default_id) {
+							$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+							$edit_status .= '<a class="status_form_link" href="#" rel="';
+							$edit_status .= ($row->user_status == 'active') ? 'disabled">' . $__FM_CONFIG['icons']['disable'] : 'active">' . $__FM_CONFIG['icons']['enable'];
+							$edit_status .= '</a>';
+						}
 
 						/** Cannot change password without mail_enable defined */
 						if (getOption('mail_enable') && $row->user_auth_type != 2 && $row->user_template_only == 'no') {
@@ -430,7 +441,7 @@ class fm_users {
 						$edit_status .= sprintf('<center>%s</center>', _('Enabled'));
 					}
 				}
-				if ($row->user_id != 1) {
+				if ((currentUserCan('do_everything') || !userCan($row->user_id, 'do_everything')) && $row->user_id != $default_id) {
 					$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				}
 			} else {
@@ -444,7 +455,6 @@ class fm_users {
 			if ($row->user_ipaddr) {
 				$user_ipaddr = (verifyIPAddress($row->user_ipaddr) !== false) ? @gethostbyaddr($row->user_ipaddr) : $row->user_ipaddr;
 			} else $user_ipaddr = _('None');
-			$super_admin_status = (userCan($row->user_id, 'do_everything')) ? 'yes' : 'no';
 
 			if ($row->user_auth_type == 2) {
 				$user_auth_type = 'LDAP';
@@ -454,21 +464,31 @@ class fm_users {
 				$user_auth_type = _('None');
 			}
 			$column = "<td>$star $template_user</td>
-			<td title=\"{$row->user_comment}\">{$row->user_login}</td>
+			<td>{$row->user_login}</td>
 			<td>$last_login</td>
 			<td>$user_ipaddr</td>
 			<td>$user_auth_type</td>
-			<td>$super_admin_status</td>";
+			<td>{$row->user_comment}</td>";
 			$name = $row->user_login;
 		} else {
 			$id = $row->group_id;
-			if (currentUserCan('manage_users')) {
+			if (currentUserCan('do_everything') || (!groupCan($row->group_id, 'do_everything') && currentUserCan('manage_users'))) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			} else {
-				$edit_status = null;
+				$edit_status = $id = null;
 			}
-			$column = "<td>{$row->group_name}</td>
+			$star = (groupCan($row->group_id, 'do_everything')) ? $__FM_CONFIG['icons']['star'] : null;
+			
+			$group_members_arr = $this->getGroupUsers($row->group_id, 'all');
+			foreach ($group_members_arr as $group => $member) {
+				$group_members[] = $member[0];
+			}
+			$group_members = join(', ', (array) $group_members);
+			
+			$column = "<td>$star</td>
+			<td>{$row->group_name}</td>
+			<td>$group_members</td>
 			<td>" . nl2br($row->group_comment) . "</td>";
 			$name = $row->group_name;
 		}
@@ -500,6 +520,8 @@ HTML;
 		$hidden = $user_perm_form = $return_form_rows = null;
 		$user_force_pwd_change = $user_template_only = null;
 		$group_name = $group_comment = $user_group = null;
+		
+		$default_id = getDefaultAdminID();
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -563,7 +585,7 @@ HTML;
 			}
 		}
 		
-		if ((in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) && !userCan($user_id, 'do_everything') || $user_id == $_SESSION['user']['id']) {
+		if ((in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) || $user_id == $_SESSION['user']['id']) {
 			if ($action == 'add') $button_disabled = 'disabled';
 			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
@@ -585,7 +607,7 @@ HTML;
 				</tr>';
 		}
 		
-		if (in_array('user_groups', $form_bits) && !userCan($user_id, 'do_everything')) {
+		if (in_array('user_groups', $form_bits) && $user_id != $default_id) {
 			$user_group_options = buildSelect('user_group', 'user_group', $this->getGroups(), $user_group);
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row">' . _('Associated Group') . '</th>
@@ -603,7 +625,7 @@ HTML;
 				</tr>';
 		}
 		
-		if (in_array('user_options', $form_bits)) {
+		if (in_array('user_options', $form_bits) && $user_id != $default_id) {
 			$force_pwd_check = ($user_force_pwd_change == 'yes') ? 'checked disabled' : null;
 			$user_template_only_check = ($user_template_only == 'yes') ? 'checked' : null;
 			$return_form_rows .= '<tr>
@@ -651,8 +673,8 @@ HTML;
 		}
 		
 		do if (in_array('user_perms', $form_bits)) {
-			/** Cannot edit perms of super-admin if logged in user is not a super-admin */
-			if ((userCan($user_id, 'do_everything')) && !currentUserCan('do_everything')) break;
+			/** Cannot edit perms if a member of a group or super-admin if logged in user is not a super-admin */
+			if ($user_id == $default_id || (userCan($user_id, 'do_everything') && !currentUserCan('do_everything'))) break;
 			
 			if ($type == 'users') {
 				$id = $user_id;
@@ -668,12 +690,15 @@ HTML;
 			$i = 1;
 			$fm_user_caps = getAvailableUserCapabilities();
 			foreach ($fm_user_caps[$fm_name] as $key => $title) {
+				if ($key == 'do_everything') {
+					if (!currentUserCan('do_everything')) continue;
+					$title = "<b>$title</b>";
+				}
 				if ($key != 'do_everything' && $user_is_super_admin) {
 					$checked = null;
 				} else {
 					$checked = ($perm_function($id, $key)) ? 'checked' : null;
 				}
-				if ($key == 'do_everything') $title = "<b>$title</b>";
 				$fm_perm_boxes .= ' <input name="user_caps[' . $fm_name . '][' . $key . ']" id="fm_perm_' . $key . '" type="checkbox" value="1" ' . $checked . '/> <label for="fm_perm_' . $key . '">' . $title . '</label>' . "\n";
 				/** Display checkboxes three per row */
 				if ($i == 3) {
@@ -786,20 +811,20 @@ PERM;
 	 * @param integer $group_id Group ID to return user list from
 	 * @return array
 	 */
-	function getGroupUsers($group_id = null, $ids = null) {
+	function getGroupUsers($group_id = null, $include = 'id-only') {
 		global $fmdb, $__FM_CONFIG;
 		
 		$user_list = null;
 		
 		if ($group_id == null) {
-			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND (user_caps IS NULL OR user_caps NOT LIKE '%do_everything%')");
+			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND user_id!={$_SESSION['user']['id']} AND (user_caps IS NULL OR user_caps NOT LIKE '%do_everything%')");
 		} else {
-			$query = "SELECT user_id FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} AND user_status!='deleted' AND user_template_only='no' AND user_group=$group_id";
+			$query = "SELECT user_id, user_login FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} AND user_status!='deleted' AND user_template_only='no' AND user_group=$group_id";
 			$fmdb->get_results($query);
 		}
 		
 		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			if (isset($fmdb->last_result[$i]->user_login)) {
+			if ($include == 'all' || ($include == 'id-only' && $group_id == null)) {
 				$user_list[$i][] = $fmdb->last_result[$i]->user_login;
 				$user_list[$i][] = $fmdb->last_result[$i]->user_id;
 			} else {

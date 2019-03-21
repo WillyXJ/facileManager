@@ -30,7 +30,7 @@ if (is_array($_POST) && count($_POST)) {
 	$domain_id = intval($_POST['domain_id']);
 	
 	/** Ensure user is allowed to reload zone */
-	$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload');
+	$zone_access_allowed = zoneAccessIsAllowed(array($domain_id), 'reload_zones');
 
 	if ($domain_id && $zone_access_allowed) {
 		echo buildPopup('header', __('Zone Reload Results'));

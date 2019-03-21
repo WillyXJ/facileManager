@@ -199,16 +199,16 @@ function installSchema($database) {
 	
 	$default_timezone = date_default_timezone_get() ? date_default_timezone_get() : 'America/Denver';
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_accounts` (
   `account_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `account_key` varchar(255) NOT NULL,
   `account_name` VARCHAR(255) NOT NULL ,
   `account_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
 ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -218,9 +218,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_groups` (
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_logs` (
   `log_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_login` varchar(255) NOT NULL DEFAULT '0',
@@ -230,9 +230,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_logs` (
   `log_data` text NOT NULL,
   PRIMARY KEY (`log_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_options` (
   `option_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '0',
@@ -241,18 +241,18 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_options` (
   `option_value` text NOT NULL,
   PRIMARY KEY (`option_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_pwd_resets` (
   `pwd_id` varchar(255) NOT NULL,
   `pwd_login` int(11) NOT NULL,
   `pwd_timestamp` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`pwd_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
-	$table[] = <<<TABLE
+	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_users` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
@@ -271,41 +271,41 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_users` (
   `user_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`user_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-TABLE;
+TABLESQL;
 
 
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `$database`.`fm_accounts` (`account_id` ,`account_key`, `account_name` ,`account_status`) VALUES ('1' , 'default', 'Default Account',  'active');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (option_name, option_value) 
 	SELECT 'fm_db_version', '$fm_db_version' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'fm_db_version');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 	SELECT 'auth_method', '1' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'auth_method');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 	SELECT 'mail_enable', '1' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'mail_enable');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 	SELECT 'mail_smtp_host', 'localhost' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'mail_smtp_host');
-INSERT;
+INSERTSQL;
 
 	$inserts[] = "
 INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
@@ -314,69 +314,69 @@ WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'mail_from');
 ";
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`option_name`, `option_value`) 
 	SELECT 'mail_smtp_tls', '0' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'mail_smtp_tls');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 1, 'timezone', '$default_timezone' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'timezone');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 1, 'date_format', 'D, d M Y' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'date_format');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 1, 'time_format', 'H:i:s O' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'time_format');
-INSERT;
+INSERTSQL;
 
 	$tmp = sys_get_temp_dir();
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'fm_temp_directory', '$tmp' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'fm_temp_directory');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'software_update', 1 FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'software_update');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'software_update_interval', 'week' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'software_update_interval');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'client_auto_register', 1 FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'client_auto_register');
-INSERT;
+INSERTSQL;
 
-	$inserts[] = <<<INSERT
+	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_options` (`account_id` ,`option_name`, `option_value`) 
 	SELECT 0, 'ssh_user', 'fm_user' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT option_name FROM `$database`.`fm_options` WHERE option_name = 'ssh_user');
-INSERT;
+INSERTSQL;
 
 
 	/** Create table schema */

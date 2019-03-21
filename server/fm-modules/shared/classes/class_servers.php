@@ -114,7 +114,7 @@ class fm_shared_module_servers {
 					if (is_array($server_remote)) {
 						if (array_key_exists('output', $server_remote) && !count($server_remote['output'])) {
 							unset($server_remote);
-							continue;
+							break;
 						}
 					} else {
 						return $server_remote;

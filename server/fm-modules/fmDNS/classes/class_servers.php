@@ -104,6 +104,11 @@ class fm_module_servers extends fm_shared_module_servers {
 	function addServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
+		
+		/** Get a valid and unique serial number */
+		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? $post['server_serial_no'] : generateSerialNo($module);
+
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
@@ -1116,11 +1121,6 @@ FORM;
 			}
 		}
 		
-		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
-
-		/** Get a valid and unique serial number */
-		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? $post['server_serial_no'] : generateSerialNo($module);
-
 		/** Process server_key */
 		if (isset($post['keys'])) {
 			$post['keys'] = join(',', $post['keys']);

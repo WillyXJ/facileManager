@@ -3945,7 +3945,7 @@ function getBrandLogo($size = 'sm_brand_img') {
 
 
 /**
- * Returns the branding logo
+ * Automatically run remote commands
  *
  * @since 3.3
  * @package facileManager
@@ -4003,15 +4003,32 @@ function autoRunRemoteCommand($server_info, $command_args, $output_type = 'popup
 			return (strpos($server_remote, 'popup') === false || $output_type != 'popup') ? $server_remote : buildPopup('header', _('Error')) . '<p>' . $server_remote . '</p>' . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 		}
 	} else {
-		/** Return if the leases did not get dumped from the server */
+		/** Return if the items did not get dumped from the server */
 		if (!isset($server_remote['output'])) {
-			$return = sprintf('<p>%s</p>', __('The leases from the DHCP server could not be retrieved or managed. Possible causes include:'));
+			$return = sprintf('<p>%s</p>', __('The data from the server could not be retrieved or managed. Possible causes include:'));
 			$return .= sprintf('<ul><li>%s</li><li>%s</li></ul>',
 					__('The update ports on the server are not accessible'),
 					__('This server is updated via cron (only SSH and http/https are supported)'));
 			return $return;
 		}
 	}
+}
+
+
+/**
+ * Returns the ID of the default super admin
+ *
+ * @since 3.3.1
+ * @package facileManager
+ *
+ * @return integer
+ */
+function getDefaultAdminID() {
+	global $fmdb;
+	
+	$result = $fmdb->query("SELECT user_id FROM `fm_users` WHERE `user_auth_type`=1 ORDER BY user_id ASC LIMIT 1");
+
+	return $fmdb->last_result[0]->user_id;
 }
 
 
