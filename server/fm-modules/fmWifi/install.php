@@ -176,6 +176,7 @@ VALUES
 ('ieee80211n', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('ieee80211ac', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('ieee80211d', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
+('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('wmm_enabled', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('auth_algs', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('ignore_broadcast_ssid', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),

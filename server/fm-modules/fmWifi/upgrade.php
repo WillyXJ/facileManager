@@ -199,17 +199,29 @@ INSERT;
 	return true;
 }
 
-/** 1.1.1 */
-function upgradefmWifi_111($__FM_CONFIG, $running_version) {
+/** 0.2 */
+function upgradefmWifi_03($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
 	/** Check if previous upgrades have run (to support n+1) **/
-	$success = version_compare($running_version, '1.0.1', '<') ? upgradefmWifi_101($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.2', '<') ? upgradefmWifi_02($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
 	/** Insert upgrade steps here **/
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmWifi']['prefix']}table` ...";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmWifi']['prefix']}table` ...";
+	$table[] = <<<INSERT
+INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` (
+`def_option`,
+`def_type`,
+`def_multiple_values`,
+`def_dropdown`,
+`def_int_range`,
+`def_minimum_version`,
+`def_option_type`
+)
+VALUES 
+('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan')
+
+INSERT;
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -218,11 +230,11 @@ function upgradefmWifi_111($__FM_CONFIG, $running_version) {
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
-
+	
 	/** Handle updating table with client version and module version **/
 	if (!setOption('fmWifi_client_version', $__FM_CONFIG['fmWifi']['client_version'], 'auto', false)) return false;
 	
-	setOption('version', '1.1.1', 'auto', false, 0, $module_name);
+	setOption('version', '0.3', 'auto', false, 0, 'fmWifi');
 	
 	return true;
 }
