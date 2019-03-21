@@ -350,6 +350,13 @@ function buildModuleHelpFile() {
 			<p><i>The 'Manage WLANs' or 'Super Admin' permission is required to add, edit, and delete WLANs.</i></p>
 			<br />
 			
+			<p><b>Options</b><br />
+			Options can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. Currently, the options 
+			configuration is rudimentary and can be defined at Config &rarr; <a href="__menu{Options}">Options</a>.</p>
+			<p>Server-level options always supercede global options.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage WLAN options.</i></p>
+			<br />
+			
 			<p><b>Users</b><br />
 			If you want to use individual user accounts, they need to be defined at WLAN &rarr; <a href="__menu{Users}">Users</a>. Users allow 
 			unique passphrases for each connecting MAC address (client) to the WLAN. These will override the WLAN WPA2 passphrase which may or may 
