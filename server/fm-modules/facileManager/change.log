@@ -1,4 +1,4 @@
-3.4.1 (2019-03-??)
+3.4.1 (2019-03-20)
 ==================
 * Server - [security] Fixed user management privileges so super-admins cannot
            be added, modified, or deleted by less privileged users. (Issue #436)

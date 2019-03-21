@@ -1,4 +1,4 @@
-3.3.2 (2019-03-??)
+3.3.2 (2019-03-20)
 ==================
 * Server - [bug] Fixed server menu badge counts with respect to remote
            servers. (Issue #218)

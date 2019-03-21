@@ -1,6 +1,7 @@
-0.2.1 (2019-03-??)
+0.2.1 (2019-03-20)
 ==================
 * Server - [bug] Fixed installs and upgrades with PHP 7.3.x. (Issue #436)
+* Server - [bug] Added missing help text for configuration options.
 
 0.2 (2019-03-16)
 ================
