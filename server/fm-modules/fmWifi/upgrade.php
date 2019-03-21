@@ -30,7 +30,7 @@ function upgradefmWifiSchema($module_name) {
 	$running_version = getOption('version', 0, 'fmWifi');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.2', '<') ? upgradefmWifi_02($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.2.1', '<') ? upgradefmWifi_021($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmWifi']['client_version'], 'auto', false, 0, 'fmWifi');
@@ -200,7 +200,7 @@ INSERTSQL;
 }
 
 /** 0.2 */
-function upgradefmWifi_03($__FM_CONFIG, $running_version) {
+function upgradefmWifi_021($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
 	/** Check if previous upgrades have run (to support n+1) **/
@@ -234,7 +234,7 @@ INSERT;
 	/** Handle updating table with client version and module version **/
 	if (!setOption('fmWifi_client_version', $__FM_CONFIG['fmWifi']['client_version'], 'auto', false)) return false;
 	
-	setOption('version', '0.3', 'auto', false, 0, 'fmWifi');
+	setOption('version', '0.2.1', 'auto', false, 0, 'fmWifi');
 	
 	return true;
 }
