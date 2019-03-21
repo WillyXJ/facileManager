@@ -219,7 +219,7 @@ INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` (
 `def_option_type`
 )
 VALUES 
-('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan')
+('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global')
 
 INSERT;
 	

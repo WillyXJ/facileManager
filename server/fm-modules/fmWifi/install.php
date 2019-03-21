@@ -176,7 +176,6 @@ VALUES
 ('ieee80211n', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('ieee80211ac', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('ieee80211d', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
-('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('wmm_enabled', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('auth_algs', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
 ('ignore_broadcast_ssid', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'wlan'),
@@ -292,7 +291,8 @@ VALUES
 ('radius_server_clients', '( string )', 'no', 'no', NULL, NULL, 'global'),
 ('radius_server_auth_port', '( port )', 'no', 'no', NULL, NULL, 'global'),
 ('radius_server_acct_port', '( port )', 'no', 'no', NULL, NULL, 'global'),
-('radius_server_ipv6', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global')
+('radius_server_ipv6', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global'),
+('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global')
 INSERTSQL;
 
 	$option_name = 'use_ebtables';
