@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '3.3', '<') ? upgradefmDNS_330($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '3.3.3', '<') ? upgradefmDNS_333($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2159,6 +2159,28 @@ function upgradefmDNS_330($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '3.3', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
+/** 3.3.3 */
+function upgradefmDNS_333($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '3.3', '<') ? upgradefmDNS_330($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` DROP `server_key`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `server_id` INT(11) NOT NULL DEFAULT '0' AFTER `cfg_type`";
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '3.3.3', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }
