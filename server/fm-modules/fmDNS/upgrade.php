@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '3.3.3', '<') ? upgradefmDNS_333($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '3.3.4', '<') ? upgradefmDNS_334($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2181,6 +2181,48 @@ function upgradefmDNS_333($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '3.3.3', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
+/** 3.3.4 */
+function upgradefmDNS_334($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '3.3.3', '<') ? upgradefmDNS_333($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'M' WHERE `def_option` IN ('allow-update', 'check-dup-records', 'check-integrity', 'check-mx', 'check-mx-cname', 'check-sibling', 'check-srv-cname', 'check-wildcard', 'dnssec-secure-to-insecure', 'max-zone-ttl')";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'S' WHERE `def_option` IN ('allow-update-forwarding', 'request-expire')";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `def_option` IN ('also-notify', 'alt-transfer-source', 'alt-transfer-source-v6', 'masterfile-style', 'max-transfer-idle-out', 'max-transfer-time-out', 'notify-source', 'notify-source-v6')";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MSF' WHERE `def_option` IN ('forwarders', 'forward')";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'F' WHERE `def_option` = 'delegation-only'";
+
+	$table[] = <<<INSERTSQL
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_zone_support`,
+`def_dropdown`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'dlz', '( quoted_string )', 'no', 'Z', 'MS', 'no', NULL),
+('options', 'max-records', '( integer )', 'no', 'Z', 'MS', 'no', NULL)
+;
+INSERTSQL;
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '3.3.4', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }
