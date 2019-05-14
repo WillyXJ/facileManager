@@ -507,7 +507,7 @@ HTML;
 			unset($post['host']);
 		}
 		
-		$post = $this->validateDefType($post, $def_option);
+		$post = $this->validateDefType($post);
 		
 		return $post;
 	}
@@ -520,10 +520,9 @@ HTML;
 	 * @package fmDHCP
 	 *
 	 * @param string $def_option Option type to validate
-	 * @param string $def_data Data to parse/format
 	 * @return string Return formated data
 	 */
-	function validateDefType($post, $def_data) {
+	function validateDefType($post) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$post['config_name']}'";
