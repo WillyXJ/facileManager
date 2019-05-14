@@ -1541,6 +1541,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG, $server_group_ids, $server_serial_no;
 		
 		$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+		$server_root_dir = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_root_dir');
 		
 		$extra_tab = ($view == true) ? "\t" : null;
 		$server_ip = gethostbyname($server_name);
