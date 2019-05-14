@@ -108,7 +108,7 @@ class fm_module_options {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'cfg_comment') return __('Empty values are not allowed.');
+				if (!strlen($clean_data) && ($key != 'cfg_comment') && ($post['cfg_name'] != 'forwarders')) return __('Empty values are not allowed.');
 				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return sprintf(__('%s is not an acceptable option name.'), $clean_data);
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
@@ -172,8 +172,8 @@ class fm_module_options {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'cfg_comment') return false;
-				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return false;
+				if (!strlen($clean_data) && ($key != 'cfg_comment') && ($post['cfg_name'] != 'forwarders')) return __('Empty values are not allowed.');
+				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return sprintf(__('%s is not an acceptable option name.'), $clean_data);
 				$sql_edit .= $key . "='" . $clean_data . "', ";
 			}
 		}
@@ -535,6 +535,9 @@ HTML;
 						break;
 					case 'domain_id':
 						$query .= 'Z';
+						$domain_type = getNameFromID($_POST['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+						$domain_type = ($domain_type == 'stub') ? 'B' : strtoupper($domain_type[0]);
+						$query .= "%' AND def_zone_support LIKE '%$domain_type";
 						break;
 					case 'server_id':
 						$query .= 'S';

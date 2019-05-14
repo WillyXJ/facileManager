@@ -1,3 +1,6 @@
+3.3.4 (2019-05-??)
+==================
+* Server - [bug] Fixed support for empty forwarders zone option. (Issue #443)
 3.3.3 (2019-03-29)
 ==================
 * Server - [bug] Fixed client installations from an install of v3.3.0-3.3.2. (Issue #438)
