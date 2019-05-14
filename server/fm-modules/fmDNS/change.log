@@ -3,6 +3,7 @@
 * Server - [bug] Fixed support for empty forwarders zone option. (Issue #443)
 * Server - [bug] Updated which zone options are available based on zone type.
 * Server - [bug] Fixed unset variable during configuration builds.
+* Server - Updated default named.root file.
 
 3.3.3 (2019-03-29)
 ==================
