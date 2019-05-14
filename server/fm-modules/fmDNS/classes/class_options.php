@@ -51,7 +51,7 @@ class fm_module_options {
 									'class' => 'header-tiny header-nosort'
 								);
 			}
-			if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
+			if (isset($_GET['type']) && sanitize($_GET['type']) == 'ratelimit') {
 				$title_array[] = array('title' => __('Zone'), 'rel' => 'domain_id');
 			}
 			$title_array[] = array('title' => __('Option'), 'rel' => 'cfg_name');
@@ -255,7 +255,7 @@ class fm_module_options {
 		$cfg_data = $this->parseDefType($row->cfg_name, $row->cfg_data);
 		
 		$zone_row = null;
-		if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
+		if (isset($_GET['type']) && sanitize($_GET['type']) == 'ratelimit') {
 			$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : '<span>All Zones</span>';
 			$zone_row = '<td>' . $domain_name . '</td>';
 			unset($domain_name);
@@ -377,7 +377,7 @@ HTML;
 						var $swap = $(this).parent().parent().next().find("td");
 						var form_data = {
 							server_serial_no: getUrlVars()["server_serial_no"],
-							cfg_type: getUrlVars()["option_type"],
+							cfg_type: getUrlVars()["type"],
 							cfg_name: $(this).parent().parent().next().find("td").find("select").val(),
 							get_available_options: true,
 							item_sub_type: "domain_id",
@@ -537,7 +537,7 @@ HTML;
 						$query .= 'Z';
 						$domain_type = getNameFromID($_POST['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
 						$domain_type = ($domain_type == 'stub') ? 'B' : strtoupper($domain_type[0]);
-						$query .= "%' AND def_zone_support LIKE '%$domain_type";
+						$query .= ($option_type != 'ratelimit') ? "%' AND def_zone_support LIKE '%$domain_type" : null;
 						break;
 					case 'server_id':
 						$query .= 'S';
@@ -552,7 +552,7 @@ HTML;
 				AND def_option_type='$option_type' AND def_option='$cfg_name'";
 		}
 		$query .= " ORDER BY def_option ASC";
-		
+
 		$def_avail_result = $fmdb->get_results($query);
 		$def_avail_result_count = $fmdb->num_rows;
 		

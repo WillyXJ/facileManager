@@ -4,6 +4,8 @@
 * Server - [bug] Updated which zone options are available based on zone type.
 * Server - [bug] Fixed unset variable during configuration builds.
 * Server - Updated default named.root file.
+* Server - [bug] Fixed Rate Limit display and zone configuration when selecting
+           a zone.
 
 3.3.3 (2019-03-29)
 ==================
