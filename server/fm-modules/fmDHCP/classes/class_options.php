@@ -50,9 +50,6 @@ class fm_module_options {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
-			$title_array[] = array('title' => __('Zone'), 'rel' => 'domain_id');
-		}
 		$title_array[] = array('title' => __('Option'), 'rel' => 'config_name');
 		$title_array[] = array('title' => __('Value'), 'rel' => 'config_data');
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
@@ -251,18 +248,11 @@ class fm_module_options {
 		/** Parse address_match_element configs */
 		$config_data = $this->parseDefType($row->config_name, $row->config_data);
 		
-		$zone_row = null;
-		if (isset($_GET['option_type']) && sanitize($_GET['option_type']) == 'ratelimit') {
-			$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : '<span>All Zones</span>';
-			$zone_row = '<td>' . $domain_name . '</td>';
-			unset($domain_name);
-		}
 		$config_name = ($row->config_in_clause == 'yes') ? $row->config_name : '<b>' . $row->config_name . '</b>';
 
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_name"$disabled_class>
 			$checkbox
-			$zone_row
 			<td>$config_name</td>
 			<td>$config_data</td>
 			<td>$comments</td>
