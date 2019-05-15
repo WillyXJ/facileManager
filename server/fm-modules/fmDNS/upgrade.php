@@ -2197,6 +2197,11 @@ function upgradefmDNS_334($__FM_CONFIG, $running_version) {
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MS' WHERE `def_option` IN ('also-notify', 'alt-transfer-source', 'alt-transfer-source-v6', 'masterfile-style', 'max-transfer-idle-out', 'max-transfer-time-out', 'notify-source', 'notify-source-v6')";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'MSF' WHERE `def_option` IN ('forwarders', 'forward')";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'F' WHERE `def_option` = 'delegation-only'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_multiple_values` = 'yes' WHERE `def_option` = 'cookie-secret'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( master | slave | response | secondary ) ( warn | fail | ignore )' WHERE `def_option` = 'check-names'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'Z' WHERE `def_option` = 'inline-signing'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | primary | master | secondary | slave )' WHERE `def_option` = 'ixfr-from-differences'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = NULL WHERE `def_option` IN ('transfers-in', 'transfers-out', 'transfers-per-ns')";
 
 	$table[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
@@ -2210,9 +2215,38 @@ INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 `def_minimum_version`
 )
 VALUES 
+('options', 'answer-cookie', '( yes | no )', 'no', 'O', NULL, 'yes', '9.11.4'),
+('options', 'cleaning-interval', '( minutes )', 'no', 'OV', NULL, 'no', NULL),
 ('options', 'dlz', '( quoted_string )', 'no', 'Z', 'MS', 'no', NULL),
-('options', 'max-records', '( integer )', 'no', 'Z', 'MS', 'no', NULL)
-;
+('options', 'fstrm-set-buffer-hint', '( integer )', 'no', 'O', NULL, 'no', '9.11.0'),
+('options', 'fstrm-set-flush-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.11.0'),
+('options', 'fstrm-set-input-queue-size', '( integer )', 'no', 'O', NULL, 'no', '9.11.0'),
+('options', 'fstrm-set-output-notify-threshold', '( integer )', 'no', 'O', NULL, 'no', '9.11.0'),
+('options', 'fstrm-set-output-queue-model', '( mpsc | spsc )', 'no', 'O', NULL, 'yes', '9.11.0'),
+('options', 'fstrm-set-output-queue-size', '( integer )', 'no', 'O', NULL, 'no', '9.11.0'),
+('options', 'fstrm-set-reopen-interval', '( integer )', 'no', 'O', NULL, 'no', '9.11.0'),
+('options', 'glue-cache', '( yes | no )', 'no', 'O', NULL, 'yes', '9.13.0'),
+('options', 'lmdb-mapsize', '( size_spec )', 'no', 'O', NULL, 'no', '9.11.2'),
+('options', 'max-records', '( integer )', 'no', 'Z', 'MS', 'no', NULL),
+('options', 'min-cache-ttl', '( seconds )', 'no', 'OV', NULL, 'no', '9.14.0'),
+('options', 'min-ncache-ttl', '( seconds )', 'no', 'OV', NULL, 'no', '9.14.0'),
+('options', 'max-stale-ttl', '( integer )', 'no', 'O', NULL, 'no', '9.12.1'),
+('options', 'new-zones-directory', '( quoted_string )', 'no', 'O', NULL, 'no', '9.12.1'),
+('options', 'nxdomain-redirect', '( quoted_string )', 'no', 'O', NULL, 'no', '9.11.2'),
+('options', 'qname-minimization', '( strict | relaxed | disabled | off )', 'no', 'O', NULL, 'yes', '9.14.0'),
+('options', 'request-expire', '( yes | no )', 'no', 'O', NULL, 'yes', '9.11.2'),
+('options', 'resolver-nonbackoff-tries', '( integer )', 'no', 'O', NULL, 'no', '9.12.1'),
+('options', 'resolver-retry-interval', '( integer )', 'no', 'O', NULL, 'no', '9.12.1'),
+('options', 'response-padding', '( address_match_element ) [ block-size integer ]', 'no', 'O', NULL, 'no', '9.12.0'),
+('options', 'root-key-sentinel', '( yes | no )', 'no', 'O', 'M', 'yes', '9.11.4'),
+('options', 'stale-answer-enable', '( yes | no )', 'no', 'O', NULL, 'yes', '9.12.1'),
+('options', 'stale-answer-ttl', '( integer )', 'no', 'O', NULL, 'no', '9.12.1'),
+('options', 'synth-from-dnssec', '( yes | no )', 'no', 'O', NULL, 'yes', '9.12.0'),
+('options', 'tcp-advertised-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.12.0'),
+('options', 'tcp-idle-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.12.0'),
+('options', 'tcp-initial-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.12.0'),
+('options', 'tcp-keepalive-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.12.0'),
+('options', 'tkey-gssapi-keytab', '( quoted_string )', 'no', 'O', NULL, 'no', NULL)
 INSERTSQL;
 	
 	/** Run queries */
