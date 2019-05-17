@@ -1,4 +1,4 @@
-0.4.2 (2019-05-??)
+0.4.2 (2019-05-17)
 ==================
 * Server - [bug] Fixed more PHP 7.3.x compatibility. (Issue #442)
 
