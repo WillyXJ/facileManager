@@ -1,3 +1,7 @@
+3.3.5 (2019-05-??)
+==================
+* Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)
+
 3.3.4 (2019-05-17)
 ==================
 * Server - [bug] Fixed support for empty forwarders zone option. (Issue #443)
