@@ -163,7 +163,7 @@ class fm_dns_masters {
 			$log_message = sprintf(__("%s was deleted from the %s master"), $tmp_address, $tmp_name);
 		} else {
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` SET `master_status`='deleted' WHERE account_id='{$_SESSION['user']['account_id']}' AND `master_parent_id`='" . sanitize($id) . "'";
-			if (!$fmdb->query($query)) {
+			if (!$fmdb->query($query) && $fmdb->sql_errors) {
 				return formatError(__('The associated master elements could not be deleted because a database error occurred.'), 'sql');
 			}
 		}
