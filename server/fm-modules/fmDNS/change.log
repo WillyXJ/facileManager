@@ -4,6 +4,8 @@
 * Server - [bug] Fixed master clause deletions when no address lists are
            associated with it. (Issue #447)
 * Server - [bug] Ensured multi-line record values do not contain extra spaces.
+* Server - [bug] Fixed jquery to highlight records to be updated when the multi-line
+           values are modified.
 
 3.3.4 (2019-05-17)
 ==================
