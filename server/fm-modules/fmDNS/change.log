@@ -3,6 +3,7 @@
 * Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)
 * Server - [bug] Fixed master clause deletions when no address lists are
            associated with it. (Issue #447)
+* Server - [bug] Ensured multi-line record values do not contain extra spaces.
 
 3.3.4 (2019-05-17)
 ==================

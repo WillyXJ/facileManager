@@ -183,6 +183,12 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 	}
 	if (!empty($data['record_value'])) {
 		$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);
+		if (strpos($data['record_value'], "\n")) {
+			foreach (explode("\n", $data['record_value']) as $line) {
+				$tmp_value[] = trim($line);
+			}
+			$data['record_value'] = join("\n", $tmp_value);
+		}
 		foreach ($data as $key => $val) {
 			$data[$key] = trim($val, '"\'');
 			
