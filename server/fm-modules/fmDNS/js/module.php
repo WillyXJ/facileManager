@@ -305,7 +305,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$(".existing-container .display_results").delegate("input:not([id^=\'record_delete_\']), select", "change", function(e) {
+	$(".existing-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change", function(e) {
 		if ($(this).attr("type") == "checkbox") {
 			$(this).parent().parent().parent().addClass("build");
 		} else {
