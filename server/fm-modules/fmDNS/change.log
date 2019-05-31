@@ -1,3 +1,7 @@
+3.4.0 (2019-0?-??)
+==================
+* Server - [feature] Added support for TLSA and OPENPGPKEY RR types. (Issue #439)
+
 3.3.5 (2019-05-??)
 ==================
 * Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)

@@ -1248,6 +1248,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
 						$record_array[1 . $record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_value . $record_comment . "\n";
 						break;
+					case 'OPENPGPKEY':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.11.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'OpenPGP Keys';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						break;
 					case 'PTR':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Addresses point to hosts';
 						$record_name = ($record_result[$i]->record_append == 'yes' && $domain->domain_mapping == 'reverse') ? $record_result[$i]->record_name . '.' . $domain_name : $record_result[$i]->record_name;
@@ -1269,6 +1274,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';
 						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_weight . $separator . $record_result[$i]->record_port . $separator . $record_value . $record_comment . "\n";
+						break;
+					case 'TLSA':
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Transport Layer Security';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . ' ' . $record_result[$i]->record_weight . ' ' . $record_result[$i]->record_port . $separator . $record_result[$i]->record_value . $record_comment . "\n";
 						break;
 					case 'TXT':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
