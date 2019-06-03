@@ -10,6 +10,7 @@
 * Server - [bug] Ensured multi-line record values do not contain extra spaces.
 * Server - [bug] Fixed jquery to highlight records to be updated when the multi-line
            values are modified.
+* Server - [bug] Fixed remote server creation after a fresh installation.
 
 3.3.4 (2019-05-17)
 ==================
