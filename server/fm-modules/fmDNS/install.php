@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_name` varchar(255) NOT NULL,
   `server_os` varchar(50) DEFAULT NULL,
   `server_os_distro` varchar(50) DEFAULT NULL,
-  `server_type` enum('bind9') NOT NULL DEFAULT 'bind9',
+  `server_type` enum('bind9','remote') NOT NULL DEFAULT 'bind9',
   `server_version` varchar(150) DEFAULT NULL,
   `server_run_as_predefined` enum('named','bind','daemon','as defined:') NOT NULL DEFAULT 'named',
   `server_run_as` varchar(50) DEFAULT NULL,
