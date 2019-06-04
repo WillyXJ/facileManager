@@ -31,7 +31,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmFirewall'] = array(
-		'version'							=> '1.7.1',
+		'version'							=> '2.0',
 		'client_version'					=> '1.7',
 		'description'						=> __('Managing software firewalls should not be difficult. Manage one or more software firewall servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files individually.', 'fmFirewall'),
 		'prefix'							=> 'fw_',
@@ -45,6 +45,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['block']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
 	$__FM_CONFIG['module']['icons']['action']['reject']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
 	$__FM_CONFIG['module']['icons']['action']['log']		= '<i class="fa fa-file-text-o __action__" alt="__Action__" title="__Action__"></i>';
+	$__FM_CONFIG['module']['icons']['negated']				= '<i class="fa fa-exclamation-circle block" aria-hidden="true" title="' . __('Negated') . '"></i>';
 }
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);

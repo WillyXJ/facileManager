@@ -55,7 +55,7 @@ class fm_module_policies {
 								);
 				$title_array[] = array('class' => 'header-tiny');
 			}
-			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Source'), __('Destination'), __('Service'), __('Interface'),
+			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Source'), __('Destination'), __('Service'), __('Interface'),
 									__('Direction'), __('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;')));
 			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
@@ -280,9 +280,9 @@ HTML;
 		$interface = ($row->policy_interface) ? $row->policy_interface : 'any';
 		$policy_time = ($row->policy_time) ? getNameFromID($row->policy_time, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name') : 'any';
 		
-		$source_not = ($row->policy_source_not) ? '!' : null;
-		$destination_not = ($row->policy_destination_not) ? '!' : null;
-		$service_not = ($row->policy_services_not) ? '!' : null;
+		$source = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_source_not) . ' ' . $source;
+		$destination = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_destination_not) . ' ' . $destination;
+		$services = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_services_not) . ' ' . $services;
 
 		$comments = nl2br($row->policy_comment);
 
@@ -291,9 +291,10 @@ HTML;
 			$checkbox
 			$grab_bars
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
-			<td>$source_not $source</td>
-			<td>$destination_not $destination</td>
-			<td>$service_not $services</td>
+			<td>$row->policy_name</td>
+			<td>$source</td>
+			<td>$destination</td>
+			<td>$services</td>
 			<td>$interface</td>
 			<td>$row->policy_direction</td>
 			<td>$policy_time</td>
@@ -311,7 +312,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$policy_id = $policy_order_id = 0;
-		$policy_interface = $policy_direction = $policy_time = $policy_comment = $policy_options = null;
+		$policy_name = $policy_interface = $policy_direction = $policy_time = $policy_comment = $policy_options = null;
 		$policy_services = $policy_source = $policy_destination = $policy_action = null;
 		$source_items = $destination_items = $services_items = null;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
@@ -326,7 +327,7 @@ HTML;
 		}
 		
 		/** Build form */
-		$popup_title = $action == 'add' ? __('Add Policy') : __('Edit Policy');
+		$popup_title = $action == 'add' ? __('Add Rule') : __('Edit Rule');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
@@ -384,15 +385,85 @@ FORM;
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				if (in_array($server_firewall_type, $opt_array['firewalls'])) {
 					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-					$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']">' . $opt_array['desc'] . "</label><br />\n";
+					$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']" class="white-space: unset">' . $opt_array['desc'] . "</label><br />\n";
 				}
 			}
 
 			$return_form .= sprintf('
-			<input type="hidden" name="policy_source_not" value="0" />
-			<input type="hidden" name="policy_destination_not" value="0" />
-			<input type="hidden" name="policy_services_not" value="0" />
+			<input type="hidden" name="policy_source_not" value="" />
+			<input type="hidden" name="policy_destination_not" value="" />
+			<input type="hidden" name="policy_services_not" value="" />
+	<div id="tabs">
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-1" checked />
+			<label for="tab-1">%s</label>
+			<div id="tab-content">
 			<table class="form-table policy-form">
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_name">%s</label></th>
+					<td width="67&#37;"><input name="policy_name" id="policy_name" type="text" value="%s" /></td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">%s</textarea></td>
+				</tr>
+			</table>
+			</div>
+		</div>
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-2" />
+			<label for="tab-2">%s</label>
+			<div id="tab-content">
+			<table class="form-table">
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						%s<br />
+						<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						%s<br />
+						<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						%s<br />
+						<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_action">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+			</table>
+			</div>
+		</div>
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-3" />
+			<label for="tab-3">%s</label>
+			<div id="tab-content">
+			<table class="form-table">
+				%s
+				%s
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						%s
+					</td>
+				</tr>
+			</table>
+			</div>
+		</div>
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-4" />
+			<label for="tab-4">%s</label>
+			<div id="tab-content">
+			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="policy_interface">%s</label></th>
 					<td width="67&#37;">%s</td>
@@ -401,56 +472,38 @@ FORM;
 					<th width="33&#37;" scope="row"><label for="policy_direction">%s</label></th>
 					<td width="67&#37;">%s</td>
 				</tr>
+			</table>
+			</div>
+		</div>
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-5" />
+			<label for="tab-5">%s</label>
+			<div id="tab-content">
+			<table class="form-table">
 				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">
-						<input name="policy_source_not" id="policy_source_not" value="1" type="checkbox" %s /><label for="policy_source_not"><b>%s</b></label>
-						<p class="checkbox_desc">%s</p>
-						%s
-					</td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">
-						<input name="policy_destination_not" id="policy_destination_not" value="1" type="checkbox" %s /><label for="policy_destination_not"><b>%s</b></label>
-						<p class="checkbox_desc">%s</p>
-						%s
-					</td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">
-						<input name="policy_services_not" id="policy_services_not" value="1" type="checkbox" %s /><label for="policy_services_not"><b>%s</b></label>
-						<p class="checkbox_desc">%s</p>
-						%s
-					</td>
-				</tr>
-				%s
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_action">%s</label></th>
+					<th width="33&#37;" scope="row"><label for="policy_targets">%s</label></th>
 					<td width="67&#37;">%s</td>
 				</tr>
-				%s
-				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">
-						%s
-					</td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">%s</textarea></td>
-				</tr>
-			</table>',
+			</table>
+			</div>
+		</div>
+	</div>',
+					__('Basic'),
+					__('Policy Name'), $policy_name,
+					_('Comment'), $policy_comment,
+					__('Policy'),
+					__('Source'), $source_items, $source_not_check, __('Negate'), __('Use this option to invert the match'),
+					__('Destination'), $destination_items, $destination_not_check, __('Negate'), __('Use this option to invert the match'),
+					__('Services'), $services_items, $service_not_check, __('Negate'), __('Use this option to invert the match'),
+					__('Action'), $policy_action,
+					__('Options'),
+					$policy_time_form, $policy_packet_state_form,
+					__('Options'), $options,
+					__('Interface'),
 					__('Interface'), $policy_interface,
 					__('Direction'), $policy_direction,
-					__('Source'), $source_not_check, __('not'), __('Use this option to invert the match'), $source_items,
-					__('Destination'), $destination_not_check, __('not'), __('Use this option to invert the match'), $destination_items,
-					__('Services'), $service_not_check, __('not'), __('Use this option to invert the match'), $services_items,
-					$policy_time_form,
-					__('Action'), $policy_action, $policy_packet_state_form,
-					__('Options'), $options,
-					_('Comment'), $policy_comment
+					__('Targets'),
+					null, null
 				);
 		}
 		
@@ -505,6 +558,9 @@ FORM;
 		if (getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type') == 'ipfilter' && $post['policy_action'] == 'reject') {
 			$post['policy_action'] = 'block';
 		}
+		
+		/** Remove tabs */
+		unset($post['tab-group-1'], $post['tab-group-2'], $post['tab-group-3'], $post['tab-group-4']);
 		
 		return $post;
 	}

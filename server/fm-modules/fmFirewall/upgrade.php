@@ -32,7 +32,7 @@ function upgradefmFirewallSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '1.4-beta2', '<') ? upgradefmFirewall_1401($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '2.0', '<') ? upgradefmFirewall_200($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
@@ -284,6 +284,44 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
 	
 	setOption('version', '1.4-beta2', 'auto', false, 0, 'fmFirewall');
+	
+	return true;
+}
+
+/** 2.0 */
+function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '1.4-beta2', '<') ? upgradefmFirewall_1401($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_name` VARCHAR(255) NULL DEFAULT NULL AFTER `policy_order_id`";
+	
+	/** Change policy negates */
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_source_not` `policy_source_not` ENUM('0','1','','!') NOT NULL DEFAULT '0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_destination_not` `policy_destination_not` ENUM('0','1','','!') NOT NULL DEFAULT '0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_services_not` `policy_services_not` ENUM('0','1','','!') NOT NULL DEFAULT '0'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_source_not`='!' WHERE `policy_source_not`='1'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_source_not`='' WHERE `policy_source_not`='0'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_destination_not`='!' WHERE `policy_destination_not`='1'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_destination_not`='' WHERE `policy_destination_not`='0'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_services_not`='!' WHERE `policy_services_not`='1'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_services_not`='' WHERE `policy_services_not`='0'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_source_not` `policy_source_not` ENUM('','!') NOT NULL DEFAULT ''";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_destination_not` `policy_destination_not` ENUM('','!') NOT NULL DEFAULT ''";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_services_not` `policy_services_not` ENUM('','!') NOT NULL DEFAULT ''";
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
+	
+	setOption('version', '2.0', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
 }

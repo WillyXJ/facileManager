@@ -210,7 +210,7 @@ class fm_module_time {
 		$date_range = $this->formatDates($row->time_start_date, $row->time_end_date);
 		
 		/** Format weekdays */
-		$weekdays .= $row->time_weekdays_not . ' ' . $this->formatDays($row->time_weekdays);
+		$weekdays .= str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->time_weekdays_not) . ' ' . $this->formatDays($row->time_weekdays);
 
 		$comments = nl2br($row->time_comment);
 		
@@ -325,17 +325,15 @@ HTML;
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;" style="white-space: nowrap;">
-						<input name="time_weekdays_not" id="time_weekdays_not" value="!" type="checkbox" %s /><label for="time_weekdays_not"><b>%s</b></label>
-						<p class="checkbox_desc">%s</p>
-						%s
+						%s<br />
+						<input name="time_weekdays_not" id="time_weekdays_not" value="!" type="checkbox" %s /><label for="time_weekdays_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
 					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;" style="white-space: nowrap;">
-						<input name="time_monthdays_not" id="time_monthdays_not" value="!" type="checkbox" %s /><label for="time_monthdays_not"><b>%s</b></label>
-						<p class="checkbox_desc">%s</p>
-						%s
+						%s<br />
+						<input name="time_monthdays_not" id="time_monthdays_not" value="!" type="checkbox" %s /><label for="time_monthdays_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
 					</td>
 				</tr>
 				<tr>
@@ -371,8 +369,8 @@ HTML;
 				__('Start Time'), "$time_start_hour : $time_start_min",
 				__('End Date'), $time_end_date,
 				__('End Time'), "$time_end_hour : $time_end_min",
-				__('Weekdays'), $weekdays_not_check, __('not'), __('Use this option to invert the match'), $weekdays_form,
-				__('Monthdays'), $monthdays_not_check, __('not'), __('Use this option to invert the match'), $monthdays_form,
+				__('Weekdays'), $weekdays_form, $weekdays_not_check, __('Negate'), __('Use this option to invert the match'),
+				__('Monthdays'), $monthdays_form, $monthdays_not_check, __('Negate'), __('Use this option to invert the match'),
 				__('Options'), $time_options,
 				$time_zone_form,
 				_('Comment'), $time_comment,
