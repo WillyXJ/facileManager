@@ -1108,7 +1108,9 @@ echo '$(document).ready(function() {
 			});
 		};
 
-	$("#table_edits.grab tbody, #table_edits.grab1 tbody").sortable({
+	$("#table_edits.grab tbody, #table_edits.grab1 tbody").not(".no-grab").sortable({
+		items: "tr",
+		handle: ".fa-bars",
 		helper: fixHelperModified,
 		start: function() {
 			$(this).parent().addClass("grabbing");
@@ -1117,7 +1119,7 @@ echo '$(document).ready(function() {
 			$(this).parent().removeClass("grabbing");
 			updateIndex;
 			
-			var items = $("#table_edits.grab tr, #table_edits.grab1 tr");
+			var items = $("#table_edits.grab tr:not(.no-grab), #table_edits.grab1 tr");
 			var linkIDs = [items.size()];
 			var index = 0;
 			
