@@ -32,7 +32,9 @@ echo '$(document).ready(function() {
 			minimumResultsForSearch: 10
 		});
 		$(function() {
-			$( "#manage_item_contents" ).draggable();
+			$( "#manage_item_contents" ).draggable({
+				handle: "div.popup-header"
+			});
 		});
 	});
 	
