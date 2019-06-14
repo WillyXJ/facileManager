@@ -114,7 +114,9 @@ function buildModuleHelpFile() {
 			{$__FM_CONFIG['icons']['delete']}, and reorder rules (drag and drop the row). When adding or editing a rule, you can select the 
 			firewall interface the rule applies to, the direction, source, destination, services, time restriction (iptables only), action, and
 			any options you want for the rule.</p>
-			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete firewall policies.</i></p>
+			<p>Policy Templates contain policy rules that can be applied to multiple firewalls (targets). When viewing policies, any rules from a template
+			will be highlighted and not editable.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to add, edit, and delete firewall templates and policies.</i></p>
 			<p>When the rules are defined and ready for deployment to the firewall server, you can preview {$__FM_CONFIG['icons']['preview']} the config
 			before building {$__FM_CONFIG['icons']['build']} it from the <a href="__menu{Firewalls}">Firewalls</a> 
 			menu item.</p>
@@ -359,7 +361,7 @@ function getTemplateIDs($id, $server_serial_no = 0) {
 	$template_ids = array();
 	
 	if ($server_serial_no) {
-		$template_id_count = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND (policy_targets='0' OR policy_targets='s_$id' OR policy_targets LIKE 's_$id;%' OR policy_targets LIKE '%;s_$id' OR policy_targets LIKE '%;s_$id;%') AND policy_type='template'");
+		$template_id_count = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND (policy_targets='0' OR policy_targets='s_$id' OR policy_targets LIKE 's_$id;%' OR policy_targets LIKE '%;s_$id' OR policy_targets LIKE '%;s_$id;%') AND policy_type='template' AND policy_status='active'");
 	} else {
 		/** Template stack? */
 		$template_id_count = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND policy_id='$id' AND (policy_template_stack!='' OR policy_template_stack!=NULL) AND policy_type='template'");
