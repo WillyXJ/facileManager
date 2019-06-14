@@ -73,7 +73,6 @@ p.checkbox_desc {
 	color: #e19419;
 }
 .log {
-	padding-right: 4px;
 	color: #4e65e0;
 }
 
@@ -89,4 +88,11 @@ select.select-stack {
 }
 select.select-stack option {
 	padding: 3px;
+}
+table.grab tbody tr td.options {
+	white-space: nowrap;
+	text-align: right;
+}
+table.grab tbody tr td.options i {
+	margin-left: 4px;
 }

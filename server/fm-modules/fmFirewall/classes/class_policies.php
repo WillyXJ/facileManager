@@ -283,7 +283,11 @@ HTML;
 	function displayRow($row, $type) {
 		global $__FM_CONFIG;
 		
-		if ($row->policy_status == 'disabled') $class[] = 'disabled';
+		$row_title = $options = null;
+		if ($row->policy_status == 'disabled') {
+			$class[] = 'disabled';
+			$row_title = sprintf('title="%s"', __('Rule is disabled'));
+		}
 		if ($row->policy_from_template) $class[] = 'notice';
 		
 		$edit_status = $edit_actions = $checkbox = $grab_bars = null;
@@ -318,7 +322,11 @@ HTML;
 		$source = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_source_not) . ' ' . $source;
 		$destination = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_destination_not) . ' ' . $destination;
 		$services = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_services_not) . ' ' . $services;
-
+		
+		if ($row->policy_targets) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></a>', __('Policy targets defined'));
+		if ($row->policy_packet_state) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></a>', str_replace(',', ', ', $row->policy_packet_state));
+		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></a>', __('Matching fragment packets'));
+		
 		$comments = nl2br($row->policy_comment);
 		if ($row->server_serial_no) {
 			$location = getNameFromID($row->server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
@@ -329,12 +337,13 @@ HTML;
 		}
 
 		if ($class) $class = 'class="' . join(' ', $class) . '"';
+		if ($options) $options = join('&nbsp;&nbsp;', $options);
 		
 		echo <<<HTML
-		<tr id="$row->policy_id" name="$row->policy_name" $class>
+		<tr id="$row->policy_id" name="$row->policy_name" $class $row_title>
 			$checkbox
 			$grab_bars
-			<td style="white-space: nowrap; text-align: right;">$log $action</td>
+			<td class="options">$options $log $action</td>
 			<td>$row->policy_name</td>
 			<td>$location</td>
 			<td>$source</td>
@@ -434,7 +443,7 @@ FORM;
 				);
 			}
 
-			if ($server_firewall_type == 'iptables') {
+			if ($server_firewall_type == 'iptables' || $_POST['server_serial_no'][0] == 't') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
 				$policy_time_form .= sprintf('
 				<tr>
@@ -456,7 +465,7 @@ FORM;
 			/** Parse options */
 			$options = null;
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
-				if (in_array($server_firewall_type, $opt_array['firewalls'])) {
+				if (in_array($server_firewall_type, $opt_array['firewalls']) || $_POST['server_serial_no'][0] == 't') {
 					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
 					$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']" style="white-space: unset">' . $opt_array['desc'] . "</label><br />\n";
 				}
@@ -492,21 +501,21 @@ FORM;
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
 						%s<br />
-						<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+						<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
 					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
 						%s<br />
-						<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+						<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
 					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
 						%s<br />
-						<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+						<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
 					</td>
 				</tr>
 				<tr>

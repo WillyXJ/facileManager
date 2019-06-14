@@ -4,6 +4,9 @@
 * Server - [improvement] Updated policy and time configurations with multiple tabs.
 * Server - [improvement] Use font-awesome for negated displays.
 * Server - [feature] Added policy templates.
+* Server - [feature] Added support for policy names.
+* Server - [bug] Fixed pf macro for multiple negated ports.
+* Server - [improvement] Policy page now displays if options are set on a rule.
 
 1.7.1 (2019-03-20)
 ==================

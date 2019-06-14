@@ -205,6 +205,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			$rule_number = $i + 1;
 			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
@@ -461,6 +462,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			$rule_number = $i + 1;
 			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
@@ -618,7 +620,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 									} else {
 										$service_ports = implode(',', $ports);
 										$service_ports = str_replace(array(',; ', ',! '), ',', $service_ports);
-										if (strpos($service_ports, ',') !== false) $service_ports = str_replace('port =', '{', $service_ports) . ' }';
+										if (strpos($service_ports, ',') !== false) $service_ports = str_replace(array('port =', 'port !='), array('{', '{!'), $service_ports) . ' }';
 										$service_ports = str_replace(',{', ',', $service_ports);
 										$service_ports = str_replace('{', 'port {', $service_ports);
 									}
@@ -688,6 +690,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			$rule_number = $i + 1;
 			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
@@ -888,6 +891,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			$rule_number = $i + 1;
 			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
