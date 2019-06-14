@@ -70,8 +70,8 @@ function buildModuleDashboard() {
 function buildModuleToolbar() {
 	global $__FM_CONFIG;
 	
-	if (isset($_GET['server_serial_no'])) {
-		$server_name = getNameFromID($_GET['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+	if (isset($_GET['server_serial_no']) && $_GET['server_serial_no']) {
+		$server_name = ($_GET['server_serial_no'][0] == 't') ? getNameFromID(preg_replace('/\D/', null, $_GET['server_serial_no']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name') : getNameFromID($_GET['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		$domain_menu = sprintf('<div id="topheadpart">
 			<span class="single_line">%s:&nbsp;&nbsp; %s</span>
 		</div>', __('Firewall'), $server_name);
@@ -322,6 +322,10 @@ function buildModuleMenu() {
 	addObjectPage(__('Firewalls'), __('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true);
 		addSubmenuPage('config-servers.php', null, __('Firewall Policy'), null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
 
+	addObjectPage(__('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
+		addSubmenuPage('config-policy.php', __('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
+		addSubmenuPage('config-policy.php', __('Templates'), __('Policy Templates'), array('manage_policies', 'view_all'), $_SESSION['module'], 'templates-policy.php');
+
 	addObjectPage(__('Objects'), __('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
 		addSubmenuPage('object-groups.php', __('Groups'), __('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
 		addSubmenuPage('object-groups.php', __('Hosts'), __('Host Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-host.php');
@@ -334,6 +338,84 @@ function buildModuleMenu() {
 		addSubmenuPage('service-groups.php', __('UDP'), __('UDP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-udp.php');
 
 	addObjectPage(__('Time'), __('Time Restrictions'), array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
+}
+
+
+/**
+ * Gets policy template IDs
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param integer $id Server or template ID
+ * @param integer $server_serial_no
+ * 
+ * @return array
+ */
+function getTemplateIDs($id, $server_serial_no = 0) {
+	global $__FM_CONFIG, $fmdb;
+	
+	$template_ids = array();
+	
+	if ($server_serial_no) {
+		$template_id_count = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND (policy_targets='0' OR policy_targets='s_$id' OR policy_targets LIKE 's_$id;%' OR policy_targets LIKE '%;s_$id' OR policy_targets LIKE '%;s_$id;%') AND policy_type='template'");
+	} else {
+		/** Template stack? */
+		$template_id_count = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND policy_id='$id' AND (policy_template_stack!='' OR policy_template_stack!=NULL) AND policy_type='template'");
+	}
+	
+	if ($template_id_count) {
+		$template_id_results = $fmdb->last_result;
+		foreach ($template_id_results as $row) {
+			if ($row->policy_template_stack) {
+				foreach (explode(';', $row->policy_template_stack) as $stack_tpl_id) {
+					$template_ids[] = $stack_tpl_id;
+				}
+			}
+			$template_ids[] = $row->policy_id;
+		}
+	}
+	
+	return $template_ids;
+}
+
+
+/**
+ * Gets template policies
+ *
+ * @since 2.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param array $template_ids Template IDs
+ * @param integer $server_id
+ * @param integer $template_id
+ * @param string $type Type of policy item to retrieve
+ * @param string $status Status of policy
+ * 
+ * @return array
+ */
+function getTemplatePolicies($template_ids, $server_id = 0, $template_id = 0, $type = 'filter') {
+	global $__FM_CONFIG, $fmdb;
+	
+	$template_id_count = 0;
+	$template_results = array();
+	
+
+	foreach ($template_ids as $tpl_id) {
+		$target_sql = ($server_id) ? "AND (policy_targets='' OR policy_targets='0' OR policy_targets='s_$server_id' OR policy_targets LIKE 's_$server_id;%' OR policy_targets LIKE '%;s_$server_id' OR policy_targets LIKE '%;s_$server_id;%')" : null;
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND policy_template_id=$tpl_id AND policy_template_id!=$template_id AND policy_type='$type' $target_sql");
+		if ($result) {
+			$template_id_count += $fmdb->num_rows;
+			foreach ($fmdb->last_result as $key => $object) {
+				$fmdb->last_result[$key]->policy_from_template = true;
+			}
+			$template_results = array_merge((array) $template_results, $fmdb->last_result);
+		}
+	}
+	
+	return array($template_results, $template_id_count);
 }
 
 

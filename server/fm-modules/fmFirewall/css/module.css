@@ -76,3 +76,17 @@ p.checkbox_desc {
 	padding-right: 4px;
 	color: #4e65e0;
 }
+
+#stack-label {
+	font-weight: bold;
+	padding: 3px;
+	font-size: 8pt;
+}
+select.select-stack {
+	width: 150px;
+	height: 200px;
+	margin-top: 5px;
+}
+select.select-stack option {
+	padding: 3px;
+}

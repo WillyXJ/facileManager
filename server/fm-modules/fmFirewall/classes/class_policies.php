@@ -42,33 +42,48 @@ class fm_module_policies {
 			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
 		}
 
+		$fmdb->num_rows = $num_rows;
+		
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+//		echo '<div class="overflow-container">';
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="policies">%s</p>', __('There are no firewall policies.'));
-		} else {
-			if (is_array($bulk_actions_list)) {
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
-									'class' => 'header-tiny header-nosort'
-								);
-				$title_array[] = array('class' => 'header-tiny');
-			}
-			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Source'), __('Destination'), __('Service'), __('Interface'),
-									__('Direction'), __('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;')));
-			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+			$title_array[] = array('class' => 'header-tiny');
+		}
+		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Location'), __('Source'), __('Destination'), __('Service'), __('Interface'),
+								__('Direction'), __('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;')));
+		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+//		echo '<div class="existing-container" style="bottom: 10em;">';
+
+		if ($total_pages) {
+			$grabbable = true;
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
+				if ($results[$x]->policy_from_template && $grabbable) {
+					echo '</tbody><tbody class="no-grab">';
+					$grabbable = false;
+				}
+				if (!$results[$x]->policy_from_template && !$grabbable) {
+					echo '</tbody><tbody>';
+					$grabbable = true;
+				}
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
-			
-			echo "</tbody>\n";
+		}
+
+		echo "</tbody>\n</table>\n";
+		
+		if (!$total_pages) {
+			printf('<p id="table_edits" class="noresult" name="policies">%s</p>', __('There are no firewall rules.'));
 		}
 		
 		$server_firewall_type = getNameFromID($_REQUEST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
@@ -93,7 +108,6 @@ class fm_module_policies {
 		$action_active = implode("\n", $action_active);
 		
 		echo <<<HTML
-			</table>
 			$policy_note
 			<table class="legend">
 				<tbody>
@@ -102,7 +116,7 @@ class fm_module_policies {
 					</tr>
 				</tbody>
 			</table>
-
+			</div></div>
 HTML;
 	}
 
@@ -136,6 +150,10 @@ HTML;
 						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
 					} elseif ($key == 'policy_time') {
 						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
+					} elseif ($key == 'policy_targets') {
+						$clean_data = str_replace("<br />\n", ', ', $this->formatServerIDs($clean_data));
+					} elseif ($key == 'policy_template_id') {
+						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
 					}
 					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
 				}
@@ -168,8 +186,15 @@ HTML;
 			/** Make new order in array */
 			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
 			
+			$template_id_sql = null;
+			if ($post['server_serial_no'][0] == 't') {
+				$template_id = preg_replace('/\D/', null, $post['server_serial_no']);
+				$template_id_sql = " AND policy_template_id=$template_id";
+				$post['server_serial_no'] = 0;
+			}
+			
 			/** Get policy listing for server */
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', 'AND server_serial_no=' . $post['server_serial_no']);
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', 'AND server_serial_no=' . $post['server_serial_no'] . $template_id_sql);
 			$count = $fmdb->num_rows;
 			$policy_result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
@@ -205,6 +230,10 @@ HTML;
 				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
 						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
+					} elseif ($key == 'policy_targets') {
+						$clean_data = str_replace("<br />\n", ', ', $this->formatServerIDs($clean_data));
+					} elseif ($key == 'policy_template_id') {
+						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
 					}
 					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
 				}
@@ -254,22 +283,28 @@ HTML;
 	function displayRow($row, $type) {
 		global $__FM_CONFIG;
 		
-		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
+		if ($row->policy_status == 'disabled') $class[] = 'disabled';
+		if ($row->policy_from_template) $class[] = 'notice';
 		
 		$edit_status = $edit_actions = $checkbox = $grab_bars = null;
 		$bars_title = __('Click and drag to reorder');
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->policy_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->policy_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!$row->policy_from_template) {
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->policy_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->policy_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
+				$grab_bars = '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>';
+			} else {
+				$checkbox = $grab_bars = '<td></td>';
+				$class[] = 'no-grab';
+			}
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
-			$grab_bars = '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>';
 		}
 		
 		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']) : null;
@@ -285,13 +320,23 @@ HTML;
 		$services = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_services_not) . ' ' . $services;
 
 		$comments = nl2br($row->policy_comment);
+		if ($row->server_serial_no) {
+			$location = getNameFromID($row->server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+		} elseif ($row->policy_from_template) {
+			$location = '<a href="?server_serial_no=t_' . $row->policy_template_id . '">' . getNameFromID($row->policy_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name') . '</a>';
+		} else {
+			$location = getNameFromID($row->policy_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
+		}
 
+		if ($class) $class = 'class="' . join(' ', $class) . '"';
+		
 		echo <<<HTML
-		<tr id="$row->policy_id" name="$row->policy_name"$disabled_class>
+		<tr id="$row->policy_id" name="$row->policy_name" $class>
 			$checkbox
 			$grab_bars
 			<td style="white-space: nowrap; text-align: right;">$log $action</td>
 			<td>$row->policy_name</td>
+			<td>$location</td>
 			<td>$source</td>
 			<td>$destination</td>
 			<td>$services</td>
@@ -311,12 +356,13 @@ HTML;
 	function printForm($data = '', $action = 'add', $type = 'filter') {
 		global $__FM_CONFIG;
 		
-		$policy_id = $policy_order_id = 0;
+		$policy_id = $policy_order_id = $policy_targets = $policy_template_id = 0;
 		$policy_name = $policy_interface = $policy_direction = $policy_time = $policy_comment = $policy_options = null;
 		$policy_services = $policy_source = $policy_destination = $policy_action = null;
 		$source_items = $destination_items = $services_items = null;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
 		$policy_packet_state_form = $policy_packet_state = $policy_time_form = null;
+		$target_tab = null;
 		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -329,7 +375,7 @@ HTML;
 		/** Build form */
 		$popup_title = $action == 'add' ? __('Add Rule') : __('Edit Rule');
 		$popup_header = buildPopup('header', $popup_title);
-		$popup_footer = buildPopup('footer');
+		$popup_footer = ($action != 'add' && ($policy_template_id && 't_' . $policy_template_id != $_POST['server_serial_no'])) ? buildPopup('footer', _('Cancel'), array('cancel_button' => 'cancel')) : buildPopup('footer');
 		
 		$return_form = <<<FORM
 		<form name="manage" id="manage" method="post" action="?server_serial_no={$_REQUEST['server_serial_no']}">
@@ -361,6 +407,33 @@ FORM;
 			$destination_not_check = ($policy_destination_not) ? 'checked' : null;
 			$service_not_check = ($policy_services_not) ? 'checked' : null;
 
+			/** Policy targets should only be available for template policies */
+			if ($_POST['server_serial_no'][0] == 't' || (is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
+				/** Process multiple policy targets */
+				if (strpos($policy_targets, ';')) {
+					$policy_targets = explode(';', rtrim($policy_targets, ';'));
+					if (in_array('0', $policy_targets)) $policy_targets = 0;
+				}
+
+				$targets = buildSelect('policy_targets', 'policy_targets', availableServers('id'), $policy_targets, 1, null, true);
+				
+				$target_tab = sprintf('
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-5" />
+			<label for="tab-5">%s</label>
+			<div id="tab-content">
+			<table class="form-table">
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_targets">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+			</table>
+			</div>
+		</div>',
+					__('Targets'), __('Firewalls'), $targets
+				);
+			}
+
 			if ($server_firewall_type == 'iptables') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
 				$policy_time_form .= sprintf('
@@ -385,7 +458,7 @@ FORM;
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				if (in_array($server_firewall_type, $opt_array['firewalls'])) {
 					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-					$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']" class="white-space: unset">' . $opt_array['desc'] . "</label><br />\n";
+					$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']" style="white-space: unset">' . $opt_array['desc'] . "</label><br />\n";
 				}
 			}
 
@@ -475,18 +548,7 @@ FORM;
 			</table>
 			</div>
 		</div>
-		<div id="tab">
-			<input type="radio" name="tab-group-1" id="tab-5" />
-			<label for="tab-5">%s</label>
-			<div id="tab-content">
-			<table class="form-table">
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_targets">%s</label></th>
-					<td width="67&#37;">%s</td>
-				</tr>
-			</table>
-			</div>
-		</div>
+		%s
 	</div>',
 					__('Basic'),
 					__('Policy Name'), $policy_name,
@@ -502,8 +564,7 @@ FORM;
 					__('Interface'),
 					__('Interface'), $policy_interface,
 					__('Direction'), $policy_direction,
-					__('Targets'),
-					null, null
+					$target_tab
 				);
 		}
 		
@@ -537,10 +598,16 @@ FORM;
 		} else $post['policy_options'] = 0;
 		
 		$post['server_serial_no'] = isset($post['server_serial_no']) ? $post['server_serial_no'] : $_REQUEST['server_serial_no'];
+		if ($post['server_serial_no'][0] == 't') {
+			$post['policy_template_id'] = preg_replace('/\D/', null, $post['server_serial_no']);
+			$post['server_serial_no'] = 0;
+		}
 		$post['policy_source'] = implode(';', $post['source_items']);
 		$post['policy_destination'] = implode(';', $post['destination_items']);
 		$post['policy_services'] = implode(';', $post['services_items']);
 		$post['policy_packet_state'] = implode(',', $post['policy_packet_state']);
+		$post['policy_targets'] = implode(';', $post['policy_targets']);
+		if (!$post['policy_targets']) $post['policy_targets'] = 0;
 		unset($post['source_items']);
 		unset($post['destination_items']);
 		unset($post['services_items']);
@@ -560,7 +627,7 @@ FORM;
 		}
 		
 		/** Remove tabs */
-		unset($post['tab-group-1'], $post['tab-group-2'], $post['tab-group-3'], $post['tab-group-4']);
+		unset($post['tab-group-1']);
 		
 		return $post;
 	}
@@ -622,6 +689,17 @@ FORM;
 		return $return;
 	}
 
+	function formatServerIDs($ids) {
+		global $__FM_CONFIG;
+		
+		$names = null;
+		foreach (explode(';', trim($ids, ';')) as $temp_id) {
+			$names[] = ($temp_id == 0) ? _('All Servers') : getNameFromID(preg_replace('/\D/', null, $temp_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+		}
+		
+		return implode("<br />\n", $names);
+	}
+	
 }
 
 if (!isset($fm_module_policies))

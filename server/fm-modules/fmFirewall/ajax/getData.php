@@ -45,7 +45,8 @@ $checks_array = @array('servers' => 'manage_servers',
 					'objects' => 'manage_objects',
 					'groups' => 'manage_' . $_POST['item_sub_type'] . 's',
 					'time' => 'manage_time',
-					'policies' => 'manage_policies'
+					'policies' => 'manage_policies',
+					'policy' => 'manage_policies'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -107,6 +108,13 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$prefix = 'cfg_';
 			$field = $prefix . 'id';
 			$type_map = 'global';
+			break;
+		case 'policy':
+			$post_class = $fm_module_templates;
+			$prefix = 'policy_';
+			$field = $prefix . 'id';
+			$type_map = sanitize($_POST['item_type']);
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies';
 			break;
 	}
 	

@@ -3,6 +3,7 @@
 * Server - [bug] Fixed PHP errors.
 * Server - [improvement] Updated policy and time configurations with multiple tabs.
 * Server - [improvement] Use font-awesome for negated displays.
+* Server - [feature] Added policy templates.
 
 1.7.1 (2019-03-20)
 ==================
