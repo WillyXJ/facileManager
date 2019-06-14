@@ -1,3 +1,8 @@
+3.5.0 (2019-0?)
+==================
+* Server - [improvement] Popup windows are now draggable only by the title bar.
+* Server - [improvement] Refinements around grabbable rows.
+
 3.4.2 (2019-05-17)
 ==================
 * Server - [bug] Fixed font-awesome graphics for offline installations. (Issue #441)
