@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] Popup windows are now draggable only by the title bar.
 * Server - [improvement] Refinements around grabbable rows.
+* Server - [bug] Configuration previews no longer process characters as html.
 
 3.4.2 (2019-05-17)
 ==================
