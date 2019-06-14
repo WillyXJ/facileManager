@@ -72,6 +72,11 @@ $__FM_CONFIG['fw']['policy_options']	= array(
 												'firewalls' => array('iptables', 'ipfw', 'ipfilter'),
 												'bit' => 4,
 												'desc' => __('Matches packets that are fragments and not the first fragment of an IP datagram')
+											),
+											'quick' => array(
+												'firewalls' => array('pf'),
+												'bit' => 8,
+												'desc' => __('Cancel further rule processing with the "quick" keyword')
 											)
 										);
 

@@ -70,8 +70,6 @@ function upgradefmFirewall_01003($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
-	
 	setOption('version', '1.0-beta3', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
@@ -136,8 +134,6 @@ function upgradefmFirewall_01005($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
-	
 	setOption('version', '1.0-beta5', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
@@ -187,8 +183,6 @@ function upgradefmFirewall_01006($__FM_CONFIG, $running_version) {
 		}
 	}
 	
-	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
-	
 	setOption('version', '1.0-rc1', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
@@ -229,8 +223,6 @@ function upgradefmFirewall_111($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
-	
 	setOption('version', '1.1.1', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
@@ -281,8 +273,6 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
-	
 	setOption('version', '1.4-beta2', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
@@ -315,6 +305,15 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_destination_not` `policy_destination_not` ENUM('','!') NOT NULL DEFAULT ''";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_services_not` `policy_services_not` ENUM('','!') NOT NULL DEFAULT ''";
 	
+	/** Enable quick option on all pf rules */
+	$result = $fmdb->get_results("SELECT `server_serial_no` FROM `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` WHERE `server_type`='pf'");
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $server) {
+			$serial_nos[] = $server->server_serial_no;
+		}
+		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_options`=`policy_options` + 8 WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ")";
+	}
+	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
@@ -323,8 +322,6 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	if (!setOption('fmFirewall_client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false)) return false;
-	
 	setOption('version', '2.0', 'auto', false, 0, 'fmFirewall');
 	
 	return true;

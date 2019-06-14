@@ -326,6 +326,7 @@ HTML;
 		if ($row->policy_targets) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></a>', __('Policy targets defined'));
 		if ($row->policy_packet_state) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></a>', str_replace(',', ', ', $row->policy_packet_state));
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></a>', __('Matching fragment packets'));
+		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></a>', __('Quick processing cancels further rule processing upon match'));
 		
 		$comments = nl2br($row->policy_comment);
 		if ($row->server_serial_no) {
@@ -445,12 +446,15 @@ FORM;
 
 			if ($server_firewall_type == 'iptables' || $_POST['server_serial_no'][0] == 't') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-left" data-tooltip="%s %s"><i class="fa fa-question-circle"></i></a>',
+						__('Supported firewalls:'), 'iptables'
+					) : null;
 				$policy_time_form .= sprintf('
 				<tr>
 					<th width="33&#37;" scope="row"><label for="policy_time">%s</label></th>
-					<td width="67&#37;">%s</td>
+					<td width="67&#37;">%s %s</td>
 				</tr>',
-						__('Time Restriction'), $policy_time
+						__('Time Restriction'), $policy_time, $supported_firewalls
 					);
 
 				$policy_packet_state_form .= sprintf('
@@ -467,7 +471,13 @@ FORM;
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				if (in_array($server_firewall_type, $opt_array['firewalls']) || $_POST['server_serial_no'][0] == 't') {
 					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-					$options .= '<input name="policy_options[]" id="policy_options[' . $opt_array['bit'] . ']" value="' . $opt_array['bit'] . '" type="checkbox" ' . $checked . ' /><label for="policy_options[' . $opt_array['bit'] . ']" style="white-space: unset">' . $opt_array['desc'] . "</label><br />\n";
+					$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" style="color: unset;" data-tooltip="%s %s">%s</a>',
+							__('Supported firewalls:'), join(', ', $opt_array['firewalls']), $opt_array['desc']
+						) : $opt_array['desc'];
+					$options .= sprintf('<input name="policy_options[]" id="policy_options[%s]" value="%s" type="checkbox" %s /><label for="policy_options[%s]" style="white-space: unset">%s</label><br />' . "\n",
+							$opt_array['bit'], $opt_array['bit'], $checked, $opt_array['bit'],
+							$supported_firewalls
+						);
 				}
 			}
 

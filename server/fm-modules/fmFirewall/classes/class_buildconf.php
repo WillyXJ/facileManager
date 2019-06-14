@@ -72,7 +72,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				list($template_results, $template_id_count) = getTemplatePolicies($template_ids, $server_id, 0, 'filter');
 			}
 			
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_status='active'");
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no");
 			$fmdb->num_rows += $template_id_count;
 			if ($fmdb->num_rows) {
 				$template_results = array_merge((array) $template_results, (array) $fmdb->last_result);
@@ -477,7 +477,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$label = ' label "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ': "';
 			}
 			
-			$line[] = 'quick';
+			/** Handle quick processing */
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) {
+				$line[] = 'quick';
+			}
 			
 			/** Handle interface */
 			$interface = ($policy_result[$i]->policy_interface != 'any') ? 'on ' . $policy_result[$i]->policy_interface : null;
