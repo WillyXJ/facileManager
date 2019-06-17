@@ -276,7 +276,7 @@ HTML;
 			$tcp_flags_head .= '<th title="' . $flag .'">' . $flag[0] . "</th>\n";
 			
 			$tcp_flags_mask_form .= '<td><input type="checkbox" name="service_tcp_flags[mask][' . $bit . ']" ';
-			if ($bit & $tcp_flag_mask) $tcp_flags_mask_form .= 'checked';
+			if ($bit & (integer) $tcp_flag_mask) $tcp_flags_mask_form .= 'checked';
 			$tcp_flags_mask_form .= "/></td>\n";
 
 			$tcp_flags_settings_form .= '<td><input type="checkbox" name="service_tcp_flags[settings][' . $bit . ']" ';
