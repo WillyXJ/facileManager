@@ -7,6 +7,7 @@
 * Server - [bug] Fixed jquery to highlight records to be updated when the multi-line
            values are modified.
 * Server - [bug] Fixed remote server creation after a fresh installation.
+* Server - [bug] Fixed dynamic zone loading for reverse zones. (Issue #449)
 
 3.3.4 (2019-05-17)
 ==================

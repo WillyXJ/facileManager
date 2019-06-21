@@ -891,9 +891,11 @@ HTML;
 			
 			if (version_compare($server_client_version, '3.0-alpha1', '<')) continue;
 			
+			$file_ext = ($domain_mapping == 'forward') ? 'hosts' : 'rev';
+			
 			/** Get zone data via ssh */
 			if ($server_update_method == 'ssh') {
-				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.hosts', 'return', $server_update_port);
+				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.' . $file_ext, 'return', $server_update_port);
 			} elseif (in_array($server_update_method, array('http', 'https'))) {
 				/** Get zone data via http(s) */
 				/** Test the port first */
@@ -906,7 +908,7 @@ HTML;
 						'serial_no' => $server_serial_no,
 						'domain_id' => $domain_id,
 						'module' => $_SESSION['module'],
-						'command_args' => 'dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.hosts'
+						'command_args' => 'dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.' . $file_ext
 					);
 
 					$server_remote = getPostData($url, $post_data);
