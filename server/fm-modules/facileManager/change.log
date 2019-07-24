@@ -1,3 +1,7 @@
+3.4.3 (2019-??-??)
+==================
+* Server - [bug] Fixed PHP errors during installation process.
+
 3.4.2 (2019-05-17)
 ==================
 * Server - [bug] Fixed font-awesome graphics for offline installations. (Issue #441)

@@ -42,13 +42,15 @@ if (is_array($GLOBALS)) {
 	if (@array_key_exists('logout', $GLOBALS['URI'])) exit;
 }
 
-if ($GLOBALS['basename'] == 'index.php') {
+if (isset($GLOBALS['basename']) && $GLOBALS['basename'] == 'index.php') {
 	require_once(ABSPATH . 'fm-includes/init.php');
 	checkAppVersions();
 }
 
-if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename']))) {
-	@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename']));
-} else throwHTTPError('404');
+if (function_exists('includeModuleFile')) {
+	if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename']))) {
+		@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename']));
+	} else throwHTTPError('404');
+}
 
 ?>

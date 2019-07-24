@@ -253,7 +253,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 	}
 
-} else {
+} elseif (!defined('FM_NO_CHECKS')) {
 
 	/** A config file doesn't exist */
 	header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');

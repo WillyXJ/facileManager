@@ -2,9 +2,10 @@
 if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
-header("Content-Type: text/javascript");
+if (isset($__FM_CONFIG)) {
+	header("Content-Type: text/javascript");
 
-echo '$(document).ready(function() {
+	echo '$(document).ready(function() {
 	
 	var KEYCODE_ENTER = 13;
 	var KEYCODE_ESC = 27;
@@ -1304,4 +1305,5 @@ function doLogout() {
 	window.location = "?logout";
 }
 ';
+}
 ?>
