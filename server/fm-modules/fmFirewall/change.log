@@ -8,7 +8,7 @@
 * Server - [bug] Fixed pf macro for multiple negated ports.
 * Server - [improvement] Policy page now displays if options are set on a rule.
 * Server - [feature] The pf 'quick' keyword is now an option.
-* Server - [bug] Fixed PHP errors.
+* Server - [feature] Packet state for all firewall types can now be defined.
 
 1.7.1 (2019-03-20)
 ==================

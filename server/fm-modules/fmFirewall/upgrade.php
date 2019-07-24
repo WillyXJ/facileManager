@@ -312,6 +312,25 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 			$serial_nos[] = $server->server_serial_no;
 		}
 		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_options`=`policy_options` + 8 WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ")";
+		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") AND `policy_action='pass'";
+	}
+	
+	/** Set packet state on all "pass" rules */
+	$serial_nos = null;
+	$result = $fmdb->get_results("SELECT `server_serial_no` FROM `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` WHERE `server_type`='ipfilter'");
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $server) {
+			$serial_nos[] = $server->server_serial_no;
+		}
+		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") `policy_action='pass'";
+	}
+	$serial_nos = null;
+	$result = $fmdb->get_results("SELECT `server_serial_no` FROM `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` WHERE `server_type`='ipfw'");
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $server) {
+			$serial_nos[] = $server->server_serial_no;
+		}
+		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep-state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") `policy_action='pass'";
 	}
 	
 	/** Create table schema */

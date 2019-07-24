@@ -456,15 +456,27 @@ FORM;
 				</tr>',
 						__('Time Restriction'), $policy_time, $supported_firewalls
 					);
-
-				$policy_packet_state_form .= sprintf('
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_packet_state">%s</label></th>
-					<td width="67&#37;">%s</td>
-				</tr>',
-						__('Packet State'), buildSelect('policy_packet_state', 'policy_packet_state', $__FM_CONFIG['fw']['policy_states'], explode(',', trim($policy_packet_state, ',')), 1, null, true, null, null, __('Select one or more packet states'))
-					);
 			}
+
+			$policy_packet_state_options = ($server_firewall_type) ? $__FM_CONFIG['fw']['policy_states'][$server_firewall_type] : null;
+			if ($_POST['server_serial_no'][0] == 't' || (is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
+				$policy_packet_state_options = array();
+				foreach ($__FM_CONFIG['fw']['policy_states'] as $fw => $values) {
+					$i = 0;
+					foreach ($values as $state) {
+						$policy_packet_state_options[$fw][$i][0] = $state;
+						$policy_packet_state_options[$fw][$i][1] = $state;
+						$i++;
+					}
+				}
+			}
+			$policy_packet_state_form .= sprintf('
+			<tr>
+				<th width="33&#37;" scope="row"><label for="policy_packet_state">%s</label></th>
+				<td width="67&#37;">%s</td>
+			</tr>',
+					__('Packet State'), buildSelect('policy_packet_state', 'policy_packet_state', $policy_packet_state_options, explode(',', trim($policy_packet_state, ',')), 1, null, true, null, null, __('Select one or more packet states'))
+				);
 
 			/** Parse options */
 			$options = null;
