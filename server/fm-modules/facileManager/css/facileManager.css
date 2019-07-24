@@ -598,7 +598,7 @@ h4 {
 #table_edits.grab1 tbody tr td:first-child i {
 	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
 }
-#table_edits.grab tbody tr td:nth-child(2) i {
+#table_edits.grab tbody:not(.no-grab) tr td:nth-child(2) i {
 	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
 }
 #table_edits.grabbing tbody tr td:nth-child(2) i {
