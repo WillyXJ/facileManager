@@ -309,18 +309,18 @@ class fm_module_templates {
 	function displayRow($row) {
 		global $__FM_CONFIG;
 		
-		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
+//		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
 		
 		$edit_status = $edit_actions = $checkbox = $grab_bars = null;
 		$bars_title = __('Click and drag to reorder');
 		
 		if (currentUserCan('manage_policies', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->policy_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->policy_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
+//			$edit_status .= '<a class="status_form_link" href="#" rel="';
+//			$edit_status .= ($row->policy_status == 'active') ? 'disabled' : 'active';
+//			$edit_status .= '">';
+//			$edit_status .= ($row->policy_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+//			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
@@ -332,7 +332,7 @@ class fm_module_templates {
 		$comments = nl2br($row->policy_comment);
 
 		echo <<<HTML
-		<tr id="$row->policy_id" name="$row->policy_name"$disabled_class>
+		<tr id="$row->policy_id" name="$row->policy_name">
 			$checkbox
 			$grab_bars
 			<td><a href="/config-policy.php?server_serial_no=t_{$row->policy_id}">$row->policy_name</a></td>
