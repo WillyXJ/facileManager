@@ -386,10 +386,13 @@ HTML;
 
 		/** Build template stack lists */
 		$all_templates = $this->getTemplateList();
-		$selected_templates = null;
+		$selected_templates = array();
 		if ($policy_id) {
 			$i = 0;
 			foreach ($all_templates as $template_array_key => $template) {
+				if ($policy_id == $template[1]) {
+					unset ($all_templates[$template_array_key]);
+				}
 				foreach (explode(';', $policy_template_stack) as $selected_template_id) {
 					if ($selected_template_id == $template[1]) {
 						$selected_templates[$i] = $template;
@@ -401,8 +404,8 @@ HTML;
 		}
 		$available_templates = $all_templates;
 		
-		$available_templates = buildSelect('select-from', 'select-from', $available_templates, null, 1, null, true, null, 'select-stack');
-		$selected_templates = buildSelect('policy_template_stack', 'policy_template_stack', $selected_templates, null, 1, null, true, null, 'select-stack');
+		$available_templates = buildSelect('select-from', 'select-from', array_merge($available_templates, array()), null, 1, null, true, null, 'select-stack');
+		$selected_templates = buildSelect('policy_template_stack', 'policy_template_stack', array_merge($selected_templates, array()), null, 1, null, true, null, 'select-stack');
 		
 		$form = sprintf('<form name="manage" id="manage" method="post" action="">
 			%s
