@@ -290,6 +290,7 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_type` `policy_type` ENUM('filter','nat','template') NOT NULL DEFAULT 'filter'";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_targets` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `policy_order_id`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_template_stack` VARCHAR(255) NULL DEFAULT NULL AFTER `policy_type`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_order_id` `policy_order_id` INT(11) NULL DEFAULT NULL";
 	
 	/** Change policy negates */
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_source_not` `policy_source_not` ENUM('0','1','','!') NOT NULL DEFAULT '0'";

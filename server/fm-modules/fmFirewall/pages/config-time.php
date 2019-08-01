@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
- | Processes time management page                                          |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 if (!currentUserCan(array('manage_time', 'view_all'), $_SESSION['module'])) unAuth();
@@ -54,7 +51,7 @@ if (currentUserCan('manage_time', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_time', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_time', $_SESSION['module']), null, null, 'noscroll');
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name', 'time_');
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

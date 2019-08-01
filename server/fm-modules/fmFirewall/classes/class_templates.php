@@ -70,8 +70,8 @@ class fm_module_templates {
 								array('title' => _('Comment'), 'style' => 'width: 20%;')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
-		echo displayTableHeader($table_info, $title_array);
 		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {
 			$y = 0;
@@ -545,7 +545,7 @@ HTML;
 		
 		$post['policy_name'] = sanitize($post['policy_name']);
 		$post['policy_type'] = 'template';
-		$post['server_serial_no'] = $post['policy_order_id'] = 0;
+		$post['server_serial_no'] = 0;
 		if (!array_key_exists('policy_targets', $post)) {
 			$post['policy_targets'] = array(-1);
 		}

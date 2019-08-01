@@ -33,10 +33,17 @@ if ($server_serial_no === 0) {
 }
 $original_server_serial_no = $server_serial_no;
 
-//if (!$server_id = getServerID($server_serial_no, $_SESSION['module'])) header('Location: ' . $server_config_page);
+/** Validate serial_no */
+$valid = false;
+if (getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id')) {
+	$valid = true;
+} elseif ($server_serial_no[0] == 't' && getNameFromID(preg_replace('/\D/', null, $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_status')) {
+	$valid = true;
+}
 
-/** Should not be here if the client has not been installed */
-//if (getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_installed') != 'yes') header('Location: ' . $server_config_page);
+if ($valid === false) {
+	$server_serial_no = $original_server_serial_no = null;
+}
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_policies.php');
 
@@ -83,7 +90,7 @@ if ($fmdb->num_rows && !$fmdb->sql_errors) {
 $avail_servers = buildServerSubMenu($server_serial_no, $avail_servers);
 
 $allowed_to_add = ($server_serial_no) ? currentUserCan('manage_policies', $_SESSION['module']) : false;
-echo printPageHeader((string) $response, null, $allowed_to_add, $type);
+echo printPageHeader((string) $response, null, $allowed_to_add, $type, null, 'noscroll');
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
@@ -96,11 +103,14 @@ HTML;
 
 /** Get template ID if appropriate */
 $template_id = 0;
+$template_id_sql = null;
 if ($server_serial_no[0] == 't') {
 	$template_id = preg_replace('/\D/', null, $server_serial_no);
 	$template_id_sql = "AND policy_template_id=$template_id";
 	$server_serial_no = 0;
 }
+
+$fmdb->num_rows = 0;
 
 /** Get policies for server including templates */
 $server_id = getServerID($server_serial_no, $_SESSION['module']);

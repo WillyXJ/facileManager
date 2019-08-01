@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
- | Processes objects management page                                       |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 if (!isset($type)) header('Location: objects-host.php');
@@ -61,7 +58,7 @@ printHeader();
 @printMenu();
 
 //$allowed_to_add = ($type == 'custom' && currentUserCan('manage_objects', $_SESSION['module'])) ? true : false;
-echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), $type, null, 'noscroll');
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name', 'object_', "AND object_type='$type'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

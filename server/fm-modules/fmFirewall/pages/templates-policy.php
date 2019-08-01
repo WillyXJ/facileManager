@@ -48,7 +48,7 @@ if (!empty($_POST)) {
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_policies', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_policies', $_SESSION['module']), null, null, 'noscroll');
 
 $sort_direction = null;
 

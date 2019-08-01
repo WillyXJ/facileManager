@@ -46,7 +46,7 @@ class fm_module_policies {
 		
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
-//		echo '<div class="overflow-container">';
+		echo '<div class="overflow-container">';
 
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
@@ -59,8 +59,8 @@ class fm_module_policies {
 								__('Direction'), __('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
+		echo '<div class="existing-container" style="bottom: 10em;">';
 		echo displayTableHeader($table_info, $title_array);
-//		echo '<div class="existing-container" style="bottom: 10em;">';
 
 		if ($total_pages) {
 			$grabbable = true;

@@ -37,35 +37,38 @@ class fm_module_services {
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+		echo '<div class="overflow-container">';
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="services">%s</p>', sprintf(__('There are no %s services defined.'), strtoupper($type)));
-		} else {
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'services'
-						);
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'services'
+					);
 
-			if (is_array($bulk_actions_list)) {
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
-									'class' => 'header-tiny header-nosort'
-								);
-			}
-			$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), _('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
-			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		}
+		$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), _('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
+		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo displayTableHeader($table_info, $title_array);
+
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
 				$y++;
 			}
-			
-			echo "</tbody>\n</table>\n";
+		}
+
+		echo "</tbody>\n</table></div></div>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="services">%s</p>', sprintf(__('There are no %s services defined.'), strtoupper($type)));
 		}
 	}
 

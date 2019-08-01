@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
- | Processes services management page                                      |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 if (!isset($type)) header('Location: services-icmp.php');
@@ -58,7 +55,7 @@ printHeader();
 @printMenu();
 
 //$allowed_to_add = ($type == 'custom' && currentUserCan('manage_services', $_SESSION['module'])) ? true : false;
-echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $type, null, 'noscroll');
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name', 'service_', "AND service_type='$type'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

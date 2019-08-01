@@ -37,37 +37,40 @@ class fm_module_objects {
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+		echo '<div class="overflow-container">';
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', sprintf(__('There are no %s objects defined.'), $type));
-		} else {
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'objects'
-						);
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'objects'
+					);
 
-			if (is_array($bulk_actions_list)) {
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
-									'class' => 'header-tiny header-nosort'
-								);
-			}
-			$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address')));
-			if ($type != 'host') $title_array[] = __('Netmask');
-			$title_array[] = array('title' => _('Comment'), 'style' => 'width: 40%;');
-			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		}
+		$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address')));
+		if ($type != 'host') $title_array[] = __('Netmask');
+		$title_array[] = array('title' => _('Comment'), 'style' => 'width: 40%;');
+		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo displayTableHeader($table_info, $title_array);
+
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table></div></div>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', sprintf(__('There are no %s objects defined.'), $type));
 		}
 	}
 

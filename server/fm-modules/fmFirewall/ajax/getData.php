@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
- | Displays module forms                                                   |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 if (!defined('AJAX')) define('AJAX', true);
@@ -120,7 +117,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	
 	if ($add_new) {
 		if ($_POST['item_type'] == 'policies') {
-			$edit_form = $post_class->printForm(null, $action, $_POST['item_sub_type']);
+			$edit_form = $post_class->printForm(null, $action, sanitize($_POST['item_sub_type']));
 		} else {
 			$edit_form = $post_class->printForm(null, $action, $type_map, $id);
 		}
@@ -131,7 +128,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		
 		$edit_form_data[] = $results[0];
 		if ($_POST['item_type'] == 'policies') {
-			$edit_form = $post_class->printForm($edit_form_data, 'edit', $_POST['item_sub_type']);
+			$edit_form = $post_class->printForm($edit_form_data, 'edit', sanitize($_POST['item_sub_type']));
 		} else {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $view_id);
 		}

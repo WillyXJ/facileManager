@@ -41,7 +41,7 @@
 }
 
 table.legend {
-	margin-top: 3em;
+	margin: 3em 0;
 	font-size: 11px;
 }
 table.legend tr td {
