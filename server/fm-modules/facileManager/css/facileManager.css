@@ -1430,6 +1430,11 @@ span.not_installed {
 	max-width: 100%;
 }
 
+.existing-container #shadow_box {
+	margin: 0 .3em;
+	min-width: 99%;
+}
+
 #shadow_container.fullwidthbox {
 	line-height: 10pt;
 	padding: 0;
