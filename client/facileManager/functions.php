@@ -1515,7 +1515,7 @@ function getInterfaceAddresses($interface = null) {
 			break;
 	}
 	
-	exec($command . $interface . ' | grep inet | awk \'{print $2}\' | egrep -v \'127.0.0.1|^::1\' | sort | uniq', $addresses);
+	exec($command . $interface . ' | grep inet | awk \'{print $2}\' | egrep -v \'127.0.0.1|^::1|^169.254.\' | sort | uniq', $addresses);
 	
 	return $addresses;
 }
