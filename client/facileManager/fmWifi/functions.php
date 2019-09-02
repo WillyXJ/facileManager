@@ -786,7 +786,7 @@ function apStatus($info = 'daemon') {
 		$aplist[$dev]['clients'] = apGetClients('quiet', $dev);
 	}
 	
-	$aplist = array_merge(array('status' => intval($status), $server_type . '-uptime' => trim(shell_exec("ps -eo comm,etimes | grep $server_type | awk '{print \$NF}'"))), array('interfaces' => $aplist));
+	$aplist = array_merge(array('status' => intval($status), $server_type . '-uptime' => trim(shell_exec("ps -eo comm,etimes | grep $server_type | awk '{print \$NF}'"))), array('interfaces' => $aplist, 'interface-addresses' => getInterfaceAddresses()));
 
 	$data['action'] = 'status-upload';
 	$data['ap-info'] = $aplist;
