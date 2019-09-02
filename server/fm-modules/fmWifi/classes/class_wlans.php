@@ -60,7 +60,7 @@ class fm_wifi_wlans {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = array_merge((array) $title_array, array(__('SSID'), __('Security'), __('Associated APs'), _('Comment')));
+		$title_array = array_merge((array) $title_array, array(__('SSID'), __('Frequency'), __('Security'), __('Associated APs'), _('Comment')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 		echo displayTableHeader($table_info, $title_array);
@@ -386,15 +386,35 @@ class fm_wifi_wlans {
 			$icons = implode(' ', $icons);
 		}
 		
-		/** Display fixed address */
 		$query = 'SELECT * FROM `fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config` WHERE `config_status`!="deleted" AND `account_id`="' . $_SESSION['user']['account_id'] . '" AND 
 			`config_name`="ssid" AND `config_data`="' . $row->config_data . '"';
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
+			$last_result = $fmdb->last_result[0];
+			/** Display security type */
 			$query = 'SELECT * FROM `fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config` WHERE `config_status`!="deleted" AND `account_id`="' . $_SESSION['user']['account_id'] . '" AND 
-				`config_name`="wpa_key_mgmt" AND `config_parent_id`="' . $fmdb->last_result[0]->config_id . '"';
+				`config_name`="wpa_key_mgmt" AND `config_parent_id`="' . $last_result->config_id . '"';
 			$fmdb->get_results($query);
 			$security_type = $fmdb->last_result[0]->config_data;
+			
+			/** Display frequency */
+			$query = 'SELECT * FROM `fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config` WHERE `config_status`!="deleted" AND `account_id`="' . $_SESSION['user']['account_id'] . '" AND 
+				`config_name`="hw_mode" AND `config_parent_id`="' . $last_result->config_id . '"';
+			$fmdb->get_results($query);
+			switch ($fmdb->last_result[0]->config_data) {
+				case 'a':
+					$frequency = '5 GHz';
+					break;
+				case 'b':
+				case 'g':
+					$frequency = '2.4 GHz';
+					break;
+				case 'ad':
+					$frequency = '60 GHz';
+					break;
+				default:
+					$frequency = _('None');
+			}
 		}
 		
 		if (!$security_type) {
@@ -421,6 +441,7 @@ class fm_wifi_wlans {
 		<tr id="$row->config_id" name="$row->config_data" $class>
 			$checkbox
 			<td>$row->config_data $icons</td>
+			<td>$frequency</td>
 			<td>$security_type</td>
 			<td>$associated_aps</td>
 			<td>$row->config_comment</td>
@@ -498,6 +519,7 @@ HTML;
 		$max_num_sta_note = sprintf(' <a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('Limit the number of clients that can connect or leave empty for the maximum (2007). In addition, you can choose to ignore broadcast Probe Request frames from unassociated clients if the maximum client count has been reached which would discourage clients from trying to associate with this AP if the association would be rejected due to the maximum client limit.'));
 		$no_probe_resp_if_max_sta_checked = (str_replace(array('"', "'"), '', $this->getConfig($config_id, 'no_probe_resp_if_max_sta'))) ? 'checked' : null;
 
+		$ieee80211n_entry = 'none';
 		if (in_array($hw_mode, array('', 'a', 'b', 'g'))) {
 			$hw_mode_option_style = 'block';
 			$ieee80211ac_style = (in_array($hw_mode, array('', 'a'))) ? 'inline' : 'none';
