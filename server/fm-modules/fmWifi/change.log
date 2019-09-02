@@ -1,3 +1,7 @@
+0.2.2 (2019-??)
+==================
+* Server - [bug] Fixed dashboard display of uptime when multiple APs are in use.
+
 0.2.1 (2019-03-20)
 ==================
 * Server - [bug] Fixed installs and upgrades with PHP 7.3.x. (Issue #436)

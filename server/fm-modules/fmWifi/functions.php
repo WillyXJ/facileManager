@@ -159,13 +159,15 @@ HTML;
 			$ap_groups = $fm_module_servers->getServerGroups($server_info->server_id, 'group_name');
 			if (is_array($ap_groups)) {
 				$ap_groups = join('; ', $ap_groups);
+			} else {
+				$ap_groups = sprintf('<i>%s</i>', _('None'));
 			}
 			$ap_uptime = secondsToTime(0);
 			if ($apstats_result) {
 				foreach ($apstats_result as $apstats) {
-					$ap_uptime = secondsToTime(0);
 					if ($apstats->server_serial_no != $server_info->server_serial_no) continue;
 					
+					$ap_uptime = secondsToTime(0);
 					$ap_stat = unserialize($apstats->stat_info);
 					$active_time = strtotime('3 minutes ago');
 
@@ -177,7 +179,6 @@ HTML;
 					if (!$reported_ap && $ap_stat['status']) {
 						unset($ap_stat['interfaces']);
 						$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}stats` SET stat_info = NULL WHERE `account_id`='" . $_SESSION['user']['account_id'] . "' AND `server_serial_no`='$server_info->server_serial_no' LIMIT 1";
-						echo $query;
 						$fmdb->query($query);
 					}
 					$uptime = 0;
