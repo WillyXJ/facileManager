@@ -198,6 +198,7 @@ HTML;
 						}
 //					$ap_clients =+ count((array) $iface_info['clients']);
 					}
+					$ap_addresses = isset($ap_stat['interface-addresses']) ? join('<br />', $ap_stat['interface-addresses']) : null;
 				}
 			}
 			$return .= <<<HTML
@@ -206,7 +207,7 @@ HTML;
 					<td>$ap_status</td>
 					<td>$ap_uptime</td>
 					<td>$ap_clients</td>
-					<td></td>
+					<td>$ap_addresses</td>
 					<td>$ap_groups</td>
 				</tr>
 HTML;

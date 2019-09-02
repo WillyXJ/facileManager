@@ -1,3 +1,7 @@
+3.5.0 (2019-??)
+==================
+* Client - [improvement] Added support to gather interface addresses.
+
 3.4.2 (2019-05-17)
 ==================
 * Server - [bug] Fixed font-awesome graphics for offline installations. (Issue #441)

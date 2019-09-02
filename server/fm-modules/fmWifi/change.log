@@ -3,6 +3,7 @@
 * Server - [bug] Fixed dashboard display of uptime when multiple APs are in use.
 * Server - [improvement] Added display of WLAN frequency.
 * Server - [bug] Fixed PHP errors.
+* Both   - [improvement] Added AP interface addresses to the dashboard.
 
 0.2.1 (2019-03-20)
 ==================
