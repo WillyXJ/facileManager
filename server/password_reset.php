@@ -19,15 +19,6 @@
  +-------------------------------------------------------------------------+
 */
 
-/**
- * Handles password resets
- *
- * @author		Jon LaBass
- * @version		$Id:$
- * @copyright	2013
- *
- */
-
 define('CLIENT', true);
 
 require_once('fm-init.php');
@@ -35,10 +26,16 @@ require_once('fm-init.php');
 $message = null;
 
 /** Redirect if key and login are not set */
-if (!count($_POST) && (!array_key_exists('key', $_GET) || !array_key_exists('login', $_GET))) header('Location: ' . $GLOBALS['RELPATH']);
+if (!count($_POST) && (!array_key_exists('key', $_GET) || !array_key_exists('login', $_GET))) {
+	header('Location: ' . $GLOBALS['RELPATH']);
+	exit;
+}
 
 /** Check key for validity */
-if (!checkForgottonPasswordKey(sanitize($_GET['key']), sanitize($_GET['login']))) header('Location: ' . $GLOBALS['RELPATH'] . '?forgot_password&keyInvalid');
+if (!checkForgottonPasswordKey(sanitize($_GET['key']), sanitize($_GET['login']))) {
+	header('Location: ' . $GLOBALS['RELPATH'] . '?forgot_password&keyInvalid');
+	exit;
+}
 
 if (count($_POST)) {
 	extract($_POST);
