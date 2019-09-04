@@ -2,6 +2,9 @@
 ==================
 * Server - [feature] Added support for TLSA and OPENPGPKEY RR types. (Issue #439)
 * Server - [bug] Fixed PHP error during config generation via cron. (Issue #454)
+* Both   - [security] Fixed an issue where local privileges could be escalated
+           to root. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
+           Ivars Vids)
 
 3.3.5 (2019-05-??)
 ==================

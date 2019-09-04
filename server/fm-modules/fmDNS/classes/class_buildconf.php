@@ -2146,7 +2146,7 @@ HTML;
 		$dnssec_ksk = join(' ', $dnssec_ksk);
 		
 		/** Sign zone with all keys */
-		$dnssec_output = shell_exec('cd ' . $tmp_dir . ' && ' . $dnssec_signzone . ' -g -K ' . $tmp_dir . ' -o ' . $domain->domain_name . ' ' . $dnssec_ksk . ' -f ' . $temp_zone_file . '.signed -e ' . $dnssec_endtime . ' ' . $temp_zone_file . ' ' . $dnssec_key_signing_array['ZSK'][0][0] . ' 2>&1');
+		$dnssec_output = shell_exec('cd ' . escapeshellarg($tmp_dir) . ' && ' . $dnssec_signzone . ' -g -K ' . escapeshellarg($tmp_dir) . ' -o ' . escapeshellarg($domain->domain_name) . ' ' . $dnssec_ksk . ' -f ' . escapeshellarg($temp_zone_file) . '.signed -e ' . $dnssec_endtime . ' ' . escapeshellarg($temp_zone_file) . ' ' . escapeshellarg($dnssec_key_signing_array['ZSK'][0][0]) . ' 2>&1');
 		if (file_exists($temp_zone_file . '.signed')) {
 			$signed_zone = file_get_contents($temp_zone_file . '.signed');
 			$GLOBALS[$_SESSION['module']]['DNSSEC'][] = array('domain_id' => $domain->parent_domain_id, 'domain_dnssec_signed' => strtotime('now'));
