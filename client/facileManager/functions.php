@@ -528,11 +528,11 @@ function getServerPath($server) {
 function pingTest($server) {
 	$program = findProgram('ping');
 	if (PHP_OS == 'FreeBSD' || PHP_OS == 'Darwin') {
-		$ping = shell_exec("$program -t 2 -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -t 2 -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	} elseif (PHP_OS == 'Linux') {
-		$ping = shell_exec("$program -W 2 -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -W 2 -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	} else {
-		$ping = shell_exec("$program -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	}
 	if (preg_match('/64 bytes from/', $ping)) {
 		return true;
@@ -818,7 +818,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 		/** cron */
 		case 'c':
 			$tmpfile = sys_get_temp_dir() . '/crontab.facileManager';
-			$dump = shell_exec('crontab -l 2>/dev/null | grep -v ' . $module_name . '> ' . $tmpfile . ' 2>/dev/null');
+			$dump = shell_exec('crontab -l 2>/dev/null | grep -v ' . escapeshellarg($module_name) . '> ' . $tmpfile . ' 2>/dev/null');
 			
 			/** Handle special cases */
 			if (PHP_OS == 'SunOS') {
@@ -978,7 +978,7 @@ function addUser($user_info, $passwd_users) {
 	}
 	
 	if (!$retval) {
-		$ssh_dir = trim(shell_exec("grep $user_name /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
+		$ssh_dir = trim(shell_exec('grep ' . escapeshellarg($user_name) . " /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
 		if ($ssh_dir && $ssh_dir != '/') {
 			createDir($ssh_dir, $user_name);
 			return $ssh_dir;
@@ -1210,7 +1210,7 @@ function extractFiles($files = array()) {
  * @return string
  */
 function getParameterValue($param, $file, $delimiter = '=') {
-	$raw_line = shell_exec('grep ' . $param . ' ' . $file . ' 2>/dev/null');
+	$raw_line = shell_exec('grep ' . escapeshellarg($param) . ' ' . escapeshellarg($file) . ' 2>/dev/null');
 	if (!$raw_line) {
 		return false;
 	}

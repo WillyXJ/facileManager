@@ -951,11 +951,11 @@ function functionalCheck() {
 function pingTest($server) {
 	$program = findProgram('ping');
 	if (PHP_OS == 'FreeBSD' || PHP_OS == 'Darwin') {
-		$ping = shell_exec("$program -t 2 -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -t 2 -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	} elseif (PHP_OS == 'Linux') {
-		$ping = shell_exec("$program -W 2 -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -W 2 -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	} else {
-		$ping = shell_exec("$program -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	}
 	if (preg_match('/64 bytes from/', $ping)) {
 		return true;

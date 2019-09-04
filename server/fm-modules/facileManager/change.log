@@ -6,6 +6,9 @@
 * Server - [security] Fixed an issue where unauthenticated password resets could
            occur. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
            Ivars Vids)
+* Both   - [security] Fixed an issue where local privileges could be escalated
+           to root. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
+           Ivars Vids)
 
 3.4.2 (2019-05-17)
 ==================
