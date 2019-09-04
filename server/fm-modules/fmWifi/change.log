@@ -4,6 +4,9 @@
 * Server - [improvement] Added display of WLAN frequency.
 * Server - [bug] Fixed PHP errors.
 * Both   - [improvement] Added AP interface addresses to the dashboard.
+* Client - [security] Fixed an issue where local privileges could be escalated
+           to root. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
+           Ivars Vids)
 
 0.2.1 (2019-03-20)
 ==================

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -163,7 +163,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	
 	/** Add AP status cron */
 	$tmpfile = sys_get_temp_dir() . '/crontab.' . $module_name;
-	$entry_exists = intval(trim(shell_exec('crontab -l 2>/dev/null | grep ' . $module_name . ' | grep -c status-all')));
+	$entry_exists = intval(trim(shell_exec('crontab -l 2>/dev/null | grep ' . escapeshellarg($module_name) . ' | grep -c status-all')));
 	
 	if (!$entry_exists) {
 		$dump = shell_exec('crontab -l > ' . $tmpfile . ' 2>/dev/null');
@@ -552,7 +552,7 @@ iface %s inet manual
 		);
 		file_put_contents($bridge_conf, $vlan_conf_config);
 		
-		shell_exec("ifup $default_interface > /dev/null 2>&1");
+		shell_exec('ifup ' . escapeshellarg($default_interface) . ' > /dev/null 2>&1');
 		echo "done\n";
 	}
 	
@@ -735,9 +735,9 @@ interface %s
 		if ($rc) {
 			shell_exec('iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE');
 		}
-		shell_exec('sh -c "iptables-save > /etc/iptables.ipv4.' . $module_name . '"');
+		shell_exec('sh -c "iptables-save > /etc/iptables.ipv4.' . escapeshellarg($module_name) . '"');
 		if (strpos(file_get_contents('/etc/rc.local'), $module_name) === false) {
-			shell_exec('sed -i "s#^exit 0\$#iptables-restore < /etc/iptables.ipv4.' . $module_name . '\\nexit 0#" /etc/rc.local');
+			shell_exec('sed -i "s#^exit 0\$#iptables-restore < /etc/iptables.ipv4.' . escapeshellarg($module_name) . '\\nexit 0#" /etc/rc.local');
 		}
 		echo "done\n\n";
 	}
@@ -786,7 +786,7 @@ function apStatus($info = 'daemon') {
 		$aplist[$dev]['clients'] = apGetClients('quiet', $dev);
 	}
 	
-	$aplist = array_merge(array('status' => intval($status), $server_type . '-uptime' => trim(shell_exec("ps -eo comm,etimes | grep $server_type | awk '{print \$NF}'"))), array('interfaces' => $aplist, 'interface-addresses' => getInterfaceAddresses()));
+	$aplist = array_merge(array('status' => intval($status), $server_type . '-uptime' => trim(shell_exec('ps -eo comm,etimes | grep ' . escapeshellarg($server_type) . " | awk '{print \$NF}'"))), array('interfaces' => $aplist, 'interface-addresses' => getInterfaceAddresses()));
 
 	$data['action'] = 'status-upload';
 	$data['ap-info'] = $aplist;
