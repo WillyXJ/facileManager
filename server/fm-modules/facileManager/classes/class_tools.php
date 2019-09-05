@@ -210,7 +210,7 @@ class fm_tools {
 		}
 		
 		/** Remove old password reset requests */
-		$time = date("Y-m-d H:i:s", strtotime($__FM_CONFIG['clean']['days'] . ' days ago'));
+		$time = date("Y-m-d H:i:s", strtotime($__FM_CONFIG['clean']['time'] . ' ago'));
 		$query = 'DELETE FROM `fm_pwd_resets` WHERE `pwd_timestamp`<"' . $time . '"';
 		$fmdb->query($query);
 		$record_count += $fmdb->rows_affected;

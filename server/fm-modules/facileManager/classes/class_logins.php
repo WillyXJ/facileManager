@@ -412,6 +412,7 @@ class fm_login {
 <p>If you don't want to reset your password, then you can ignore this message.</p>
 <p>To reset your password, click the following link:<br />
 <<a href="{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}</a>></p>
+<p>This link expires in {$__FM_CONFIG['clean']['time']}.</p>
 </div>
 </div>
 <p style="font-size: 10px; color: #888; text-align: center;">$fm_name | $from_address</p>

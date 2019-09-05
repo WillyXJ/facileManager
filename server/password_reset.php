@@ -113,7 +113,7 @@ function printPasswordResetForm($message = null) {
 function checkForgottonPasswordKey($key, $fm_login) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$time = date("Y-m-d H:i:s", strtotime($__FM_CONFIG['clean']['days'] . ' days ago'));
+	$time = date("U", strtotime($__FM_CONFIG['clean']['time'] . ' ago'));
 	$query = "SELECT * FROM `fm_pwd_resets` WHERE `pwd_id`='$key' AND `pwd_login`=(SELECT `user_id` FROM `fm_users` WHERE `user_login`='$fm_login' AND `user_status`!='deleted') AND `pwd_timestamp`>='$time'";
 	$fmdb->get_results($query);
 	

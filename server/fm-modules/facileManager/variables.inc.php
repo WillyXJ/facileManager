@@ -72,7 +72,7 @@ if (isset($_SESSION['module'])) {
 
 /** Cleanup options */
 $__FM_CONFIG['clean']['prefixes']	= array('fm_accounts' => 'account', 'fm_users' => 'user');
-$__FM_CONFIG['clean']['days']		= 7;
+$__FM_CONFIG['clean']['time']		= '15 minutes';
 
 /** Text string variables */
 $__FM_CONFIG['password_hint']['medium']		= array(_('Medium'), _('The password must be at least seven (7) characters long containing letters and numbers.'));
