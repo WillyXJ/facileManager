@@ -262,7 +262,7 @@ class fm_login {
 
 			/** Builtin Authentication */
 			if ($auth_method == 1) {
-				$pwd_query = ($encrypted) ? "'$pass'" : $pwd_query = "password('$pass')";
+				$pwd_query = ($encrypted) ? "'$pass'" : "password('$pass')";
 		
 				if (getOption('fm_db_version') >= 18) {
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=1 AND `user_template_only`='no' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);

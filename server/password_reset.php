@@ -41,10 +41,13 @@ if (count($_POST)) {
 	extract($_POST);
 	extract($_GET);
 	
+	$login = sanitize($login);
+	$user_password = sanitize($user_password);
+	
 	if ($user_password != $cpassword) {
 		$message = sprintf('<p class="failed">%s</p>', _('The passwords do not match.'));
 	} else {
-		if (!resetPassword(sanitize($login), sanitize($key), sanitize($user_password))) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
+		if (!resetPassword($login, sanitize($key), $user_password)) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
 		else {
 			require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 			$fm_login->checkPassword($login, $user_password);
