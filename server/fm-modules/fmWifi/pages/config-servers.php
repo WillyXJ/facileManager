@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -39,7 +39,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
+			}
 		}
 		break;
 	case 'edit':
@@ -48,7 +51,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . $uri_params);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
+			}
 		}
 		break;
 	}
