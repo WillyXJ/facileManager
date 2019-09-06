@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -16,9 +16,6 @@
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/                                           |
- +-------------------------------------------------------------------------+
- | Processes module management page                                        |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
@@ -46,10 +43,14 @@ if (array_key_exists('action', $_GET) && array_key_exists('module', $_GET)) {
 			if ($_GET['module'] == $_SESSION['module']) $_SESSION['module'] = $fm_name;
 			
 			header('Location: ' . getMenuURL(_('Modules')));
+			exit;
 		} else {
 			$response = sprintf(_('Could not %s this module.'), sanitize($_GET['action']));
 		}
-	} else header('Location: ' . getMenuURL(_('Modules')));
+	} else {
+		header('Location: ' . getMenuURL(_('Modules')));
+		exit;
+	}
 }
 
 require(ABSPATH . 'fm-includes/version.php');

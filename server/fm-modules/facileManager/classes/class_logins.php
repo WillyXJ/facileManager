@@ -87,7 +87,10 @@ class fm_login {
 	 */
 	function printUserForm($message = null) {
 		/** Should not be here if there is no mail_enable defined or if not using builtin auth */
-		if (!getOption('mail_enable') || getOption('auth_method') != 1) header('Location: ' . $GLOBALS['RELPATH']);
+		if (!getOption('mail_enable') || getOption('auth_method') != 1) {
+			header('Location: ' . $GLOBALS['RELPATH']);
+			exit;
+		}
 
 		global $fm_name;
 		printHeader(_('Password Reset'), 'login');

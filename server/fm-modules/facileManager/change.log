@@ -19,6 +19,8 @@
 * Server - [security] Fixed an issue where admin-servers.php was susceptible to
            SQL injection. (Found and reported by Arturs Danilevics, Oskars Vegeris,
            and Ivars Vids)
+* Server - [security] Ensured header() calls are not skipped. (Found and reported
+           by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
 
 3.4.2 (2019-05-17)
 ==================

@@ -40,6 +40,7 @@ require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 if ($fm_login->isLoggedIn() || (isset($_SESSION) && array_key_exists('user', $_SESSION))) {
 	$fm_login->logout();
 	header('Location: ' . $GLOBALS['RELPATH']);
+	exit;
 }
 
 /** Ensure we meet the requirements */
@@ -62,15 +63,22 @@ switch ($step) {
 			displaySetup();
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=3');
+			exit;
 		}
 		break;
 	case 2:
-		if (!$_POST || !array($_POST)) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+		if (!$_POST || !array($_POST)) {
+			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+			exit;
+		}
 		printHeader(_('Installation'), 'install');
 		processSetup();
 		break;
 	case 3:
-		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
+			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+			exit;
+		}
 		require_once(ABSPATH . 'fm-modules/facileManager/install.php');
 		
 		@include(ABSPATH . 'config.inc.php');
@@ -91,21 +99,27 @@ switch ($step) {
 			$result = $fmdb->query($query);
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH']);
+			exit;
 		}
 		
 		if ($result && $fmdb->num_rows) {
 			/** Check if the default admin account exists */
 			if (!checkAccountCreation($__FM_CONFIG['db']['name'])) {
 				header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4');
+				exit;
 			} else {
 				header('Location: ' . $GLOBALS['RELPATH']);
+				exit;
 			}
 		} else {
 			fmInstall($__FM_CONFIG['db']['name']);
 		}
 		break;
 	case 4:
-		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
+			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+			exit;
+		}
 		
 		include(ABSPATH . 'config.inc.php');
 		include_once(ABSPATH . 'fm-includes/fm-db.php');
@@ -117,12 +131,19 @@ switch ($step) {
 			displayAccountSetup();
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH']);
+			exit;
 		}
 		
 		break;
 	case 5:
-		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
-		if (!$_POST || !array($_POST)) header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
+			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+			exit;
+		}
+		if (!$_POST || !array($_POST)) {
+			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+			exit;
+		}
 		
 		include(ABSPATH . 'config.inc.php');
 		include_once(ABSPATH . 'fm-includes/fm-db.php');
