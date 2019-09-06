@@ -10,6 +10,8 @@
 * Server - [feature] The pf 'quick' keyword is now an option.
 * Server - [feature] Packet state for all firewall types can now be defined.
 * Server - [improvement] CSS tweaks.
+* Server - [security] Ensured header() calls are not skipped. (Found and reported
+           by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
 
 1.7.1 (2019-03-20)
 ==================

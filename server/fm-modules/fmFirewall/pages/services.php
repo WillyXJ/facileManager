@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -20,8 +20,14 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!isset($type)) header('Location: services-icmp.php');
-if (isset($_GET['type'])) header('Location: services-' . sanitize(strtolower($_GET['type'])) . '.php');
+if (!isset($type)) {
+	header('Location: services-icmp.php');
+	exit;
+}
+if (isset($_GET['type'])) {
+	header('Location: services-' . sanitize(strtolower($_GET['type'])) . '.php');
+	exit;
+}
 
 if (!currentUserCan(array('manage_services', 'view_all'), $_SESSION['module'])) unAuth();
 
@@ -36,7 +42,10 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+				exit;
+			}
 		}
 		break;
 	case 'edit':
@@ -45,7 +54,10 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+				exit;
+			}
 		}
 		break;
 	}

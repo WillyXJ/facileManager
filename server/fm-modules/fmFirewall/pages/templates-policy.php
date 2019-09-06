@@ -33,13 +33,19 @@ if (!empty($_POST)) {
 			$result = $fm_module_templates->add($_POST);
 			if ($result !== true) {
 				$response = displayResponseClose($result);
-			} else header('Location: ' . $GLOBALS['basename']);
+			} else {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 			break;
 		case 'edit':
 			$update_status = $fm_module_templates->update($_POST);
 			if ($update_status !== true) {
 				$response = displayResponseClose($update_status);
-			} else header('Location: ' . $GLOBALS['basename']);
+			} else {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 			break;
 		}
 	}

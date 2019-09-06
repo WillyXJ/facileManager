@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -30,6 +30,7 @@ $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['typ
 $server_serial_no = (isset($_GET['server_serial_no'])) ? sanitize($_GET['server_serial_no']) : null;
 if ($server_serial_no === 0) {
 	header('Location: ' . $GLOBALS['basename']);
+	exit;
 }
 $original_server_serial_no = $server_serial_no;
 
@@ -56,7 +57,10 @@ if (currentUserCan('manage_policies', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
+				exit;
+			}
 		}
 		break;
 	case 'edit':
@@ -65,7 +69,10 @@ if (currentUserCan('manage_policies', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
+				exit;
+			}
 		}
 		break;
 	}
