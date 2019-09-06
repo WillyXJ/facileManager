@@ -252,7 +252,8 @@ class fm_login {
 		if (empty($user_login) || empty($pass)) return false;
 		
 		/** Built-in authentication */
-		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : true;
+		$fm_db_version = getOption('fm_db_version');
+		$auth_method = ($fm_db_version >= 18) ? getOption('auth_method') : true;
 		if ($auth_method) {
 			/** Default Super Admin? */
 			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_auth_type`=1 ORDER BY user_id ASC LIMIT 1");
@@ -264,9 +265,10 @@ class fm_login {
 			if ($auth_method == 1) {
 				$pwd_query = ($encrypted) ? "'$pass'" : "password('$pass')";
 		
-				if (getOption('fm_db_version') >= 18) {
-					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=1 AND `user_template_only`='no' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);
+				if ($fm_db_version >= 18) {
+					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=1 AND `user_template_only`='no' AND `user_login`='$user_login'");
 				} else {
+					/** Old auth */
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);
 				}
 				if (!$fmdb->num_rows) {
@@ -279,8 +281,22 @@ class fm_login {
 				} else {
 					$user = $fmdb->last_result[0];
 					
+					/** Check password */
+					if ($user->user_password[0] == '*') {
+						/** Old MySQL hashing that needs to change */
+						if ($user->user_password != '*' . strtoupper(sha1(sha1($pass, true)))) {
+							return false;
+						}
+						resetPassword($user_login, $pass);
+					} else {
+						/** PHP hashing */
+						if (!password_verify($pass, $user->user_password)) {
+							return false;
+						}
+					}
+					
 					/** Enforce password change? */
-					if (getOption('fm_db_version') >= 15) {
+					if ($fm_db_version >= 15) {
 						if ($user->user_force_pwd_change == 'yes') {
 							$pwd_reset_query = "SELECT * FROM `fm_pwd_resets` WHERE `pwd_login`={$user->user_id} ORDER BY `pwd_timestamp` LIMIT 1";
 							$fmdb->get_results($pwd_reset_query);

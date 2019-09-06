@@ -1,5 +1,6 @@
 3.5.0 (2019-0?)
 ==================
+** Minimum PHP version is now 5.5 **
 * Server - [improvement] Popup windows are now draggable only by the title bar.
 * Server - [improvement] Refinements around grabbable rows.
 * Server - [bug] Configuration previews no longer process characters as html.
@@ -13,6 +14,8 @@
            escalation and SQL injections could occur. (Found and reported by 
            Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
 * Server - [security] Changed the default password reset expiration to 15 minutes.
+* Server - [security] Updated the user password hashing to a more secure algorithm.
+           (Found and reported by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
 
 3.4.2 (2019-05-17)
 ==================

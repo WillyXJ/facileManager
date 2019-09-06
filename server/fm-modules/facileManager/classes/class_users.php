@@ -143,7 +143,7 @@ class fm_users {
 		}
 		
 		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_comment`, `user_email`, `user_group`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
-				VALUES('{$_SESSION['user']['account_id']}', '$user_login', password('$user_password'), '$user_comment', '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
+				VALUES('{$_SESSION['user']['account_id']}', '$user_login', '" . password_hash($user_password, PASSWORD_DEFAULT) . "', '$user_comment', '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
@@ -244,7 +244,8 @@ class fm_users {
 		if (!empty($post['user_password'])) {
 			if (empty($post['cpassword']) || $post['user_password'] != $post['cpassword']) return _('Passwords do not match.');
 			$post['user_password'] = sanitize($post['user_password'], false);
-			$sql_pwd = "`user_password`=password('" . $post['user_password'] . "'),";
+			if (password_verify($post['user_password'], getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_password'))) return _('Password is not changed.');
+			$sql_pwd = "`user_password`='" . password_hash($_POST['user_password'], PASSWORD_DEFAULT) . "',";
 		} else $sql_pwd = null;
 		
 		/** Check name field length */

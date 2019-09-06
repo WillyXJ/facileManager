@@ -47,7 +47,7 @@ if (count($_POST)) {
 	if ($user_password != $cpassword) {
 		$message = sprintf('<p class="failed">%s</p>', _('The passwords do not match.'));
 	} else {
-		if (!resetPassword($login, sanitize($key), $user_password)) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
+		if (!resetPassword($login, $user_password)) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
 		else {
 			require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 			$fm_login->checkPassword($login, $user_password);
@@ -118,34 +118,6 @@ function checkForgottonPasswordKey($key, $fm_login) {
 	$fmdb->get_results($query);
 	
 	if ($fmdb->num_rows) return true;
-	
-	return false;
-}
-
-
-/**
- * Resets the user password.
- *
- * @since 1.0
- * @package facileManager
- */
-function resetPassword($fm_login, $key, $user_password) {
-	global $fmdb;
-	
-	$user_info = getUserInfo($fm_login, 'user_login');
-	$fm_login_id = $user_info['user_id'];
-	
-	/** Update password */
-	$query = "UPDATE `fm_users` SET `user_password`=password('$user_password'), `user_force_pwd_change`='no' WHERE `user_id`='$fm_login_id'";
-	$fmdb->query($query);
-	
-	if ($fmdb->rows_affected) {
-		/** Remove entry from fm_pwd_resets table */
-		$query = "DELETE FROM `fm_pwd_resets` WHERE `pwd_login`='$fm_login_id'";
-		$fmdb->query($query);
-		
-		return true;
-	}
 	
 	return false;
 }

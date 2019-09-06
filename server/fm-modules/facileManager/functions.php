@@ -2310,6 +2310,35 @@ function setTimezone() {
 
 
 /**
+ * Resets the user password.
+ *
+ * @since 1.0
+ * @package facileManager
+ */
+function resetPassword($fm_login, $user_password) {
+	global $fmdb;
+	
+	if ($user_info = getUserInfo($fm_login, 'user_login')) {
+		$fm_login_id = $user_info['user_id'];
+
+		/** Update password */
+		$query = "UPDATE `fm_users` SET `user_password`='" . password_hash($user_password, PASSWORD_DEFAULT) . "', `user_force_pwd_change`='no' WHERE `user_id`='$fm_login_id'";
+		$fmdb->query($query);
+
+		if ($fmdb->rows_affected) {
+			/** Remove entry from fm_pwd_resets table */
+			$query = "DELETE FROM `fm_pwd_resets` WHERE `pwd_login`='$fm_login_id'";
+			$fmdb->query($query);
+
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
+/**
  * Gets menu badge counts
  *
  * @since 1.1

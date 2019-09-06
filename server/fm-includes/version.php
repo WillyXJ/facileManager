@@ -38,7 +38,7 @@ $fm_db_version = 47;
  *
  * @global string $required_php_version
  */
-$required_php_version = '5.2.1';
+$required_php_version = '5.5.0';
 
 /**
  * Holds the required MySQL version
