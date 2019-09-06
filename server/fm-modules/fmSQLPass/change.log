@@ -1,3 +1,8 @@
+1.5.2 (2019-??)
+==================
+* Server - [security] Ensured header() calls are not skipped. (Found and reported
+           by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+
 1.5.1 (2019-03-20)
 ==================
 * Server - [bug] Fixed installs and upgrades with PHP 7.3.x. (Issue #436)
