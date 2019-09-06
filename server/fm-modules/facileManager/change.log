@@ -16,6 +16,9 @@
 * Server - [security] Changed the default password reset expiration to 15 minutes.
 * Server - [security] Updated the user password hashing to a more secure algorithm.
            (Found and reported by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+* Server - [security] Fixed an issue where admin-servers.php was susceptible to
+           SQL injection. (Found and reported by Arturs Danilevics, Oskars Vegeris,
+           and Ivars Vids)
 
 3.4.2 (2019-05-17)
 ==================

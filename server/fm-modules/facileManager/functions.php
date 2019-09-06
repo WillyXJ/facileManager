@@ -908,7 +908,7 @@ function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null, 
 function getAccountID($value, $field = 'account_key', $key = 'account_id') {
 	global $fmdb;
 	
-	$query = "SELECT $key FROM `fm_accounts` WHERE $field='$value'";
+	$query = sprintf('SELECT %s FROM `fm_accounts` WHERE %s="%s"', $key, $field, $value);
 	$result = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
