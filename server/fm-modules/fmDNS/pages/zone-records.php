@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes zone records page                                             |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 $map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
@@ -35,8 +32,16 @@ if (isset($_GET['record_type'])) {
 	$record_type = $default_record_type;
 }
 
-$domain_id = (isset($_GET['domain_id'])) ? $_GET['domain_id'] : header('Location: ' . getMenuURL(__('Zones')));
-if (!isValidDomain($domain_id)) header('Location: ' . getMenuURL(__('Zones')));
+if (isset($_GET['domain_id'])){
+	$domain_id = $_GET['domain_id'];
+} else {
+	header('Location: ' . getMenuURL(__('Zones')));
+	exit;
+}
+if (!isValidDomain($domain_id)) {
+	header('Location: ' . getMenuURL(__('Zones')));
+	exit;
+}
 
 /** Does the user have access? */
 if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();

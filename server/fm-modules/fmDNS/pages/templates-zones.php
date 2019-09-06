@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes zone templates management page                                |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 $template_type = 'domain';
@@ -36,13 +33,19 @@ if (!empty($_POST)) {
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
 				$response = displayResponseClose($insert_id);
-			} else header('Location: ' . $GLOBALS['basename']);
+			} else {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 			break;
 		case 'update':
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
 				$response = displayResponseClose($zone_update_status);
-			} else header('Location: ' . $GLOBALS['basename']);
+			} else {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 			break;
 		}
 	}

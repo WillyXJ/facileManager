@@ -5,6 +5,8 @@
 * Both   - [security] Fixed an issue where local privileges could be escalated
            to root. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
            Ivars Vids)
+* Server - [security] Ensured header() calls are not skipped. (Found and reported
+           by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
 
 3.3.5 (2019-05-??)
 ==================

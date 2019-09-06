@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -24,7 +24,10 @@
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
-if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
+if (empty($_POST)) {
+	header('Location: ' . $GLOBALS['RELPATH']);
+	exit;
+}
 extract($_POST);
 
 /** Should the user be here? */
@@ -51,6 +54,7 @@ if (isset($_POST['update'])) {
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 		$fm_dns_records->assignSOA($_POST['update']['soa_template_chosen'], $domain_id);
 		header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $domain_id . '&record_type=SOA');
+		exit;
 	}
 	
 	$_POST['update'] = buildUpdateArray($domain_id, $record_type, $_POST['update'], $append);
@@ -268,6 +272,7 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 			$fm_dns_records->assignSOA($_POST['create']['soa_template_chosen'], $_POST['domain_id']);
 			header('Location: zone-records.php?map=' . $_POST['map'] . '&domain_id=' . $_POST['domain_id'] . '&record_type=SOA');
+			exit;
 		}
 		if (!isset($data['soa_append'])) {
 			$data['soa_append'] = 'no';
