@@ -728,29 +728,36 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				if ($fmdb->num_rows) {
 					$count = $fmdb->num_rows;
 					$zone_result = $fmdb->last_result;
+					
+					/** Get zone filename format */
+					$file_format = getOption('zone_file_format', $_SESSION['user']['account_id'], $_SESSION['module']);
+					if (!$file_format) {
+						$file_format = $__FM_CONFIG[$_SESSION['module']]['default']['options']['zone_file_format']['default_value'];
+					}
+					
 					for ($i=0; $i < $count; $i++) {
 						/** Is this a clone id? */
 						if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'clone');
 						elseif ($zone_result[$i]->domain_template_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'template');
 						
 						if (getSOACount($zone_result[$i]->domain_id)) {
-							$domain_name = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
-							$file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
+							$domain_name = trimFullStop($this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name)));
+							$file_ext = null;
 
 							/** Are there multiple zones with the same name? */
 							if (isset($zone_result[$i]->parent_domain_id)) {
 								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->parent_domain_id);
-								if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$file_ext";
+								if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . '.';
 							} else {
 								$zone_result[$i]->parent_domain_id = $zone_result[$i]->domain_id;
 								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->domain_id);
-								if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
+								if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . '.';
 							}
 //							basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_clone_domain_id=0 AND domain_id!=' . $zone_result[$i]->domain_id);
 //							if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
 							
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
+							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/' . str_replace('{ZONENAME}', $domain_name . $file_ext, $file_format)] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 						}
 					}
 					unset($zone_result, $count);
@@ -824,6 +831,13 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;
 			$zone_result = $fmdb->last_result;
+
+			/** Get zone filename format */
+			$file_format = getOption('zone_file_format', $_SESSION['user']['account_id'], $_SESSION['module']);
+			if (!$file_format) {
+				$file_format = $__FM_CONFIG[$_SESSION['module']]['default']['options']['zone_file_format']['default_value'];
+			}
+
 			for ($i=0; $i < $count; $i++) {
 				/** Is this a clone id? */
 				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'clone');
@@ -854,18 +868,18 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$domain_name_file = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
 					$domain_name = isset($zone_result[$i]->domain_name_file) ? $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name_file)) : $domain_name_file;
 					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
-					$zones .= 'zone "' . rtrim($domain_name, '.') . "\" {\n";
+					$zones .= 'zone "' . trimFullStop($domain_name) . "\" {\n";
 					$zones .= "\ttype $domain_type;\n";
-					$default_file_ext = $file_ext = ($zone_result[$i]->domain_mapping == 'forward') ? 'hosts' : 'rev';
+					$default_file_ext = $file_ext = null;
 					
 					/** Are there multiple zones with the same name? */
 					if (isset($zone_result[$i]->parent_domain_id)) {
 						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->parent_domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->parent_domain_id . ".$default_file_ext";
+						if ($fmdb->num_rows) $file_ext = '.' . $zone_result[$i]->parent_domain_id;
 					} else {
 						$zone_result[$i]->parent_domain_id = $zone_result[$i]->domain_id;
 						basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result[$i]->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result[$i]->domain_id);
-						if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$default_file_ext";
+						if ($fmdb->num_rows) $file_ext = '.' . $zone_result[$i]->domain_id;
 					}
 					
 					if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
@@ -876,15 +890,16 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					switch($domain_type) {
 						case 'master':
 						case 'slave':
-							$zones .= "\tfile \"$server_zones_dir/$domain_type/db." . $domain_name_file . "$file_ext\";\n";
+							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
+							$zones .= "\tfile \"$server_zones_dir/$domain_type/$domain_name_file\";\n";
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
-							$files[$server_zones_dir . '/' . $domain_type . '/db.' . $domain_name_file . $file_ext] = $zone_file_contents;
+							$files[$server_zones_dir . '/' . $domain_type . '/' . $domain_name_file] = $zone_file_contents;
 							unset($zone_file_contents);
 							break;
 						case 'stub':
-							$zones .= "\tfile \"$server_zones_dir/stub/db." . $domain_name . "$file_ext\";\n";
+							$zones .= "\tfile \"$server_zones_dir/stub/" . str_replace('{ZONENAME}', trimFullStop($domain_name) . $file_ext, $file_format) . "\";\n";
 							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
 							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;

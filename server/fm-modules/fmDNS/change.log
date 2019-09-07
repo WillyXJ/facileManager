@@ -7,6 +7,7 @@
            Ivars Vids)
 * Server - [security] Ensured header() calls are not skipped. (Found and reported
            by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+* Server - [feature] Added support to define the zone filename. (Issue #456)
 
 3.3.5 (2019-05-??)
 ==================
