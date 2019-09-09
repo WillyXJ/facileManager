@@ -1,5 +1,12 @@
 3.4.0 (2019-0?-??)
 ==================
+* Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)
+* Server - [bug] Fixed master clause deletions when no address lists are
+           associated with it. (Issue #447)
+* Server - [bug] Ensured multi-line record values do not contain extra spaces.
+* Server - [bug] Fixed jquery to highlight records to be updated when the multi-line
+           values are modified.
+* Server - [bug] Fixed remote server creation after a fresh installation.
 * Server - [feature] Added support for TLSA and OPENPGPKEY RR types. (Issue #439)
 * Server - [bug] Fixed PHP error during config generation via cron. (Issue #454)
 * Both   - [security] Fixed an issue where local privileges could be escalated
@@ -8,16 +15,7 @@
 * Server - [security] Ensured header() calls are not skipped. (Found and reported
            by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
 * Server - [feature] Added support to define the zone filename. (Issue #456)
-
-3.3.5 (2019-05-??)
-==================
-* Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)
-* Server - [bug] Fixed master clause deletions when no address lists are
-           associated with it. (Issue #447)
-* Server - [bug] Ensured multi-line record values do not contain extra spaces.
-* Server - [bug] Fixed jquery to highlight records to be updated when the multi-line
-           values are modified.
-* Server - [bug] Fixed remote server creation after a fresh installation.
+* Server - [bug] Fixed an issue where ACLs could not be deleted. (Issue #458)
 
 3.3.4 (2019-05-17)
 ==================
