@@ -930,7 +930,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			$user = getParameterValue('^User', $httpdconf, ' ');
 			if ($user[0] == '$') {
 				$user_var = preg_replace(array('/\$/', '/{/', '/}/'), '', $user);
-				$user = getParameterValue($user_var, findFile('envvars'), '=');
+				$user = preg_replace(array('/\$/', '/{/', '/}/'), '', getParameterValue($user_var, findFile('envvars'), '='));
 			}
 			echo fM('  --> Detected ' . $web_server['app'] . " runs as '$user'\n");
 			$sudoers_line = "$user\tALL=(root)\tNOPASSWD: " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . '/client.php *';
