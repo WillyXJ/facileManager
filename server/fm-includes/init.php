@@ -116,7 +116,7 @@ RewriteRule . index.php [L]
 ');
 			} else {
 				if ($single_check) {
-					bailOut(sprintf(_('I cannot create the missing %1s.htaccess which is required by %2s so please create it with the following contents:'), ABSPATH, $fm_name) . 
+					bailOut(sprintf(_('The missing %1s.htaccess which is required by %2s could not be created. Please create it with the following contents:'), ABSPATH, $fm_name) . 
 				'<textarea rows="8">&lt;IfModule mod_headers.c&gt;
 	&lt;FilesMatch "\.(js|css|txt)$"&gt;
 		Header set Cache-Control "max-age=7200"
@@ -151,7 +151,8 @@ RewriteRule . index.php [L]
 			$test_output = isSerialized($test_output) ? unserialize($test_output) : $test_output;
 			if (strpos($test_output, 'Account is not found.') === false) {
 				$message = sprintf(_('The required .htaccess file appears to not work with your Apache configuration which is required by %1s. '
-						. 'AllowOverride None in your configuration may be blocking the use of .htaccess.'), $fm_name);
+						. 'AllowOverride None in your configuration may be blocking the use of .htaccess or %s is not resolvable.'),
+						$fm_name, $_SERVER['SERVER_NAME']);
 				if ($single_check) {
 					bailOut($message);
 				} else {
