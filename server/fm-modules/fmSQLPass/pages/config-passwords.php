@@ -19,7 +19,6 @@
  | http://www.facilemanager.com/modules/fmsqlpass/                         |
  +-------------------------------------------------------------------------+
  | Processes password management page                                      |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 

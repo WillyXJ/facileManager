@@ -22,7 +22,6 @@
 /**
  * Processes main page
  *
- * @author		Jon LaBass
  * @version		$Id:$
  * @copyright	2013
  *

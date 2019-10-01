@@ -22,7 +22,7 @@
            and Ivars Vids)
 * Server - [security] Ensured header() calls are not skipped. (Found and reported
            by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
-* Server - [improvement] Updated .htacess installation checks verbiage. (Issue #461)
+* Server - [improvement] Updated .htaccess installation checks verbiage. (Issue #461)
 * Client - [bug] Fixed parsing of the apache2 user on Debian systems. (Issue #462)
 * Server - [improvement] CSS tweaks for shadow containers.
 * Client - [improvement] Added support to gather interface addresses.

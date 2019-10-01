@@ -18,7 +18,6 @@
  | http://www.facilemanager.com/modules/                                   |
  +-------------------------------------------------------------------------+
  | Shows a preview of the server configuration files                       |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
