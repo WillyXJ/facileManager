@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-16 16:51-0600\n"
+"POT-Creation-Date: 2019-10-01 15:04-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -567,62 +567,58 @@ msgid_plural "Host name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:54
-msgid "Zone"
-msgstr ""
-
-#: server/fm-modules/fmDHCP/classes/class_options.php:56
+#: server/fm-modules/fmDHCP/classes/class_options.php:53
 msgid "Option"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:57
+#: server/fm-modules/fmDHCP/classes/class_options.php:54
 msgid "Value"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:59
+#: server/fm-modules/fmDHCP/classes/class_options.php:56
 #: server/fm-modules/fmDHCP/classes/class_servers.php:71
 msgid "Actions"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:74
+#: server/fm-modules/fmDHCP/classes/class_options.php:71
 msgid "There are no options."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:98
-#: server/fm-modules/fmDHCP/classes/class_options.php:163
+#: server/fm-modules/fmDHCP/classes/class_options.php:95
+#: server/fm-modules/fmDHCP/classes/class_options.php:160
 msgid "This record already exists."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:113
+#: server/fm-modules/fmDHCP/classes/class_options.php:110
 msgid "Empty values are not allowed."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:126
+#: server/fm-modules/fmDHCP/classes/class_options.php:123
 msgid "Could not add the option because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:188
+#: server/fm-modules/fmDHCP/classes/class_options.php:185
 msgid "Could not update the option because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:215
+#: server/fm-modules/fmDHCP/classes/class_options.php:212
 msgid "This option could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:218
+#: server/fm-modules/fmDHCP/classes/class_options.php:215
 #, php-format
 msgid "Option '%s' for %s was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:329
+#: server/fm-modules/fmDHCP/classes/class_options.php:319
 msgid "Add Option"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:329
+#: server/fm-modules/fmDHCP/classes/class_options.php:319
 msgid "Edit Option"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:371
+#: server/fm-modules/fmDHCP/classes/class_options.php:361
 msgid "Option Name"
 msgstr ""
 
@@ -859,6 +855,6 @@ msgstr ""
 msgid "Pulling the leases from the server"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/pages/leases.php:65
+#: server/fm-modules/fmDHCP/pages/leases.php:66
 msgid "You must select a server to view leases from."
 msgstr ""

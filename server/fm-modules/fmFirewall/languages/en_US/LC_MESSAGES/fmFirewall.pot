@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-16 16:51-0600\n"
+"POT-Creation-Date: 2019-10-01 15:04-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,89 +27,111 @@ msgstr ""
 msgid "Firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:321
+#: server/fm-modules/fmFirewall/functions.php:324
+#: server/fm-modules/fmFirewall/classes/class_policies.php:443
+#: server/fm-modules/fmFirewall/classes/class_templates.php:149
+#: server/fm-modules/fmFirewall/classes/class_templates.php:250
+#: server/fm-modules/fmFirewall/classes/class_templates.php:478
 msgid "Firewalls"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:321
+#: server/fm-modules/fmFirewall/functions.php:324
 msgid "Firewall Servers"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:322
+#: server/fm-modules/fmFirewall/functions.php:325
+#: server/fm-modules/fmFirewall/functions.php:327
+#: server/fm-modules/fmFirewall/functions.php:328
 msgid "Firewall Policy"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:324
+#: server/fm-modules/fmFirewall/functions.php:327
+#: server/fm-modules/fmFirewall/functions.php:328
+msgid "Policies"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/functions.php:329
+#: server/fm-modules/fmFirewall/pages/config-policy.php:90
+#: server/fm-modules/fmFirewall/pages/config-policy.php:92
+#: server/fm-modules/fmFirewall/pages/config-policy.php:93
+msgid "Templates"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/functions.php:329
+msgid "Policy Templates"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/functions.php:331
 msgid "Objects"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:324
-#: server/fm-modules/fmFirewall/functions.php:325
+#: server/fm-modules/fmFirewall/functions.php:331
+#: server/fm-modules/fmFirewall/functions.php:332
 msgid "Object Groups"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:325
-#: server/fm-modules/fmFirewall/functions.php:330
+#: server/fm-modules/fmFirewall/functions.php:332
+#: server/fm-modules/fmFirewall/functions.php:337
 msgid "Groups"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:326
+#: server/fm-modules/fmFirewall/functions.php:333
 msgid "Hosts"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:326
+#: server/fm-modules/fmFirewall/functions.php:333
 msgid "Host Objects"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:327
+#: server/fm-modules/fmFirewall/functions.php:334
 msgid "Networks"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:327
+#: server/fm-modules/fmFirewall/functions.php:334
 msgid "Network Objects"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:329
-#: server/fm-modules/fmFirewall/classes/class_policies.php:449
+#: server/fm-modules/fmFirewall/functions.php:336
+#: server/fm-modules/fmFirewall/classes/class_policies.php:590
 msgid "Services"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:329
-#: server/fm-modules/fmFirewall/functions.php:330
+#: server/fm-modules/fmFirewall/functions.php:336
+#: server/fm-modules/fmFirewall/functions.php:337
 msgid "Service Groups"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:331
+#: server/fm-modules/fmFirewall/functions.php:338
 msgid "ICMP"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:331
+#: server/fm-modules/fmFirewall/functions.php:338
 msgid "ICMP Services"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:332
+#: server/fm-modules/fmFirewall/functions.php:339
 msgid "TCP"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:332
+#: server/fm-modules/fmFirewall/functions.php:339
 msgid "TCP Services"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:333
+#: server/fm-modules/fmFirewall/functions.php:340
 msgid "UDP"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:333
+#: server/fm-modules/fmFirewall/functions.php:340
 msgid "UDP Services"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:335
+#: server/fm-modules/fmFirewall/functions.php:342
 #: server/fm-modules/fmFirewall/classes/class_policies.php:59
-#: server/fm-modules/fmFirewall/classes/class_time.php:56
+#: server/fm-modules/fmFirewall/classes/class_time.php:54
 msgid "Time"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/functions.php:335
+#: server/fm-modules/fmFirewall/functions.php:342
 msgid "Time Restrictions"
 msgstr ""
 
@@ -120,121 +142,134 @@ msgid ""
 "rather than configuration files individually."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:56
+#: server/fm-modules/fmFirewall/variables.inc.php:48
+msgid "Negated"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/variables.inc.php:57
 msgid "Mon"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:56
+#: server/fm-modules/fmFirewall/variables.inc.php:57
 msgid "Tue"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:56
+#: server/fm-modules/fmFirewall/variables.inc.php:57
 msgid "Wed"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:57
+#: server/fm-modules/fmFirewall/variables.inc.php:58
 msgid "Thu"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:57
+#: server/fm-modules/fmFirewall/variables.inc.php:58
 msgid "Fri"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:57
+#: server/fm-modules/fmFirewall/variables.inc.php:58
 msgid "Sat"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:57
+#: server/fm-modules/fmFirewall/variables.inc.php:58
 msgid "Sun"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:63
+#: server/fm-modules/fmFirewall/variables.inc.php:64
 msgid "Log packets processed by this rule"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:68
+#: server/fm-modules/fmFirewall/variables.inc.php:69
 msgid "Established connection packets"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:73
+#: server/fm-modules/fmFirewall/variables.inc.php:74
 msgid ""
 "Matches packets that are fragments and not the first fragment of an IP "
 "datagram"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:103
-#: server/fm-modules/fmFirewall/variables.inc.php:106
+#: server/fm-modules/fmFirewall/variables.inc.php:79
+msgid "Cancel further rule processing with the \"quick\" keyword"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/variables.inc.php:114
+#: server/fm-modules/fmFirewall/variables.inc.php:117
 msgid ""
 "Rules are evaluated on a first-match basis and everything that isn't "
 "explicitly blocked will be passed by default. So make sure you take care "
 "with your rule order."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:104
+#: server/fm-modules/fmFirewall/variables.inc.php:115
 msgid ""
 "Rules are evaluated on a last-match basis and everything that isn't "
 "explicitly blocked will be allowed by default. So make sure you take care "
 "with your rule order."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/variables.inc.php:105
+#: server/fm-modules/fmFirewall/variables.inc.php:116
 msgid ""
 "Rules are evaluated on a first-match basis and everything that isn't "
 "explicitly passed will be blocked by default. So make sure you take care "
 "with your rule order."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:40
+#: server/fm-modules/fmFirewall/ajax/processPost.php:37
 msgid "You do not have sufficient privileges."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:69
+#: server/fm-modules/fmFirewall/ajax/processPost.php:67
 msgid "firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:73
+#: server/fm-modules/fmFirewall/ajax/processPost.php:71
 msgid "service"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:77
+#: server/fm-modules/fmFirewall/ajax/processPost.php:75
 msgid "object"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:81
+#: server/fm-modules/fmFirewall/ajax/processPost.php:79
 msgid "group"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:88
+#: server/fm-modules/fmFirewall/ajax/processPost.php:86
 msgid "time restriction"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:95
+#: server/fm-modules/fmFirewall/ajax/processPost.php:93
 msgid "policy"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:116
+#: server/fm-modules/fmFirewall/ajax/processPost.php:101
+msgid "policy template"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/ajax/processPost.php:122
 #, php-format
 msgid "This item could not be set to %s."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:122
-#: server/fm-modules/fmFirewall/ajax/processPost.php:153
+#: server/fm-modules/fmFirewall/ajax/processPost.php:128
+#: server/fm-modules/fmFirewall/ajax/processPost.php:159
 #, php-format
 msgid "Set %s for %s status to %s."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:124
-#: server/fm-modules/fmFirewall/ajax/processPost.php:155
+#: server/fm-modules/fmFirewall/ajax/processPost.php:130
+#: server/fm-modules/fmFirewall/ajax/processPost.php:161
 #, php-format
 msgid "Set %s (%s) status to %s."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:138
-#: server/fm-modules/fmFirewall/classes/class_policies.php:177
+#: server/fm-modules/fmFirewall/ajax/processPost.php:144
+#: server/fm-modules/fmFirewall/classes/class_policies.php:202
+#: server/fm-modules/fmFirewall/classes/class_templates.php:196
 msgid "The sort order could not be updated due to an invalid request."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/ajax/processPost.php:160
+#: server/fm-modules/fmFirewall/ajax/processPost.php:166
 msgid "Bulk Action Results"
 msgstr ""
 
@@ -257,104 +292,110 @@ msgid_plural "Group name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:42
+#: server/fm-modules/fmFirewall/classes/class_objects.php:54
+#: server/fm-modules/fmFirewall/classes/class_objects.php:286
+msgid "Object Name"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_objects.php:54
+#: server/fm-modules/fmFirewall/classes/class_objects.php:288
+msgid "Address"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_objects.php:55
+#: server/fm-modules/fmFirewall/classes/class_objects.php:289
+msgid "Netmask"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_objects.php:73
 #, php-format
 msgid "There are no %s objects defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:56
-#: server/fm-modules/fmFirewall/classes/class_objects.php:283
-msgid "Object Name"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_objects.php:56
-#: server/fm-modules/fmFirewall/classes/class_objects.php:285
-msgid "Address"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_objects.php:57
-#: server/fm-modules/fmFirewall/classes/class_objects.php:286
-msgid "Netmask"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_objects.php:94
-#: server/fm-modules/fmFirewall/classes/class_objects.php:298
+#: server/fm-modules/fmFirewall/classes/class_objects.php:97
+#: server/fm-modules/fmFirewall/classes/class_objects.php:301
 msgid "No object name defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:107
+#: server/fm-modules/fmFirewall/classes/class_objects.php:110
 msgid "Could not add the object because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:142
+#: server/fm-modules/fmFirewall/classes/class_objects.php:145
 msgid "Could not update the object because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:165
+#: server/fm-modules/fmFirewall/classes/class_objects.php:168
 msgid ""
 "This object could not be deleted because it is associated with one or more "
 "policies."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:170
+#: server/fm-modules/fmFirewall/classes/class_objects.php:173
 #, php-format
 msgid "Object (%s) was deleted."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:175
+#: server/fm-modules/fmFirewall/classes/class_objects.php:178
 msgid "This object could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:240
+#: server/fm-modules/fmFirewall/classes/class_objects.php:243
 msgid "Add Object"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:240
+#: server/fm-modules/fmFirewall/classes/class_objects.php:243
 msgid "Edit Object"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:284
+#: server/fm-modules/fmFirewall/classes/class_objects.php:287
 msgid "Object Type"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:299
+#: server/fm-modules/fmFirewall/classes/class_objects.php:302
 msgid "No object address defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:301
+#: server/fm-modules/fmFirewall/classes/class_objects.php:304
 msgid "No object netmask defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:306
+#: server/fm-modules/fmFirewall/classes/class_objects.php:309
 #, php-format
 msgid "Object name is too long (maximum %d character)."
 msgid_plural "Object name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:310
+#: server/fm-modules/fmFirewall/classes/class_objects.php:313
 msgid "This object name already exists."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:313
+#: server/fm-modules/fmFirewall/classes/class_objects.php:316
 msgid "Address is invalid."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_objects.php:315
+#: server/fm-modules/fmFirewall/classes/class_objects.php:318
 msgid "Netmask is invalid."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:49
-msgid "There are no firewall policies."
+#: server/fm-modules/fmFirewall/classes/class_policies.php:58
+#: server/fm-modules/fmFirewall/classes/class_templates.php:69
+#: server/fm-modules/fmFirewall/classes/class_time.php:370
+msgid "Name"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_policies.php:58
-#: server/fm-modules/fmFirewall/classes/class_policies.php:447
+msgid "Location"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:58
+#: server/fm-modules/fmFirewall/classes/class_policies.php:588
 msgid "Source"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_policies.php:58
-#: server/fm-modules/fmFirewall/classes/class_policies.php:448
+#: server/fm-modules/fmFirewall/classes/class_policies.php:589
 msgid "Destination"
 msgstr ""
 
@@ -363,95 +404,143 @@ msgid "Service"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_policies.php:58
-#: server/fm-modules/fmFirewall/classes/class_policies.php:445
+#: server/fm-modules/fmFirewall/classes/class_policies.php:595
+#: server/fm-modules/fmFirewall/classes/class_policies.php:596
 msgid "Interface"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_policies.php:59
-#: server/fm-modules/fmFirewall/classes/class_policies.php:446
+#: server/fm-modules/fmFirewall/classes/class_policies.php:597
 msgid "Direction"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:82
-#: server/fm-modules/fmFirewall/classes/class_servers.php:348
+#: server/fm-modules/fmFirewall/classes/class_policies.php:86
+msgid "There are no firewall rules."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:97
+#: server/fm-modules/fmFirewall/classes/class_servers.php:351
 msgid "Note:"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:151
+#: server/fm-modules/fmFirewall/classes/class_policies.php:169
 msgid "Could not add the policy because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:181
+#: server/fm-modules/fmFirewall/classes/class_policies.php:206
 msgid "Could not update the policy order because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:220
+#: server/fm-modules/fmFirewall/classes/class_policies.php:249
+#: server/fm-modules/fmFirewall/classes/class_templates.php:264
 msgid "Could not update the firewall policy because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:250
+#: server/fm-modules/fmFirewall/classes/class_policies.php:279
 msgid "This policy could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:260
+#: server/fm-modules/fmFirewall/classes/class_policies.php:289
+msgid "Rule is disabled"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:294
+#: server/fm-modules/fmFirewall/classes/class_templates.php:315
 msgid "Click and drag to reorder"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:329
-msgid "Add Policy"
+#: server/fm-modules/fmFirewall/classes/class_policies.php:326
+msgid "Policy targets defined"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:328
+msgid "Matching fragment packets"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_policies.php:329
-msgid "Edit Policy"
+msgid "Quick processing cancels further rule processing upon match"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:351
-#: server/fm-modules/fmFirewall/classes/class_policies.php:354
+#: server/fm-modules/fmFirewall/classes/class_policies.php:386
+msgid "Add Rule"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:386
+msgid "Edit Rule"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:408
+#: server/fm-modules/fmFirewall/classes/class_policies.php:411
 msgid "Select one or more objects"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:357
+#: server/fm-modules/fmFirewall/classes/class_policies.php:414
 msgid "Select one or more services"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:370
+#: server/fm-modules/fmFirewall/classes/class_policies.php:443
+#: server/fm-modules/fmFirewall/classes/class_templates.php:69
+#: server/fm-modules/fmFirewall/classes/class_templates.php:477
+msgid "Targets"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:450
+#: server/fm-modules/fmFirewall/classes/class_policies.php:487
+msgid "Supported firewalls:"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:457
 msgid "Time Restriction"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:378
+#: server/fm-modules/fmFirewall/classes/class_policies.php:478
 msgid "Packet State"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:378
+#: server/fm-modules/fmFirewall/classes/class_policies.php:478
 msgid "Select one or more packet states"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:447
-#: server/fm-modules/fmFirewall/classes/class_policies.php:448
-#: server/fm-modules/fmFirewall/classes/class_policies.php:449
-#: server/fm-modules/fmFirewall/classes/class_time.php:374
-#: server/fm-modules/fmFirewall/classes/class_time.php:375
-msgid "not"
+#: server/fm-modules/fmFirewall/classes/class_policies.php:584
+#: server/fm-modules/fmFirewall/classes/class_templates.php:471
+msgid "Basic"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:447
-#: server/fm-modules/fmFirewall/classes/class_policies.php:448
-#: server/fm-modules/fmFirewall/classes/class_policies.php:449
-#: server/fm-modules/fmFirewall/classes/class_time.php:374
+#: server/fm-modules/fmFirewall/classes/class_policies.php:585
+msgid "Policy Name"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:587
+msgid "Policy"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:588
+#: server/fm-modules/fmFirewall/classes/class_policies.php:589
+#: server/fm-modules/fmFirewall/classes/class_policies.php:590
 #: server/fm-modules/fmFirewall/classes/class_time.php:375
+#: server/fm-modules/fmFirewall/classes/class_time.php:376
+msgid "Negate"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_policies.php:588
+#: server/fm-modules/fmFirewall/classes/class_policies.php:589
+#: server/fm-modules/fmFirewall/classes/class_policies.php:590
+#: server/fm-modules/fmFirewall/classes/class_time.php:375
+#: server/fm-modules/fmFirewall/classes/class_time.php:376
 msgid "Use this option to invert the match"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:451
+#: server/fm-modules/fmFirewall/classes/class_policies.php:591
 msgid "Action"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:452
-#: server/fm-modules/fmFirewall/classes/class_time.php:376
+#: server/fm-modules/fmFirewall/classes/class_policies.php:592
+#: server/fm-modules/fmFirewall/classes/class_policies.php:594
+#: server/fm-modules/fmFirewall/classes/class_time.php:377
 msgid "Options"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_policies.php:533
+#: server/fm-modules/fmFirewall/classes/class_policies.php:687
 msgid "none"
 msgstr ""
 
@@ -463,353 +552,416 @@ msgstr ""
 msgid "Build Config"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:51
-msgid "There are no firewall servers."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_servers.php:60
+#: server/fm-modules/fmFirewall/classes/class_servers.php:58
 msgid "Hostname"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:60
+#: server/fm-modules/fmFirewall/classes/class_servers.php:58
 msgid "Method"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:60
-#: server/fm-modules/fmFirewall/classes/class_servers.php:386
+#: server/fm-modules/fmFirewall/classes/class_servers.php:58
+#: server/fm-modules/fmFirewall/classes/class_servers.php:389
 msgid "Firewall Type"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:60
+#: server/fm-modules/fmFirewall/classes/class_servers.php:58
 msgid "Version"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:60
-#: server/fm-modules/fmFirewall/classes/class_servers.php:388
+#: server/fm-modules/fmFirewall/classes/class_servers.php:58
+#: server/fm-modules/fmFirewall/classes/class_servers.php:391
 msgid "Config File"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:62
+#: server/fm-modules/fmFirewall/classes/class_servers.php:60
 msgid "Actions"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:105
-#: server/fm-modules/fmFirewall/classes/class_servers.php:398
+#: server/fm-modules/fmFirewall/classes/class_servers.php:78
+msgid "There are no firewall servers."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_servers.php:108
+#: server/fm-modules/fmFirewall/classes/class_servers.php:401
 msgid "No server name defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:118
+#: server/fm-modules/fmFirewall/classes/class_servers.php:121
 msgid "Could not add the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:147
-#: server/fm-modules/fmFirewall/classes/class_servers.php:158
+#: server/fm-modules/fmFirewall/classes/class_servers.php:150
+#: server/fm-modules/fmFirewall/classes/class_servers.php:161
 #, php-format
 msgid "Required for %s client interaction."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:199
+#: server/fm-modules/fmFirewall/classes/class_servers.php:202
 msgid "Could not update the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:224
+#: server/fm-modules/fmFirewall/classes/class_servers.php:227
 msgid ""
 "The associated policies could not be removed because a database error "
 "occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:230
+#: server/fm-modules/fmFirewall/classes/class_servers.php:233
 #, php-format
 msgid "Server '%s' (%s) was deleted"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:235
+#: server/fm-modules/fmFirewall/classes/class_servers.php:238
 msgid "This server could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:271
+#: server/fm-modules/fmFirewall/classes/class_servers.php:274
 msgid "Client Upgrade Available"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:275
+#: server/fm-modules/fmFirewall/classes/class_servers.php:278
 msgid "Client Install Required"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:344
+#: server/fm-modules/fmFirewall/classes/class_servers.php:347
 msgid "Add Firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:344
+#: server/fm-modules/fmFirewall/classes/class_servers.php:347
 msgid "Edit Firewall"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:348
+#: server/fm-modules/fmFirewall/classes/class_servers.php:351
 msgid "The client installer can automatically generate this entry."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:385
+#: server/fm-modules/fmFirewall/classes/class_servers.php:388
 msgid "Server Name"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:387
+#: server/fm-modules/fmFirewall/classes/class_servers.php:390
 msgid "Update Method"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:402
+#: server/fm-modules/fmFirewall/classes/class_servers.php:405
 #, php-format
 msgid "Server name is too long (maximum %d character)."
 msgid_plural "Server name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:406
+#: server/fm-modules/fmFirewall/classes/class_servers.php:409
 msgid "This server name already exists."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_servers.php:427
+#: server/fm-modules/fmFirewall/classes/class_servers.php:430
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:42
+#: server/fm-modules/fmFirewall/classes/class_services.php:54
+#: server/fm-modules/fmFirewall/classes/class_services.php:357
+msgid "Service Name"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_services.php:54
+msgid "ICMP Type"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_services.php:54
+msgid "ICMP Code"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_services.php:54
+msgid "Source Ports"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_services.php:54
+msgid "Dest Ports"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_services.php:54
+msgid "Flags"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_services.php:71
 #, php-format
 msgid "There are no %s services defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:56
-#: server/fm-modules/fmFirewall/classes/class_services.php:354
-msgid "Service Name"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_services.php:56
-msgid "ICMP Type"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_services.php:56
-msgid "ICMP Code"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_services.php:56
-msgid "Source Ports"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_services.php:56
-msgid "Dest Ports"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_services.php:56
-msgid "Flags"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_services.php:92
-#: server/fm-modules/fmFirewall/classes/class_services.php:372
+#: server/fm-modules/fmFirewall/classes/class_services.php:95
+#: server/fm-modules/fmFirewall/classes/class_services.php:375
 msgid "No service name defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:105
+#: server/fm-modules/fmFirewall/classes/class_services.php:108
 msgid "Could not add the service because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:140
+#: server/fm-modules/fmFirewall/classes/class_services.php:143
 msgid "Could not update the service because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:163
+#: server/fm-modules/fmFirewall/classes/class_services.php:166
 msgid ""
 "This service could not be deleted because it is associated with one or more "
 "policies."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:173
+#: server/fm-modules/fmFirewall/classes/class_services.php:176
 msgid "This service could not be deleted."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:287
+#: server/fm-modules/fmFirewall/classes/class_services.php:290
 msgid "Add Service"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:287
+#: server/fm-modules/fmFirewall/classes/class_services.php:290
 msgid "Edit Service"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:355
+#: server/fm-modules/fmFirewall/classes/class_services.php:358
 msgid "Service Type"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:357
+#: server/fm-modules/fmFirewall/classes/class_services.php:360
 msgid "Source Port Range"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:357
-#: server/fm-modules/fmFirewall/classes/class_services.php:358
+#: server/fm-modules/fmFirewall/classes/class_services.php:360
+#: server/fm-modules/fmFirewall/classes/class_services.php:361
 msgid "Start"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:357
-#: server/fm-modules/fmFirewall/classes/class_services.php:358
+#: server/fm-modules/fmFirewall/classes/class_services.php:360
+#: server/fm-modules/fmFirewall/classes/class_services.php:361
 msgid "End"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:358
+#: server/fm-modules/fmFirewall/classes/class_services.php:361
 msgid "Destination Port Range"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:359
+#: server/fm-modules/fmFirewall/classes/class_services.php:362
 msgid "TCP Flags"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:359
+#: server/fm-modules/fmFirewall/classes/class_services.php:362
 msgid "Only iptables uses the Mask bit"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:359
+#: server/fm-modules/fmFirewall/classes/class_services.php:362
 msgid "Mask"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:360
+#: server/fm-modules/fmFirewall/classes/class_services.php:363
 msgid "Settings"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:376
+#: server/fm-modules/fmFirewall/classes/class_services.php:379
 #, php-format
 msgid "Service name is too long (maximum %d character)."
 msgid_plural "Service name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:380
+#: server/fm-modules/fmFirewall/classes/class_services.php:383
 msgid "This service name already exists."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:385
+#: server/fm-modules/fmFirewall/classes/class_services.php:388
 #, php-format
 msgid "Source ports must be a valid %s port range."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:396
+#: server/fm-modules/fmFirewall/classes/class_services.php:399
 #, php-format
 msgid "Destination ports must be a valid %s port range."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:409
+#: server/fm-modules/fmFirewall/classes/class_services.php:412
 msgid "ICMP type is invalid."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_services.php:412
+#: server/fm-modules/fmFirewall/classes/class_services.php:415
 msgid "ICMP code is invalid."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:42
-msgid "There are no time restrictions defined."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:69
+#: server/fm-modules/fmFirewall/classes/class_templates.php:474
+msgid "Stack"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:56
-msgid "Restriction Name"
+#: server/fm-modules/fmFirewall/classes/class_templates.php:87
+msgid "There are no templates."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:56
-msgid "Date Range"
+#: server/fm-modules/fmFirewall/classes/class_templates.php:123
+#: server/fm-modules/fmFirewall/classes/class_templates.php:225
+#: server/fm-modules/fmFirewall/classes/class_templates.php:586
+msgid "All Servers"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:56
-#: server/fm-modules/fmFirewall/classes/class_time.php:374
-msgid "Weekdays"
+#: server/fm-modules/fmFirewall/classes/class_templates.php:128
+#: server/fm-modules/fmFirewall/classes/class_templates.php:230
+#: server/fm-modules/fmFirewall/classes/class_templates.php:586
+#: server/fm-modules/fmFirewall/classes/class_templates.php:589
+msgid "None"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:93
-msgid "No time name defined."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:163
+msgid "Could not add the template because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:106
-msgid "Could not add the time restriction because a database error occurred."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:200
+msgid "Could not update the template order because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:147
-msgid ""
-"Could not update the time restriction because a database error occurred."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:206
+msgid "Updated policy template order."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:172
-msgid ""
-"This schedule could not be deleted because it is associated with one or more "
-"policies."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:291
+msgid "This template could not be deleted because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:177
-#, php-format
-msgid "Time restriction (%s) was deleted."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:361
+msgid "Add Template"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:182
-msgid "This time restriction could not be deleted."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:361
+msgid "Edit Template"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:290
-msgid "Use contiguous time"
+#: server/fm-modules/fmFirewall/classes/class_templates.php:472
+msgid "Template Name"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:290
-msgid ""
-"When end time is smaller than start time, match this as a single time period "
-"instead distinct intervals."
+#: server/fm-modules/fmFirewall/classes/class_templates.php:475
+msgid "Available"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:293
-msgid "Add Restriction"
+#: server/fm-modules/fmFirewall/classes/class_templates.php:476
+msgid "Selected"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:293
-msgid "Edit Restriction"
+#: server/fm-modules/fmFirewall/classes/class_templates.php:553
+msgid "No name is defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:369
-msgid "Name"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_time.php:370
-msgid "Start Date"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_time.php:371
-msgid "Start Time"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_time.php:372
-msgid "End Date"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_time.php:373
-msgid "End Time"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_time.php:375
-msgid "Monthdays"
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_time.php:389
-msgid "No name defined."
-msgstr ""
-
-#: server/fm-modules/fmFirewall/classes/class_time.php:393
+#: server/fm-modules/fmFirewall/classes/class_templates.php:557
+#: server/fm-modules/fmFirewall/classes/class_time.php:394
 #, php-format
 msgid "Name is too long (maximum %d character)."
 msgid_plural "Name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:397
+#: server/fm-modules/fmFirewall/classes/class_templates.php:561
+msgid "This template name already exists."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:54
+msgid "Restriction Name"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:54
+msgid "Date Range"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:54
+#: server/fm-modules/fmFirewall/classes/class_time.php:375
+msgid "Weekdays"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:71
+msgid "There are no time restrictions defined."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:96
+msgid "No time name defined."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:109
+msgid "Could not add the time restriction because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:150
+msgid ""
+"Could not update the time restriction because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:175
+msgid ""
+"This schedule could not be deleted because it is associated with one or more "
+"policies."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:180
+#, php-format
+msgid "Time restriction (%s) was deleted."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:185
+msgid "This time restriction could not be deleted."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:293
+msgid "Use contiguous time"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:293
+msgid ""
+"When end time is smaller than start time, match this as a single time period "
+"instead distinct intervals."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:296
+msgid "Add Restriction"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:296
+msgid "Edit Restriction"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:371
+msgid "Start Date"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:372
+msgid "Start Time"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:373
+msgid "End Date"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:374
+msgid "End Time"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:376
+msgid "Monthdays"
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:390
+msgid "No name defined."
+msgstr ""
+
+#: server/fm-modules/fmFirewall/classes/class_time.php:398
 msgid "This name already exists."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:425
-#: server/fm-modules/fmFirewall/classes/class_time.php:442
+#: server/fm-modules/fmFirewall/classes/class_time.php:426
+#: server/fm-modules/fmFirewall/classes/class_time.php:443
 msgid "Everyday"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:427
+#: server/fm-modules/fmFirewall/classes/class_time.php:428
 msgid "Creation"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_time.php:429
+#: server/fm-modules/fmFirewall/classes/class_time.php:430
 msgid "Infinity"
 msgstr ""
 
