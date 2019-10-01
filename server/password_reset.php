@@ -19,15 +19,6 @@
  +-------------------------------------------------------------------------+
 */
 
-/**
- * Handles password resets
- *
- * @author		Jon LaBass
- * @version		$Id:$
- * @copyright	2013
- *
- */
-
 define('CLIENT', true);
 
 require_once('fm-init.php');
@@ -35,19 +26,28 @@ require_once('fm-init.php');
 $message = null;
 
 /** Redirect if key and login are not set */
-if (!count($_POST) && (!array_key_exists('key', $_GET) || !array_key_exists('login', $_GET))) header('Location: ' . $GLOBALS['RELPATH']);
+if (!count($_POST) && (!array_key_exists('key', $_GET) || !array_key_exists('login', $_GET))) {
+	header('Location: ' . $GLOBALS['RELPATH']);
+	exit;
+}
 
 /** Check key for validity */
-if (!checkForgottonPasswordKey(sanitize($_GET['key']), sanitize($_GET['login']))) header('Location: ' . $GLOBALS['RELPATH'] . '?forgot_password&keyInvalid');
+if (!checkForgottonPasswordKey(sanitize($_GET['key']), sanitize($_GET['login']))) {
+	header('Location: ' . $GLOBALS['RELPATH'] . '?forgot_password&keyInvalid');
+	exit;
+}
 
 if (count($_POST)) {
 	extract($_POST);
 	extract($_GET);
 	
+	$login = sanitize($login);
+	$user_password = sanitize($user_password);
+	
 	if ($user_password != $cpassword) {
 		$message = sprintf('<p class="failed">%s</p>', _('The passwords do not match.'));
 	} else {
-		if (!resetPassword(sanitize($login), sanitize($key), sanitize($user_password))) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
+		if (!resetPassword($login, $user_password)) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
 		else {
 			require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 			$fm_login->checkPassword($login, $user_password);
@@ -113,39 +113,11 @@ function printPasswordResetForm($message = null) {
 function checkForgottonPasswordKey($key, $fm_login) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$time = date("Y-m-d H:i:s", strtotime($__FM_CONFIG['clean']['days'] . ' days ago'));
+	$time = date("U", strtotime($__FM_CONFIG['clean']['time'] . ' ago'));
 	$query = "SELECT * FROM `fm_pwd_resets` WHERE `pwd_id`='$key' AND `pwd_login`=(SELECT `user_id` FROM `fm_users` WHERE `user_login`='$fm_login' AND `user_status`!='deleted') AND `pwd_timestamp`>='$time'";
 	$fmdb->get_results($query);
 	
 	if ($fmdb->num_rows) return true;
-	
-	return false;
-}
-
-
-/**
- * Resets the user password.
- *
- * @since 1.0
- * @package facileManager
- */
-function resetPassword($fm_login, $key, $user_password) {
-	global $fmdb;
-	
-	$user_info = getUserInfo($fm_login, 'user_login');
-	$fm_login_id = $user_info['user_id'];
-	
-	/** Update password */
-	$query = "UPDATE `fm_users` SET `user_password`=password('$user_password'), `user_force_pwd_change`='no' WHERE `user_id`='$fm_login_id'";
-	$fmdb->query($query);
-	
-	if ($fmdb->rows_affected) {
-		/** Remove entry from fm_pwd_resets table */
-		$query = "DELETE FROM `fm_pwd_resets` WHERE `pwd_login`='$fm_login_id'";
-		$fmdb->query($query);
-		
-		return true;
-	}
 	
 	return false;
 }

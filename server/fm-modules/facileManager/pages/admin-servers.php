@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -17,8 +17,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
- | Processes client installations                                          |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
@@ -41,7 +39,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 	} else {
 		if (in_array($_POST['module_name'], getActiveModules())) {
 			if (array_key_exists('genserial', $_GET)) {
-				$module = ($_POST['module_name']) ? $_POST['module_name'] : $_SESSION['module'];
+				$module = ($_POST['module_name']) ? sanitize($_POST['module_name']) : $_SESSION['module'];
 				$data['server_serial_no'] = generateSerialNo($module);
 			}
 			
@@ -50,7 +48,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				$data = $_POST;
 
 				/** Does the record already exist for this account? */
-				basicGet('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['server_name'], 'server_', 'server_name');
+				basicGet('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', sanitize($_POST['server_name']), 'server_', 'server_name');
 				if ($fmdb->num_rows) {
 					$server_array = $fmdb->last_result;
 					$_POST['server_id'] = $server_array[0]->server_id;
@@ -71,7 +69,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 			/** Client installs */
 			if (array_key_exists('install', $_GET)) {
 				/** Set flags */
-				$data = basicUpdate('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', $_POST['SERIALNO'], 'server_installed', 'yes', 'server_serial_no');
+				$data = basicUpdate('fm_' . $__FM_CONFIG[$_POST['module_name']]['prefix'] . 'servers', sanitize($_POST['SERIALNO']), 'server_installed', 'yes', 'server_serial_no');
 				if (function_exists('moduleCompleteClientInstallation')) {
 					moduleCompleteClientInstallation();
 				}
@@ -87,7 +85,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 				if (!isset($__FM_CONFIG[$_POST['module_name']]['min_client_auto_upgrade_version'])) {
 					$__FM_CONFIG[$_POST['module_name']]['min_client_auto_upgrade_version'] = 0;
 				}
-				$current_module_version = getOption('client_version', 0, $_POST['module_name']);
+				$current_module_version = getOption('client_version', 0, sanitize($_POST['module_name']));
 				if ($_POST['server_client_version'] == $current_module_version) {
 					$data = sprintf(_("Latest version: %s\nNo upgrade available."), $current_module_version) . "\n";
 				} elseif (version_compare($_POST['server_client_version'], $__FM_CONFIG[$_POST['module_name']]['min_client_auto_upgrade_version'], '<')) {
@@ -119,7 +117,7 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 			}
 			
 			if (array_key_exists('ssh', $_GET)) {
-				$data = getOption('ssh_' . $_GET['ssh'], getAccountID($_POST['AUTHKEY']));
+				$data = getOption('ssh_' . sanitize($_GET['ssh']), getAccountID(sanitize($_POST['AUTHKEY'])));
 			}
 		} else {
 			$data = sprintf(_("failed\n\nInstallation aborted. %s is not an active module."), $_POST['module_name']) . "\n";

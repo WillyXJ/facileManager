@@ -87,7 +87,10 @@ class fm_login {
 	 */
 	function printUserForm($message = null) {
 		/** Should not be here if there is no mail_enable defined or if not using builtin auth */
-		if (!getOption('mail_enable') || getOption('auth_method') != 1) header('Location: ' . $GLOBALS['RELPATH']);
+		if (!getOption('mail_enable') || getOption('auth_method') != 1) {
+			header('Location: ' . $GLOBALS['RELPATH']);
+			exit;
+		}
 
 		global $fm_name;
 		printHeader(_('Password Reset'), 'login');
@@ -252,7 +255,8 @@ class fm_login {
 		if (empty($user_login) || empty($pass)) return false;
 		
 		/** Built-in authentication */
-		$auth_method = (getOption('fm_db_version') >= 18) ? getOption('auth_method') : true;
+		$fm_db_version = getOption('fm_db_version');
+		$auth_method = ($fm_db_version >= 18) ? getOption('auth_method') : true;
 		if ($auth_method) {
 			/** Default Super Admin? */
 			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_auth_type`=1 ORDER BY user_id ASC LIMIT 1");
@@ -262,11 +266,12 @@ class fm_login {
 
 			/** Builtin Authentication */
 			if ($auth_method == 1) {
-				$pwd_query = ($encrypted) ? "'$pass'" : $pwd_query = "password('$pass')";
+				$pwd_query = ($encrypted) ? "'$pass'" : "password('$pass')";
 		
-				if (getOption('fm_db_version') >= 18) {
-					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=1 AND `user_template_only`='no' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);
+				if ($fm_db_version >= 18) {
+					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=1 AND `user_template_only`='no' AND `user_login`='$user_login'");
 				} else {
+					/** Old auth */
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);
 				}
 				if (!$fmdb->num_rows) {
@@ -279,8 +284,22 @@ class fm_login {
 				} else {
 					$user = $fmdb->last_result[0];
 					
+					/** Check password */
+					if ($user->user_password[0] == '*') {
+						/** Old MySQL hashing that needs to change */
+						if ($user->user_password != '*' . strtoupper(sha1(sha1($pass, true)))) {
+							return false;
+						}
+						resetPassword($user_login, $pass);
+					} else {
+						/** PHP hashing */
+						if (!password_verify($pass, $user->user_password)) {
+							return false;
+						}
+					}
+					
 					/** Enforce password change? */
-					if (getOption('fm_db_version') >= 15) {
+					if ($fm_db_version >= 15) {
 						if ($user->user_force_pwd_change == 'yes') {
 							$pwd_reset_query = "SELECT * FROM `fm_pwd_resets` WHERE `pwd_login`={$user->user_id} ORDER BY `pwd_timestamp` LIMIT 1";
 							$fmdb->get_results($pwd_reset_query);
@@ -412,6 +431,7 @@ class fm_login {
 <p>If you don't want to reset your password, then you can ignore this message.</p>
 <p>To reset your password, click the following link:<br />
 <<a href="{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}</a>></p>
+<p>This link expires in {$__FM_CONFIG['clean']['time']}.</p>
 </div>
 </div>
 <p style="font-size: 10px; color: #888; text-align: center;">$fm_name | $from_address</p>

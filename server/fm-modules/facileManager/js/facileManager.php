@@ -33,7 +33,9 @@ if (isset($__FM_CONFIG)) {
 			minimumResultsForSearch: 10
 		});
 		$(function() {
-			$( "#manage_item_contents" ).draggable();
+			$( "#manage_item_contents" ).draggable({
+				handle: "div.popup-header"
+			});
 		});
 	});
 	
@@ -1107,7 +1109,9 @@ if (isset($__FM_CONFIG)) {
 			});
 		};
 
-	$("#table_edits.grab tbody, #table_edits.grab1 tbody").sortable({
+	$("#table_edits.grab tbody, #table_edits.grab1 tbody").not(".no-grab").sortable({
+		items: "tr",
+		handle: ".fa-bars",
 		helper: fixHelperModified,
 		start: function() {
 			$(this).parent().addClass("grabbing");
@@ -1116,7 +1120,7 @@ if (isset($__FM_CONFIG)) {
 			$(this).parent().removeClass("grabbing");
 			updateIndex;
 			
-			var items = $("#table_edits.grab tr, #table_edits.grab1 tr");
+			var items = $("#table_edits.grab tr:not(.no-grab), #table_edits.grab1 tr");
 			var linkIDs = [items.size()];
 			var index = 0;
 			

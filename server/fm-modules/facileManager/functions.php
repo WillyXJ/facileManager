@@ -908,7 +908,7 @@ function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null, 
 function getAccountID($value, $field = 'account_key', $key = 'account_id') {
 	global $fmdb;
 	
-	$query = "SELECT $key FROM `fm_accounts` WHERE $field='$value'";
+	$query = sprintf('SELECT %s FROM `fm_accounts` WHERE %s="%s"', $key, $field, $value);
 	$result = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
@@ -951,11 +951,11 @@ function functionalCheck() {
 function pingTest($server) {
 	$program = findProgram('ping');
 	if (PHP_OS == 'FreeBSD' || PHP_OS == 'Darwin') {
-		$ping = shell_exec("$program -t 2 -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -t 2 -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	} elseif (PHP_OS == 'Linux') {
-		$ping = shell_exec("$program -W 2 -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -W 2 -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	} else {
-		$ping = shell_exec("$program -c 3 $server 2>/dev/null");
+		$ping = shell_exec("$program -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	}
 	if (preg_match('/64 bytes from/', $ping)) {
 		return true;
@@ -2306,6 +2306,35 @@ function setTimezone() {
 			date_default_timezone_set('UTC');
 		}
 	}
+}
+
+
+/**
+ * Resets the user password.
+ *
+ * @since 1.0
+ * @package facileManager
+ */
+function resetPassword($fm_login, $user_password) {
+	global $fmdb;
+	
+	if ($user_info = getUserInfo($fm_login, 'user_login')) {
+		$fm_login_id = $user_info['user_id'];
+
+		/** Update password */
+		$query = "UPDATE `fm_users` SET `user_password`='" . password_hash($user_password, PASSWORD_DEFAULT) . "', `user_force_pwd_change`='no' WHERE `user_id`='$fm_login_id'";
+		$fmdb->query($query);
+
+		if ($fmdb->rows_affected) {
+			/** Remove entry from fm_pwd_resets table */
+			$query = "DELETE FROM `fm_pwd_resets` WHERE `pwd_login`='$fm_login_id'";
+			$fmdb->query($query);
+
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -16,9 +16,6 @@
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/                                           |
- +-------------------------------------------------------------------------+
- | Processes accounts management page                                      |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
@@ -35,5 +32,6 @@ if (array_key_exists('verify', $_GET)) {
 }
 
 header('Location: ' . $GLOBALS['RELPATH']);
+exit;
 
 ?>

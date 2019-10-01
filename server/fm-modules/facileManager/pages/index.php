@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -17,14 +17,12 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
- | Processes main page                                                     |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 /* Redirect to activate modules if none are active */
 if ($_SESSION['module'] == $fm_name && currentUserCan('manage_modules')) {
 	header('Location: ' . $menu[getParentMenuKey(_('Modules'))][4]);
+	exit;
 }
 
 setUserModule($_REQUEST['module']);

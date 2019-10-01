@@ -53,6 +53,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	} elseif (!function_exists('functionalCheck') || !is_array($__FM_CONFIG['db'])) {
 		/** A config file is empty */
 		header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+		exit;
 	}
 	
 	/** Load language */
@@ -76,6 +77,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			if (!isSiteSecure()) {
 				$fm_port_ssl = getOption('fm_port_ssl') ? getOption('fm_port_ssl') : 443;
 				header('Location: https://' . $_SERVER['HTTP_HOST'] . ':' . $fm_port_ssl . $_SERVER['REQUEST_URI']);
+				exit;
 			}
 		}
 		
@@ -90,6 +92,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		if (isset($_GET) && array_key_exists('logout', $_GET)) {
 			$fm_login->logout();
 			header('Location: ' . $GLOBALS['RELPATH']);
+			exit;
 		}
 		
 		/** Process password resets */
@@ -134,8 +137,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 					echo "password_reset.php?key=$reset_key&login=$user_login";
 				} else echo $_SERVER['REQUEST_URI'];
 			} else {
-				if (!$logged_in) $fm_login->printLoginForm();
-				else header('Location: ' . $_SERVER['REQUEST_URI']);
+				if (!$logged_in) {
+					$fm_login->printLoginForm();
+				} else {
+					header('Location: ' . $_SERVER['REQUEST_URI']);
+					exit;
+				}
 			}
 			
 			exit;
@@ -257,6 +264,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 
 	/** A config file doesn't exist */
 	header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php');
+	exit;
 
 }
 

@@ -40,7 +40,10 @@ require_once('fm-init.php');
 ini_set('display_errors', false);
 error_reporting(0);
 
-if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('fm_db_version') >= 32)) header('Location: ' . dirname($_SERVER['PHP_SELF']));
+if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('fm_db_version') >= 32)) {
+	header('Location: ' . dirname($_SERVER['PHP_SELF']));
+	exit;
+}
 
 /** Ensure we meet the requirements */
 require_once(ABSPATH . 'fm-includes/init.php');
@@ -57,6 +60,7 @@ if (array_key_exists('backup', $_GET)) {
 	}
 	$fm_tools->backupDatabase();
 	header('Location: ' . $GLOBALS['basename']);
+	exit;
 }
 
 $branding_logo = getBrandLogo();
@@ -68,6 +72,7 @@ switch ($step) {
 	case 1:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
 			header('Location: /fm-install.php');
+			exit;
 		}
 		printf('<div id="fm-branding">
 		<img src="%s" /><span>%s</span>
@@ -80,6 +85,7 @@ switch ($step) {
 	case 2:
 		if (!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) {
 			header('Location: /fm-install.php');
+			exit;
 		}
 		require_once(ABSPATH . 'fm-modules/facileManager/upgrade.php');
 

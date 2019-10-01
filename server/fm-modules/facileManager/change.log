@@ -1,6 +1,29 @@
-3.4.3 (2019-??-??)
+3.5.0 (2019-0?)
 ==================
+** Minimum PHP version is now 5.5 **
 * Server - [bug] Fixed PHP errors during installation process.
+* Server - [improvement] Popup windows are now draggable only by the title bar.
+* Server - [improvement] Refinements around grabbable rows.
+* Server - [bug] Configuration previews no longer process characters as html.
+* Server - [security] Fixed an issue where unauthenticated password resets could
+           occur. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
+           Ivars Vids)
+* Both   - [security] Fixed an issue where local privileges could be escalated
+           to root. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
+           Ivars Vids)
+* Server - [security] Fixed an issue with password resets where local privilege
+           escalation and SQL injections could occur. (Found and reported by 
+           Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+* Server - [security] Changed the default password reset expiration to 15 minutes.
+* Server - [security] Updated the user password hashing to a more secure algorithm.
+           (Found and reported by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+* Server - [security] Fixed an issue where admin-servers.php was susceptible to
+           SQL injection. (Found and reported by Arturs Danilevics, Oskars Vegeris,
+           and Ivars Vids)
+* Server - [security] Ensured header() calls are not skipped. (Found and reported
+           by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+* Server - [improvement] Updated .htacess installation checks verbiage. (Issue #461)
+* Client - [bug] Fixed parsing of the apache2 user on Debian systems. (Issue #462)
 
 3.4.2 (2019-05-17)
 ==================

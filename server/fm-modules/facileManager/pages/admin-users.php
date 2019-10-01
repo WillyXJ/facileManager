@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -16,9 +16,6 @@
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/                                           |
- +-------------------------------------------------------------------------+
- | Processes user management page                                          |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
@@ -43,7 +40,10 @@ case 'add':
 		$response = ($_POST['type'] == 'users') ? $fm_users->addUser($_POST) : $fm_users->addGroup($_POST);
 		if ($response !== true) {
 			$form_data = $_POST;
-		} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
+		} else {
+			header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
+			exit;
+		}
 	}
 	break;
 case 'edit':
@@ -51,20 +51,27 @@ case 'edit':
 		$response = ($_POST['type'] == 'users') ? $fm_users->updateUser($_POST) : $fm_users->updateGroup($_POST);
 		if ($response !== true) {
 			$form_data = $_POST;
-		} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
+		} else {
+			header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
+			exit;
+		}
 	}
 	if (isset($_GET['status']) && $_POST['type'] == 'users') {
-		if ($_GET['id'] == 1) $_GET['id'] = 0;
-		$user_info = getUserInfo($_GET['id']);
+		$user_id = sanitize($_GET['id']);
+		$user_status = sanitize($_GET['status']);
+		
+		if ($user_id == 1) $user_id = 0;
+		$user_info = getUserInfo($user_id);
 		if ($user_info) {
 			if ($user_info['user_template_only'] == 'no') {
-				if (updateStatus('fm_users', $_GET['id'], 'user_', $_GET['status'], 'user_id')) {
-					addLogEntry(sprintf(_("Set user '%s' status to %s."), $user_info['user_login'], $_GET['status']), $fm_name);
+				if (updateStatus('fm_users', $user_id, 'user_', $user_status, 'user_id')) {
+					addLogEntry(sprintf(_("Set user '%s' status to %s."), $user_info['user_login'], $user_status), $fm_name);
 					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['type']);
+					exit;
 				}
 			}
 		}
-		$response = sprintf(_('This user could not be set to %s.') . "\n", $_GET['status']);
+		$response = sprintf(_('This user could not be set to %s.') . "\n", $user_status);
 	}
 }
 
