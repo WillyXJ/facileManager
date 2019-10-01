@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -18,17 +18,20 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes zone management page                                          |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 if (!currentUserCan(array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 
-if (!isset($map)) header('Location: zones-forward.php');
-if (isset($_GET['map'])) header('Location: zones-' . sanitize(strtolower($_GET['map'])) . '.php');
+if (!isset($map)) {
+	header('Location: zones-forward.php');
+	exit;
+}
+if (isset($_GET['map'])) {
+	header('Location: zones-' . sanitize(strtolower($_GET['map'])) . '.php');
+	exit;
+}
 $map = (isset($_POST['createZone'][0]['domain_mapping'])) ? sanitize(strtolower($_POST['createZone'][0]['domain_mapping'])) : $map;
 
 if (currentUserCan('manage_zones', $_SESSION['module'])) {
@@ -49,6 +52,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 				}
 				$redirect_record_type = (isset($_POST['soa_id']) && $_POST['soa_id']) ? 'NS' : 'SOA';
 				header('Location: zone-records.php?map=' . $map . '&domain_id=' . $insert_id . '&record_type=' . $redirect_record_type);
+				exit;
 			}
 		}
 		break;
@@ -57,12 +61,18 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
 				$response = displayResponseClose($zone_update_status);
-			} else header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
+				exit;
+			}
 		}
 		if (isset($_GET['status'])) {
 			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_GET['domain_id'], 'domain_', $_GET['status'], 'domain_id')) {
 				$response = displayResponseClose(sprintf(__('This item could not be set to %s.'), $_GET['status']));
-			} else header('Location: ' . $GLOBALS['basename']);
+			} else {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 		}
 		break;
 	case 'download':
@@ -114,7 +124,10 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 					exit;
 				}
 			}
-		} else header('Location: ' . $GLOBALS['basename']);
+		} else {
+			header('Location: ' . $GLOBALS['basename']);
+			exit;
+		}
 		break;
 	}
 }

@@ -1,4 +1,4 @@
-3.3.5 (2019-05-??)
+3.4.0 (2019-0?-??)
 ==================
 * Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)
 * Server - [bug] Fixed master clause deletions when no address lists are
@@ -8,6 +8,15 @@
            values are modified.
 * Server - [bug] Fixed remote server creation after a fresh installation.
 * Server - [bug] Fixed dynamic zone loading for reverse zones. (Issue #449)
+* Server - [feature] Added support for TLSA and OPENPGPKEY RR types. (Issue #439)
+* Server - [bug] Fixed PHP error during config generation via cron. (Issue #454)
+* Both   - [security] Fixed an issue where local privileges could be escalated
+           to root. (Found and reported by Arturs Danilevics, Oskars Vegeris, and
+           Ivars Vids)
+* Server - [security] Ensured header() calls are not skipped. (Found and reported
+           by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+* Server - [feature] Added support to define the zone filename. (Issue #456)
+* Server - [bug] Fixed an issue where ACLs could not be deleted. (Issue #458)
 
 3.3.4 (2019-05-17)
 ==================

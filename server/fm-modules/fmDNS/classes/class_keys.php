@@ -537,7 +537,7 @@ HTML;
 		
 		/** ZSK */
 		if ($data['key_subtype'] == 'ZSK' || $data['key_subtype'] == __('Both')) {
-			$zsk_output = shell_exec("$dnssec_keygen -K $tmp_dir -a {$data['key_algorithm']} -b {$data['key_size']} -n zone $domain_name");
+			$zsk_output = shell_exec("$dnssec_keygen -K $tmp_dir -a {$data['key_algorithm']} -b {$data['key_size']} -n zone " . escapeshellarg($domain_name));
 			$data['key_secret'] = file_get_contents($tmp_dir . DIRECTORY_SEPARATOR . trim($zsk_output) . '.private');
 			$data['key_public'] = file_get_contents($tmp_dir . DIRECTORY_SEPARATOR . trim($zsk_output) . '.key');
 			$data['key_name'] = trim($zsk_output);
@@ -558,7 +558,7 @@ HTML;
 		
 		/** KSK */
 		if ($data['key_subtype'] == 'KSK') {
-			$ksk_output = shell_exec("$dnssec_keygen -K $tmp_dir -a {$data['key_algorithm']} -b {$data['key_size']} -f KSK -n zone $domain_name");
+			$ksk_output = shell_exec("$dnssec_keygen -K $tmp_dir -a {$data['key_algorithm']} -b {$data['key_size']} -f KSK -n zone " . escapeshellarg($domain_name));
 			$data['key_secret'] = file_get_contents($tmp_dir . DIRECTORY_SEPARATOR . trim($ksk_output) . '.private');
 			$data['key_public'] = file_get_contents($tmp_dir . DIRECTORY_SEPARATOR . trim($ksk_output) . '.key');
 			$data['key_name'] = trim($ksk_output);
@@ -602,7 +602,7 @@ HTML;
 		file_put_contents($tmp_dir . $saved_data->key_name . '.private', $saved_data->key_secret);
 		file_put_contents($tmp_dir . $saved_data->key_name . '.key', $saved_data->key_public);
 		
-		$output = shell_exec("$dnssec_revoke -K $tmp_dir {$saved_data->key_name} 2>&1");
+		$output = shell_exec("$dnssec_revoke -K $tmp_dir " . escapeshellarg($saved_data->key_name) . ' 2>&1');
 		$data['key_secret'] = file_get_contents(trim($output) . '.private');
 		$data['key_public'] = file_get_contents(trim($output) . '.key');
 		$data['key_name'] = str_replace($tmp_dir, '', trim($output));

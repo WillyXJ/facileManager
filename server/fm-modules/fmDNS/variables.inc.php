@@ -84,6 +84,7 @@ $__FM_CONFIG['records']['digest_types'] = array(
 											array('SHA-1', 1),
 											array('SHA-256', 2)
 											);
+$__FM_CONFIG['records']['tlsa_flags'] = array('0', '1', '2', '3');
 $__FM_CONFIG['records']['caa_flags']		= array('issue', 'issuewild', 'iodef');
 
 $__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Servers'), 'groups' => _('Groups'));
@@ -148,6 +149,10 @@ $__FM_CONFIG['fmDNS']['default']['options'] = @array(
 				'description' => array(__('Purge Configuration Files'), __('When enabled, configuration files will be deleted on the DNS servers before building the server config. This can be handy if you want to remove unused files.')),
 				'default_value' => 'no',
 				'type' => 'checkbox'),
+		'zone_file_format' => array(
+				'description' => array(__('Zone Filename Format'), __('The filename structure for the zone files. {ZONENAME} will be replaced with the name of the zone.')),
+				'default_value' => 'db.{ZONENAME}.hosts',
+				'type' => 'text'),
 		'auto_create_ptr_zones' => array(
 				'description' => array(__('Create Reverse Zones Automatically'), __('While creating A records and choosing to create the associated PTR record, reverse zones can be automatically created if they are missing.')),
 				'default_value' => 'no',

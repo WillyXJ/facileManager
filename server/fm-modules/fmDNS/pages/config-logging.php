@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes server logging management page                                |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
@@ -35,6 +32,7 @@ $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST[
 /* Ensure proper type is defined */
 if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {
 	header('Location: ' . $GLOBALS['basename']);
+	exit;
 }
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -50,6 +48,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
+				exit;
 			}
 		}
 		break;
@@ -62,6 +61,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type'] . $server_serial_no_uri);
+				exit;
 			}
 		}
 	}

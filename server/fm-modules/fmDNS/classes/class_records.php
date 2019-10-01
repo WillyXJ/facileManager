@@ -105,6 +105,9 @@ class fm_dns_records {
 			$sql_fields .= $key . ', ';
 			$sql_values .= "'" . sanitize($data) . "', ";
 			if ($key != 'account_id') {
+				if ($record_type == 'TLSA') {
+					$key = str_replace(array('priority', 'weight', 'port'), array('usage', 'selector', 'type'), $key);
+				}
 				$log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			}
 			if ($key == 'soa_default' && $data == 'yes') {
@@ -161,6 +164,9 @@ class fm_dns_records {
 				$sql_edit .= $key . '=NULL,';
 			} else {
 				$sql_edit .= $key . "='" . sanitize(str_replace("\r\n", "\n", $data)) . "', ";
+			}
+			if ($record_type == 'TLSA') {
+				$key = str_replace(array('priority', 'weight', 'port'), array('usage', 'selector', 'type'), $key);
 			}
 			if (!$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			if ($key == 'soa_default' && $data == 'yes') {
@@ -308,6 +314,12 @@ class fm_dns_records {
 			$title_array[] = array('title' => __('Type'), 'rel' => 'record_params');
 		}
 		
+		if ($type == 'TLSA') {
+			$title_array[] = array('title' => __('Usage'), 'rel' => 'record_priority');
+			$title_array[] = array('title' => __('Selector'), 'rel' => 'record_weight');
+			$title_array[] = array('title' => __('Type'), 'rel' => 'record_port');
+		}
+		
 		if ($show_value) $title_array[] = array('title' => __('Value'), 'rel' => 'record_value');
 				
 		if ($type == 'RP' ) {
@@ -442,6 +454,20 @@ class fm_dns_records {
 				$show_value = false;
 			}
 			
+			if ($type == 'TLSA') {
+				$tmp_flags1 = $__FM_CONFIG['records']['tlsa_flags'];
+				array_pop($tmp_flags1);
+				$tmp_flags2 = $tmp_flags1;
+				array_pop($tmp_flags1);
+				$field_values['data']['Priority'] = '>' . buildSelect($action . '[_NUM_][record_priority]', '_NUM_', $__FM_CONFIG['records']['tlsa_flags'], $record_priority);
+				$field_values['data']['Weight'] = '>' . buildSelect($action . '[_NUM_][record_weight]', '_NUM_', $tmp_flags1, $record_weight);
+				$field_values['data']['Port'] = '>' . buildSelect($action . '[_NUM_][record_port]', '_NUM_', $tmp_flags2, $record_port);
+			}
+			
+			if ($type == 'OPENPGPKEY') {
+				$value_textarea = true;
+			}
+			
 			if (in_array($type, array('DHCID', 'DLV', 'DS'))) {
 				if (in_array($type, array('DLV', 'DS'))) {
 					$field_values['data']['Key Tag'] = '><input style="width: 45px;" type="text" name="' . $action . '[_NUM_][record_key_tag]" value="' . $record_key_tag . '" onkeydown="return validateNumber(event)" />';
@@ -506,6 +532,12 @@ class fm_dns_records {
 				$field_values['data']['Flags'] = '>' . $record_flags;
 				$field_values['data']['Params'] = '>' . $record_params;
 				$field_values['data']['Regex'] = '>' . $record_regex;
+			}
+			
+			if ($type == 'TLSA') {
+				$field_values['data']['Priority'] = '>' . $record_priority;
+				$field_values['data']['Weight'] = '>' . $record_weight;
+				$field_values['data']['Port'] = '>' . $record_port;
 			}
 			
 			if ($show_value) $field_values['data']['Value'] = '>' . $record_value;

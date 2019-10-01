@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -18,12 +18,12 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
- | Processes server keys management page                                   |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
-if (!isset($template_type)) header('Location: ' . $GLOBALS['RELPATH']);
+if (!isset($template_type)) {
+	header('Location: ' . $GLOBALS['RELPATH']);
+	exit;
+}
 
 $tpl_perms = array('manage_zones', 'view_all');
 if (isset($tpl_extra_perm)) $tpl_perms[] = $tpl_extra_perm;

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -17,9 +17,6 @@
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
- +-------------------------------------------------------------------------+
- | Processes server options management page                                |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
@@ -44,7 +41,10 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 	}
 	
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_id, 'view_', 'view_id');
-	if (!$fmdb->num_rows) header('Location: config-views.php');
+	if (!$fmdb->num_rows) {
+		header('Location: config-views.php');
+		exit;
+	}
 	$view_info = $fmdb->last_result;
 	
 	$display_option_type = $view_info[0]->view_name;
@@ -55,14 +55,20 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 /* Configure options for a zone */
 } elseif (array_key_exists('domain_id', $_GET)) {
 	$domain_id = (isset($_GET['domain_id'])) ? sanitize($_GET['domain_id']) : null;
-	if (!$domain_id) header('Location: ' . $GLOBALS['basename']);
+	if (!$domain_id) {
+		header('Location: ' . $GLOBALS['basename']);
+		exit;
+	}
 	
 	/** Does the user have access? */
 	$perms = zoneAccessIsAllowed(array($domain_id), 'manage_zones');
 	if (!currentUserCan(array('access_specific_zones', 'view_all'), $_SESSION['module'], array(0, $domain_id))) unAuth();
 
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
-	if (!$fmdb->num_rows) header('Location: zones.php');
+	if (!$fmdb->num_rows) {
+		header('Location: zones.php');
+		exit;
+	}
 	$domain_info = $fmdb->last_result;
 	
 	$display_option_type = displayFriendlyDomainName($domain_info[0]->domain_name);
@@ -73,10 +79,16 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 /* Configure options for a server */
 } elseif (array_key_exists('server_id', $_GET)) {
 	$server_id = (isset($_GET['server_id'])) ? sanitize($_GET['server_id']) : null;
-	if (!$server_id) header('Location: ' . $GLOBALS['basename']);
+	if (!$server_id) {
+		header('Location: ' . $GLOBALS['basename']);
+		exit;
+	}
 	
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_id, 'server_', 'server_id');
-	if (!$fmdb->num_rows) header('Location: config-servers.php');
+	if (!$fmdb->num_rows) {
+		header('Location: config-servers.php');
+		exit;
+	}
 	$server_info = $fmdb->last_result;
 	
 	$display_option_type = $server_info[0]->server_name;
@@ -104,6 +116,7 @@ if ($perms) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
 			}
 		}
 		break;
@@ -116,6 +129,7 @@ if ($perms) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
 			}
 		}
 	}

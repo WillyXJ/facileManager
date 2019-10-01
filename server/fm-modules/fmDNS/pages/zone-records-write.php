@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -26,7 +26,10 @@ require_once('fm-init.php');
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
-if (empty($_POST)) header('Location: ' . $GLOBALS['RELPATH']);
+if (empty($_POST)) {
+	header('Location: ' . $GLOBALS['RELPATH']);
+	exit;
+}
 
 /** Make sure we can handle all of the variables */
 checkMaxInputVars();
@@ -117,11 +120,14 @@ if (isset($create) && is_array($create)) {
 
 if (isset($record_type) && $domain_id && !isset($import_records)) {
 	header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);
+	exit;
 } else {
 	if ($domain_id) {
 		header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);
+		exit;
 	} else {
 		header('Location: ' . $menu[getParentMenuKey(__('SOA'))][4]);
+		exit;
 	}
 }
 

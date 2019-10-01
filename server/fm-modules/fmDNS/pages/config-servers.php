@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -17,9 +17,6 @@
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmdns/                             |
- +-------------------------------------------------------------------------+
- | Processes servers management page                                       |
- | Author: Jon LaBass                                                      |
  +-------------------------------------------------------------------------+
 */
 
@@ -43,7 +40,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
+				exit;
+			}
 		}
 		break;
 	case 'edit':
@@ -56,7 +56,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
+				exit;
+			}
 		}
 		if (isset($_GET['status'])) {
 			if ($_GET['type'] == 'servers') {
@@ -70,6 +73,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 					addLogEntry(sprintf(__('Set server (%s) status to %s.'), $tmp_name, $_GET['status']));
 					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
+					exit;
 				}
 			} elseif ($_GET['type'] == 'groups') {
 				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $_GET['id'], 'group_', $_GET['status'], 'group_id')) {
@@ -78,6 +82,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 					addLogEntry(sprintf(__('Set server group (%s) status to %s.'), $tmp_name, $_GET['status']));
 					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
+					exit;
 				}
 			}
 		}
