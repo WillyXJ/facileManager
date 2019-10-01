@@ -194,7 +194,10 @@ input[type="checkbox"].modules {
 	font-size: 9pt;
 }
 #donate a {
-	color: #000000;
+	color: #888888;
+}
+#donate a:hover i {
+	color: #c11515;
 }
 
 #mainitems {
@@ -1837,9 +1840,9 @@ pre {
 	bottom: 0;
 	right: 0;
 	padding: 10px;
-	color: #ccc;
+	color: #888888;
 	text-align: center;
-	background: #fff;
+	background: #ffffff;
 	width: 100%;
 }
 #issue_tracker a {
