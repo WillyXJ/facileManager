@@ -60,9 +60,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}poli
   `server_serial_no` int(10) NOT NULL,
   `policy_type` enum('filter','nat','template') NOT NULL DEFAULT 'filter',
   `policy_template_stack` varchar(255) NULL DEFAULT NULL,
-  `policy_template_id` int(11) NOT NULL DEFAULT '0'
+  `policy_template_id` int(11) NOT NULL DEFAULT '0',
   `policy_order_id` int(11) NULL DEFAULT NULL,
-  `policy_targets` varchar(255) NOT NULL DEFAULT '0'
+  `policy_targets` varchar(255) NOT NULL DEFAULT '0',
   `policy_name` varchar(255) DEFAULT NULL,
   `policy_interface` varchar(150) NOT NULL DEFAULT 'any',
   `policy_direction` enum('in','out') NOT NULL DEFAULT 'in',

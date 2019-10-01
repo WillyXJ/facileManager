@@ -335,7 +335,7 @@ class fm_module_templates {
 		<tr id="$row->policy_id" name="$row->policy_name">
 			$checkbox
 			$grab_bars
-			<td><a href="/config-policy.php?server_serial_no=t_{$row->policy_id}">$row->policy_name</a></td>
+			<td><a href="config-policy.php?server_serial_no=t_{$row->policy_id}">$row->policy_name</a></td>
 			<td>$stacks</td>
 			<td>$targets</td>
 			<td>$comments</td>
