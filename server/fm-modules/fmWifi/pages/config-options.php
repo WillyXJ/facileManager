@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -67,6 +67,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
 			}
 		}
 		break;
@@ -79,6 +80,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
 			}
 		}
 	}

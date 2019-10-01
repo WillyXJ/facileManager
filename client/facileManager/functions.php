@@ -1448,10 +1448,9 @@ function versionCheck($app_version, $serverhost, $compress) {
  * @since 3.2.1
  * @package facileManager
  *
- * @param string $os Detected operating system
  * @return string
  */
-function getInterfaceNames($os) {
+function getInterfaceNames() {
 	$interfaces = null;
 	
 	switch(PHP_OS) {
@@ -1479,6 +1478,46 @@ function getInterfaceNames($os) {
 	exec($command . ' | awk "{print \$1}" | sort | uniq', $interfaces);
 	
 	return $interfaces;
+}
+
+
+/**
+ * Gets the network interface addresses
+ *
+ * @since 3.5.0
+ * @package facileManager
+ *
+ * @param string Interface name
+ * @return string
+ */
+function getInterfaceAddresses($interface = null) {
+	$addresses = null;
+	
+	switch(PHP_OS) {
+		case 'Linux':
+			if ($ifcfg = findProgram('ip')) {
+				$command = $ifcfg . ' addr';
+			} elseif ($ifcfg = findProgram('ifconfig')) {
+				$command = $ifcfg;
+			}
+			break;
+		case 'Darwin':
+		case 'FreeBSD':
+		case 'OpenBSD':
+		case 'NetBSD':
+			$command = findProgram('ifconfig');
+			break;
+		case 'SunOS':
+			$command = findProgram('ifconfig');
+			break;
+		default:
+			return null;
+			break;
+	}
+	
+	exec($command . $interface . ' | grep inet | awk \'{print $2}\' | egrep -v \'127.0.0.1|^::1|^169.254.\' | sort | uniq', $addresses);
+	
+	return $addresses;
 }
 
 
