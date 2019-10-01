@@ -1,4 +1,4 @@
-1.5.2 (2019-??)
+1.5.2 (2019-10-01)
 ==================
 * Server - [security] Ensured header() calls are not skipped. (Found and reported
            by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)

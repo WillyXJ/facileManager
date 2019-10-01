@@ -1,4 +1,4 @@
-3.4.0 (2019-0?-??)
+3.4.0 (2019-10-01)
 ==================
 * Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)
 * Server - [bug] Fixed master clause deletions when no address lists are

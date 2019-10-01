@@ -1,6 +1,6 @@
-3.5.0 (2019-0?)
+3.5.0 (2019-10-01)
 ==================
-** Minimum PHP version is now 5.5 **
+** Minimum PHP version is now 5.5 for the web server **
 * Server - [bug] Fixed PHP errors during installation process.
 * Server - [improvement] Popup windows are now draggable only by the title bar.
 * Server - [improvement] Refinements around grabbable rows.

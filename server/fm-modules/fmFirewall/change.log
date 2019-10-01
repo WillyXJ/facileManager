@@ -1,4 +1,4 @@
-?? (2019-0?)
+2.0.0 (2019-10-01)
 ==================
 * Server - [bug] Fixed PHP errors.
 * Server - [improvement] Updated policy and time configurations with multiple tabs.
