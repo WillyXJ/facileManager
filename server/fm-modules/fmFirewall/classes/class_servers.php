@@ -46,33 +46,36 @@ class fm_module_servers extends fm_shared_module_servers {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		$fmdb->num_rows = $num_rows;
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
+		echo '<div class="overflow-container">';
 			
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no firewall servers.'));
-		} else {
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'servers'
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'servers'
+					);
+
+		$title_array[] = array('class' => 'header-tiny');
+		$title_array = array_merge($title_array, array(__('Hostname'), __('Method'), __('Firewall Type'), __('Version'), __('Config File')));
+		$title_array[] = array(
+							'title' => __('Actions'),
+							'class' => 'header-actions'
 						);
 
-			$title_array[] = array('class' => 'header-tiny');
-			$title_array = array_merge($title_array, array(__('Hostname'), __('Method'), __('Firewall Type'), __('Version'), __('Config File')));
-			$title_array[] = array(
-								'title' => __('Actions'),
-								'class' => 'header-actions'
-							);
+		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo displayTableHeader($table_info, $title_array);
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table></div></div>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no firewall servers.'));
 		}
 	}
 

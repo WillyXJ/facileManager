@@ -1,3 +1,18 @@
+?? (2019-0?)
+==================
+* Server - [bug] Fixed PHP errors.
+* Server - [improvement] Updated policy and time configurations with multiple tabs.
+* Server - [improvement] Use font-awesome for negated displays.
+* Server - [feature] Added policy templates.
+* Server - [feature] Added support for policy names.
+* Server - [bug] Fixed pf macro for multiple negated ports.
+* Server - [improvement] Policy page now displays if options are set on a rule.
+* Server - [feature] The pf 'quick' keyword is now an option.
+* Server - [feature] Packet state for all firewall types can now be defined.
+* Server - [improvement] CSS tweaks.
+* Server - [security] Ensured header() calls are not skipped. (Found and reported
+           by Arturs Danilevics, Oskars Vegeris, and Ivars Vids)
+
 1.7.1 (2019-03-20)
 ==================
 * Server - [bug] Fixed installs and upgrades with PHP 7.3.x. (Issue #436)

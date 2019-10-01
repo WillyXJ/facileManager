@@ -65,8 +65,18 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$config_head = '# This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 			$config = $config_head;
 			
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no AND policy_status='active'");
+			/** Get associated templates */
+			$template_ids = getTemplateIDs($server_id, $server_serial_no);
+			$template_id_count = 0;
+			if (count($template_ids)) {
+				list($template_results, $template_id_count) = getTemplatePolicies($template_ids, $server_id, 0, 'filter');
+			}
+			
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no");
+			$fmdb->num_rows += $template_id_count;
 			if ($fmdb->num_rows) {
+				$template_results = array_merge((array) $template_results, (array) $fmdb->last_result);
+				$fmdb->last_result = $template_results;
 				$policy_count = $fmdb->num_rows;
 				$policy_result = $fmdb->last_result;
 				
@@ -188,10 +198,14 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$config[] = '';
 		
 		for ($i=0; $i<$count; $i++) {
+			if ($policy_result[$i]->policy_status != 'active') continue;
+			
 			$line = $keep_state = null;
 			$log_rule = false;
 			
-			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$rule_number = $i + 1;
+			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
@@ -199,7 +213,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) {
 				$log_rule = true;
-				$log_chain = 'RULE_' . $policy_result[$i]->policy_order_id;
+				$log_chain = 'RULE_' . $rule_number;
 				$config[] = '-N ' . $log_chain;
 				$config[] = '-A ' . strtoupper($policy_result[$i]->policy_direction) . 'PUT -j ' . $log_chain;
 			}
@@ -218,7 +232,12 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			/** Handle keep-states */
 			if ($policy_result[$i]->policy_packet_state) {
-				$keep_state = ' -m state --state ' . str_replace(';', ',', $policy_result[$i]->policy_packet_state);
+				foreach (explode(',', $policy_result[$i]->policy_packet_state) as $state) {
+					if (in_array($state, $__FM_CONFIG['fw']['policy_states'][$server_result->server_type])) $keep_state[] = $state;
+				}
+				if ($keep_state) {
+					$keep_state = ' -m state --state ' . join(',', $keep_state);
+				}
 			}
 			
 			/** Handle frags */
@@ -442,9 +461,13 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							'reject' => 'block return-icmp');
 		
 		for ($i=0; $i<$count; $i++) {
-			$line = $label = null;
+			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$line = $label = $keep_state = null;
+			
+			$rule_number = $i + 1;
+			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
@@ -459,7 +482,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$label = ' label "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ': "';
 			}
 			
-			$line[] = 'quick';
+			/** Handle quick processing */
+			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) {
+				$line[] = 'quick';
+			}
 			
 			/** Handle interface */
 			$interface = ($policy_result[$i]->policy_interface != 'any') ? 'on ' . $policy_result[$i]->policy_interface : null;
@@ -468,7 +494,14 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$line[] = 'inet';
 			
 			/** Handle keep-states */
-			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep state' : null;
+			if ($policy_result[$i]->policy_packet_state) {
+				foreach (explode(',', $policy_result[$i]->policy_packet_state) as $state) {
+					if (in_array($state, $__FM_CONFIG['fw']['policy_states'][$server_result->server_type])) $keep_state[] = $state;
+				}
+				if ($keep_state) {
+					$keep_state = ' ' . join(',', $keep_state);
+				}
+			}
 
 			/** Handle match inverses */
 			$services_not = ($policy_result[$i]->policy_services_not) ? '!' : null;
@@ -481,8 +514,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$source_address = ($policy_result[$i]->policy_source_not) ? '! ' : null;
 			if (is_array($policy_source)) {
 				if (count($policy_source) > 1) {
-					$table[] = 'table <fM_r' . $policy_result[$i]->policy_order_id . '_src> { ' . implode(', ', $policy_source) . ' }';
-					$source_address .= '<fM_r' . $policy_result[$i]->policy_order_id . '_src>';
+					$table[] = 'table <fM_r' . $rule_number . '_src> { ' . implode(', ', $policy_source) . ' }';
+					$source_address .= '<fM_r' . $rule_number . '_src>';
 				} else {
 					$source_address .= implode(', ', $policy_source);
 				}
@@ -498,8 +531,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$destination_address = ($policy_result[$i]->policy_destination_not) ? '! ' : null;
 			if (is_array($policy_destination)) {
 				if (count($policy_destination) > 1) {
-					$table[] = 'table <fM_r' . $policy_result[$i]->policy_order_id . '_dst> { ' . implode(', ', $policy_destination) . ' }';
-					$destination_address .= '<fM_r' . $policy_result[$i]->policy_order_id . '_dst>';
+					$table[] = 'table <fM_r' . $rule_number . '_dst> { ' . implode(', ', $policy_destination) . ' }';
+					$destination_address .= '<fM_r' . $rule_number . '_dst>';
 				} else {
 					$destination_address .= implode(', ', $policy_destination);
 				}
@@ -602,7 +635,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 									} else {
 										$service_ports = implode(',', $ports);
 										$service_ports = str_replace(array(',; ', ',! '), ',', $service_ports);
-										if (strpos($service_ports, ',') !== false) $service_ports = str_replace('port =', '{', $service_ports) . ' }';
+										if (strpos($service_ports, ',') !== false) $service_ports = str_replace(array('port =', 'port !='), array('{', '{!'), $service_ports) . ' }';
 										$service_ports = str_replace(',{', ',', $service_ports);
 										$service_ports = str_replace('{', 'port {', $service_ports);
 									}
@@ -666,9 +699,13 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							'reject' => 'block');
 		
 		for ($i=0; $i<$count; $i++) {
-			$line = null;
+			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$line = $keep_state = null;
+			
+			$rule_number = $i + 1;
+			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
@@ -689,8 +726,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			if ($interface) $line[] = $interface;
 			
 			/** Handle keep-states */
-			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep state' : null;
-
+			$keep_state = ($policy_result[$i]->policy_packet_state && in_array('keep state', explode(',', $policy_result[$i]->policy_packet_state))) ? ' keep state' : null;
+			
 			/** Handle frags */
 			$frag = ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) ? ' with frag' : null;
 
@@ -863,9 +900,13 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$config[] = null;
 		
 		for ($i=0; $i<$count; $i++) {
-			$line = null;
+			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$rule_title = 'fmFirewall Rule ' . $policy_result[$i]->policy_order_id;
+			$line = $keep_state = null;
+			
+			$rule_number = $i + 1;
+			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
 			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
@@ -883,8 +924,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$interface = ($policy_result[$i]->policy_interface != 'any') ? ' via ' . $policy_result[$i]->policy_interface : null;
 			
 			/** Handle keep-states */
-			$keep_state = ($policy_result[$i]->policy_action == 'pass') ? ' keep-state' : null;
-
+			$keep_state = ($policy_result[$i]->policy_packet_state && in_array('keep-state', explode(',', $policy_result[$i]->policy_packet_state))) ? ' keep-state' : null;
+			
 			/** Handle established option */
 			$established = ($policy_result[$i]->policy_action == 'pass' && ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['established']['bit'])) ? 'established ' : null;
 

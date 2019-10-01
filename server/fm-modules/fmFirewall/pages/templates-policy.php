@@ -20,51 +20,48 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!currentUserCan(array('manage_services', 'view_all'), $_SESSION['module'])) unAuth();
+if (!currentUserCan(array('manage_policies', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_policies.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 
-if (currentUserCan('manage_services', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_groups->add($_POST);
+if (!empty($_POST)) {
+	if (currentUserCan('manage_policies', $_SESSION['module'])) {
+		$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
+		switch ($action) {
+		case 'add':
+			$result = $fm_module_templates->add($_POST);
 			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
+				$response = displayResponseClose($result);
 			} else {
 				header('Location: ' . $GLOBALS['basename']);
 				exit;
 			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_groups->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
+			break;
+		case 'edit':
+			$update_status = $fm_module_templates->update($_POST);
+			if ($update_status !== true) {
+				$response = displayResponseClose($update_status);
 			} else {
 				header('Location: ' . $GLOBALS['basename']);
 				exit;
 			}
+			break;
 		}
-		break;
 	}
 }
 
 printHeader();
 @printMenu();
 
-$group_type = 'service';
+echo printPageHeader((string) $response, null, currentUserCan('manage_policies', $_SESSION['module']), null, null, 'noscroll');
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $group_type);
+$sort_direction = null;
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='service'");
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND policy_type='template'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_module_groups->rows($result, $group_type, $page, $total_pages);
+$fm_module_templates->rows($result, 'policy', $page, $total_pages);
 
 printFooter();
 

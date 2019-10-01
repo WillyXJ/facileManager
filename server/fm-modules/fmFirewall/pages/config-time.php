@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -18,9 +18,6 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
- | Processes time management page                                          |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
 if (!currentUserCan(array('manage_time', 'view_all'), $_SESSION['module'])) unAuth();
@@ -36,7 +33,10 @@ if (currentUserCan('manage_time', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename']);
+			} else {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 		}
 		break;
 	case 'edit':
@@ -45,7 +45,10 @@ if (currentUserCan('manage_time', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename']);
+			} else {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 		}
 		break;
 	}
@@ -54,7 +57,7 @@ if (currentUserCan('manage_time', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_time', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_time', $_SESSION['module']), null, null, 'noscroll');
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name', 'time_');
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

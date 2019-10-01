@@ -41,7 +41,7 @@
 }
 
 table.legend {
-	margin-top: 3em;
+	margin: 3em 0;
 	font-size: 11px;
 }
 table.legend tr td {
@@ -73,6 +73,26 @@ p.checkbox_desc {
 	color: #e19419;
 }
 .log {
-	padding-right: 4px;
 	color: #4e65e0;
+}
+
+#stack-label {
+	font-weight: bold;
+	padding: 3px;
+	font-size: 8pt;
+}
+select.select-stack {
+	width: 150px;
+	height: 200px;
+	margin-top: 5px;
+}
+select.select-stack option {
+	padding: 3px;
+}
+table.grab tbody tr td.options {
+	white-space: nowrap;
+	text-align: right;
+}
+table.grab tbody tr td.options i {
+	margin-left: 4px;
 }

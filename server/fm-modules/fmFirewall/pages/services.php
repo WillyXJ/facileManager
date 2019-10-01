@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -18,13 +18,16 @@
  +-------------------------------------------------------------------------+
  | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
- | Processes services management page                                      |
- | Author: Jon LaBass                                                      |
- +-------------------------------------------------------------------------+
 */
 
-if (!isset($type)) header('Location: services-icmp.php');
-if (isset($_GET['type'])) header('Location: services-' . sanitize(strtolower($_GET['type'])) . '.php');
+if (!isset($type)) {
+	header('Location: services-icmp.php');
+	exit;
+}
+if (isset($_GET['type'])) {
+	header('Location: services-' . sanitize(strtolower($_GET['type'])) . '.php');
+	exit;
+}
 
 if (!currentUserCan(array('manage_services', 'view_all'), $_SESSION['module'])) unAuth();
 
@@ -39,7 +42,10 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+				exit;
+			}
 		}
 		break;
 	case 'edit':
@@ -48,7 +54,10 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
-			} else header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+			} else {
+				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+				exit;
+			}
 		}
 		break;
 	}
@@ -58,7 +67,7 @@ printHeader();
 @printMenu();
 
 //$allowed_to_add = ($type == 'custom' && currentUserCan('manage_services', $_SESSION['module'])) ? true : false;
-echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $type, null, 'noscroll');
 
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name', 'service_', "AND service_type='$type'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
