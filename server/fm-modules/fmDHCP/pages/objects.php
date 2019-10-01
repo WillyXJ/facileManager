@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2018 The facileManager Team                               |
+ | Copyright (C) 2013-2018 The facileManager Team                          |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -20,7 +20,10 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!isset($type)) header('Location: object-hosts.php');
+if (!isset($type)) {
+	header('Location: object-hosts.php');
+	exit;
+}
 //if (isset($_GET['type'])) header('Location: config-' . sanitize(strtolower($_GET['type'])) . '.php');
 
 /** Ensure user can use this page */
@@ -45,6 +48,7 @@ if (currentUserCan($required_permission, $_SESSION['module'])) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
 			}
 		}
 		break;
@@ -57,6 +61,7 @@ if (currentUserCan($required_permission, $_SESSION['module'])) {
 			} else {
 				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 				header('Location: ' . $GLOBALS['basename'] . $uri_params);
+				exit;
 			}
 		}
 		break;
