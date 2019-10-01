@@ -148,7 +148,7 @@ function upgradefmDHCP_031($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 0.3.1 */
+/** 0.3.2 */
 function upgradefmDHCP_032($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
