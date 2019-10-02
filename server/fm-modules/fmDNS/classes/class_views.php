@@ -125,7 +125,7 @@ class fm_dns_views {
 			for ($i=0; $i<$count; $i++) {
 				$order_id = array_search($view_result[$i]->view_id, $new_sort_order);
 				if ($order_id === false) return __('The sort order could not be updated due to an invalid request.');
-				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}viewss` SET `view_order_id`=$order_id WHERE `view_id`={$view_result[$i]->view_id} AND `server_serial_no`={$post['server_serial_no']} AND `account_id`='{$_SESSION['user']['account_id']}'";
+				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}views` SET `view_order_id`=$order_id WHERE `view_id`={$view_result[$i]->view_id} AND `server_serial_no`={$post['server_serial_no']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 				$result = $fmdb->query($query);
 				if ($fmdb->sql_errors) {
 					return formatError(__('Could not update the order because a database error occurred.'), 'sql');

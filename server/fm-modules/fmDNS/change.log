@@ -1,3 +1,7 @@
+3.4.1 (2019-10-??)
+==================
+* Server - [bug] Fixed an issue where the view order could not be changed. (Issue #464)
+
 3.4.0 (2019-10-01)
 ==================
 * Server - [bug] Fixed zone imports for lines without a record name. (Issue #445)
