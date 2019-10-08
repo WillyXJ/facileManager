@@ -1210,7 +1210,7 @@ function extractFiles($files = array()) {
  * @return string
  */
 function getParameterValue($param, $file, $delimiter = '=') {
-	$raw_line = shell_exec('grep ' . escapeshellarg($param) . ' ' . escapeshellarg($file) . ' 2>/dev/null');
+	$raw_line = shell_exec('grep ' . escapeshellarg($param) . ' ' . escapeshellarg($file) . ' 2>/dev/null | grep ' . escapeshellarg($delimiter));
 	if (!$raw_line) {
 		return false;
 	}
