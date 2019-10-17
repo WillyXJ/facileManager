@@ -1,4 +1,4 @@
-3.5.1 (2019-10-??)
+3.5.1 (2019-10-16)
 ==================
 * Client - [bug] Fixed parsing of the apache2 user on Debian systems. (Issue #462)
 

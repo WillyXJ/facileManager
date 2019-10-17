@@ -1,4 +1,4 @@
-3.4.1 (2019-10-??)
+3.4.1 (2019-10-16)
 ==================
 * Server - [bug] Fixed an issue where the view order could not be changed. (Issue #464)
 * Server - [bug] Fixed zone file names during reloads. (Issue #468)
