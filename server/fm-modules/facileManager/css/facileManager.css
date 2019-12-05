@@ -65,6 +65,9 @@ input[type="checkbox"]:checked:before {
 input[type="checkbox"].modules {
 	margin-top: 12px;
 }
+::placeholder {
+	color: #bcbcbc;
+}
 #tophead {
 	background: #7d7e7d; /* Old browsers */
 	background: -moz-linear-gradient(top,  #7d7e7d 0%, #565656 100%); /* FF3.6+ */

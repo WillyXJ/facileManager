@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed support for passwords with quotation marks. (Issue #469)
 * Server - [bug] Fixed branding image display in password reset emails.
+* Server - [improvement] Changed color of placeholder text. (Issue #371)
 
 3.5.1 (2019-10-16)
 ==================
