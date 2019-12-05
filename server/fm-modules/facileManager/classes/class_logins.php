@@ -409,7 +409,11 @@ class fm_login {
 		global $fm_name, $__FM_CONFIG;
 		
 		if ($build_html) {
-			$branding_logo = $GLOBALS['FM_URL'] . str_replace('//', '/', str_replace($GLOBALS['RELPATH'], '', getBrandLogo()));
+			$branding_logo = getBrandLogo();
+			if ($GLOBALS['RELPATH'] != '/') {
+				$branding_logo = str_replace($GLOBALS['RELPATH'], '', $branding_logo);
+			}
+			$branding_logo = $GLOBALS['FM_URL'] . str_replace('//', '/', $branding_logo);
 			
 			$body = <<<BODY
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -430,7 +434,7 @@ class fm_login {
 <p>You (or somebody else) has requested a link to reset your $fm_name password.</p>
 <p>If you don't want to reset your password, then you can ignore this message.</p>
 <p>To reset your password, click the following link:<br />
-<<a href="{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}</a>></p>
+<a href="{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}">{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}</a></p>
 <p>This link expires in {$__FM_CONFIG['clean']['time']}.</p>
 </div>
 </div>
@@ -447,8 +451,12 @@ If you don\'t want to reset your password, then you can ignore this message.
 
 To reset your password, click the following link:
 
-%s',
-	$user_info['user_login'], $fm_name, "{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}");
+%s
+
+This link expires in %s.',
+		$user_info['user_login'], $fm_name,
+		"{$GLOBALS['FM_URL']}password_reset.php?key=$uniq_hash&login={$user_info['user_login']}",
+		$__FM_CONFIG['clean']['time']);
 		}
 		
 		return $body;
