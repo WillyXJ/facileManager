@@ -243,9 +243,9 @@ class fm_users {
 		if (empty($post['user_login'])) return _('No username defined.');
 		if (!empty($post['user_password'])) {
 			if (empty($post['cpassword']) || $post['user_password'] != $post['cpassword']) return _('Passwords do not match.');
-			$post['user_password'] = sanitize($post['user_password'], false);
+			$post['user_password'] = sanitize($post['user_password']);
 			if (password_verify($post['user_password'], getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_password'))) return _('Password is not changed.');
-			$sql_pwd = "`user_password`='" . password_hash($_POST['user_password'], PASSWORD_DEFAULT) . "',";
+			$sql_pwd = "`user_password`='" . password_hash($post['user_password'], PASSWORD_DEFAULT) . "',";
 		} else $sql_pwd = null;
 		
 		/** Check name field length */

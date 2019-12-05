@@ -311,7 +311,7 @@ class fm_login {
 					}
 			
 					$this->setSession($user);
-			
+
 					if (useMySQLi()) {
 						@mysqli_free_result($result);
 					} else {
@@ -322,7 +322,7 @@ class fm_login {
 				}
 			/** LDAP Authentication */
 			} else {
-				return $this->doLDAPAuth($user_login, $pass);
+				return $this->doLDAPAuth($user_login, $_POST['password']);
 			}
 		}
 		

@@ -1,3 +1,7 @@
+3.5.2 (2019-12-??)
+==================
+* Server - [bug] Fixed support for passwords with quotation marks. (Issue #469)
+
 3.5.1 (2019-10-16)
 ==================
 * Client - [bug] Fixed parsing of the apache2 user on Debian systems. (Issue #462)
