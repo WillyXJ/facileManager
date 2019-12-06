@@ -1,4 +1,4 @@
-3.5.2 (2019-12-??)
+3.5.2 (2019-12-06)
 ==================
 * Server - [bug] Fixed support for passwords with quotation marks. (Issue #469)
 * Server - [bug] Fixed branding image display in password reset emails.
