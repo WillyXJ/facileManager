@@ -1,7 +1,7 @@
 facileManager
 =============
                                           
-(c) 2013-2016 by facileManager project members.
+(c) 2013-2019 by facileManager project members.
 facileManager is free software released under the terms of GNU GPL v2.
 Please see LICENSE for license.
 
@@ -27,7 +27,7 @@ Prerequisites
 
 facileManager (server) requires the following:
 
-* PHP 5.2.0 or later with MySQL support
+* PHP 5.5.0 or later with MySQL support
 * MySQL 5.0 or later
   * Required MySQL user privileges on the database include
 
