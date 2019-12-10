@@ -228,26 +228,34 @@ class fm_tools {
 	function backupDatabase() {
 		global $__FM_CONFIG, $fm_name;
 		
-		if (!currentUserCan('run_tools')) return displayResponseClose(_('You are not authorized to run these tools.'));
-		
-		/** Temporary fix for MySQL 5.6 warnings */
-		$exclude_warnings = array('Warning: Using a password on the command line interface can be insecure.' . "\n");
-		
-		$curdate = date("Y-m-d_H.i.s");
-		$sql_file = getOption('fm_temp_directory') . '/' . $__FM_CONFIG['db']['name'] . '_' . $curdate . '.sql';
-		$error_log = str_replace('.sql', '.err', $sql_file);
+		if (!currentUserCan('run_tools')) return _('You are not authorized to run these tools.');
 		
 		$mysqldump = findProgram('mysqldump');
-		if (!$mysqldump) return displayResponseClose(sprintf(_('mysqldump is not found on %s.'), php_uname('n')));
+		if (!$mysqldump) return sprintf(_('mysqldump is not found on %s.'), php_uname('n'));
 		
-		$command_string = "$mysqldump --opt -Q -h {$__FM_CONFIG['db']['host']} -u {$__FM_CONFIG['db']['user']} -p{$__FM_CONFIG['db']['pass']} {$__FM_CONFIG['db']['name']} > " . getOption('fm_temp_directory') . "/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
+		$curdate = date("Y-m-d_H.i.s");
+		$tmp_directory = getOption('fm_temp_directory');
+		$sql_file = $tmp_directory . '/' . $__FM_CONFIG['db']['name'] . '_' . $curdate . '.sql';
+		$error_log = str_replace('.sql', '.err', $sql_file);
+		
+		$defaults_extra_file = $tmp_directory . '/' . $fm_name . '.conf';
+		if (file_put_contents($defaults_extra_file, sprintf('[mysqldump]
+user=%s
+password=%s', $__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'])) === false) {
+			return sprintf(_('Could not create %s.'), $defaults_extra_file);
+		}
+		chmod($defaults_extra_file, 0600);
+		
+		$command_string = "$mysqldump --defaults-extra-file=$defaults_extra_file --opt -Q -h {$__FM_CONFIG['db']['host']} {$__FM_CONFIG['db']['name']} > " . getOption('fm_temp_directory') . "/{$__FM_CONFIG['db']['name']}_$curdate.sql 2>$error_log";
 		@system($command_string, $retval);
 		$retarr = @file_get_contents($error_log);
+		
+		@unlink($defaults_extra_file);
 		
 		if ($retval) {
 			@unlink($error_log);
 			@unlink($sql_file);
-			return displayResponseClose(nl2br(str_replace($exclude_warnings, '', $retarr)));
+			return nl2br($retarr);
 		}
 		
 		compressFile($sql_file, @file_get_contents($sql_file));

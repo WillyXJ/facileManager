@@ -37,8 +37,10 @@ if (array_key_exists('submit', $_POST)) {
 			break;
 		case _('Backup Database'):
 			$response = $fm_tools->backupDatabase();
-			if (!$response) header('Location: ' . $GLOBALS['basename']);
-			exit;
+			if (!$response) {
+				header('Location: ' . $GLOBALS['basename']);
+				exit;
+			}
 			break;
 	}
 }

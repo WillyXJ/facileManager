@@ -93,6 +93,8 @@ function generateConfig() {
 	extract($_POST);
 	$dbname = sanitize($dbname, '_');
 	
+	$dbpass = str_replace("'", "\'", $dbpass);
+	
 	$config = <<<CFG
 <?php
 

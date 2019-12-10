@@ -1,3 +1,10 @@
+3.5.3 (2019-12-??)
+==================
+* Server - [bug] Fixed database installation and backup support for passwords
+           with quotation marks. (Issue #470)
+* Server - [security] Database backups no longer send the password to the command
+           line. (Issue #470)
+
 3.5.2 (2019-12-06)
 ==================
 * Server - [bug] Fixed support for passwords with quotation marks. (Issue #469)

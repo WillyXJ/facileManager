@@ -582,6 +582,11 @@ if (isset($__FM_CONFIG)) {
 		});
     });
 
+	$("#pre_upgrade_backup").click(function() {
+		$("#response").html("");
+		window.location = "?backup";
+	});
+	
 	/* Account authentication method changes */
 	$("#manage_item_contents").delegate("#user_auth_type", "change", function(e) {
 		if ($(this).val() == 2) {

@@ -40,6 +40,8 @@ require_once('fm-init.php');
 ini_set('display_errors', false);
 error_reporting(0);
 
+$response = null;
+
 if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('fm_db_version') >= 32)) {
 	header('Location: ' . dirname($_SERVER['PHP_SELF']));
 	exit;
@@ -58,9 +60,13 @@ if (array_key_exists('backup', $_GET)) {
 	if (!class_exists('fm_tools')) {
 		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 	}
-	$fm_tools->backupDatabase();
-	header('Location: ' . $GLOBALS['basename']);
-	exit;
+	$response = $fm_tools->backupDatabase();
+	if (!$response) {
+		header('Location: ' . $GLOBALS['basename']);
+		exit;
+	} else {
+		$response = sprintf(_('Error: %s'), $response);
+	}
 }
 
 $branding_logo = getBrandLogo();
@@ -78,7 +84,7 @@ switch ($step) {
 		<img src="%s" /><span>%s</span>
 	</div>
 	<div id="window"><p>', $branding_logo, _('Upgrade'));
-		$backup_button = findProgram('mysqldump') ? sprintf('<a href="?backup" class="button">%s</a>', _('Backup Database')) : null;
+		$backup_button = findProgram('mysqldump') ? sprintf('<a id="pre_upgrade_backup" class="button">%s</a></p><p id="response">%s', _('Backup Database'), $response) : null;
 		printf(_("I have detected you recently upgraded %s and its modules, but have not upgraded the database. Click 'Upgrade' to start the upgrade process."), $fm_name);
 		printf('</p><p class="step"><a href="?step=2" class="button click_once">%s</a> %s</p></div>', _('Upgrade'), $backup_button);
 		break;
