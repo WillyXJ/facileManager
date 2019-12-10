@@ -4,6 +4,8 @@
            with quotation marks. (Issue #470)
 * Server - [security] Database backups no longer send the password to the command
            line. (Issue #470)
+* Server - [bug] Fixed server configuration preview formatting when html is in
+           in the output.
 
 3.5.2 (2019-12-06)
 ==================

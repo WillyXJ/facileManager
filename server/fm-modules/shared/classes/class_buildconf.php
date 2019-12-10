@@ -51,7 +51,7 @@ class fm_shared_module_buildconf {
 				foreach ($contents_array as $line) {
 					$preview .= '<font color="#ccc">' . str_pad($i, strlen(count($contents_array)), ' ', STR_PAD_LEFT) . '</font> ';
 					if (strpos($check_status, "$filename:$i:") !== false || strpos($check_status, "$filename line $i:") !== false) {
-						$preview .= sprintf('<font color="red">%s</font>', $line);
+						$preview .= sprintf('<font color="red">%s</font>', htmlentities($line));
 					} else {
 						$preview .= $line;
 					}

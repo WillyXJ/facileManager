@@ -69,7 +69,7 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 }
 
 printHeader(_('Server Config Preview'), 'facileManager', 'no-help', 'no-menu');
-echo $message . $check_status . "<pre>\n" . str_replace('<', '&lt;', $preview) . "\n</pre>\n";
+echo $message . $check_status . "<pre>\n" . $preview . "\n</pre>\n";
 printFooter();
 
 ?>
