@@ -1410,7 +1410,7 @@ HTML;
 			$sql_name_servers = rtrim($sql_name_servers, ',') . ')';
 		} else $sql_name_servers = null;
 		
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' $sql_name_servers ORDER BY `server_update_method`";
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND server_type!='remote' $sql_name_servers ORDER BY `server_update_method`";
 		$result = $fmdb->query($query);
 		
 		/** No name servers so return */

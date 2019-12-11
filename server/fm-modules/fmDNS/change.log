@@ -2,6 +2,8 @@
 ==================
 * Server - [bug] Fixed PHP error during server configuration build.
 * Server - [improvement] Updated named.root from upstream.
+* Server - [bug] Fixed an issue where zone reloads would be attempted on remote
+           servers.
 
 3.4.1 (2019-10-16)
 ==================
