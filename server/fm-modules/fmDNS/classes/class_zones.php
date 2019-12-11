@@ -444,7 +444,7 @@ class fm_dns_zones {
 				}
 			}
 		}
-		$sql_edit .= "domain_reload='no'";
+		$sql_edit .= "domain_reload='no', domain_check_config='yes'";
 		
 		/** Set the server_build_config flag for existing servers */
 		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'master') {
@@ -463,8 +463,8 @@ class fm_dns_zones {
 
 		/** Update the child zones */
 		if ($post['domain_template'] == 'yes') {
-			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET domain_view='{$post['domain_view']}' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
-			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET domain_name_servers='{$post['domain_name_servers']}' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
+			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET domain_view='{$post['domain_view']}', domain_check_config='yes' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
+			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET domain_name_servers='{$post['domain_name_servers']}', domain_check_config='yes' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 			foreach ($query_arr as $query) {
 				$result = $fmdb->query($query);
 

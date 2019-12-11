@@ -1,5 +1,7 @@
 3.5.0 (2019-??-??)
 ==================
+* Server - [improvement] named checks now skip previously checked zones. (Issue #212)
+           Note: The first named check will process all configured zones.
 * Server - [bug] Fixed PHP error during server configuration build.
 * Server - [improvement] Updated named.root from upstream.
 * Server - [bug] Fixed an issue where zone reloads would be attempted on remote

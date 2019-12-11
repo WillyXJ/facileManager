@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `domain_dnssec_parent_domain_id` int(11) NOT NULL DEFAULT '0',
   `domain_dnssec_sig_expire` int(2) NOT NULL DEFAULT '0',
   `domain_dnssec_signed` INT(2) NOT NULL DEFAULT '0',
+  `domain_check_config` ENUM('yes','no') NOT NULL DEFAULT 'yes',
   `domain_reload` enum('yes','no') NOT NULL DEFAULT 'no',
   `domain_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`domain_id`),

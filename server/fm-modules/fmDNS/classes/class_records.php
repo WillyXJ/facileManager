@@ -859,7 +859,7 @@ HTML;
 	 * @return null
 	 */
 	function processSOAUpdates($domain_id, $record_type, $action) {
-		global $fm_dns_zones;
+		global $fm_dns_zones, $__FM_CONFIG;
 		
 		if (!$fm_dns_zones) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 		
@@ -885,6 +885,9 @@ HTML;
 					setBuildUpdateConfigFlag(getZoneServers($child_id), 'yes', 'build');
 				}
 			}
+
+			/** Set the domain_check_config flag */
+			basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $child_id, 'domain_check_config', 'yes', 'domain_id');
 		}
 	}
 	

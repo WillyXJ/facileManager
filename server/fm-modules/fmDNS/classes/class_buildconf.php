@@ -897,7 +897,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
-							$files[$server_zones_dir . '/' . $domain_type . '/' . $domain_name_file] = $zone_file_contents;
+							$files[$server_zones_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
 							unset($zone_file_contents);
 							break;
 						case 'stub':
@@ -1369,6 +1369,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$parent_zone->domain_clone_dname = $zone->domain_clone_dname;
 			$parent_zone->domain_dnssec = $zone->domain_dnssec;
 			$parent_zone->domain_dnssec_sig_expire = $zone->domain_dnssec_sig_expire;
+			$parent_zone->domain_check_config = $zone->domain_check_config;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
 			
@@ -1425,6 +1426,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			}
 			$sql = rtrim($sql, ',');
 			$fmdb->query($sql);
+			
+			/** Update domain_check_config */
+			$query = "UPDATE `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "domains` SET `domain_check_config`='no' WHERE domain_id IN (" . implode(',', array_unique($built_domain_ids)) . ')';
+			$fmdb->query($query);
 		}
 	}
 	
@@ -1484,7 +1489,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						preg_match('/file "(.+?)+/', trim($zone_def), $tmp_zone_def_file);
 						$tmp_zone_def_file = explode('"', $tmp_zone_def_file[0]);
 						if (!empty($tmp_zone_def_file[1])) {
-							$zone_files[$view][$tmp_zone_def[1]] = $tmp_zone_def_file[1];
+							if (isset($files_array['files'][$tmp_zone_def_file[1]]['syntax_check']) && $files_array['files'][$tmp_zone_def_file[1]]['syntax_check'] == 'yes') {
+								$zone_files[$view][$tmp_zone_def[1]] = $tmp_zone_def_file[1];
+							}
 						}
 					}
 				}
@@ -2047,6 +2054,10 @@ HTML;
 		}
 		if (isset($reload_domain_ids)) {
 			$query = "DELETE FROM `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "track_reloads` WHERE `server_serial_no`='" . sanitize($server_serial_no) . "' AND domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
+			$fmdb->query($query);
+			
+			/** Update domain_check_config */
+			$query = "UPDATE `fm_" . $__FM_CONFIG['fmDNS']['prefix'] . "domains` SET `domain_check_config`='no' WHERE domain_id IN (" . implode(',', array_unique($reload_domain_ids)) . ')';
 			$fmdb->query($query);
 		}
 	}
