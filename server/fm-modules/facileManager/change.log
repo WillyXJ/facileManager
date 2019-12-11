@@ -1,3 +1,8 @@
+3.5.4 (2019-12-??)
+==================
+* Server - [bug] Fixed server configuration preview formatting when html is in
+           in the output.
+
 3.5.3 (2019-12-??)
 ==================
 * Server - [bug] Fixed database installation and backup support for passwords
