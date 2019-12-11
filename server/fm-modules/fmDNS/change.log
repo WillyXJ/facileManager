@@ -1,6 +1,7 @@
 3.5.0 (2019-??-??)
 ==================
 * Server - [bug] Fixed PHP error during server configuration build.
+* Server - [improvement] Updated named.root from upstream.
 
 3.4.1 (2019-10-16)
 ==================
