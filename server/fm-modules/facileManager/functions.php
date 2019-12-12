@@ -148,7 +148,7 @@ function isUpgradeAvailable() {
  * @since 1.0
  * @package facileManager
  */
-function isNewVersionAvailable($package, $version) {
+function isNewVersionAvailable($package, $version, $interval = 'schedule') {
 	$fm_site_url = 'http://www.facilemanager.com/check/';
 	
 	$data['package'] = $package;
@@ -172,6 +172,10 @@ function isNewVersionAvailable($package, $version) {
 		$method = 'insert';
 	} elseif (isset($last_version_check['data']['version']) && $last_version_check['data']['version'] == $version) {
 		$last_version_check['timestamp'] = 0;
+	}
+	if ($interval == 'force') {
+		$last_version_check['timestamp'] = 0;
+		$last_version_check['data'] = null;
 	}
 	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
 		$data['software_update_tree'] = getOption('software_update_tree');

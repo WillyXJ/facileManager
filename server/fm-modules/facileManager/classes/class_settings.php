@@ -307,8 +307,11 @@ class fm_settings {
 		$software_update_tree_list = buildSelect('software_update_tree', 'software_update_tree', $__FM_CONFIG['options']['software_update_tree'], $software_update_tree);
 		$software_update = getOption('software_update');
 		if ($software_update) {
-			 $software_update_checked = 'checked';
-			 $software_update_options_style = 'style="display: block;"';
+			$software_update_checked = 'checked';
+			$software_update_options_style = 'style="display: block;"';
+			if (currentUserCan('manage_modules')) {
+				$software_update_list .= sprintf('<p><a name="force_software_check" id="force_software_check" class="button click_once" >%s</a></p>', _('Check Now'));
+			}
 		} else $software_update_checked = $software_update_options_style = null;
 
 		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);

@@ -57,6 +57,30 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	$save_result = $fm_module_settings->save();
 	echo ($save_result !== true) ? displayResponseClose($save_result) : sprintf("<p>%s</p>\n", _('These settings have been saved.'));
 
+/** Handle forced software update checks */
+} elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_software_update_check') {
+	if (!currentUserCan('manage_settings')) returnUnAuth(false);
+
+	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
+	$fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version, 'force');
+	$module_new_version_available = false;
+
+	$modules = getAvailableModules();
+	if (count($modules)) {
+		foreach ($modules as $module_name) {
+			/** Include module variables */
+			@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+			$module_version = getOption('version', 0, $module_name);
+			if (isNewVersionAvailable($module_name, $module_version, 'force')) {
+				$module_new_version_available = true;
+			}
+		}
+	}
+
+	if (!empty($fm_new_version_available) || $module_new_version_available) {
+		echo 'admin-modules.php';
+	}
+
 /** Handle bulk actions */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('upgrade', 'build config', 'activate', 'deactivate', 'update'))) {
