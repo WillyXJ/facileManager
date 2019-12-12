@@ -1,3 +1,8 @@
+3.5.5 (2019-12-??)
+==================
+* Server - [security] Fixed an issue where non-privileged users could be escalated
+           to super-admin.
+
 3.5.4 (2019-12-11)
 ==================
 * Server - [bug] Fixed server configuration preview formatting when html is in

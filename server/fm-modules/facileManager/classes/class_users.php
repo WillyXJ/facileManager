@@ -236,28 +236,21 @@ class fm_users {
 			if (!$post['user_auth_type']) $post['user_auth_type'] = 1;
 		}
 
-		if (!isset($post['user_id'])) {
+		if (!isset($post['user_id']) || !$post['user_id']) {
 			$post['user_id'] = $_SESSION['user']['id'];
-			$post['user_login'] = $_SESSION['user']['name'];
 		}
-		if (empty($post['user_login'])) return _('No username defined.');
+
+		/** Authorized to update users? */
+		if ((!currentUserCan('manage_users') && $_SESSION['user']['id'] != $post['user_id']) || isset($post['user_login'])) {
+			return _('You do not have permission to make these changes.');
+		}
+
 		if (!empty($post['user_password'])) {
 			if (empty($post['cpassword']) || $post['user_password'] != $post['cpassword']) return _('Passwords do not match.');
 			$post['user_password'] = sanitize($post['user_password']);
 			if (password_verify($post['user_password'], getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_password'))) return _('Password is not changed.');
 			$sql_pwd = "`user_password`='" . password_hash($post['user_password'], PASSWORD_DEFAULT) . "',";
 		} else $sql_pwd = null;
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_users', 'user_login');
-		if ($field_length !== false && strlen($post['user_login']) > $field_length) sprintf(_('Username is too long (maximum %d characters).'), $field_length);
-		
-		/** Does the record already exist for this account? */
-		basicGet('fm_users', sanitize($post['user_login']), 'user_', 'user_login');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			if ($result[0]->user_id != $post['user_id']) return _('This user already exists.');
-		}
 		
 		$sql_edit = null;
 		
@@ -289,11 +282,13 @@ class fm_users {
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not update the user because a database error occurred.'), 'sql');
 		}
+
+		$user_login = getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_login');
 		
 		/** Process forced password change */
-		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($post['user_login']);
+		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login);
 		
-		addLogEntry(sprintf(_("Updated user '%s'."), $post['user_login']));
+		addLogEntry(sprintf(_("Updated user '%s'."), $user_login));
 		
 		return true;
 	}
@@ -547,7 +542,6 @@ HTML;
 			
 			$username_form = $action == 'add' ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" />' : '<span id="form_username">' . $user_login . '</span>';
 			$hidden .= '<input type="hidden" name="user_id" value="' . $user_id . '" />';
-			$hidden .= $action != 'add' ? '<input type="hidden" name="user_login" value="' . $user_login . '" />' : null;
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_login">' . _('User Login') . '</label></th>
 					<td width="67%">' . $username_form . '</td>
