@@ -2,6 +2,7 @@
 ==================
 * Server - [security] Fixed an issue where non-privileged users could be escalated
            to super-admin.
+* Server - [bug] New user passwords can be created with quotation marks.
 
 3.5.4 (2019-12-11)
 ==================

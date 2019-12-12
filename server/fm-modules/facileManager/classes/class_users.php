@@ -106,7 +106,7 @@ class fm_users {
 			$user_password = null;
 		} else {
 			if (empty($user_password) && $user_template_only == 'no') return _('No password defined.');
-			if ($user_password != $cpassword && $user_template_only == 'no') return _('Passwords do not match.');
+			if ($user_password != sanitize($cpassword) && $user_template_only == 'no') return _('Passwords do not match.');
 		}
 		if (empty($user_email) && $user_template_only == 'no') return _('No e-mail address defined.');
 		
