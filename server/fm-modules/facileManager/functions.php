@@ -1246,7 +1246,13 @@ function buildHelpFile() {
 			
 			<p>New user accounts can be created quickly from a template by duplicating the template user. This will prompt you for the new 
 			username and password while giving you the ability to change any other settings prior to user creation.</p>
+
+			<p>User groups can also be created to easily provide the same level of access to multiple user accounts.</p>
 			<p><i>The 'User Management' or 'Super Admin' permission is required for these actions.</i></p>
+
+			<p>When API Support is enabled at Settings &rarr; <a href="__menu{Settings}">General</a>, each user may create an API keypair
+			by editing their user profile. Privileged users will be able change the status of any keypair through Admin &rarr; 
+			<a href="__menu{Users & Groups}">Users</a>. This keypair allows the user to authenticate via the API through the client scripts.</p> 
 		</div>
 	</li>
 	<li>
@@ -1271,6 +1277,9 @@ function buildHelpFile() {
 			<p><i>define('FM_NO_AUTH', true);</i></p>
 			<p><b>Client Registration</b><br />
 			You can choose to allow clients to automatically register in the database or not.</p>
+			<p><b>API Support</b><br />
+			By enabling API support, users are able to create keypairs to authenticate with through the client scripts. This opens up the ability
+			to make a limited selection of module changes without using the web interface.</p>
 			<p><b>SSL</b><br />
 			You can choose to have $fm_name enforce the use of SSL when a user tries to access the web app.</p>
 			<p><b>Mailing</b><br />
@@ -2585,6 +2594,9 @@ function unAuth($link_display = 'show') {
  * @return boolean
  */
 function currentUserCan($capability, $module = 'facileManager', $extra_perm = null) {
+	if (!isset($_SESSION['user'])) {
+		return false;
+	}
 	return userCan($_SESSION['user']['id'], $capability, $module, $extra_perm);
 }
 
@@ -4065,4 +4077,20 @@ function getDefaultAdminID() {
 }
 
 
+/**
+ * Returns the first array key
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @return mixed
+ */
+if (!function_exists('array_key_first')) {
+	function array_key_first(array $arr) {
+		foreach($arr as $key => $unused) {
+			return $key;
+		}
+		return null;
+	}
+}
 ?>

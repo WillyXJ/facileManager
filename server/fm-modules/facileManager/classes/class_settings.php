@@ -26,7 +26,7 @@ class fm_settings {
 	 */
 	function save() {
 		global $fmdb, $__FM_CONFIG, $fm_name;
-		
+
 		if (!currentUserCan('manage_settings')) return _('You do not have permission to make these changes.');
 		
 		$force_logout = false;
@@ -246,6 +246,10 @@ class fm_settings {
 		$enforce_ssl_checked = (getOption('enforce_ssl')) ? 'checked' : null;
 		$fm_port_ssl = getOption('fm_port_ssl');
 		
+		/** API Section */
+		$api_token_support_checked = (getOption('api_token_support')) ? 'checked' : null;
+		$enforce_ssl_checked .= ($api_token_support_checked) ? ' disabled' : null;
+
 		/** Mailing Section */
 		$mail_enable = getOption('mail_enable');
 		if ($mail_enable) {
@@ -322,6 +326,7 @@ class fm_settings {
 			<input type="hidden" name="item_type" value="fm_settings" />
 			<input type="hidden" name="ldap_group_require" value="0" />
 			<input type="hidden" name="client_auto_register" value="0" />
+			<input type="hidden" name="api_token_support" value="0" />
 			<input type="hidden" name="enforce_ssl" value="0" />
 			<input type="hidden" name="mail_enable" value="0" />
 			<input type="hidden" name="mail_smtp_auth" value="0" />
@@ -475,6 +480,15 @@ class fm_settings {
 						</div>
 						<div class="choices">
 							<input name="client_auto_register" id="client_auto_register" type="checkbox" value="1" ' . $client_auto_register_checked . ' /><label for="client_auto_register">' . _('Allow Automatic Client Registration') . '</label>
+						</div>
+					</div>
+					<div id="setting-row">
+						<div class="description">
+							<label for="api_token_support">' . _('Enable API Token Support') . '</label>
+							<p>' . _('Allow users to authenticate via API tokens. (https must be enforced)') . '</p>
+						</div>
+						<div class="choices">
+							<input name="api_token_support" id="api_token_support" type="checkbox" value="1" ' . $api_token_support_checked . ' /><label for="api_token_support">' . _('Enable API') . '</label>
 						</div>
 					</div>
 				</div>

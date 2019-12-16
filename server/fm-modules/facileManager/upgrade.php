@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_311($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_400($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -728,6 +728,42 @@ function fmUpgrade_311($database) {
 	}
 
 	upgradeConfig('fm_db_version', 47, false);
+	
+	return $success;
+}
+
+
+/** fM v4.0.0 **/
+function fmUpgrade_400($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 47) ? fmUpgrade_311($database) : true;
+	
+	if ($success) {
+		$table[] = "CREATE TABLE IF NOT EXISTS `$database`.`fm_keys` (
+			`key_id` int(11) NOT NULL,
+			`account_id` int(11) NOT NULL DEFAULT '1',
+			`user_id` int(11) NOT NULL,
+			`key_token` varchar(255) NOT NULL,
+			`key_secret` varchar(255) NOT NULL,
+			`key_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+			PRIMARY KEY (`key_id`),
+			UNIQUE KEY `idx_key_token` (`key_token`)
+		  ) ENGINE=MyISAM DEFAULT CHARSET=utf8";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 48, false);
 	
 	return $success;
 }

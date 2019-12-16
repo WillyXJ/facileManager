@@ -15,27 +15,22 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/                                   |
+ | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
- | Processes config builds                                                 |
+ | Processes API requests                                                  |
  +-------------------------------------------------------------------------+
 */
+
+/** Ensure we have data to process */
+if (!isset($_POST) || !count($_POST)) {
+	exit;
+}
 
 /** Handle client interactions */
 if (!defined('CLIENT')) define('CLIENT', true);
 
 require_once('fm-init.php');
 include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/classes/class_buildconf.php');
-include(ABSPATH . 'fm-modules/' . $_POST['module_name'] . '/classes/class_servers.php');
-
-/** Validate daemon version */
-if (array_key_exists('action', $_POST) && $_POST['action'] == 'version_check') {
-	$data = $fm_module_buildconf->validateDaemonVersion($_POST);
-	if ($_POST['compress']) echo gzcompress(serialize($data));
-	else echo serialize($data);
-	exit;
-}
 
 /** Ensure we have a valid account */
 $account_verify = $fm_accounts->verify($_POST);
@@ -45,38 +40,30 @@ if ($account_verify != 'Success') {
 	exit;
 }
 
-/** Process action */
-if (array_key_exists('action', $_POST)) {
-	/** Process building of the server config */
-	if ($_POST['action'] == 'buildconf') {
-		@list($data, $message) = $fm_module_buildconf->buildServerConfig($_POST);
-	}
-	
-	/** Process building of whatever is required */
-	if ($_POST['action'] == 'cron') {
-		@list($data, $message) = $fm_module_buildconf->buildCronConfigs($_POST);
-	}
-	
-	/** Process updating the tables */
-	if ($_POST['action'] == 'update') {
-		$data = $fm_module_buildconf->updateReloadFlags($_POST);
-	}
-	
-	/** Include actions from module */
-	$module_buildconf_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_POST['module_name'] . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . 'buildconf.inc.php';
-	if (file_exists($module_buildconf_file)) {
-		include($module_buildconf_file);
-	}
+/** Authenticate token */
+require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
+$logged_in = @$fm_login->doAPIAuth(sanitize($_POST['APIKEY']), sanitize($_POST['APISECRET']));
 
-	/** Output $data */
-	if (!empty($data)) {
-		if ($_POST['compress']) echo gzcompress(serialize($data));
-		else echo serialize($data);
-	}
-	
-	$fm_module_servers->updateServerVersion();
+if (!$logged_in) {
+	$message = _('Invalid credentials.') . "\n";
+	if ($_POST['compress']) echo gzcompress(serialize($message));
+	else echo serialize($message);
+	exit;
 }
 
-$fm_module_servers->updateClientVersion();
+if (isset($_POST['test'])) {
+	$message = _('API functionality tests were successful.') . "\n";
+	if ($_POST['compress']) echo gzcompress(serialize($message));
+	else echo serialize($message);
+	exit;
+}
+
+/** Include actions from module */
+$module_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_POST['module_name'] . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . 'api.inc.php';
+if (file_exists($module_file)) {
+	include($module_file);
+}
+
+exit;
 
 ?>

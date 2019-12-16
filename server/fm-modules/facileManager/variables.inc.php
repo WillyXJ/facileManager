@@ -77,7 +77,10 @@ $__FM_CONFIG['clean']['time']		= '15 minutes';
 /** Text string variables */
 $__FM_CONFIG['password_hint']['medium']		= array(_('Medium'), _('The password must be at least seven (7) characters long containing letters and numbers.'));
 $__FM_CONFIG['password_hint']['strong']		= array(_('Strong'), _('The password must be at least eight (8) characters long containing uppercase and lowercase letters, numbers, and special characters (\'&\', \'$\', \'@\', etc.).'));
-$__FM_CONFIG['users']['avail_types']        = array('users' => _('Users'), 'groups' => _('Groups'));
+$__FM_CONFIG['users']['avail_types']        = (currentUserCan('manage_users')) ? array('users' => _('Users'), 'groups' => _('Groups')) : null;
+if (getOption('api_token_support')) {
+	$__FM_CONFIG['users']['avail_types']['keys'] = _('API Keys');
+}
 
 /** Limits */
 $__FM_CONFIG['limit']['records']	= array(20, 35, 50, 75, 100, 200);

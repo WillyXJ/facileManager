@@ -772,6 +772,14 @@ if (isset($__FM_CONFIG)) {
 		}
 	});
 	
+	$("#api_token_support").click(function() {
+		if ($(this).is(":checked")) {
+			$("#enforce_ssl").prop("checked", this.checked).attr("disabled", true);
+		} else {
+			$("#enforce_ssl").attr("disabled", false);
+		}
+	});
+	
 	$("#mail_enable").click(function() {
 		if ($(this).is(":checked")) {
 			$("#fm_mailing_options").show("slow");

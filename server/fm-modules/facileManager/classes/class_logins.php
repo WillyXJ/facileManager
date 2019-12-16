@@ -245,14 +245,13 @@ class fm_login {
 	 * @package facileManager
 	 *
 	 * @param string $user_login Username to authenticate
-	 * @param string $pass Password to authenticate with
-	 * @param boolean $encrypted Whether or not the password is already encrypted
+	 * @param string $user_password Password to authenticate with
 	 * @return boolean
 	 */
-	function checkPassword($user_login, $pass, $encrypted = false) {
+	function checkPassword($user_login, $user_password) {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
-		if (empty($user_login) || empty($pass)) return false;
+		if (empty($user_login) || empty($user_password)) return false;
 		
 		/** Built-in authentication */
 		$fm_db_version = getOption('fm_db_version');
@@ -266,13 +265,11 @@ class fm_login {
 
 			/** Builtin Authentication */
 			if ($auth_method == 1) {
-				$pwd_query = ($encrypted) ? "'$pass'" : "password('$pass')";
-		
 				if ($fm_db_version >= 18) {
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=1 AND `user_template_only`='no' AND `user_login`='$user_login'");
 				} else {
 					/** Old auth */
-					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_login`='$user_login' AND `user_password`=" . $pwd_query);
+					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_login`='$user_login' AND `user_password`='$user_password'");
 				}
 				if (!$fmdb->num_rows) {
 					if (useMySQLi()) {
@@ -287,13 +284,13 @@ class fm_login {
 					/** Check password */
 					if ($user->user_password[0] == '*') {
 						/** Old MySQL hashing that needs to change */
-						if ($user->user_password != '*' . strtoupper(sha1(sha1($pass, true)))) {
+						if ($user->user_password != '*' . strtoupper(sha1(sha1($user_password, true)))) {
 							return false;
 						}
-						resetPassword($user_login, $pass);
+						resetPassword($user_login, $user_password);
 					} else {
 						/** PHP hashing */
-						if (!password_verify($pass, $user->user_password)) {
+						if (!password_verify($user_password, $user->user_password)) {
 							return false;
 						}
 					}
@@ -691,6 +688,58 @@ This link expires in %s.',
 			};
 		};
 		return false;
+	}
+	
+	
+	/**
+	 * Authenticates the provided API token
+	 *
+	 * @since 4.0
+	 * @package facileManager
+	 *
+	 * @param string $token API key
+	 * @param string $secret API secret key
+	 * @return boolean
+	 */
+	function doAPIAuth($token, $secret) {
+		global $fmdb;
+
+		$result = $fmdb->get_results("SELECT * FROM `fm_keys` WHERE `key_status`='active' AND `key_token`='$token' AND `account_id`='" . getAccountID($_POST['AUTHKEY']) . "'");
+		if (!$fmdb->num_rows) {
+			if (useMySQLi()) {
+				@mysqli_free_result($result);
+			} else {
+				@mysql_free_result($result);
+			}
+			return false;
+		}
+		$apikey = $fmdb->last_result[0];
+		
+		/** Check token secret */
+		/** PHP hashing */
+		if (!password_verify($secret, $apikey->key_secret)) {
+			return false;
+		}
+		
+		$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_template_only`='no' AND `user_id`=" . $apikey->user_id . " AND `account_id`='" . getAccountID($_POST['AUTHKEY']) . "'");
+		if (!$fmdb->num_rows) {
+			if (useMySQLi()) {
+				@mysqli_free_result($result);
+			} else {
+				@mysql_free_result($result);
+			}
+			return false;
+		}
+
+		$this->setSession($fmdb->last_result[0]);
+
+		if (useMySQLi()) {
+			@mysqli_free_result($result);
+		} else {
+			@mysql_free_result($result);
+		}
+		
+		return true;
 	}
 	
 }

@@ -179,12 +179,22 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 /** Handle users */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
-	if (!currentUserCan('manage_users')) returnUnAuth();
-	
 	if (isset($_POST['item_id'])) {
 		$id = sanitize($_POST['item_id']);
 	} else returnError();
 
+	/** Process API key changes */
+	if (!isset($_POST['item_sub_type']) && isset($_POST['url_var_type']) && $_POST['url_var_type'] == 'keys') {
+		$_POST['item_sub_type'] = 'keys';
+	}	
+	if (isset($_POST['item_sub_type']) && $_POST['item_sub_type'] == 'keys') {
+		if (!getOption('api_token_support')) returnUnAuth();
+
+		if (!currentUserCan('manage_users') && getNameFromID($id, 'fm_keys', 'key_', 'key_id', 'user_id') != $_SESSION['user']['id']) returnUnAuth();
+	}	
+
+	if (!currentUserCan('manage_users') && $_POST['item_sub_type'] != 'keys') returnUnAuth();
+	
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
 	
 	switch ($_POST['action']) {
@@ -200,15 +210,25 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			break;
 		case 'edit':
 			if (isset($_POST['item_status'])) {
-				if ((!currentUserCan('do_everything') && userCan($id, 'do_everything')) || $id == getDefaultAdminID()) {
-					exit(_('You do not have permission to modify the status of this user.'));
-				}
-				if (!updateStatus('fm_users', $id, 'user_', sanitize($_POST['item_status']), 'user_id')) {
-					exit(sprintf(_('This user could not be set to %s.') . "\n", $_POST['item_status']));
-				} else {
-					$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
-					addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])));
-					exit('Success');
+				if (isset($_POST['url_var_type']) && $_POST['url_var_type'] != 'keys') {
+					if ((!currentUserCan('do_everything') && userCan($id, 'do_everything')) || $id == getDefaultAdminID()) {
+						exit(_('You do not have permission to modify the status of this user.'));
+					}
+					if (!updateStatus('fm_users', $id, 'user_', sanitize($_POST['item_status']), 'user_id')) {
+						exit(sprintf(_('This user could not be set to %s.') . "\n", $_POST['item_status']));
+					} else {
+						$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
+						addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])), $fm_name);
+						exit('Success');
+					}
+				} elseif (isset($_POST['url_var_type']) && $_POST['url_var_type'] == 'keys') {
+					if (!updateStatus('fm_keys', $id, 'key_', sanitize($_POST['item_status']), 'key_id')) {
+						exit(sprintf(_('This API key could not be set to %s.') . "\n", $_POST['item_status']));
+					} else {
+						$tmp_name = getNameFromID($id, 'fm_keys', 'key_', 'key_id', 'key_token');
+						addLogEntry(sprintf(_('Set API key (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])), $fm_name);
+						exit('Success');
+					}
 				}
 			}
 			break;
