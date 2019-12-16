@@ -1602,7 +1602,7 @@ function loadAPICredentials($url, $data) {
 	/** Ensure $proto = https */
 	if ($proto != 'https') {
 		echo fM($server_path['hostname'] . " must be configured with https.\n");
-		// exit(1);
+		exit(1);
 	}
 
 	/** Set the API URL */
