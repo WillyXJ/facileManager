@@ -275,6 +275,18 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_users` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 TABLESQL;
 
+$table[] = <<<TABLESQL
+CREATE TABLE IF NOT EXISTS `$database`.`fm_keys` (
+  `key_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `user_id` int(11) NOT NULL,
+  `key_token` varchar(255) NOT NULL,
+  `key_secret` varchar(255) NOT NULL,
+  `key_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`key_id`),
+  UNIQUE KEY `idx_key_token` (`key_token`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+TABLESQL;
 
 
 	$inserts[] = <<<INSERTSQL

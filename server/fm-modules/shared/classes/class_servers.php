@@ -160,8 +160,8 @@ class fm_shared_module_servers {
 	function updateServerVersion() {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_version`='" . $_POST['server_version'] . "', `server_os`='" . $_POST['server_os'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
-			(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
+		$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_version`='" . sanitize($_POST['server_version']) . "', `server_os`='" . sanitize($_POST['server_os']) . "' WHERE `server_serial_no`='" . sanitize($_POST['SERIALNO']) . "' AND `account_id`=
+			(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . sanitize($_POST['AUTHKEY']) . "')";
 		$fmdb->query($query);
 	}
 	
@@ -176,14 +176,14 @@ class fm_shared_module_servers {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (array_key_exists('server_client_version', $_POST)) {
-			$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_client_version`='" . $_POST['server_client_version'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
-				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
+			$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_client_version`='" . sanitize($_POST['server_client_version']) . "' WHERE `server_serial_no`='" . sanitize($_POST['SERIALNO']) . "' AND `account_id`=
+				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . sanitize($_POST['AUTHKEY']) . "')";
 			$fmdb->query($query);
 		}
 		
 		if (array_key_exists('server_os_distro', $_POST)) {
-			$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_os_distro`='" . $_POST['server_os_distro'] . "' WHERE `server_serial_no`='" . $_POST['SERIALNO'] . "' AND `account_id`=
-				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . $_POST['AUTHKEY'] . "')";
+			$query = "UPDATE `fm_{$__FM_CONFIG[$_POST['module_name']]['prefix']}servers` SET `server_os_distro`='" . sanitize($_POST['server_os_distro']) . "' WHERE `server_serial_no`='" . sanitize($_POST['SERIALNO']) . "' AND `account_id`=
+				(SELECT account_id FROM `fm_accounts` WHERE `account_key`='" . sanitize($_POST['AUTHKEY']) . "')";
 			$fmdb->query($query);
 		}
 	}
