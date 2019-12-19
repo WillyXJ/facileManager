@@ -208,8 +208,8 @@ php {$argv[0]} [options]
   -s|no-ssl      Do not use SSL to retrieve the configs
   -v|version     Display the client version
      no-sudoers  Do not create/update the sudoers file at install time
-	 no-update   Do not update the server configuration from the client
-	 apitest     Perform basic API functionality tests
+     no-update   Do not update the server configuration from the client
+     apitest     Perform basic API functionality tests
 
 HELP;
 
@@ -1602,7 +1602,7 @@ function loadAPICredentials($url, $data) {
 	/** Ensure $proto = https */
 	if ($proto != 'https') {
 		echo fM($server_path['hostname'] . " must be configured with https.\n");
-		// exit(1);
+		exit(1);
 	}
 
 	/** Set the API URL */
