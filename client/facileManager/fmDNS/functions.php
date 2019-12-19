@@ -336,6 +336,8 @@ function detectChrootDir() {
 
 
 function manageCache($action, $message) {
+	global $debug;
+
 	addLogEntry($message);
 	if (shell_exec('ps -A | grep named | grep -vc grep') > 0) {
 		$last_line = system(findProgram('rndc') . ' ' . $action . ' 2>&1', $retval);
@@ -381,6 +383,8 @@ function manageCache($action, $message) {
  * @return boolean
  */
 function processReloadFailure($last_line) {
+	global $debug;
+	
 	if ($debug) echo fM($last_line);
 	addLogEntry($last_line);
 	$message = "There was an error reloading the server - please check the logs for details\n";
@@ -486,6 +490,63 @@ function runRndcActions($rndc_actions = array()) {
 function addChrootFiles() {
 	if (file_exists('/usr/libexec/setup-named-chroot.sh') && !exec('grep -c ' . escapeshellarg('named.conf.keys') . ' /usr/libexec/setup-named-chroot.sh')) {
 		file_put_contents('/usr/libexec/setup-named-chroot.sh', str_replace('rndc.key', 'rndc.key /etc/named.conf.keys', file_get_contents('/usr/libexec/setup-named-chroot.sh')));
+	}
+}
+
+
+/**
+ * Makes the API call
+ *
+ * @since 4.0
+ * @package fmDNS
+ *
+ * @return boolean
+ */
+function callAPI($url, $data) {
+	list($url, $data) = loadAPICredentials($url, $data);
+
+	$retval = 0;
+
+	$raw_data = getPostData($url, $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	if (is_array($raw_data)) {
+		list($retval, $message) = $raw_data;
+		$raw_data = sprintf("ERROR (%s) %s\n", $retval, $message);
+		$retval = 1;
+	}
+	echo $raw_data;
+
+	exit($retval);
+}
+
+
+/**
+ * Validates the API parameters
+ *
+ * @since 4.0
+ * @package fmDNS
+ *
+ * @param string $param Parameter name
+ * @param string $value Parameter value
+ * @return boolean
+ */
+function validateAPIParam($param, $value) {
+	$api_quick_validation = array(
+		'append' => array('yes', 'no'),
+		'action' => array('add', 'update', 'delete'),
+		'status' => array('active', 'disabled')
+	);
+
+	if (array_key_exists($param, $api_quick_validation)) {
+		if (!in_array($value, $api_quick_validation[$param])) {
+			echo fM(sprintf("Supported values for the '%s' parameter: %s\n", $param, join(', ', $api_quick_validation[$param])));
+			exit(1);
+		}
+	} else {
+		if (in_array($param, array('ttl', 'priority')) && !is_numeric($value)) {
+			echo fM(sprintf("'%s' must be an integer.\n", $param));
+			exit(1);
+		}
 	}
 }
 

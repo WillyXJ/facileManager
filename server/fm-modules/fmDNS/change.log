@@ -6,6 +6,8 @@
 * Server - [improvement] Updated named.root from upstream.
 * Server - [bug] Fixed an issue where zone reloads would be attempted on remote
            servers.
+* Both   - [feature] Added support for API calls to add, update, and delete
+           records. (Issue #289 #327)
 
 3.4.1 (2019-10-16)
 ==================

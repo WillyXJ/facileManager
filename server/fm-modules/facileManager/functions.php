@@ -4093,4 +4093,36 @@ if (!function_exists('array_key_first')) {
 		return null;
 	}
 }
+
+
+/**
+ * Throws an API error
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @param integer $code Error code to throw
+ * @return mixed
+ */
+function throwAPIError($code) {
+	switch ($code) {
+		case 1000:
+		case 1001:
+		case 1002:
+			$message = _('Permission denied.');
+			break;
+		case 1004:
+			$message = _('The record already exists.');
+			break;
+		case 1005:
+			$message = _('The record was not found.');
+			break;
+		default:
+			$code = 2000;
+			$message = _('Something was wrong with the request.');
+			break;
+		}
+	return array($code, $message);
+}
+
 ?>

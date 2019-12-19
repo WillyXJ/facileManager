@@ -64,6 +64,12 @@ if (file_exists($module_file)) {
 	include($module_file);
 }
 
+/** Output $data */
+if (!empty($data)) {
+	if ($_POST['compress']) echo gzcompress(serialize($data));
+	else echo serialize($data);
+}
+
 exit;
 
 ?>
