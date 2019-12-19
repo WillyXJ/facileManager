@@ -48,6 +48,19 @@ function printModuleHelp () {
      dump-zone   Dump the specified zone data to STDOUT
      clear-cache Clear the DNS cache
      id=XX       Specify the individual DomainID to build and reload
+	 
+     setHost     Defines API call
+     action=XX   Defines API action to take on a record (add, update, delete)
+     type=XX     Defines the RR type (A, AAAA, CNAME, DNAME, MX, NS, PTR, TXT)
+     name=XX     Defines the name of the RR
+     value=XX    Defines the value of the RR
+     ttl=XX      Defines the TTL of the RR
+     priority=XX Defines the priority of the RR (MX only)
+     append=XX   Defines whether to append the domain or not (yes, no)
+     comment=XX  Defines the record comment
+     status=XX   Defines the record status (active, disabled)
+     newname=XX  Defines the new record name (when action=update)
+     newvalue=XX Defines the new record value (when action=update)
   
 HELP;
 }
