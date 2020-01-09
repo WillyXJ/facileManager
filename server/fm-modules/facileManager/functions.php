@@ -2253,6 +2253,10 @@ function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM
 	/** Process server group */
 	if (!empty($serial_no) && $serial_no[0] == 'g') {
 		global $fm_module_servers;
+
+		if (!class_exists('fm_module_servers')) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
+		}
 		
 		$group_servers = $fm_module_servers->getGroupServers(substr($serial_no, 2));
 
