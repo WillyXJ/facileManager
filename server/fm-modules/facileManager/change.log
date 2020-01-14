@@ -3,7 +3,7 @@
 * Server - [bug] Fixed PHP errors.
 * Both   - [feature] Added support for user API keys. (Issue #289 #327)
 
-3.5.6 (2020-01-??)
+3.5.6 (2020-01-09)
 ==================
 * Server - [bug] Fixed PHP fatal error when setting the server build/update flag
            for server groups. (Issue #472)
