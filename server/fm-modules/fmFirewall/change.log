@@ -1,3 +1,7 @@
+2.0.1 (2019-10-01)
+==================
+* Server - [security] Fixed SQL injection. (Issue #475) (Fixed by shoeper)
+
 2.0.0 (2019-10-01)
 ==================
 * Server - [bug] Fixed PHP errors.
