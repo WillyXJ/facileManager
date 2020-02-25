@@ -1,3 +1,8 @@
+2.0.2 (2020-02-??)
+==================
+* Server - [bug] Fixed object and service creation/modification bug that was
+           introduced in v2.0.0. (Issue #477)
+
 2.0.1 (2019-10-01)
 ==================
 * Server - [security] Fixed SQL injection. (Issue #475) (Fixed by shoeper)

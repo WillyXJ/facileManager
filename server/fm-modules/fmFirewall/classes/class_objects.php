@@ -110,8 +110,11 @@ class fm_module_objects {
 			return formatError(__('Could not add the object because a database error occurred.'), 'sql');
 		}
 
+		if ($post['object_type'] == 'network') {
+			$post['object_mask'] = '/ ' . $post['object_mask'];
+		}
 		addLogEntry("Added object:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
-				"Address: {$post['object_address']} / {$post['object_mask']}\nComment: {$post['object_comment']}");
+				"Address: {$post['object_address']} {$post['object_mask']}\nComment: {$post['object_comment']}");
 		return true;
 	}
 
@@ -150,8 +153,11 @@ class fm_module_objects {
 
 //		setBuildUpdateConfigFlag(getServerSerial($post['object_id'], $_SESSION['module']), 'yes', 'build');
 		
+		if ($post['object_type'] == 'network') {
+			$post['object_mask'] = '/ ' . $post['object_mask'];
+		}
 		addLogEntry("Updated object '$old_name' to:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
-					"Address: {$post['object_address']} / {$post['object_mask']}\nComment: {$post['object_comment']}");
+					"Address: {$post['object_address']} {$post['object_mask']}\nComment: {$post['object_comment']}");
 		return true;
 	}
 	
@@ -244,7 +250,7 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
+		$return_form = sprintf('<form name="manage" id="manage" method="post">
 		%s
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="object_id" value="%s" />
@@ -282,7 +288,7 @@ HTML;
 				});
 			});
 		</script>',
-				$type, $popup_header, $action, $object_id,
+				$popup_header, $action, $object_id,
 				__('Object Name'), $object_name, $object_name_length,
 				__('Object Type'), $object_type,
 				__('Address'), $object_address, $object_address_length,

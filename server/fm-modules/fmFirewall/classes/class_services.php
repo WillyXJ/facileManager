@@ -291,7 +291,7 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
+		$return_form = sprintf('<form name="manage" id="manage" method="post">
 		%s
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="service_id" value="%s" />
@@ -352,7 +352,7 @@ HTML;
 				});
 			});
 		</script>',
-				$type, $popup_header,
+				$popup_header,
 				$action, $service_id,
 				__('Service Name'), $service_name, $service_name_length,
 				__('Service Type'), $service_type,
