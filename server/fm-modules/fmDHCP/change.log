@@ -1,4 +1,4 @@
-0.4.4 (2020-02-??)
+0.4.4 (2020-02-25)
 ==================
 * Server - [bug] Multiple hosts can now have the same IP address. (Issue #474)
 
