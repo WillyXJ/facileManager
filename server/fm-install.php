@@ -331,7 +331,7 @@ function processAccountSetup($database) {
 		exit(displayAccountSetup(_('Username and password cannot be empty.')));
 	}
 	
-	$query = "INSERT INTO `$database`.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', password('$pass'), '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
+	$query = "INSERT INTO `$database`.fm_users (user_login, user_password, user_email, user_caps, user_ipaddr, user_status) VALUES('$user', '" . password_hash($pass, PASSWORD_DEFAULT) . "', '$email', '" . serialize(array($fm_name => array('do_everything' => 1))). "', '{$_SERVER['REMOTE_ADDR']}', 'active')";
 	$result = $fmdb->query($query) or die($fmdb->last_error);
 	
 	addLogEntry(sprintf(_("Installer created user '%s'"), $user), $fm_name);
