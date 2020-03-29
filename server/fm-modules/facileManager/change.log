@@ -1,6 +1,7 @@
 4.0.0 (2020-??-??)
 * Server - [bug] Fixed PHP errors.
 * Both   - [feature] Added support for user API keys. (Issue #289 #327)
+* Server - [improvement] CSS changes.
 
 3.5.6 (2020-01-09)
 ==================
