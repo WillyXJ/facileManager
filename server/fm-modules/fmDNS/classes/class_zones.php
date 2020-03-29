@@ -870,7 +870,7 @@ HTML;
 			}
 		}
 		
-		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
+		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $domain_name;
 		
 		/** Process multiple views */
 		if (strpos($domain_view, ';')) {
@@ -1716,7 +1716,7 @@ HTML;
 			if ($post['domain_mapping'] == 'reverse') {
 				$post['domain_name'] = $this->fixDomainTypos($post['domain_name']);
 			} else {
-				$post['domain_name'] = function_exists('idn_to_ascii') ? idn_to_ascii($post['domain_name']) : $post['domain_name'];
+				$post['domain_name'] = function_exists('idn_to_ascii') ? idn_to_ascii($post['domain_name'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $post['domain_name'];
 			}
 			if (!$this->validateDomainName($post['domain_name'], $post['domain_mapping'])) return __('Invalid zone name.');
 		}

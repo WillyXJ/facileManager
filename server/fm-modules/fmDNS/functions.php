@@ -774,7 +774,7 @@ function buildModuleMenu() {
  * @return string
  */
 function displayFriendlyDomainName($domain_name) {
-	$new_domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
+	$new_domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $domain_name;
 	if ($new_domain_name != $domain_name) $new_domain_name = $domain_name . ' (' . $new_domain_name . ')';
 	
 	return $new_domain_name;
