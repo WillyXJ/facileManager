@@ -2090,9 +2090,10 @@ function verifySimpleVariable($data, $filter_type) {
  * @return string
  */
 function buildSettingsForm($saved_options, $default_options) {
-	$option_rows = null;
+	$option_rows = $current_parent = null;
 	
 	foreach ($default_options as $option => $options_array) {
+		$option_row_head = null;
 		$option_value = array_key_exists($option, $saved_options) ? $saved_options[$option] : $options_array['default_value'];
 		
 		if (is_array($option_value)) {
@@ -2102,6 +2103,8 @@ function buildSettingsForm($saved_options, $default_options) {
 			}
 			$option_value = rtrim($temp_value);
 		}
+
+		$div_style = 'style="display: none;"';
 		
 		switch($options_array['type']) {
 			case 'textarea':
@@ -2109,8 +2112,11 @@ function buildSettingsForm($saved_options, $default_options) {
 				break;
 			case 'checkbox':
 				$checked = $option_value == 'yes' ? 'checked' : null;
-				$input_field = '<input name="' . $option . '" id="' . $option . '" type="hidden" value="no" />';
+				$input_field = '<input name="' . $option . '" type="hidden" value="no" />';
 				$input_field .= '<label><input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="yes" ' . $checked . ' />' . $options_array['description'][0] . '</label>';
+				if (isset($options_array['show_children_when_value']) && $options_array['show_children_when_value'] == $checked) {
+					$div_style = 'style="display: block;"';
+				}
 				break;
 			case 'select':
 				$input_field = buildSelect($option, $option, $options_array['options'], $option_value);
@@ -2120,7 +2126,23 @@ function buildSettingsForm($saved_options, $default_options) {
 				$addl = (isset($options_array['addl'])) ? $options_array['addl'] : null;
 				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="' . $size . '" ' . $addl . ' />';
 		}
+		if (array_key_exists('parent', $options_array)) {
+			if ($options_array['parent'] === true && $option_rows) {
+				$option_row_head = '</div><div id="settings-section">' . "\n";
+			} elseif ($options_array['parent'] !== true) {
+				if ($current_parent != $options_array['parent']) {
+					$option_row_head = sprintf('<div id="%s_options" %s>', $options_array['parent'], $div_style);
+					$current_parent = $options_array['parent'];
+				}
+			}
+		} else {
+			if ($current_parent) {
+				$option_row_head = "</div>\n";
+			}
+			$current_parent = null;
+		}
 		$option_rows .= <<<ROW
+			$option_row_head
 			<div id="setting-row">
 				<div class="description">
 					<label for="$option">{$options_array['description'][0]}</label>
@@ -2134,7 +2156,7 @@ function buildSettingsForm($saved_options, $default_options) {
 ROW;
 	}
 	
-	return $option_rows;
+	return '<div id="settings-section">' . $option_rows . '</div>';
 }
 
 
