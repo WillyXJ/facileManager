@@ -3,6 +3,7 @@
 * Both   - [feature] Added support for user API keys. (Issue #289 #327)
 * Server - [improvement] CSS changes.
 * Server - [improvement] Added support for module settings to have sections.
+* Client - [bug] Fixed text output wordwrapping.
 
 3.5.6 (2020-01-09)
 ==================

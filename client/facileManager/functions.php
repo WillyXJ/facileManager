@@ -1098,7 +1098,8 @@ function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), 
  * @return string
  */
 function fM($message) {
-	if (!$columns = intval(shell_exec(findProgram('tput') . ' cols 2>/dev/null'))) {
+	list($rows, $columns) = explode(' ', shell_exec(findProgram('stty') . ' size 2>/dev/null'));
+	if (!$columns = intval($columns)) {
 		$columns = 90;
 	}
 	return wordwrap($message, $columns, "\n");
