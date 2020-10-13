@@ -74,6 +74,8 @@ class fm_dns_acls {
 		if (array_key_exists('acl_name', $post)) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', sanitize($post['acl_name']), 'acl_', 'acl_name');
 			if ($fmdb->num_rows) return __('This ACL already exists.');
+		} else {
+			if (!$post['acl_addresses']) return __('No ACL address defined.');
 		}
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls`";
@@ -81,9 +83,9 @@ class fm_dns_acls {
 		$sql_values = null;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
-		
+
 		/** Cleans up acl_addresses for future parsing **/
-		if (in_array($post['acl_addresses'], $this->getPredefinedACLs())) {
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only'))) {
 			$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
 		}
 		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
@@ -137,10 +139,12 @@ class fm_dns_acls {
 			}
 			
 			if (empty($post['acl_name'])) return __('No ACL name defined.');
+		} else {
+			if (!$post['acl_addresses']) return __('No ACL address defined.');
 		}
 		
 		/** Cleans up acl_addresses for future parsing **/
-		if (in_array($post['acl_addresses'], $this->getPredefinedACLs())) {
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only'))) {
 			$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
 		}
 		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
@@ -523,24 +527,25 @@ HTML;
 	 * @param string $addl_address Add any additional addresses to the array
 	 * @return array
 	 */
-	function getPredefinedACLs($encode = null, $addl_address = null) {
+	function getPredefinedACLs($encode = null, $addl_address = null, $return = 'all') {
 		$i = 0;
 		foreach (array('none', 'any', 'localhost', 'localnets') as $predefined) {
-			$acl_list[$i]['id'] = $predefined;
-			$acl_list[$i]['text'] = $predefined;
+			$acl_list[$i]['id'] = $acl_list[$i]['text'] = $acl_list_names[$i] = $predefined;
 			$i++;
 			if ($predefined != 'none') {
-				$acl_list[$i]['id'] = '!' . $predefined;
-				$acl_list[$i]['text'] = '!' . $predefined;
+				$acl_list[$i]['id'] = $acl_list[$i]['text'] = $acl_list_names[$i] = '!' . $predefined;
 				$i++;
 			}
 		}
 		
 		if ($addl_address) {
-			$acl_list[$i]['id'] = $addl_address;
-			$acl_list[$i]['text'] = $addl_address;
+			$acl_list[$i]['id'] = $acl_list[$i]['text'] = $acl_list_names[$i] = $addl_address;
 		}
 		
+		if ($return == 'names-only') {
+			$acl_list = $acl_list_names;
+		}
+
 		return ($encode == 'JSON') ? json_encode($acl_list) : $acl_list;
 	}
 
