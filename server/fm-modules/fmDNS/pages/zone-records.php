@@ -73,17 +73,26 @@ $avail_types = buildRecordTypes($record_type, $parent_domain_ids, $map, $support
 
 $response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
-	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = '** You need to <a href="" class="zone_reload" id="' . $domain_id . '">reload</a> this zone **';
+	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = sprintf(__('You need to %s this zone'), sprintf('<a href="" class="zone_reload" id="' . $domain_id . '">%s</a>', __('reload')));
 }
 if (!getNSCount($domain_id)) {
-	$response = sprintf('** %s **', __('One more more NS records still needs to be created for this zone'));
+	$response = __('One or more NS records still needs to be created for this zone');
+	$response_class = 'attention';
 }
 if (!getSOACount($domain_id)) {
-	$response = sprintf('** %s **', __('The SOA record still needs to be created for this zone'));
+	$response = __('The SOA record still needs to be created for this zone');
+	$response_class = 'attention';
+}
+if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
+	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id', 'AND record_type="URL"');
+	if ($fmdb->num_rows) {
+		$response = __('There are no URL RR web servers defined in the Settings to support the URL resource records.');
+		$response_class = 'attention';
+	}
 }
 
 $body = '<div id="body_container" class="fm-noscroll">' . "\n";
-if (!empty($response)) $body .= '<div id="response"><p>' . $response . '</p></div>';
+if (!empty($response)) $body .= '<div id="response" class="' . (string) $response_class . '"><p>' . $response . '</p></div>';
 $body .= sprintf('<h2>%s</h2>
 	<div id="pagination_container" class="submenus record-types">
 	<div>

@@ -23,6 +23,10 @@
 require_once(ABSPATH . 'fm-modules/shared/classes/class_buildconf.php');
 
 class fm_module_buildconf extends fm_shared_module_buildconf {
+
+	public $url_config_file = null;
+
+	public $server_info = null;
 	
 	/**
 	 * Generates the server config and updates the DNS server
@@ -57,7 +61,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$server_version = '10.0';
 		}
 
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no', 'AND server_type!="remote"');
 		if ($fmdb->num_rows) {
 			$server_result = $fmdb->last_result;
 			$data = $server_result[0];
@@ -73,10 +77,16 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					exit;
 				}
 			}
-			
+
+			$this->server_info = $data;
+
 			include(ABSPATH . 'fm-includes/version.php');
-			
 			$config = $zones = $key_config = '// This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
+
+			if ($server_url_server_type && $server_url_config_file) {
+				$data->files[$server_url_config_file] = $this->url_config_file = str_replace('//', '#', $config);
+			}
+			
 			$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_name`='directory'";
 			$config_dir_result = $fmdb->get_results($query);
 			$logging = $keys = $servers = null;
@@ -667,6 +677,15 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$this->setBuiltDomainIDs($server_serial_no, $data->built_domain_ids);
 			}
 			
+			/** url-only servers should not have any other files configured */
+			if ($this->server_info->server_type == 'url-only') {
+				unset($data->files);
+				unset($GLOBALS['built_domain_ids']);
+			}
+			if ($server_url_server_type && $server_url_config_file) {
+				$data->files[$this->server_info->server_url_config_file] = $this->url_config_file;
+			}
+			
 			return array(get_object_vars($data), $message);
 		}
 		
@@ -704,7 +723,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				extract(get_object_vars($data), EXTR_SKIP);
 			}
 			
-			if (!$domain_id) {
+			if ($server_type == 'url-only') {
+				$_POST['action'] = 'buildconf';
+				return $this->buildServerConfig($_POST);
+			} elseif (!$domain_id) {
 				/** Build all zone files */
 				list($data->files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no);
 			} else {
@@ -762,6 +784,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/' . str_replace('{ZONENAME}', $domain_name . $file_ext, $file_format)] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 						}
 					}
+
 					unset($zone_result, $count);
 					if (isset($data->files)) {
 						/** set the server_update_config flag */
@@ -841,6 +864,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			}
 
 			for ($i=0; $i < $count; $i++) {
+				if ($zone_result[$i]->domain_type == 'url-redirect') {
+					$zone_result[$i]->domain_type = 'master';
+				}
 				/** Is this a clone id? */
 				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'clone');
 				elseif ($zone_result[$i]->domain_template_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'template');
@@ -943,7 +969,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		
 		$zone_file = '; This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
-		
+
 		/** Get the SOA */
 		list($soa, $soa_ttl) = $this->buildSOA($domain);
 		$zone_file .= $soa;
@@ -1300,7 +1326,24 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . "\t(\"" . join("\"\n\t\t\"", $this->characterSplit($record_result[$i]->record_value)) . "\")" . $record_comment . "\n";
 						break;
-				}
+					case 'URL':
+						if ($url_rr_web_servers = getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
+							$record_array[$record_result[$i]->record_type]['Description'] = 'URL redirects';
+							foreach (explode(';', str_replace(',', ';', $url_rr_web_servers)) as $url_host) {
+								$url_host = trim($url_host);
+								if (verifyIPAddress($url_host)) {
+									$url_rr_type = strpos($url_host, '.') ? 'A' : 'AAAA';
+								} else {
+									$url_rr_type = 'CNAME';
+									$url_host = trimFullStop($url_host) . '.';
+								}
+								$record_array[$record_result[$i]->record_type]['Data'][] = str_replace('URL', $url_rr_type, $record_start) . $separator . $url_host . $record_comment . "\n";
+
+							}
+							$this->url_config_file .= $this->buildURLWebRedirects(trimFullStop($record_name), $record_result[$i]->record_value, $record_result[$i]->record_comment);
+						}
+						break;
+						}
 			}
 			
 			ksort($record_array);
@@ -1448,6 +1491,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		if (!array_key_exists('server_serial_no', $files_array)) return;
 		if (getOption('enable_config_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
+		if ($this->server_info->server_type == 'url-only') return;
 		
 		$die = false;
 		$named_checkconf = findProgram('named-checkconf');
@@ -2193,6 +2237,55 @@ HTML;
 		return $signed_zone ? $signed_zone : $dnssec_output;
 	}
 	
+	
+	/**
+	 * Builds the web server redirects
+	 *
+	 * @since 4.0
+	 * @package fmDNS
+	 *
+	 * @param string $hostname The hostname to redirect
+	 * @param string $url The URL to redirect the hostnme to
+	 * @param string $comment Redirect record comment
+	 * @return string
+	 */
+	function buildURLWebRedirects($hostname, $url, $comment = null) {
+		global $fmdb, $__FM_CONFIG;
+
+		$config = null;
+
+		if ($comment) {
+			$comment = "# $comment\n";
+		}
+
+		switch ($this->server_info->server_url_server_type) {
+			case 'httpd':
+				$config = '
+%sRewriteCond "%%{HTTP_HOST}" "^%s" [NC]
+RewriteRule "^/?(.*)"      "%s" [L,R,LE]
+';
+				break;
+			case 'lighttpd':
+				$config = '
+%s$HTTP["host"] =~ "%s" {
+  url.redirect  = (
+    "^/(.*)" => "%s",
+  )
+}
+';
+				break;
+			case 'nginx':
+				$config = '
+';
+				break;
+		}
+
+		$config = sprintf($config, $comment, str_replace('*', '(^.*|\.)', str_replace('.', '\.', $hostname)), $url);
+
+		// return $config;
+		return (strpos($this->url_config_file, $config) === false) ? $config : null;
+	}
+		
 }
 
 if (!isset($fm_module_buildconf))

@@ -41,55 +41,67 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-   -D            Name of zone to dump (required by dump-zone)
-   -f            Filename hosting the zone data (required by dump-zone)
-   -z|zones      Build all associated zone files
-     dump-cache  Dump the DNS cache
-     dump-zone   Dump the specified zone data to STDOUT
-     clear-cache Clear the DNS cache
-     id=XX       Specify the individual DomainID to build and reload
+   -D             Name of zone to dump (required by dump-zone)
+   -f             Filename hosting the zone data (required by dump-zone)
+   -z|zones       Build all associated zone files
+     dump-cache   Dump the DNS cache
+     dump-zone    Dump the specified zone data to STDOUT
+     clear-cache  Clear the DNS cache
+     id=XX        Specify the individual DomainID to build and reload
 	 
-     setHost     Defines API call
-     action=XX   Defines API action to take on a record (add, update, delete)
-     type=XX     Defines the RR type (A, AAAA, CNAME, DNAME, MX, NS, PTR, TXT)
-     name=XX     Defines the name of the RR
-     value=XX    Defines the value of the RR
-     ttl=XX      Defines the TTL of the RR
-     priority=XX Defines the priority of the RR (MX only)
-     append=XX   Defines whether to append the domain or not (yes, no)
-     comment=XX  Defines the record comment
-     status=XX   Defines the record status (active, disabled)
-     newname=XX  Defines the new record name (when action=update)
-     newvalue=XX Defines the new record value (when action=update)
+     setHost      Defines API call
+     action=XX    Defines API action to take on a record (add, update, delete)
+     type=XX      Defines the RR type (A, AAAA, CNAME, DNAME, MX, NS, PTR, TXT)
+     name=XX      Defines the name of the RR
+     value=XX     Defines the value of the RR
+     ttl=XX       Defines the TTL of the RR
+     priority=XX  Defines the priority of the RR (MX only)
+     append=XX    Defines whether to append the domain or not (yes, no)
+     comment=XX   Defines the record comment
+     status=XX    Defines the record status (active, disabled)
+     newname=XX   Defines the new record name (when action=update)
+     newvalue=XX  Defines the new record value (when action=update)
+
+    install url-only 
+        Will install the client app to be a URL RR web server only
+
+    enable url
+        Enables the URL RR web server support on a previous installation
   
 HELP;
 }
 
 
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
-	global $argv;
+	global $argv, $module_name;
 	
 	extract($server_location);
 
-	echo fM('  --> Running version tests...');
-	$app = detectDaemonVersion(true);
-	if ($app === null) {
-		echo "failed\n\n";
-		echo fM("Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n");
-		exit(1);
-	}
-	extract($app);
-	$data['server_type'] = $server['type'];
-	if (versionCheck($app_version, $proto . '://' . $hostname . '/' . $path, $compress) == true) {
-		echo "ok\n";
+	if (in_array('url-only', $argv)) {
+		$data['server_type'] = 'url-only';
+
+		$data = array_merge($data, setURLConfig());
 	} else {
-		echo "failed\n\n";
-		echo "$app_version is not supported.\n";
-		exit(1);
+		echo fM('  --> Running version tests...');
+		$app = detectDaemonVersion(true);
+		if ($app === null) {
+			echo "failed\n\n";
+			echo fM("Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n");
+			exit(1);
+		}
+		extract($app);
+		$data['server_type'] = $server['type'];
+		if (versionCheck($app_version, $proto . '://' . $hostname . '/' . $path, $compress) == true) {
+			echo "ok\n";
+		} else {
+			echo "failed\n\n";
+			echo "$app_version is not supported.\n";
+			exit(1);
+		}
+		$data['server_version'] = $app_version;
+		
+		echo fM("\n  --> Tests complete.  Continuing installation.\n\n");
 	}
-	$data['server_version'] = $app_version;
-	
-	echo fM("\n  --> Tests complete.  Continuing installation.\n\n");
 	
 	/** Handle the update method */
 	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
@@ -147,11 +159,11 @@ function buildConf($url, $data) {
 	$chown_dirs = array($server_zones_dir);
 	
 	/** Freeze zones */
-	if (isDaemonRunning('named')) {
+	if (!$data['dryrun'] && isDaemonRunning('named')) {
 		/** Handle dynamic zones to support reloading */
 		runRndcActions('freeze');
 	}
-		
+	
 	/** Remove previous files so there are no stale files */
 	if ($purge || ($purge_config_files == 'yes' && $server_update_config == 'conf')) {
 		/** Server config files */
@@ -173,41 +185,71 @@ function buildConf($url, $data) {
 	installFiles($files, $data['dryrun'], $chown_dirs, $runas);
 	
 	/** Reload the server */
-	$message = "Reloading the server\n";
-	if ($debug) echo fM($message);
 	if (!$data['dryrun']) {
-		addLogEntry($message);
-		if (isDaemonRunning('named')) {
-			$rndc_actions = array('reload', 'thaw');
-			
-			/** Handle dynamic zones to support reloading */
-			runRndcActions($rndc_actions);
-		} else {
-			$message = "The server is not running - attempting to start it\n";
+		/** Reload web server */
+		if ($server_url_server_type) {
+			$message = "Reloading $server_url_server_type\n";
 			if ($debug) echo fM($message);
 			addLogEntry($message);
-			$named_rc_script = getStartupScript($chroot_environment);
-			if ($named_rc_script === false) {
+
+			$rc_script = getStartupScript($server_url_server_type);
+			if ($rc_script === false) {
 				$last_line = "Cannot locate the start script\n";
 				$retval = true;
 			} else {
-				$last_line = system($named_rc_script . ' 2>&1', $retval);
+				if (!isDaemonRunning($server_url_server_type)) {
+					$message = "The server is not running - attempting to start it\n";
+					if ($debug) echo fM($message);
+					addLogEntry($message);
+
+					$last_line = system($rc_script . ' 2>&1', $retval);
+				} else {
+					$last_line = system(str_replace('start', 'reload', $rc_script) . ' 2>&1', $retval);
+				}
+			}
+			if ($retval) {
+				return processReloadFailure($last_line);
 			}
 		}
-		if ($retval) {
-			return processReloadFailure($last_line);
-		} else {
-			/** Only update reloaded zones */
-			$data['reload_domain_ids'] = $reload_domain_ids;
-			if (!isset($server_build_all)) {
-				$data['zone'] = 'update';
+
+		/** Reload the dns server */
+		if ($server_type == 'bind9') {
+			$message = "Reloading $server_type\n";
+			if ($debug) echo fM($message);
+			addLogEntry($message);
+
+			if (isDaemonRunning('named')) {
+				$rndc_actions = array('reload', 'thaw');
+				
+				/** Handle dynamic zones to support reloading */
+				runRndcActions($rndc_actions);
+			} else {
+				$message = "The server is not running - attempting to start it\n";
+				if ($debug) echo fM($message);
+				addLogEntry($message);
+				$named_rc_script = getStartupScript($server_type, $chroot_environment);
+				if ($named_rc_script === false) {
+					$last_line = "Cannot locate the start script\n";
+					$retval = true;
+				} else {
+					$last_line = system($named_rc_script . ' 2>&1', $retval);
+				}
 			}
-			
-			/** Update the server with a successful reload */
-			$data['action'] = 'update';
-			$raw_update = getPostData($url, $data);
-			$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
-			if ($debug) echo $raw_update;
+			if ($retval) {
+				return processReloadFailure($last_line);
+			} else {
+				/** Only update reloaded zones */
+				$data['reload_domain_ids'] = $reload_domain_ids;
+				if (!isset($server_build_all)) {
+					$data['zone'] = 'update';
+				}
+				
+				/** Update the server with a successful reload */
+				$data['action'] = 'update';
+				$raw_update = getPostData($url, $data);
+				$raw_update = $data['compress'] ? @unserialize(gzuncompress($raw_update)) : @unserialize($raw_update);
+				if ($debug) echo $raw_update;
+			}
 		}
 	}
 	return true;
@@ -226,28 +268,34 @@ function detectServerType() {
 
 
 function moduleAddServer() {
-	/** Attempt to determine default variables */
-	$named_conf = findFile('named.conf', array('/etc/named', '/etc/namedb', '/etc/bind'));
-	$data['server_run_as_predefined'] = 'named';
-	if ($named_conf) {
-		if (function_exists('posix_getgrgid')) {
-			if ($run_as = posix_getgrgid(filegroup($named_conf))) {
-				$data['server_run_as_predefined'] = $run_as['name'];
+	global $argv;
+
+	if (in_array('url-only', $argv)) {
+		$data['server_type'] = 'url-only';
+	} else {
+		/** Attempt to determine default variables */
+		$named_conf = findFile('named.conf', array('/etc/named', '/etc/namedb', '/etc/bind'));
+		$data['server_run_as_predefined'] = 'named';
+		if ($named_conf) {
+			if (function_exists('posix_getgrgid')) {
+				if ($run_as = posix_getgrgid(filegroup($named_conf))) {
+					$data['server_run_as_predefined'] = $run_as['name'];
+				}
 			}
-		}
-		$data['server_config_file'] = $named_conf;
-		$server_root = getParameterValue('directory', $named_conf, '"');
-		
-		if ($server_root === false) {
-			if (file_exists($named_conf . '.options')) {
-				$server_root = getParameterValue('directory', $named_conf . '.options', '"');
+			$data['server_config_file'] = $named_conf;
+			$server_root = getParameterValue('directory', $named_conf, '"');
+			
+			if ($server_root === false) {
+				if (file_exists($named_conf . '.options')) {
+					$server_root = getParameterValue('directory', $named_conf . '.options', '"');
+				}
 			}
+			$data['server_root_dir'] = $server_root;
+			
+			$data['server_zones_dir'] = (dirname($named_conf) == '/etc') ? null : dirname($named_conf) . '/zones';
 		}
-		$data['server_root_dir'] = $server_root;
-		
-		$data['server_zones_dir'] = (dirname($named_conf) == '/etc') ? null : dirname($named_conf) . '/zones';
+		$data['server_chroot_dir'] = detectChrootDir();
 	}
-	$data['server_chroot_dir'] = detectChrootDir();
 	
 	return $data;
 }
@@ -268,35 +316,61 @@ function detectDaemonVersion($return_array = false) {
 }
 
 
-function getStartupScript($chroot_environment = false) {
+function getStartupScript($app, $chroot_environment = false) {
 	$distros = array(
-		'Arch'      => array('/etc/rc.d/named start', findProgram('systemctl') . ' start named.service'),
-		'Debian'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
-		'Redhat'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
-		'SUSE'      => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
-		'Gentoo'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
-		'Slackware' => array('/etc/rc.d/rc.bind start', findProgram('systemctl') . ' start bind.service'),
-		'FreeBSD'   => array('/usr/local/etc/rc.d/named start' , '/etc/rc.d/named start'),
-		'OpenBSD'   => array('/usr/local/etc/rc.d/named start' , '/etc/rc.d/named start'),
-		'Apple'     => findProgram('launchctl') . ' start org.isc.named'
-		);
+		'bind9' => array(
+			'Arch'      => array('/etc/rc.d/named start', findProgram('systemctl') . ' start named.service'),
+			'Debian'    => array('/etc/init.d/bind9 start', findProgram('systemctl') . ' start bind9.service'),
+			'Redhat'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service', findProgram('systemctl') . ' start named-chroot.service'),
+			'SUSE'      => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+			'Gentoo'    => array('/etc/init.d/named start', findProgram('systemctl') . ' start named.service'),
+			'Slackware' => array('/etc/rc.d/rc.bind start', findProgram('systemctl') . ' start bind.service'),
+			'FreeBSD'   => array('/usr/local/etc/rc.d/named start' , '/etc/rc.d/named start'),
+			'OpenBSD'   => array('/usr/local/etc/rc.d/named start' , '/etc/rc.d/named start'),
+			'Apple'     => findProgram('launchctl') . ' start org.isc.named'
+		),
+		'httpd' => array(
+			'Arch'      => array('/etc/rc.d/httpd start', findProgram('systemctl') . ' start httpd.service'),
+			'Debian'    => array('/etc/init.d/httpd start', findProgram('systemctl') . ' start httpd.service'),
+			'Redhat'    => array('/etc/init.d/httpd start', findProgram('systemctl') . ' start httpd.service'),
+			'SUSE'      => array('/etc/init.d/httpd start', findProgram('systemctl') . ' start httpd.service'),
+			'Gentoo'    => array('/etc/init.d/httpd start', findProgram('systemctl') . ' start httpd.service'),
+			'Slackware' => array('/etc/rc.d/rc.httpd start', findProgram('systemctl') . ' start httpd.service'),
+			'FreeBSD'   => array('/usr/local/etc/rc.d/httpd start' , '/etc/rc.d/httpd start'),
+			'OpenBSD'   => array('/usr/local/etc/rc.d/httpd start' , '/etc/rc.d/httpd start')
+		),
+		'lighttpd' => array(
+			'Arch'      => array('/etc/rc.d/lighttpd start', findProgram('systemctl') . ' start lighttpd.service'),
+			'Debian'    => array('/etc/init.d/lighttpd start', findProgram('systemctl') . ' start lighttpd.service'),
+			'Redhat'    => array('/etc/init.d/lighttpd start', findProgram('systemctl') . ' start lighttpd.service'),
+			'SUSE'      => array('/etc/init.d/lighttpd start', findProgram('systemctl') . ' start lighttpd.service'),
+			'Gentoo'    => array('/etc/init.d/lighttpd start', findProgram('systemctl') . ' start lighttpd.service'),
+			'Slackware' => array('/etc/rc.d/rc.lighttpd start', findProgram('systemctl') . ' start lighttpd.service'),
+			'FreeBSD'   => array('/usr/local/etc/rc.d/lighttpd start' , '/etc/rc.d/lighttpd start'),
+			'OpenBSD'   => array('/usr/local/etc/rc.d/lighttpd start' , '/etc/rc.d/lighttpd start')
+		)
+	);
+
+	if (!array_key_exists($app, $distros)) {
+		return false;
+	}
 	
 	/** Debian-based distros */
-	$distros['Raspbian'] = $distros['Ubuntu'] = $distros['Fubuntu'] = $distros['Debian'];
+	$distros[$app]['Raspbian'] = $distros[$app]['Ubuntu'] = $distros[$app]['Fubuntu'] = $distros[$app]['Debian'];
 	
 	/** Redhat-based distros */
-	$distros['Fedora'] = $distros['CentOS'] = $distros['ClearOS'] = $distros['Oracle'] = $distros['Scientific'] = $distros['Redhat'];
+	$distros[$app]['Fedora'] = $distros[$app]['CentOS'] = $distros[$app]['ClearOS'] = $distros[$app]['Oracle'] = $distros[$app]['Scientific'] = $distros[$app]['Redhat'];
 
 	$os = detectOSDistro();
 	
-	if (array_key_exists($os, $distros)) {
-		if (is_array($distros[$os])) {
-			foreach ($distros[$os] as $rcscript) {
+	if (array_key_exists($os, $distros[$app])) {
+		if (is_array($distros[$app][$os])) {
+			foreach ($distros[$app][$os] as $rcscript) {
 				$script = preg_split('/\s+/', $rcscript);
 				if (file_exists($script[0])) {
 					if ($chroot_environment) {
-						if (strpos($distros[$os][count($distros[$os])-1], $script[0]) !== false) {
-							return $distros[$os][count($distros[$os])-1];
+						if (strpos($distros[$app][$os][count($distros[$app][$os])-1], $script[0]) !== false) {
+							return $distros[$app][$os][count($distros[$app][$os])-1];
 						}
 					}
 					
@@ -304,7 +378,7 @@ function getStartupScript($chroot_environment = false) {
 				}
 			}
 		} else {
-			return $distros[$os];
+			return $distros[$app][$os];
 		}
 	}
 	
@@ -561,6 +635,95 @@ function validateAPIParam($param, $value) {
 			exit(1);
 		}
 	}
+}
+
+
+/**
+ * Sets web server config for URL RR hosting
+ *
+ * @since 4.0
+ * @package fmDNS
+ *
+ * @param string $param Parameter name
+ * @param string $value Parameter value
+ * @return boolean
+ */
+function setURLConfig() {
+	global $module_name;
+
+	/** Detect which web server is running */
+	list($web_server, $web_server_conf, $docroot) = getWebServerInfo();
+	$data['server_url_server_type'] = $web_server['app'];
+
+	/** Get location of .htaccess file (or equivalent) */
+	echo fM("  --> Setting the URL RR rewrite file...");
+	switch ($web_server['app']) {
+		case 'httpd':
+			$data['server_url_config_file'] = $docroot . '/.htaccess';
+			break;
+		case 'lighttpd':
+			$data['server_url_config_file'] = dirname($web_server_conf) . '/' . $module_name . '.conf';
+
+			/** Update lighttpd.conf */
+			addToConfigFile($web_server_conf, 'include "' . $module_name . '.conf"');
+			break;
+		case 'nginx':
+			break;
+	}
+
+	echo $data['server_url_config_file'] . "\n";
+
+	echo fM("\n  --> Starting {$web_server['app']}...");
+	if (isDaemonRunning($web_server['app'])) {
+		echo "already running\n";
+	} else {
+		$rc_script = getStartupScript($web_server['app']);
+		if ($rc_script === false) {
+			$last_line = "Cannot locate the start script";
+			$retval = true;
+		} else {
+			$last_line = system($rc_script . ' 2>&1', $retval);
+		}
+	}
+	if ($retval) {
+		echo "$last_line\n";
+	} else {
+		echo "running\n";
+	}
+
+	return $data;
+}
+
+
+/**
+ * Enables URL RR hosting
+ *
+ * @since 4.0
+ * @package fmDNS
+ *
+ * @param string $param Parameter name
+ * @param string $value Parameter value
+ * @return boolean
+ */
+function enableURL() {
+	global $module_name, $url, $data;
+
+	if (!array_key_exists('server_name', $data)) {
+		$data['server_name'] = gethostname();
+	}
+
+	echo fM("Enabling URL RR hosting...");
+
+	$data = array_merge($data, setURLConfig());
+
+	$raw_data = getPostData(str_replace('buildconf.php', 'admin-servers.php?addserial', $url), $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+
+	if ($raw_data) {
+		if ($debug) exit($raw_data);
+	}
+
+	exit(fM("\nConfiguration complete.\n"));
 }
 
 

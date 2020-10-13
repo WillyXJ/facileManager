@@ -2283,14 +2283,21 @@ function upgradefmDNS_340($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 3.5.0 */
-function upgradefmDNS_350($__FM_CONFIG, $running_version) {
+/** 4.0.0 */
+function upgradefmDNS_400($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '3.4.0', '<') ? upgradefmDNS_340($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_check_config` ENUM('yes','no') NOT NULL DEFAULT 'yes' AFTER `domain_dnssec_signed`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE `record_type` `record_type` ENUM('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','HINFO','KEY','KX','MX','NAPTR','NS','OPENPGPKEY','PTR','RP','SSHFP','SRV','TLSA','TXT','URL') NOT NULL DEFAULT 'A'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_type` `server_type` ENUM('bind9','remote','url-only') NOT NULL DEFAULT 'bind9'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_url_server_type` ENUM('httpd','lighttpd','nginx') NULL DEFAULT NULL AFTER `server_config_file`, ADD `server_url_config_file` VARCHAR(255) NULL DEFAULT NULL AFTER `server_url_server_type`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_update_method` `server_update_method` ENUM('http','https','cron','ssh') NULL DEFAULT NULL";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_update_port` `server_update_port` INT(5) NULL DEFAULT NULL";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_menu_display` ENUM('include','exclude') NOT NULL DEFAULT 'include' AFTER `server_client_version`";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_menu_display`='exclude' WHERE `server_type`='remote'";
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {
@@ -2299,7 +2306,7 @@ function upgradefmDNS_350($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('version', '3.5', 'auto', false, 0, 'fmDNS');
+	setOption('version', '4.0', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }

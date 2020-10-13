@@ -45,7 +45,10 @@ class fm_module_settings {
 				}
 				
 				/** Ensure non-empty option */
-				if (empty($data)) return _('Empty values are not allowed.');
+				// if (empty($data)) return _('Empty values are not allowed.');
+				if (empty($data) && array_key_exists('default_value', $__FM_CONFIG[$_SESSION['module']]['default']['options'][$key])) {
+					$data = $__FM_CONFIG[$_SESSION['module']]['default']['options'][$key]['default_value'];
+				}
 				
 				/** Check if the option has changed */
 				$current_value = getOption($key, $_SESSION['user']['account_id'], $_SESSION['module']);
@@ -92,6 +95,13 @@ class fm_module_settings {
 					$log_value = trim($option_value);
 				}
 				$log_message .= ucwords(str_replace('_', ' ', $option)) . ": $log_value\n";
+
+				/** Run optional function after save */
+				if (array_key_exists('function', $__FM_CONFIG[$_SESSION['module']]['default']['options'][$key])) {
+					if (function_exists($__FM_CONFIG[$_SESSION['module']]['default']['options'][$key]['function'])) {
+						$__FM_CONFIG[$_SESSION['module']]['default']['options'][$key]['function']();
+					}
+				}
 			}
 		}
 		

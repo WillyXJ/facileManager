@@ -683,6 +683,10 @@ HTML;
 			
 			return join(' ', $order_spec);
 		}
+
+		if (!$fm_dns_acls) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+		}
 		
 		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \
 			strpos($cfg_data, 'domain_') !== false || strpos($def_type, 'address_match_element') !== false || \

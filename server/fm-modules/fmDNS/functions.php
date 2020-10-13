@@ -1256,5 +1256,24 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 	return array(null, __('Forward domain not found.'));
 }
 
+/**
+ * Resets the URL RR servers config builds status
+ *
+ * @since 4.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $build_update Build or Update
+ * @return null
+ */
+function resetURLServerConfigStatus($build_update = 'build') {
+	global $__FM_CONFIG, $fmdb;
+
+	$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_{$build_update}_config`='yes' WHERE `server_url_config_file`!='' AND `server_status`!='deleted' AND `server_installed`='yes' AND `account_id`='{$_SESSION['user']['account_id']}'";
+	$fmdb->query($query);
+
+	return;
+}
+
 
 ?>

@@ -42,6 +42,7 @@ if (!$api_call) {
 	$dump_cache = in_array('dump-cache', $argv) ? true : false;
 	$clear_cache = in_array('clear-cache', $argv) ? true : false;
 	$dump_zone = in_array('dump-zone', $argv) ? true : false;
+	$enable_url = in_array('enable', $argv) && in_array('url', $argv) ? true : false;
 } else {
 	$api_supported_rr = array('A', 'AAAA', 'CNAME', 'DNAME', 'MX', 'NS', 'PTR', 'TXT');
 	$api_params = array(
@@ -124,6 +125,11 @@ if ($api_call) {
 
 /** Check if running supported version */
 $data['server_version'] = detectDaemonVersion();
+
+/** Enable URL hosting */
+if ($enable_url) {
+	enableURL();
+}
 
 /** Build the zone files */
 if ($zones) {

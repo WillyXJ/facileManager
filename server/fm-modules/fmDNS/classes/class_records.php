@@ -219,6 +219,11 @@ class fm_dns_records {
 			basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $id, 'record_ptr_id', 0, 'record_ptr_id');
 		}
 
+		/** Set the server_update_config flag for existing servers */
+		if ($record_type == 'URL') {
+			resetURLServerConfigStatus('update');
+		}
+
 		addLogEntry($log_message);
 		return $result;
 	}

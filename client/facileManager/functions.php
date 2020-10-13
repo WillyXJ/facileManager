@@ -322,10 +322,7 @@ function installFM($proto, $compress) {
 	}
 
 	/** Server serial number **/
-	$data['server_name'] = exec(findProgram('hostname') . ' -f', $output, $rc);
-	if ($rc > 0 || empty($data['server_name'])) {
-		$data['server_name'] = php_uname('n');
-	}
+	$data['server_name'] = gethostname();
 
 	$data['server_os'] = PHP_OS;
 	$data['server_os_distro'] = detectOSDistro();
@@ -645,13 +642,14 @@ function generateSerialNo($url, $data) {
  *
  * @return string
  */
-function detectHttpd() {
+function detectWebServer() {
 	$httpd_choices = array(
-							'httpd'=>'httpd.conf',
-							'httpd2'=>'httpd.conf',
-							'apache2'=>'apache2.conf',
-							'lighttpd'=>''
-						);
+		'httpd'=>'httpd.conf',
+		'httpd2'=>'httpd.conf',
+		'apache2'=>'apache2.conf',
+		'lighttpd'=>'lighttpd.conf',
+		'nginx'=>'nginx.conf'
+	);
 	
 	foreach ($httpd_choices as $app => $file) {
 		if (findProgram($app)) return array('app'=>$app, 'file'=>$file);
@@ -898,35 +896,9 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 		/** http(s) */
 		case 'h':
 			/** Detect which web server is running */
-			$web_server = detectHttpd();
-			if (!is_array($web_server)) {
-				echo fM("\nCannot find a supported web server - please check the README document for supported web servers.  Aborting.\n");
-				exit(1);
-			}
-			
+			list($web_server, $config_file, $docroot) = getWebServerInfo();
+
 			/** Add a symlink to the docroot */
-			$httpdconf = findFile($web_server['file']);
-			if (!$httpdconf) {
-				echo fM("\nCannot find " . $web_server['file'] . '.  Please enter the full path of ' . $web_server['file'] . ' (/etc/httpd/conf/httpd.conf): ');
-				$httpdconf = trim(strtolower(fgets(STDIN)));
-				
-				/** Check if the file exists */
-				if (!is_file($httpdconf)) {
-					echo fM("  --> $httpdconf does not exist.  Aborting.\n");
-					exit(1);
-				}
-			}
-			/** Get the docroot from STDIN if it's not found */
-			if (! $docroot = getParameterValue('^DocumentRoot', $httpdconf, '"')) {
-				echo fM("\nCannot find DocumentRoot in " . $web_server['file'] . ".  Please enter the full path of your default DocumentRoot (/var/www/html): ");
-				$docroot = rtrim(trim(strtolower(fgets(STDIN))), '/');
-			}
-				
-			/** Check if the docroot exists */
-			if (!is_dir($docroot)) {
-				echo fM("  --> $docroot does not exist.  Aborting.\n");
-				exit(1);
-			}
 			$link_name = $docroot . DIRECTORY_SEPARATOR . 'fM';
 			
 			echo fM("  --> Creating $link_name link.\n");
@@ -936,7 +908,7 @@ function processUpdateMethod($module_name, $update_method = null, $data, $url) {
 			} else echo fM("      --> $link_name already exists...skipping\n");
 			
 			/** Add an entry to sudoers */
-			$user = getParameterValue('^User', $httpdconf, ' ');
+			$user = getParameterValue('^User', $config_file, ' ');
 			if ($user[0] == '$') {
 				$user_var = preg_replace(array('/\$/', '/{/', '/}/'), '', $user);
 				$user = preg_replace(array('/\$/', '/{/', '/}/'), '', getParameterValue($user_var, findFile('envvars'), '='));
@@ -1349,7 +1321,8 @@ function deleteFile($file, $debug = false, $dryrun = false) {
  */
 function findFile($file, $addl_path = null) {
 	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2',
-				'/usr/local/etc/apache22', '/etc/apache2', '/etc', '/usr/local/etc');
+				'/usr/local/etc/apache22', '/etc/apache2', '/etc', '/usr/local/etc',
+				'/etc/lighttpd', '/usr/local/nginx/conf', '/etc/nginx', '/usr/local/etc/nginx');
 	
 	if (is_array($addl_path)) {
 		$path = array_unique(array_merge($path, $addl_path));
@@ -1396,8 +1369,10 @@ function addServer($url, $data) {
 		echo fM("Cannot find a supported application to manage - please check the README document for supported applications.  Aborting.\n");
 		exit(1);
 	}
-	$data['server_type'] = $app['server']['type'];
-	$data['server_version'] = $app['app_version'];
+	if (!isset($data['server_type'])) {
+		$data['server_type'] = $app['server']['type'];
+		$data['server_version'] = $app['app_version'];
+	}
 
 	/** Add the server to the account */
 	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
@@ -1422,7 +1397,7 @@ function addServer($url, $data) {
  * @return boolean
  */
 function isDaemonRunning($daemon) {
-	return shell_exec('ps -A | grep ' . escapeshellarg($daemon) . ' | grep -vc grep');
+	return intval(shell_exec('ps -A | grep ' . escapeshellarg($daemon) . ' | grep -vc grep'));
 }
 
 
@@ -1643,4 +1618,162 @@ function doAPITest($url, $data) {
 	exit;
 }
 
+
+/**
+ * Gets web server information through auto-detect and user input
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @param 
+ * @return array
+ */
+function getWebServerInfo() {
+	while (!is_array($web_server)) {
+		echo fM("\n  --> Detecting the web server...");
+		$web_server = detectWebServer();
+		if (!is_array($web_server)) {
+			echo "none\n\n";
+			echo fM("Cannot find a supported web server - please check the README document for supported web servers.\n");
+			echo fM('Which server would you like me to try installing? [(H)ttpd/(L)ighttpd/(N)ginx] ');
+			$package = strtolower(trim(fgets(STDIN)));
+			$package_names = array('h' => 'httpd', 'l' => 'lighttpd', 'n' => 'nginx');
+			if (!$package || !in_array($package, array_merge(array('h', 'l', 'n'), $package_names))) {
+				echo "No package selected. Aborting.\n";
+				exit(1);
+			}
+
+			if (strlen($package) == 1) {
+				$package = $package_names[$package];
+			}
+			
+			installPackage($package);
+		} else {
+			echo $web_server['app'] . "\n";
+		}
+	}
+	
+	/** Get web server config file */
+	echo fM("  --> Detecting the web server configuration file...");
+	$config_file = findFile($web_server['file']);
+	if (!$config_file) {
+		echo fM("\n\nCannot find " . $web_server['file'] . '.  Please enter the full path of ' . $web_server['file'] . ' (/etc/httpd/conf/httpd.conf): ');
+		$config_file = trim(strtolower(fgets(STDIN)));
+		
+		/** Check if the file exists */
+		if (!is_file($config_file)) {
+			echo fM("  --> $config_file does not exist.  Aborting.\n");
+			exit(1);
+		}
+	} else {
+		echo $config_file . "\n";
+	}
+
+	/** Get the docroot from STDIN if it's not found */
+	echo fM("  --> Detecting the web server document root...");
+	switch ($web_server['app']) {
+		case 'httpd':
+			$docroot_parameter = 'DocumentRoot';
+			break;
+		case 'lighttpd':
+			$docroot_parameter = 'server.document-root';
+			break;
+		case 'nginx':
+			$docroot_parameter = 'document root';
+			break;
+	}
+	if (! $docroot = getParameterValue('^' . $docroot_parameter, $config_file, '"')) {
+		echo fM("\nCannot find $docroot_parameter in " . $web_server['file'] . ".  Please enter the full path of your default $docroot_parameter (/var/www/html): ");
+		$docroot = rtrim(trim(strtolower(fgets(STDIN))), '/');
+	} else {
+		echo $docroot . "\n";
+	}
+		
+	/** Check if the docroot exists */
+	if (!is_dir($docroot)) {
+		echo fM("  --> $docroot does not exist.  Creating directory.\n");
+		@mkdir($docroot, 0755, true);
+	}
+
+	return array($web_server, $config_file, $docroot);
+}
+
+
+/**
+ * Adds content to a configuration file
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @param string $url URL to query
+ * @param array $data Information to submit
+ * @return boolean
+ */
+function addToConfigFile($config_file, $content, $break_on_string = null) {
+	global $module_name, $data;
+
+	$config_basename = basename($config_file);
+
+	echo fM(sprintf('  --> Configuring %s...', $config_basename));
+	/** Check if the file exists */
+	if (!is_file($config_file)) {
+		echo "failed\n";
+		echo fM("  --> $config_file does not exist.  Aborting.\n");
+		exit(1);
+	}
+
+	$current_file_contents = file_get_contents($config_file);
+	if (strpos($current_file_contents, $module_name) === false) {
+		$new_content = sprintf('
+# This section was built using %s v%s
+%s
+# End %s section
+',
+			$module_name, $data['server_client_version'],
+			$content,
+			$module_name
+		);
+		
+		$current_file_contents = explode("\n", $current_file_contents);
+		foreach ($current_file_contents as $key => $line) {
+			if (!$line) {
+				$last_empty_key = $key;
+				continue;
+			}
+			if ($break_on_string) {
+				$pos = strpos($line, $break_on_string);
+				if ($pos !== false && $pos == 0) {
+					break;
+				}
+			}
+		}
+		$current_file_contents[$last_empty_key] = $new_content;
+		$current_file_contents = join("\n", $current_file_contents);
+		
+		file_put_contents($config_file, $current_file_contents);
+		echo "done\n\n";
+	} else {
+		echo "skipping - already configured\n\n";
+	}
+}
+
+
+/**
+ * Gets the hostname
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @return string
+ */
+if (!function_exists('gethostname')) {
+	function gethostname() {
+		$hostname = exec(findProgram('hostname') . ' -f', $output, $rc);
+		if ($rc > 0 || empty($hostname)) {
+			$hostname = php_uname('n');
+		}
+
+		return $hostname;
+	}
+}
 ?>

@@ -2115,7 +2115,7 @@ function buildSettingsForm($saved_options, $default_options) {
 				$input_field = '<input name="' . $option . '" type="hidden" value="no" />';
 				$input_field .= '<label><input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="yes" ' . $checked . ' />' . $options_array['description'][0] . '</label>';
 				if (isset($options_array['show_children_when_value']) && $options_array['show_children_when_value'] == $checked) {
-					$div_style = 'style="display: block;"';
+					$show_children[$option] = 'style="display: block;"';
 				}
 				break;
 			case 'select':
@@ -2131,6 +2131,9 @@ function buildSettingsForm($saved_options, $default_options) {
 				$option_row_head = '</div><div id="settings-section">' . "\n";
 			} elseif ($options_array['parent'] !== true) {
 				if ($current_parent != $options_array['parent']) {
+					if ($show_children[$options_array['parent']]) {
+						$div_style = $show_children[$options_array['parent']];
+					}
 					$option_row_head = sprintf('<div id="%s_options" %s>', $options_array['parent'], $div_style);
 					$current_parent = $options_array['parent'];
 				}
@@ -3183,6 +3186,9 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'defau
 	if ($rel) $rel = ' rel="' . $rel . '"';
 	
 	$image = '<i class="mini-icon ' . $style . '" title="' . $title . '">' . $contents . '</i>';
+	if ($style != 'default') {
+		$title = 'null" class="tooltip-top mini-icon" data-tooltip="' . $title;
+	}
 	
 	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
 }
@@ -3959,7 +3965,7 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
 		if ($fmdb->num_rows && !$fmdb->sql_errors) {
 			$server_array[_('Servers')][] = null;
 			foreach ($fmdb->last_result as $results) {
-				if (property_exists($results, 'server_type') && $results->server_type == 'remote') continue;
+				if (property_exists($results, 'server_menu_display') && $results->server_menu_display == 'exclude') continue;
 				$server_array[_('Servers')][$j][] = $results->server_name;
 				if ($server_id_type == 'serial') {
 					$server_array[_('Servers')][$j][] = $results->server_serial_no;

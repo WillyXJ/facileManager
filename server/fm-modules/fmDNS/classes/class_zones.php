@@ -51,7 +51,7 @@ class fm_dns_zones {
 		$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
 
 		$classes = (array_key_exists('attention', $_GET)) ? null : ' grey';
-		$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? '<i class="fa fa-eye fa-lg eye-attention' . $classes . '" title="' . __('Only view zones that need attention') . '"></i>' : null;
+		$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-eye fa-lg eye-attention %s"></i></a>', __('Only view zones that need attention'), $classes) : null;
 		$addl_blocks = ($map != 'groups') ? array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention) : null;
 		$fmdb->num_rows = $num_rows;
 		echo displayPagination($page, $total_pages, $addl_blocks);
@@ -263,7 +263,7 @@ class fm_dns_zones {
 			}
 			if (!$post['domain_view']) $post['domain_view'] = 0;
 			
-			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id');
+			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url');
 		
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
@@ -314,6 +314,21 @@ class fm_dns_zones {
 				$query .= "'masters', '" . $required_servers . "')";
 				$result = $fmdb->query($query);
 				$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
+			} elseif (isset($post['domain_redirect_url'])) {
+				if (!class_exists('fm_dns_records')) {
+					include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+				}
+				$record_array = array(
+					'record_name' => '@',
+					'record_value' => $post['domain_redirect_url']
+				);
+				$fm_dns_records->add($insert_id, 'URL', $record_array);
+				$record_array = array(
+					'record_name' => '*',
+					'record_value' => '@',
+					'record_append' => 'no'
+				);
+				$fm_dns_records->add($insert_id, 'CNAME', $record_array);
 			}
 		}
 		if ($fmdb->sql_errors) {
@@ -385,16 +400,13 @@ class fm_dns_zones {
 		$_POST['domain_mapping'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
 		$_POST['domain_type'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
 		
-		$post = $this->validatePost($_POST);
-		if (!is_array($post)) return $post;
-		
 		$sql_edit = $domain_name_servers = $domain_view = null;
 		
 		$old_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$log_message = "Updated a zone ($old_name) with the following details:\n";
 
 		/** If changing zone to clone or different domain_type, are there any existing associated records? */
-		if ($post['domain_clone_domain_id'] || $post['domain_type'] != 'master') {
+		if ($post['domain_clone_domain_id']) {
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) return __('There are associated records with this zone.');
 		}
@@ -754,7 +766,19 @@ class fm_dns_zones {
 			}
 
 			if (in_array($row->domain_type, array('master', 'slave')) && (currentUserCan(array('manage_zones', 'view_all'), $_SESSION['module']) || $zone_access_allowed)) {
-				$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s"></i></a>', $row->domain_id, __('Configure Additional Options'));
+				$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->domain_id, __('Configure Additional Options'));
+			}
+
+			if ($row->domain_type == 'master') {
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $row->domain_id, 'record_', 'domain_id', 'AND record_type="URL" AND record_name="@"');
+				if ($fmdb->num_rows) {
+					$domain_redirect_url = $fmdb->last_result[0]->record_value;
+					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This domain redirects to %s'), $domain_redirect_url));
+					if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
+						$response = __('There are no URL RR web servers defined in the Settings to support the URL resource records.');
+						$classes[] = 'attention';
+					}
+				}
 			}
 
 			if (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') {
@@ -762,19 +786,19 @@ class fm_dns_zones {
 				if ($fmdb->num_rows) {
 					$icons[] = sprintf('<div class="mini-icon tooltip-copy nowrap"><span><b>%s:</b><br /><textarea>' . trim($row->domain_dnssec_ds_rr) . '</textarea><p>%s</p></span><i class="fa fa-lock secure" title="%s"></i></div>', __('Zone DS RRset'), __('Click to copy'), __('Zone is secured with DNSSEC'));
 				} else {
-					$icons[] = sprintf('<i class="mini-icon fa fa-lock insecure" title="%s"></i>', __('Zone is configured but not secured with DNSSEC'));
+					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock insecure" aria-hidden="true"></i></a>', __('Zone is configured but not secured with DNSSEC'));
 					$response = __('There are no DNSSEC keys defined for this zone.');
 					$classes[] = 'attention';
 				}
 			}
 			if ($dynamic_zone == 'yes') {
-				$icons[] = sprintf('<i class="mini-icon fa fa-share-alt" title="%s"></i>', __('Zone supports dynamic updates'));
+				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates'));
 			}
 			if ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
-				$icons[] = sprintf('<i class="mini-icon fa fa-picture-o" title="%s"></i>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')));
+				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-picture-o" aria-hidden="true"></i></a>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')));
 			}
 
-			$response = ($response) ? sprintf('<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', $response) : null;
+			$response = ($response) ? sprintf('<a href="#" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>', $response) : null;
 
 			$class = 'class="' . implode(' ', $classes) . '"';
 			if (is_array($icons)) {
@@ -785,7 +809,7 @@ class fm_dns_zones {
 		<tr id="$row->domain_id" name="$row->domain_name" $class>
 			$checkbox
 			<td>$row->domain_id</td>
-			<td><b>$edit_name</b> $icons $add_new $clone_names $response</td>
+			<td><b>$edit_name</b> $icons $add_new $response $clone_names</td>
 			<td>$row->domain_type
 				$clone_types</td>
 			<td>$domain_view
@@ -889,7 +913,7 @@ HTML;
 
 		$views = buildSelect('domain_view', 'domain_view', $this->availableViews(), $domain_view, 4, null, true);
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
-		$domain_types = buildSelect('domain_type', 'domain_type', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type'), $domain_type, 1, $disabled);
+		$domain_types = buildSelect('domain_type', 'domain_type', array_merge(enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type'), array('url-redirect')), $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
 		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableServers('id'), $domain_name_servers, 1, null, true);
 
@@ -1074,6 +1098,10 @@ HTML;
 							<input type="hidden" name="domain_required_servers[masters]" id="domain_required_servers" class="address_match_element" data-placeholder="%s" value="%s" /><br />
 							( address_match_element )
 						</div>
+						<div id="define_redirect_url" style="display: none">
+							<h4>%s <a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h4>
+							<input type="text" id="domain_redirect_url" name="domain_redirect_url" size="40" value="" />
+						</div>
 					</td>
 				</tr>
 				<tr>
@@ -1103,6 +1131,7 @@ HTML;
 				__('Zone Type'), $domain_types,
 				$forwarders_show, $forward_dropdown, __('Define forwarders'), $domain_forward_servers,
 				$masters_show, __('Define masters'), $domain_master_servers,
+				__('Redirect to URL'), __('Requests to this zone will be redirected to the specified URL'),
 				__('Clone Of (optional)'), $clone, $clone_override_show, $clone_dname_checked,
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
 				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
@@ -1215,10 +1244,10 @@ HTML;
 				$return[$clone_id]['clone_views'] = $clone_results[$i]->domain_view;
 				
 				/** Dynamic updates support */
-				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<i class="mini-icon fa fa-share-alt" title="%s"></i> ', __('Zone supports dynamic updates')) : null;
+				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a> ', __('Zone supports dynamic updates')) : null;
 				
 				/** DNSSEC support */
-				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="mini-icon fa fa-lock secure" title="%s"></i> ', __('Zone is secured with DNSSEC')) : null;
+				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="mini-icon fa fa-lock secure" aria-hidden="true" title="%s"></i> ', __('Zone is secured with DNSSEC')) : null;
 			}
 		}
 		return $return;
@@ -1410,7 +1439,7 @@ HTML;
 			$sql_name_servers = rtrim($sql_name_servers, ',') . ')';
 		} else $sql_name_servers = null;
 		
-		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND server_type!='remote' $sql_name_servers ORDER BY `server_update_method`";
+		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND server_type NOT IN ('remote') $sql_name_servers ORDER BY `server_type` DESC, `server_url_server_type`, `server_update_method`";
 		$result = $fmdb->query($query);
 		
 		/** No name servers so return */
@@ -1815,6 +1844,20 @@ HTML;
 			return $post;
 		} else {
 			$post['domain_template_id'] = 0;
+		}
+
+		/** Redirect zone to URL? */
+		if ($post['domain_type'] == 'url-redirect') {
+			$post['domain_redirect_url'] = sanitize($post['domain_redirect_url']);
+			if (!$post['domain_redirect_url']) {
+				return sprintf(__('You must specify a URL to redirect %s to.'), $post['domain_name']);
+			}
+			if (!filter_var($post['domain_redirect_url'], FILTER_VALIDATE_URL)) {
+				return sprintf(__('%s is not a valid URL.'), $post['domain_redirect_url']);
+			}
+			$post['domain_type'] = 'master';
+		} else {
+			unset($post['domain_redirect_url']);
 		}
 		
 		/** No need to process more if zone is cloned */

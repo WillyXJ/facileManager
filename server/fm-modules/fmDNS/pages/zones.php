@@ -41,7 +41,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		if (!empty($_POST)) {
 			$insert_id = $fm_dns_zones->add($_POST);
 			if (!is_numeric($insert_id)) {
-				$response = displayResponseClose($insert_id);
+				$response = $insert_id;
 			} else {
 				if ($map == 'groups') {
 					header('Location: zones-groups.php');
@@ -60,7 +60,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 		if (!empty($_POST)) {
 			$zone_update_status = $fm_dns_zones->update();
 			if ($zone_update_status !== true) {
-				$response = displayResponseClose($zone_update_status);
+				$response = $zone_update_status;
 			} else {
 				header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
 				exit;

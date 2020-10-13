@@ -36,7 +36,7 @@ $__FM_CONFIG['fmDNS'] = array(
 		'description'						=> __('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.', 'fmDNS'),
 		'prefix'							=> 'dns_',
 		'required_dns_version'				=> '9.3',
-		'required_fm_version'				=> '3.5',
+		'required_fm_version'				=> '4.0',
 		'min_client_auto_upgrade_version'	=> '2.2'
 	);
 
@@ -171,8 +171,15 @@ $__FM_CONFIG['fmDNS']['default']['options'] = @array(
 				'default_value' => 30,
 				'type' => 'number',
 				'size' => 10,
-				'addl' => 'onkeydown="return validateNumber(event)"')
-	);
+				'addl' => 'onkeydown="return validateNumber(event)"'),
+		'url_rr_web_servers' => array(
+				'description' => array(__('Define URL RR Web Servers'), __('This feature will allow DNS records to redirect the user to a URL. For example:') .
+								"<pre>foo.bar.com  IN  URL  http://www.foobar.com/some/landing/page.html</pre>" . 
+								__('List the (public) IP addresses or hostnames the URL RRs should resolve to (semi-colon or comma delimited).')),
+				'default_value' => null,
+				'type' => 'text',
+				'function' => 'resetURLServerConfigStatus')
+			);
 
 /** Array sorts */
 sort($__FM_CONFIG['logging']['categories']);
