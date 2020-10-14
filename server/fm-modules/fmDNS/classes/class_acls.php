@@ -70,12 +70,31 @@ class fm_dns_acls {
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
 		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', $field_length), $field_length);
 		
+		$post['acl_comment'] = trim($post['acl_comment']);
+		
 		/** Does the record already exist for this account? */
 		if (array_key_exists('acl_name', $post)) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', sanitize($post['acl_name']), 'acl_', 'acl_name');
 			if ($fmdb->num_rows) return __('This ACL already exists.');
 		} else {
-			if (!$post['acl_addresses']) return __('No ACL address defined.');
+			if (!$post['acl_addresses']) {
+				if (!$post['acl_bulk']) {
+					return __('No ACL address defined.') . $post['acl_comment'];
+				} else {
+					$tmp_post = $post;
+					unset($tmp_post['acl_bulk']);
+					foreach (explode("\n", $post['acl_bulk']) as $tmp_acl_line) {
+						list($tmp_post['acl_addresses'], $tmp_post['acl_comment']) = explode(';', str_replace(',', ';', trim($tmp_acl_line)));
+
+						// Prevent never-ending loop
+						if (!$tmp_post['acl_addresses']) return __('No ACL address defined.');
+
+						$result = $this->add($tmp_post);
+						if ($result !== true) return $result;
+					}
+					return true;
+				}
+			}
 		}
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls`";
@@ -89,8 +108,6 @@ class fm_dns_acls {
 			$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
 		}
 		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
-		
-		$post['acl_comment'] = trim($post['acl_comment']);
 		
 		$exclude = array('submit', 'action', 'server_id');
 
@@ -330,6 +347,16 @@ HTML;
 				$popup_footer
 			);
 		} else {
+			$acl_note = ($action == 'add') ? sprintf('<tr>
+			<th width="33&#37;" scope="row"></th>
+			<td width="67&#37;"><span><a href="#" id="acl_bulk_add">%s</a></span></td>
+		</tr>
+		<tr class="bulkshow" style="display: none">
+		<th width="33&#37;" scope="row"><label for="acl_bulk">%s</label></th>
+		<td width="67&#37;"><textarea id="acl_bulk" name="acl_bulk" rows="4" cols="26" placeholder="%s"></textarea></td>
+	</tr>
+', __('Confiure multiple addresses in bulk') . ' &raquo;', __('Matched Address List'), __('On each line enter an address and comment delimited by a comma or semi-colon.')) : null;
+
 			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s
 			<input type="hidden" name="action" value="%s" />
@@ -341,11 +368,12 @@ HTML;
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">%s</td>
 				</tr>
-				<tr>
+				%s
+				<tr class="bulkhide">
 					<th width="33&#37;" scope="row"><label for="acl_addresses">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="acl_addresses" class="address_match_element" value="%s" /></td>
 				</tr>
-				<tr>
+				<tr class="bulkhide">
 					<th width="33&#37;" scope="row"><label for="acl_comment">%s</label></th>
 					<td width="67&#37;"><textarea id="acl_comment" name="acl_comment" rows="4" cols="26">%s</textarea></td>
 				</tr>
@@ -371,11 +399,17 @@ HTML;
 					tokenSeparators: [",", " ", ";"],
 					data: %s
 				});
+				$("#acl_bulk_add").click(function(e) {
+					$(".bulkhide").slideUp().remove();
+					$(".bulkshow").show("slow");
+					$(this).parent().parent().parent().slideUp().remove();
+				});
 			});
 		</script>',
 				$popup_header,
 				$action, $acl_id, $acl_parent_id, $server_serial_no,
 				__('ACL Name'), getNameFromID($acl_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'),
+				$acl_note,
 				__('Matched Address List'), $acl_addresses,
 				_('Comment'), $acl_comment,
 				$popup_footer,
