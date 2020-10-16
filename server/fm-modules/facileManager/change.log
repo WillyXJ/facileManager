@@ -3,6 +3,8 @@
 * Both   - [feature] Added support for user API keys. (Issue #289 #327)
 * Server - [improvement] CSS changes.
 * Server - [improvement] Added support for module settings to have sections.
+* Server - [improvement] Added support to define LDAPS certificate and CA
+           files in the settings. (Issue #500)
 
 3.5.6 (2020-01-09)
 ==================

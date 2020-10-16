@@ -509,6 +509,8 @@ This link expires in %s.',
 		if (empty($ldap_port_ssl))        $ldap_port_ssl        = getOption('ldap_port_ssl');
 		if (empty($ldap_version))         $ldap_version         = getOption('ldap_version');
 		if (empty($ldap_encryption))      $ldap_encryption      = getOption('ldap_encryption');
+		if (empty($ldap_cert_file))       $ldap_cert_file       = getOption('ldap_cert_file');
+		if (empty($ldap_ca_cert_file))    $ldap_ca_cert_file    = getOption('ldap_ca_cert_file');
 		if (empty($ldap_referrals))       $ldap_referrals       = getOption('ldap_referrals');
 		if (empty($ldap_dn))              $ldap_dn              = getOption('ldap_dn');
 		if (empty($ldap_group_require))   $ldap_group_require   = getOption('ldap_group_require');
@@ -518,6 +520,8 @@ This link expires in %s.',
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
 		if ($ldap_encryption == 'SSL') {
+			@ldap_set_option(NULL, LDAP_OPT_X_TLS_CERTFILE, $ldap_cert_file);
+			@ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, $ldap_ca_cert_file);
 			$ldap_connect = @ldap_connect('ldaps://' . $ldap_server, $ldap_port_ssl);
 		} else {
 			$ldap_connect = @ldap_connect($ldap_server, $ldap_port);

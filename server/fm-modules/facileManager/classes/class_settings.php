@@ -225,6 +225,8 @@ class fm_settings {
 		$ldap_version_list = buildSelect('ldap_version', 'ldap_version', $__FM_CONFIG['options']['ldap_version'], $ldap_version);
 		$ldap_encryption = getOption('ldap_encryption');
 		$ldap_encryption_list = buildSelect('ldap_encryption', 'ldap_encryption', $__FM_CONFIG['options']['ldap_encryption'], $ldap_encryption);
+		$ldap_cert_file = getOption('ldap_cert_file');
+		$ldap_ca_cert_file = getOption('ldap_ca_cert_file');
 		$ldap_referrals = getOption('ldap_referrals');
 		$ldap_referrals_list = buildSelect('ldap_referrals', 'ldap_referrals', $__FM_CONFIG['options']['ldap_referrals'], $ldap_referrals);
 		
@@ -401,6 +403,24 @@ class fm_settings {
 							</div>
 							<div class="choices">
 								' . $ldap_encryption_list . '
+							</div>
+						</div>
+						<div id="setting-row">
+							<div class="description">
+								<label for="ldap_cert_file">' . _('Certificate File') . '</label>
+								<p>' . _('Local location of certificate.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="ldap_cert_file" id="ldap_cert_file" type="text" value="' . $ldap_cert_file . '" size="40" />
+							</div>
+						</div>
+						<div id="setting-row">
+							<div class="description">
+								<label for="ldap_ca_cert_file">' . _('Root CA Certificate') . '</label>
+								<p>' . _('Local location of root CA certificate.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="ldap_ca_cert_file" id="ldap_ca_cert_file" type="text" value="' . $ldap_ca_cert_file . '" size="40" />
 							</div>
 						</div>
 						<div id="setting-row">
