@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}conf
   `domain_id` int(11) NOT NULL DEFAULT '0',
   `cfg_isparent` enum('yes','no') NOT NULL DEFAULT 'no',
   `cfg_parent` int(11) NOT NULL DEFAULT '0',
+  `cfg_order_id` int(11) NOT NULL DEFAULT '0',
   `cfg_name` varchar(50) NOT NULL,
   `cfg_data` text NOT NULL,
   `cfg_in_clause` enum('yes','no') NOT NULL DEFAULT 'yes',
@@ -125,7 +126,7 @@ TABLESQL;
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
   `def_function` enum('options','logging','key','view') NOT NULL,
-  `def_option_type` enum('global','ratelimit','rrset') NOT NULL DEFAULT 'global',
+  `def_option_type` enum('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global',
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
   `def_multiple_values` enum('yes','no') NOT NULL DEFAULT 'no',
@@ -693,7 +694,13 @@ VALUES
 ('options', 'ratelimit', 'qps-scale', '( integer )', 'no', 'OVZ', 'no', '9.9.4'),
 ('options', 'ratelimit', 'referrals-per-second', '( integer )', 'no', 'OVZ', 'no', '9.9.4'),
 ('options', 'ratelimit', 'slip', '( integer )', 'no', 'OVZ', 'no', '9.9.4'),
-('options', 'ratelimit', 'window', '( integer )', 'no', 'OVZ', 'no', '9.9.4')
+('options', 'ratelimit', 'window', '( integer )', 'no', 'OVZ', 'no', '9.9.4'),
+('options', 'rpz', 'recursive-only', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'max-policy-ttl', '( integer )', 'no', 'OV', 'no', '9.10.0'),
+('options', 'rpz', 'break-dnssec', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'min-ns-dots', '( integer )', 'no', 'OV', 'no', '9.10.0'),
+('options', 'rpz', 'qname-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'nsip-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0')
 ;
 INSERTSQL;
 

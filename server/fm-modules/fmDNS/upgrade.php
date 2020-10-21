@@ -2298,6 +2298,29 @@ function upgradefmDNS_400($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_update_port` `server_update_port` INT(5) NULL DEFAULT NULL";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_menu_display` ENUM('include','exclude') NOT NULL DEFAULT 'include' AFTER `server_client_version`";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_menu_display`='exclude' WHERE `server_type`='remote'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `cfg_order_id` INT(11) NOT NULL DEFAULT '0' AFTER `cfg_parent`";
+
+	$table[] = <<<INSERTSQL
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'rpz', 'recursive-only', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'max-policy-ttl', '( integer )', 'no', 'OV', 'no', '9.10.0'),
+('options', 'rpz', 'break-dnssec', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'min-ns-dots', '( integer )', 'no', 'OV', 'no', '9.10.0'),
+('options', 'rpz', 'qname-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'nsip-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0')
+;
+INSERTSQL;
 	
 	/** Run queries */
 	if (count($table) && $table[0]) {

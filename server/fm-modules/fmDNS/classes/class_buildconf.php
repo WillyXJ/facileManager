@@ -443,8 +443,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Build rate limits */
 			$config .= $this->getRateLimits(0, $server_serial_no);
 			
-			/** Build rate limits */
+			/** Build RRSet */
 			$config .= $this->getRRSetOrder(0, $server_serial_no);
+			
+			/** Build RPZ */
+			$config .= $this->getRPZ(0, $server_serial_no, $server_group_ids);
 			
 			$config .= "};\n\n";
 			unset($config_array);
@@ -594,9 +597,12 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					/** Build rate limits */
 					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
 
-					/** Build rate limits */
+					/** Build RRSet */
 					$config .= $this->getRRSetOrder($view_result[$i]->view_id, $server_serial_no);
 
+					/** Build RPZ */
+					$config .= $this->getRPZ($view_result[$i]->view_id, $server_serial_no, $server_group_ids);
+					
 					/** Get corresponding keys */
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', "AND key_status='active' AND key_view='" . $view_result[$i]->view_id . "'");
 					if ($fmdb->num_rows) {
@@ -1899,7 +1905,7 @@ HTML;
 	 * @param string $sql Additional SQL statement
 	 * @return string
 	 */
-	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir = null, $tab = "\t\t", $sql = null) {
+	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment = null, $server_root_dir = null, $tab = "\t\t", $sql = null) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$config = null;
@@ -2286,6 +2292,111 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		return (strpos($this->url_config_file, $config) === false) ? $config : null;
 	}
 		
+	/**
+	 * Formats the RPZ statements
+	 *
+	 * @since 4.0
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @param array $server_group_ids Array containing group server IDs
+	 * @return string
+	 */
+	function getRPZ($view_id, $server_serial_no, $server_group_ids) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Check if rpz is supported by server_version */
+		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
+		if (version_compare($server_version, '9.10.0', '<')) {
+			return "\t//\n\t// BIND 9.10.0 or greater is required for Response Policy Zones.\n\t//\n\n";
+		}
+		
+		$global_rpz_config = $domain_rpz_config = $config_array = null;
+		
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="rpz" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			$result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_config_count; $i++) {
+				$domain = displayFriendlyDomainName(getNameFromID($result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+	
+				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="0"');
+				foreach ($fmdb->last_result as $record) {
+					if ($record->cfg_data) {
+						$config_array['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+					}
+				}
+		
+			}
+			unset($result);
+		}
+		
+		$server_config = array();
+		/** Override with group-specific configs */
+		if (is_array($server_group_ids)) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', 'AND cfg_type="rpz" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				$server_config_result = $fmdb->last_result;
+				$global_config_count = $fmdb->num_rows;
+				for ($i=0; $i < $global_config_count; $i++) {
+					$domain = displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+		
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+					foreach ($fmdb->last_result as $record) {
+						$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+					}
+				}
+				unset($server_config_result);
+			}
+		}
+
+		/** Override with server-specific configs */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="rpz" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			$server_config_result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_config_count; $i++) {
+				$domain = displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+	
+				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+				foreach ($fmdb->last_result as $record) {
+					$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+				}
+			}
+			unset($server_config_result);
+		}
+
+		/** Merge arrays */
+		$config_array = array_replace_recursive((array)$config_array, $server_config);
+		unset($server_config);
+		
+		foreach ($config_array as $cfg_name => $value_array) {
+			foreach ($value_array as $domain_name => $cfg_data) {
+				if (!$domain_name) {
+					foreach ($cfg_data as $global_cfg_name => $global_cfg_data) {
+						if ($global_cfg_data) {
+							$global_rpz_config .= "$global_cfg_name $global_cfg_data ";
+						}
+					}
+				} else {
+					$domain_rpz_config .= "\n\t\tzone \"$domain_name\" ";
+					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
+						if ($domain_cfg_data) {
+							$domain_rpz_config .= "$domain_cfg_name $domain_cfg_data ";
+						}
+					}
+					$domain_rpz_config .= "; ";
+				}
+			}
+		}
+		if ($domain_rpz_config) {
+			$domain_rpz_config = "$domain_rpz_config\n\t";
+		}
+		return ($global_rpz_config || $domain_rpz_config) ? "\tresponse-policy {" . $domain_rpz_config . trim('} ' . $global_rpz_config) . ";\n" : null;
+	}
+	
+	
 }
 
 if (!isset($fm_module_buildconf))

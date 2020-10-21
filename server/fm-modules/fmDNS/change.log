@@ -4,6 +4,8 @@
            records. (Issue #289 #327)
 * Both   - [feature] Added support to forward records to URLs through the fmDNS
            URL RR. (Issue #396)
+* Server - [feature] Added support to add ACL addresses in bulk. (Issue #484)
+* Server - [feature] Added support for Response Policy Zones. (Issue #471)
 * Server - [improvement] named checks now skip previously checked zones. (Issue #212)
            Note: The first named check will process all configured zones.
 * Server - [improvement] Updated named.root from upstream.
@@ -12,7 +14,6 @@
            servers.
 * Server - [bug] Use UTS46 for IDN translations to fix PHP 7.2 errors. (Issue #481)
 * Server - [bug] Fixed ACL validation.
-* Server - [feature] Added support to add ACL addresses in bulk. (Issue #484)
 * Server - [bug] Fixed zone import when values contain domain name. (Issue #486)
 
 3.4.1 (2019-10-16)

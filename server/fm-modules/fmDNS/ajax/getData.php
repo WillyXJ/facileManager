@@ -183,6 +183,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_rpz.php');
 
 /** Edits */
 $checks_array = array('servers' => 'manage_servers',
@@ -195,7 +196,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'masters' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'domain' => 'manage_zones',
-					'soa' => 'manage_zones'
+					'soa' => 'manage_zones',
+					'rpz' => 'manage_zones'
 				);
 
 if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
@@ -259,6 +261,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			$item_type = sanitize($_POST['item_sub_type']) . ' ';
+			break;
+		case 'rpz':
+			$post_class = $fm_module_rpz;
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
+			$prefix = 'cfg_';
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;

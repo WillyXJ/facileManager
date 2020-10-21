@@ -509,6 +509,24 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#manage_item_contents").delegate("#domain_id", "change", function(e) {
+		if ($(this).val() == "0") {
+			$(".global_option").show("slow");
+			$(".domain_option").slideUp();
+		} else {
+			$(".domain_option").show("slow");
+			$(".global_option").slideUp();
+		}
+	});
+
+	$("#manage_item_contents").delegate("#policy", "change", function(e) {
+		if ($(this).val() == "cname") {
+			$("#cname_option").show("slow");
+		} else {
+			$("#cname_option").slideUp();
+		}
+	});
+
 });
 
 function displayOptionPlaceholder(option_value) {

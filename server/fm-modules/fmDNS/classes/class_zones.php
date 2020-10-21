@@ -1474,17 +1474,20 @@ HTML;
 		$result = $fmdb->query($query);
 	}
 	
-	function availableZones($include = 'no-clones', $zone_type = null, $limit = 'all', $extra = 'none') {
+	function availableZones($include = 'no-clones', $zone_type = null, $limit = 'all', $extra = 'none', $exclude = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!is_array($include)) {
 			$include = (array) $include;
 		}
+		if ($exclude && !is_array($exclude)) {
+			$exclude = (array) $exclude;
+		}
 		
 		$start = 0;
 		$return = array();
 		
-		if ($extra == 'all') {
+		if ($extra == 'all' && !@in_array(0, $exclude)) {
 			$start = 1;
 			$return = array(array(__('All Zones'), 0));
 		}
@@ -1511,8 +1514,10 @@ HTML;
 		} else {
 			$zone_type_sql = null;
 		}
+
+		$exclude_sql = ($exclude) ? "AND domain_id NOT IN(" . implode(',', $exclude) . ')' : null;
 		
-		$query = "SELECT domain_id,domain_name,domain_view FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_sql $zone_type_sql $restricted_sql ORDER BY domain_mapping,domain_name ASC";
+		$query = "SELECT domain_id,domain_name,domain_view FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_sql $zone_type_sql $restricted_sql $exclude_sql ORDER BY domain_mapping,domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
@@ -1943,20 +1948,15 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $saved_zones IDs to convert to names
 	 * @param string $zones Include all zones in the list
+	 * @param array $exclude Domain IDs to exclude
 	 * @return json array
 	 */
-	function buildZoneJSON($zones = 'all') {
-		$temp_zones = $this->availableZones('all', array('master', 'slave', 'forward'));
+	function buildZoneJSON($zones = 'all', $exclude = null) {
+		$temp_zones = $this->availableZones('no-templates', array('master', 'slave', 'forward'), 'all', $zones, $exclude);
 		$i = 0;
-		if ($zones == 'all') {
-			$available_zones = array(array('id' => $i, 'text' => __('All Zones')));
-			$i++;
-		}
 		foreach ($temp_zones as $temp_zone_array) {
-			$available_zones[$i]['id'] = $temp_zone_array[1];
-			$available_zones[$i]['text'] = $temp_zone_array[0];
+			list($available_zones[$i]['text'], $available_zones[$i]['id']) = $temp_zone_array;
 			$i++;
 		}
 		$available_zones = json_encode($available_zones);

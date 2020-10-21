@@ -35,6 +35,7 @@ include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_log
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
 include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_rpz.php');
 
 /** Handle mass updates */
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
@@ -53,7 +54,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'masters' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'domain' => 'manage_zones',
-					'soa' => 'manage_zones'
+					'soa' => 'manage_zones',
+					'rpz' => 'manage_zones'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -118,6 +120,13 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$server_serial_no = $_POST['item_type'];
 			$type = sanitize($_POST['item_type']) . 's';
 			break;
+		case 'rpz':
+			$post_class = $fm_module_rpz;
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
+			$prefix = 'cfg_';
+			$object = __('rpz');
+			$field_data = $prefix . 'data';
+			break;
 		default:
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$object = substr($item_type, 0, -1);
@@ -146,6 +155,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 				} else {
 					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
+					if ($object == 'rpz') {
+						$tmp_name = ($tmp_name) ? getNameFromID($tmp_name, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : __('All Zones');
+					}
 					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
 					exit('Success');
 				}
