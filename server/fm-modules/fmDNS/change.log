@@ -17,6 +17,7 @@
 * Server - [bug] Fixed zone import when values contain domain name. (Issue #486)
 * Server - [bug] Fixed an issue where DNSSEC zone configuration item would be
            incorrectly displayed.
+* Server - [bug] Exclude template zones from DNSSEC keys filter menu.
 
 3.4.1 (2019-10-16)
 ==================
