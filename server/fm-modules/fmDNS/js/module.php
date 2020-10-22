@@ -444,8 +444,12 @@ $(document).ready(function() {
 		if ($(this).is(":checked")) {
 			$("#dnssec_option").show("slow");
 			$("#domain_dynamic").prop("checked", false);
+			if ($("#domain_dnssec_generate_ds").is(":checked")) {
+				$("#dnssec_ds_option").show("slow");
+			}
 		} else {
 			$("#dnssec_option").slideUp();
+			$("#dnssec_ds_option").slideUp();
 		}
 	});
 

@@ -15,6 +15,8 @@
 * Server - [bug] Use UTS46 for IDN translations to fix PHP 7.2 errors. (Issue #481)
 * Server - [bug] Fixed ACL validation.
 * Server - [bug] Fixed zone import when values contain domain name. (Issue #486)
+* Server - [bug] Fixed an issue where DNSSEC zone configuration item would be
+           incorrectly displayed.
 
 3.4.1 (2019-10-16)
 ==================
