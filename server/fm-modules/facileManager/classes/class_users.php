@@ -36,6 +36,47 @@ class fm_users {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'users'
+					);
+		$title_array[] = array('class' => 'header-tiny header-nosort');
+
+		if ($type == 'users') {
+			$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
+			array_push($title_array,
+					array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
+					array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
+					array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
+					array('title' => _('Comment'), 'class' => 'header-nosort'));
+		} elseif ($type == 'groups') {
+			array_push($title_array,
+				array('title' => _('Group Name'), 'rel' => 'group_name'),
+				array('title' => _('Group Members'), 'class' => 'header-nosort'),
+				array('title' => _('Comment'), 'class' => 'header-nosort'));
+		} elseif ($type == 'keys') {
+			array_push($title_array,
+				array('title' => _('Key'), 'rel' => 'key_token'));
+			if (currentUserCan('manage_users')) {
+				array_push($title_array,
+					array('title' => _('User'), 'rel' => 'user_id'));	
+			}
+		}
+		$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
+
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
+			$y = 0;
+			for ($x=$start; $x<$num_rows; $x++) {
+				if ($y == $_SESSION['user']['record_count']) break;
+				$this->displayRow($results[$x], $type);
+				$y++;
+			}
+		}
+			
+		echo "</tbody>\n</table>\n";
 		if (!$result) {
 			if ($type == 'users') {
 				$message = _('There are no users.');
@@ -45,46 +86,6 @@ class fm_users {
 				$message = _('There are no keys.');
 			}
 			printf('<p id="table_edits" class="noresult" name="users">%s</p>', $message);
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'users'
-						);
-			$title_array[] = array('class' => 'header-tiny header-nosort');
-
-			if ($type == 'users') {
-				$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
-				array_push($title_array,
-						array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
-						array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
-						array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
-						array('title' => _('Comment'), 'class' => 'header-nosort'));
-			} elseif ($type == 'groups') {
-				array_push($title_array,
-					array('title' => _('Group Name'), 'rel' => 'group_name'),
-					array('title' => _('Group Members'), 'class' => 'header-nosort'),
-					array('title' => _('Comment'), 'class' => 'header-nosort'));
-			} elseif ($type == 'keys') {
-				array_push($title_array,
-					array('title' => _('Key'), 'rel' => 'key_token'));
-				if (currentUserCan('manage_users')) {
-					array_push($title_array,
-						array('title' => _('User'), 'rel' => 'user_id'));	
-				}
-			}
-			$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
-
-			echo displayTableHeader($table_info, $title_array);
-			
-			$y = 0;
-			for ($x=$start; $x<$num_rows; $x++) {
-				if ($y == $_SESSION['user']['record_count']) break;
-				$this->displayRow($results[$x], $type);
-				$y++;
-			}
-			
-			echo "</tbody>\n</table>\n";
 		}
 	}
 
