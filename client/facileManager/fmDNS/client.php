@@ -36,10 +36,23 @@ error_reporting(0);
 $module_name = basename(dirname(__FILE__));
 
 /** Check for options */
-$zones = (in_array('-z', $argv) || in_array('zones', $argv)) ? true : false;
-$dump_cache = in_array('dump-cache', $argv) ? true : false;
-$clear_cache = in_array('clear-cache', $argv) ? true : false;
-$dump_zone = in_array('dump-zone', $argv) ? true : false;
+$api_call = ($argv[1] == 'setHost') ? true : false;
+if (!$api_call) {
+	$zones = (in_array('-z', $argv) || in_array('zones', $argv)) ? true : false;
+	$dump_cache = in_array('dump-cache', $argv) ? true : false;
+	$clear_cache = in_array('clear-cache', $argv) ? true : false;
+	$dump_zone = in_array('dump-zone', $argv) ? true : false;
+	$enable_url = in_array('enable', $argv) && in_array('url', $argv) ? true : false;
+} else {
+	$api_supported_rr = array('A', 'AAAA', 'CNAME', 'DNAME', 'MX', 'NS', 'PTR', 'TXT');
+	$api_params = array(
+		'common' => array('action', 'id', 'type', 'name', 'value', 'ttl', 'comment', 'status'),
+		'CNAME'  => array('append'),
+		'DNAME'  => array('append'),
+		'MX'  => array('priority', 'append'),
+		'update' => array('newname', 'newvalue')
+	);
+}
 
 /** Include shared client functions */
 $fm_client_functions = dirname(dirname(__FILE__)) . '/functions.php';
@@ -63,10 +76,60 @@ for ($i=0; $i < count($argv); $i++) {
 		$zonefile = $argv[$i+1];
 		$i++;
 	}
+
+	/** Get API parameters */
+	if ($api_call) {
+		foreach (array_unique(call_user_func_array('array_merge', $api_params)) as $param) {
+			if (strncmp(strtolower($argv[$i]), $param . '=', strlen($param) + 1) == 0) {
+				$prefix = ($param == 'id') ? 'domain_' : 'record_';
+				if ($param == 'action') $prefix = null;
+				$data['api'][$prefix . $param] = substr($argv[$i], strlen($param) + 1);
+
+				validateAPIParam($param, $data['api'][$prefix . $param]);
+			}
+		}
+	}
+}
+
+if (isset($data['domain_id'])) $data['api']['domain_id'] = $data['domain_id'];
+
+if ($api_call) {
+	/** Verify type is supported */
+	if (!isset($data['api']['record_type'])) {
+		echo fM("type is a required parameter.\n");
+		exit(1);
+	} else {
+		$data['api']['record_type'] = strtoupper($data['api']['record_type']);
+		if (!in_array($data['api']['record_type'], $api_supported_rr)) {
+			echo fM(sprintf("%s is not a supported RR type.\nSupported types: %s\n", $data['api']['record_type'], join(', ', $api_supported_rr)));
+			exit(1);
+		}
+	}
+
+	/** Remove optional parameters */
+	for ($x = 1; $x <= 3; $x++) {
+		array_pop($api_params['common']);
+	}
+	if ($data['api']['action'] == 'delete') {
+		array_pop($api_params['CNAME']);
+	}
+
+	/** Check if all required parameters are given for API calls */
+	foreach (@array_merge($api_params['common'], (array) $api_params[$data['api']['record_type']]) as $key) {
+		if (!array_key_exists($key, $data['api']) && !array_key_exists('record_' . $key, $data['api']) && !array_key_exists('domain_' . $key, $data['api'])) {
+			echo fM($key . " is a required parameter.\n");
+			exit(1);
+		}
+	}
 }
 
 /** Check if running supported version */
 $data['server_version'] = detectDaemonVersion();
+
+/** Enable URL hosting */
+if ($enable_url) {
+	enableURL();
+}
 
 /** Build the zone files */
 if ($zones) {
@@ -92,7 +155,7 @@ if ($dump_zone) {
 }
 
 /** Build the configs provided by $url */
-$retval = buildConf($url, $data);
+$retval = ($api_call) ? callAPI($url, $data) : buildConf($url, $data);
 
 if (!$retval) exit(1);
 

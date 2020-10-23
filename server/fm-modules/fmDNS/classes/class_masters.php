@@ -34,29 +34,30 @@ class fm_dns_masters {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="masters">%s</p>', __('There are no masters.'));
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'masters'
-						);
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'masters'
+					);
 
-			$title_array = array(array('title' => __('Name'), 'rel' => 'master_name'), 
-				array('title' => _('Comment'), 'class' => 'header-nosort'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		$title_array = array(array('title' => __('Name'), 'rel' => 'master_name'), 
+			array('title' => _('Comment'), 'class' => 'header-nosort'));
+		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
-			echo displayTableHeader($table_info, $title_array, 'masters');
-			
+		echo displayTableHeader($table_info, $title_array, 'masters');
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="masters">%s</p>', __('There are no masters.'));
 		}
 	}
 

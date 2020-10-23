@@ -135,10 +135,11 @@ HTML;
 			}
 		} else $soa_row = null;
 
-		$clean_contents = str_replace('.' . trimFullStop($domain_name) . '.', '', $clean_contents);
-		$clean_contents = str_replace("\n" . trimFullStop($domain_name) . '.', "\n@", $clean_contents);
-		$clean_contents = str_replace(trimFullStop($domain_name) . '.', '', $clean_contents);
-		
+		$clean_domain_name = trimFullStop($domain_name);
+		$clean_contents = str_replace(array('.' . $clean_domain_name . '.' . PHP_EOL, '.' . $clean_domain_name . '. '), array(PHP_EOL, ' '), $clean_contents);
+		$clean_contents = str_replace(PHP_EOL . $clean_domain_name . '.', PHP_EOL . '@', $clean_contents);
+		$clean_contents = str_replace(array($clean_domain_name . '.' . PHP_EOL, $clean_domain_name . '. '), array(PHP_EOL, ' '), $clean_contents);
+
 		$available_record_types = array_filter(enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type'), 'removeRestrictedRR');
 		sort($available_record_types);
 

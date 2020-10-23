@@ -921,7 +921,7 @@ i.text_icon {
 	text-align: center;
 	color: #000;
 	font-size: 10pt;
-	margin-top: -12px;
+	margin-top: -13px;
 	width: 75%;
 	margin-left: 12.5%;
 	background-color: #FFFBCC;
@@ -963,6 +963,10 @@ i.text_icon {
 }
 #response a {
 	text-decoration: underline;
+}
+#response.attention {
+	border-color: #f0b1b1;
+	background-color: #f7cdcd;
 }
 
 #response_close {
@@ -1024,6 +1028,7 @@ i.delete {
 }
 #row_actions i.preview {
 	color: #8ba7d6;
+	cursor: pointer;
 }
 #row_actions i.toggle {
 	color: #569b42;
@@ -1142,6 +1147,7 @@ i.delete {
 	-moz-border-radius-topright: 8px;
 	border-top-right-radius: 8px;
 	padding: 4px 15px;
+	cursor: move;
 }
 
 .popup-header h3 {
@@ -1355,7 +1361,7 @@ i.popout {
 	padding-right: 2px;
 }
 
-#plus {
+h2 > a#plus {
 	padding: 0 5px;
 	position: relative;
 	top: 1px;

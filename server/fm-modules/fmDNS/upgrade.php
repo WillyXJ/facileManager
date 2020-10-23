@@ -2283,4 +2283,56 @@ function upgradefmDNS_340($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 4.0.0 */
+function upgradefmDNS_400($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '3.4.0', '<') ? upgradefmDNS_340($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_check_config` ENUM('yes','no') NOT NULL DEFAULT 'yes' AFTER `domain_dnssec_signed`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE `record_type` `record_type` ENUM('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','HINFO','KEY','KX','MX','NAPTR','NS','OPENPGPKEY','PTR','RP','SSHFP','SRV','TLSA','TXT','URL') NOT NULL DEFAULT 'A'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_type` `server_type` ENUM('bind9','remote','url-only') NOT NULL DEFAULT 'bind9'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_url_server_type` ENUM('httpd','lighttpd','nginx') NULL DEFAULT NULL AFTER `server_config_file`, ADD `server_url_config_file` VARCHAR(255) NULL DEFAULT NULL AFTER `server_url_server_type`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_update_method` `server_update_method` ENUM('http','https','cron','ssh') NULL DEFAULT NULL";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` CHANGE `server_update_port` `server_update_port` INT(5) NULL DEFAULT NULL";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_menu_display` ENUM('include','exclude') NOT NULL DEFAULT 'include' AFTER `server_client_version`";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_menu_display`='exclude' WHERE `server_type`='remote'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global'";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `cfg_order_id` INT(11) NOT NULL DEFAULT '0' AFTER `cfg_parent`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dnssec_sign_inline` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_dnssec_signed`";
+
+	$table[] = <<<INSERTSQL
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'rpz', 'recursive-only', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'max-policy-ttl', '( integer )', 'no', 'OV', 'no', '9.10.0'),
+('options', 'rpz', 'break-dnssec', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'min-ns-dots', '( integer )', 'no', 'OV', 'no', '9.10.0'),
+('options', 'rpz', 'qname-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
+('options', 'rpz', 'nsip-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0')
+;
+INSERTSQL;
+	
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '4.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
 ?>

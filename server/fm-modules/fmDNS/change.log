@@ -1,3 +1,26 @@
+4.0.0 (2020-??-??)
+==================
+* Both   - [feature] Added support for API calls to add, update, and delete
+           records. (Issue #289 #327)
+* Both   - [feature] Added support to forward records to URLs through the fmDNS
+           URL RR. (Issue #396)
+* Server - [feature] Added support to add ACL addresses in bulk. (Issue #484)
+* Server - [feature] Added support for Response Policy Zones. (Issue #471)
+* Server - [improvement] named checks now skip previously checked zones. (Issue #212)
+           Note: The first named check will process all configured zones.
+* Server - [improvement] Updated named.root from upstream.
+* Server - [improvement] DNSSEC inline signing is now supported. (Issue #476)
+* Server - [improvement] New zones icon to quickly manage DNSSEC keys from.
+* Server - [bug] Fixed PHP error during server configuration build.
+* Server - [bug] Fixed an issue where zone reloads would be attempted on remote
+           servers.
+* Server - [bug] Use UTS46 for IDN translations to fix PHP 7.2 errors. (Issue #481)
+* Server - [bug] Fixed ACL validation.
+* Server - [bug] Fixed zone import when values contain domain name. (Issue #486)
+* Server - [bug] Fixed an issue where DNSSEC zone configuration item would be
+           incorrectly displayed.
+* Server - [bug] Exclude template zones from DNSSEC keys filter menu.
+
 3.4.1 (2019-10-16)
 ==================
 * Server - [bug] Fixed an issue where the view order could not be changed. (Issue #464)

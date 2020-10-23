@@ -398,7 +398,7 @@ function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = f
 			return substr($record, -1, 1) == '.';
 		}
 		return true;
-	} else if ($record == '@') {
+	} else if (in_array($record, array('@', '*.'))) {
 		return true;
 	}
 	return false;

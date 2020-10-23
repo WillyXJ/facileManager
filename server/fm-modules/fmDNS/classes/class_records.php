@@ -30,22 +30,23 @@ class fm_dns_records {
 		
 		$return = null;
 		
-		if (!$result) {
-			$return = sprintf('<p id="table_edits" class="noresult">%s</p>', sprintf(__('There are no %s records.'), $record_type));
-		} else {
-			$results = $fmdb->last_result;
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			$end = $_SESSION['user']['record_count'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $_SESSION['user']['record_count'] * $page;
+		$results = $fmdb->last_result;
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		$end = $_SESSION['user']['record_count'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $_SESSION['user']['record_count'] * $page;
 
-			$table_info = array('class' => 'display_results sortable');
+		$table_info = array('class' => 'display_results sortable');
 
-			$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
-			
+		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
+		
+		if ($result) {
 			for ($x=$start; $x<$end; $x++) {
 				$return .= $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
 			}
+		}
 			
-			$return .= "</tbody>\n</table>\n";
+		$return .= "</tbody>\n</table>\n";
+		if (!$result) {
+			$return .= sprintf('<p id="table_edits" class="noresult">%s</p>', sprintf(__('There are no %s records.'), $record_type));
 		}
 		
 		return $return;
@@ -217,6 +218,11 @@ class fm_dns_records {
 		/** Unlink PTR */
 		if ($record_type == 'PTR' && $array['record_status'] == 'deleted') {
 			basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $id, 'record_ptr_id', 0, 'record_ptr_id');
+		}
+
+		/** Set the server_update_config flag for existing servers */
+		if ($record_type == 'URL') {
+			resetURLServerConfigStatus('update');
 		}
 
 		addLogEntry($log_message);
@@ -859,7 +865,7 @@ HTML;
 	 * @return null
 	 */
 	function processSOAUpdates($domain_id, $record_type, $action) {
-		global $fm_dns_zones;
+		global $fm_dns_zones, $__FM_CONFIG;
 		
 		if (!$fm_dns_zones) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 		
@@ -885,6 +891,9 @@ HTML;
 					setBuildUpdateConfigFlag(getZoneServers($child_id), 'yes', 'build');
 				}
 			}
+
+			/** Set the domain_check_config flag */
+			basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $child_id, 'domain_check_config', 'yes', 'domain_id');
 		}
 	}
 	

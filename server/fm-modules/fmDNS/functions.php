@@ -209,7 +209,9 @@ function buildModuleHelpFile() {
 			{$_SESSION['module']} to compare the zone file from the DNS server with that in the database and make any necessary changes. This option
 			will increase processing time while reloading zones.</p>
 			<p>Zones can support DNSSEC signing only if the checkbox is ticked while creating or editing individual zones. You must create the KSK and ZSK
-			before zones will be signed (only offline signing is supported). This option will increase processing time while reloading zones.</p>
+			before zones will be signed (offline and inline signing are supported). During a configuration build or zone reload, the ZSK and KSK files will
+			stored on the name servers in the directory defined by the most specific key-directory option defined (global, view, zone, server-override,
+			etc.). This option will increase processing time while reloading zones.</p>
 			<p><i>The 'Zone Management' or 'Super Admin' permission is required to add, edit, and delete zones and templates.</i></p>
 			<p><i>The 'Reload Zone' or 'Super Admin' permission is required for reloading zones.</i></p>
 			<p>Reverse zones can be entered by either their subnet value (192.168.1) or by their arpa value (1.168.192.in-addr.arpa). You can also
@@ -251,6 +253,12 @@ function buildModuleHelpFile() {
 			<p>You can also import BIND-compatible zone files instead of adding records individually. Go to Admin &rarr; 
 			<a href="__menu{Tools}">Tools</a> and use the Import Zone Files utility. After selecting the file and zone 
 			to import to, you have one final chance to review what gets imported before the records are actually imported.</p>
+			<p>Certain zone records can be managed from the client script on the name servers via an API. Reference the client helpfile for supported uses.</p>
+			<p><b>URL Resource Records</b><br />
+			The custom URL resource record allows domains or records to redirect users to a web page. This is enabled by defining one or more web servers
+			that will handle the web redirects at Admin &rarr; <a href="__menu{{$_SESSION['module']} Settings}">Settings</a>. The supporting web servers
+			will also need the client installed to enable URL redirects (reference client help file). Once defined, the URL RR will be available when 
+			managing zone records.</p>
 			<br />
 		</div>
 	</li>
@@ -325,11 +333,11 @@ function buildModuleHelpFile() {
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server logging.</i></p>
 			<br />
 			
-			<p><b>Controls</b><br />
-			Controls can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. 
-			To manage the controls configuration, go to Config &rarr; <a href="__menu{Operations}">Operations</a>.</p>
+			<p><b>Operations</b><br />
+			Controls and Statistics Channels can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. 
+			To manage the controls and statistics configuration, go to Config &rarr; <a href="__menu{Operations}">Operations</a>.</p>
 			<p>Server-level controls always supercede global ones.</p>
-			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server controls.</i></p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage server operations.</i></p>
 			<br />
 		</div>
 	</li>
@@ -368,10 +376,10 @@ function reloadZoneSQL($domain_ids, $reload_zone, $associated) {
 	if ($associated == 'all') {
 		if (!is_array($domain_ids)) $domain_ids = array($domain_ids);
 
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone' WHERE `domain_template` = 'no' AND
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone', `domain_check_config`='no' WHERE `domain_template` = 'no' AND
 				(`domain_id` IN (" . join(',', $domain_ids) . ") OR `domain_clone_domain_id` IN (" . join(',', $domain_ids) . ") OR `domain_template_id` IN (" . join(',', $domain_ids) . '))';
 	} else {
-		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone' WHERE `domain_template` = 'no' AND `domain_id`=$domain_ids";
+		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_reload`='$reload_zone', `domain_check_config`='no' WHERE `domain_template` = 'no' AND `domain_id`=$domain_ids";
 	}
 	$fmdb->query($query);
 }
@@ -744,6 +752,7 @@ function buildModuleMenu() {
 		addSubmenuPage('zones.php', __('Groups'), __('Zones Groups'), array('view_all'), $_SESSION['module'], 'zones-groups.php');
 		addSubmenuPage('zones.php', null, __('Records'), null, $_SESSION['module'], 'zone-records.php');
 		addSubmenuPage('zones.php', null, __('Record Validation'), null, $_SESSION['module'], 'zone-records-validate.php');
+		addSubmenuPage('zones.php', __('Response Policy'), __('Response Policy Zones'), array('manage_zones', 'view_all'), $_SESSION['module'], 'config-rpz.php');
 	
 	addObjectPage(__('Config'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
 		addSubmenuPage('config-servers.php', _('Servers'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
@@ -774,7 +783,7 @@ function buildModuleMenu() {
  * @return string
  */
 function displayFriendlyDomainName($domain_name) {
-	$new_domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name) : $domain_name;
+	$new_domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $domain_name;
 	if ($new_domain_name != $domain_name) $new_domain_name = $domain_name . ' (' . $new_domain_name . ')';
 	
 	return $new_domain_name;
@@ -1254,6 +1263,25 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 	}
 
 	return array(null, __('Forward domain not found.'));
+}
+
+/**
+ * Resets the URL RR servers config builds status
+ *
+ * @since 4.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $build_update Build or Update
+ * @return null
+ */
+function resetURLServerConfigStatus($build_update = 'build') {
+	global $__FM_CONFIG, $fmdb;
+
+	$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_{$build_update}_config`='yes' WHERE `server_url_config_file`!='' AND `server_status`!='deleted' AND `server_installed`='yes' AND `account_id`='{$_SESSION['user']['account_id']}'";
+	$fmdb->query($query);
+
+	return;
 }
 
 

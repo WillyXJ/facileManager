@@ -36,41 +36,42 @@ class fm_module_options {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="options">%s</p>', __('There are no options.'));
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'options'
-						);
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'options'
+					);
 
-			if (is_array($bulk_actions_list)) {
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
-									'class' => 'header-tiny header-nosort'
-								);
-			}
-			if (isset($_GET['type']) && sanitize($_GET['type']) == 'ratelimit') {
-				$title_array[] = array('title' => __('Zone'), 'rel' => 'domain_id');
-			}
-			$title_array[] = array('title' => __('Option'), 'rel' => 'cfg_name');
-			$title_array[] = array('title' => __('Value'), 'rel' => 'cfg_data');
-			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
-			
-			$perms = ($results[0]->domain_id) ? zoneAccessIsAllowed(array($results[0]->domain_id), 'manage_zones') : currentUserCan('manage_servers', $_SESSION['module']);
-			if ($perms) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		}
+		if (isset($_GET['type']) && sanitize($_GET['type']) == 'ratelimit') {
+			$title_array[] = array('title' => __('Zone'), 'rel' => 'domain_id');
+		}
+		$title_array[] = array('title' => __('Option'), 'rel' => 'cfg_name');
+		$title_array[] = array('title' => __('Value'), 'rel' => 'cfg_data');
+		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+		
+		$perms = ($results[0]->domain_id) ? zoneAccessIsAllowed(array($results[0]->domain_id), 'manage_zones') : currentUserCan('manage_servers', $_SESSION['module']);
+		if ($perms) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $perms);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="options">%s</p>', __('There are no options.'));
 		}
 	}
 
@@ -682,6 +683,10 @@ HTML;
 			$order_spec[] = 'order ' . $order_spec_elements[3];
 			
 			return join(' ', $order_spec);
+		}
+
+		if (!$fm_dns_acls) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
 		
 		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \

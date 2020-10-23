@@ -52,49 +52,50 @@ class fm_module_servers extends fm_shared_module_servers {
 		$fmdb->num_rows = $num_rows;
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 			
-		if (!$result) {
-			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
-			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'servers'
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'servers'
+					);
+
+		if ($type == 'servers') {
+			$title_array[] = array('class' => 'header-tiny header-nosort');
+			$title_array = array_merge($title_array, array(array('title' => __('Hostname'), 'rel' => 'server_name'),
+				array('title' => __('Method'), 'rel' => 'server_update_method'),
+				array('title' => __('Keys'), 'class' => 'header-nosort'),
+				array('title' => __('Server Type'), 'class' => 'header-nosort'),
+				array('title' => __('Version'), 'class' => 'header-nosort'),
+				array('title' => __('Run-as'), 'rel' => 'server_run_as_predefined'),
+				array('title' => __('Config File'), 'rel' => 'server_config_file'),
+				array('title' => __('Server Root'), 'rel' => 'server_root_dir'),
+				array('title' => __('Zones Directory'), 'rel' => 'server_zones_dir'),
+				));
+		} elseif ($type == 'groups') {
+			$title_array = array_merge((array)$title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
+				array('title' => __('Master Servers'), 'class' => 'header-nosort'),
+				array('title' => __('Slave Servers'), 'class' => 'header-nosort'),
+				));
+		}
+		$title_array[] = array(
+							'title' => __('Actions'),
+							'class' => 'header-actions header-nosort'
 						);
 
-			if ($type == 'servers') {
-				$title_array[] = array('class' => 'header-tiny header-nosort');
-				$title_array = array_merge($title_array, array(array('title' => __('Hostname'), 'rel' => 'server_name'),
-					array('title' => __('Method'), 'rel' => 'server_update_method'),
-					array('title' => __('Keys'), 'class' => 'header-nosort'),
-					array('title' => __('Server Type'), 'class' => 'header-nosort'),
-					array('title' => __('Version'), 'class' => 'header-nosort'),
-					array('title' => __('Run-as'), 'rel' => 'server_run_as_predefined'),
-					array('title' => __('Config File'), 'rel' => 'server_config_file'),
-					array('title' => __('Server Root'), 'rel' => 'server_root_dir'),
-					array('title' => __('Zones Directory'), 'rel' => 'server_zones_dir'),
-					));
-			} elseif ($type == 'groups') {
-				$title_array = array_merge((array)$title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
-					array('title' => __('Master Servers'), 'class' => 'header-nosort'),
-					array('title' => __('Slave Servers'), 'class' => 'header-nosort'),
-					));
-			}
-			$title_array[] = array(
-								'title' => __('Actions'),
-								'class' => 'header-actions header-nosort'
-							);
-
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
+			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
 		}
 	}
 
@@ -147,21 +148,23 @@ class fm_module_servers extends fm_shared_module_servers {
 		$new_server_id = $fmdb->insert_id;
 		
 		/** Process config options */
-		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
-		$sql_fields = '(`server_id`, `cfg_type`, `cfg_name`, `cfg_data`)';
-		$sql_values = null;
-		foreach ($config_opts as $option) {
-			$clean_data = sanitize($post[$option]);
-			$sql_values .= "('$new_server_id', 'global', '$option', '$clean_data'), ";
-		}
+		if ($post['server_type'] != 'url-only') {
+			$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
+			$sql_fields = '(`server_id`, `cfg_type`, `cfg_name`, `cfg_data`)';
+			$sql_values = null;
+			foreach ($config_opts as $option) {
+				$clean_data = sanitize($post[$option]);
+				$sql_values .= "('$new_server_id', 'global', '$option', '$clean_data'), ";
+			}
 
-		$sql_values = rtrim($sql_values, ', ');
+			$sql_values = rtrim($sql_values, ', ');
 
-		$query = "$sql_insert $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+			$query = "$sql_insert $sql_fields VALUES $sql_values";
+			$result = $fmdb->query($query);
 
-		if ($fmdb->sql_errors) {
-			return formatError(__('Could not add the server options because a database error occurred.'), 'sql');
+			if ($fmdb->sql_errors) {
+				return formatError(__('Could not add the server options because a database error occurred.'), 'sql');
+			}
 		}
 		
 		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
@@ -465,7 +468,8 @@ class fm_module_servers extends fm_shared_module_servers {
 			$os_image = ($row->server_type == 'remote') ? '<i class="fa fa-globe fa-2x grey" style="font-size: 1.5em" title="' . __('Remote server') . '" aria-hidden="true"></i>' : setOSIcon($row->server_os_distro);
 
 			$edit_actions = ($row->server_type != 'remote') ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
-			$icons = sprintf('<a href="config-options.php?server_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s"></i></a>', $row->server_id, __('Configure Additional Options'));
+			if ($row->server_type != 'url-only') $icons[] = sprintf('<a href="config-options.php?server_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->server_id, __('Configure Additional Options'));
+			if ($row->server_url_server_type) $icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This server hosts URL redirects with %s for the URL RR'), $row->server_url_server_type));
 			$checkbox = '<td></td>';
 
 			if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
@@ -506,7 +510,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 				$runas = ($row->server_run_as_predefined == 'as defined:') ? $row->server_run_as : $row->server_run_as_predefined;
 
-				$port = ($row->server_update_method != 'cron') ? ' (tcp/' . $row->server_update_port . ')' : null;
+				$port = (isset($row->server_update_method) && $row->server_update_method != 'cron') ? ' (tcp/' . $row->server_update_port . ')' : null;
 				$update_method = $row->server_update_method . $port;
 			}
 
@@ -516,6 +520,10 @@ class fm_module_servers extends fm_shared_module_servers {
 			$keys = $fm_dns_acls->parseACL($this->getConfig($row->server_id, 'keys'));
 			
 			if ($class) $class = 'class="' . $class . '"';
+
+			if (is_array($icons)) {
+				$icons = implode(' ', $icons);
+			}
 
 			echo <<<HTML
 		<tr id="$row->server_id" name="$row->server_name" $class>
@@ -596,7 +604,7 @@ HTML;
 		$server_id = $group_id = 0;
 		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
-		$server_chroot_dir = $group_name = null;
+		$server_chroot_dir = $group_name = $server_type_disabled = null;
 		$server_installed = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -653,7 +661,10 @@ FORM;
 			$server_chroot_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_chroot_dir');
 			$server_zones_dir_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_zones_dir');
 
-			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1);
+			if ($server_type == 'url-only') {
+				$server_type_disabled = 'disabled';
+			}
+			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1, $server_type_disabled);
 			$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
@@ -689,7 +700,7 @@ FORM;
 					<td width="67&#37;">%s
 					<div id="run_as" style="display: %s"><input name="server_run_as" id="server_run_as" type="text" placeholder="%s" value="%s" /></div></td>
 				</tr>
-				<tr class="local_server_options">
+				<tr class="local_server_options url_only_options">
 					<th width="33&#37;" scope="row"><label for="server_update_method">%s</label></th>
 					<td width="67&#37;">%s<div id="server_update_port_option" %s><input type="number" name="server_update_port" value="%s" placeholder="80" onkeydown="return validateNumber(event)" maxlength="5" max="65535" /></div></td>
 				</tr>
@@ -712,7 +723,7 @@ FORM;
 			</table>
 			</div>
 		</div>
-		<div id="tab">
+		<div id="tab" class="no_url_only_options">
 			<input type="radio" name="tab-group-1" id="tab-3" />
 			<label for="tab-3">%s</label>
 			<div id="tab-content">
@@ -752,8 +763,14 @@ FORM;
 				});
 				if ($("#server_type").val() == "remote") {
 					$(".local_server_options").slideUp();
+				} else if ($("#server_type").val() == "url-only") {
+					$(".local_server_options").slideUp();
+					$(".no_url_only_options").slideUp();
+					$(".url_only_options").show("slow");
 				} else {
 					$(".local_server_options").show("slow");
+					$(".url_only_options").show("slow");
+					$(".no_url_only_options").show("slow");
 				}
 			});
 		</script>',
@@ -834,7 +851,7 @@ FORM;
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
 			foreach ($fmdb->last_result as $results) {
-				if (property_exists($results, 'server_type') && $results->server_type == 'remote') continue;
+				if (property_exists($results, 'server_menu_display') && $results->server_menu_display == 'exclude') continue;
 				$type_name = $type . '_name';
 				$type_id   = $type . '_id';
 				$return[$j][] = $results->$type_name;
@@ -1093,9 +1110,10 @@ FORM;
 			unset($post['server_run_as_predefined'], $post['server_update_method'], $post['server_update_port']);
 			$post['server_status'] = 'active';
 		} else {
-			if (empty($post['server_root_dir'])) $post['server_root_dir'] = $__FM_CONFIG['ns']['named_root_dir'];
-			if (empty($post['server_zones_dir'])) $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
-			if (empty($post['server_config_file'])) $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
+			if (empty($post['server_root_dir']) && $post['server_type'] != 'url-only') $post['server_root_dir'] = $__FM_CONFIG['ns']['named_root_dir'];
+			if (empty($post['server_zones_dir']) && $post['server_type'] != 'url-only') $post['server_zones_dir'] = $__FM_CONFIG['ns']['named_zones_dir'];
+			if (empty($post['server_config_file']) && $post['server_type'] != 'url-only') $post['server_config_file'] = $__FM_CONFIG['ns']['named_config_file'];
+			if (empty($post['server_config_file']) && $post['server_type'] == 'url-only') $post['server_config_file'] = '';
 
 			$post['server_root_dir'] = rtrim($post['server_root_dir'], '/');
 			$post['server_chroot_dir'] = rtrim($post['server_chroot_dir'], '/');
@@ -1109,7 +1127,7 @@ FORM;
 			}
 
 			/** Set default ports */
-			if (!isset($post['server_update_method'])) $post['server_update_method'] = 'http';
+			// if (!isset($post['server_update_method'])) $post['server_update_method'] = 'http';
 			if ($post['server_update_method'] == 'cron') {
 				$post['server_update_port'] = 0;
 			}
@@ -1120,7 +1138,10 @@ FORM;
 				elseif ($post['server_update_method'] == 'ssh') $post['server_update_port'] = 22;
 			}
 		}
-		
+
+		/** Show server in menus? */
+		$post['server_menu_display'] = (in_array($post['server_type'], array('remote', 'url-only'))) ? 'exclude' : 'include';
+
 		/** Process server_key */
 		if (isset($post['keys'])) {
 			$post['keys'] = join(',', $post['keys']);

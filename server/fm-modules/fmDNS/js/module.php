@@ -372,17 +372,25 @@ $(document).ready(function() {
 			$("#define_soa").slideUp();
 			$("#dynamic_updates").slideUp();
 			$("#enable_dnssec").slideUp();
+			$("#define_redirect_url").slideUp();
 		} else if ($(this).val() == "slave" || $(this).val() == "stub") {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").show("slow");
 			$("#define_soa").slideUp();
 			$("#dynamic_updates").slideUp();
 			$("#enable_dnssec").slideUp();
-		} else if ($(this).val() == "master") {
+			$("#define_redirect_url").slideUp();
+		} else if ($(this).val() == "master" || $(this).val() == "url-redirect") {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").slideUp();
 			$("#define_soa").show("slow");
-			$("#dynamic_updates").show("slow");
+			if ($(this).val() == "master") {
+				$("#dynamic_updates").show("slow");
+				$("#define_redirect_url").slideUp();
+			} else {
+				$("#dynamic_updates").slideUp();
+				$("#define_redirect_url").show("slow");
+			}
 			$("#enable_dnssec").show("slow");
 		} else {
 			$("#define_forwarders").slideUp();
@@ -390,6 +398,7 @@ $(document).ready(function() {
 			$("#define_soa").slideUp();
 			$("#dynamic_updates").slideUp();
 			$("#enable_dnssec").slideUp();
+			$("#define_redirect_url").slideUp();
 		}
 	});
 
@@ -435,8 +444,12 @@ $(document).ready(function() {
 		if ($(this).is(":checked")) {
 			$("#dnssec_option").show("slow");
 			$("#domain_dynamic").prop("checked", false);
+			if ($("#domain_dnssec_generate_ds").is(":checked")) {
+				$("#dnssec_ds_option").show("slow");
+			}
 		} else {
 			$("#dnssec_option").slideUp();
+			$("#dnssec_ds_option").slideUp();
 		}
 	});
 
@@ -476,12 +489,45 @@ $(document).ready(function() {
 	});
 
 	$("#manage_item_contents").delegate("#server_type", "change", function(e) {
-		if ($(this).val() == "remote") {
+		if ($("#server_type").val() == "remote") {
 			$(".local_server_options").slideUp();
+			$("#alternative_help").slideUp();
+		} else if ($("#server_type").val() == "url-only") {
+			$(".local_server_options").slideUp();
+			$(".no_url_only_options").slideUp();
+			$(".url_only_options").show("slow");
 			$("#alternative_help").slideUp();
 		} else {
 			$(".local_server_options").show("slow");
+			$(".url_only_options").show("slow");
+			$(".no_url_only_options").show("slow");
 			$("#alternative_help").show("slow");
+		}
+	});
+
+	$("#enable_url_rr").click(function() {
+		if ($(this).is(":checked")) {
+			$("#enable_url_rr_options").show("slow");
+		} else {
+			$("#enable_url_rr_options").slideUp();
+		}
+	});
+
+	$("#manage_item_contents").delegate("#domain_id", "change", function(e) {
+		if ($(this).val() == "0") {
+			$(".global_option").show("slow");
+			$(".domain_option").slideUp();
+		} else {
+			$(".domain_option").show("slow");
+			$(".global_option").slideUp();
+		}
+	});
+
+	$("#manage_item_contents").delegate("#policy", "change", function(e) {
+		if ($(this).val() == "cname") {
+			$("#cname_option").show("slow");
+		} else {
+			$("#cname_option").slideUp();
 		}
 	});
 

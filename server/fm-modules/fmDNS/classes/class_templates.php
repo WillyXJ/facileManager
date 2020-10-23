@@ -34,30 +34,31 @@ class fm_module_templates {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no templates.'));
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => $type
-						);
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => $type
+					);
 
-			global $fm_dns_records;
-			if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
-			$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
-			if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		global $fm_dns_records;
+		if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+		$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
+		if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no templates.'));
 		}
 	}
 	
@@ -111,7 +112,7 @@ HTML;
 		
 		$excluded_fields = array($prefix . '_id', 'account_id', $prefix . '_template', $prefix . '_default',
 				$prefix . '_name', $prefix . '_status', $prefix . '_template_id', $prefix . '_dynamic',
-				'soa_serial_no_previous');
+				'soa_serial_no_previous', $prefix . '_check_config');
 		
 		if ($prefix == 'soa') {
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));
