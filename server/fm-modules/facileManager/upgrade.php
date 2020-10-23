@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_400($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_4001($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -733,8 +733,8 @@ function fmUpgrade_311($database) {
 }
 
 
-/** fM v4.0.0 **/
-function fmUpgrade_400($database) {
+/** fM v4.0.0-beta1 **/
+function fmUpgrade_4001($database) {
 	global $fmdb, $fm_name;
 	
 	$success = true;
