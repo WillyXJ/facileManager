@@ -1,4 +1,4 @@
-0.4.5 (2020-??-??)
+0.4.5 (2020-10-23)
 ==================
 * Server - [bug] Added missing 'option' prefix to global options. (Issue #497)
 * Server - [bug] Pool configuration can now select a failover peer. (Issue #480)

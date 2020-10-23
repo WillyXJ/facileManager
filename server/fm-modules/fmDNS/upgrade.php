@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '3.4', '<') ? upgradefmDNS_340($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '4.0.0-beta1', '<') ? upgradefmDNS_4001($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2283,8 +2283,8 @@ function upgradefmDNS_340($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 4.0.0 */
-function upgradefmDNS_400($__FM_CONFIG, $running_version) {
+/** 4.0.0-beta1 */
+function upgradefmDNS_4001($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '3.4.0', '<') ? upgradefmDNS_340($__FM_CONFIG, $running_version) : true;
@@ -2330,7 +2330,7 @@ INSERTSQL;
 		}
 	}
 
-	setOption('version', '4.0', 'auto', false, 0, 'fmDNS');
+	setOption('version', '4.0.0-beta1', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }
