@@ -30,22 +30,23 @@ class fm_dns_records {
 		
 		$return = null;
 		
-		if (!$result) {
-			$return = sprintf('<p id="table_edits" class="noresult">%s</p>', sprintf(__('There are no %s records.'), $record_type));
-		} else {
-			$results = $fmdb->last_result;
-			$start = $_SESSION['user']['record_count'] * ($page - 1);
-			$end = $_SESSION['user']['record_count'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $_SESSION['user']['record_count'] * $page;
+		$results = $fmdb->last_result;
+		$start = $_SESSION['user']['record_count'] * ($page - 1);
+		$end = $_SESSION['user']['record_count'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $_SESSION['user']['record_count'] * $page;
 
-			$table_info = array('class' => 'display_results sortable');
+		$table_info = array('class' => 'display_results sortable');
 
-			$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
-			
+		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)));
+		
+		if ($result) {
 			for ($x=$start; $x<$end; $x++) {
 				$return .= $this->getInputForm(strtoupper($record_type), false, $domain_id, $results[$x]);
 			}
+		}
 			
-			$return .= "</tbody>\n</table>\n";
+		$return .= "</tbody>\n</table>\n";
+		if (!$result) {
+			$return .= sprintf('<p id="table_edits" class="noresult">%s</p>', sprintf(__('There are no %s records.'), $record_type));
 		}
 		
 		return $return;

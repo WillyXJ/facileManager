@@ -34,31 +34,32 @@ class fm_dns_views {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="views">%s</p>', __('There are no views.'));
-		} else {
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'views'
-						);
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'views'
+					);
 
-			$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => _('Comment'), 'class' => 'header-nosort'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) {
-				$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
-				if ($num_rows > 1) $table_info['class'] .= ' grab1';
-			}
+		$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+			if ($num_rows > 1) $table_info['class'] .= ' grab1';
+		}
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x]);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="views">%s</p>', __('There are no views.'));
 		}
 	}
 

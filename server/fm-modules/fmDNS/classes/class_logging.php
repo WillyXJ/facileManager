@@ -34,30 +34,31 @@ class fm_module_logging {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(__('There are no %s defined.'), strtolower($__FM_CONFIG['logging']['avail_types'][$channel_category])));
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'logging'
-						);
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'logging'
+					);
 
-			$title_array[] = array('title' => __('Name'), 'rel' => 'cfg_data');
-			if ($channel_category == 'category') $title_array[] = array('title' => __('Channels'), 'class' => 'header-nosort');
-			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		$title_array[] = array('title' => __('Name'), 'rel' => 'cfg_data');
+		if ($channel_category == 'category') $title_array[] = array('title' => __('Channels'), 'class' => 'header-nosort');
+		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $channel_category);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(__('There are no %s defined.'), strtolower($__FM_CONFIG['logging']['avail_types'][$channel_category])));
 		}
 	}
 

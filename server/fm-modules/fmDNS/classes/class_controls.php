@@ -34,31 +34,32 @@ class fm_dns_controls {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
-		if (!$result) {
-			$message = $type == 'controls' ? __('There are no controls.') : __('There are no statistics channels.');
-			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', $message);
-		} else {
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'controls'
-						);
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'controls'
+					);
 
-			$title_array = array(__('IP Address'), __('Port'), __('Address List'));
-			if ($type == 'controls') $title_array[] = __('Keys');
-			$title_array[] = _('Comment');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+		$title_array = array(__('IP Address'), __('Port'), __('Address List'));
+		if ($type == 'controls') $title_array[] = __('Keys');
+		$title_array[] = _('Comment');
+		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			$message = $type == 'controls' ? __('There are no controls.') : __('There are no statistics channels.');
+			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', $message);
 		}
 	}
 

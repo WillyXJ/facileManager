@@ -57,37 +57,34 @@ class fm_dns_zones {
 		echo displayPagination($page, $total_pages, $addl_blocks);
 		echo '<div class="overflow-container">';
 
-		if (!$result) {
-			$message = ($map == 'groups') ? __('There are no zone groups.') : __('There are no zones.');
-			printf('<p id="table_edits" class="noresult" name="domains">%s</p>', $message);
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'domains'
-						);
-
-			if ($map == 'groups') {
-				$title_array = array(array('title' => __('Group Name'), 'rel' => 'group_name'),
-					array('title' => __('Associated Domains')),
-					array('title' => _('Comment'))
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'domains'
 					);
-			} else {
-				$title_array = array(array('title' => __('ID'), 'class' => 'header-small header-nosort'), 
-					array('title' => __('Domain'), 'rel' => 'domain_name'), 
-					array('title' => __('Type'), 'rel' => 'domain_type'),
-					array('title' => __('Views'), 'class' => 'header-nosort'),
-					array('title' => __('Records'), 'class' => 'header-small  header-nosort'));
-			}
-			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
-			
-			if (is_array($checkbox)) {
-				$title_array = array_merge($checkbox, $title_array);
-			}
 
-			echo '<div class="existing-container" style="bottom: 10em;">';
-			echo displayTableHeader($table_info, $title_array, 'zones');
-			
+		if ($map == 'groups') {
+			$title_array = array(array('title' => __('Group Name'), 'rel' => 'group_name'),
+				array('title' => __('Associated Domains')),
+				array('title' => _('Comment'))
+				);
+		} else {
+			$title_array = array(array('title' => __('ID'), 'class' => 'header-small header-nosort'), 
+				array('title' => __('Domain'), 'rel' => 'domain_name'), 
+				array('title' => __('Type'), 'rel' => 'domain_type'),
+				array('title' => __('Views'), 'class' => 'header-nosort'),
+				array('title' => __('Records'), 'class' => 'header-small  header-nosort'));
+		}
+		$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		
+		if (is_array($checkbox)) {
+			$title_array = array_merge($checkbox, $title_array);
+		}
+
+		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo displayTableHeader($table_info, $title_array, 'zones');
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$all_num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
@@ -111,8 +108,12 @@ class fm_dns_zones {
 					$y++;
 				}
 			}
+		}
 			
-			echo "</tbody>\n</table></div></div>\n";
+		echo "</tbody>\n</table></div></div>\n";
+		if (!$result) {
+			$message = ($map == 'groups') ? __('There are no zone groups.') : __('There are no zones.');
+			printf('<p id="table_edits" class="noresult" name="domains">%s</p>', $message);
 		}
 	}
 

@@ -34,23 +34,21 @@ class fm_module_rpz {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="rpz">%s</p>', __('There are no response policy zones defined.'));
-		} else {
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'rpz'
-						);
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'rpz'
+					);
 
-			$title_array = array(array('class' => 'header-tiny'), array('title' => __('Zone')), array('title' => __('Policy')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort'));
-			if (currentUserCan('manage_servers', $_SESSION['module'])) {
-				$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
-				if ($num_rows > 1) $table_info['class'] .= ' grab1';
-			}
+		$title_array = array(array('class' => 'header-tiny'), array('title' => __('Zone')), array('title' => __('Policy')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+			if ($num_rows > 1) $table_info['class'] .= ' grab1';
+		}
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$grabbable = true;
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
@@ -66,8 +64,11 @@ class fm_module_rpz {
 				$this->displayRow($results[$x]);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="rpz">%s</p>', __('There are no response policy zones defined.'));
 		}
 	}
 

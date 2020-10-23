@@ -40,47 +40,48 @@ class fm_dns_keys {
 
 		echo displayPagination($page, $total_pages, array(@buildBulkActionMenu($bulk_actions_list), $addl_blocks));
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="keys">%s</p>', __('There are no keys.'));
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'keys'
+					);
+
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		}
+		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny header-nosort'), array('title' => __('Key'), 'rel' => 'key_name')));
+		if ($type == 'tsig') {
+			$title_array = array_merge($title_array, array(
+				array('title' => __('Algorithm'), 'class' => 'header-nosort'),
+				array('title' => __('Secret'), 'rel' => 'key_secret'),
+				array('title' => __('View'), 'class' => 'header-nosort')));
 		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'keys'
-						);
+			$title_array = array_merge($title_array, array(
+				array('title' => __('Type'), 'rel' => 'key_secret'),
+				array('title' => __('Algorithm'), 'class' => 'header-nosort'),
+				array('title' => __('Bits'), 'class' => 'header-nosort'),
+				array('title' => __('Created'), 'rel' => 'key_created')));
+		}
+		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
-			if (is_array($bulk_actions_list)) {
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
-									'class' => 'header-tiny header-nosort'
-								);
-			}
-			$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny header-nosort'), array('title' => __('Key'), 'rel' => 'key_name')));
-			if ($type == 'tsig') {
-				$title_array = array_merge($title_array, array(
-					array('title' => __('Algorithm'), 'class' => 'header-nosort'),
-					array('title' => __('Secret'), 'rel' => 'key_secret'),
-					array('title' => __('View'), 'class' => 'header-nosort')));
-			} else {
-				$title_array = array_merge($title_array, array(
-					array('title' => __('Type'), 'rel' => 'key_secret'),
-					array('title' => __('Algorithm'), 'class' => 'header-nosort'),
-					array('title' => __('Bits'), 'class' => 'header-nosort'),
-					array('title' => __('Created'), 'rel' => 'key_created')));
-			}
-			$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
-			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
-
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="keys">%s</p>', __('There are no keys.'));
 		}
 	}
 

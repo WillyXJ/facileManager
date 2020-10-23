@@ -52,49 +52,50 @@ class fm_module_servers extends fm_shared_module_servers {
 		$fmdb->num_rows = $num_rows;
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 			
-		if (!$result) {
-			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
-			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'servers'
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'servers'
+					);
+
+		if ($type == 'servers') {
+			$title_array[] = array('class' => 'header-tiny header-nosort');
+			$title_array = array_merge($title_array, array(array('title' => __('Hostname'), 'rel' => 'server_name'),
+				array('title' => __('Method'), 'rel' => 'server_update_method'),
+				array('title' => __('Keys'), 'class' => 'header-nosort'),
+				array('title' => __('Server Type'), 'class' => 'header-nosort'),
+				array('title' => __('Version'), 'class' => 'header-nosort'),
+				array('title' => __('Run-as'), 'rel' => 'server_run_as_predefined'),
+				array('title' => __('Config File'), 'rel' => 'server_config_file'),
+				array('title' => __('Server Root'), 'rel' => 'server_root_dir'),
+				array('title' => __('Zones Directory'), 'rel' => 'server_zones_dir'),
+				));
+		} elseif ($type == 'groups') {
+			$title_array = array_merge((array)$title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
+				array('title' => __('Master Servers'), 'class' => 'header-nosort'),
+				array('title' => __('Slave Servers'), 'class' => 'header-nosort'),
+				));
+		}
+		$title_array[] = array(
+							'title' => __('Actions'),
+							'class' => 'header-actions header-nosort'
 						);
 
-			if ($type == 'servers') {
-				$title_array[] = array('class' => 'header-tiny header-nosort');
-				$title_array = array_merge($title_array, array(array('title' => __('Hostname'), 'rel' => 'server_name'),
-					array('title' => __('Method'), 'rel' => 'server_update_method'),
-					array('title' => __('Keys'), 'class' => 'header-nosort'),
-					array('title' => __('Server Type'), 'class' => 'header-nosort'),
-					array('title' => __('Version'), 'class' => 'header-nosort'),
-					array('title' => __('Run-as'), 'rel' => 'server_run_as_predefined'),
-					array('title' => __('Config File'), 'rel' => 'server_config_file'),
-					array('title' => __('Server Root'), 'rel' => 'server_root_dir'),
-					array('title' => __('Zones Directory'), 'rel' => 'server_zones_dir'),
-					));
-			} elseif ($type == 'groups') {
-				$title_array = array_merge((array)$title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
-					array('title' => __('Master Servers'), 'class' => 'header-nosort'),
-					array('title' => __('Slave Servers'), 'class' => 'header-nosort'),
-					));
-			}
-			$title_array[] = array(
-								'title' => __('Actions'),
-								'class' => 'header-actions header-nosort'
-							);
-
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
+			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
 		}
 	}
 
