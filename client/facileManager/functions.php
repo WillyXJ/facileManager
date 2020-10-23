@@ -50,6 +50,8 @@ $dryrun		= (in_array('-n', $argv) || in_array('dryrun', $argv)) ? true : false;
 $buildconf	= (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : false;
 $cron		= (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 
+$apitest	= (in_array('apitest', $argv)) ? true : false;
+
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
 /** Display the client version */
@@ -180,6 +182,12 @@ if (in_array('upgrade', $argv)) {
 	upgradeFM($proto . '://' . FMHOST . 'admin-servers.php?upgrade', $data);
 }
 
+/** Test API functionality */
+if ($apitest) {
+	/** Run the API tests */
+	doAPITest($url, $data);
+}
+
 /** Display dry-run messaging */
 if ($dryrun && $debug) echo fM("Dryrun mode (nothing will be written to disk)\n\n");
 
@@ -200,7 +208,8 @@ php {$argv[0]} [options]
   -s|no-ssl      Do not use SSL to retrieve the configs
   -v|version     Display the client version
      no-sudoers  Do not create/update the sudoers file at install time
-     no-update   Do not update the server configuration from the client
+	 no-update   Do not update the server configuration from the client
+	 apitest     Perform basic API functionality tests
 
 HELP;
 
@@ -1575,6 +1584,62 @@ function installPackage($packages) {
  */
 function isDebianSystem($os) {
 	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu', 'raspbian'));
+}
+
+
+/**
+ * Loads the API credentials for use
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @param array $data Information to modify
+ * @return array
+ */
+function loadAPICredentials($url, $data) {
+	global $proto, $server_path;
+
+	/** Ensure $proto = https */
+	if ($proto != 'https') {
+		echo fM($server_path['hostname'] . " must be configured with https.\n");
+		exit(1);
+	}
+
+	/** Set the API URL */
+	$url = str_replace('buildconf.php', 'api/', $url);
+
+	if (!defined('APIKEY') || !defined('APISECRET')) {
+		echo fM("API credentials are not found in config.inc.php. Please add them using the following format:\n\ndefine('APIKEY', 'MY_KEY');\ndefine('APISECRET', 'MY_KEY_SECRET');\n\n");
+		exit(1);
+	}
+
+	$data['APIKEY'] = APIKEY;
+	$data['APISECRET'] = APISECRET;
+
+	return array($url, $data);
+}
+
+
+/**
+ * Performs basic API functionality tests
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @param string $url URL to query
+ * @param array $data Information to submit
+ * @return boolean
+ */
+function doAPITest($url, $data) {
+	list($url, $data) = loadAPICredentials($url, $data);
+
+	$data['test'] = true;
+
+	$raw_data = getPostData($url, $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	echo $raw_data;
+
+	exit;
 }
 
 ?>

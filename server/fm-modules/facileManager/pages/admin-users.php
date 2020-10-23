@@ -22,7 +22,8 @@
 /** Don't display if there's no authentication service */
 if (!getOption('auth_method')) unAuth();
 
-if (!currentUserCan('manage_users')) unAuth();
+/** Don't display keys if the setting is disabled */
+if (!count($__FM_CONFIG['users']['avail_types'])) unAuth();
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
 
@@ -31,7 +32,7 @@ $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 $form_data = null;
 $response = isset($response) ? $response : null;
 
-$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['users']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'users';
+$type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['users']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : array_key_first($__FM_CONFIG['users']['avail_types']);
 $display_type = $__FM_CONFIG['users']['avail_types'][$type];
 
 switch ($action) {
@@ -78,17 +79,26 @@ case 'edit':
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['users']['avail_types']);
-echo printPageHeader($response, $display_type, currentUserCan('manage_users'), $type);
-
-$sort_field = ($type == 'users') ? 'user_login' : 'group_name';
+$can_add = currentUserCan('manage_users');
+if ($type == 'users') {
+	$sort_field = 'user_login';
+} elseif ($type == 'groups') {
+	$sort_field = 'group_name';
+} elseif ($type == 'keys') {
+	$sort_field = 'key_id';
+	$can_add = true;
+}
 $sort_direction = null;
+
+$avail_types = buildSubMenu($type, $__FM_CONFIG['users']['avail_types']);
+echo printPageHeader($response, $display_type, $can_add, $type);
 
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo <<<HTML
+if (count($__FM_CONFIG['users']['avail_types']) > 1) {
+	echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
 	<div class="stretch"></div>
@@ -97,8 +107,17 @@ echo <<<HTML
 </div>
 
 HTML;
+}
 
-$result = ($type == 'users') ? basicGetList('fm_users', $sort_field, 'user_', null, null, false, $sort_direction) : basicGetList('fm_groups', $sort_field, 'group_', null, null, false, $sort_direction);
+if ($type == 'users') {
+	$sql = (!currentUserCan('manage_users')) ? 'AND user_id=' . $_SESSION['user']['id'] : null;
+	$result = basicGetList('fm_users', $sort_field, 'user_', $sql, null, false, $sort_direction);
+} elseif ($type == 'groups') {
+	$result = basicGetList('fm_groups', $sort_field, 'group_', null, null, false, $sort_direction);
+} elseif ($type == 'keys') {
+	$sql = (!currentUserCan('manage_users')) ? 'AND user_id=' . $_SESSION['user']['id'] : null;
+	$result = basicGetList('fm_keys', $sort_field, 'key_', $sql, null, false, $sort_direction);
+}
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_users->rows($result, $type, $page, $total_pages);

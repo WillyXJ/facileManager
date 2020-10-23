@@ -514,6 +514,28 @@ if (isset($__FM_CONFIG)) {
 		return false;
 	});
 	
+	$("#force_software_check").click(function() {
+		var form_data = {
+			item_type: "fm_software_update_check"
+		};
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/facileManager/ajax/processPost.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				} else {
+					window.location = response;
+				}
+			}
+		});
+		
+		return false;
+	});
+	
 	/* Account settings */
     $(".account_settings").click(function() {
         var $this 		= $(this);
@@ -747,6 +769,14 @@ if (isset($__FM_CONFIG)) {
 			$("#ldap_group_require_options").show("slow");
 		} else {
 			$("#ldap_group_require_options").slideUp();
+		}
+	});
+	
+	$("#api_token_support").click(function() {
+		if ($(this).is(":checked")) {
+			$("#enforce_ssl").prop("checked", this.checked).attr("disabled", true);
+		} else {
+			$("#enforce_ssl").attr("disabled", false);
 		}
 	});
 	

@@ -44,7 +44,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
-	$form_bits = array('user_login', 'user_comment', 'user_email', 'user_module');
+	$form_bits = array('user_login', 'user_comment', 'user_email', 'user_module', 'user_token');
 	if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_auth_type') == 1) {
 		$form_bits[] = 'user_password';
 	}
@@ -60,6 +60,15 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 }
 
 if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
+	/** Process API key creations */
+	if ($_POST['item_sub_type'] == 'keys') {
+		if (!getOption('api_token_support')) returnUnAuth();
+		
+		include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
+		echo $fm_users->generateAPIKey();
+		exit;
+	}
+
 	if (!currentUserCan('manage_users')) returnUnAuth();
 	
 	if (array_key_exists('add_form', $_POST)) {
@@ -101,9 +110,11 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 		if ($_POST['item_sub_type'] == 'users') {
 			if (currentUserCan('manage_users')) {
 				basicGet('fm_users', $id, 'user_', 'user_id');
-				$form_bits = ($fmdb->last_result[0]->user_auth_type == 2) ? array('user_login', 'user_comment', 'user_email', 'user_perms', 'user_module', 'user_groups') : array('user_login', 'user_comment', 'user_email', 'user_options', 'user_perms', 'user_module', 'user_groups');
-				if ($fmdb->last_result[0]->user_auth_type != 2) {
-					$form_bits[] = 'user_password';
+				if ($fmdb->num_rows) {
+					$form_bits = ($fmdb->last_result[0]->user_auth_type == 2) ? array('user_login', 'user_comment', 'user_email', 'user_perms', 'user_module', 'user_groups') : array('user_login', 'user_comment', 'user_email', 'user_options', 'user_perms', 'user_module', 'user_groups');
+					if ($fmdb->last_result[0]->user_auth_type != 2) {
+						$form_bits[] = 'user_password';
+					}
 				}
 			} else {
 				$form_bits = array('user_password');

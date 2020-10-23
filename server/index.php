@@ -41,15 +41,22 @@ if (is_array($GLOBALS)) {
 	if (@array_key_exists('logout', $GLOBALS['URI'])) exit;
 }
 
-if (isset($GLOBALS['basename']) && $GLOBALS['basename'] == 'index.php') {
+if (isset($GLOBALS['path_parts']['basename']) && $GLOBALS['path_parts']['basename'] == 'api') {
+	if (!defined('CLIENT')) {
+		throwHTTPError('404');
+	}
+	$GLOBALS['basename'] = 'api.php';
+	require_once(ABSPATH . 'fm-modules/facileManager/functions.php');
+} elseif (isset($GLOBALS['basename']) && $GLOBALS['basename'] == 'index.php') {
 	require_once(ABSPATH . 'fm-includes/init.php');
 	checkAppVersions();
-}
+} 
 
 if (function_exists('includeModuleFile')) {
 	if (@file_exists(includeModuleFile($_SESSION['module'], $GLOBALS['basename']))) {
 		@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename']));
 	} else throwHTTPError('404');
 }
+
 
 ?>

@@ -700,7 +700,9 @@ tbody {
 .display_results textarea,
 #bulk_action,
 #pagination input,
-#search_form_container {
+#search_form_container,
+#settings input:not([type="submit"]):not([type="button"]),
+.log_search_form input[type="text"] {
 	line-height: 20px;
 	font-size: 12px;
 	padding: 2px;
@@ -1864,7 +1866,7 @@ pre {
 
 .search-form {
 	position: absolute;
-	top: 11px;
+	top: 4px;
 	float: right;
 	margin-bottom: -2.6em;
 	right: 22px;

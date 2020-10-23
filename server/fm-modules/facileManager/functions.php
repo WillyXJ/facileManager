@@ -148,7 +148,7 @@ function isUpgradeAvailable() {
  * @since 1.0
  * @package facileManager
  */
-function isNewVersionAvailable($package, $version) {
+function isNewVersionAvailable($package, $version, $interval = 'schedule') {
 	$fm_site_url = 'http://www.facilemanager.com/check/';
 	
 	$data['package'] = $package;
@@ -172,6 +172,10 @@ function isNewVersionAvailable($package, $version) {
 		$method = 'insert';
 	} elseif (isset($last_version_check['data']['version']) && $last_version_check['data']['version'] == $version) {
 		$last_version_check['timestamp'] = 0;
+	}
+	if ($interval == 'force') {
+		$last_version_check['timestamp'] = 0;
+		$last_version_check['data'] = null;
 	}
 	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
 		$data['software_update_tree'] = getOption('software_update_tree');
@@ -1242,7 +1246,13 @@ function buildHelpFile() {
 			
 			<p>New user accounts can be created quickly from a template by duplicating the template user. This will prompt you for the new 
 			username and password while giving you the ability to change any other settings prior to user creation.</p>
+
+			<p>User groups can also be created to easily provide the same level of access to multiple user accounts.</p>
 			<p><i>The 'User Management' or 'Super Admin' permission is required for these actions.</i></p>
+
+			<p>When API Support is enabled at Settings &rarr; <a href="__menu{Settings}">General</a>, each user may create an API keypair
+			by editing their user profile. Privileged users will be able change the status of any keypair through Admin &rarr; 
+			<a href="__menu{Users & Groups}">Users</a>. This keypair allows the user to authenticate via the API through the client scripts.</p> 
 		</div>
 	</li>
 	<li>
@@ -1267,6 +1277,9 @@ function buildHelpFile() {
 			<p><i>define('FM_NO_AUTH', true);</i></p>
 			<p><b>Client Registration</b><br />
 			You can choose to allow clients to automatically register in the database or not.</p>
+			<p><b>API Support</b><br />
+			By enabling API support, users are able to create keypairs to authenticate with through the client scripts. This opens up the ability
+			to make a limited selection of module changes without using the web interface.</p>
 			<p><b>SSL</b><br />
 			You can choose to have $fm_name enforce the use of SSL when a user tries to access the web app.</p>
 			<p><b>Mailing</b><br />
@@ -2077,9 +2090,10 @@ function verifySimpleVariable($data, $filter_type) {
  * @return string
  */
 function buildSettingsForm($saved_options, $default_options) {
-	$option_rows = null;
+	$option_rows = $current_parent = null;
 	
 	foreach ($default_options as $option => $options_array) {
+		$option_row_head = null;
 		$option_value = array_key_exists($option, $saved_options) ? $saved_options[$option] : $options_array['default_value'];
 		
 		if (is_array($option_value)) {
@@ -2089,6 +2103,8 @@ function buildSettingsForm($saved_options, $default_options) {
 			}
 			$option_value = rtrim($temp_value);
 		}
+
+		$div_style = 'style="display: none;"';
 		
 		switch($options_array['type']) {
 			case 'textarea':
@@ -2096,8 +2112,11 @@ function buildSettingsForm($saved_options, $default_options) {
 				break;
 			case 'checkbox':
 				$checked = $option_value == 'yes' ? 'checked' : null;
-				$input_field = '<input name="' . $option . '" id="' . $option . '" type="hidden" value="no" />';
+				$input_field = '<input name="' . $option . '" type="hidden" value="no" />';
 				$input_field .= '<label><input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="yes" ' . $checked . ' />' . $options_array['description'][0] . '</label>';
+				if (isset($options_array['show_children_when_value']) && $options_array['show_children_when_value'] == $checked) {
+					$div_style = 'style="display: block;"';
+				}
 				break;
 			case 'select':
 				$input_field = buildSelect($option, $option, $options_array['options'], $option_value);
@@ -2107,7 +2126,23 @@ function buildSettingsForm($saved_options, $default_options) {
 				$addl = (isset($options_array['addl'])) ? $options_array['addl'] : null;
 				$input_field = '<input name="' . $option . '" id="' . $option . '" type="' . $options_array['type'] . '" value="' . $option_value . '" size="' . $size . '" ' . $addl . ' />';
 		}
+		if (array_key_exists('parent', $options_array)) {
+			if ($options_array['parent'] === true && $option_rows) {
+				$option_row_head = '</div><div id="settings-section">' . "\n";
+			} elseif ($options_array['parent'] !== true) {
+				if ($current_parent != $options_array['parent']) {
+					$option_row_head = sprintf('<div id="%s_options" %s>', $options_array['parent'], $div_style);
+					$current_parent = $options_array['parent'];
+				}
+			}
+		} else {
+			if ($current_parent) {
+				$option_row_head = "</div>\n";
+			}
+			$current_parent = null;
+		}
 		$option_rows .= <<<ROW
+			$option_row_head
 			<div id="setting-row">
 				<div class="description">
 					<label for="$option">{$options_array['description'][0]}</label>
@@ -2121,7 +2156,7 @@ function buildSettingsForm($saved_options, $default_options) {
 ROW;
 	}
 	
-	return $option_rows;
+	return '<div id="settings-section">' . $option_rows . '</div>';
 }
 
 
@@ -2585,6 +2620,9 @@ function unAuth($link_display = 'show') {
  * @return boolean
  */
 function currentUserCan($capability, $module = 'facileManager', $extra_perm = null) {
+	if (!isset($_SESSION['user'])) {
+		return false;
+	}
 	return userCan($_SESSION['user']['id'], $capability, $module, $extra_perm);
 }
 
@@ -4065,4 +4103,20 @@ function getDefaultAdminID() {
 }
 
 
+/**
+ * Returns the first array key
+ *
+ * @since 4.0
+ * @package facileManager
+ *
+ * @return mixed
+ */
+if (!function_exists('array_key_first')) {
+	function array_key_first(array $arr) {
+		foreach($arr as $key => $unused) {
+			return $key;
+		}
+		return null;
+	}
+}
 ?>

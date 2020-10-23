@@ -1,3 +1,11 @@
+4.0.0 (2020-??-??)
+* Server - [bug] Fixed PHP errors.
+* Both   - [feature] Added support for user API keys. (Issue #289 #327)
+* Server - [improvement] CSS changes.
+* Server - [improvement] Added support for module settings to have sections.
+* Server - [improvement] Added support to define LDAPS certificate and CA
+           files in the settings. (Issue #500)
+
 3.5.7 (2020-03-04)
 ==================
 * Server - [bug] Fixed user creation during installation. (Issue #478)
@@ -12,6 +20,7 @@
 * Server - [security] Fixed an issue where non-privileged users could be escalated
            to super-admin.
 * Server - [bug] New user passwords can be created with quotation marks.
+* Server - [improvement] Added support for manual software update checks.
 
 3.5.4 (2019-12-11)
 ==================

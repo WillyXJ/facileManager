@@ -36,42 +36,56 @@ class fm_users {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages);
 
-		if (!$result) {
-			$message = ($type == 'users') ? _('There are no users.') : _('There are no groups.');
-			printf('<p id="table_edits" class="noresult" name="users">%s</p>', $message);
-		} else {
-			$table_info = array(
-							'class' => 'display_results sortable',
-							'id' => 'table_edits',
-							'name' => 'users'
-						);
-			$title_array[] = array('class' => 'header-tiny header-nosort');
+		$table_info = array(
+						'class' => 'display_results sortable',
+						'id' => 'table_edits',
+						'name' => 'users'
+					);
+		$title_array[] = array('class' => 'header-tiny header-nosort');
 
-			if ($type == 'users') {
-				$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
-				array_push($title_array,
-						array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
-						array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
-						array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
-						array('title' => _('Comment'), 'class' => 'header-nosort'));
-			} else {
-				array_push($title_array,
-					array('title' => _('Group Name'), 'rel' => 'group_name'),
-					array('title' => _('Group Members'), 'class' => 'header-nosort'),
+		if ($type == 'users') {
+			$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
+			array_push($title_array,
+					array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
+					array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
+					array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
 					array('title' => _('Comment'), 'class' => 'header-nosort'));
+		} elseif ($type == 'groups') {
+			array_push($title_array,
+				array('title' => _('Group Name'), 'rel' => 'group_name'),
+				array('title' => _('Group Members'), 'class' => 'header-nosort'),
+				array('title' => _('Comment'), 'class' => 'header-nosort'));
+		} elseif ($type == 'keys') {
+			array_push($title_array,
+				array('title' => _('Key'), 'rel' => 'key_token'));
+			if (currentUserCan('manage_users')) {
+				array_push($title_array,
+					array('title' => _('User'), 'rel' => 'user_id'));	
 			}
-			$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
+		}
+		$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
+		}
 			
-			echo "</tbody>\n</table>\n";
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			if ($type == 'users') {
+				$message = _('There are no users.');
+			} elseif ($type == 'groups') {
+				$message = _('There are no groups.');
+			} elseif ($type == 'keys') {
+				$message = _('There are no keys.');
+			}
+			printf('<p id="table_edits" class="noresult" name="users">%s</p>', $message);
 		}
 	}
 
@@ -153,7 +167,7 @@ class fm_users {
 		/** Process forced password change */
 		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login);
 		
-		addLogEntry(sprintf(_("Added user '%s'."), $user_login));
+		addLogEntry(sprintf(_("Added user '%s'."), $user_login), $fm_name);
 		return true;
 	}
 
@@ -212,7 +226,7 @@ class fm_users {
 			}
 		}
 
-		addLogEntry(sprintf(_("Added group '%s'."), $group_name));
+		addLogEntry(sprintf(_("Added group '%s'."), $group_name), $fm_name);
 		return true;
 	}
 
@@ -288,7 +302,7 @@ class fm_users {
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login);
 		
-		addLogEntry(sprintf(_("Updated user '%s'."), $user_login));
+		addLogEntry(sprintf(_("Updated user '%s'."), $user_login), $fm_name);
 		
 		return true;
 	}
@@ -356,7 +370,7 @@ class fm_users {
 			}
 		}
 
-		addLogEntry(sprintf(_("Updated group '%s'."), $post['group_name']));
+		addLogEntry(sprintf(_("Updated group '%s'."), $post['group_name']), $fm_name);
 		
 		return true;
 	}
@@ -373,7 +387,7 @@ class fm_users {
 		
 		$functionCan = $type . 'Can';
 		
-		if ((!currentUserCan('do_everything') && $functionCan($id, 'do_everything')) || ($type == 'user' && $id == getDefaultAdminID())) {
+		if ($type != 'key' && (!currentUserCan('do_everything') && $functionCan($id, 'do_everything')) || ($type == 'user' && $id == getDefaultAdminID())) {
 			return sprintf(_('You do not have permission to delete this %s.'), $type);
 		}
 		if ($type == 'user') {
@@ -388,6 +402,8 @@ class fm_users {
 			if (basicUpdate('fm_users', $id, 'user_group', 0, 'user_group') === false) {
 				return formatError(_('This group could not be removed from the associated users.'), 'sql');
 			}
+		} elseif ($type == 'key') {
+			$field = 'key_token';
 		}
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $type . 's', $type . '_', $type . '_id', $field);
@@ -409,7 +425,8 @@ class fm_users {
 	function displayRow($row, $type) {
 		global $__FM_CONFIG, $fm_name;
 		
-		$disabled_class = ($row->user_status == 'disabled') ? ' class="disabled"' : null;
+		$property = rtrim($type, 's') . '_status';
+		$disabled_class = ($row->$property == 'disabled') ? ' class="disabled"' : null;
 
 		if ($type == 'users') {
 			$id = $row->user_id;
@@ -466,7 +483,7 @@ class fm_users {
 			<td>$user_auth_type</td>
 			<td>{$row->user_comment}</td>";
 			$name = $row->user_login;
-		} else {
+		} elseif ($type == 'groups') {
 			$id = $row->group_id;
 			if (currentUserCan('do_everything') || (!groupCan($row->group_id, 'do_everything') && currentUserCan('manage_users'))) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -487,6 +504,27 @@ class fm_users {
 			<td>$group_members</td>
 			<td>" . nl2br($row->group_comment) . "</td>";
 			$name = $row->group_name;
+		} elseif ($type == 'keys') {
+			$edit_status = $id = $user_column = null;
+			$can_manage_users = currentUserCan('manage_users');
+			if ($can_manage_users || $row->user_id == $_SESSION['user']['id']) {
+				$id = $row->key_id;
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->key_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->key_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+				$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			}
+
+			if ($can_manage_users) {
+				$user_column = sprintf('<td>%s</td>', getNameFromID($row->user_id, 'fm_users', 'user_', 'user_id', 'user_login'));
+			}
+
+			$column = "<td></td>
+			<td>{$row->key_token}</td>
+			$user_column";
+			$name = $row->key_token;
 		}
 		
 		echo <<<HTML
@@ -628,6 +666,15 @@ HTML;
 					<td width="67%">
 						<input name="user_force_pwd_change" id="user_force_pwd_change" value="yes" type="checkbox" ' . $force_pwd_check . '/><label for="user_force_pwd_change">' . _('Force Password Change at Next Login') . '</label><br />
 						<input name="user_template_only" id="user_template_only" value="yes" type="checkbox" ' . $user_template_only_check . '/><label for="user_template_only">' . _('Template User') . '</label>
+					</td>
+				</tr>';
+		}
+		
+		if (in_array('user_token', $form_bits) && getOption('api_token_support') && $user_id == $_SESSION['user']['id']) {
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row"></th>
+					<td width="67%">
+						<span><a href="admin-users.php?type=keys">' . __('Configure API Keys') . ' &raquo;</a></span>
 					</td>
 				</tr>';
 		}
@@ -853,6 +900,61 @@ PERM;
 		}
 		
 		return (array) $group_list;
+	}
+
+	
+	/**
+	 * Generates unique API keypair for the user
+	 *
+	 * @since 4.0
+	 * @package facileManager
+	 *
+	 * @return string
+	 */
+	function generateAPIKey() {
+		global $fmdb, $__FM_CONFIG, $fm_name;
+		
+		$unique_key = false;
+
+		$popup_header = buildPopup('header', _('API Key Creation'));
+		$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+		
+		/** Ensure the key is unique */
+		while ($unique_key == false) {
+			$key_token = strtoupper(genRandomString(mt_rand(20, 30)));
+			$key_secret = genRandomString(mt_rand(30, 50));
+
+			$query = "SELECT * FROM `fm_keys` WHERE `key_status`!='deleted' AND `key_token`='$key_token'";
+			$fmdb->get_results($query);
+			if (!$fmdb->num_rows) $unique_key = true;
+		}
+
+		$query = sprintf("INSERT INTO fm_keys (`account_id`, `user_id`, `key_token`, `key_secret`) VALUES (%d, %d, '%s', '%s')",
+			$_SESSION['user']['account_id'], $_SESSION['user']['id'], $key_token, password_hash($key_secret, PASSWORD_DEFAULT));
+		$result = $fmdb->query($query);
+		
+		if ($fmdb->sql_errors) {
+			return $popup_header . formatError(_('Could not create the keypair because a database error occurred.'), 'sql') . $popup_footer;
+		}
+
+		addLogEntry(sprintf(_("Added API key '%s'."), $key_token), $fm_name);
+
+		/** Give user ability to copy keypair */
+		$message = sprintf('<p>%s %s</p>
+		<p>%s <u>%s</u></p>
+		<p><b>%s :</b> %s<br />
+		<b>%s :</b> %s</p>',
+			$__FM_CONFIG['icons']['ok'],
+			_('Your API keypair has been successfully created.'),
+			_('Please copy the keypair and store in safe place.'),
+			_('This your only opportunity of retrieving the secret key.'),
+			_('Key'), $key_token,
+			_('Secret'), $key_secret
+		);
+		
+		$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), 'admin-users.php?type=keys');
+
+		return $popup_header . $message . $popup_footer;
 	}
 }
 
