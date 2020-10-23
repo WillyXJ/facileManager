@@ -557,45 +557,17 @@ iface %s inet manual
 	}
 	
 	/** Update dhcpcd.conf */
-	echo fM('  --> Configuring dhcpcd.conf...');
 	$dhcpcd_conf = findFile('dhcpcd.conf');
 	if (!$dhcpcd_conf) {
 		echo fM("Failed to find dhcpcd.conf. Aborting.\n");
 		exit(1);
 	}
-	$dhcpcd_conf_config = file_get_contents($dhcpcd_conf);
-	if (strpos($dhcpcd_conf_config, $module_name) === false) {
-		$vlan_conf_config = sprintf('
-# This section was built using %s v%s
-denyinterfaces %s
-denyinterfaces %s
-# End %s section
-',
-			$module_name, $data['server_client_version'],
-			$wdev, $default_interface,
-			$module_name
-		);
-		
-		$dhcpcd_conf_config = explode("\n", $dhcpcd_conf_config);
-		foreach ($dhcpcd_conf_config as $key => $line) {
-			if (!$line) {
-				$last_empty_key = $key;
-				continue;
-			}
-			$pos = strpos($line, 'interface');
-			if ($pos !== false && $pos == 0) {
-				break;
-			}
-		}
-		$dhcpcd_conf_config[$last_empty_key] = $vlan_conf_config;
-		$dhcpcd_conf_config = join("\n", $dhcpcd_conf_config);
-		
-		file_put_contents($dhcpcd_conf, $dhcpcd_conf_config);
-		echo "done\n\n";
-	} else {
-		echo "skipping - already configured\n\n";
-	}
-	
+	$vlan_conf_config = sprintf('denyinterfaces %s
+denyinterfaces %s',
+		$wdev, $default_interface
+	);
+	addToConfigFile($dhcpcd_conf, $vlan_conf_config, 'interface');
+
 	
 	/** Create bridge */
 	$program = 'bridge-utils';
