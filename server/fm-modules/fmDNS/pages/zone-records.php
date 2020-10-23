@@ -65,13 +65,23 @@ $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'
 sort($supported_record_types);
 $supported_record_types[] = 'SOA';
 
+$response = $form_data = $action = null;
+if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
+	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id', 'AND record_type="URL"');
+	if ($fmdb->num_rows) {
+		$response = __('There are no URL RR web servers defined in the Settings to support the URL resource records.');
+		$response_class = 'attention';
+	} else {
+		unset($supported_record_types[array_search('URL', $supported_record_types)]);
+	}
+}
+
 $parent_domain_ids = getZoneParentID($domain_id);
 $zone_access_allowed = zoneAccessIsAllowed($parent_domain_ids);
 		
 if (!in_array($record_type, $supported_record_types)) $record_type = $default_record_type;
 $avail_types = buildRecordTypes($record_type, $parent_domain_ids, $map, $supported_record_types, $search_query);
 
-$response = $form_data = $action = null;
 if (reloadZone($domain_id)) {
 	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = sprintf(__('You need to %s this zone'), sprintf('<a href="" class="zone_reload" id="' . $domain_id . '">%s</a>', __('reload')));
 }
@@ -82,13 +92,6 @@ if (!getNSCount($domain_id)) {
 if (!getSOACount($domain_id)) {
 	$response = __('The SOA record still needs to be created for this zone');
 	$response_class = 'attention';
-}
-if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
-	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id', 'AND record_type="URL"');
-	if ($fmdb->num_rows) {
-		$response = __('There are no URL RR web servers defined in the Settings to support the URL resource records.');
-		$response_class = 'attention';
-	}
 }
 
 $body = '<div id="body_container" class="fm-noscroll">' . "\n";
