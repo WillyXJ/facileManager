@@ -1,3 +1,8 @@
+0.4.5 (2020-??-??)
+==================
+* Server - [bug] Added missing 'option' prefix to global options. (Issue #497)
+* Server - [bug] Pool configuration can now select a failover peer. (Issue #480)
+
 0.4.4 (2020-02-25)
 ==================
 * Server - [bug] Multiple hosts can now have the same IP address. (Issue #474)

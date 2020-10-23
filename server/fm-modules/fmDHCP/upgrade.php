@@ -30,7 +30,7 @@ function upgradefmDHCPSchema($module_name) {
 	$running_version = getOption('version', 0, 'fmDHCP');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.3.2', '<') ? upgradefmDHCP_032($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.4.5', '<') ? upgradefmDHCP_045($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false, 0, 'fmDHCP');
@@ -39,7 +39,7 @@ function upgradefmDHCPSchema($module_name) {
 }
 
 /** 0.2 */
-function upgradefmDHCP_02($__FM_CONFIG, $running_version) {
+function upgradefmDHCP_020($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` ADD `def_prefix` VARCHAR(20) NULL DEFAULT NULL AFTER `def_option_type`";
@@ -124,6 +124,9 @@ VALUES
 function upgradefmDHCP_031($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
+	$success = version_compare($running_version, '0.2', '<') ? upgradefmDHCP_020($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
 	/** Insert upgrade steps here **/
 	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` SET `config_name`='load balance max seconds' WHERE `config_name`='load balance max secs'";
 	
@@ -152,6 +155,9 @@ function upgradefmDHCP_031($__FM_CONFIG, $running_version) {
 function upgradefmDHCP_032($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
+	$success = version_compare($running_version, '0.3.1', '<') ? upgradefmDHCP_031($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
 	/** Insert upgrade steps here **/
 	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` SET `config_name`='load balance max seconds' WHERE `config_name`='load_balance_max_seconds'";
 	
@@ -172,6 +178,50 @@ function upgradefmDHCP_032($__FM_CONFIG, $running_version) {
 	
 	/** Handle updating table with module version **/
 	setOption('version', '0.3.2', 'auto', false, 0, 'fmDHCP');
+	
+	return true;
+}
+
+/** 0.4.5 */
+function upgradefmDHCP_045($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '0.3.2', '<') ? upgradefmDHCP_032($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	/** Insert upgrade steps here **/
+	// Get all pools
+	// Foreach pool, get failover peer config
+	// If it does not exist, insert it with a value of 0
+	$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDHCP']['prefix']}config WHERE config_status!='deleted' AND config_type='pool' AND config_is_parent='yes' AND config_name='pool' ORDER BY config_id ASC";
+	$result = $fmdb->get_results($query);
+	if (!$fmdb->sql_errors && $fmdb->num_rows) {
+		foreach ($fmdb->last_result as $record) {
+			$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG['fmDHCP']['prefix']}config WHERE config_status!='deleted' AND config_parent_id='{$record->config_id}' AND config_name='failover peer' ORDER BY config_id ASC";
+			$result = $fmdb->get_results($query);
+			if (!$fmdb->sql_errors && !$fmdb->num_rows) {
+				$inserts[] = "INSERT INTO `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` (`config_type`,`config_parent_id`,`config_name`,`config_data`) VALUES ('pool', {$record->config_id}, 'failover peer', '0')";
+			}	
+		}
+	}
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $query) {
+			$fmdb->query($query);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Handle updating table with module version **/
+	setOption('version', '0.4.5', 'auto', false, 0, 'fmDHCP');
 	
 	return true;
 }

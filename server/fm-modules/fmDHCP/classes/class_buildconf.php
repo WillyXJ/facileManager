@@ -160,6 +160,12 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$config_name = $config_result[$i]->config_name;
 				if ($type == 'peer') {
 					$config_name = 'failover peer';
+				} else {
+					// Get option prefix
+					$fmdb->get_results('SELECT def_prefix FROM fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'functions WHERE def_option_type="' . $type . '" AND def_option="' . $config_name . '"');
+					if ($fmdb->num_rows && $fmdb->last_result[0]->def_prefix) {
+						$config_name = $fmdb->last_result[0]->def_prefix . ' ' . $config_name;
+					}
 				}
 				$config .= $tab . $config_name;
 				unset($config_name);
