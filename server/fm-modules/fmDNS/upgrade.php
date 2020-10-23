@@ -2300,6 +2300,7 @@ function upgradefmDNS_400($__FM_CONFIG, $running_version) {
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_menu_display`='exclude' WHERE `server_type`='remote'";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global'";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` ADD `cfg_order_id` INT(11) NOT NULL DEFAULT '0' AFTER `cfg_parent`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_dnssec_sign_inline` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `domain_dnssec_signed`";
 
 	$table[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (

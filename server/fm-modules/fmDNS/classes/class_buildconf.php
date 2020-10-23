@@ -435,10 +435,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				/** Include hint zone (root servers) */
 				if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
 				
-				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
+				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t");
 			}
 			/** Build global option includes */
-			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir);
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids);
 			
 			/** Build rate limits */
 			$config .= $this->getRateLimits(0, $server_serial_no);
@@ -509,7 +509,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			unset($control_result, $control_config_count, $control_config);
 
 			/** Build extra includes */
-			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, 0, 'outside');
+			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, 0, 'outside');
 			
 			
 			/** Debian-based requires named.conf.options */
@@ -583,7 +583,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					foreach ($config_array as $cfg_name => $cfg_data) {
 						list($cfg_info, $cfg_comment) = $cfg_data;
 
-						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t");
+						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t");
 						
 						if ($cfg_name == 'recursion') {
 							$include_hint_zone_local = ($cfg_info == 'yes') ? true : false;
@@ -592,7 +592,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					unset($config_array);
 
 					/** Build includes */
-					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids, $server_root_dir);
+					$config .= $this->getIncludeFiles($view_result[$i]->view_id, $server_serial_no, $server_group_ids);
 
 					/** Build rate limits */
 					$config .= $this->getRateLimits($view_result[$i]->view_id, $server_serial_no);
@@ -941,6 +941,22 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
 					}
 					$zones .= "};\n";
+
+					/** Build DNSSEC keys for domain_id */
+					$real_domain_id = (isset($zone_result[$i]->parent_domain_id)) ? $zone_result[$i]->parent_domain_id : $zone_result[$i]->omain_id;
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', array('key_id', 'domain_id'), 'key_', "AND key_type='dnssec' AND key_status='active' AND key_signing='yes' AND domain_id=$real_domain_id");
+					if ($fmdb->num_rows) {
+						$dnssec_keys_result = $fmdb->last_result;
+
+						/** Get key-directory */
+						if ($key_directory = str_replace('$ZONES', $server_zones_dir, $this->getKeyDirectory($real_domain_id, $view_id, $server_serial_no, $server_id))) {
+							/** Populate the DNSSEC signing key files */
+							foreach ($dnssec_keys_result as $dnssec_key_record) {
+								$files[$key_directory . DIRECTORY_SEPARATOR . $dnssec_key_record->key_name . '.private'] = $dnssec_key_record->key_secret;
+								$files[$key_directory . DIRECTORY_SEPARATOR . $dnssec_key_record->key_name . '.key'] = $dnssec_key_record->key_public;
+							}
+						}
+					}
 	
 					/** Add domain_id to built_domain_ids for tracking */
 					$GLOBALS['built_domain_ids'][] = $zone_result[$i]->domain_id;
@@ -992,7 +1008,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		
 		/** Sign the zone? */
-		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes') {
+		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes' && $domain->domain_dnssec_sign_inline == 'no') {
 			$zone_file = $this->dnssecSignZone($domain, $zone_file);
 		}
 		
@@ -1418,6 +1434,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$parent_zone->domain_clone_dname = $zone->domain_clone_dname;
 			$parent_zone->domain_dnssec = $zone->domain_dnssec;
 			$parent_zone->domain_dnssec_sig_expire = $zone->domain_dnssec_sig_expire;
+			$parent_zone->domain_dnssec_sign_inline = $zone->domain_dnssec_sign_inline;
 			$parent_zone->domain_check_config = $zone->domain_check_config;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
@@ -1665,7 +1682,7 @@ HTML;
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			list($cfg_info, $cfg_comment) = $cfg_data;
 
-			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t$extra_tab");
+			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t$extra_tab");
 		}
 		
 		if (!$config) {
@@ -1775,8 +1792,6 @@ HTML;
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		$config = null;
 		
-		$server_root_dir = getNameFromID($server_serial_no, "fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir');
-		
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id IN ('" . join("','", $domain_ids) . "') AND server_serial_no='0' AND cfg_status='active'");
 		if ($fmdb->num_rows) {
 			$config_result = $fmdb->last_result;
@@ -1805,11 +1820,11 @@ HTML;
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			list($cfg_info, $cfg_comment) = $cfg_data;
 
-			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
+			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
 		}
 
 		/** Build includes */
-		$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $server_root_dir, $domain_ids);
+		$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_ids);
 
 		return $config;
 	}
@@ -1905,7 +1920,7 @@ HTML;
 	 * @param string $sql Additional SQL statement
 	 * @return string
 	 */
-	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment = null, $server_root_dir = null, $tab = "\t\t", $sql = null) {
+	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment = null, $server_info = null, $tab = "\t\t", $sql = null) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
 		
 		$config = null;
@@ -1930,7 +1945,7 @@ HTML;
 		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
 		
-		$config .= str_replace('$ROOT', $server_root_dir, trim(rtrim(trim($cfg_info), ';')));
+		$config .= str_replace(array('$ROOT', '$ZONES'), array($server_info->server_root_dir, $server_info->server_zones_dir), trim(rtrim(trim($cfg_info), ';')));
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) {
 			$config .= $cfg_info ? '; }' : ' }';
 		}
@@ -2047,7 +2062,7 @@ HTML;
 	 * @param string  $clause Whether includes are inside or outside of clauses
 	 * @return array
 	 */
-	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $server_root_dir, $domain_id = 0, $clause = 'inside') {
+	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $domain_id = 0, $clause = 'inside') {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (is_array($server_group_ids)) {
@@ -2075,7 +2090,7 @@ HTML;
 			foreach ($include_config as $cfg_name => $value_array) {
 				foreach ($value_array as $domain_name => $cfg_data) {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $server_root_dir, $tab);
+					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, $tab);
 				}
 			}
 			return $include_files;
@@ -2397,6 +2412,35 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 	}
 	
 	
+	/**
+	 * Gets the key-directory
+	 *
+	 * @since 4.0
+	 * @package fmDNS
+	 *
+	 * @param integer $domain_id The domain_id to get key directory for
+	 * @return string
+	 */
+	function getKeyDirectory($domain_id, $view_id, $server_serial_no, $server_id) {
+		global $fmdb, $__FM_CONFIG, $fm_module_servers;
+
+		/** Get associated server group IDs */
+		$server_group_ids = $fm_module_servers->getServerGroupIDs($server_id);
+		$server_group_ids_sql = (is_array($server_group_ids)) ? ", 'g_" . implode(", 'g_", $server_group_ids) . "'" : null;
+		
+		$query = "SELECT * FROM `fm_dns_config` WHERE `cfg_name` = 'key-directory' AND cfg_type='global' AND account_id=1 AND cfg_status='active'
+			AND domain_id IN (0, $domain_id) AND view_id IN (0, $view_id) AND server_serial_no IN ('0', '$server_serial_no' $server_group_ids_sql)
+			ORDER BY domain_id DESC, view_id DESC, (server_serial_no > 0) DESC, server_serial_no DESC LIMIT 1";
+		$fmdb->query($query);
+
+		if ($fmdb->num_rows) {
+			return str_replace(array('"', "'"), '', $fmdb->last_result[0]->cfg_data);
+		}
+
+		return null;
+	}
+
+
 }
 
 if (!isset($fm_module_buildconf))

@@ -167,6 +167,8 @@ class fm_dns_zones {
 			return $insert_id;
 		}
 		
+		$dbupdate_error_msg = __('Could not add the zone because a database error occurred.');
+		
 		/** Zones */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains`";
 		$sql_fields = '(';
@@ -293,7 +295,7 @@ class fm_dns_zones {
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
-			return formatError(__('Could not add the zone because a database error occurred.'), 'sql');
+			return formatError($dbupdate_error_msg, 'sql');
 		}
 
 		$insert_id = $fmdb->insert_id;
@@ -331,8 +333,21 @@ class fm_dns_zones {
 				$fm_dns_records->add($insert_id, 'CNAME', $record_array);
 			}
 		}
+
 		if ($fmdb->sql_errors) {
-			return formatError(__('Could not add the zone because a database error occurred.'), 'sql');
+			return formatError($dbupdate_error_msg, 'sql');
+		}
+
+		/** Add DNSSEC inline signing zone options */
+		if ($post['domain_dnssec_sign_inline'] == 'yes') {
+			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'auto-dnssec' => 'maintain') as $param => $val) {
+				$result = $fmdb->query($query . "'$param', '$val')");
+				$log_message .= formatLogKeyData('domain_', $param, $val);
+
+				if ($fmdb->sql_errors) {
+					return formatError($dbupdate_error_msg, 'sql');
+				}
+			}
 		}
 		
 		$this->updateSOASerialNo($insert_id, 0);
@@ -395,6 +410,8 @@ class fm_dns_zones {
 		}
 
 		$domain_id = sanitize($_POST['domain_id']);
+
+		$dbupdate_error_msg = __('Could not update the zone because a database error occurred.');
 		
 		/** Validate post */
 		$_POST['domain_mapping'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
@@ -468,7 +485,7 @@ class fm_dns_zones {
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
-			return formatError(__('Could not update the zone because a database error occurred.'), 'sql');
+			return formatError($dbupdate_error_msg, 'sql');
 		}
 		
 		$rows_affected = $fmdb->rows_affected;
@@ -499,6 +516,9 @@ class fm_dns_zones {
 				} else {
 					$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 				}
+				if ($fmdb->sql_errors) {
+					return formatError($dbupdate_error_msg, 'sql');
+				}
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
 
 				$domain_forward = sanitize($post['domain_forward'][0]);
@@ -523,7 +543,21 @@ class fm_dns_zones {
 			basicDelete("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", $domain_id, 'domain_id');
 		}
 		if ($fmdb->sql_errors) {
-			return formatError(__('Could not update zone because a database error occurred.'), 'sql');
+			return formatError($dbupdate_error_msg, 'sql');
+		}
+
+		/** Add DNSSEC inline signing zone options */
+		if ($post['domain_dnssec_sign_inline'] == 'yes') {
+			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'auto-dnssec' => 'maintain') as $param => $val) {
+				if (!getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='$param'")) {
+					$result = $fmdb->query($query . "'$param', '$val')");
+				}
+				$log_message .= formatLogKeyData('domain_', $param, $val);
+
+				if ($fmdb->sql_errors) {
+					return formatError($dbupdate_error_msg, 'sql');
+				}
+			}
 		}
 		
 		/** Return if there are no changes */
@@ -790,6 +824,7 @@ class fm_dns_zones {
 					$response = __('There are no DNSSEC keys defined for this zone.');
 					$classes[] = 'attention';
 				}
+				$icons[] = sprintf('<a href="config-keys.php?type=dnssec&domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-key secure" aria-hidden="true"></i></a>', $row->domain_id, __('Manage zone DNSSEC keys'));
 			}
 			if ($dynamic_zone == 'yes') {
 				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates'));
@@ -873,7 +908,7 @@ HTML;
 		$domain_view = -1;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
 		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
-		$domain_dnssec_sig_expire = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
+		$domain_dnssec_sig_expire = $domain_dnssec_sign_inline = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
 		$disabled = $action == 'create' ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -1037,6 +1072,7 @@ HTML;
 				$dnssec_generate_ds_checked = null;
 			}
 			if (!$domain_dnssec_sig_expire) $domain_dnssec_sig_expire = null;
+			$domain_dnssec_sign_inline_checked = ($domain_dnssec_sign_inline == 'yes') ? 'checked' : null;
 			
 			$available_zones = array_reverse($this->availableZones('all', 'master', 'restricted'));
 			$available_zones[] = array(null, 0);
@@ -1051,7 +1087,8 @@ HTML;
 					<h4>%s</h4>
 					<label for="domain_dnssec_sig_expire">%s</label> <input type="text" id="domain_dnssec_sig_expire" name="domain_dnssec_sig_expire" value="%s" placeholder="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /> 
 					<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a><br />
-					<p><input type="checkbox" id="domain_dnssec_generate_ds" name="domain_dnssec_generate_ds" value="yes" %s /><label for="domain_dnssec_generate_ds"> %s</label></p>
+					<input type="checkbox" id="domain_dnssec_sign_inline" name="domain_dnssec_sign_inline" value="yes" %s /><label for="domain_dnssec_sign_inline"> %s</label> <a href="#" class="tooltip-left" data-tooltip="%s"><i class="fa fa-question-circle"></i></a><br />
+					<input type="checkbox" id="domain_dnssec_generate_ds" name="domain_dnssec_generate_ds" value="yes" %s /><label for="domain_dnssec_generate_ds"> %s</label>
 				</div>
 				<div id="dnssec_ds_option" style="display: %s;">
 					<h4>%s:</h4>
@@ -1062,6 +1099,7 @@ HTML;
 				sprintf(__('The dnssec-signzone and dnssec-keygen utilities must be installed on %s in order for this to work.'), php_uname('n')), $dnssec_style,
 				__('Signature Expiry Override (optional)'), __('Days'), $domain_dnssec_sig_expire, getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']),
 				sprintf(__('Enter the number of days to expire the signature if different from what is defined in the %s.'), _('Settings')),
+				$domain_dnssec_sign_inline_checked, __('Automatically resign the zone'), __('This enables the inline-signing, auto-dnssec, and key-directory options which allows BIND to automatically resign the zone.'),
 				$dnssec_generate_ds_checked, __('Generate DS RR during signing'),
 				$dnssec_ds_style, __('Include DS RR in selected parent zone'), $available_zones
 			);
@@ -1772,6 +1810,11 @@ HTML;
 		if ($post['domain_dnssec_generate_ds'] != 'yes') {
 			$post['domain_dnssec_generate_ds'] = 'no';
 		}
+		if ($post['domain_dnssec_sign_inline'] != 'yes') {
+			$post['domain_dnssec_sign_inline'] = 'no';
+		} else {
+			$post['domain_dnssec_signed'] = 0;
+		}
 		
 		/** Ensure domain_view is set */
 		if (!array_key_exists('domain_view', $post)) {
@@ -1836,7 +1879,7 @@ HTML;
 		if ($post['domain_template_id']) {
 			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
 				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
-				'domain_dnssec_parent_domain_id', 'domain_view');
+				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view');
 			foreach ($include as $key) {
 				$new_post[$key] = $post[$key];
 			}
@@ -2356,6 +2399,32 @@ HTML;
 	}
 	
 	
+	/**
+	 * Gets config item data from key
+	 *
+	 * @since 4.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param integer $domain_id Domain ID to get the config option for
+	 * @param string $config_opt Config option to retrieve
+	 * @return string
+	 */
+	function getConfig($domain_id, $config_opt = null) {
+		global $fmdb, $__FM_CONFIG;
+		
+		$return = null;
+		
+		/** Get the data from $config_opt */
+		$query = "SELECT cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND domain_id='{$domain_id}' AND cfg_name='$config_opt' LIMIT 1";
+		$result = $fmdb->get_results($query);
+		if (!$fmdb->sql_errors && $fmdb->num_rows) {
+			$return = $fmdb->last_result[0]->cfg_data;
+		}
+		
+		return $return;
+	}
+
 }
 
 if (!isset($fm_dns_zones))
