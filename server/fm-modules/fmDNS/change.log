@@ -1,5 +1,5 @@
-4.0.0-beta1 (2020-10-23)
-========================
+4.0-beta1 (2020-10-23)
+======================
 * Both   - [feature] Added support for API calls to add, update, and delete
            records. (Issue #289 #327)
 * Both   - [feature] Added support to forward records to URLs through the fmDNS
