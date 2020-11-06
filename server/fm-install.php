@@ -190,6 +190,18 @@ function displaySetup($error = null) {
 	$dbname = (isset($_POST['dbname'])) ? $_POST['dbname'] : $fm_name;
 	$dbuser = (isset($_POST['dbuser'])) ? $_POST['dbuser'] : null;
 	$dbpass = (isset($_POST['dbpass'])) ? $_POST['dbpass'] : null;
+	$key = (isset($_POST['ssl']['key'])) ? $_POST['ssl']['key'] : null;
+	$cert = (isset($_POST['ssl']['cert'])) ? $_POST['ssl']['cert'] : null;
+	$ca = (isset($_POST['ssl']['ca'])) ? $_POST['ssl']['ca'] : null;
+	$capath = (isset($_POST['ssl']['capath'])) ? $_POST['ssl']['capath'] : null;
+	$cipher = (isset($_POST['ssl']['cipher'])) ? $_POST['ssl']['cipher'] : null;
+	if (isset($_POST['install_enable_ssl'])) {
+		$ssl_checked = 'checked';
+		$ssl_show_hide = 'table-row-group';
+	} else {
+		$ssl_checked = null;
+		$ssl_show_hide = 'none';
+	}
 	
 	printf('
 <form method="post" action="?step=2">
@@ -200,6 +212,7 @@ function displaySetup($error = null) {
 	%s
 	<p>' . _('Before we can install the backend database, your database credentials are needed. (They will also be used to generate the <code>config.inc.php</code> file.)') . '</p>
 	<table>
+		<tbody>
 		<tr>
 			<th><label for="dbhost">' . _('Database Host') . '</label></th>
 			<td><input type="text" size="25" name="dbhost" id="dbhost" value="%s" placeholder="localhost" /></td>
@@ -216,10 +229,49 @@ function displaySetup($error = null) {
 			<th><label for="dbpass">' . _('Password') . '</label></th>
 			<td><input type="password" size="25" name="dbpass" id="dbpass" value="%s" placeholder="' . _('password') . '" /></td>
 		</tr>
+		<tr>
+			<th></th>
+			<td><input type="checkbox" name="install_enable_ssl" id="install_enable_ssl" %s /> <label for="enable_ssl">%s</label></td>
+		</tr>
+		</tbody>
+		<tbody id="install_ssl_options" style="display: %s">
+		<tr>
+			<th><label for="dbhost">%s</label></th>
+			<td><input type="text" size="25" name="ssl[key]" id="key" value="%s" placeholder="/path/to/ssl.key" /></td>
+		</tr>
+		<tr>
+			<th><label for="dbhost">%s</label></th>
+			<td><input type="text" size="25" name="ssl[cert]" id="cert" value="%s" placeholder="/path/to/ssl.crt" /></td>
+		</tr>
+		<tr>
+			<th><label for="dbhost">%s</label></th>
+			<td><input type="text" size="25" name="ssl[ca]" id="ca" value="%s" placeholder="/path/to/ca.pem" /></td>
+		</tr>
+		<tr>
+			<th><label for="dbhost">%s</label></th>
+			<td><input type="text" size="25" name="ssl[capath]" id="capath" value="%s" placeholder="/path/to/trusted/cas" /></td>
+		</tr>
+		<tr>
+			<th><label for="dbhost">%s</label></th>
+			<td><input type="text" size="25" name="ssl[cipher]" id="cipher" value="%s" /></td>
+		</tr>
+		</tbody>
 	</table>
 	<p class="step"><input name="submit" type="submit" value="' . _('Submit') . '" class="button" /></p>
 	</div>
-</form>', $branding_logo, _('Install'), $error, $dbhost, $dbname, $dbuser, $dbpass);
+</form>
+<script>
+$("#install_enable_ssl").click(function(){
+	if ($(this).is(":checked")) {
+		$("#install_ssl_options").show("slow");
+	} else {
+		$("#install_ssl_options").slideUp();
+	}
+});
+</script>
+', $branding_logo, _('Install'), $error, $dbhost, $dbname, $dbuser, $dbpass, $ssl_checked, _('Enable SSL'),
+	$ssl_show_hide, _('SSL Key Path'), $key, _('SSL Certificate Path'), $cert, _('SSL Certificate CA Path'), $ca,
+	_('SSL Trusted CA Path (optional)'), $capath, _('SSL Ciphers (optional)'), $cipher);
 }
 
 /**
@@ -230,7 +282,17 @@ function displaySetup($error = null) {
  * @subpackage Installer
  */
 function processSetup() {
+	global $__FM_CONFIG;
 	extract($_POST);
+
+	foreach ($ssl as $key=>$val) {
+		if ($install_enable_ssl) {
+			$__FM_CONFIG['db'][$key] = $val;
+		} else {
+			unset($_POST['ssl']);
+			break;
+		}
+	}
 	
 	include_once(ABSPATH . 'fm-includes/fm-db.php');
 	$fmdb = new fmdb($dbuser, $dbpass, $dbname, $dbhost, 'silent connect');

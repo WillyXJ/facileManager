@@ -139,7 +139,16 @@ class fmdb {
 		global $__FM_CONFIG;
 		
 		if ($this->use_mysqli) {
-			$this->dbh = @mysqli_connect($dbhost, $dbuser, $dbpassword);
+			$this->dbh = @mysqli_init();
+
+			/** Set SSL */
+			if (isset($__FM_CONFIG['db']['key'])) {
+				mysqli_ssl_set($this->dbh, $__FM_CONFIG['db']['key'], $__FM_CONFIG['db']['cert'], $__FM_CONFIG['db']['ca'], $__FM_CONFIG['db']['capth'], $__FM_CONFIG['db']['cipher']);
+			}
+
+			if (!@mysqli_real_connect($this->dbh, $dbhost, $dbuser, $dbpassword)) {
+				$this->dbh = false;
+			}
 		} else {
 			$this->dbh = @mysql_connect($dbhost, $dbuser, $dbpassword);
 		}

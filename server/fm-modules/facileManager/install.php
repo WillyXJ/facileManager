@@ -94,7 +94,21 @@ function generateConfig() {
 	$dbname = sanitize($dbname, '_');
 	
 	$dbpass = str_replace("'", "\'", $dbpass);
-	
+
+	if ($install_enable_ssl) {
+		$ssl_config = <<<CFG
+/** Database SSL connection settings (optional) */
+\$__FM_CONFIG['db']['key'] = '{$ssl['key']}';
+\$__FM_CONFIG['db']['cert'] = '{$ssl['cert']}';
+\$__FM_CONFIG['db']['ca'] = '{$ssl['ca']}';
+\$__FM_CONFIG['db']['capath'] = '{$ssl['capth']}';
+\$__FM_CONFIG['db']['cipher'] = '{$ssl['cipher']}';
+
+CFG;
+	} else {
+		$ssl_config = null;
+	}
+
 	$config = <<<CFG
 <?php
 
@@ -111,6 +125,7 @@ function generateConfig() {
 \$__FM_CONFIG['db']['pass'] = '$dbpass';
 \$__FM_CONFIG['db']['name'] = '$dbname';
 
+$ssl_config
 require_once(ABSPATH . 'fm-modules/facileManager/functions.php');
 
 ?>
