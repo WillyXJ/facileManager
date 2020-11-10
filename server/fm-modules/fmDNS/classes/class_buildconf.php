@@ -1330,6 +1330,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						if (!strlen($record_result[$i]->record_text)) $record_text = '.';
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_value . $separator . $record_text . $record_comment . "\n";
 						break;
+					case 'SMIMEA':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.11.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'S/MIME';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . ' ' . $record_result[$i]->record_weight . ' ' . $record_result[$i]->record_port . $separator . "\t(\n\t\t\t" . str_replace("\n", "\n\t\t\t", $record_result[$i]->record_value) . ' )' . $record_comment . "\n";
+						break;
 					case 'SSHFP':
 						$record_array[$record_result[$i]->record_type]['Version'] = '9.3.0';
 						$record_array[$record_result[$i]->record_type]['Description'] = 'SSH Key Fingerprint records';

@@ -320,7 +320,7 @@ class fm_dns_records {
 			$title_array[] = array('title' => __('Type'), 'rel' => 'record_params');
 		}
 		
-		if ($type == 'TLSA') {
+		if (in_array($type, array('SMIMEA', 'TLSA'))) {
 			$title_array[] = array('title' => __('Usage'), 'rel' => 'record_priority');
 			$title_array[] = array('title' => __('Selector'), 'rel' => 'record_weight');
 			$title_array[] = array('title' => __('Type'), 'rel' => 'record_port');
@@ -460,7 +460,7 @@ class fm_dns_records {
 				$show_value = false;
 			}
 			
-			if ($type == 'TLSA') {
+			if (in_array($type, array('SMIMEA', 'TLSA'))) {
 				$tmp_flags1 = $__FM_CONFIG['records']['tlsa_flags'];
 				array_pop($tmp_flags1);
 				$tmp_flags2 = $tmp_flags1;
@@ -470,7 +470,7 @@ class fm_dns_records {
 				$field_values['data']['Port'] = '>' . buildSelect($action . '[_NUM_][record_port]', '_NUM_', $tmp_flags2, $record_port);
 			}
 			
-			if ($type == 'OPENPGPKEY') {
+			if (in_array($type, array('SMIMEA', 'OPENPGPKEY'))) {
 				$value_textarea = true;
 			}
 			

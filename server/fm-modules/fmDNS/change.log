@@ -1,3 +1,7 @@
+4.0-beta2 (2020-??-??)
+======================
+* Server - [feature] Added support for SMIMEA RR. (Issue #501)
+
 4.0-beta1 (2020-10-23)
 ======================
 * Both   - [feature] Added support for API calls to add, update, and delete

@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '4.0.0-beta1', '<') ? upgradefmDNS_4001($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '4.0.0-beta2', '<') ? upgradefmDNS_4002($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2331,6 +2331,27 @@ INSERTSQL;
 	}
 
 	setOption('version', '4.0.0-beta1', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
+/** 4.0.0-beta2 */
+function upgradefmDNS_4002($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '4.0.0-beta1', '<') ? upgradefmDNS_4001($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE `record_type` `record_type` ENUM('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','HINFO','KEY','KX','MX','NAPTR','NS','OPENPGPKEY','PTR','RP','SMIMEA','SSHFP','SRV','TLSA','TXT','URL') NOT NULL DEFAULT 'A'";
+
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '4.0.0-beta2', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }
