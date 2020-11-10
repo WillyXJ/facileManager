@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}reco
   `record_value` text,
   `record_ttl` varchar(50) NOT NULL DEFAULT '',
   `record_class` enum('IN','CH','HS') NOT NULL DEFAULT 'IN',
-  `record_type` enum('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','HINFO','KEY','KX','MX','NAPTR','NS','OPENPGPKEY','PTR','RP','SSHFP','SRV','TLSA','TXT','URL') NOT NULL DEFAULT 'A',
+  `record_type` enum('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','HINFO','KEY','KX','MX','NAPTR','NS','OPENPGPKEY','PTR','RP','SMIMEA','SSHFP','SRV','TLSA','TXT','URL') NOT NULL DEFAULT 'A',
   `record_priority` int(4) DEFAULT NULL,
   `record_weight` int(4) DEFAULT NULL,
   `record_port` int(4) DEFAULT NULL,
