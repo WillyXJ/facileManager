@@ -1353,6 +1353,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$record_array[$record_result[$i]->record_type]['Description'] = 'TXT records';
 						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . "\t(\"" . join("\"\n\t\t\"", $this->characterSplit($record_result[$i]->record_value)) . "\")" . $record_comment . "\n";
 						break;
+					case 'URI':
+						$record_array[$record_result[$i]->record_type]['Version'] = '9.11.0';
+						$record_array[$record_result[$i]->record_type]['Description'] = 'Service records';
+						$record_array[$record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_weight . $separator . '"' . $record_result[$i]->record_value . '"' . $record_comment . "\n";
+						break;
 					case 'URL':
 						if ($url_rr_web_servers = getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
 							$record_array[$record_result[$i]->record_type]['Description'] = 'URL redirects';
