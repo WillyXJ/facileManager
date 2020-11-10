@@ -333,12 +333,13 @@ class fm_dns_records {
 		}
 		
 		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
-		$priority = array('MX', 'SRV', 'KX');
+		$priority = array('MX', 'SRV', 'KX', 'URI');
+		$weight = array('SRV', 'URI');
 		
 		if (in_array($type, $priority)) $title_array[] = array('title' => __('Priority'), 'rel' => 'record_priority');
+		if (in_array($type, $weight)) $title_array[] = array('title' => __('Weight'), 'rel' => 'record_weight');
 		
 		if ($type == 'SRV') {
-			$title_array[] = array('title' => __('Weight'), 'rel' => 'record_weight');
 			$title_array[] = array('title' => __('Port'), 'rel' => 'record_port');
 		}
 		
@@ -370,7 +371,8 @@ class fm_dns_records {
 		$value_textarea = false;
 		
 		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
-		$priority = array('MX', 'SRV', 'KX');
+		$priority = array('MX', 'SRV', 'KX', 'URI');
+		$weight = array('SRV', 'URI');
 
 		if ($results) {
 			$results = get_object_vars($results);
@@ -503,9 +505,9 @@ class fm_dns_records {
 			}
 			
 			if (in_array($type, $priority)) $field_values['data']['Priority'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_priority]" value="' . $record_priority . '" onkeydown="return validateNumber(event)" />';
+			if (in_array($type, $weight)) $field_values['data']['Weight'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_weight]" value="' . $record_weight . '" onkeydown="return validateNumber(event)" />';
 	
 			if ($type == 'SRV') {
-				$field_values['data']['Weight'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_weight]" value="' . $record_weight . '" onkeydown="return validateNumber(event)" />';
 				$field_values['data']['Port'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_port]" value="' . $record_port . '" onkeydown="return validateNumber(event)" />';
 			}
 		
