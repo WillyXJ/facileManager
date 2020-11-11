@@ -1,17 +1,14 @@
-4.0-beta2 (2020-??-??)
-======================
-* Server - [feature] Added support for MySQL SSL connections. (Issue #485)
+4.0.0 (2020-11-11)
+==================
 * Server - [security] Fixed an issue where unprivileged users could create
            additional users with super-admin privileges.
-
-4.0-beta1 (2020-10-23)
-======================
-* Server - [bug] Fixed PHP errors.
 * Both   - [feature] Added support for user API keys. (Issue #289 #327)
+* Server - [feature] Added support for MySQL SSL connections. (Issue #485)
 * Server - [improvement] CSS changes.
 * Server - [improvement] Added support for module settings to have sections.
 * Server - [improvement] Added support to define LDAPS certificate and CA
            files in the settings. (Issue #500)
+* Server - [bug] Fixed PHP errors.
 
 3.5.7 (2020-03-04)
 ==================

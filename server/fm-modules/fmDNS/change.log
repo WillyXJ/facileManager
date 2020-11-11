@@ -1,16 +1,13 @@
-4.0-beta2 (2020-??-??)
-======================
-* Server - [feature] Added support for SMIMEA RRTYPE. (Issue #501)
-* Server - [feature] Added support for URI RRTYPE.
-
-4.0-beta1 (2020-10-23)
-======================
+4.0.0 (2020-11-11)
+==================
 * Both   - [feature] Added support for API calls to add, update, and delete
            records. (Issue #289 #327)
 * Both   - [feature] Added support to forward records to URLs through the fmDNS
            URL RR. (Issue #396)
 * Server - [feature] Added support to add ACL addresses in bulk. (Issue #484)
 * Server - [feature] Added support for Response Policy Zones. (Issue #471)
+* Server - [feature] Added support for SMIMEA RRTYPE. (Issue #501)
+* Server - [feature] Added support for URI RRTYPE.
 * Server - [improvement] named checks now skip previously checked zones. (Issue #212)
            Note: The first named check will process all configured zones.
 * Server - [improvement] Updated named.root from upstream.
