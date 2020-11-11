@@ -3,7 +3,7 @@
 * Both   - [feature] Added support for API calls to add, update, and delete
            records. (Issue #289 #327)
 * Both   - [feature] Added support to forward records to URLs through the fmDNS
-           URL RR. (Issue #396)
+           URL RRTYPE. (Issue #396)
 * Server - [feature] Added support to add ACL addresses in bulk. (Issue #484)
 * Server - [feature] Added support for Response Policy Zones. (Issue #471)
 * Server - [feature] Added support for SMIMEA RRTYPE. (Issue #501)
