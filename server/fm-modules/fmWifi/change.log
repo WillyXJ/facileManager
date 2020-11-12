@@ -1,3 +1,7 @@
+0.3.1 (2020-??-??)
+==================
+* Server - [bug] Fixed PHP errors.
+
 0.3.0 (2019-10-01)
 ==================
 * Server - [bug] Fixed dashboard display of uptime when multiple APs are in use.
