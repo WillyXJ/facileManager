@@ -1,3 +1,8 @@
+4.0.1 (2020-??-??)
+==================
+* Server - [bug] Unsupported BIND version messages for Rate Limit and RPZ features
+           in server configurations only show when those features are used.
+
 4.0.0 (2020-11-11)
 ==================
 * Both   - [feature] Added support for API calls to add, update, and delete
