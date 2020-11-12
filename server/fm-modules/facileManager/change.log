@@ -1,3 +1,7 @@
+4.0.1 (2020-??-??)
+==================
+* Server - [bug] Fixed an issue where users could not be enabled or disabled.
+
 4.0.0 (2020-11-11)
 ==================
 * Server - [security] Fixed an issue where unprivileged users could create

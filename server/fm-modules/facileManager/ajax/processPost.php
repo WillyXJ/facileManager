@@ -210,7 +210,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			break;
 		case 'edit':
 			if (isset($_POST['item_status'])) {
-				if (isset($_POST['url_var_type']) && $_POST['url_var_type'] != 'keys') {
+				if (!isset($_POST['url_var_type']) || (isset($_POST['url_var_type']) && $_POST['url_var_type'] != 'keys')) {
 					if ((!currentUserCan('do_everything') && userCan($id, 'do_everything')) || $id == getDefaultAdminID()) {
 						exit(_('You do not have permission to modify the status of this user.'));
 					}
@@ -231,6 +231,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 					}
 				}
 			}
+			exit(_('Error: Malformed request.'));
 			break;
 	}
 /** Handle everything else */
