@@ -1854,14 +1854,13 @@ HTML;
 		
 		/** Check if rrl is supported by server_version */
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
-		if (version_compare($server_version, '9.9.4', '<')) {
-			return "\t//\n\t// BIND 9.9.4 or greater is required for Response Rate Limiting.\n\t//\n\n";
-		}
+		$unsupported_version = $this->versionCompatCheck('Response Rate Limiting', '9.9.4', $server_version);
 		
 		$ratelimits = $ratelimits_domains = $rate_config_array = null;
 		
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
 		if ($fmdb->num_rows) {
+			if ($unsupported_version) return $unsupported_version;
 			$rate_result = $fmdb->last_result;
 			$global_rate_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_rate_count; $i++) {
@@ -1877,6 +1876,7 @@ HTML;
 		/** Override with server-specific configs */
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
 		if ($fmdb->num_rows) {
+			if ($unsupported_version) return $unsupported_version;
 			$server_config_result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_config_count; $i++) {
@@ -2333,14 +2333,13 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		
 		/** Check if rpz is supported by server_version */
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
-		if (version_compare($server_version, '9.10.0', '<')) {
-			return "\t//\n\t// BIND 9.10.0 or greater is required for Response Policy Zones.\n\t//\n\n";
-		}
+		$unsupported_version = $this->versionCompatCheck('Response Policy Zones', '9.10.0', $server_version);
 		
 		$global_rpz_config = $domain_rpz_config = $config_array = null;
 		
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="rpz" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
 		if ($fmdb->num_rows) {
+			if ($unsupported_version) return $unsupported_version;
 			$result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_config_count; $i++) {
@@ -2362,6 +2361,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		if (is_array($server_group_ids)) {
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', 'AND cfg_type="rpz" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
 			if ($fmdb->num_rows) {
+				if ($unsupported_version) return $unsupported_version;
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $global_config_count; $i++) {
@@ -2379,6 +2379,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		/** Override with server-specific configs */
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="rpz" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
 		if ($fmdb->num_rows) {
+			if ($unsupported_version) return $unsupported_version;
 			$server_config_result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_config_count; $i++) {
@@ -2445,6 +2446,26 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 
 		if ($fmdb->num_rows) {
 			return str_replace(array('"', "'"), '', $fmdb->last_result[0]->cfg_data);
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Checks if the server version is compatible with the feature
+	 *
+	 * @since 4.0.1
+	 * @package fmDNS
+	 *
+	 * @param string $feature The feature to check
+	 * @param string $required_version The minimum required version
+	 * @param string $server_version Installed server version
+	 * @return string
+	 */
+	private function versionCompatCheck($feature, $required_version, $server_version) {
+		if (version_compare($server_version, $required_version, '<')) {
+			return sprintf("\t//\n\t// BIND %s or greater is required for %s.\n\t//\n\n", $required_version, $feature);
 		}
 
 		return null;
