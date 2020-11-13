@@ -155,6 +155,7 @@ HTML;
 		}
 		foreach ($result as $server_info) {
 			$ap_clients = 0;
+			$ap_addresses = null;
 			$ap_status = str_replace(_('Failed'), __('AP is down'), $__FM_CONFIG['module']['icons']['fail']);
 			$ap_groups = $fm_module_servers->getServerGroups($server_info->server_id, 'group_name');
 			if (is_array($ap_groups)) {
