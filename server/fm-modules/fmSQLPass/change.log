@@ -1,3 +1,7 @@
+1.5.3 (2020-??-??)
+==================
+* Server - [bug] Fixed upgrade process retry attempts.
+
 1.5.2 (2019-10-01)
 ==================
 * Server - [security] Ensured header() calls are not skipped. (Found and reported

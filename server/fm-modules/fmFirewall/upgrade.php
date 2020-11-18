@@ -235,13 +235,25 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.1.1', '<') ? upgradefmFirewall_111($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_zone` ENUM('utc','kerneltz','localtz') NOT NULL DEFAULT 'utc' AFTER `time_weekdays`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_weekdays_not` ENUM('','!') NOT NULL DEFAULT '' AFTER `time_end_time`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_contiguous` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `time_weekdays`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays_not` ENUM('','!') NOT NULL DEFAULT '' AFTER `time_weekdays`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays` TEXT NULL DEFAULT NULL AFTER `time_monthdays_not`";
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}time", 'time_zone')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_zone` ENUM('utc','kerneltz','localtz') NOT NULL DEFAULT 'utc' AFTER `time_weekdays`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}mtime", 'time_weekdays_not')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_weekdays_not` ENUM('','!') NOT NULL DEFAULT '' AFTER `time_end_time`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}time", 'time_contiguous')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_contiguous` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `time_weekdays`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}time", 'time_monthdays_not')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays_not` ENUM('','!') NOT NULL DEFAULT '' AFTER `time_weekdays`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}time", 'time_monthdays')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}time` ADD `time_monthdays` TEXT NULL DEFAULT NULL AFTER `time_monthdays_not`";
+	}
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_type` `policy_type` ENUM('rules','filter','nat') NOT NULL DEFAULT 'filter'";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_packet_state` TEXT NULL DEFAULT NULL AFTER `policy_options`";
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_packet_state')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_packet_state` TEXT NULL DEFAULT NULL AFTER `policy_options`";
+	}
 	
 	$inserts = $updates = null;
 	
@@ -285,11 +297,20 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '1.4-beta2', '<') ? upgradefmFirewall_1401($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_name` VARCHAR(255) NULL DEFAULT NULL AFTER `policy_order_id`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_template_id` INT(11) NOT NULL DEFAULT '0' AFTER `policy_type`";
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_name')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_name` VARCHAR(255) NULL DEFAULT NULL AFTER `policy_order_id`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_template_id')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_template_id` INT(11) NOT NULL DEFAULT '0' AFTER `policy_type`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_targets')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_targets` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `policy_order_id`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_template_stack')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_template_stack` VARCHAR(255) NULL DEFAULT NULL AFTER `policy_type`";
+	}
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_type`='filter' WHERE `policy_type`='rules'";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_type` `policy_type` ENUM('filter','nat','template') NOT NULL DEFAULT 'filter'";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_targets` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `policy_order_id`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_template_stack` VARCHAR(255) NULL DEFAULT NULL AFTER `policy_type`";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_order_id` `policy_order_id` INT(11) NULL DEFAULT NULL";
 	
 	/** Change policy negates */
@@ -313,7 +334,7 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 			$serial_nos[] = $server->server_serial_no;
 		}
 		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_options`=`policy_options` + 8 WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ")";
-		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") AND `policy_action='pass'";
+		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") AND `policy_action`='pass'";
 	}
 	
 	/** Set packet state on all "pass" rules */
@@ -323,7 +344,7 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 		foreach ($fmdb->last_result as $server) {
 			$serial_nos[] = $server->server_serial_no;
 		}
-		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") `policy_action='pass'";
+		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") AND `policy_action`='pass'";
 	}
 	$serial_nos = null;
 	$result = $fmdb->get_results("SELECT `server_serial_no` FROM `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` WHERE `server_type`='ipfw'");
@@ -331,7 +352,7 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 		foreach ($fmdb->last_result as $server) {
 			$serial_nos[] = $server->server_serial_no;
 		}
-		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep-state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") `policy_action='pass'";
+		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep-state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") AND `policy_action`='pass'";
 	}
 	
 	/** Create table schema */

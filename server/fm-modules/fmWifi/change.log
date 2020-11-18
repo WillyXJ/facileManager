@@ -1,6 +1,7 @@
 0.3.1 (2020-??-??)
 ==================
 * Server - [bug] Fixed PHP errors.
+* Server - [bug] Fixed upgrade process retry attempts.
 
 0.3.0 (2019-10-01)
 ==================

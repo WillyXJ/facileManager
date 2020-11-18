@@ -826,4 +826,23 @@ function displaySetupMessage($message = 1, $url = null) {
 	}
 }
 
+
+/**
+ * Checks if a table column exists.
+ *
+ * @since 4.0.1
+ * @package facileManager
+ * @subpackage Upgrader
+ * 
+ * @param string $table The table containing the column
+ * @param string $column The column to check
+ */
+function columnExists($table, $column) {
+	global $fmdb, $__FM_CONFIG;
+
+	$fmdb->query("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='{$__FM_CONFIG['db']['name']}' AND TABLE_NAME='$table' AND COLUMN_NAME='$column'");
+
+	return $fmdb->num_rows;
+}
+
 ?>

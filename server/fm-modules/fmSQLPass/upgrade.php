@@ -42,7 +42,9 @@ function upgradefmSQLPassSchema($running_version) {
 function upgradefmSQLPass_01002($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
-	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` ADD  `server_port` INT( 5 ) NULL DEFAULT NULL AFTER  `server_type` ";
+	if (!columnExists("fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers", 'server_port')) {
+		$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` ADD  `server_port` INT( 5 ) NULL DEFAULT NULL AFTER  `server_type` ";
+	}
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_groups`  `server_groups` TEXT NULL DEFAULT NULL ";
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_credentials`  `server_credentials` TEXT NULL DEFAULT NULL ";
 	

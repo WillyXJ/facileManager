@@ -43,7 +43,9 @@ function upgradefmWifi_02($__FM_CONFIG, $running_version) {
 	global $fmdb, $module_name;
 	
 	/** Insert upgrade steps here **/
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` ADD `def_int_range` VARCHAR(5) NULL DEFAULT NULL AFTER `def_dropdown`";
+	if (!columnExists("fm_{$__FM_CONFIG['fmWifi']['prefix']}functions", 'def_int_range')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` ADD `def_int_range` VARCHAR(5) NULL DEFAULT NULL AFTER `def_dropdown`";
+	}
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` SET `def_option_type`='wlan'";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmWifi']['prefix']}config` SET `config_type`='wlan'";
 	$table[] = <<<INSERTSQL

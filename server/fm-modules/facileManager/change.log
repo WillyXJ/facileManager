@@ -3,6 +3,7 @@
 * Server - [bug] Fixed an issue where users could not be enabled or disabled.
 * Server - [bug] Users with permission to manage servers can now preview the
            server configuration.
+* Server - [bug] Fixed upgrade process retry attempts.
 
 4.0.0 (2020-11-11)
 ==================

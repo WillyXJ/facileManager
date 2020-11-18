@@ -42,7 +42,9 @@ function upgradefmDHCPSchema($module_name) {
 function upgradefmDHCP_020($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` ADD `def_prefix` VARCHAR(20) NULL DEFAULT NULL AFTER `def_option_type`";
+	if (!columnExists("fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions", 'def_prefix')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` ADD `def_prefix` VARCHAR(20) NULL DEFAULT NULL AFTER `def_option_type`";
+	}
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','shared','subnet','group','host','pool','peer') NOT NULL DEFAULT 'global'";
 	
 	/** Insert upgrade steps here **/
