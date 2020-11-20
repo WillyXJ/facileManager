@@ -825,7 +825,7 @@ class fm_dns_zones {
 					$response = __('There are no DNSSEC keys defined for this zone.');
 					$classes[] = 'attention';
 				}
-				$icons[] = sprintf('<a href="config-keys.php?type=dnssec&domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-key secure" aria-hidden="true"></i></a>', $row->domain_id, __('Manage zone DNSSEC keys'));
+				$icons[] = sprintf('<a href="config-keys.php?type=dnssec&domain_id[]=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-key secure" aria-hidden="true"></i></a>', $row->domain_id, __('Manage zone DNSSEC keys'));
 			}
 			if ($dynamic_zone == 'yes') {
 				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates'));

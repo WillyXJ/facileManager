@@ -4,6 +4,7 @@
            in server configurations only show when those features are used.
 * Server - [bug] Fixed upgrade process retry attempts.
 * Server - [bug] Fixed an issue where ACLs could not be defined. (Issue #505)
+* Server - [bug] Fixed zone DNSSEC key link.
 
 4.0.0 (2020-11-11)
 ==================
