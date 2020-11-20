@@ -110,7 +110,7 @@ class fm_dns_acls {
 		}
 		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
 		
-		$exclude = array('submit', 'action', 'server_id');
+		$exclude = array('submit', 'action', 'server_id', 'acl_bulk');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);

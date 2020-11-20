@@ -3,6 +3,7 @@
 * Server - [bug] Unsupported BIND version messages for Rate Limit and RPZ features
            in server configurations only show when those features are used.
 * Server - [bug] Fixed upgrade process retry attempts.
+* Server - [bug] Fixed an issue where ACLs could not be defined. (Issue #505)
 
 4.0.0 (2020-11-11)
 ==================
