@@ -343,8 +343,9 @@ HTML;
 						$array['record_name'] = isset($current_name) ? $current_name : '@';
 						list($array['record_class'], $array['record_type'], $array['record_algorithm'], $array['record_cert_type'], $array['record_value']) = $parts;
 				}
-			} elseif (in_array('SRV', $parts)) {
-				switch(array_search('SRV', $parts)) {
+			} elseif (in_array('SRV', $parts) || in_array('TLSA', $parts)) {
+				$key = (array_search('SRV', $parts)) ? array_search('SRV', $parts) : array_search('TLSA', $parts);
+				switch($key) {
 					case 3:
 						list($array['record_name'], $array['record_ttl'], $array['record_class'], $array['record_type'], $array['record_priority'], $array['record_weight'], $array['record_port'], $array['record_value']) = $parts;
 						break;
@@ -930,14 +931,32 @@ BODY;
 						$rr['record_regex'] = str_replace('"', '', $rr_fields[8]);
 						$rr['record_value'] = $rr_fields[9];
 						break;
+					case 'OPENPGPKEY':
+						$txt_record = null;
+						for ($i=4; $i<count($rr_fields); $i++) {
+							$txt_record[] = $rr_fields[$i];
+						}
+						$rr['record_value'] = join("\n", $txt_record);
+						break;
 					case 'RP':
 						$rr['record_text'] = $rr_fields[5];
+						break;
+					case 'SMIMEA':
+						$rr['record_priority'] = $rr_fields[4];
+						$rr['record_weight'] = $rr_fields[5];
+						$rr['record_port'] = $rr_fields[6];
+						$txt_record = null;
+						for ($i=7; $i<count($rr_fields); $i++) {
+							$txt_record[] = $rr_fields[$i];
+						}
+						$rr['record_value'] = join("\n", $txt_record);
 						break;
 					case 'SSHFP':
 						$rr['record_algorithm'] = $rr_fields[4];
 						$rr['record_value'] = $rr_fields[6];
 						break;
 					case 'SRV':
+					case 'TLSA':
 						$rr['record_priority'] = $rr_fields[4];
 						$rr['record_weight'] = $rr_fields[5];
 						$rr['record_port'] = $rr_fields[6];
@@ -949,6 +968,11 @@ BODY;
 							$txt_record .= $rr_fields[$i] . ' ';
 						}
 						$rr['record_value'] = rtrim($txt_record);
+						break;
+					case 'URI':
+						$rr['record_priority'] = $rr_fields[4];
+						$rr['record_weight'] = $rr_fields[5];
+						$rr['record_value'] = $rr_fields[6];
 						break;
 				}
 				
