@@ -5,6 +5,7 @@
 * Server - [bug] Fixed upgrade process retry attempts.
 * Server - [bug] Fixed an issue where ACLs could not be defined. (Issue #505)
 * Server - [bug] Fixed zone DNSSEC key link.
+* Server - [bug] Fixed zone bulk import when values contain the domain name. (Issue #486)
 
 4.0.0 (2020-11-11)
 ==================
@@ -26,7 +27,7 @@
            servers.
 * Server - [bug] Use UTS46 for IDN translations to fix PHP 7.2 errors. (Issue #481)
 * Server - [bug] Fixed ACL validation.
-* Server - [bug] Fixed zone import when values contain domain name. (Issue #486)
+* Server - [bug] Fixed zone import when values contain the domain name. (Issue #486)
 * Server - [bug] Fixed an issue where DNSSEC zone configuration item would be
            incorrectly displayed.
 * Server - [bug] Exclude template zones from DNSSEC keys filter menu.

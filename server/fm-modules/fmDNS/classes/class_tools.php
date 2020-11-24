@@ -842,11 +842,15 @@ BODY;
 					}
 				}
 			} elseif (strpos($line, ' IN ') !== false) {
-				$line = str_replace('.' . trimFullStop($domain_name) . '.', '', $line);
+				$clean_domain_name = trimFullStop($domain_name);
+				if (strpos(';;' . $line, $clean_domain_name . '. ') == 2) {
+					$line = str_replace($clean_domain_name . '. ', '@ ', $line);
+				}
+				$line = str_replace(array('.' . $clean_domain_name . '.' . PHP_EOL, '.' . $clean_domain_name . '. '), array(PHP_EOL, ' '), $line);
+				$line = str_replace(array($clean_domain_name . '.' . PHP_EOL, $clean_domain_name . '. '), array(PHP_EOL, ' '), $line);
 				$rr_fields = preg_split('/\s+/', trim($line));
 				
 				$rr['record_name'] = $rr_fields[0];
-				$rr['record_name'] = str_replace(trimFullStop($domain_name) . '.', '', $rr['record_name']);
 				if (!strlen($rr['record_name'])) {
 					unset($rr['record_name']);
 				}
