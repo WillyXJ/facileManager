@@ -1755,7 +1755,7 @@ HTML;
 		
 		$remote_headers = get_headers($remote_hint_zone, 1);
 		
-		if (filemtime($local_hint_zone) < strtotime($remote_headers['Last-Modified']) && !isset($GLOBALS['root_servers_updated'])) {
+		if (filemtime($local_hint_zone) < @strtotime($remote_headers['Last-Modified']) && !isset($GLOBALS['root_servers_updated'])) {
 			$GLOBALS['root_servers_updated'] = true;
 			
 			/** Download the latest root servers (must be writeable by web server) */
@@ -1955,7 +1955,9 @@ HTML;
 		if (!isset($fm_module_options)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		$cfg_info = $fm_module_options->parseDefType($cfg_name, $cfg_info);
 		
-		$config .= str_replace(array('$ROOT', '$ZONES'), array($server_info->server_root_dir, $server_info->server_zones_dir), trim(rtrim(trim($cfg_info), ';')));
+		if ($server_info) {
+			$config .= str_replace(array('$ROOT', '$ZONES'), array($server_info->server_root_dir, $server_info->server_zones_dir), trim(rtrim(trim($cfg_info), ';')));
+		}
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) {
 			$config .= $cfg_info ? '; }' : ' }';
 		}
@@ -2308,6 +2310,9 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			case 'nginx':
 				$config = '
 ';
+				break;
+			default:
+				return null;
 				break;
 		}
 
