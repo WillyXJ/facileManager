@@ -6,6 +6,7 @@
 * Server - [bug] Fixed an issue where ACLs could not be defined. (Issue #505)
 * Server - [bug] Fixed zone DNSSEC key link.
 * Server - [bug] Fixed zone bulk import when values contain the domain name. (Issue #486)
+* Server - [bug] Fixed zone bulk import when tabs are present in the file. (Issue #488)
 
 4.0.0 (2020-11-11)
 ==================

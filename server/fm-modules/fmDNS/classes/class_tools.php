@@ -755,7 +755,8 @@ BODY;
 		
 		$file = fopen($_FILES['import-file']['tmp_name'], 'r');
 		while (!feof($file)){
-			$line = fgets($file);
+			/** Change tabs into spaces */
+			$line = str_replace("\t", ' ', fgets($file));
 			
 			if (strpos($line, '.bind/CH') !== false || strpos($line, '.server/CH') !== false) {
 				continue;
