@@ -4,6 +4,7 @@
 * Server - [bug] Users with permission to manage servers can now preview the
            server configuration.
 * Server - [bug] Fixed upgrade process retry attempts.
+* Client - [bug] Fixed client cron entry when fullpath is not used.
 
 4.0.0 (2020-11-11)
 ==================
