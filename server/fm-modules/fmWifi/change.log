@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed PHP errors.
 * Server - [bug] Fixed upgrade process retry attempts.
+* Client - [bug] Fixed status cron entry when fullpath is not used.
 
 0.3.0 (2019-10-01)
 ==================
