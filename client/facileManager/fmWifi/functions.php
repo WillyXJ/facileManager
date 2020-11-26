@@ -168,7 +168,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	if (!$entry_exists) {
 		$dump = shell_exec('crontab -l > ' . $tmpfile . ' 2>/dev/null');
 
-		$cmd = "echo '* * * * * " . findProgram('php') . ' ' . dirname(__FILE__) . '/' . $module_name . "/client.php status-all' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
+		$cmd = "echo '* * * * * " . findProgram('php') . ' ' . dirname(__FILE__) . "/client.php status-all' >> $tmpfile && " . findProgram('crontab') . ' ' . $tmpfile;
 		$cron_update = system($cmd, $retval);
 		unlink($tmpfile);
 		
