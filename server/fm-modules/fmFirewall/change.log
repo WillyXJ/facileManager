@@ -1,4 +1,4 @@
-2.0.3 (2020-??-??)
+2.0.3 (2020-11-27)
 ==================
 * Server - [bug] Fixed Config Servers display with limited user permissions.
 * Server - [bug] Fixed upgrade process retry attempts.

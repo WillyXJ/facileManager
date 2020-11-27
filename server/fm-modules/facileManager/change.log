@@ -1,4 +1,4 @@
-4.0.1 (2020-??-??)
+4.0.1 (2020-11-27)
 ==================
 * Server - [bug] Fixed an issue where users could not be enabled or disabled.
 * Server - [bug] Users with permission to manage servers can now preview the
