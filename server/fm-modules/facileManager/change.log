@@ -1,3 +1,7 @@
+4.0.2 (2020-??-??)
+==================
+* Server - [bug] Fixed API key creation. (Issue #507)
+
 4.0.1 (2020-11-27)
 ==================
 * Server - [bug] Fixed an issue where users could not be enabled or disabled.

@@ -292,7 +292,7 @@ TABLESQL;
 
 $table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_keys` (
-  `key_id` int(11) NOT NULL,
+  `key_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `user_id` int(11) NOT NULL,
   `key_token` varchar(255) NOT NULL,

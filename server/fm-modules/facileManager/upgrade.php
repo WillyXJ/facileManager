@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_4001($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_402($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -764,6 +764,33 @@ function fmUpgrade_4001($database) {
 	}
 
 	upgradeConfig('fm_db_version', 48, false);
+	
+	return $success;
+}
+
+
+/** fM v4.0.2 **/
+function fmUpgrade_402($database) {
+	global $fmdb, $fm_name;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 48) ? fmUpgrade_4001($database) : true;
+	
+	if ($success) {
+		$table[] = "ALTER TABLE `$database`.`fm_keys` MODIFY `key_id` int(11) NOT NULL AUTO_INCREMENT";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 49, false);
 	
 	return $success;
 }
