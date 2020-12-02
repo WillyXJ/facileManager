@@ -589,7 +589,7 @@ $main_menu_html
 			</ul>
 		</div>
 		<div id="donate" class="grey">
-			<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NGSWSA7ZQ7J9S&source=url" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
+			<p><a href="http://www.facilemanager.com/donate/" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
 		</div>
 	</div>
 
