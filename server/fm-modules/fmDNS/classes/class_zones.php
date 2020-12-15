@@ -1882,7 +1882,9 @@ HTML;
 				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
 				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view');
 			foreach ($include as $key) {
-				$new_post[$key] = $post[$key];
+				if (isset($post[$key])) {
+					$new_post[$key] = $post[$key];
+				}
 			}
 			$post = $new_post;
 			unset($new_post, $post['domain_template']);
