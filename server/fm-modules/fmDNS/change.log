@@ -1,3 +1,7 @@
+4.0.3 (2021-??-??)
+==================
+* Server - [bug] Fixed server group view sorting. (Issue #509)
+
 4.0.2 (2020-12-16)
 ==================
 * Server - [bug] Fixed domain creations based on templates. (Issue #508)
