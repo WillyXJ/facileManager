@@ -1812,6 +1812,20 @@ HTML;
 			unset($config_result);
 		} else $global_config = array();
 
+		$server_config = array();
+		/** Override with group-specific configs */
+		if (is_array($server_group_ids)) {
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', "AND cfg_type='global' AND domain_id IN ('" . join("','", $domain_ids) . "') AND server_serial_no IN ('g_" . implode("','g_", $server_group_ids) . "') AND cfg_status='active'");
+			if ($fmdb->num_rows) {
+				$server_config_result = $fmdb->last_result;
+				$config_count = $fmdb->num_rows;
+				for ($j=0; $j < $config_count; $j++) {
+					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+				}
+				unset($server_config_result, $global_config_count);
+			}
+		}
+
 		/** Override with server-specific configs */
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id IN ('" . join("','", $domain_ids) . "') AND server_serial_no='$server_serial_no' AND cfg_status='active'");
 		if ($fmdb->num_rows) {
@@ -1821,7 +1835,7 @@ HTML;
 				$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $config_result[$j]->cfg_comment);
 			}
 			unset($server_config_result);
-		} else $server_config = array();
+		}
 
 		/** Merge arrays */
 		$config_array = array_merge($global_config, $server_config);
