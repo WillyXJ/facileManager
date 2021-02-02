@@ -21,6 +21,11 @@
  +-------------------------------------------------------------------------+
 */
 
+if (defined('CLIENT')) {
+    header('Location: ' . $GLOBALS['RELPATH']);
+    exit;
+}
+
 printHeader();
 @printMenu();
 

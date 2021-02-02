@@ -2,6 +2,8 @@
 ==================
 * Server - [security] Fixed a SQL injection issue with session variables.
            (Found and reported by Niko K from Cure53)
+* Server - [security] unauthenticated clients can no longer view the dashboard.
+           (Found and reported by Niko K from Cure53)
 * Server - [bug] CSS tweaks.
 
 4.0.2 (2020-12-02)
