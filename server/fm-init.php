@@ -45,6 +45,14 @@ $path_parts = parse_url($_SERVER['REQUEST_URI']);
 $path_parts = array_merge($path_parts, pathinfo($path_parts['path']));
 
 if (file_exists(ABSPATH . 'config.inc.php')) {
+	/** Ensure session variables are not manually set */
+	if (isset($_POST['_SESSION']) || isset($_GET['_SESSION']) || isset($_REQUEST['_SESSION'])) {
+		unset($_POST['_SESSION']);
+		unset($_GET['_SESSION']);
+		unset($_REQUEST['_SESSION']);
+		header('Location: ' . $GLOBALS['RELPATH']);
+		exit;
+	}
 	
 	/** The config file resides in ABSPATH */
 	require_once(ABSPATH . 'config.inc.php');
@@ -82,7 +90,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		}
 		
 		require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
-		
+
 		if (!$is_logged_in = $fm_login->isLoggedIn()) {
 			require_once(ABSPATH . 'fm-includes/init.php');
 			checkAppVersions();
