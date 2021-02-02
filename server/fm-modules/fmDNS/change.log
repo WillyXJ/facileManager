@@ -1,5 +1,7 @@
 4.0.3 (2021-??-??)
 ==================
+* Server - [security] Fixed an issue where arbitrary system commands could be run
+           through the DNSSEC key generation. (Found and reported by Niko K from Cure53)
 * Server - [bug] Fixed server group view sorting. (Issue #509)
 
 4.0.2 (2020-12-16)

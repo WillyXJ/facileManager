@@ -92,6 +92,7 @@ class fm_dns_keys {
 		global $fmdb, $__FM_CONFIG;
 		
 		$post['key_comment'] = trim($post['key_comment']);
+		if (!in_array($post['key_algorithm'], $this->getKeyAlgorithms($post['key_type']))) return __('The selected key algorithm is invalid.');
 		
 		/** DNSSEC */
 		if ($post['key_type'] == 'dnssec' && !isset($post['generate'])) {
@@ -528,6 +529,8 @@ HTML;
 	 */
 	private function generateDNSSECKeys($data) {
 		global $__FM_CONFIG;
+
+		if (!in_array($post['key_size'], $__FM_CONFIG['keys']['avail_sizes'])) return __('The selected key size is invalid.');
 		
 		if (!$dnssec_keygen = findProgram('dnssec-keygen')) return sprintf(__('The dnssec-keygen utility cannot be found on %s to generate the keys.'), php_uname('n'));
 		
