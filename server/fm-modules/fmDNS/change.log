@@ -6,6 +6,7 @@
            deleting records. (Issue #510)
 * Server - [bug] Fixed server group view sorting. (Issue #509)
 * Server - [bug] Fixed group-specific zone options. (Issue #517)
+* Server - [bug] Removed duplicate record type from log entries.
 
 4.0.2 (2020-12-16)
 ==================
