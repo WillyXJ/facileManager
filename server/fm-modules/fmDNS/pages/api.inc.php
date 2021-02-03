@@ -71,27 +71,42 @@ switch ($_POST['api']['action']) {
         }
         break;
     case 'update':
-    case 'delete':
         /** Get record_id from array values */
         basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $record_data['record_name'], 'record_', 'record_name', 'AND record_value="' . $record_data['record_value'] . '" AND record_type="' . $record_data['record_type'] . '"');
         if ($fmdb->num_rows == 1) {
             $record_type = $record_data['record_type'];
-            if ($_POST['api']['action'] == 'delete') {
-                unset($record_data);
-                $record_data['record_status'] = 'deleted';
-            } else {
-                if (isset($record_data['record_newname'])) {
-                    $record_data['record_name'] = $record_data['record_newname'];
-                    unset($record_data['record_newname']);
-                }
-                if (isset($record_data['record_newvalue'])) {
-                    $record_data['record_value'] = $record_data['record_newvalue'];
-                    unset($record_data['record_newvalue']);
-                }
+            if (isset($record_data['record_newname'])) {
+                $record_data['record_name'] = $record_data['record_newname'];
+                unset($record_data['record_newname']);
+            }
+            if (isset($record_data['record_newvalue'])) {
+                $record_data['record_value'] = $record_data['record_newvalue'];
+                unset($record_data['record_newvalue']);
             }
             if (!is_bool($fm_dns_records->update($domain_id, $fmdb->last_result[0]->record_id, $record_type, $record_data))) {
                 $data = true;
                 $error = false;
+            }
+        } else {
+            $code = 1005;
+        }
+
+        break;
+    case 'delete':
+        /** Get record_id from array values */
+        $record_value_sql = (isset($record_data['record_value'])) ? 'AND record_value="' . $record_data['record_value'] . '"' : null;
+        basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $record_data['record_name'], 'record_', 'record_name', $record_value_sql . ' AND record_type="' . $record_data['record_type'] . '"');
+        if ($fmdb->num_rows) {
+            $num_rows = $fmdb->num_rows;
+            $last_result = $fmdb->last_result;
+            $record_type = $record_data['record_type'];
+            unset($record_data);
+            $record_data['record_status'] = 'deleted';
+            for ($i=0; $i<$num_rows; $i++) {
+                if (!is_bool($fm_dns_records->update($domain_id, $last_result[$i]->record_id, $record_type, $record_data))) {
+                    $data = true;
+                    $error = false;
+                }
             }
         } else {
             $code = 1005;

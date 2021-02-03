@@ -49,7 +49,7 @@ function printModuleHelp () {
      clear-cache  Clear the DNS cache
      id=XX        Specify the individual DomainID to build and reload
 	 
-     setHost      Defines API call
+     setHost      Invokes the API functionality
      action=XX    Defines API action to take on a record (add, update, delete)
      type=XX      Defines the RR type (A, AAAA, CNAME, DNAME, MX, NS, PTR, TXT)
      name=XX      Defines the name of the RR
