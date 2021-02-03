@@ -598,7 +598,7 @@ function callAPI($url, $data) {
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	if (is_array($raw_data)) {
 		list($retval, $message) = $raw_data;
-		$raw_data = sprintf("ERROR (%s) %s\n", $retval, $message);
+		$raw_data = ($retval == 3000) ? "$message\n" : sprintf("ERROR (%s) %s\n", $retval, $message);
 		$retval = 1;
 	}
 	echo $raw_data;

@@ -4149,6 +4149,9 @@ function throwAPIError($code) {
 		case 1005:
 			$message = _('The record was not found.');
 			break;
+		case 3000:
+			$message = _('Dryrun was successful.');
+			break;
 		default:
 			$code = 2000;
 			$message = _('Something was wrong with the request.');

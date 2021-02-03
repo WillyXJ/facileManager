@@ -59,15 +59,19 @@ $error = true;
 $code = null;
 switch ($_POST['api']['action']) {
     case 'add':
-        $retval = $fm_dns_records->add($domain_id, $record_data['record_type'], $record_data);
-        if (is_bool($retval)) {
-            if ($retval === true) {
-                $data = true;
-                $error = false;
+        if (!$_POST['dryrun']) {
+            $retval = $fm_dns_records->add($domain_id, $record_data['record_type'], $record_data);
+            if (is_bool($retval)) {
+                if ($retval === true) {
+                    $data = true;
+                    $error = false;
+                }
+            } else {
+                /** Record already exists */
+                $code = 1004;
             }
         } else {
-            /** Record already exists */
-            $code = 1004;
+            $code = 3000;
         }
         break;
     case 'update':
@@ -83,9 +87,13 @@ switch ($_POST['api']['action']) {
                 $record_data['record_value'] = $record_data['record_newvalue'];
                 unset($record_data['record_newvalue']);
             }
-            if (!is_bool($fm_dns_records->update($domain_id, $fmdb->last_result[0]->record_id, $record_type, $record_data))) {
-                $data = true;
-                $error = false;
+            if (!$_POST['dryrun']) {
+                if (!is_bool($fm_dns_records->update($domain_id, $fmdb->last_result[0]->record_id, $record_type, $record_data))) {
+                    $data = true;
+                    $error = false;
+                }
+            } else {
+                $code = 3000;
             }
         } else {
             $code = 1005;
@@ -102,11 +110,15 @@ switch ($_POST['api']['action']) {
             $record_type = $record_data['record_type'];
             unset($record_data);
             $record_data['record_status'] = 'deleted';
-            for ($i=0; $i<$num_rows; $i++) {
-                if (!is_bool($fm_dns_records->update($domain_id, $last_result[$i]->record_id, $record_type, $record_data))) {
-                    $data = true;
-                    $error = false;
+            if (!$_POST['dryrun']) {
+                for ($i=0; $i<$num_rows; $i++) {
+                    if (!is_bool($fm_dns_records->update($domain_id, $last_result[$i]->record_id, $record_type, $record_data))) {
+                        $data = true;
+                        $error = false;
+                    }
                 }
+            } else {
+                $code = 3000;
             }
         } else {
             $code = 1005;
