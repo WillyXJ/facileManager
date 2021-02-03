@@ -4,6 +4,7 @@
            (Found and reported by Niko K from Cure53)
 * Server - [security] unauthenticated clients can no longer view the dashboard.
            (Found and reported by Niko K from Cure53)
+* Server - [security] Fixed a SQL injection issue with user and group edits.
 * Server - [bug] CSS tweaks.
 * Server - [bug] Changed SSH parameter to disable pseudo-tty allocation. (Pull #513)
 

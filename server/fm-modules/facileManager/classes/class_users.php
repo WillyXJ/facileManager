@@ -250,9 +250,7 @@ class fm_users {
 			if (!$post['user_auth_type']) $post['user_auth_type'] = 1;
 		}
 
-		if (!isset($post['user_id']) || !$post['user_id']) {
-			$post['user_id'] = $_SESSION['user']['id'];
-		}
+		$post['user_id'] = (!isset($post['user_id']) || !$post['user_id']) ? $_SESSION['user']['id'] : intval($post['user_id']);
 
 		/** Authorized to update users? */
 		if ((!currentUserCan('manage_users') && $_SESSION['user']['id'] != $post['user_id']) || isset($post['user_login'])) {
@@ -317,6 +315,7 @@ class fm_users {
 	function updateGroup($post) {
 		global $fmdb, $fm_name, $fm_login;
 		
+		$post['group_id'] = intval($post['group_id']);
 		if (!isset($post['group_id'])) return _('This is a malformed request.');
 		if (empty($post['group_name'])) return _('No group name defined.');
 		
@@ -861,7 +860,7 @@ PERM;
 		if ($group_id == null) {
 			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND user_id!={$_SESSION['user']['id']} AND (user_caps IS NULL OR user_caps NOT LIKE '%do_everything%')");
 		} else {
-			$query = "SELECT user_id, user_login FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} AND user_status!='deleted' AND user_template_only='no' AND user_group=$group_id";
+			$query = "SELECT user_id, user_login FROM fm_users WHERE account_id={$_SESSION['user']['account_id']} AND user_status!='deleted' AND user_template_only='no' AND user_group=" . sanitize($group_id);
 			$fmdb->get_results($query);
 		}
 		
