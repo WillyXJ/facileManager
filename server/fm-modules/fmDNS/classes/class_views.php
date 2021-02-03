@@ -99,8 +99,11 @@ class fm_dns_views {
 			return formatError(__('Could not add the view because a database error occurred.'), 'sql');
 		}
 
-		$tmp_server_name = $server_serial_no ? getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
-		addLogEntry("Added view:\nName: $view_name\nServer: $tmp_server_name\nComment: $view_comment");
+		$tmp_server_name = _('All Servers');
+		if ($server_serial_no) {
+			$tmp_server_name = (strpos($server_serial_no, 'g_') !== false) ? 'Group: ' . getNameFromID(str_replace('g_', '', $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name') : 'Server: ' . getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+		}
+		addLogEntry("Added view:\nName: $view_name\n$tmp_server_name\nComment: $view_comment");
 		return true;
 	}
 
@@ -135,7 +138,10 @@ class fm_dns_views {
 			
 			setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
-			$servername = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : _('All Servers');
+			$servername = _('All Servers');
+			if ($post['server_serial_no']) {
+				$servername = (strpos($post['server_serial_no'], 'g_') !== false) ? getNameFromID(str_replace('g_', '', $post['server_serial_no']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name') : getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+			}
 			addLogEntry('Updated view order for ' . $servername);
 			return true;
 		}
