@@ -78,7 +78,7 @@ class fm_shared_module_tools {
 						} elseif (!$ssh_user) {
 							$return .= _('no SSH user defined');
 						} else {
-							exec(findProgram('ssh') . " -t -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $post_result, $retval);
+							exec(findProgram('ssh') . " -T -i $temp_ssh_key -o 'StrictHostKeyChecking no' -p {$results[$x]->server_update_port} -l $ssh_user {$results[$x]->server_name} 'ls /usr/local/$fm_name/{$_SESSION['module']}/client.php'", $post_result, $retval);
 							if ($retval) {
 								$return .= ($retval == 255) ? _('ssh key login failed') : _('client file is not present');
 							} else {
