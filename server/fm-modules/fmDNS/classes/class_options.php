@@ -474,25 +474,6 @@ HTML;
 	}
 
 
-	function availableViews() {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return[0][] = 'None';
-		$return[0][] = '0';
-		
-		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_id', 'view_');
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i+1][] = $results[$i]->view_name;
-				$return[$i+1][] = $results[$i]->view_id;
-			}
-		}
-		
-		return $return;
-	}
-
-
 	function availableOptions($action, $server_serial_no, $option_type = 'global', $cfg_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		

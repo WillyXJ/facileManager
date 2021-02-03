@@ -315,7 +315,7 @@ HTML;
 			/** Check name field length */
 			$key_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
 
-			$key_view = buildSelect('key_view', 'key_view', $fm_dns_zones->availableViews(), $key_view);
+			$key_view = buildSelect('key_view', 'key_view', availableViews('active'), $key_view);
 
 			$key_options = sprintf('<tr>
 					<th width="33&#37;" scope="row"><label for="key_name">%s</label></th>

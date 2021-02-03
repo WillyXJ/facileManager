@@ -947,7 +947,7 @@ HTML;
 		/** Get field length */
 		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
 
-		$views = buildSelect('domain_view', 'domain_view', $this->availableViews(), $domain_view, 4, null, true);
+		$views = buildSelect('domain_view', 'domain_view', availableViews('active'), $domain_view, 4, null, true);
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
 		$domain_types = buildSelect('domain_type', 'domain_type', array_merge(enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type'), array('url-redirect')), $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
@@ -1321,24 +1321,6 @@ HTML;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$return[$i+1][] = count(array_keys($domain_names, $clone_results[$i]->domain_name)) > 1 ? $clone_results[$i]->domain_name . ' (' . $clone_results[$i]->domain_id . ')' : $clone_results[$i]->domain_name;
 				$return[$i+1][] = $clone_results[$i]->domain_id;
-			}
-		}
-		return $return;
-	}
-	
-	function availableViews() {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return[0][] = __('All Views');
-		$return[0][] = '0';
-		
-		$query = "SELECT view_id,view_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}views WHERE account_id='{$_SESSION['user']['account_id']}' AND view_status='active' ORDER BY view_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i+1][] = $results[$i]->view_name;
-				$return[$i+1][] = $results[$i]->view_id;
 			}
 		}
 		return $return;
@@ -2027,7 +2009,7 @@ HTML;
 		/** Get zones based on access */
 		$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
 
-		$available_views = $this->availableViews();
+		$available_views = availableViews('active');
 		if (currentUserCan('do_everything', $_SESSION['module']) || (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0] == '0')) $available_groups = $this->availableGroups();
 		$filters = null;
 		
