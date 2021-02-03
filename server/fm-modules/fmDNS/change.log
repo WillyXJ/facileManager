@@ -1,4 +1,4 @@
-4.0.3 (2021-??-??)
+4.1.0 (2021-02-03)
 ==================
 * Server - [security] Fixed an issue where arbitrary system commands could be run
            through the DNSSEC key generation. (Found and reported by Niko K from Cure53)
