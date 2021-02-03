@@ -112,14 +112,19 @@ if ($api_call) {
 	}
 	if ($data['api']['action'] == 'delete') {
 		array_pop($api_params['CNAME']);
+		unset($api_params['common'][array_search('value', $api_params['common'])]);
 	}
 
 	/** Check if all required parameters are given for API calls */
+	$validation_error = false;
 	foreach (@array_merge($api_params['common'], (array) $api_params[$data['api']['record_type']]) as $key) {
 		if (!array_key_exists($key, $data['api']) && !array_key_exists('record_' . $key, $data['api']) && !array_key_exists('domain_' . $key, $data['api'])) {
 			echo fM($key . " is a required parameter.\n");
-			exit(1);
+			$validation_error = true;
 		}
+	}
+	if ($validation_error) {
+		exit(1);
 	}
 }
 

@@ -1,3 +1,14 @@
+4.0.3 (2021-??-??)
+==================
+* Server - [security] Fixed an issue where arbitrary system commands could be run
+           through the DNSSEC key generation. (Found and reported by Niko K from Cure53)
+* Both   - [improvement] Removed required value parameter from client API call when
+           deleting records. (Issue #510)
+* Server - [bug] Fixed server group view sorting. (Issue #509)
+* Server - [bug] Fixed group-specific zone options. (Issue #517)
+* Server - [bug] Removed duplicate record type from log entries.
+* Both   - [bug] Dryrun client parameter is now supported in API calls.
+
 4.0.2 (2020-12-16)
 ==================
 * Server - [bug] Fixed domain creations based on templates. (Issue #508)
