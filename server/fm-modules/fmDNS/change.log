@@ -3,6 +3,7 @@
 * Server - [improvement] View selection menus now list the server or server group they
            belong to.
 * Server - [bug] Fixed log entries when adding a group view or changing a group view order.
+* Server - [bug] Fixed reverse zone filename when the server update method is cron. (Issue #519)
 
 4.1.0 (2021-02-03)
 ==================

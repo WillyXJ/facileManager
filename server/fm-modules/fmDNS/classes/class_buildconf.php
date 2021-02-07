@@ -1068,21 +1068,33 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						elseif ($zone_result->domain_template_id) $zone_result = $this->mergeZoneDetails($zone_result, 'template');
 						
 						if (getSOACount($zone_result->domain_id)) {
-							$domain_name = $this->getDomainName($zone_result->domain_mapping, trimFullStop($zone_result->domain_name));
-							$file_ext = ($zone_result->domain_mapping == 'forward') ? 'hosts' : 'rev';
+							/** Get zone filename format */
+							$file_format = getOption('zone_file_format', $_SESSION['user']['account_id'], $_SESSION['module']);
+							if (!$file_format) {
+								$file_format = $__FM_CONFIG[$_SESSION['module']]['default']['options']['zone_file_format']['default_value'];
+							}
 
+							$domain_name_file = $this->getDomainName($zone_result->domain_mapping, trimFullStop($zone_result->domain_name));
+							$default_file_ext = $file_ext = null;
+					
 							/** Are there multiple zones with the same name? */
 							if (isset($zone_result->parent_domain_id)) {
 								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->parent_domain_id);
-								if ($fmdb->num_rows) $file_ext = $zone_result->parent_domain_id . ".$file_ext";
+								if ($fmdb->num_rows) $file_ext = '.' . $zone_result[$i]->parent_domain_id;
 							} else {
 								$zone_result->parent_domain_id = $zone_result->domain_id;
 								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->domain_id);
-								if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
+								if ($fmdb->num_rows) $file_ext = '.' . $zone_result[$i]->domain_id;
 							}
 							
+							if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
+								$file_ext = $view_id . ".$default_file_ext";
+							}
+							unset($default_file_ext);
+
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result, $server_serial_no);
+							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
+							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/' . $domain_name_file] = $this->buildZoneFile($zone_result, $server_serial_no);
 							
 							/** Track reloads */
 							$data->reload_domain_ids[] = isset($zone_result->parent_domain_id) ? $zone_result->parent_domain_id : $zone_result->domain_id;
