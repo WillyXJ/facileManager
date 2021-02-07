@@ -2,7 +2,7 @@ Please prefix your issue title with one of the following: [BUG], [ISSUE], [FEATU
 
 Replace everything between stars with current version of your facileManager and module installations:  
 fM Version : **X.X.X**
-{Module Name} Version : **X.X.X**
+<Specify Module Name> Version : **X.X.X**
 
 **In raising this issue, I confirm the following (please check boxes, eg [X]):**
 
