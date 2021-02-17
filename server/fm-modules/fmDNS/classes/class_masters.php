@@ -323,7 +323,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="master_port">%s</label></th>
-					<td width="67&#37;"><input name="master_port" id="master_port" type="text" value="%s" maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)" %s /></td>
+					<td width="67&#37;"><input name="master_port" id="master_port" type="text" value="%s" maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)" class="%s" %s /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="master_key_id">%s</label></th>
@@ -360,7 +360,7 @@ HTML;
 				$popup_header,
 				$action, $master_id, $parent_id, $server_serial_no,
 				__('master Name'), getNameFromID($parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name'),
-				__('Matched Address List'), __('Choose an existing master or type a new one.'), $master_addresses, __('Port'), $master_port, $disabled,
+				__('Matched Address List'), __('Choose an existing master or type a new one.'), $master_addresses, __('Port'), $master_port, $disabled, $disabled,
 				__('Key'), $master_keys, _('Comment'), $master_comment,
 				$popup_footer,
 				$this->getPredefinedMasters('JSON', $master_addresses)

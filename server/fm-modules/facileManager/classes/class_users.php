@@ -821,7 +821,7 @@ PERM;
 		if ($display_type == 'popup') $return_form .= '
 		</div>
 		<div class="popup-footer">
-			<input type="submit" id="' . $button_id . '" name="submit" value="' . $button_text . '" class="button primary" ' . $button_disabled . '/>
+			<input type="submit" id="' . $button_id . '" name="submit" value="' . $button_text . '" class="button primary ' . $button_disabled . '" ' . $button_disabled . '/>
 			<input type="button" value="' . _('Cancel') . '" class="button left" id="cancel_button" />
 		</div>
 		</form>

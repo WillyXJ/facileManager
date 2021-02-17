@@ -1320,6 +1320,10 @@ input.disabled {
 	color: #aeaeae;
 	cursor: not-allowed;
 }
+label.disabled {
+	color: #aeaeae;
+	cursor: not-allowed;
+}
 
 .left {
 	float: left;
