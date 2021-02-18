@@ -4,6 +4,8 @@
            belong to.
 * Server - [bug] Fixed log entries when adding a group view or changing a group view order.
 * Server - [bug] Fixed reverse zone filename when the server update method is cron. (Issue #519)
+* Server - [bug] Fixed slave file name when only a single zone is defined with the specified
+           name. (Issue #456)
 
 4.1.0 (2021-02-03)
 ==================

@@ -917,7 +917,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 					
 					if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
-						$file_ext = $view_id . ".$default_file_ext";
+						$file_ext = '.' . $view_id;
 					}
 					unset($default_file_ext);
 					
