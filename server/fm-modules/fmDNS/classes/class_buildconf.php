@@ -154,10 +154,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$acl_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
 						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
-							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
+							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name][] = trim($address);
 						}
 					}
-					$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
+					$global_acl_array[$acl_result[$i]->acl_name] = array(implode(',', (array) $global_acl_array[$acl_result[$i]->acl_name]), $acl_result[$i]->acl_comment);
 					unset($acl_child_result);
 				}
 			} else $global_acl_array = array();
@@ -175,10 +175,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$acl_child_result = $fmdb->last_result;
 						for ($j=0; $j < $fmdb->num_rows; $j++) {
 							foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
-								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+								if(trim($address)) $server_acl_addresses[] = trim($address);
 							}
 						}
-						$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+						$server_acl_array[$server_acl_result[$i]->acl_name] = array(implode(',', (array) $server_acl_addresses), $server_acl_result[$i]->acl_comment);
 						unset($acl_child_result, $server_acl_addresses);
 					}
 				}
@@ -195,10 +195,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$acl_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
 						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
-							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+							if(trim($address)) $server_acl_addresses[] = trim($address);
 						}
 					}
-					$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+					$server_acl_array[$server_acl_result[$i]->acl_name] = array(implode(',', (array) $server_acl_addresses), $server_acl_result[$i]->acl_comment);
 					unset($acl_child_result, $server_acl_addresses);
 				}
 			}
@@ -215,8 +215,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					unset($comment);
 				}
 				$config .= 'acl "' . $acl_name . "\" {\n";
-				$config .= "\t" . $acl_item;
-				if ($acl_item) $config .= ';';
+				if ($acl_item) $config .= "\t" . str_replace('; ', ";\n\t", $fm_dns_acls->parseACL($acl_item)) . ';';
 				$config .= "\n};\n\n";
 			}
 			unset($acl_result, $global_acl_array, $server_acl_array, $acl_array);
