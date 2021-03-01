@@ -6,6 +6,7 @@
 * Server - [bug] Fixed reverse zone filename when the server update method is cron. (Issue #519)
 * Server - [bug] Fixed slave file name when only a single zone is defined with the specified
            name. (Issue #456)
+* Server - [bug] Fixed an issue where zone forwarders and masters could not be updated. (Issue #518)
 
 4.1.0 (2021-02-03)
 ==================
