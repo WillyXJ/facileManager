@@ -154,10 +154,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$acl_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
 						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
-							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name] .= "\t" . $address . ";\n";
+							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name][] = trim($address);
 						}
 					}
-					$global_acl_array[$acl_result[$i]->acl_name] = array(rtrim(ltrim($global_acl_array[$acl_result[$i]->acl_name], "\t"), ";\n"), $acl_result[$i]->acl_comment);
+					$global_acl_array[$acl_result[$i]->acl_name] = array(implode(',', (array) $global_acl_array[$acl_result[$i]->acl_name]), $acl_result[$i]->acl_comment);
 					unset($acl_child_result);
 				}
 			} else $global_acl_array = array();
@@ -175,10 +175,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						$acl_child_result = $fmdb->last_result;
 						for ($j=0; $j < $fmdb->num_rows; $j++) {
 							foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
-								if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+								if(trim($address)) $server_acl_addresses[] = trim($address);
 							}
 						}
-						$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+						$server_acl_array[$server_acl_result[$i]->acl_name] = array(implode(',', (array) $server_acl_addresses), $server_acl_result[$i]->acl_comment);
 						unset($acl_child_result, $server_acl_addresses);
 					}
 				}
@@ -195,10 +195,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$acl_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
 						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
-							if(trim($address)) $server_acl_addresses .= "\t" . trim($address) . ";\n";
+							if(trim($address)) $server_acl_addresses[] = trim($address);
 						}
 					}
-					$server_acl_array[$server_acl_result[$i]->acl_name] = array(rtrim(ltrim($server_acl_addresses, "\t"), ";\n"), $server_acl_result[$i]->acl_comment);
+					$server_acl_array[$server_acl_result[$i]->acl_name] = array(implode(',', (array) $server_acl_addresses), $server_acl_result[$i]->acl_comment);
 					unset($acl_child_result, $server_acl_addresses);
 				}
 			}
@@ -215,8 +215,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					unset($comment);
 				}
 				$config .= 'acl "' . $acl_name . "\" {\n";
-				$config .= "\t" . $acl_item;
-				if ($acl_item) $config .= ';';
+				if ($acl_item) $config .= "\t" . str_replace('; ', ";\n\t", $fm_dns_acls->parseACL($acl_item)) . ';';
 				$config .= "\n};\n\n";
 			}
 			unset($acl_result, $global_acl_array, $server_acl_array, $acl_array);
@@ -917,7 +916,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 					
 					if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
-						$file_ext = $view_id . ".$default_file_ext";
+						$file_ext = '.' . $view_id;
 					}
 					unset($default_file_ext);
 					
@@ -1068,21 +1067,33 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						elseif ($zone_result->domain_template_id) $zone_result = $this->mergeZoneDetails($zone_result, 'template');
 						
 						if (getSOACount($zone_result->domain_id)) {
-							$domain_name = $this->getDomainName($zone_result->domain_mapping, trimFullStop($zone_result->domain_name));
-							$file_ext = ($zone_result->domain_mapping == 'forward') ? 'hosts' : 'rev';
+							/** Get zone filename format */
+							$file_format = getOption('zone_file_format', $_SESSION['user']['account_id'], $_SESSION['module']);
+							if (!$file_format) {
+								$file_format = $__FM_CONFIG[$_SESSION['module']]['default']['options']['zone_file_format']['default_value'];
+							}
 
+							$domain_name_file = $this->getDomainName($zone_result->domain_mapping, trimFullStop($zone_result->domain_name));
+							$default_file_ext = $file_ext = null;
+					
 							/** Are there multiple zones with the same name? */
 							if (isset($zone_result->parent_domain_id)) {
 								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->parent_domain_id);
-								if ($fmdb->num_rows) $file_ext = $zone_result->parent_domain_id . ".$file_ext";
+								if ($fmdb->num_rows) $file_ext = '.' . $zone_result[$i]->parent_domain_id;
 							} else {
 								$zone_result->parent_domain_id = $zone_result->domain_id;
 								basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone_result->domain_name, 'domain_', 'domain_name', 'AND domain_id!=' . $zone_result->domain_id);
-								if ($fmdb->num_rows) $file_ext = $zone_result->domain_id . ".$file_ext";
+								if ($fmdb->num_rows) $file_ext = '.' . $zone_result[$i]->domain_id;
 							}
 							
+							if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
+								$file_ext = $view_id . ".$default_file_ext";
+							}
+							unset($default_file_ext);
+
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/db.' . $domain_name . $file_ext] = $this->buildZoneFile($zone_result, $server_serial_no);
+							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
+							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/' . $domain_name_file] = $this->buildZoneFile($zone_result, $server_serial_no);
 							
 							/** Track reloads */
 							$data->reload_domain_ids[] = isset($zone_result->parent_domain_id) ? $zone_result->parent_domain_id : $zone_result->domain_id;

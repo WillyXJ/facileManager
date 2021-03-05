@@ -314,8 +314,7 @@ class fm_dns_zones {
 				$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
 				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
 			} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
-				$query .= "'masters', '" . $required_servers . "')";
-				$result = $fmdb->query($query);
+				$result = $fmdb->query($query . "'masters', '" . $required_servers . "')");
 				$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
 			} elseif (isset($post['domain_redirect_url'])) {
 				if (!class_exists('fm_dns_records')) {
@@ -374,6 +373,10 @@ class fm_dns_zones {
 	function update() {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Validate post */
+		$_POST['domain_mapping'] = getNameFromID(sanitize($_POST['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+		$_POST['domain_type'] = getNameFromID(sanitize($_POST['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+		
 		$post = $this->validatePost($_POST);
 		if (!is_array($post)) return $post;
 
@@ -413,10 +416,6 @@ class fm_dns_zones {
 		$domain_id = sanitize($_POST['domain_id']);
 
 		$dbupdate_error_msg = __('Could not update the zone because a database error occurred.');
-		
-		/** Validate post */
-		$_POST['domain_mapping'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
-		$_POST['domain_type'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
 		
 		$sql_edit = $domain_name_servers = $domain_view = null;
 		
@@ -509,33 +508,35 @@ class fm_dns_zones {
 		/** Add mandatory config options */
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $domain_id, ";
-		$required_servers = sanitize($post['domain_required_servers']);
+		$required_servers = $post['domain_required_servers'];
 		if (!$post['domain_template_id']) {
 			if ($post['domain_type'] == 'forward') {
-				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")) {
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'") !== false) {
 					basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forwarders'"), 'cfg_data', $required_servers, 'cfg_id');
 				} else {
 					$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 				}
+				$rows_affected += $fmdb->rows_affected;
 				if ($fmdb->sql_errors) {
 					return formatError($dbupdate_error_msg, 'sql');
 				}
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
 
 				$domain_forward = sanitize($post['domain_forward'][0]);
-				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'")) {
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'") !== false) {
 					basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forward'"), 'cfg_data', $domain_forward, 'cfg_id');
 				} else {
 					$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
 				}
+				$rows_affected += $fmdb->rows_affected;
 				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
 			} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
-				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")) {
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'") !== false) {
 					basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='masters'"), 'cfg_data', $required_servers, 'cfg_id');
 				} else {
-					$query .= "'masters', '" . $required_servers . "')";
-					$result = $fmdb->query($query);
+					$result = $fmdb->query($query . "'masters', '" . $required_servers . "')");
 				}
+				$rows_affected += $fmdb->rows_affected;
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 				$log_message .= formatLogKeyData('domain_', 'masters', $fm_dns_acls->parseACL($required_servers));
 			}
@@ -553,6 +554,7 @@ class fm_dns_zones {
 				if (!getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='$param'")) {
 					$result = $fmdb->query($query . "'$param', '$val')");
 				}
+				$rows_affected += $fmdb->rows_affected;
 				$log_message .= formatLogKeyData('domain_', $param, $val);
 
 				if ($fmdb->sql_errors) {
@@ -947,7 +949,7 @@ HTML;
 		/** Get field length */
 		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
 
-		$views = buildSelect('domain_view', 'domain_view', $this->availableViews(), $domain_view, 4, null, true);
+		$views = buildSelect('domain_view', 'domain_view', availableViews('active'), $domain_view, 4, null, true);
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
 		$domain_types = buildSelect('domain_type', 'domain_type', array_merge(enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type'), array('url-redirect')), $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
@@ -1321,24 +1323,6 @@ HTML;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$return[$i+1][] = count(array_keys($domain_names, $clone_results[$i]->domain_name)) > 1 ? $clone_results[$i]->domain_name . ' (' . $clone_results[$i]->domain_id . ')' : $clone_results[$i]->domain_name;
 				$return[$i+1][] = $clone_results[$i]->domain_id;
-			}
-		}
-		return $return;
-	}
-	
-	function availableViews() {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return[0][] = __('All Views');
-		$return[0][] = '0';
-		
-		$query = "SELECT view_id,view_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}views WHERE account_id='{$_SESSION['user']['account_id']}' AND view_status='active' ORDER BY view_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i+1][] = $results[$i]->view_name;
-				$return[$i+1][] = $results[$i]->view_id;
 			}
 		}
 		return $return;
@@ -2027,7 +2011,7 @@ HTML;
 		/** Get zones based on access */
 		$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
 
-		$available_views = $this->availableViews();
+		$available_views = availableViews('active');
 		if (currentUserCan('do_everything', $_SESSION['module']) || (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0] == '0')) $available_groups = $this->availableGroups();
 		$filters = null;
 		

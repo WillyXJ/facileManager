@@ -237,7 +237,7 @@ HTML;
 		
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', $control_addresses), ';'));
 		if ($type == 'controls') {
-			$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
+			$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty', 'AND key_type="tsig"'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
 			$control_key_form = sprintf('<tr>
 					<th width="33&#37;" scope="row"><label for="control_keys">%s</label></th>
 					<td width="67&#37;">%s</td>

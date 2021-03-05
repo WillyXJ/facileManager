@@ -105,10 +105,10 @@ class fm_dns_acls {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
 		/** Cleans up acl_addresses for future parsing **/
-		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only'))) {
-			$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'key_') === false) {
+			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
+			if ($ip_check != $post['acl_addresses']) return $ip_check;
 		}
-		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
 		
 		$exclude = array('submit', 'action', 'server_id', 'acl_bulk');
 
@@ -162,10 +162,10 @@ class fm_dns_acls {
 		}
 		
 		/** Cleans up acl_addresses for future parsing **/
-		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only'))) {
-			$post['acl_addresses'] = verifyAndCleanAddresses($post['acl_addresses']);
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'key_') === false) {
+			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
+			if ($ip_check != $post['acl_addresses']) return $ip_check;
 		}
-		if (strpos($post['acl_addresses'], 'not valid') !== false) return $post['acl_addresses'];
 		
 		$post['acl_comment'] = trim($post['acl_comment']);
 		
@@ -348,6 +348,16 @@ HTML;
 				$popup_footer
 			);
 		} else {
+			$acl_elements = array_merge($this->getPredefinedACLs(), $this->getACLList($server_serial_no, 'define-acl-elements'));
+			$found = false;
+			foreach ($acl_elements as $item) {
+				if ($acl_addresses == $item['id']) {
+					$found = true;
+					break;
+				}
+			}
+			if (!$found) $acl_elements = array_merge(array(array('id' => $acl_addresses, 'text' => $acl_addresses)), $acl_elements);
+
 			$acl_note = ($action == 'add') ? sprintf('<tr>
 			<th width="33&#37;" scope="row"></th>
 			<td width="67&#37;"><span><a href="#" id="acl_bulk_add">%s</a></span></td>
@@ -414,7 +424,7 @@ HTML;
 				__('Matched Address List'), $acl_addresses,
 				_('Comment'), $acl_comment,
 				$popup_footer,
-				$this->getPredefinedACLs('JSON', $acl_addresses)
+				json_encode($acl_elements)
 			);
 		}
 
@@ -448,7 +458,7 @@ HTML;
 			}
 		}
 		
-		if (in_array($include, array('all', 'tsig-keys'))) {
+		if (in_array($include, array('all', 'tsig-keys', 'define-acl-elements'))) {
 			if ($include == 'all') {
 				/** Predefined ACLs */
 				$acl_list = array_merge($acl_list, $this->getPredefinedACLs());
@@ -456,11 +466,10 @@ HTML;
 			}
 			
 			/** Keys */
-			if ($include == 'tsig-keys') {
-				$key_type = ' AND key_type="tsig"';
-			} else {
+			$key_type = ' AND key_type="tsig"';
+			if ($include == 'all') {
 				$view_id = (isset($_POST['view_id']) && is_numeric(sanitize($_POST['view_id']))) ? sanitize($_POST['view_id']) : 0;
-				$key_type = 'AND key_view IN (0, ' . $view_id . ')';
+				$key_type .= ' AND key_view IN (0, ' . $view_id . ')';
 			}
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', $key_type . ' AND key_status="active"');
 			for ($j=0; $j<$fmdb->num_rows; $j++) {
@@ -604,7 +613,7 @@ HTML;
 			$element_array = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
 				$element_id = $element_array[$i]->acl_id;
-				$return[$element_id]['element_addresses'] = $element_array[$i]->acl_addresses;
+				$return[$element_id]['element_addresses'] = $this->parseACL($element_array[$i]->acl_addresses);
 				
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_servers'), $_SESSION['module'])) {

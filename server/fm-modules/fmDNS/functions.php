@@ -1001,23 +1001,48 @@ HTML;
  * @package facileManager
  * @subpackage fmDNS
  *
+ * @param string $status What view status to pull results with
  * @return array
  */
-function availableViews() {
+function availableViews($status = 'any') {
 	global $fmdb, $__FM_CONFIG;
 	
-	$array[0][] = __('All Views');
-	$array[0][] = '0';
+	$array[0][] = null;
+	$array[0][0][] = __('All Views');
+	$array[0][0][] = '0';
 	
-	$j = 0;
+	$j = $k = $l = 0;
 	/** Views */
-	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name', 'view_');
-	if ($fmdb->num_rows) {
-		$results = $fmdb->last_result;
-		for ($i=0; $i<$fmdb->num_rows; $i++) {
-			$array[$j+1][] = $results[$i]->view_name;
-			$array[$j+1][] = $results[$i]->view_id;
-			$j++;
+	$status = ($status == 'any') ? null : "AND v.view_status='$status'";
+	$fmdb->query("SELECT v.server_serial_no,v.view_id,v.view_name,s.server_name FROM `fm_dns_views` v LEFT JOIN `fm_dns_servers` s USING(server_serial_no) WHERE v.`view_status`!='deleted' $status AND v.account_id='1' ORDER BY v.`server_serial_no`  ASC,v.view_name ASC");
+	if ($fmdb->num_rows && !$fmdb->sql_errors) {
+		$last_result = $fmdb->last_result;
+		foreach ($last_result as $results) {
+			if (!$results->server_serial_no) {
+				if (!array_key_exists(_('All Servers'), $array)) {
+					$array[_('All Servers')][] = null;
+				}
+				$array[_('All Servers')][$j][] = $results->view_name;
+				$array[_('All Servers')][$j][] = $results->view_id;
+				$j++;
+			} elseif (strpos($results->server_serial_no, 'g_') !== false) {
+				$group_name = getNameFromID(str_replace('g_', '', $results->server_serial_no), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+				if (!array_key_exists($group_name, $array)) {
+					$array[$group_name][] = null;
+					$k = 0;
+				}
+				$array[$group_name][$k][] = $results->view_name;
+				$array[$group_name][$k][] = $results->view_id;
+				$k++;
+			} elseif ($results->server_serial_no) {
+				if (!array_key_exists($results->server_name, $array)) {
+					$array[$results->server_name][] = null;
+					$l = 0;
+				}
+				$array[$results->server_name][$l][] = $results->view_name;
+				$array[$results->server_name][$l][] = $results->view_id;
+				$l++;
+			}
 		}
 	}
 	

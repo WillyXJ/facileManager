@@ -1,6 +1,15 @@
 4.2.0 (2021-??-??)
 ==================
-Server - [improvement] Updated UI to better show disabled buttons and fields.
+* Server - [improvement] Updated UI to better show disabled buttons and fields.
+* Server - [improvement] View selection menus now list the server or server group they
+           belong to.
+* Server - [improvement] ACLs can now contain TSIG keys. (Issue #511)
+* Server - [bug] Fixed log entries when adding a group view or changing a group view order.
+* Server - [bug] Fixed reverse zone filename when the server update method is cron. (Issue #519)
+* Server - [bug] Fixed slave file name when only a single zone is defined with the specified
+           name. (Issue #456)
+* Server - [bug] Fixed an issue where zone forwarders and masters could not be updated. (Issue #518)
+* Server - [bug] Ensure only TSIG keys are available when defining controls.
 
 4.1.0 (2021-02-03)
 ==================
