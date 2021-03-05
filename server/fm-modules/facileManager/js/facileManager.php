@@ -614,9 +614,11 @@ if (isset($__FM_CONFIG)) {
 		if ($(this).val() == 2) {
 			$("tr.user_password").hide();
 			$("input#submit").removeAttr("disabled");
+			$("input#submit").removeClass("disabled");
 		} else {
 			$("tr.user_password").show();
 			$("input#submit").attr("disabled", "disabled");
+			$("input#submit").addClass("disabled");
 		}
 	});
 
@@ -746,6 +748,7 @@ if (isset($__FM_CONFIG)) {
 	
 	$("#manage_item_contents").delegate("#user_template_only", "click tap", function(e) {
 		$("input[type=\"submit\"]").removeAttr("disabled");
+		$("input[type=\"submit\"]").removeClass("disabled");
 	});
 	
 	$("#auth_method").change(function() {
@@ -775,8 +778,12 @@ if (isset($__FM_CONFIG)) {
 	$("#api_token_support").click(function() {
 		if ($(this).is(":checked")) {
 			$("#enforce_ssl").prop("checked", this.checked).attr("disabled", true);
+			$("#enforce_ssl").addClass("disabled");
+			$("#enforce_ssl_label").addClass("disabled");
 		} else {
 			$("#enforce_ssl").attr("disabled", false);
+			$("#enforce_ssl").removeClass("disabled");
+			$("#enforce_ssl_label").removeClass("disabled");
 		}
 	});
 	
@@ -1241,40 +1248,49 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 		strength.innerHTML = "' . _('No Password') . '";
 		strength.style.background = "";
 		button.disabled = true;
+		$(button).addClass("disabled");
 	} else {
 		strength.style.color = "white";
 		if (false == enoughRegex.test(pwd1.value)) {
 			strength.innerHTML = "' . _('More Characters') . '";
 			strength.style.background = "#878787";
 			button.disabled = true;
+			$(button).addClass("disabled");
 		} else if (strongRegex.test(pwd1.value)) {
 			strength.innerHTML = "' . _('Strong') . '";
 			strength.style.background = "green";
 			button.disabled = false;
+			$(button).removeClass("disabled");
 		} else if (mediumRegex.test(pwd1.value)) {
 			strength.innerHTML = "' . _('Medium') . '";
 			strength.style.background = "orange";
 			if (pwdtype == "strong") {
 				button.disabled = true;
+				$(button).addClass("disabled");
 			} else {
 				button.disabled = false;
+				$(button).removeClass("disabled");
 			}
 		} else {
 			strength.innerHTML = "' . _('Weak') . '";
 			strength.style.background = "red";
 			button.disabled = true;
+			$(button).addClass("disabled");
 		}
 	}
 	if (pwd2.value.length!=0 && pwd1.value!=pwd2.value) {
 		strength.innerHTML = "' . _("Passwords don't match") . '";
 		strength.style.background = "red";
 		button.disabled = true;
+		$(button).addClass("disabled");
 	} else if (pwd2.value.length==0) {
 		button.disabled = true;
+		$(button).addClass("disabled");
 	} else if (user.value.length==0) {
 		strength.innerHTML = "' . _('No Username Specified') . '";
 		strength.style.background = "#878787";
 		button.disabled = true;
+		$(button).addClass("disabled");
 	}
 }
 

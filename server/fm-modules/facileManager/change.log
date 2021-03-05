@@ -1,3 +1,7 @@
+4.0.4 (2021-??-??)
+==================
+Server - [improvement] Updated UI to better show disabled buttons and fields.
+
 4.0.3 (2021-02-03)
 ==================
 * Server - [security] Fixed a SQL injection issue with session variables.

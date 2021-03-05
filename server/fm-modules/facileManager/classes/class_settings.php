@@ -250,7 +250,7 @@ class fm_settings {
 		
 		/** API Section */
 		$api_token_support_checked = (getOption('api_token_support')) ? 'checked' : null;
-		$enforce_ssl_checked .= ($api_token_support_checked) ? ' disabled' : null;
+		$enforce_ssl_checked .= ($api_token_support_checked) ? ' disabled class="disabled"' : null;
 
 		/** Mailing Section */
 		$mail_enable = getOption('mail_enable');
@@ -519,7 +519,7 @@ class fm_settings {
 							<p>' . _('Attempt to auto-detect and redirect the user to https.') . '</p>
 						</div>
 						<div class="choices">
-							<input name="enforce_ssl" id="enforce_ssl" type="checkbox" value="1" ' . $enforce_ssl_checked . ' /><label for="enforce_ssl">' . _('Enforce SSL') . '</label>
+							<input name="enforce_ssl" id="enforce_ssl" type="checkbox" value="1" ' . $enforce_ssl_checked . ' /><label id="enforce_ssl_label" for="enforce_ssl" ' . $enforce_ssl_checked . '>' . _('Enforce SSL') . '</label>
 						</div>
 					</div>
 					<div id="setting-row">

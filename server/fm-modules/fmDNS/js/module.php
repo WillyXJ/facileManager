@@ -483,8 +483,10 @@ $(document).ready(function() {
 		if ($(this).val().indexOf("master_") > -1) {
 			$("#master_port").val("");
 			$("#master_port, #master_key_id").attr("disabled", "disabled");
+			$("#master_port, #master_key_id").addClass("disabled");
 		} else {
 			$("#master_port, #master_key_id").removeAttr("disabled");
+			$("#master_port, #master_key_id").removeClass("disabled");
 		}
 	});
 
