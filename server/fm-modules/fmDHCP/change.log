@@ -1,3 +1,7 @@
+0.4.7 (2021-??-??)
+==================
+* Server - [bug] Fixed the ability to delete DHCP servers. (Issue #529)
+
 0.4.6 (2020-11-27)
 ==================
 * Server - [bug] Fixed upgrade process retry attempts.

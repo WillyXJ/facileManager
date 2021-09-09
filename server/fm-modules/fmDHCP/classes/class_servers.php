@@ -212,11 +212,6 @@ class fm_module_servers extends fm_shared_module_servers {
 		$server_serial_no = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_serial_no');
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
-			/** Delete associated records from other tables */
-			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'table1', $server_serial_no, 'prefix_', 'deleted', 'server_serial_no') === false) {
-				return __('The associated table records could not be removed because a database error occurred.');
-			}
-			
 			/** Delete server */
 			$tmp_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_id, 'server_', 'deleted', 'server_id')) {
