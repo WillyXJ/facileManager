@@ -1539,9 +1539,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$die = false;
 		$named_checkconf = findProgram('named-checkconf');
+		$named_checkzone = findProgram('named-checkzone');
 		
 		$uname = php_uname('n');
-		if (!$named_checkconf) {
+		if (!$named_checkconf || !$named_checkzone) {
 			return sprintf('<div id="config_check" class="info"><p>%s</p></div>', 
 					sprintf(__('The named utilities (specifically named-checkconf and named-checkzone) cannot be found on %s. If they were installed, these configs and zones could be checked for syntax.'), $uname));
 		}
