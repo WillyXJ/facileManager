@@ -30,7 +30,7 @@ function upgradefmDHCPSchema($module_name) {
 	$running_version = getOption('version', 0, 'fmDHCP');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.4.5', '<') ? upgradefmDHCP_045($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.4.7', '<') ? upgradefmDHCP_047($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false, 0, 'fmDHCP');
@@ -224,6 +224,29 @@ function upgradefmDHCP_045($__FM_CONFIG, $running_version) {
 	
 	/** Handle updating table with module version **/
 	setOption('version', '0.4.5', 'auto', false, 0, 'fmDHCP');
+	
+	return true;
+}
+
+/** 0.4.7 */
+function upgradefmDHCP_047($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '0.4.5', '<') ? upgradefmDHCP_045($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}servers` CHANGE `server_update_config` `server_update_config` ENUM('yes','no','conf') NOT NULL DEFAULT 'no'";
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Handle updating table with module version **/
+	setOption('version', '0.4.7', 'auto', false, 0, 'fmDHCP');
 	
 	return true;
 }

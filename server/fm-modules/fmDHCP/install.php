@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_update_method` enum('http','https','cron','ssh') NOT NULL DEFAULT 'http',
   `server_update_port` int(5) NOT NULL DEFAULT '0',
   `server_build_config` enum('yes','no') NOT NULL DEFAULT 'no',
-  `server_update_config` enum('yes','no') NOT NULL DEFAULT 'no',
+  `server_update_config` enum('yes','no','conf') NOT NULL DEFAULT 'no',
   `server_installed` enum('yes','no') NOT NULL DEFAULT 'no',
   `server_client_version` varchar(150) DEFAULT NULL,
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
