@@ -530,7 +530,7 @@ HTML;
 	private function generateDNSSECKeys($data) {
 		global $__FM_CONFIG;
 
-		if (!in_array($post['key_size'], $__FM_CONFIG['keys']['avail_sizes'])) return __('The selected key size is invalid.');
+		if (!in_array($data['key_size'], $__FM_CONFIG['keys']['avail_sizes'])) return __('The selected key size is invalid.');
 		
 		if (!$dnssec_keygen = findProgram('dnssec-keygen')) return sprintf(__('The dnssec-keygen utility cannot be found on %s to generate the keys.'), php_uname('n'));
 		
