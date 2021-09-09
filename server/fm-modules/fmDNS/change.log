@@ -12,6 +12,7 @@
 * Server - [bug] Ensure only TSIG keys are available when defining controls.
 * Server - [bug] Fixed DNSSEC key creations. (Issue #527)
 * Server - [bug] Fixed zone config checks when named-checkzone is missing. (Issue #535)
+* Server - [bug] Fixed DNSSEC zone config builds. (Issue #528)
 
 4.1.0 (2021-02-03)
 ==================

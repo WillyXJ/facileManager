@@ -2468,7 +2468,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 
 		/** Get associated server group IDs */
 		$server_group_ids = $fm_module_servers->getServerGroupIDs($server_id);
-		$server_group_ids_sql = (is_array($server_group_ids)) ? ", 'g_" . implode(", 'g_", $server_group_ids) . "'" : null;
+		$server_group_ids_sql = (is_array($server_group_ids)) ? ", 'g_" . implode("', 'g_", $server_group_ids) . "'" : null;
 		
 		$query = "SELECT * FROM `fm_dns_config` WHERE `cfg_name` = 'key-directory' AND cfg_type='global' AND account_id=1 AND cfg_status='active'
 			AND domain_id IN (0, $domain_id) AND view_id IN (0, $view_id) AND server_serial_no IN ('0', '$server_serial_no' $server_group_ids_sql)
