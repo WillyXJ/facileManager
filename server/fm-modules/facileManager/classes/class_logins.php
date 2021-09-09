@@ -688,7 +688,7 @@ This link expires in %s.',
 		} else {
 			for ($i = 0; $i < $entries[0][$ldap_group_attribute]['count']; $i++) {
 				if ($entries[0][$ldap_group_attribute][$i] == $groupdn) return true;
-				elseif ($this->checkGroupMembership($ldap_connect, $entries[0][$ldap_group_attribute][$i], $groupdn)) return true;
+				elseif ($this->checkGroupMembership($ldap_connect, $entries[0][$ldap_group_attribute][$i], $groupdn, $ldap_group_attribute)) return true;
 			};
 		};
 		return false;
