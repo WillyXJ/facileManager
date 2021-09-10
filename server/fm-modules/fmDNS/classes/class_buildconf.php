@@ -1594,7 +1594,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		if (!$die) {
 			/** Run named-checkconf */
-			$named_checkconf_cmd = findProgram('sudo') . ' ' . findProgram('named-checkconf') . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
+			$named_checkconf_cmd = findProgram('sudo') . ' -n ' . findProgram('named-checkconf') . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
 			exec($named_checkconf_cmd, $named_checkconf_results, $retval);
 			if ($retval) {
 				$class = 'class="error"';
@@ -1612,7 +1612,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				if (array($zone_files)) {
 					foreach ($zone_files as $view => $zones) {
 						foreach ($zones as $zone_name => $zone_file) {
-							$named_checkzone_cmd = findProgram('sudo') . ' ' . findProgram('named-checkzone') . ' -t ' . $tmp_dir . ' ' . $zone_name . ' ' . $zone_file . ' 2>&1';
+							$named_checkzone_cmd = findProgram('sudo') . ' -n ' . findProgram('named-checkzone') . ' -t ' . $tmp_dir . ' ' . $zone_name . ' ' . $zone_file . ' 2>&1';
 							exec($named_checkzone_cmd, $results, $retval);
 							if ($retval) {
 								$class = 'class="error"';
