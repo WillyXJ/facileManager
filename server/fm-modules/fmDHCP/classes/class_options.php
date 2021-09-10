@@ -83,10 +83,9 @@ class fm_module_options {
 		if (!is_array($post)) return $post;
 		
 		if (empty($post['config_name'])) return false;
-//		print_r($post);exit;
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', sanitize($post['config_name']), 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' AND server_serial_no='{$post['server_serial_no']}'");
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', sanitize($post['config_name']), 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_parent_id='{$post['config_parent_id']}' AND config_data!='' AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
 			$num_same_config = $fmdb->num_rows;
 			$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option='" . sanitize($post['config_name']) . "' AND def_option_type='{$post['config_type']}'";
@@ -149,7 +148,7 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', sanitize($post['config_name']), 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' AND server_serial_no='{$post['server_serial_no']}'");
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', sanitize($post['config_name']), 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_parent_id='{$post['config_parent_id']}' AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->config_id != $post['config_id']) {
