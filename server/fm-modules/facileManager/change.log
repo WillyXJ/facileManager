@@ -1,6 +1,7 @@
 4.0.4 (2021-??-??)
 ==================
 * Server - [improvement] Updated UI to better show disabled buttons and fields.
+* Server - [improvement] LDAPS authentication no longer requires certificate inputs. (Issue #534)
 * Server - [bug] Fixed LDAP group authentication. (Issue #533)
 
 4.0.3 (2021-02-03)

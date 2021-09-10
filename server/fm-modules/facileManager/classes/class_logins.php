@@ -520,8 +520,12 @@ This link expires in %s.',
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
 		if ($ldap_encryption == 'SSL') {
-			@ldap_set_option(NULL, LDAP_OPT_X_TLS_CERTFILE, $ldap_cert_file);
-			@ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, $ldap_ca_cert_file);
+			if ($ldap_cert_file) {
+				@ldap_set_option(NULL, LDAP_OPT_X_TLS_CERTFILE, $ldap_cert_file);
+			}
+			if ($ldap_ca_cert_file) {
+				@ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, $ldap_ca_cert_file);
+			}
 			$ldap_connect = @ldap_connect('ldaps://' . $ldap_server, $ldap_port_ssl);
 		} else {
 			$ldap_connect = @ldap_connect($ldap_server, $ldap_port);
