@@ -1961,14 +1961,22 @@ HTML;
 		
 		$config = null;
 		
-		$query = "SELECT def_multiple_values FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' $sql";
+		$query = "SELECT def_multiple_values,def_minimum_version FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' $sql";
 		$fmdb->get_results($query);
 		if (!$fmdb->num_rows) {
 			return;
 		} else {
 			$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
+			$def_minimum_version = (isset($fmdb->last_result[0]->def_minimum_version)) ? $fmdb->last_result[0]->def_minimum_version : null;
 		}
 
+		// Ensure minimum version is achieved
+		if ($server_info && $server_info->server_version) {
+			if (version_compare($server_info->server_version, $def_minimum_version, '<')) {
+				return $tab . sprintf(__('// BIND %s or greater is required for %s'), $def_minimum_version, $cfg_name) . "\n";
+			}
+		}
+		
 		if ($cfg_comment) {
 			$comment = wordwrap($cfg_comment, 50, "\n");
 			$config .= "\n$tab// " . str_replace("\n", "\n$tab// ", $comment) . "\n";
