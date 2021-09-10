@@ -14,6 +14,7 @@
 * Server - [bug] Fixed DNSSEC key creations. (Issue #527)
 * Server - [bug] Fixed zone config checks when named-checkzone is missing. (Issue #535)
 * Server - [bug] Fixed DNSSEC zone config builds. (Issue #528)
+* Server - [bug] Fixed missing information in sudo error messages.
 
 4.1.0 (2021-02-03)
 ==================

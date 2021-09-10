@@ -1601,7 +1601,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$named_checkconf_results = implode("\n", $named_checkconf_results);
 				if (strpos($named_checkconf_results, 'sudo') !== false) {
 					$class = 'class="info"';
-					$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $checkconf_cmd, 'checkconf_results' => $checkconf_results));
+					$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkconf_cmd, 'checkconf_results' => $named_checkconf_results));
 				} else {
 					$message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkconf_results));
 				}
