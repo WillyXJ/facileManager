@@ -662,6 +662,7 @@ VALUES
 ('options', 'use-v4-udp-ports', '( range ip_port ip_port )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'use-v6-udp-ports', '( range ip_port ip_port )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'v6-bias', '( integer )', 'no', 'O', NULL, 'no', '9.10.0'),
+('options', 'validate-except', '( domain_select )', 'yes', 'O', NULL, 'no', '9.13.3'),
 ('options', 'view', '( quoted_string )', 'no', 'R', NULL, 'no', NULL),
 ('options', 'version', '( quoted_string | none )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL),

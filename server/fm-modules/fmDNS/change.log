@@ -1,5 +1,6 @@
 4.2.0 (2021-??-??)
 ==================
+* Server - [feature] Added support for validate-except option. (Issue #537)
 * Server - [improvement] Updated UI to better show disabled buttons and fields.
 * Server - [improvement] View selection menus now list the server or server group they
            belong to.

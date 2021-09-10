@@ -2410,4 +2410,38 @@ function upgradefmDNS_400($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 4.1.0 */
+function upgradefmDNS_410($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '4.0.0', '<') ? upgradefmDNS_400($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = <<<INSERTSQL
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_dropdown`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'validate-except', '( domain_select )', 'yes', 'O', 'no', '9.13.3')
+;
+INSERTSQL;
+
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '4.1.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
 ?>

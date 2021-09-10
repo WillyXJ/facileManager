@@ -55,6 +55,27 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 						data: %s
 					});
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
+		} elseif (strpos($result[0]->def_type, 'domain_select') !== false) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			$available_domains = $fm_dns_zones->buildZoneJSON();
+
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="cfg_data" class="domain_select" value="%s" /><br />
+					%s
+					<script>
+					$(".domain_select").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: true,
+						width: "200px",
+						tokenSeparators: [",", " ", ";"],
+						data: %s
+					});
+					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_domains);
 		} elseif (strpos($result[0]->def_type, 'rrset_order_spec') !== false) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 			$cfg_data = ($cfg_data) ? explode(' ', $cfg_data) : array(null, null, null, null);

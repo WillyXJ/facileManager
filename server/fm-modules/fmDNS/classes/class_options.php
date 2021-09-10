@@ -666,6 +666,12 @@ HTML;
 			return join(' ', $order_spec);
 		}
 
+		if (strpos($def_type, 'domain_select') !== false) {
+			foreach (explode(',', $cfg_data) as $domain_name) $exclude_domain_names[] = '"' . displayFriendlyDomainName(getNameFromID($domain_name, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name')) . '"';
+			
+			return join(";\n\t\t", $exclude_domain_names);
+		}
+
 		if (!$fm_dns_acls) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
