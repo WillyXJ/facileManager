@@ -432,7 +432,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		if (!$die) {
 			/** Check config */
-			$checkconf_cmd = findProgram('sudo') . ' ' . findProgram('dhcpd') . ' -t -cf ' . $tmp_dir . $files_array['server_config_file'] . ' 2>&1';
+			$checkconf_cmd = findProgram('sudo') . ' -n ' . findProgram('dhcpd') . ' -t -cf ' . $tmp_dir . $files_array['server_config_file'] . ' 2>&1';
 			exec($checkconf_cmd, $checkconf_results, $retval);
 			if ($retval) {
 				$class = 'class="error"';
