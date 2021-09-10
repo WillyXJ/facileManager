@@ -1671,7 +1671,7 @@ function generateSerialNo($module = null) {
 			$serialno = rand(100000000, 999999999);
 			
 			/** Ensure the serial number does not exist in any of the server tables */
-			$result = $fmdb->get_results("SELECT table_name FROM information_schema.tables t WHERE t.table_schema = '{$__FM_CONFIG['db']['name']}' AND t.table_name LIKE 'fm_%_servers'");
+			$result = $fmdb->get_results("SELECT table_name AS table_name FROM information_schema.tables t WHERE t.table_schema = '{$__FM_CONFIG['db']['name']}' AND t.table_name LIKE 'fm_%_servers'");
 			$table_count = $fmdb->num_rows;
 			$taken = true;
 			for ($i=0; $i<$table_count; $i++) {
