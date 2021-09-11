@@ -1,5 +1,6 @@
 4.0.4 (2021-??-??)
 ==================
+* Server - [security] Upgraded to jQuery 3.6.0. (Issue #525)
 * Server - [improvement] Updated UI to better show disabled buttons and fields.
 * Server - [improvement] LDAPS authentication no longer requires certificate inputs. (Issue #534)
 * Server - [bug] Fixed LDAP group authentication. (Issue #533)
