@@ -2431,6 +2431,7 @@ VALUES
 ('options', 'validate-except', '( domain_select )', 'yes', 'O', 'no', '9.13.3')
 ;
 INSERTSQL;
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE `record_type` `record_type` ENUM('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','HINFO','KEY','KX','MX','NAPTR','NS','OPENPGPKEY','PTR','RP','SMIMEA','SSHFP','SRV','TLSA','TXT','URI','URL','CUSTOM') NOT NULL DEFAULT 'A'";
 
 	/** Run queries */
 	if (count($table) && $table[0]) {

@@ -64,6 +64,7 @@ $search_query = createSearchSQL(array('name', 'value', 'ttl', 'class', 'text', '
 $supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
 sort($supported_record_types);
 $supported_record_types[] = 'SOA';
+unset($supported_record_types[array_search('CUSTOM', $supported_record_types)]);
 
 $response = $form_data = $action = null;
 if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
@@ -79,7 +80,7 @@ if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION[
 $parent_domain_ids = getZoneParentID($domain_id);
 $zone_access_allowed = zoneAccessIsAllowed($parent_domain_ids);
 		
-if (!in_array($record_type, $supported_record_types)) $record_type = $default_record_type;
+if (!in_array($record_type, $supported_record_types) && $record_type != 'CUSTOM') $record_type = $default_record_type;
 $avail_types = buildRecordTypes($record_type, $parent_domain_ids, $map, $supported_record_types, $search_query);
 
 if (reloadZone($domain_id)) {
@@ -106,9 +107,9 @@ $body .= sprintf('<h2>%s</h2>
 	
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php">
-<input type="hidden" name="domain_id" value="' . $domain_id . '">
-<input type="hidden" name="record_type" value="' . $record_type . '">
-<input type="hidden" name="map" value="' . $map . '">' . "\n";
+<input type="hidden" name="domain_id" value="' . $domain_id . '" />
+<input type="hidden" name="record_type" value="' . $record_type . '" />
+<input type="hidden" name="map" value="' . $map . '" />' . "\n";
 } else $form = null;
 
 if ($record_type == 'SOA') {
@@ -117,6 +118,23 @@ if ($record_type == 'SOA') {
 		`soa_status`='active'";
 	$result = $fmdb->get_results($soa_query);
 	$body .= $form . $fm_dns_records->buildSOA($result);
+	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
+	}
+} elseif ($record_type == 'CUSTOM') {
+	$create_update = 'create';
+	$record_id = 1;
+
+	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id', 'AND record_type="CUSTOM"');
+	if ($fmdb->num_rows) {
+		$record_id = $fmdb->last_result[0]->record_id;
+		$domain_custom_rr_value = $fmdb->last_result[0]->record_value;
+		$create_update = 'update';
+	}
+
+	$body .= $form . '<input type="hidden" name="' . $create_update . '[' . $record_id . '][record_name]" value="' . $record_type . '" /><p>' . __('This field allows you to enter any additional zone record data that is not currently supported by fmDNS (there is no error checking and the data is appended to the zonefile).') . '</p>
+	<div class="display_results"><textarea rows="20" style="width: 100%;" name="' . $create_update . '[' . $record_id . '][record_value]">' . $domain_custom_rr_value . '</textarea></div>' . "\n";
+	
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
 	}
@@ -197,6 +215,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 		@sort($used_record_types);
 		
 		$used_record_types[] = 'SOA';
+		unset($used_record_types[array_search('CUSTOM', $used_record_types)]);
 		
 		foreach ($used_record_types as $type) {
 			if (empty($type)) continue;
@@ -224,8 +243,14 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 					}
 				}
 			}
+			if (!$search_query) {
+				$custom_tip = __('Add your own custom records');
+				$select = ($record_type == 'CUSTOM') ? ' class="selected"' : '';
+				$custom_rr = '<span' . $select . '><a' . $select . ' href="zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=CUSTOM" class="tooltip-left" data-tooltip="' . $custom_tip . '"><i class="fa fa-window-maximize" aria-hidden="true"></i></a></span>';
+			}
 			$menu_selects = <<<MENU
 			$menu_selects
+			$custom_rr
 			</div>
 			<div id="configtypesmenu" class="nopadding dropdown">
 				<div id="recordmenu">

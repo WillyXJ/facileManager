@@ -366,7 +366,7 @@ HTML;
 		<th width="33&#37;" scope="row"><label for="acl_bulk">%s</label></th>
 		<td width="67&#37;"><textarea id="acl_bulk" name="acl_bulk" rows="4" cols="26" placeholder="%s"></textarea></td>
 	</tr>
-', __('Confiure multiple addresses in bulk') . ' &raquo;', __('Matched Address List'), __('On each line enter an address and comment delimited by a comma or semi-colon.')) : null;
+', __('Configure multiple addresses in bulk') . ' &raquo;', __('Matched Address List'), __('On each line enter an address and comment delimited by a comma or semi-colon.')) : null;
 
 			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s

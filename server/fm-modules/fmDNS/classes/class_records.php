@@ -276,7 +276,7 @@ class fm_dns_records {
 			$title_array[] = array('title' => __('Map'), 'rel' => $type . '_mapping');
 			$title_array[] = array('title' => __('Type'), 'rel' => $type . '_type');
 		}
-		if (!in_array($type, array('SOA', 'DOMAIN'))) {
+		if (!in_array($type, array('SOA', 'DOMAIN', 'CUSTOM'))) {
 			$title_array[] = array('title' => __('Record'), 'rel' => 'record_name');
 			$title_array[] = array('title' => __('TTL'), 'rel' => 'record_ttl');
 			$title_array[] = array('title' => __('Class'), 'rel' => 'record_class');
@@ -343,13 +343,13 @@ class fm_dns_records {
 			$title_array[] = array('title' => __('Port'), 'rel' => 'record_port');
 		}
 		
-		if (!in_array($type, array('SOA', 'DOMAIN'))) {
+		if (!in_array($type, array('SOA', 'DOMAIN', 'CUSTOM'))) {
 			$title_array[] = array('title' => _('Comment'), 'rel' => 'record_comment');
 		}
 		
 		if (in_array($type, $append)) $title_array[] = array('title' => __('Append Domain'), 'class' => 'header-nosort', 'style' => 'text-align: center;', 'nowrap' => null, 'rel' => 'record_append');
 		
-		if (!in_array($type, array('SOA', 'DOMAIN'))) $title_array[] = array('title' => __('Status'), 'rel' => 'record_status');
+		if (!in_array($type, array('SOA', 'DOMAIN', 'CUSTOM'))) $title_array[] = array('title' => __('Status'), 'rel' => 'record_status');
 		if (empty($_POST) || $type == 'DOMAIN') {
 			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		} else {

@@ -104,6 +104,10 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	
 	foreach ($data_array as $id => $data) {
 		if (!is_array($data)) continue;
+		if ($record_type == 'CUSTOM' && !$data['record_value']) {
+			$value[$id] = $data;
+			$data['Delete'] = 'on';
+		}
 		if (isset($data['Delete'])) {
 			$action = _('Delete');
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');

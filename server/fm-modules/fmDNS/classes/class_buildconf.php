@@ -1386,7 +1386,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$this->url_config_file .= $this->buildURLWebRedirects(trimFullStop($record_name), $record_result[$i]->record_value, $record_result[$i]->record_comment);
 						}
 						break;
-						}
+					case 'CUSTOM':
+						$domain_custom_rr_data = $record_result[$i]->record_value;
+						break;
+				}
 			}
 			
 			ksort($record_array);
@@ -1404,6 +1407,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$zone_file .= "\n";
 			}
 			unset($record_result);
+
+			if (isset($domain_custom_rr_data)) {
+				$zone_file .= sprintf("\n;\n; %s\n;\n%s\n", __('This section is added from the custom field.'), $domain_custom_rr_data);
+			}
 		}
 		
 		return $zone_file;
