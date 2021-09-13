@@ -1545,6 +1545,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		if ($this->server_info->server_type == 'url-only') return;
 		
 		$die = false;
+		$message = null;
 		$named_checkconf = findProgram('named-checkconf');
 		$named_checkzone = findProgram('named-checkzone');
 		
@@ -1603,18 +1604,28 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Run named-checkconf */
 			$named_checkconf_cmd = findProgram('sudo') . ' -n ' . findProgram('named-checkconf') . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
 			exec($named_checkconf_cmd, $named_checkconf_results, $retval);
-			if ($retval) {
-				$class = 'class="error"';
+			/** Remove key-directory statements for config checks */
+			foreach ($named_checkconf_results as $key => $val) {
+				if (strpos($val, 'key-directory') !== false) {
+					unset($named_checkconf_results[$key]);
+				}
+			}
+
+			if ($retval || $named_checkconf_results) {
+				$class = ($retval) ? 'class="error"' : 'class="info"';
 				$named_checkconf_results = implode("\n", $named_checkconf_results);
 				if (strpos($named_checkconf_results, 'sudo') !== false) {
 					$class = 'class="info"';
 					$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkconf_cmd, 'checkconf_results' => $named_checkconf_results));
 				} else {
-					$message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkconf_results));
+					$message_type = (strpos($class, 'errors') !== false) ? 'errors' : 'warning';
+					$message = $this->getSyntaxCheckMessage($message_type, array('checkconf_results' => $named_checkconf_results));
 				}
 				
+			}
+
 			/** Run named-checkzone */
-			} else {
+			if (!$retval) {
 				$named_checkzone_results = null;
 				if (array($zone_files)) {
 					foreach ($zone_files as $view => $zones) {
@@ -1637,8 +1648,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				if ($named_checkzone_results) {
 					if (empty($message)) $message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkzone_results));
 				} else {
-					$class = null;
-					$message = $this->getSyntaxCheckMessage('loadable');
+					if (empty($message)) {
+						$class = null;
+						$message = $this->getSyntaxCheckMessage('loadable');
+					}
 				}
 			}
 		}
