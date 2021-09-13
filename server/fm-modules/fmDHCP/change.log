@@ -5,6 +5,7 @@
 * Server - [bug] Fixed the ability to delete DHCP servers. (Issue #529)
 * Server - [bug] Fixed client config updates via cron. (Issue #523)
 * Server - [bug] Fixed ability to add/edit options without being duplicates. (Issue #524)
+* Server - [bug] Fixed the server config preview for disabled servers.
 
 0.4.6 (2020-11-27)
 ==================
