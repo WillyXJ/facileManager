@@ -90,6 +90,11 @@ class fm_dns_keys {
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
+
+		/** Ensure key_name does not contain spaces */
+		if (strpos($post['key_name'], ' ')) {
+			return __('The key name cannot contain spaces.');
+		}
 		
 		$post['key_comment'] = trim($post['key_comment']);
 		if (!in_array($post['key_algorithm'], $this->getKeyAlgorithms($post['key_type']))) return __('The selected key algorithm is invalid.');
@@ -159,6 +164,12 @@ class fm_dns_keys {
 		global $fmdb, $__FM_CONFIG;
 		
 		if ($post['key_type'] == 'tsig' && (empty($post['key_name']) || empty($post['key_secret']))) return __('No key defined.');
+
+		/** Ensure key_name does not contain spaces */
+		if (strpos($post['key_name'], ' ')) {
+			return __('The key name cannot contain spaces.');
+		}
+		
 		$post['key_comment'] = trim($post['key_comment']);
 		
 		/** Check name field length */
