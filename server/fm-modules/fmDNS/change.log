@@ -9,6 +9,7 @@
 * Server - [improvement] Web server sudo commands now pass the non-interactive flag.
 * Server - [improvement] BIND options are commented out for unsupported BIND versions.
 * Server - [improvement] Configuration checks now display loadable warnings.
+* Server - [improvement] Server configs can now be previewed when a client upgrade is available.
 * Server - [bug] Fixed log entries when adding a group view or changing a group view order.
 * Server - [bug] Fixed reverse zone filename when the server update method is cron. (Issue #519)
 * Server - [bug] Fixed slave file name when only a single zone is defined with the specified

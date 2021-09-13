@@ -1,3 +1,7 @@
+2.1.0 (2021-??-??)
+==================
+* Server - [improvement] Server configs can now be previewed when a client upgrade is available.
+
 2.0.3 (2020-11-27)
 ==================
 * Server - [bug] Fixed Config Servers display with limited user permissions.

@@ -243,7 +243,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$os_image = setOSIcon($row->server_os_distro);
 		
 		$edit_status = $edit_actions = null;
-		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		
@@ -266,7 +266,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		}
 		
 		if (isset($row->server_client_version) && version_compare($row->server_client_version, getOption('client_version', 0, $_SESSION['module']), '<')) {
-			$edit_actions = __('Client Upgrade Available') . '<br />';
+			$edit_actions = __('Client Upgrade Available') . '<br />' . $preview;
 			$class = 'attention';
 		}
 		if ($row->server_installed != 'yes') {

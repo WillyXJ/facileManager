@@ -1,6 +1,7 @@
-0.4.7 (2021-??-??)
+0.5.0 (2021-??-??)
 ==================
 * Server - [improvement] Web server sudo commands now pass the non-interactive flag.
+* Server - [improvement] Server configs can now be previewed when a client upgrade is available.
 * Server - [bug] Fixed the ability to delete DHCP servers. (Issue #529)
 * Server - [bug] Fixed client config updates via cron. (Issue #523)
 * Server - [bug] Fixed ability to add/edit options without being duplicates. (Issue #524)
