@@ -132,8 +132,11 @@ if ($record_type == 'SOA') {
 		$create_update = 'update';
 	}
 
-	$body .= $form . '<input type="hidden" name="' . $create_update . '[' . $record_id . '][record_name]" value="' . $record_type . '" /><p>' . __('This field allows you to enter any additional zone record data that is not currently supported by fmDNS (there is no error checking and the data is appended to the zonefile).') . '</p>
-	<div class="display_results"><textarea rows="20" style="width: 100%;" name="' . $create_update . '[' . $record_id . '][record_value]">' . $domain_custom_rr_value . '</textarea></div>' . "\n";
+	$body .= $form . '<input type="hidden" name="' . $create_update . '[' . $record_id . '][record_name]" value="' . $record_type . '" />';
+	$body .= sprintf('<div id="config_check" class="info"><p>%s</p><p><b>%s</b></p></div>',
+		__('This field allows you to enter any additional zone record data that is not currently supported by fmDNS.'),
+		__('Error checking is not provided and the data is appended to the zone file.'));
+	$body .= '<div class="display_results"><textarea rows="20" style="width: 100%;" name="' . $create_update . '[' . $record_id . '][record_value]">' . $domain_custom_rr_value . '</textarea></div>' . "\n";
 	
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
