@@ -1,6 +1,7 @@
 2.1.0 (2021-??-??)
 ==================
 * Server - [improvement] Server configs can now be previewed when a client upgrade is available.
+* Server - [bug] Fixed PHP error during policy edits.
 
 2.0.3 (2020-11-27)
 ==================

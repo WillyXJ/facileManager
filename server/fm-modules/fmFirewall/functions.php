@@ -184,7 +184,7 @@ function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_
 	
 	$service_ids = $group_ids = $edit_group_id_sql = null;
 	
-	if (count($select_ids)) {
+	if (is_array($select_ids) && count($select_ids)) {
 		foreach ($select_ids as $temp_id) {
 			if (substr($temp_id, 0, 1) == 'g') {
 				$group_ids[] = substr($temp_id, 1);
