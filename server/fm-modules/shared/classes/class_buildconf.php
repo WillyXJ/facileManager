@@ -45,7 +45,7 @@ class fm_shared_module_buildconf {
 			$preview .= str_repeat('=', 75) . "\n";
 			$preview .= $filename . ":\n";
 			$preview .= str_repeat('=', 75) . "\n";
-			if (strpos($check_status, 'error') !== false) {
+			if (strpos($check_status, _('Your configuration is loadable.')) === false) {
 				$i = 1;
 				$contents_array = explode("\n", $contents);
 				foreach ($contents_array as $line) {
@@ -241,6 +241,7 @@ class fm_shared_module_buildconf {
 							'<br /><pre>' . $checkconf_cmd . '</pre><p>',
 							'<pre>' . $checkconf_results . '</pre>'),
 			'errors' => sprintf('%s<br /><pre>%s</pre>', _('Your configuration contains one or more errors:'), $checkconf_results),
+			'warning' => sprintf('%s<br /><pre>%s</pre>', _('Your configuration is loadable, but contains one or more warnings:'), $checkconf_results),
 			'loadable' => _('Your configuration is loadable.')
 			);
 		
