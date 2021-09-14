@@ -1,4 +1,4 @@
-1.5.4 (2021-??-??)
+1.6.0 (2021-09-14)
 ==================
 * Server - [improvement] Password update outputs now use language files.
 * Server - [improvement] Added notes for credentials when defining servers.
