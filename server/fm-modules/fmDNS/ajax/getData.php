@@ -107,7 +107,12 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 				unset($port_key, $dscp_key);
 			}
 			$cfg_data = str_replace(array('{', '}'), '', $cfg_data);
-			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no);
+			// This section would be to allow keys to be selected, but an IP also needs to be defined
+			// $available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
+			// $available_masters = $fm_dns_masters->getMasterList($server_serial_no, 'all');
+			// $available_masters = array_merge($available_masters, $fm_dns_acls->getACLList($server_serial_no, 'tsig-keys'));
+			$available_masters = null;
+			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no, $available_masters);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;">

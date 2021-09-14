@@ -399,8 +399,10 @@ HTML;
 	/**
 	 * Builds the master listing JSON
 	 */
-	function buildMasterJSON($saved_masters, $server_serial_no = 0, $include = 'all') {
-		$available_masters = $this->getMasterList($server_serial_no, $include);
+	function buildMasterJSON($saved_masters, $server_serial_no = 0, $available_masters = null, $include = 'all') {
+		if (!$available_masters) {
+			$available_masters = $this->getMasterList($server_serial_no, $include);
+		}
 		$temp_masters = array();
 		foreach ($available_masters as $temp_master_array) {
 			$temp_masters[] = $temp_master_array['id'];
