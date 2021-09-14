@@ -1,4 +1,4 @@
-4.2.0 (2021-??-??)
+5.0.0 (2021-09-14)
 ==================
 * Server - [feature] Added support for validate-except option. (Issue #537)
 * Server - [feature] Added ability to append any records/data to each zone file.

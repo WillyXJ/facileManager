@@ -1,4 +1,4 @@
-4.1.0 (2021-??-??)
+4.1.0 (2021-09-14)
 ==================
 * Server - [security] Upgraded to jQuery 3.6.0. (Issue #525)
 * Server - [improvement] Updated UI to better show disabled buttons and fields.
