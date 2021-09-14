@@ -157,7 +157,7 @@ HTML;
 function getServerCredentials($account_id = 0, $server_serial_no) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$query = "SELECT * FROM fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers WHERE server_serial_no=$server_serial_no AND account_id=$account_id";
+	$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers WHERE server_serial_no=$server_serial_no AND account_id=$account_id";
 	$results = $fmdb->get_results($query);
 	
 	if ($fmdb->num_rows) {
@@ -192,48 +192,48 @@ function changeMySQLUserPassword($server_name, $server_port, $admin_user, $admin
 	global $__FM_CONFIG;
 	
 	/** Connect to remote server */
-	$verbose_output = ' --> Connecting to MySQL ';
+	$verbose_output = sprintf(' --> %s ', __('Connecting to MySQL '));
 	if (!socketTest($server_name, $server_port, 5)) {
-		return $verbose_output . "[failed] - Could not connect to $server_name on tcp/$server_port\n";
+		return $verbose_output . sprintf("[%s] - %s\n", __('failed'), sprintf(__('Could not connect to %s on tcp/%s'), $server_name, $server_port));
 	}
 
 	$remote_connection = @new mysqli($server_name, $admin_user, $admin_pass, null, $server_port);
-	if (!$remote_connection->connect_error) $verbose_output .= "[ok]\n";
+	if (!$remote_connection->connect_error) $verbose_output .= sprintf("[%s]\n", __('ok'));
 	else {
-		$verbose_output .= '[failed] - ' . $remote_connection->connect_error . "\n";
-		return $verbose_output;
+		return $verbose_output . sprintf('[%s] - ' . $remote_connection->connect_error . "\n", __('failed'));
 	}
 	
 	/** Ensure database user exists before changing the password */
-	$verbose_output .= " --> Verifying $user exists ";
+	$verbose_output .= sprintf(' --> %s ', sprintf(__('Verifying user account (%s) exists'), $user));
 	list($user_login, $user_host) = explode('@', $user);
 	$user_host_query = !empty($user_host) ? "AND Host='$user_host'" : null;
 	if ($result = $remote_connection->query("SELECT User FROM mysql.user WHERE User='$user_login' $user_host_query")) {
 		if ($result->num_rows) {
-			$verbose_output .= "[ok]\n --> Updating the password for $user ";
+			$verbose_output .= sprintf("[%s]\n", __('ok'));
+			$verbose_output .= sprintf(' --> %s ', sprintf(__('Updating the password for user account (%s)'), $user));
 			$remote_connection->query("UPDATE mysql.user SET Password=PASSWORD('$user_password') WHERE User='$user_login' $user_host_query");
 			if ($remote_connection->affected_rows > 0) {
-				$verbose_output .= "[ok]\n";
+				$verbose_output .= sprintf("[%s]\n", __('ok'));
 				
 				/** Update last changed */
-				basicUpdate('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', $server_group, 'group_pwd_change', time(), 'group_id');
+				basicUpdate('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $server_group, 'group_pwd_change', time(), 'group_id');
 				
 				/** Flush privileges */
-				$verbose_output .= ' --> Flushing privileges ';
+				$verbose_output = sprintf(' --> %s ', __('Flushing privileges '));
 				$remote_connection->query('FLUSH PRIVILEGES');
-				$verbose_output .= ($remote_connection->error) ? '[failed] - ' . $remote_connection->error . "\n" : "[ok]\n";
+				$verbose_output .= ($remote_connection->error) ? sprintf('[%s] - ', __('failed')) . $remote_connection->error . "\n" : sprintf("[%s]\n", __('ok'));
 				
 				/** Log entry */
-				addLogEntry("Updated MySQL Account ($server_name : $user).");
+				addLogEntry(sprintf('%s (%s : %s).'), __('Updated MySQL Account'), $server_name, $user);
 			} else {
-				$verbose_output .= '[failed] - ';
-				$verbose_output .= ($remote_connection->error) ? $remote_connection->error . "\n" : "Password for $user was not different.\n";
+				$verbose_output .= sprintf('[%s] - ', __('failed'));
+				$verbose_output .= ($remote_connection->error) ? $remote_connection->error . "\n" : sprintf(__('Password for user account (%s) was not different.'), $user) . "\n";
 			}
 		} else {
-			$verbose_output .= "[failed] - User account ($user) does not exist.\n";
+			$verbose_output .= sprintf("[%s] - %s\n", __('failed'), sprintf(__('User account (%s) does not exist.'), $user));
 		}
 	} else {
-		$verbose_output .= '[failed] - ' . $remote_connection->error . "\n";
+		$verbose_output .= sprintf('[%s] - ', __('failed')) . $remote_connection->error . "\n";
 	}
 	$remote_connection->close();
 	
@@ -244,7 +244,7 @@ function changeMySQLUserPassword($server_name, $server_port, $admin_user, $admin
 /**
  * Changes a PostgreSQL user password
  *
- * @since 1.0
+ * @since 1.3
  * @package facileManager
  * @subpackage fmSQLPass
  *
@@ -261,18 +261,42 @@ function changePostgreSQLUserPassword($server_name, $server_port, $admin_user, $
 	global $__FM_CONFIG;
 	
 	/** Connect to remote server */
-	$verbose_output = ' --> Connecting to PostreSQL ';
+	$verbose_output = sprintf(' --> %s ', __('Connecting to PostgreSQL '));
 	if (!socketTest($server_name, $server_port, 5)) {
-		return $verbose_output . "[failed] - Could not connect to $server_name on tcp/$server_port\n";
+		return $verbose_output . sprintf("[%s] - %s\n", __('failed'), sprintf(__('Could not connect to %s on tcp/%s'), $server_name, $server_port));
 	}
 	
 	$remote_connection = pg_connect("host='$server_name' port='$server_port' user='$admin_user' password='$admin_pass' dbname='postgres'");
-	if (pg_connection_status($remote_connection) === PGSQL_CONNECTION_OK) $verbose_output .= "[ok]\n";
+	if (pg_connection_status($remote_connection) === PGSQL_CONNECTION_OK) $verbose_output .= sprintf("[%s]\n", __('ok'));
 	else {
-		$verbose_output .= '[failed] - ' . pg_last_error() . "\n";
-		return $verbose_output;
+		return $verbose_output . sprintf('[%s] - ' . pg_last_error() . "\n", __('failed'));
 	}
 	
+	/** Ensure database user exists before changing the password */
+	$verbose_output .= sprintf(' --> %s ', sprintf(__('Verifying user account (%s) exists'), $user));
+	if ($result = pg_query($remote_connection, "SELECT 1 FROM pg_roles WHERE rolname='$user_login'")) {
+		if (pg_num_rows($result)) {
+			$verbose_output .= sprintf("[%s]\n", __('ok'));
+			$verbose_output .= sprintf(' --> %s ', sprintf(__('Updating the password for user account (%s)'), $user));
+			pg_query($remote_connection, "ALTER USER $user_login WITH PASSWORD '$user_password' WHERE User='$user'");
+			if ($remote_connection->affected_rows > 0) {
+				$verbose_output .= sprintf("[%s]\n", __('ok'));
+				
+				/** Update last changed */
+				basicUpdate('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', $server_group, 'group_pwd_change', time(), 'group_id');
+				
+				/** Log entry */
+				addLogEntry(sprintf('%s (%s : %s).'), __('Updated PostgreSQL Account'), $server_name, $user);
+			} else {
+				$verbose_output .= sprintf('[%s] - ', __('failed'));
+				$verbose_output .= (pg_last_error()) ? pg_last_error() . "\n" : sprintf(__('Password for user account (%s) was not different.'), $user) . "\n";
+			}
+		} else {
+			$verbose_output .= sprintf("[%s] - %s\n", __('failed'), sprintf(__('User account (%s) does not exist.'), $user));
+		}
+	} else {
+		$verbose_output .= sprintf('[%s] - ', __('failed')) . pg_last_error() . "\n";
+	}
 	@pg_close($remote_connection);
 	
 	return $verbose_output;
