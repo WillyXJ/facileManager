@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-13 09:06-0600\n"
+"POT-Creation-Date: 2021-09-14 13:31-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2187,6 +2187,11 @@ msgstr ""
 msgid "Connectivity Test Results"
 msgstr ""
 
+#: server/fm-modules/shared/classes/class_buildconf.php:48
+#: server/fm-modules/shared/classes/class_buildconf.php:245
+msgid "Your configuration is loadable."
+msgstr ""
+
 #: server/fm-modules/shared/classes/class_buildconf.php:237
 #, php-format
 msgid ""
@@ -2212,7 +2217,7 @@ msgid "Your configuration contains one or more errors:"
 msgstr ""
 
 #: server/fm-modules/shared/classes/class_buildconf.php:244
-msgid "Your configuration is loadable."
+msgid "Your configuration is loadable, but contains one or more warnings:"
 msgstr ""
 
 #: server/fm-modules/shared/classes/class_servers.php:36

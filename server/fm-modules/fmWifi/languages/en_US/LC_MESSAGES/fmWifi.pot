@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-01 15:04-0600\n"
+"POT-Creation-Date: 2021-09-14 13:31-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,7 +81,7 @@ msgid "Uptime"
 msgstr ""
 
 #: server/fm-modules/fmWifi/functions.php:147
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "IP Address"
 msgstr ""
 
@@ -89,100 +89,100 @@ msgstr ""
 msgid "Groups"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:158
-#: server/fm-modules/fmWifi/functions.php:189
+#: server/fm-modules/fmWifi/functions.php:159
+#: server/fm-modules/fmWifi/functions.php:190
 #: server/fm-modules/fmWifi/ajax/getData.php:84
 msgid "AP is down"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:189
+#: server/fm-modules/fmWifi/functions.php:190
 #: server/fm-modules/fmWifi/ajax/getData.php:82
 msgid "AP is up"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:223
+#: server/fm-modules/fmWifi/functions.php:224
 msgid "Client Connections"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "User"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
-#: server/fm-modules/fmWifi/functions.php:471
+#: server/fm-modules/fmWifi/functions.php:231
+#: server/fm-modules/fmWifi/functions.php:472
 #: server/fm-modules/fmWifi/classes/class_acls.php:63
 msgid "WLAN"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "AP"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "Connected"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "Down"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "Up"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "Bitrate"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 msgid "SNR (dB)"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:230
+#: server/fm-modules/fmWifi/functions.php:231
 #: server/fm-modules/fmWifi/classes/class_options.php:56
 #: server/fm-modules/fmWifi/classes/class_servers.php:83
 msgid "Actions"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:236
+#: server/fm-modules/fmWifi/functions.php:237
 msgid "Block"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:294
+#: server/fm-modules/fmWifi/functions.php:295
 msgid "Firewall"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:468
+#: server/fm-modules/fmWifi/functions.php:469
 msgid "Config"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:471
+#: server/fm-modules/fmWifi/functions.php:472
 #: server/fm-modules/fmWifi/extra/capabilities.inc.php:29
 msgid "Manage WLANs"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:473
+#: server/fm-modules/fmWifi/functions.php:474
 msgid "Options"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:474
+#: server/fm-modules/fmWifi/functions.php:475
 msgid "Users"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:475
+#: server/fm-modules/fmWifi/functions.php:476
 msgid "ACLs"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:477
+#: server/fm-modules/fmWifi/functions.php:478
 msgid "WLANs"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:480
+#: server/fm-modules/fmWifi/functions.php:481
 #, php-format
 msgid "%s Settings"
 msgstr ""
 
-#: server/fm-modules/fmWifi/functions.php:632
+#: server/fm-modules/fmWifi/functions.php:633
 #: server/fm-modules/fmWifi/classes/class_acls.php:262
 #: server/fm-modules/fmWifi/classes/class_wlan_users.php:225
 #: server/fm-modules/fmWifi/classes/class_wlans.php:848
