@@ -62,15 +62,8 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			if ($zone_update_status !== true) {
 				$response = $zone_update_status;
 			} else {
-				header('Location: ' . $GLOBALS['basename'] . '?map=' . $map);
-				exit;
-			}
-		}
-		if (isset($_GET['status'])) {
-			if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_GET['domain_id'], 'domain_', $_GET['status'], 'domain_id')) {
-				$response = displayResponseClose(sprintf(__('This item could not be set to %s.'), $_GET['status']));
-			} else {
-				header('Location: ' . $GLOBALS['basename']);
+				$path_query = (isset($GLOBALS['path_parts']['query'])) ? '?' . $GLOBALS['path_parts']['query'] : null;
+				header('Location: zones-' . $map . '.php' . $path_query);
 				exit;
 			}
 		}
