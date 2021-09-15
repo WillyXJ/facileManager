@@ -30,6 +30,13 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.ph
 
 $selected_zone = 0;
 
+/** Fix absence of $_POST['submit'] */
+if (count($_POST)) {
+	if (!array_key_exists('submit', $_POST) && array_key_exists('action', $_POST)) {
+		$_POST['submit'] = __('Save');
+	}
+}
+
 /** Process ad-hoc zone creations and record imports */
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
