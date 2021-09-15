@@ -621,7 +621,8 @@ class fm_dns_zones {
 			/** Delete all associated configs */
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $domain_id, 'cfg_', 'domain_id');
 			if ($fmdb->num_rows) {
-				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $domain_id, 'cfg_', 'deleted', 'domain_id') === false) {
+				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_parent') === false || 
+					updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_id') === false) {
 					return formatError(__('The associated configs for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
 				unset($fmdb->num_rows);
@@ -672,8 +673,30 @@ class fm_dns_zones {
 					$clone_domain_result = $fmdb->last_result;
 					$clone_domain_num_rows = $fmdb->num_rows;
 					for ($i=0; $i<$clone_domain_num_rows; $i++) {
-						if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
-							return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+						/** Delete all associated configs */
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $clone_domain_result[$i]->domain_id, 'cfg_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_parent') === false || 
+								updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_id') === false) {
+								return formatError(__('The associated configs for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
+						}
+						
+						/** Delete all associated records */
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
+								return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
+						}
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records_skipped', $clone_domain_result[$i]->domain_id, 'record_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records_skipped', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
+								return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
 						}
 					}
 					unset($fmdb->num_rows);

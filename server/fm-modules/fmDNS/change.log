@@ -5,6 +5,7 @@
 * Server - [bug] Fixed zone creations during zone file imports.
 * Server - [bug] Fixed zone drop-down menu display of cloned zones without an associated view.
 * Server - [bug] Fixed view selection when editing a zone based on a template or is a clone.
+* Server - [bug] Fixed zone deletions when RPZ is configured.
 
 5.0.0 (2021-09-14)
 ==================
