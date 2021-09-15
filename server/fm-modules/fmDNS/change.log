@@ -4,6 +4,7 @@
 * Server - [bug] Fixed used RR type display.
 * Server - [bug] Editing zone configuration now keeps the user on the current page.
 * Server - [bug] Fixed zone creations during zone file imports.
+* Server - [bug] Fixed zone drop-down menu display of cloned zones without an associated view.
 
 5.0.0 (2021-09-14)
 ==================
