@@ -1802,8 +1802,9 @@ HTML;
 		}
 		
 		/** Ensure domain_view is set */
-		if (!array_key_exists('domain_view', $post)) {
-			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id']) ? -1 : 0;
+		$tmp_domain_clone_domain_id = getNameFromID(sanitize($post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		if (!array_key_exists('domain_view', $post) && $tmp_domain_clone_domain_id) {
+			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id'] || $tmp_domain_clone_domain_id) ? -1 : 0;
 		} elseif (is_array($post['domain_view']) && in_array(0, $post['domain_view'])) {
 			$post['domain_view'] = 0;
 		}
@@ -1873,7 +1874,7 @@ HTML;
 			$post = $new_post;
 			unset($new_post, $post['domain_template']);
 			$post['domain_type'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
-			if (!is_array($post['domain_view']) && $post['domain_view'] < 0) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+			if (!is_array($post['domain_view']) && (!isset($post['domain_view']) || $post['domain_view'] < 0)) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
 			$post['domain_name_servers'] = explode(';', getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
 
 			return $post;
@@ -1896,7 +1897,7 @@ HTML;
 		}
 		
 		/** No need to process more if zone is cloned */
-		if ($post['domain_clone_domain_id']) {
+		if ($post['domain_clone_domain_id'] || $tmp_domain_clone_domain_id) {
 			return $post;
 		}
 		
