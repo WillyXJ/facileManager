@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `domain_template` ENUM('yes','no') NOT NULL DEFAULT 'no',
   `domain_default` ENUM('yes','no') NOT NULL DEFAULT 'no',
   `domain_template_id` INT(11) NOT NULL DEFAULT '0',
+  `domain_ttl` varchar(50) DEFAULT NULL,
   `soa_id` int(11) NOT NULL DEFAULT '0',
   `soa_serial_no` INT(2) NOT NULL DEFAULT  '0',
   `soa_serial_no_previous` INT(2) NOT NULL DEFAULT '0',
