@@ -7,6 +7,7 @@
 * Server - [bug] Fixed view selection when editing a zone based on a template or is a clone.
 * Server - [bug] Fixed zone deletions when RPZ is configured.
 * Server - [bug] Fixed zone import records button when defining a new zone.
+* Server - [bug] Fixed Response Policy Zone display when All Zones is the only record.
 
 5.0.0 (2021-09-14)
 ==================

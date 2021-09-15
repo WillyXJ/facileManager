@@ -123,7 +123,7 @@ $global_num_rows = $fmdb->num_rows;
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='zone' AND domain_id>0 AND cfg_isparent='yes'", null, false, $sort_direction);
 $tmp_last_result = array_merge((array) $global_result, (array) $fmdb->last_result);
 $tmp_num_rows = $fmdb->num_rows + $global_num_rows;
-$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+$total_pages = ceil($tmp_num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 
 /** RPZ is limited to 32 defined zones */
@@ -144,7 +144,7 @@ HTML;
 
 $fmdb->last_result = $tmp_last_result;
 $fmdb->num_rows = $tmp_num_rows;
-$fm_module_rpz->rows($result, $page, $total_pages);
+$fm_module_rpz->rows($fmdb->num_rows, $page, $total_pages);
 
 printFooter();
 
