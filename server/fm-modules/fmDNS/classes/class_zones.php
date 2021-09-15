@@ -621,7 +621,8 @@ class fm_dns_zones {
 			/** Delete all associated configs */
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $domain_id, 'cfg_', 'domain_id');
 			if ($fmdb->num_rows) {
-				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $domain_id, 'cfg_', 'deleted', 'domain_id') === false) {
+				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_parent') === false || 
+					updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_id') === false) {
 					return formatError(__('The associated configs for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
 				unset($fmdb->num_rows);
@@ -672,8 +673,30 @@ class fm_dns_zones {
 					$clone_domain_result = $fmdb->last_result;
 					$clone_domain_num_rows = $fmdb->num_rows;
 					for ($i=0; $i<$clone_domain_num_rows; $i++) {
-						if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
-							return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+						/** Delete all associated configs */
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $clone_domain_result[$i]->domain_id, 'cfg_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_parent') === false || 
+								updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_id') === false) {
+								return formatError(__('The associated configs for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
+						}
+						
+						/** Delete all associated records */
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
+								return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
+						}
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records_skipped', $clone_domain_result[$i]->domain_id, 'record_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records_skipped', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
+								return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
 						}
 					}
 					unset($fmdb->num_rows);
@@ -1808,8 +1831,9 @@ HTML;
 		}
 		
 		/** Ensure domain_view is set */
-		if (!array_key_exists('domain_view', $post)) {
-			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id']) ? -1 : 0;
+		$tmp_domain_clone_domain_id = getNameFromID(sanitize($post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		if (!array_key_exists('domain_view', $post) && $tmp_domain_clone_domain_id) {
+			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id'] || $tmp_domain_clone_domain_id) ? -1 : 0;
 		} elseif (is_array($post['domain_view']) && in_array(0, $post['domain_view'])) {
 			$post['domain_view'] = 0;
 		}
@@ -1880,7 +1904,7 @@ HTML;
 			$post = $new_post;
 			unset($new_post, $post['domain_template']);
 			$post['domain_type'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
-			if (!is_array($post['domain_view']) && $post['domain_view'] < 0) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+			if (!is_array($post['domain_view']) && (!isset($post['domain_view']) || $post['domain_view'] < 0)) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
 			$post['domain_name_servers'] = explode(';', getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
 
 			return $post;
@@ -1903,7 +1927,7 @@ HTML;
 		}
 		
 		/** No need to process more if zone is cloned */
-		if ($post['domain_clone_domain_id']) {
+		if ($post['domain_clone_domain_id'] || $tmp_domain_clone_domain_id) {
 			return $post;
 		}
 		

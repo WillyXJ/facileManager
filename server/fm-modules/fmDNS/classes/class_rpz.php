@@ -282,8 +282,9 @@ class fm_module_rpz {
 		$tmp_name = ($tmp_name) ? getNameFromID($tmp_name, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : __('All Zones');
 
 		/** Delete associated children */
-		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_parent`=$id";
-		$fmdb->query($query);
+		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_parent') === false) {
+			return formatError(__('This RPZ could not be deleted because a database error occurred.'), 'sql');
+		}
 		
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
