@@ -1547,7 +1547,7 @@ HTML;
 			$count = $fmdb->num_rows;
 			for ($i=0; $i<$count; $i++) {
 				$domain_name = (!function_exists('displayFriendlyDomainName')) ? $results[$i]->domain_name : displayFriendlyDomainName($results[$i]->domain_name);
-				if ($results[$i]->domain_view) {
+				if ($results[$i]->domain_view > 0) {
 					$domain_name .= ' (' . getNameFromID($results[$i]->domain_view, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ')';
 				}
 				$return[$i+$start][] = $domain_name;
