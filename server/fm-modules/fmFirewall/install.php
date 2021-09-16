@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}poli
   `policy_services_not` enum('','!') NOT NULL DEFAULT '',
   `policy_services` text,
   `policy_time` text,
+  `policy_uid` text,
   `policy_options` int(3) NOT NULL DEFAULT '0',
   `policy_packet_state` text,
   `policy_comment` text,

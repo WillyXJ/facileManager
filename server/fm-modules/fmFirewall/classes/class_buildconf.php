@@ -200,7 +200,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$line = $keep_state = null;
+			$line = $keep_state = $uid = null;
 			$log_rule = false;
 			
 			$rule_number = $i + 1;
@@ -415,6 +415,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$line[] = $time_restrictions;
 			}
 			
+			/** Handle UID */
+			if ($policy_result[$i]->policy_uid) {
+				$uid = ' -m owner --uid-owner ' . $policy_result[$i]->policy_uid;
+			}
+			
 			@sort($policy_services['processed']);
 			
 			/** Build the rules */
@@ -425,11 +430,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					if (is_array($policy_services['processed'])) {
 						foreach ($policy_services['processed'] as $line_array) {
 							foreach ($line_array as $rule) {
-								$config[] = implode(' ', $line) . $source . $destination . $rule . $keep_state . $frag . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+								$config[] = implode(' ', $line) . $source . $destination . $rule . $uid . $keep_state . $frag . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination . $keep_state . $frag . ' -j ' . $rule_chain;
+						$config[] = implode(' ', $line) . $source . $destination . $uid . $keep_state . $frag . ' -j ' . $rule_chain;
 					}
 				}
 			}
@@ -463,7 +468,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$line = $label = $keep_state = null;
+			$line = $label = $keep_state = $uid = null;
 			
 			$rule_number = $i + 1;
 			$rule_title = 'fmFirewall Rule ' . $rule_number;
@@ -649,6 +654,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 			}
 			
+			/** Handle UID */
+			if ($policy_result[$i]->policy_uid) {
+				$uid = ' user { ' . $policy_result[$i]->policy_uid . ' }';
+			}
+			
 			/** Build the rules */
 			if (@is_array($policy_services['processed'])) {
 				foreach ($policy_services['processed'] as $protocol => $proto_array) {
@@ -668,7 +678,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$icmptypes = null;
 						}
 						
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . $keep_state . $label;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $uid . $icmptypes . $keep_state . $label;
 						
 						if (strpos($protocol, 'icmp') !== false) break;
 					}
@@ -902,7 +912,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$line = $keep_state = null;
+			$line = $keep_state = $uid = null;
 			
 			$rule_number = $i + 1;
 			$rule_title = 'fmFirewall Rule ' . $rule_number;
@@ -1050,6 +1060,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 			}
 			
+			/** Handle UID */
+			if ($policy_result[$i]->policy_uid) {
+				$uid = ' uid ' . $policy_result[$i]->policy_uid;
+			}
+			
 			/** Build the rules */
 			if (@is_array($policy_services['processed'])) {
 				foreach ($policy_services['processed'] as $protocol => $proto_array) {
@@ -1060,12 +1075,12 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$source_ports = $destination_ports = null;
 						}
 		
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
 					}
 				}
 				unset($policy_services);
 			} else {
-				$config[] = implode(' ', $line) . " all from $source_address to $destination_address " . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state;
+				$config[] = implode(' ', $line) . " all from $source_address to $destination_address " . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
 			}
 			
 			$config[] = null;

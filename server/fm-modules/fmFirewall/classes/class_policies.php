@@ -327,6 +327,7 @@ HTML;
 		if ($row->policy_packet_state) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></a>', str_replace(',', ', ', $row->policy_packet_state));
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></a>', __('Matching fragment packets'));
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></a>', __('Quick processing cancels further rule processing upon match'));
+		if ($row->policy_uid) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-user" aria-hidden="true"></i></a>', __('User ID defined'));
 		
 		$comments = nl2br($row->policy_comment);
 		if ($row->server_serial_no) {
@@ -372,7 +373,7 @@ HTML;
 		$source_items = $destination_items = $services_items = null;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
 		$policy_packet_state_form = $policy_packet_state = $policy_time_form = null;
-		$target_tab = null;
+		$target_tab = $policy_uid = $policy_uid_form = null;
 		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -444,20 +445,36 @@ FORM;
 				);
 			}
 
+			/** Time restriction */
 			if ($server_firewall_type == 'iptables' || $_POST['server_serial_no'][0] == 't') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
-				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-left" data-tooltip="%s %s"><i class="fa fa-question-circle"></i></a>',
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle"></i></a>',
 						__('Supported firewalls:'), 'iptables'
 					) : null;
 				$policy_time_form .= sprintf('
 				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_time">%s</label></th>
-					<td width="67&#37;">%s %s</td>
+					<th width="33&#37;" scope="row"><label for="policy_time">%s</label> %s</th>
+					<td width="67&#37;">%s</td>
 				</tr>',
-						__('Time Restriction'), $policy_time, $supported_firewalls
+						__('Time Restriction'), $supported_firewalls, $policy_time
 					);
 			}
 
+			/** UID support */
+			if (in_array($server_firewall_type, array('iptables', 'ipfw', 'pf')) || $_POST['server_serial_no'][0] == 't') {
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle"></i></a>',
+						__('Supported firewalls:'), 'iptables, ipfw, pf'
+					) : null;
+				$policy_uid_form = sprintf('
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_uid">%s</label> %s</th>
+					<td width="67&#37;"><input name="policy_uid" id="policy_uid" type="text" value="%s" /></td>
+				</tr>',
+						__('User ID'), $supported_firewalls, $policy_uid
+					);
+			}
+
+			/** Packet state */
 			$policy_packet_state_options = ($server_firewall_type) ? $__FM_CONFIG['fw']['policy_states'][$server_firewall_type] : null;
 			if ($_POST['server_serial_no'][0] == 't' || (is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
 				$policy_packet_state_options = array();
@@ -554,6 +571,7 @@ FORM;
 			<table class="form-table">
 				%s
 				%s
+				%s
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
@@ -590,7 +608,7 @@ FORM;
 					__('Services'), $services_items, $service_not_check, __('Negate'), __('Use this option to invert the match'),
 					__('Action'), $policy_action,
 					__('Options'),
-					$policy_time_form, $policy_packet_state_form,
+					$policy_time_form, $policy_uid_form, $policy_packet_state_form,
 					__('Options'), $options,
 					__('Interface'),
 					__('Interface'), $policy_interface,

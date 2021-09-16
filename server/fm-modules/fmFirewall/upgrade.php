@@ -368,4 +368,35 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 3.0.0 */
+function upgradefmFirewall_300($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '2.0', '<') ? upgradefmFirewall_200($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_uid` TEXT NULL DEFAULT NULL AFTER `policy_time`";
+	
+	$inserts = null;
+	
+	/** Create table schema */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	if (count($inserts) && $inserts[0]) {
+		foreach ($inserts as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.0.0', 'auto', false, 0, 'fmFirewall');
+	
+	return true;
+}
+
 ?>
