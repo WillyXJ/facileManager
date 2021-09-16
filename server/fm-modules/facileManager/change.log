@@ -1,3 +1,7 @@
+4.1.1 (2021-??-??)
+==================
+* Server - [bug] Fixed CSS for the tooltip in some windows.
+
 4.1.0 (2021-09-14)
 ==================
 * Server - [security] Upgraded to jQuery 3.6.0. (Issue #525)
