@@ -328,6 +328,7 @@ HTML;
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></a>', __('Matching fragment packets'));
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></a>', __('Quick processing cancels further rule processing upon match'));
 		if ($row->policy_uid) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-user" aria-hidden="true"></i></a>', __('User ID defined'));
+		if ($row->policy_tcp_flags) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-flag" aria-hidden="true"></i></a>', __('TCP flags defined'));
 		
 		$comments = nl2br($row->policy_comment);
 		if ($row->server_serial_no) {
@@ -373,8 +374,7 @@ HTML;
 		$source_items = $destination_items = $services_items = null;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
 		$policy_packet_state_form = $policy_packet_state = $policy_time_form = null;
-		$target_tab = $policy_uid = $policy_uid_form = null;
-		$ucaction = ucfirst($action);
+		$target_tab = $policy_uid = $policy_uid_form = $policy_tcp_flags = null;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -448,7 +448,7 @@ FORM;
 			/** Time restriction */
 			if ($server_firewall_type == 'iptables' || $_POST['server_serial_no'][0] == 't') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
-				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle"></i></a>',
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>',
 						__('Supported firewalls:'), 'iptables'
 					) : null;
 				$policy_time_form .= sprintf('
@@ -462,7 +462,7 @@ FORM;
 
 			/** UID support */
 			if (in_array($server_firewall_type, array('iptables', 'ipfw', 'pf')) || $_POST['server_serial_no'][0] == 't') {
-				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle"></i></a>',
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>',
 						__('Supported firewalls:'), 'iptables, ipfw, pf'
 					) : null;
 				$policy_uid_form = sprintf('
@@ -495,6 +495,21 @@ FORM;
 					__('Packet State'), buildSelect('policy_packet_state', 'policy_packet_state', $policy_packet_state_options, explode(',', trim($policy_packet_state, ',')), 1, null, true, null, null, __('Select one or more packet states'))
 				);
 
+			/** Process TCP Flags */
+			@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $policy_tcp_flags);
+			$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
+			foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
+				$tcp_flags_head .= '<th title="' . $flag .'">' . $flag . "</th>\n";
+				
+				$tcp_flags_mask_form .= '<td><input type="checkbox" name="policy_tcp_flags[mask][' . $bit . ']" ';
+				if ($bit & (integer) $tcp_flag_mask) $tcp_flags_mask_form .= 'checked';
+				$tcp_flags_mask_form .= "/></td>\n";
+
+				$tcp_flags_settings_form .= '<td><input type="checkbox" name="policy_tcp_flags[settings][' . $bit . ']" ';
+				if ($bit & $tcp_flag_settings) $tcp_flags_settings_form .= 'checked';
+				$tcp_flags_settings_form .= "/></td>\n";
+			}
+			
 			/** Parse options */
 			$options = null;
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
@@ -540,21 +555,21 @@ FORM;
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
 						%s<br />
-						<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+						<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
 					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
 						%s<br />
-						<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+						<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
 					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
 						%s<br />
-						<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+						<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
 					</td>
 				</tr>
 				<tr>
@@ -576,6 +591,27 @@ FORM;
 					<th width="33&#37;" scope="row">%s</th>
 					<td width="67&#37;">
 						%s
+					</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						<table class="form-table tcp-flags">
+						<tbody>
+							<tr>
+								<th></th>
+								%s
+							</tr>
+							<tr>
+								<th style="text-align: right;">%s <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></th>
+								%s
+							</tr>
+							<tr>
+								<th style="text-align: right;">%s</th>
+								%s
+							</tr>
+						</tbody>
+						</table>
 					</td>
 				</tr>
 			</table>
@@ -610,6 +646,8 @@ FORM;
 					__('Options'),
 					$policy_time_form, $policy_uid_form, $policy_packet_state_form,
 					__('Options'), $options,
+					__('TCP Flags'), $tcp_flags_head, __('Mask'), __('Only iptables uses the Mask bit. Use this for the negated bit on other firewalls.'),
+					$tcp_flags_mask_form, __('Settings'), $tcp_flags_settings_form,
 					__('Interface'),
 					__('Interface'), $policy_interface,
 					__('Direction'), $policy_direction,
@@ -637,13 +675,15 @@ FORM;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Process weekdays */
+		/** Process options */
 		if (@is_array($post['policy_options'])) {
 			$decimals = 0;
 			foreach ($post['policy_options'] as $dec) {
 				$decimals += $dec;
 			}
 			$post['policy_options'] = $decimals;
+			unset($decimals);
+			unset($dec);
 		} else $post['policy_options'] = 0;
 		
 		$post['server_serial_no'] = isset($post['server_serial_no']) ? $post['server_serial_no'] : $_REQUEST['server_serial_no'];
@@ -674,6 +714,17 @@ FORM;
 		if (getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type') == 'ipfilter' && $post['policy_action'] == 'reject') {
 			$post['policy_action'] = 'block';
 		}
+		
+		/** Process TCP Flags */
+		if (@is_array($post['policy_tcp_flags'])) {
+			$decimals['settings'] = $decimals['mask'] = 0;
+			foreach ($post['policy_tcp_flags'] as $type_array => $dec_array) {
+				foreach ($dec_array as $dec => $checked) {
+					$decimals[$type_array] += $dec;
+				}
+			}
+			$post['policy_tcp_flags'] = implode(':', $decimals);
+		} else $post['policy_tcp_flags'] = null;
 		
 		/** Remove tabs */
 		unset($post['tab-group-1']);

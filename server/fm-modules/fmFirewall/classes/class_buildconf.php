@@ -249,21 +249,21 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$policy_source = $this->buildAddressList($temp_source);
 			} else $policy_source[] = null;
 			
-			
 			/** Handle destinations */
 			unset($policy_destination);
 			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
 				$policy_destination = $this->buildAddressList($temp_destination);
 			} else $policy_destination[] = null;
-			
-			
+
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'iptables');
+
 			/** Handle match inverses */
 			$source_not = ($policy_result[$i]->policy_source_not) ? '! ' : null;
 			$destination_not = ($policy_result[$i]->policy_destination_not) ? '! ' : null;
 			$services_not = ($policy_result[$i]->policy_services_not) ? '! ' : null;
 
 			/** Handle services */
-			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
 					$temp_services = null;
@@ -420,21 +420,22 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$uid = ' -m owner --uid-owner ' . $policy_result[$i]->policy_uid;
 			}
 			
-			@sort($policy_services['processed']);
-			
 			/** Build the rules */
 			foreach ($policy_source as $source_address) {
 				$source = ($source_address) ? ' -s ' . $source_not . $source_address : null;
 				foreach ($policy_destination as $destination_address) {
 					$destination = ($destination_address) ? ' -d ' . $destination_not . $destination_address : null;
 					if (is_array($policy_services['processed'])) {
-						foreach ($policy_services['processed'] as $line_array) {
+						foreach ($policy_services['processed'] as $protocol => $line_array) {
 							foreach ($line_array as $rule) {
-								$config[] = implode(' ', $line) . $source . $destination . $rule . $uid . $keep_state . $frag . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+								$tcp_flags = ($protocol == 'tcp' && strpos($rule, 'tcp-flags') === false) ? $policy_tcp_flags : null;
+								$config[] = implode(' ', $line) . $source . $destination . $rule . $tcp_flags . $uid . $keep_state . $frag . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination . $uid . $keep_state . $frag . ' -j ' . $rule_chain;
+						$rule = implode(' ', $line);
+						$tcp_flags = (strpos($rule, 'tcp') !== false && strpos($rule, 'tcp-flags') === false) ? $policy_tcp_flags : null;
+						$config[] = $rule . $source . $destination . $tcp_flags . $uid . $keep_state . $frag . ' -j ' . $rule_chain;
 					}
 				}
 			}
@@ -545,6 +546,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$destination_address .= 'any';
 			}
 			
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'ipfilter');
+
 			/** Handle services */
 			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
@@ -678,14 +682,17 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$icmptypes = null;
 						}
 						
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $uid . $icmptypes . $keep_state . $label;
+						$tcp_flags = (strpos($protocol, 'tcp') !== false && strpos($rule_ports, 'flags') === false) ? $policy_tcp_flags : null;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $tcp_flags . $uid . $icmptypes . $keep_state . $label;
 						
 						if (strpos($protocol, 'icmp') !== false) break;
 					}
 				}
 				unset($policy_services);
 			} else {
-				$config[] = implode(' ', $line) . " from $source_address to $destination_address" . $keep_state . $label;
+				$rule = implode(' ', $line);
+				$tcp_flags = (strpos($rule, 'tcp') !== false && strpos($rule, 'flags') === false) ? $policy_tcp_flags : null;
+				$config[] = $rule . " from $source_address to $destination_address" . $tcp_flags . $keep_state . $label;
 			}
 			
 			$config[] = null;
@@ -747,14 +754,15 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$policy_source = $this->buildAddressList($temp_source);
 			} else $policy_source[] = 'any';
 			
-			
 			/** Handle destinations */
 			unset($policy_destination);
 			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
 				$policy_destination = $this->buildAddressList($temp_destination);
 			} else $policy_destination[] = 'any';
 			
-			
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'ipfilter');
+
 			/** Handle services */
 			$services_not = ($policy_result[$i]->policy_services_not) ? '!' : null;
 			$tcp = $udp = $icmp = null;
@@ -834,6 +842,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
+											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $tcp_flags . $frag . $keep_state;
 										}
 									} elseif ($direction_group == 'any-d') {
@@ -846,6 +857,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 											} else {
 												$service_ports = $port;
 												$tcp_flags = null;
+											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
 											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $frag . $keep_state;
 										}
@@ -861,6 +875,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
+											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $direction_array['d'][$index] . $tcp_flags . $frag . $keep_state;
 										}
 									} elseif ($direction_group == 'flag_only') {
@@ -873,6 +890,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
+											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $frag . $keep_state;
 										}
 									}
@@ -880,7 +900,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination. $frag . $keep_state;
+						$rule = implode(' ', $line);
+						$tcp_flags = (strpos($rule, 'tcp') !== false) ? $policy_tcp_flags : null;
+						$config[] = $rule . $source . $destination . $tcp_flags . $frag . $keep_state;
 					}
 				}
 			}
@@ -961,8 +983,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$destination_address = ($policy_result[$i]->policy_destination_not) ? 'not ' : null;
 			$destination_address .= (is_array($policy_destination)) ? implode(',', $policy_destination) : 'any';
 			
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'ipfw');
+
 			/** Handle services */
-			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
 					$temp_services = null;
@@ -1075,12 +1099,15 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$source_ports = $destination_ports = null;
 						}
 		
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
+						$tcp_flags = ($protocol == 'tcp' && strpos($rule_ports, 'flags') === false) ? $policy_tcp_flags : null;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . trim($destination_address . str_replace('  ', ' ', $destination_ports)) . $tcp_flags . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
 					}
 				}
 				unset($policy_services);
 			} else {
-				$config[] = implode(' ', $line) . " all from $source_address to $destination_address " . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
+				$rule = implode(' ', $line);
+				$tcp_flags = (strpos($rule, 'tcp') !== false) ? $policy_tcp_flags : null;
+				$config[] = $rule . " all from $source_address to $destination_address" . $tcp_flags . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
 			}
 			
 			$config[] = null;

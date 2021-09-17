@@ -376,6 +376,7 @@ function upgradefmFirewall_300($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_uid` TEXT NULL DEFAULT NULL AFTER `policy_time`";
+	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_tcp_flags` VARCHAR(5) NULL DEFAULT NULL AFTER `policy_options`";
 	
 	$inserts = null;
 	

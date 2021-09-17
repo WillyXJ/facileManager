@@ -245,7 +245,6 @@ HTML;
 		$service_id = 0;
 		$service_name = $service_tcp_flags = $service_comment = null;
 		$service_icmp_type = $service_icmp_code = null;
-		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -276,7 +275,7 @@ HTML;
 		@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $service_tcp_flags);
 		$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
 		foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
-			$tcp_flags_head .= '<th title="' . $flag .'">' . $flag[0] . "</th>\n";
+			$tcp_flags_head .= '<th title="' . $flag .'">' . $flag . "</th>\n";
 			
 			$tcp_flags_mask_form .= '<td><input type="checkbox" name="service_tcp_flags[mask][' . $bit . ']" ';
 			if ($bit & (integer) $tcp_flag_mask) $tcp_flags_mask_form .= 'checked';
@@ -317,7 +316,7 @@ HTML;
 							<label for="port_dest_end">%s</label> <input type="number" name="port_dest[]" value="%s" placeholder="0" style="width: 5em;" onkeydown="return validateNumber(event)" max="65535" />
 						</div>
 						<div id="tcp_option" style="display: %s;">
-							<h4>%s</h4>
+							<h4>%s <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h4>
 							<table class="form-table tcp-flags">
 								<tbody>
 									<tr>
@@ -359,7 +358,7 @@ HTML;
 				$icmp_option, $service_icmp_type, $service_icmp_code,
 				$tcpudp_option, __('Source Port Range'), __('Start'), $port_src_start, __('End'), $port_src_end,
 				__('Destination Port Range'), __('Start'), $port_dest_start, __('End'), $port_dest_end,
-				$tcp_option, __('TCP Flags'), $tcp_flags_head, __('Only iptables uses the Mask bit'), __('Mask'),
+				$tcp_option, __('TCP Flags'), __('TCP flags set here will override the policy TCP flags'), $tcp_flags_head, __('Only iptables uses the Mask bit'), __('Mask'),
 				$tcp_flags_mask_form, __('Settings'), $tcp_flags_settings_form,
 				_('Comment'), $service_comment,
 				$popup_footer
@@ -433,9 +432,10 @@ HTML;
 	
 	function getTCPFlags($flag_bits, $type = 'display') {
 		global $__FM_CONFIG;
+
+		if (!$flag_bits) return null;
 		
 		@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $flag_bits);
-		$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
 		$service_tcp_flags['mask'] = $service_tcp_flags['settings'] = null;
 		
 		foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
