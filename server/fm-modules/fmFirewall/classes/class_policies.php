@@ -55,8 +55,13 @@ class fm_module_policies {
 							);
 			$title_array[] = array('class' => 'header-tiny');
 		}
-		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Location'), __('Source'), __('Destination'), __('Service'), __('Interface'),
-								__('Direction'), __('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;')));
+		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Location'), __('Source'), __('Destination'), __('Service'), __('Interface')));
+		if ($type == 'filter') {
+			$title_array = array_merge($title_array, array(__('Direction'), __('Time')));
+		} elseif ($type == 'nat') {
+			$title_array = array_merge($title_array, array(__('Source Translation'), __('Destination Translation')));
+		}
+		$title_array[] = array('title' => _('Comment'), 'style' => 'width: 20%;');
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
@@ -101,13 +106,14 @@ class fm_module_policies {
 		$action_icons = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
 		$action_icons[] = 'log';
 		
-		foreach ($action_icons as $action) {
-			$action_active[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action'][$action]) . "<span>$action</span></td>\n";
-		}
-		
-		$action_active = implode("\n", $action_active);
-		
-		echo <<<HTML
+		if ($type == 'filter') {
+			foreach ($action_icons as $action) {
+				$action_active[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action'][$action]) . "<span>$action</span></td>\n";
+			}
+			
+			$action_active = implode("\n", $action_active);
+			
+			echo <<<HTML
 			$policy_note
 			<table class="legend">
 				<tbody>
@@ -118,6 +124,7 @@ class fm_module_policies {
 			</table>
 			</div></div>
 HTML;
+		}
 	}
 
 	/**
@@ -183,6 +190,9 @@ HTML;
 		
 		/** Update sort order */
 		if ($post['action'] == 'update_sort') {
+			/** Ensure policy_type is set */
+			$post['policy_type'] = (isset($post['policy_type']) && array_key_exists(sanitize(strtolower($post['policy_type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($post['policy_type'])) : 'filter';
+
 			/** Make new order in array */
 			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
 			
@@ -194,7 +204,7 @@ HTML;
 			}
 			
 			/** Get policy listing for server */
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', 'AND server_serial_no=' . $post['server_serial_no'] . $template_id_sql);
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', 'AND policy_type="' . $post['policy_type'] . '" AND server_serial_no=' . $post['server_serial_no'] . $template_id_sql);
 			$count = $fmdb->num_rows;
 			$policy_result = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
@@ -290,7 +300,7 @@ HTML;
 		}
 		if ($row->policy_from_template) $class[] = 'notice';
 		
-		$edit_status = $edit_actions = $checkbox = $grab_bars = null;
+		$edit_status = $checkbox = $grab_bars = null;
 		$bars_title = __('Click and drag to reorder');
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -312,13 +322,17 @@ HTML;
 		}
 		
 		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']) : null;
-		$action = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_action]);
+		$action = ($row->policy_type == 'filter') ? str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_action]) : null;
 		$source = ($row->policy_source) ? $this->formatPolicyIDs($row->policy_source) : 'any';
 		$destination = ($row->policy_destination) ? $this->formatPolicyIDs($row->policy_destination) : 'any';
 		$services = ($row->policy_services) ? $this->formatPolicyIDs($row->policy_services) : 'any';
 		$interface = ($row->policy_interface) ? $row->policy_interface : 'any';
-		$policy_time = ($row->policy_time) ? getNameFromID($row->policy_time, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name') : 'any';
-		
+		$policy_time = ($type == 'filter' && $row->policy_time) ? getNameFromID($row->policy_time, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name') : 'any';
+
+		$source_translated = ($row->policy_source_translated) ? $this->formatPolicyIDs($row->policy_source_translated) : 'any';
+		$destination_translated = ($row->policy_destination_translated) ? $this->formatPolicyIDs($row->policy_destination_translated) : 'any';
+		$services_translated = ($row->policy_services_translated) ? $this->formatPolicyIDs($row->policy_services_translated) : 'any';
+
 		$source = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_source_not) . ' ' . $source;
 		$destination = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_destination_not) . ' ' . $destination;
 		$services = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_services_not) . ' ' . $services;
@@ -329,18 +343,34 @@ HTML;
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></a>', __('Quick processing cancels further rule processing upon match'));
 		if ($row->policy_uid) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-user" aria-hidden="true"></i></a>', __('User ID defined'));
 		if ($row->policy_tcp_flags) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-flag" aria-hidden="true"></i></a>', __('TCP flags defined'));
+		if ($row->policy_nat_bidirectional == 'yes' && $row->policy_snat_type == 'static') $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-arrows-h" aria-hidden="true"></i></a>', __('1:1 NAT'));
 		
 		$comments = nl2br($row->policy_comment);
 		if ($row->server_serial_no) {
 			$location = getNameFromID($row->server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		} elseif ($row->policy_from_template) {
-			$location = '<a href="?server_serial_no=t_' . $row->policy_template_id . '">' . getNameFromID($row->policy_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name') . '</a>';
+			$location = '<a href="?type=' . $type . '&server_serial_no=t_' . $row->policy_template_id . '">' . getNameFromID($row->policy_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name') . '</a>';
 		} else {
 			$location = getNameFromID($row->policy_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
 		}
 
 		if ($class) $class = 'class="' . join(' ', $class) . '"';
 		if ($options) $options = join('&nbsp;&nbsp;', $options);
+
+		switch ($type) {
+			case 'filter':
+				$type_lines = <<<HTML
+			<td>$row->policy_direction</td>
+			<td>$policy_time</td>
+HTML;
+				break;
+			case 'nat':
+				$type_lines = <<<HTML
+			<td>$source_translated</td>
+			<td>$destination_translated</td>
+HTML;
+				break;
+		}
 		
 		echo <<<HTML
 		<tr id="$row->policy_id" name="$row->policy_name" $class $row_title>
@@ -353,8 +383,7 @@ HTML;
 			<td>$destination</td>
 			<td>$services</td>
 			<td>$interface</td>
-			<td>$row->policy_direction</td>
-			<td>$policy_time</td>
+			$type_lines
 			<td>$comments</td>
 			$edit_status
 		</tr>
@@ -375,6 +404,9 @@ HTML;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
 		$policy_packet_state_form = $policy_packet_state = $policy_time_form = null;
 		$target_tab = $policy_uid = $policy_uid_form = $policy_tcp_flags = null;
+		$policy_snat_type = $policy_services_translated = $policy_source_translated = $policy_destination_translated = null;
+		$policy_nat_bidirectional = null;
+		$source_translated_elements = $destination_translated_elements = $services_translated_elements = json_encode(null);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -389,62 +421,99 @@ HTML;
 		$popup_footer = ($action != 'add' && ($policy_template_id && 't_' . $policy_template_id != $_POST['server_serial_no'])) ? buildPopup('footer', _('Cancel'), array('cancel_button' => 'cancel')) : buildPopup('footer');
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="?server_serial_no={$_REQUEST['server_serial_no']}">
+		<form name="manage" id="manage" method="post" action="?type=$type&server_serial_no={$_REQUEST['server_serial_no']}">
 		$popup_header
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
+			<input type="hidden" name="policy_type" value="$type" />
 FORM;
 
-		if ($type == 'filter') {
-			$server_firewall_type = getNameFromID($_POST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
-			$available_policy_actions = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
-			if ($server_firewall_type == 'ipfilter') array_pop($available_policy_actions);
+		$server_firewall_type = getNameFromID($_POST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
+		$available_policy_actions = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
+		if ($server_firewall_type == 'ipfilter') array_pop($available_policy_actions);
 
-			$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
-			$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
-			$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
+		$policy_interface = buildSelect('policy_interface', 'policy_interface', $this->availableInterfaces($_REQUEST['server_serial_no']), $policy_interface);
+		$policy_direction = buildSelect('policy_direction', 'policy_direction', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_direction'), $policy_direction, 1);
+		$policy_action = buildSelect('policy_action', 'policy_action', $available_policy_actions, $policy_action, 1);
 
-			$source_items_assigned = getGroupItems($policy_source);
-			$source_items = buildSelect('source_items', 'source_items', availableGroupItems('object', 'available'), $source_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
+		$available_objects = availableGroupItems('object', 'available');
 
-			$destination_items_assigned = getGroupItems($policy_destination);
-			$destination_items = buildSelect('destination_items', 'destination_items', availableGroupItems('object', 'available'), $destination_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
+		$source_items_assigned = getGroupItems($policy_source);
+		$source_items = buildSelect('source_items', 'source_items', $available_objects, $source_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
 
-			$services_items_assigned = getGroupItems($policy_services);
-			$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, __('Select one or more services'));
+		$destination_items_assigned = getGroupItems($policy_destination);
+		$destination_items = buildSelect('destination_items', 'destination_items', $available_objects, $destination_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
 
-			$source_not_check = ($policy_source_not) ? 'checked' : null;
-			$destination_not_check = ($policy_destination_not) ? 'checked' : null;
-			$service_not_check = ($policy_services_not) ? 'checked' : null;
+		$services_items_assigned = getGroupItems($policy_services);
+		$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, __('Select one or more services'));
 
-			/** Policy targets should only be available for template policies */
-			if ($_POST['server_serial_no'][0] == 't' || (is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
-				/** Process multiple policy targets */
-				if (strpos($policy_targets, ';')) {
-					$policy_targets = explode(';', rtrim($policy_targets, ';'));
-					if (in_array('0', $policy_targets)) $policy_targets = 0;
-				}
+		$source_not_check = ($policy_source_not) ? 'checked' : null;
+		$destination_not_check = ($policy_destination_not) ? 'checked' : null;
+		$service_not_check = ($policy_services_not) ? 'checked' : null;
 
-				$targets = buildSelect('policy_targets', 'policy_targets', availableServers('id'), $policy_targets, 1, null, true);
-				
-				$target_tab = sprintf('
-		<div id="tab">
-			<input type="radio" name="tab-group-1" id="tab-5" />
-			<label for="tab-5">%s</label>
-			<div id="tab-content">
-			<table class="form-table">
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_targets">%s</label></th>
-					<td width="67&#37;">%s</td>
-				</tr>
-			</table>
+
+		/** Start of common form */
+		$tab_two_label = ($type == 'nat') ? __('Original Packet') : __('Policy');
+		$return_form .= sprintf('
+		<div id="tabs">
+			<div id="tab">
+				<input type="radio" name="tab-group-1" id="tab-1" checked />
+				<label for="tab-1">%s</label>
+				<div id="tab-content">
+				<table class="form-table policy-form">
+					<tr>
+						<th width="33&#37;" scope="row"><label for="policy_name">%s</label></th>
+						<td width="67&#37;"><input name="policy_name" id="policy_name" type="text" value="%s" /></td>
+					</tr>
+					<tr>
+						<th width="33&#37;" scope="row"><label for="policy_comment">%s</label></th>
+						<td width="67&#37;"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">%s</textarea></td>
+					</tr>
+				</table>
+				</div>
 			</div>
-		</div>',
-					__('Targets'), __('Firewalls'), $targets
-				);
-			}
-
+			<div id="tab">
+				<input type="hidden" name="policy_source_not" value="" />
+				<input type="hidden" name="policy_destination_not" value="" />
+				<input type="hidden" name="policy_services_not" value="" />
+				<input type="radio" name="tab-group-1" id="tab-2" />
+				<label for="tab-2">%s</label>
+				<div id="tab-content">
+				<table class="form-table">
+					<tr>
+						<th width="33&#37;" scope="row">%s</th>
+						<td width="67&#37;">
+							%s<br />
+							<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<th width="33&#37;" scope="row">%s</th>
+						<td width="67&#37;">
+							%s<br />
+							<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<th width="33&#37;" scope="row">%s</th>
+						<td width="67&#37;">
+							%s<br />
+							<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
+						</td>
+					</tr>
+				',
+				__('General'),
+				__('Policy Name'), $policy_name,
+				_('Comment'), $policy_comment,
+				$tab_two_label,
+				__('Source'), $source_items, $source_not_check, __('Negate'), __('Use this option to invert the match'),
+				__('Destination'), $destination_items, $destination_not_check, __('Negate'), __('Use this option to invert the match'),
+				__('Services'), $services_items, $service_not_check, __('Negate'), __('Use this option to invert the match')
+		);
+	
+		
+		if ($type == 'filter') {
 			/** Time restriction */
 			if ($server_firewall_type == 'iptables' || $_POST['server_serial_no'][0] == 't') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
@@ -526,52 +595,6 @@ FORM;
 			}
 
 			$return_form .= sprintf('
-			<input type="hidden" name="policy_source_not" value="" />
-			<input type="hidden" name="policy_destination_not" value="" />
-			<input type="hidden" name="policy_services_not" value="" />
-	<div id="tabs">
-		<div id="tab">
-			<input type="radio" name="tab-group-1" id="tab-1" checked />
-			<label for="tab-1">%s</label>
-			<div id="tab-content">
-			<table class="form-table policy-form">
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_name">%s</label></th>
-					<td width="67&#37;"><input name="policy_name" id="policy_name" type="text" value="%s" /></td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="policy_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="policy_comment" name="policy_comment" rows="4" cols="30">%s</textarea></td>
-				</tr>
-			</table>
-			</div>
-		</div>
-		<div id="tab">
-			<input type="radio" name="tab-group-1" id="tab-2" />
-			<label for="tab-2">%s</label>
-			<div id="tab-content">
-			<table class="form-table">
-				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">
-						%s<br />
-						<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
-					</td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">
-						%s<br />
-						<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
-					</td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">
-						%s<br />
-						<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
-					</td>
-				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="policy_action">%s</label></th>
 					<td width="67&#37;">%s</td>
@@ -616,7 +639,123 @@ FORM;
 				</tr>
 			</table>
 			</div>
+		</div>',
+					__('Action'), $policy_action,
+					__('Options'),
+					$policy_time_form, $policy_uid_form, $policy_packet_state_form,
+					__('Options'), $options,
+					__('TCP Flags'), $tcp_flags_head, __('Mask'), __('Only iptables uses the Mask bit. Use this for the negated bit on other firewalls.'),
+					$tcp_flags_mask_form, __('Settings'), $tcp_flags_settings_form
+				);
+		} elseif ($type == 'nat') {
+			$policy_dnat_checked = $policy_snat_checked = null;
+			$dnat_style = $snat_style = 'style="display: none;"';
+			$static_snat_style = null;
+
+			if ($policy_snat_type == 'hide') {
+				$static_snat_style = 'style="display: none;"';
+			}
+			if ($policy_source_translated || $policy_snat_type == 'hide') {
+				$policy_snat_checked = 'checked';
+				$snat_style = null;
+			}
+
+			$policy_snat_type = buildSelect('policy_snat_type', 'policy_snat_type', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_snat_type'), $policy_snat_type, 1);
+			$policy_nat_bidirectional = buildSelect('policy_nat_bidirectional', 'policy_nat_bidirectional', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_nat_bidirectional'), $policy_nat_bidirectional, 1);
+
+			/** Build source address translation elements */
+			$source_translated_elements = $destination_translated_elements = $this->getObjectList('hosts');
+			$found = false;
+			foreach ($source_translated_elements as $source_group => $item_array) {
+				foreach ($item_array['children'] as $item) {
+					if ($policy_source_translated == $item['id']) {
+						$found = true;
+						break;
+					}
+				}
+			}
+			if (!$found && $policy_source_translated) $source_translated_elements = array_merge(array(array('text' => __('Other'), 'children' => array(array('id' => $policy_source_translated, 'text' => $policy_source_translated)))), $source_translated_elements);
+			$source_translated_elements = json_encode($source_translated_elements);
+	
+			/** Build destination address translation elements */
+			$found = false;
+			foreach ($destination_translated_elements as $source_group => $item_array) {
+				foreach ($item_array['children'] as $item) {
+					if ($policy_destination_translated == $item['id']) {
+						$found = true;
+						break;
+					}
+				}
+			}
+			if (!$found && $policy_destination_translated) $destination_translated_elements = array_merge(array(array('text' => __('Other'), 'children' => array(array('id' => $policy_destination_translated, 'text' => $policy_destination_translated)))), $destination_translated_elements);
+			$destination_translated_elements = json_encode($destination_translated_elements);
+			if ($policy_destination_translated) {
+				$policy_dnat_checked = 'checked';
+				$dnat_style = null;
+			}
+	
+			/** Build service translation elements */
+			$services_translated_elements = $this->getObjectList('services');
+			$found = false;
+			foreach ($services_translated_elements as $item) {
+				if ($policy_services_translated == $item['id']) {
+					$found = true;
+					break;
+				}
+			}
+			if (!$found && $policy_services_translated) $services_translated_elements = array_merge(array(array('id' => $policy_services_translated, 'text' => $policy_services_translated)), $services_translated_elements);
+			$services_translated_elements = json_encode($services_translated_elements);
+	
+			$return_form .= sprintf('
+			</table>
+			</div>
 		</div>
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-3" />
+			<label for="tab-3">%s</label>
+			<div id="tab-content">
+			<h4><input name="policy_snat" id="policy_snat" type="checkbox" %s /> <label for="policy_snat">%s</label></h4>
+			<table class="form-table snat_showhide" %s>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_snat_type">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+				<tr class="static_snat" %s>
+					<th width="33&#37;" scope="row"><label for="policy_source_translated">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="policy_source_translated" class="source_address_match_element" value="%s" /></td>
+				</tr>
+				<tr class="static_snat" %s>
+					<th width="33&#37;" scope="row"><label for="policy_nat_bidirectional">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+			</table>
+			<br />
+			<h4><input name="policy_dnat" id="policy_dnat" type="checkbox" %s /> <label for="policy_dnat">%s</label></h4>
+			<table class="form-table dnat_showhide" %s>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_destination_translated">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="policy_destination_translated" class="destination_address_match_element" value="%s" /></td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_services_translated">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="policy_services_translated" class="services_match_element" value="%s" /></td>
+				</tr>
+			</table>
+			</div>
+		</div>',
+				__('Translated Packet'),
+				$policy_snat_checked, __('Source Address Translation'), $snat_style,
+				__('Translation Type'), $policy_snat_type,
+				$static_snat_style, __('Translated Address'), $policy_source_translated,
+				$static_snat_style, __('Bi Directional'), $policy_nat_bidirectional,
+				$policy_dnat_checked, __('Destination Address Translation'), $dnat_style,
+				__('Translated Address'), $policy_destination_translated,
+				__('Translated Port'), $policy_services_translated
+			);
+		}
+
+		/** Interfaces tab for filter/nat types */
+		$interfaces_tab = sprintf('
 		<div id="tab">
 			<input type="radio" name="tab-group-1" id="tab-4" />
 			<label for="tab-4">%s</label>
@@ -632,30 +771,44 @@ FORM;
 				</tr>
 			</table>
 			</div>
-		</div>
-		%s
-	</div>',
-					__('Basic'),
-					__('Policy Name'), $policy_name,
-					_('Comment'), $policy_comment,
-					__('Policy'),
-					__('Source'), $source_items, $source_not_check, __('Negate'), __('Use this option to invert the match'),
-					__('Destination'), $destination_items, $destination_not_check, __('Negate'), __('Use this option to invert the match'),
-					__('Services'), $services_items, $service_not_check, __('Negate'), __('Use this option to invert the match'),
-					__('Action'), $policy_action,
-					__('Options'),
-					$policy_time_form, $policy_uid_form, $policy_packet_state_form,
-					__('Options'), $options,
-					__('TCP Flags'), $tcp_flags_head, __('Mask'), __('Only iptables uses the Mask bit. Use this for the negated bit on other firewalls.'),
-					$tcp_flags_mask_form, __('Settings'), $tcp_flags_settings_form,
-					__('Interface'),
-					__('Interface'), $policy_interface,
-					__('Direction'), $policy_direction,
-					$target_tab
-				);
+		</div>',
+				__('Interface'),
+				__('Interface'), $policy_interface,
+				__('Direction'), $policy_direction
+			);
+
+		/** Policy targets should only be available for template policies */
+		if ($_POST['server_serial_no'][0] == 't' || (is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
+			/** Process multiple policy targets */
+			if (strpos($policy_targets, ';')) {
+				$policy_targets = explode(';', rtrim($policy_targets, ';'));
+				if (in_array('0', $policy_targets)) $policy_targets = 0;
+			}
+
+			$targets = buildSelect('policy_targets', 'policy_targets', availableServers('id'), $policy_targets, 1, null, true);
+			
+			$target_tab = sprintf('
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-5" />
+			<label for="tab-5">%s</label>
+			<div id="tab-content">
+			<table class="form-table">
+				<tr>
+					<th width="33&#37;" scope="row"><label for="policy_targets">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+			</table>
+			</div>
+		</div>',
+				__('Targets'), __('Firewalls'), $targets
+			);
 		}
 		
+		/** Complete the form */
 		$return_form .= <<<FORM
+		$interfaces_tab
+		$target_tab
+		</div>
 		$popup_footer
 		</form>
 		<script>
@@ -665,7 +818,67 @@ FORM;
 					minimumResultsForSearch: 10
 				});
 			});
-		</script>
+			$(".source_address_match_element").select2({
+				createSearchChoice:function(term, data) { 
+					if ($(data).filter(function() { 
+						return this.text.localeCompare(term)===0; 
+					}).length===0) 
+					{return {id:term, text:term};} 
+				},
+				multiple: true,
+				maximumSelectionSize: 1,
+				width: "200px",
+				tokenSeparators: [",", " ", ";"],
+				data: $source_translated_elements
+			});
+			$(".destination_address_match_element").select2({
+				createSearchChoice:function(term, data) { 
+					if ($(data).filter(function() { 
+						return this.text.localeCompare(term)===0; 
+					}).length===0) 
+					{return {id:term, text:term};} 
+				},
+				multiple: true,
+				maximumSelectionSize: 1,
+				width: "200px",
+				tokenSeparators: [",", " ", ";"],
+				data: $destination_translated_elements
+			});
+			$(".services_match_element").select2({
+				createSearchChoice:function(term, data) { 
+					if ($(data).filter(function() { 
+						return this.text.localeCompare(term)===0; 
+					}).length===0) 
+					{return {id:term, text:term};} 
+				},
+				multiple: true,
+				maximumSelectionSize: 1,
+				width: "200px",
+				tokenSeparators: [",", " ", ";"],
+				data: $services_translated_elements
+			});
+			$("#policy_dnat").click(function(e) {
+				if ($(this).is(":checked")) {
+					$(".dnat_showhide").show("slow");
+				} else {
+					$(".dnat_showhide").slideUp();
+				}
+			});
+			$("#policy_snat").click(function(e) {
+				if ($(this).is(":checked")) {
+					$(".snat_showhide").show("slow");
+				} else {
+					$(".snat_showhide").slideUp();
+				}
+			});
+			$("#policy_snat_type").change(function(e) {
+				if ($(this).val() == "hide") {
+					$(".static_snat").slideUp();
+				} else {
+					$(".static_snat").show("slow");
+				}
+			});
+</script>
 FORM;
 
 		return $return_form;
@@ -674,6 +887,7 @@ FORM;
 
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
+		// echo '<pre>';print_r($post);
 		
 		/** Process options */
 		if (@is_array($post['policy_options'])) {
@@ -700,6 +914,19 @@ FORM;
 		unset($post['source_items']);
 		unset($post['destination_items']);
 		unset($post['services_items']);
+
+		if (!isset($post['policy_snat'])) {
+			$post['policy_snat_type'] = 'static';
+			$post['policy_source_translated'] = null;
+			$post['policy_nat_bidirectional'] = 'no';
+		}
+		unset($post['policy_snat']);
+
+		if (!isset($post['policy_dnat'])) {
+			$post['policy_destination_translated'] = null;
+			$post['policy_services_translated'] = null;
+		}
+		unset($post['policy_dnat']);
 		
 		/** Get policy_order_id */
 		if (!isset($post['policy_order_id']) || $post['policy_order_id'] == 0) {
@@ -728,6 +955,8 @@ FORM;
 		
 		/** Remove tabs */
 		unset($post['tab-group-1']);
+
+		// echo '<pre>';print_r($post);exit;
 		
 		return $post;
 	}
@@ -800,6 +1029,66 @@ FORM;
 		return implode("<br />\n", $names);
 	}
 	
+	/**
+	 * Builds array of objects for drop-down lists
+	 * 
+	 * @since 3.0
+	 * @package fmFirewall
+	 * 
+	 * @param string $include What types of objects to include
+	 * @return array
+	 */
+	function getObjectList($include = 'all') {
+		global $__FM_CONFIG, $fmdb;
+		
+		if ($include == 'none') return array();
+		
+		$list = array();
+		$i = 0;
+		
+		if (in_array($include, array('all', 'hosts'))) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_id', 'object_', 'active');
+			if ($fmdb->num_rows) {
+				$last_result = $fmdb->last_result;
+				$list_network_count = $list_host_count = 0;
+				for ($j=0; $j<$fmdb->num_rows; $j++) {
+					if ($last_result[$j]->object_type == 'network') {
+						$list_group_name = __('Networks');
+						$i = $list_network_count;
+						$list_network_count++;
+					} else {
+						$list_group_name = __('Hosts');
+						$i = $list_host_count;
+						$list_host_count++;
+					}
+					$list[$list_group_name][$i]['id'] = 'o' . $last_result[$j]->object_id;
+					$list[$list_group_name][$i]['text'] = $last_result[$j]->object_name;
+				}
+				$i = 0;
+				foreach ($list as $group => $children) {
+					$tmp_list[$i]['text'] = $group;
+					$tmp_list[$i]['children'] = $children;
+					$i++;
+				}
+				$list = $tmp_list;
+			}
+		}
+		
+		if (in_array($include, array('all', 'services'))) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_id', 'service_', 'active');
+			if ($fmdb->num_rows) {
+				$last_result = $fmdb->last_result;
+				for ($j=0; $j<$fmdb->num_rows; $j++) {
+					$list[$i]['id'] = 's' . $last_result[$j]->service_id;
+					$list[$i]['text'] = $last_result[$j]->service_name . ' (' . $last_result[$j]->service_type . ')';
+					$i++;
+				}
+			}
+		}
+		
+		return $list;
+	}
+
 }
 
 if (!isset($fm_module_policies))

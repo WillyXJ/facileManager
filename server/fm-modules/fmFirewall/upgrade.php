@@ -375,10 +375,29 @@ function upgradefmFirewall_300($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '2.0', '<') ? upgradefmFirewall_200($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_uid` TEXT NULL DEFAULT NULL AFTER `policy_time`";
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_tcp_flags` VARCHAR(5) NULL DEFAULT NULL AFTER `policy_options`";
+	$inserts = $table = null;
 	
-	$inserts = null;
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_uid')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_uid` TEXT NULL DEFAULT NULL AFTER `policy_time`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_tcp_flags')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_tcp_flags` VARCHAR(5) NULL DEFAULT NULL AFTER `policy_options`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_source_translated')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_source_translated` TEXT NULL DEFAULT NULL AFTER `policy_source`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_destination_translated')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_destination_translated` TEXT NULL DEFAULT NULL AFTER `policy_destination`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_services_translated')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_services_translated` TEXT NULL DEFAULT NULL AFTER `policy_services`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_snat_type')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_snat_type` ENUM('static','hide') NOT NULL DEFAULT 'static' AFTER `policy_services_translated`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_nat_bidirectional')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_nat_bidirectional` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `policy_snat_typee`";
+	}
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
