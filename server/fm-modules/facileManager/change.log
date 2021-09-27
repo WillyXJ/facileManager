@@ -1,6 +1,8 @@
 4.1.1 (2021-??-??)
 ==================
 * Server - [bug] Fixed CSS for the tooltip in some windows.
+* Server - [bug] Fixed grabbable table rows so reordering now works. (Bug introduced
+           with jQuery upgrade)
 
 4.1.0 (2021-09-14)
 ==================
