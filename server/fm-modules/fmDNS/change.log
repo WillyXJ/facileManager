@@ -1,4 +1,4 @@
-5.1.0 (2021-09-15)
+5.1.0 (2021-09-29)
 ==================
 * Server - [improvement] Domain TTL can be set independently of SOA TTL.
 * Server - [bug] Fixed used RR type display.
