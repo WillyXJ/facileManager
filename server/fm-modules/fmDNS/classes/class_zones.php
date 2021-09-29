@@ -932,7 +932,7 @@ HTML;
 		
 		$domain_id = $domain_name_servers = 0;
 		$domain_view = -1;
-		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
+		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = $domain_ttl = null;
 		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
 		$domain_dnssec_sig_expire = $domain_dnssec_sign_inline = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
 		$disabled = $action == 'create' ? null : 'disabled';
@@ -971,6 +971,7 @@ HTML;
 		
 		/** Get field length */
 		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
+		$domain_ttl_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_ttl');
 
 		$views = buildSelect('domain_view', 'domain_view', availableViews('active'), $domain_view, 4, null, true);
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
@@ -1185,6 +1186,10 @@ HTML;
 					<th><label for="domain_name_servers">%s</label></th>
 					<td>%s</td>
 				</tr>
+				<tr class="include-with-template">
+					<th><label for="domain_ttl">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td><input type="text" id="domain_ttl" name="domain_ttl" size="40" value="%s" maxlength="%d" onkeydown="return validateTimeFormat(event, this)" /></td>
+				</tr>
 				%s
 			</table>',
 				$action, $domain_id, $classes,
@@ -1200,6 +1205,7 @@ HTML;
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
 				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
+				__('Domain TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
 				$soa_templates . $addl_zone_options . $additional_config_link . $create_template . $template_name
 				);
 
@@ -1888,7 +1894,8 @@ HTML;
 		if ($post['domain_template_id']) {
 			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
 				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
-				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view');
+				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view',
+				'domain_ttl');
 			foreach ($include as $key) {
 				if (isset($post[$key])) {
 					$new_post[$key] = $post[$key];

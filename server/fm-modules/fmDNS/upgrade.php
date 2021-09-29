@@ -2445,4 +2445,27 @@ INSERTSQL;
 	return true;
 }
 
+/** 5.1.0 */
+function upgradefmDNS_510($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '5.0.0', '<') ? upgradefmDNS_500($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_ttl')) {
+		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_ttl` VARCHAR(50) DEFAULT NULL AFTER `domain_template_id`";
+	}
+
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '5.1.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
 ?>
