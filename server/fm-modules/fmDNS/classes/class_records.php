@@ -271,6 +271,7 @@ class fm_dns_records {
 		if ($type == 'DOMAIN') {
 			$show_value = false;
 			$title_array[] = array('title' => __('Name'), 'rel' => $type . '_name');
+			$title_array[] = array('title' => __('TTL'), 'rel' => $type . '_ttl');
 			$title_array[] = array('title' => __('Name Servers'), 'rel' => $type . '_name_servers');
 			$title_array[] = array('title' => __('Views'), 'rel' => $type . '_views');
 			$title_array[] = array('title' => __('Map'), 'rel' => $type . '_mapping');

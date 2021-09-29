@@ -1167,7 +1167,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$domain_id = isset($domain->parent_domain_id) ? $domain->parent_domain_id : $domain->domain_id;
 			$serial = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no');
 			
-			$zone_file .= '$TTL ' . $soa_ttl . "\n";
+			$ttl = (isset($domain->domain_ttl)) ? $domain->domain_ttl : $soa_ttl;
+
+			$zone_file .= '$TTL ' . $ttl . "\n";
 			$zone_file .= "$domain_name IN SOA $master_server $admin_email (\n";
 			$zone_file .= "\t\t$serial\t; Serial\n";
 			$zone_file .= "\t\t$soa_refresh\t\t; Refresh\n";
@@ -1466,6 +1468,19 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$parent_zone->domain_check_config = $zone->domain_check_config;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
+
+			/** Set domain_ttl correctly */
+			if ($zone->domain_ttl) {
+				$parent_zone->domain_ttl = $zone->domain_ttl;
+			} elseif ($zone->domain_clone_domain_id && $parent_zone->domain_template_id) {
+				basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $zone->domain_clone_domain_id, 'domain_', 'domain_id');
+				if ($fmdb->last_result[0]->domain_ttl) {
+					$parent_zone->domain_ttl = $fmdb->last_result[0]->domain_ttl;
+				} else {
+					basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $parent_zone->domain_template_id, 'domain_', 'domain_id');
+					$parent_zone->domain_ttl = $fmdb->last_result[0]->domain_ttl;	
+				}
+			}
 			
 			return $parent_zone;
 		}
