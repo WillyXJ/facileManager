@@ -1,3 +1,8 @@
+4.2.0 (2021-??-??)
+==================
+* Server - [improvement] Updated max_input_vars error message to include additional methods
+           of increasing the value.
+
 4.1.1 (2021-09-29)
 ==================
 * Server - [bug] Fixed CSS for the tooltip in some windows.
