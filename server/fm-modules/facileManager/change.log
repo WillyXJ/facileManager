@@ -2,6 +2,8 @@
 ==================
 * Server - [improvement] Updated max_input_vars error message to include additional methods
            of increasing the value.
+* Server - [improvement] Added database connection error during installation process to
+           provide better debugging ability.
 
 4.1.1 (2021-09-29)
 ==================
