@@ -1004,8 +1004,10 @@ FORM;
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
 			return formatError(__('The associated server configs could not be deleted because a database error occurred.'), 'sql');
 		}
-		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', str_replace('s_', '', $server_id), 'cfg_', 'deleted', 'server_id') === false) {
-			return formatError(__('The associated server configs could not be deleted because a database error occurred.'), 'sql');
+		if (strpos($server_id, 's_') !== false) {
+			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', str_replace('s_', '', $server_id), 'cfg_', 'deleted', 'server_id') === false) {
+				return formatError(__('The associated server configs could not be deleted because a database error occurred.'), 'sql');
+			}
 		}
 
 		/** Delete associated views */
