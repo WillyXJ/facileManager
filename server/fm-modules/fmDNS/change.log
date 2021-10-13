@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed server group deletions.
 * Server - [bug] Removed obsolete cleaning-interval option from a default installation.
+* Server - [bug] Fixed configuration builds when validate-except contains non-hosted zones.
 
 5.1.0 (2021-09-29)
 ==================
