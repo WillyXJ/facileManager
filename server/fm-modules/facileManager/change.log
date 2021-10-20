@@ -1,3 +1,7 @@
+4.1.2 (2021-??-??)
+==================
+* Server - [bug] Fixed login logo to better align vertically.
+
 4.1.1 (2021-09-29)
 ==================
 * Server - [bug] Fixed CSS for the tooltip in some windows.
