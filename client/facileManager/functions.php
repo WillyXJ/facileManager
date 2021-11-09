@@ -1672,7 +1672,7 @@ function getWebServerInfo() {
 	/** Get the docroot from STDIN if it's not found */
 	echo fM("  --> Detecting the web server document root...");
 	switch ($web_server['app']) {
-		case 'httpd':
+		case 'httpd' || 'apache2':
 			$docroot_parameter = 'DocumentRoot';
 			break;
 		case 'lighttpd':
