@@ -1958,7 +1958,7 @@ HTML;
 			foreach ($value_array as $domain_name => $cfg_data) {
 				if ($cfg_name != 'domain') {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
+					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info);
 				} else {
 					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
 						$ratelimits_domains .= "\trate-limit {\n\t\tdomain $domain_name;\n";
