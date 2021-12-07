@@ -4,6 +4,11 @@
            of increasing the value.
 * Server - [improvement] Added database connection error during installation process to
            provide better debugging ability.
+* Client - [bug] Fixed httpd2 and apache2 detection. (Issue #543)
+
+4.1.2 (2021-10-27)
+==================
+* Server - [bug] Fixed login logo alignment.
 
 4.1.1 (2021-09-29)
 ==================

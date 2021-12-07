@@ -667,7 +667,11 @@ HTML;
 		}
 
 		if (strpos($def_type, 'domain_select') !== false) {
-			foreach (explode(',', $cfg_data) as $domain_name) $exclude_domain_names[] = '"' . displayFriendlyDomainName(getNameFromID($domain_name, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name')) . '"';
+			foreach (explode(',', $cfg_data) as $domain_name) {
+				$hosted_domain_name = getNameFromID($domain_name, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name');
+				$hosted_domain_name = ($hosted_domain_name) ? $hosted_domain_name : $domain_name;
+				$exclude_domain_names[] = '"' . displayFriendlyDomainName($hosted_domain_name) . '"';
+			}
 			
 			return join(";\n\t\t", $exclude_domain_names);
 		}

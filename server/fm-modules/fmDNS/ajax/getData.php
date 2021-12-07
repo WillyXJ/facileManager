@@ -57,7 +57,15 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif (strpos($result[0]->def_type, 'domain_select') !== false) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-			$available_domains = $fm_dns_zones->buildZoneJSON();
+			$temp_addl_zones = null;
+
+			/** Check for non-hosted zones */
+			foreach (explode(',', $cfg_data) as $temp_zone_id) {
+				if (is_numeric($temp_zone_id)) continue;
+
+				$temp_addl_zones[] = array($temp_zone_id, $temp_zone_id);
+			}
+			$available_domains = $fm_dns_zones->buildZoneJSON('all', null, $temp_addl_zones);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="cfg_data" class="domain_select" value="%s" /><br />

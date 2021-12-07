@@ -1,3 +1,13 @@
+5.1.2 (2021-??-??)
+==================
+* Server - [bug] Fixed RRSet and Rate Limit configuration builds. (Issue #542)
+
+5.1.1 (2021-10-27)
+==================
+* Server - [bug] Fixed server group deletions.
+* Server - [bug] Removed obsolete cleaning-interval option from a default installation.
+* Server - [bug] Fixed configuration builds when validate-except contains non-hosted zones.
+
 5.1.0 (2021-09-29)
 ==================
 * Server - [improvement] Domain TTL can be set independently of SOA TTL.

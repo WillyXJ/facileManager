@@ -396,15 +396,6 @@ INSERTSQL;
 
 	$inserts[] = <<<INSERTSQL
 INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
-	SELECT '1', '0', 'cleaning-interval', '120', 'active' FROM DUAL
-WHERE NOT EXISTS
-	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
-	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'cleaning-interval' AND server_serial_no = '0'
-	);
-INSERTSQL;
-
-	$inserts[] = <<<INSERTSQL
-INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
 	SELECT '1', '0', 'interface-interval', '0', 'active' FROM DUAL
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 

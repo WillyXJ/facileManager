@@ -2013,8 +2013,13 @@ HTML;
 	 * @param array $exclude Domain IDs to exclude
 	 * @return json array
 	 */
-	function buildZoneJSON($zones = 'all', $exclude = null) {
+	function buildZoneJSON($zones = 'all', $exclude = null, $additional_zones = null) {
 		$temp_zones = $this->availableZones('no-templates', array('master', 'slave', 'forward'), 'all', $zones, $exclude);
+
+		if ($additional_zones) {
+			$temp_zones = array_merge($additional_zones, $temp_zones);
+		}
+
 		$i = 0;
 		foreach ($temp_zones as $temp_zone_array) {
 			list($available_zones[$i]['text'], $available_zones[$i]['id']) = $temp_zone_array;
