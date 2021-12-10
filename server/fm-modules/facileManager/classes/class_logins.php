@@ -516,6 +516,7 @@ This link expires in %s.',
 		if (empty($ldap_group_require))   $ldap_group_require   = getOption('ldap_group_require');
 		if (empty($ldap_group_dn))        $ldap_group_dn        = getOption('ldap_group_dn');
 		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
+		if (empty($ldap_group_search_dn)) $ldap_group_search_dn = getOption('ldap_group_search_dn');
 
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
 
@@ -557,9 +558,13 @@ This link expires in %s.',
 			if ($ldap_bind) {
 				if ($ldap_group_require) {
 					if (strpos($ldap_dn, '@') !== false) {
-						/** Convert AD ldap_dn to real ldap_dn */
-						$ldap_dn_parts = explode('@', $ldap_dn);
-						$ldap_dn = 'dc=' . join(',dc=', explode('.', $ldap_dn_parts[1]));
+						if (isset($ldap_group_search_dn)) {
+							$ldap_dn = $ldap_group_search_dn;
+						} else {
+							/** Convert AD ldap_dn to real ldap_dn */
+							$ldap_dn_parts = explode('@', $ldap_dn);
+							$ldap_dn = 'dc=' . join(',dc=', explode('.', $ldap_dn_parts[1]));
+						}
 						
 						/** Process AD group membership */
 						$ldap_group_response = $this->checkGroupMembership($ldap_connect, $this->getDN($ldap_connect, $username, $ldap_dn), $ldap_group_dn, $ldap_group_attribute);
@@ -663,7 +668,7 @@ This link expires in %s.',
 			"(samaccountname={$samaccountname})", $attributes);
 		if ($result === false) return '';
 		$entries = ldap_get_entries($ldap_connect, $result);
-		return ($entries['count']>0) ? $entries[0]['dn'] : '';
+		return ($entries['count'] > 0) ? $entries[0]['dn'] : '';
 	}
 	
 	
