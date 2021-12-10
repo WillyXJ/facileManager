@@ -501,7 +501,7 @@ This link expires in %s.',
 	 * @return boolean
 	 */
 	function doLDAPAuth($username, $password) {
-		global $fmdb;
+		global $__FM_CONFIG, $fmdb;
 
 		/** Get LDAP variables */
 		if (empty($ldap_server))          $ldap_server          = getOption('ldap_server');
@@ -519,6 +519,14 @@ This link expires in %s.',
 		if (empty($ldap_group_search_dn)) $ldap_group_search_dn = getOption('ldap_group_search_dn');
 
 		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
+
+		/** Set default ports if none specified */
+		if (!$ldap_port) $ldap_port = 389;
+		if (!$ldap_port_ssl) $ldap_port_ssl = 636;
+
+		/** Test connectivity to ldap server */
+		$socket_test_result = ($ldap_encryption == $__FM_CONFIG['options']['ldap_encryption'][0]) ? socketTest($ldap_server, $ldap_port, 5) : socketTest($ldap_server, $ldap_port_ssl, 5);
+		if (!$socket_test_result) return _('The authentication server is currently unavailable. Please try again later.');
 
 		if ($ldap_encryption == 'SSL') {
 			if ($ldap_cert_file) {

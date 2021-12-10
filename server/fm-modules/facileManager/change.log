@@ -7,6 +7,7 @@
            provide better debugging ability.
 * Server - [improvement] Added setting to specify the Distinguished Name for the starting search
            point when using LDAP group membership during authentication.
+* Server - [improvement] LDAP server connection tests occur before authentication.
 * Client - [bug] Fixed httpd2 and apache2 detection. (Issue #543)
 * Server - [bug] Removed password change form on authenticated user profile for LDAP users.
 
