@@ -51,7 +51,7 @@ class fm_settings {
 				
 				if ($key == 'mail_from' && isEmailAddressValid($data) === false) return sprintf(_('%s is not a valid e-mail address.'), $data);
 				if (in_array($key, $ports)) {
-					if (!verifyNumber($data, 1, 65535, false)) return _('Invalid port number specified.');
+					if ($data && !verifyNumber($data, 1, 65535, false)) return _('Invalid port number specified.');
 				}
 				
 				if (isset($data_array)) $data = $data_array;
