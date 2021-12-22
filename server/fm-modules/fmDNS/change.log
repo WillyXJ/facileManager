@@ -1,6 +1,7 @@
 5.1.2 (2021-??-??)
 ==================
 * Server - [bug] Fixed RRSet and Rate Limit configuration builds. (Issue #542)
+* Server - [bug] Fixed missing support for nested ACLs. (Issue #544)
 
 5.1.1 (2021-10-27)
 ==================
