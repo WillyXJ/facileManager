@@ -1,5 +1,6 @@
-5.1.2 (2021-??-??)
+5.2.0 (2021-??-??)
 ==================
+* Both   - [improvement] Added support for separate slave/stub zone directory. (Issue #540)
 * Server - [bug] Fixed RRSet and Rate Limit configuration builds. (Issue #542)
 * Server - [bug] Fixed missing support for nested ACLs. (Issue #544)
 

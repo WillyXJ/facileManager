@@ -1776,4 +1776,28 @@ if (!function_exists('gethostname')) {
 		return $hostname;
 	}
 }
+
+
+/**
+ * Returns the line in a file that matches a string
+ *
+ * @since 4.1.3
+ * @package facileManager
+ *
+ * @param string $filename File name to search
+ * @param string $needle Search text
+ * @return string
+ * 
+ * Based on https://stackoverflow.com/a/9722200
+ */
+function getLineWithString($filename, $needle) {
+	$lines = file($filename);
+	foreach ($lines as $line) {
+		if (strpos($line, $needle) !== false) {
+			return $line;
+		}
+	}
+	return null;
+}
+
 ?>

@@ -106,6 +106,7 @@ $__FM_CONFIG['soa']['soa_expire']			= '2w';
 $__FM_CONFIG['ns']['named_root_dir']		= '/var/named';
 $__FM_CONFIG['ns']['named_chroot_dir']		= '/var/named/chroot';
 $__FM_CONFIG['ns']['named_zones_dir']		= '/etc/named/zones';
+$__FM_CONFIG['ns']['named_slave_zones_dir']	= '/var/cache/bind';
 $__FM_CONFIG['ns']['named_config_file']		= '/etc/named.conf';
 
 /** Logging Channel Options */

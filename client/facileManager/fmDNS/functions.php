@@ -293,6 +293,14 @@ function moduleAddServer() {
 			$data['server_root_dir'] = $server_root;
 			
 			$data['server_zones_dir'] = (dirname($named_conf) == '/etc') ? null : dirname($named_conf) . '/zones';
+
+			if (file_exists('/etc/apparmor.d/usr.sbin.named')) {
+				$slave_dir_line = getLineWithString('/etc/apparmor.d/usr.sbin.named', 'slave');
+				if ($slave_dir_line) {
+					$slave_dir_line_arr = explode(' ', trim($slave_dir_line));
+					if (is_dir($slave_dir_line_arr[1])) $data['server_slave_zones_dir'] = $slave_dir_line_arr[1];
+				}
+			}
 		}
 		$data['server_chroot_dir'] = detectChrootDir();
 	}
