@@ -2,6 +2,7 @@
 ==================
 * Server - [feature] Added support for defining UID in policy rules.
 * Server - [feature] Added support for setting TCP flags in policy rules.
+* Server - [improvement] Removed unused dashboard.
 
 2.1.0 (2021-09-14)
 ==================

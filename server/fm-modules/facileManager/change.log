@@ -1,3 +1,7 @@
+4.2.0 (2021-??-??)
+==================
+* Server - [improvement] Added support to hide unused module dashboards.
+
 4.1.1 (2021-09-29)
 ==================
 * Server - [bug] Fixed CSS for the tooltip in some windows.

@@ -26,6 +26,11 @@ if (defined('CLIENT')) {
     exit;
 }
 
+if (defined('NO_DASH') && isset($__FM_CONFIG['homepage'])) {
+    header('Location: ' . $__FM_CONFIG['homepage']);
+    exit;
+}
+
 printHeader();
 @printMenu();
 
