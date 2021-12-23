@@ -39,6 +39,9 @@ $__FM_CONFIG['fmFirewall'] = array(
 		'min_client_auto_upgrade_version'	=> '1.3'
 	);
 
+if($_SESSION['module'] == 'fmFirewall' && !defined('NO_DASH')) define('NO_DASH', true);
+$__FM_CONFIG['homepage'] = 'config-servers.php';
+
 /** Images */
 if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['pass']		= '<i class="fa fa-arrow-up __action__" alt="__Action__" title="__Action__"></i>';

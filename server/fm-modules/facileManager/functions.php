@@ -481,8 +481,6 @@ HTML;
  * @package facileManager
  */
 function printMenu() {
-	global $__FM_CONFIG, $menu, $submenu;
-	
 	$main_menu_html = null;
 	
 	list($filtered_menu, $filtered_submenu) = getCurrentUserMenu();
