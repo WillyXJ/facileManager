@@ -290,7 +290,7 @@ HTML;
 
 		$checked = ($time_contiguous) ? 'checked' : null;
 		$time_options = sprintf('<input name="time_contiguous" id="time_contiguous" value="yes" type="checkbox" %s /><label for="time_contiguous">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a><br />',
-			$checked, __('Use contiguous time'), __('When end time is smaller than start time, match this as a single time period instead distinct intervals.')
+			$checked, __('Use contiguous time'), __('When end time is smaller than start time, match this as a single time period instead of distinct intervals.')
 			);
 		
 		$popup_title = $action == 'add' ? __('Add Restriction') : __('Edit Restriction');
