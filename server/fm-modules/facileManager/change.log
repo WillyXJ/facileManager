@@ -1,6 +1,5 @@
 4.2.0 (2021-??-??)
 ==================
-* Server - [security] Upgraded to select2 v4.0.13. (Issue #539)
 * Server - [improvement] Updated max_input_vars error message to include additional methods
            of increasing the value.
 * Server - [improvement] Added database connection error during installation process to
