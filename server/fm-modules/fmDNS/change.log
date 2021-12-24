@@ -2,6 +2,7 @@
 ==================
 * Both   - [improvement] Added support for separate slave/stub zone directory. (Issue #540)
 * Server - [improvement] Removed record class support and defaults to INternet. (Issue #516)
+* Server - [improvement] Added link to edit additional options for cloned zones.
 * Server - [bug] Fixed RRSet and Rate Limit configuration builds. (Issue #542)
 * Server - [bug] Fixed missing support for nested ACLs. (Issue #544)
 * Server - [bug] Fixed menu display when Custom RR is set.

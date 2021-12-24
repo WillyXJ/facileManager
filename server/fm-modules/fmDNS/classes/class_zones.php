@@ -773,7 +773,7 @@ class fm_dns_zones {
 			$clone_names = $clone_types = $clone_views = $clone_counts = null;
 			foreach ($clones as $clone_id => $clone_array) {
 				$clone_names .= '<p class="subelement' . $clone_id . '"><span><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
-						'</a></span>' . $clone_array['dnssec'] . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
+						'</a></span>' . $clone_array['clone_options'] . $clone_array['dnssec'] . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
 				$clone_types .= '<p class="subelement' . $clone_id . '">' . __('clone') . '</p>' . "\n";
 				$clone_views .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 				$clone_counts_array = explode('|', $clone_array['clone_count']);
@@ -1293,12 +1293,13 @@ HTML;
 				$clone_id = $clone_results[$i]->domain_id;
 				$return[$clone_id]['clone_name'] = $clone_results[$i]->domain_name;
 				$return[$clone_id]['clone_link'] = 'zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_id;
+				$return[$clone_id]['clone_options'] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $clone_id, __('Configure Additional Options'));
 				
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
 					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) {
-					$return[$clone_id]['clone_edit'] = '<a class="subelement_edit" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-					$return[$clone_id]['clone_delete'] = ' ' . str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
+					$return[$clone_id]['clone_edit'] = sprintf('<a class="subelement_edit tooltip-top mini-icon" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '" data-tooltip="%s">' . $__FM_CONFIG['icons']['edit'] . '</a>', _('Edit'));
+					$return[$clone_id]['clone_delete'] = str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				} else {
 					$return[$clone_id]['clone_delete'] = $return[$clone_id]['clone_edit'] = null;
 				}
@@ -1314,10 +1315,10 @@ HTML;
 				$return[$clone_id]['clone_views'] = $clone_results[$i]->domain_view;
 				
 				/** Dynamic updates support */
-				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a> ', __('Zone supports dynamic updates')) : null;
+				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates')) : null;
 				
 				/** DNSSEC support */
-				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="mini-icon fa fa-lock secure" aria-hidden="true" title="%s"></i> ', __('Zone is secured with DNSSEC')) : null;
+				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock secure" aria-hidden="true"></i></a>', __('Zone is secured with DNSSEC')) : null;
 			}
 		}
 		return $return;
