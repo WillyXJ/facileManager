@@ -1922,7 +1922,8 @@ pre {
 .subelements p span.record-subtractions:before {
 	content: '-';
 }
-p[class^=subelement] span:first-child {
+p[class^=subelement] span:first-child,
+p[class^=subelement] i {
 	margin-right: 7px;
 }
 
