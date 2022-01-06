@@ -10,6 +10,7 @@
 * Client - [bug] Fixed httpd2 and apache2 detection. (Issue #543)
 * Server - [bug] Removed password change form on authenticated user profile for LDAP users.
 * Server - [bug] Ports defined in the Settings can now be unset.
+* Server - [bug] Fixed minor CSS issues.
 
 4.1.2 (2021-10-27)
 ==================
