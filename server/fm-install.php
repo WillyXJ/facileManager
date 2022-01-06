@@ -297,7 +297,7 @@ function processSetup() {
 	include_once(ABSPATH . 'fm-includes/fm-db.php');
 	$fmdb = new fmdb($dbuser, $dbpass, $dbname, $dbhost, 'silent connect');
 	if (!$fmdb->dbh) {
-		exit(displaySetup(_('Could not connect to MySQL. Please check your credentials.')));
+		exit(displaySetup(sprintf('%s : %s', _('Could not connect to MySQL'), $fmdb->last_error)));
 	} else {
 		$db_selected = $fmdb->select($dbname, 'silent');
 		if ($fmdb->last_error && strpos($fmdb->last_error, 'Unknown database') === false) {

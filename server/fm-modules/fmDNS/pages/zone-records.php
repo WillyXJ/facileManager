@@ -218,7 +218,9 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 		@sort($used_record_types);
 		
 		$used_record_types[] = 'SOA';
-		unset($used_record_types[array_search('CUSTOM', $used_record_types)]);
+		if (array_search('CUSTOM', $used_record_types) !== false) {
+			unset($used_record_types[array_search('CUSTOM', $used_record_types)]);
+		}
 		
 		foreach ($used_record_types as $type) {
 			if (empty($type)) continue;

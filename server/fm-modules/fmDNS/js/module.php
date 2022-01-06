@@ -624,8 +624,8 @@ function validateTimeFormat(event, that) {
 			// let it happen, do not do anything
 			return;
 	}
-	// Ensure that it is a s, m, h, d, or w
-	else if (event.keyCode == 83 || event.keyCode == 77 || event.keyCode == 72 || event.keyCode == 68 || event.keyCode == 87) {
+	// Ensure that it is a s, m, h, d, w, or y
+	else if (event.keyCode == 83 || event.keyCode == 77 || event.keyCode == 72 || event.keyCode == 68 || event.keyCode == 87 || event.keyCode == 89) {
 		switch (event.keyCode) {
 			case 83:
 				if (that.value.match(/(s|[a-z]$)/gi)) {
@@ -652,7 +652,12 @@ function validateTimeFormat(event, that) {
 					event.preventDefault();
 				}
 				break;
-		}
+			case 89:
+				if (that.value.match(/(y|[a-z]$)/gi)) {
+					event.preventDefault();
+				}
+				break;
+			}
 		return;
 	}
 	// Ensure that it is a number and stop the keypress

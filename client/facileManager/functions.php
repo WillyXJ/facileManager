@@ -1320,7 +1320,7 @@ function deleteFile($file, $debug = false, $dryrun = false) {
  * @return string or boolean
  */
 function findFile($file, $addl_path = null) {
-	$path = array('/etc/httpd/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2',
+	$path = array('/etc/httpd/conf', '/etc/httpd2/conf', '/usr/local/etc/apache', '/usr/local/etc/apache2',
 				'/usr/local/etc/apache22', '/etc/apache2', '/etc', '/usr/local/etc',
 				'/etc/lighttpd', '/usr/local/nginx/conf', '/etc/nginx', '/usr/local/etc/nginx');
 	
@@ -1672,7 +1672,7 @@ function getWebServerInfo() {
 	/** Get the docroot from STDIN if it's not found */
 	echo fM("  --> Detecting the web server document root...");
 	switch ($web_server['app']) {
-		case 'httpd':
+		case 'httpd' || 'httpd2' || 'apache2':
 			$docroot_parameter = 'DocumentRoot';
 			break;
 		case 'lighttpd':
@@ -1776,4 +1776,28 @@ if (!function_exists('gethostname')) {
 		return $hostname;
 	}
 }
+
+
+/**
+ * Returns the line in a file that matches a string
+ *
+ * @since 4.1.3
+ * @package facileManager
+ *
+ * @param string $filename File name to search
+ * @param string $needle Search text
+ * @return string
+ * 
+ * Based on https://stackoverflow.com/a/9722200
+ */
+function getLineWithString($filename, $needle) {
+	$lines = file($filename);
+	foreach ($lines as $line) {
+		if (strpos($line, $needle) !== false) {
+			return $line;
+		}
+	}
+	return null;
+}
+
 ?>

@@ -105,7 +105,7 @@ class fm_dns_acls {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
 		/** Cleans up acl_addresses for future parsing **/
-		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'key_') === false) {
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'acl_') && strpos($post['acl_addresses'], 'key_') === false) {
 			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
 			if ($ip_check != $post['acl_addresses']) return $ip_check;
 		}
@@ -292,7 +292,6 @@ HTML;
 		
 		$acl_id = $acl_parent_id = 0;
 		$acl_name = $acl_addresses = $acl_comment = null;
-		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && array_key_exists('add_form', $_POST)) {
@@ -348,7 +347,7 @@ HTML;
 				$popup_footer
 			);
 		} else {
-			$acl_elements = array_merge($this->getPredefinedACLs(), $this->getACLList($server_serial_no, 'define-acl-elements'));
+			$acl_elements = $this->getACLList($server_serial_no, 'all', "AND acl_id!='$acl_parent_id'");
 			$found = false;
 			foreach ($acl_elements as $item) {
 				if ($acl_addresses == $item['id']) {
@@ -434,7 +433,7 @@ HTML;
 	/**
 	 * Gets the ACL listing
 	 */
-	function getACLList($server_serial_no = 0, $include = 'acl') {
+	function getACLList($server_serial_no = 0, $include = 'acl', $sql = null) {
 		global $__FM_CONFIG, $fmdb;
 		
 		if ($include == 'none') return array();
@@ -443,8 +442,14 @@ HTML;
 		$i = 0;
 		$serial_sql = $server_serial_no ? "AND server_serial_no IN ('0','$server_serial_no')" : "AND server_serial_no='0'";
 		
+		if ($include == 'all') {
+			/** Predefined ACLs */
+			$acl_list = array_merge($acl_list, $this->getPredefinedACLs());
+			$i = count($acl_list);
+		}
+		
 		if (in_array($include, array('all', 'acl'))) {
-			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " AND acl_parent_id=0 AND acl_status='active'");
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', $serial_sql . " $sql AND acl_parent_id=0 AND acl_status='active'");
 			if ($fmdb->num_rows) {
 				$last_result = $fmdb->last_result;
 				for ($j=0; $j<$fmdb->num_rows; $j++) {
@@ -458,13 +463,7 @@ HTML;
 			}
 		}
 		
-		if (in_array($include, array('all', 'tsig-keys', 'define-acl-elements'))) {
-			if ($include == 'all') {
-				/** Predefined ACLs */
-				$acl_list = array_merge($acl_list, $this->getPredefinedACLs());
-				$i = count($acl_list);
-			}
-			
+		if (in_array($include, array('all', 'tsig-keys'))) {
 			/** Keys */
 			$key_type = ' AND key_type="tsig"';
 			if ($include == 'all') {

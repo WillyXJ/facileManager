@@ -376,11 +376,17 @@ HTML;
 					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33&#37;" scope="row"><label for="server_cred_user">%s</label></th>
+					<th width="33&#37;" scope="row">
+						<label for="server_cred_user">%s</label>
+						<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+					</th>
 					<td width="67&#37;"><input name="server_credentials[]" id="server_cred_user" type="text" value="%s" size="40" /></td>
 				</tr>
 				<tr>
-					<th width="33&#37;" scope="row"><label for="server_cred_password">%s</label></th>
+					<th width="33&#37;" scope="row">
+						<label for="server_cred_password">%s</label>
+						<a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+					</th>
 					<td width="67&#37;"><input name="server_credentials[]" id="server_cred_password" type="password" value="%s" size="40" /></td>
 				</tr>
 			</table>
@@ -400,8 +406,8 @@ HTML;
 				__('Server Type'), $server_types,
 				__('Server Port'), $server_port,
 				__('Groups'), $groups,
-				__('Username'), $server_cred_user,
-				__('Password'), $server_cred_password,
+				__('Username'), __('This field overrides the global settings'), $server_cred_user,
+				__('Password'), __('This field overrides the global settings'), $server_cred_password,
 				$popup_footer
 			);
 

@@ -569,7 +569,6 @@ HTML;
 			$popup_title = $type == 'users' ? __('Edit User') : __('Edit Group');
 		}
 		$popup_header = buildPopup('header', $popup_title);
-		$popup_footer = buildPopup('footer');
 		
 		$hidden = '<input type="hidden" name="type" value="' . $type . '" />';
 		
@@ -617,7 +616,7 @@ HTML;
 			}
 		}
 		
-		if ((in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) || $user_id == $_SESSION['user']['id']) {
+		if ((in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) || ($user_id == $_SESSION['user']['id'] && $user_auth_type != 2)) {
 			if ($action == 'add') $button_disabled = 'disabled';
 			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];

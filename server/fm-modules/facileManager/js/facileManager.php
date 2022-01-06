@@ -1163,7 +1163,7 @@ if (isset($__FM_CONFIG)) {
 			updateIndex;
 			
 			var items = $("#table_edits.grab tr:not(.no-grab), #table_edits.grab1 tr");
-			var linkIDs = [items.size()];
+			var linkIDs = [items.length];
 			var index = 0;
 			
 			items.each(function(intIndex) {

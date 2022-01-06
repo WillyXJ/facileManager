@@ -514,7 +514,7 @@ class fm_module_servers extends fm_shared_module_servers {
 				$update_method = $row->server_update_method . $port;
 			}
 
-			if (! class_exists('fm_dns_acls')) {
+			if (!class_exists('fm_dns_acls')) {
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 			}
 			$keys = $fm_dns_acls->parseACL($this->getConfig($row->server_id, 'keys'));
@@ -523,6 +523,12 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			if (is_array($icons)) {
 				$icons = implode(' ', $icons);
+			}
+
+			if ($row->server_slave_zones_dir) {
+				$server_zones_dir = sprintf('<b>%s:</b> %s<br /><b>%s:</b> %s', __('Master'), $row->server_zones_dir, __('Slave/Stub'), $row->server_slave_zones_dir);
+			} else {
+				$server_zones_dir = $row->server_zones_dir;
 			}
 
 			echo <<<HTML
@@ -537,7 +543,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$runas</td>
 			<td>$row->server_config_file</td>
 			<td>$row->server_root_dir</td>
-			<td>$row->server_zones_dir</td>
+			<td>$server_zones_dir</td>
 			<td id="row_actions">$edit_status</td>
 		</tr>
 
@@ -605,7 +611,7 @@ HTML;
 		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$server_chroot_dir = $group_name = $server_type_disabled = null;
-		$server_installed = false;
+		$server_installed = $server_slave_zones_dir = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -641,8 +647,6 @@ FORM;
 				$server_run_as = null;
 			}
 			$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
-
-			$disabled = ($server_installed == 'yes') ? 'disabled' : null;
 
 			if ($server_installed == 'yes') {
 				if (strpos($server_update_method, 'http') === false) {
@@ -720,6 +724,10 @@ FORM;
 					<th width="33&#37;" scope="row"><label for="server_zones_dir">%s</label></th>
 					<td width="67&#37;"><input name="server_zones_dir" id="server_zones_dir" type="text" value="%s" size="40" placeholder="%s" maxlength="%s" /></td>
 				</tr>
+				<tr class="local_server_options">
+					<th width="33&#37;" scope="row"><label for="server_slave_zones_dir">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;"><input name="server_slave_zones_dir" id="server_slave_zones_dir" type="text" value="%s" size="40" placeholder="%s" maxlength="%s" /></td>
+				</tr>
 			</table>
 			</div>
 		</div>
@@ -782,7 +790,8 @@ FORM;
 				__('Config File'), $server_config_file, $__FM_CONFIG['ns']['named_config_file'], $server_config_file_length,
 				__('Server Root'), $server_root_dir, $__FM_CONFIG['ns']['named_root_dir'], $server_root_dir_length,
 				__('Server Chroot'), $server_chroot_dir, $__FM_CONFIG['ns']['named_chroot_dir'], $server_chroot_dir_length,
-				__('Zone File Directory'), $server_zones_dir, $__FM_CONFIG['ns']['named_zones_dir'], $server_zones_dir_length,
+				__('Master Zone File Directory'), $server_zones_dir, $__FM_CONFIG['ns']['named_zones_dir'], $server_zones_dir_length,
+				__('Slave Zone File Directory'), __('Optional. Some systems require a separate location for slave/stub zone data.'), $server_slave_zones_dir, $__FM_CONFIG['ns']['named_slave_zones_dir'], $server_zones_dir_length,
 				__('Advanced'),
 				__('Keys'), $keys,
 				__('Bogus'), $bogus,
@@ -1004,8 +1013,10 @@ FORM;
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $server_serial_no, 'cfg_', 'deleted', 'server_serial_no') === false) {
 			return formatError(__('The associated server configs could not be deleted because a database error occurred.'), 'sql');
 		}
-		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', str_replace('s_', '', $server_id), 'cfg_', 'deleted', 'server_id') === false) {
-			return formatError(__('The associated server configs could not be deleted because a database error occurred.'), 'sql');
+		if (strpos($server_id, 's_') !== false) {
+			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', str_replace('s_', '', $server_id), 'cfg_', 'deleted', 'server_id') === false) {
+				return formatError(__('The associated server configs could not be deleted because a database error occurred.'), 'sql');
+			}
 		}
 
 		/** Delete associated views */
@@ -1118,6 +1129,7 @@ FORM;
 			$post['server_root_dir'] = rtrim($post['server_root_dir'], '/');
 			$post['server_chroot_dir'] = rtrim($post['server_chroot_dir'], '/');
 			$post['server_zones_dir'] = rtrim($post['server_zones_dir'], '/');
+			$post['server_slave_zones_dir'] = rtrim($post['server_slave_zones_dir'], '/');
 
 			/** Process server_run_as */
 			$server_run_as_options = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined');

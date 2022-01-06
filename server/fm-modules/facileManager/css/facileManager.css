@@ -1922,7 +1922,8 @@ pre {
 .subelements p span.record-subtractions:before {
 	content: '-';
 }
-p[class^=subelement] span:first-child {
+p[class^=subelement] span:first-child,
+p[class^=subelement] i {
 	margin-right: 7px;
 }
 
@@ -1998,7 +1999,6 @@ a.subelement_edit img {
 	color: #fff;
 }
 #tab [type=radio]:checked ~ label {
-	z-index: 2;
 	border: 1px solid #4F4F4F;
 	background-color: #666;
 	color: #fff;

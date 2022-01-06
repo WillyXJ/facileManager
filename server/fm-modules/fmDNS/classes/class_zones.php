@@ -621,7 +621,8 @@ class fm_dns_zones {
 			/** Delete all associated configs */
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $domain_id, 'cfg_', 'domain_id');
 			if ($fmdb->num_rows) {
-				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $domain_id, 'cfg_', 'deleted', 'domain_id') === false) {
+				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_parent') === false || 
+					updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_id') === false) {
 					return formatError(__('The associated configs for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
 				unset($fmdb->num_rows);
@@ -672,8 +673,30 @@ class fm_dns_zones {
 					$clone_domain_result = $fmdb->last_result;
 					$clone_domain_num_rows = $fmdb->num_rows;
 					for ($i=0; $i<$clone_domain_num_rows; $i++) {
-						if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
-							return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+						/** Delete all associated configs */
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $clone_domain_result[$i]->domain_id, 'cfg_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_parent') === false || 
+								updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $fmdb->last_result[0]->cfg_id, 'cfg_', 'deleted', 'cfg_id') === false) {
+								return formatError(__('The associated configs for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
+						}
+						
+						/** Delete all associated records */
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
+								return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
+						}
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records_skipped', $clone_domain_result[$i]->domain_id, 'record_', 'domain_id');
+						if ($fmdb->num_rows) {
+							if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records_skipped', $clone_domain_result[$i]->domain_id, 'record_', 'deleted', 'domain_id') === false) {
+								return formatError(__('The associated records for the cloned zones could not be deleted because a database error occurred.'), 'sql');
+							}
+							unset($fmdb->num_rows);
 						}
 					}
 					unset($fmdb->num_rows);
@@ -750,7 +773,7 @@ class fm_dns_zones {
 			$clone_names = $clone_types = $clone_views = $clone_counts = null;
 			foreach ($clones as $clone_id => $clone_array) {
 				$clone_names .= '<p class="subelement' . $clone_id . '"><span><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
-						'</a></span>' . $clone_array['dnssec'] . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
+						'</a></span>' . $clone_array['clone_options'] . $clone_array['dnssec'] . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
 				$clone_types .= '<p class="subelement' . $clone_id . '">' . __('clone') . '</p>' . "\n";
 				$clone_views .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
 				$clone_counts_array = explode('|', $clone_array['clone_count']);
@@ -909,7 +932,7 @@ HTML;
 		
 		$domain_id = $domain_name_servers = 0;
 		$domain_view = -1;
-		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = null;
+		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = $domain_ttl = null;
 		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
 		$domain_dnssec_sig_expire = $domain_dnssec_sign_inline = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
 		$disabled = $action == 'create' ? null : 'disabled';
@@ -948,6 +971,7 @@ HTML;
 		
 		/** Get field length */
 		$domain_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
+		$domain_ttl_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_ttl');
 
 		$views = buildSelect('domain_view', 'domain_view', availableViews('active'), $domain_view, 4, null, true);
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
@@ -1162,6 +1186,10 @@ HTML;
 					<th><label for="domain_name_servers">%s</label></th>
 					<td>%s</td>
 				</tr>
+				<tr class="include-with-template">
+					<th><label for="domain_ttl">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td><input type="text" id="domain_ttl" name="domain_ttl" size="40" value="%s" maxlength="%d" onkeydown="return validateTimeFormat(event, this)" /></td>
+				</tr>
 				%s
 			</table>',
 				$action, $domain_id, $classes,
@@ -1177,6 +1205,7 @@ HTML;
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
 				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
+				__('Domain TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
 				$soa_templates . $addl_zone_options . $additional_config_link . $create_template . $template_name
 				);
 
@@ -1264,12 +1293,13 @@ HTML;
 				$clone_id = $clone_results[$i]->domain_id;
 				$return[$clone_id]['clone_name'] = $clone_results[$i]->domain_name;
 				$return[$clone_id]['clone_link'] = 'zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_id;
+				$return[$clone_id]['clone_options'] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $clone_id, __('Configure Additional Options'));
 				
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
 					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) {
-					$return[$clone_id]['clone_edit'] = '<a class="subelement_edit" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-					$return[$clone_id]['clone_delete'] = ' ' . str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
+					$return[$clone_id]['clone_edit'] = sprintf('<a class="subelement_edit tooltip-top mini-icon" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '" data-tooltip="%s">' . $__FM_CONFIG['icons']['edit'] . '</a>', _('Edit'));
+					$return[$clone_id]['clone_delete'] = str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				} else {
 					$return[$clone_id]['clone_delete'] = $return[$clone_id]['clone_edit'] = null;
 				}
@@ -1285,10 +1315,10 @@ HTML;
 				$return[$clone_id]['clone_views'] = $clone_results[$i]->domain_view;
 				
 				/** Dynamic updates support */
-				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a> ', __('Zone supports dynamic updates')) : null;
+				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates')) : null;
 				
 				/** DNSSEC support */
-				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<i class="mini-icon fa fa-lock secure" aria-hidden="true" title="%s"></i> ', __('Zone is secured with DNSSEC')) : null;
+				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock secure" aria-hidden="true"></i></a>', __('Zone is secured with DNSSEC')) : null;
 			}
 		}
 		return $return;
@@ -1547,7 +1577,7 @@ HTML;
 			$count = $fmdb->num_rows;
 			for ($i=0; $i<$count; $i++) {
 				$domain_name = (!function_exists('displayFriendlyDomainName')) ? $results[$i]->domain_name : displayFriendlyDomainName($results[$i]->domain_name);
-				if ($results[$i]->domain_view) {
+				if ($results[$i]->domain_view > 0) {
 					$domain_name .= ' (' . getNameFromID($results[$i]->domain_view, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ')';
 				}
 				$return[$i+$start][] = $domain_name;
@@ -1802,8 +1832,9 @@ HTML;
 		}
 		
 		/** Ensure domain_view is set */
-		if (!array_key_exists('domain_view', $post)) {
-			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id']) ? -1 : 0;
+		$tmp_domain_clone_domain_id = getNameFromID(sanitize($post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		if (!array_key_exists('domain_view', $post) && $tmp_domain_clone_domain_id) {
+			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id'] || $tmp_domain_clone_domain_id) ? -1 : 0;
 		} elseif (is_array($post['domain_view']) && in_array(0, $post['domain_view'])) {
 			$post['domain_view'] = 0;
 		}
@@ -1864,7 +1895,8 @@ HTML;
 		if ($post['domain_template_id']) {
 			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
 				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
-				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view');
+				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view',
+				'domain_ttl');
 			foreach ($include as $key) {
 				if (isset($post[$key])) {
 					$new_post[$key] = $post[$key];
@@ -1873,7 +1905,7 @@ HTML;
 			$post = $new_post;
 			unset($new_post, $post['domain_template']);
 			$post['domain_type'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
-			if (!is_array($post['domain_view']) && $post['domain_view'] < 0) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+			if (!is_array($post['domain_view']) && (!isset($post['domain_view']) || $post['domain_view'] < 0)) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
 			$post['domain_name_servers'] = explode(';', getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
 
 			return $post;
@@ -1896,7 +1928,7 @@ HTML;
 		}
 		
 		/** No need to process more if zone is cloned */
-		if ($post['domain_clone_domain_id']) {
+		if ($post['domain_clone_domain_id'] || $tmp_domain_clone_domain_id) {
 			return $post;
 		}
 		
@@ -1982,8 +2014,13 @@ HTML;
 	 * @param array $exclude Domain IDs to exclude
 	 * @return json array
 	 */
-	function buildZoneJSON($zones = 'all', $exclude = null) {
+	function buildZoneJSON($zones = 'all', $exclude = null, $additional_zones = null) {
 		$temp_zones = $this->availableZones('no-templates', array('master', 'slave', 'forward'), 'all', $zones, $exclude);
+
+		if ($additional_zones) {
+			$temp_zones = array_merge($additional_zones, $temp_zones);
+		}
+
 		$i = 0;
 		foreach ($temp_zones as $temp_zone_array) {
 			list($available_zones[$i]['text'], $available_zones[$i]['id']) = $temp_zone_array;

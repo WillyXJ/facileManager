@@ -636,7 +636,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					}
 					
 					/** Generate zone file */
-					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_result[$i]->view_id, sanitize($view_result[$i]->view_name, '-'), $include_hint_zone_local);
+					list($tmp_files, $error) = $this->buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir, $server_serial_no, $view_result[$i]->view_id, sanitize($view_result[$i]->view_name, '-'), $include_hint_zone_local);
 					if ($error) $message = $error;
 					
 					/** Include zones for view */
@@ -655,7 +655,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 			} else {
 				/** Generate zones.all.conf */
-				list($files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no, 0, null, $include_hint_zone);
+				list($files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir, $server_serial_no, 0, null, $include_hint_zone);
 				
 				/** Include all zones in one file */
 				if (is_array($files)) {
@@ -733,7 +733,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				return $this->buildServerConfig($_POST);
 			} elseif (!$domain_id) {
 				/** Build all zone files */
-				list($data->files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_serial_no);
+				list($data->files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir, $server_serial_no);
 			} else {
 				/** Build zone files for $domain_id */
 				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
@@ -818,7 +818,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildZoneDefinitions($server_zones_dir, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
+	function buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir = null, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_servers;
 		
 		$error = null;
@@ -923,16 +923,18 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					switch($domain_type) {
 						case 'master':
 						case 'slave':
+							$zone_data_dir = ($server_slave_zones_dir && $domain_type == 'slave') ? $server_slave_zones_dir : $server_zones_dir;
 							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
-							$zones .= "\tfile \"$server_zones_dir/$domain_type/$domain_name_file\";\n";
+							$zones .= "\tfile \"$zone_data_dir/$domain_type/$domain_name_file\";\n";
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
-							$files[$server_zones_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
+							$files[$zone_data_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
 							unset($zone_file_contents);
 							break;
 						case 'stub':
-							$zones .= "\tfile \"$server_zones_dir/stub/" . str_replace('{ZONENAME}', trimFullStop($domain_name) . $file_ext, $file_format) . "\";\n";
+							$zone_data_dir = ($server_slave_zones_dir) ? $server_slave_zones_dir : $server_zones_dir;
+							$zones .= "\tfile \"$zone_data_dir/stub/" . str_replace('{ZONENAME}', trimFullStop($domain_name) . $file_ext, $file_format) . "\";\n";
 							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
 							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
@@ -1167,7 +1169,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$domain_id = isset($domain->parent_domain_id) ? $domain->parent_domain_id : $domain->domain_id;
 			$serial = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'soa_serial_no');
 			
-			$zone_file .= '$TTL ' . $soa_ttl . "\n";
+			$ttl = (isset($domain->domain_ttl)) ? $domain->domain_ttl : $soa_ttl;
+
+			$zone_file .= '$TTL ' . $ttl . "\n";
 			$zone_file .= "$domain_name IN SOA $master_server $admin_email (\n";
 			$zone_file .= "\t\t$serial\t; Serial\n";
 			$zone_file .= "\t\t$soa_refresh\t\t; Refresh\n";
@@ -1466,6 +1470,19 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$parent_zone->domain_check_config = $zone->domain_check_config;
 			
 			if ($zone->domain_view > -1) $parent_zone->domain_view = $zone->domain_view;
+
+			/** Set domain_ttl correctly */
+			if ($zone->domain_ttl) {
+				$parent_zone->domain_ttl = $zone->domain_ttl;
+			} elseif ($zone->domain_clone_domain_id && $parent_zone->domain_template_id) {
+				basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $zone->domain_clone_domain_id, 'domain_', 'domain_id');
+				if ($fmdb->last_result[0]->domain_ttl) {
+					$parent_zone->domain_ttl = $fmdb->last_result[0]->domain_ttl;
+				} else {
+					basicGet("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", $parent_zone->domain_template_id, 'domain_', 'domain_id');
+					$parent_zone->domain_ttl = $fmdb->last_result[0]->domain_ttl;	
+				}
+			}
 			
 			return $parent_zone;
 		}
@@ -1943,13 +1960,13 @@ HTML;
 			foreach ($value_array as $domain_name => $cfg_data) {
 				if ($cfg_name != 'domain') {
 					list($cfg_info, $cfg_comment) = $cfg_data;
-					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
+					$ratelimits .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info);
 				} else {
 					foreach ($cfg_data as $domain_cfg_name => $domain_cfg_data) {
 						$ratelimits_domains .= "\trate-limit {\n\t\tdomain $domain_name;\n";
 						foreach ($domain_cfg_data as $domain_cfg_data2) {
 							list($cfg_param, $cfg_comment) = $domain_cfg_data2;
-							$ratelimits_domains .= $this->formatConfigOption($domain_cfg_name, $cfg_param, $cfg_comment);
+							$ratelimits_domains .= $this->formatConfigOption($domain_cfg_name, $cfg_param, $cfg_comment, $this->server_info);
 						}
 						$ratelimits_domains .= "\t};\n";
 					}
@@ -1977,7 +1994,7 @@ HTML;
 	 * @return string
 	 */
 	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment = null, $server_info = null, $tab = "\t\t", $sql = null) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options;
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		$config = null;
 		
@@ -2226,9 +2243,9 @@ HTML;
 	 * @return string
 	 */
 	function getRRSetOrder($view_id, $server_serial_no) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG;
 		
-		$rrsets = $rrsets_domains = $rrset_config_array = $config = null;
+		$rrsets = $config = null;
 		
 		/** Use server-specific configs if present */
 		foreach (array($server_serial_no, 0) as $serial_no) {
@@ -2247,7 +2264,7 @@ HTML;
 		foreach ((array) $config as $cfg_name => $value_array) {
 			foreach ($value_array as $cfg_data) {
 				list($cfg_info, $cfg_comment) = $cfg_data;
-				$rrsets .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment);
+				$rrsets .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info);
 			}
 			$rrsets = str_replace($cfg_name, null, $rrsets);
 		}

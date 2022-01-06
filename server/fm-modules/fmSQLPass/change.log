@@ -1,3 +1,9 @@
+1.6.0 (2021-09-14)
+==================
+* Server - [improvement] Password update outputs now use language files.
+* Server - [improvement] Added notes for credentials when defining servers.
+* Server - [bug] Fixed PostgreSQL password change support.
+
 1.5.3 (2020-11-27)
 ==================
 * Server - [bug] Fixed upgrade process retry attempts.

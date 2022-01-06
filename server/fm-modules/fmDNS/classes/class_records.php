@@ -271,6 +271,7 @@ class fm_dns_records {
 		if ($type == 'DOMAIN') {
 			$show_value = false;
 			$title_array[] = array('title' => __('Name'), 'rel' => $type . '_name');
+			$title_array[] = array('title' => __('TTL'), 'rel' => $type . '_ttl');
 			$title_array[] = array('title' => __('Name Servers'), 'rel' => $type . '_name_servers');
 			$title_array[] = array('title' => __('Views'), 'rel' => $type . '_views');
 			$title_array[] = array('title' => __('Map'), 'rel' => $type . '_mapping');
@@ -279,7 +280,6 @@ class fm_dns_records {
 		if (!in_array($type, array('SOA', 'DOMAIN', 'CUSTOM'))) {
 			$title_array[] = array('title' => __('Record'), 'rel' => 'record_name');
 			$title_array[] = array('title' => __('TTL'), 'rel' => 'record_ttl');
-			$title_array[] = array('title' => __('Class'), 'rel' => 'record_class');
 		}
 		if ($type == 'CERT' ) {
 			$title_array[] = array('title' => __('Type'), 'rel' => 'record_cert_type');
@@ -363,7 +363,7 @@ class fm_dns_records {
 	function getInputForm($type, $new, $parent_domain_id, $results = null, $start = 1) {
 		global $__FM_CONFIG, $zone_access_allowed;
 		
-		$form = $record_status = $record_class = $record_name = $record_ttl = null;
+		$form = $record_status = $record_name = $record_ttl = null;
 		$record_value = $record_comment = $record_priority = $record_weight = $record_port = null;
 		$action = ($new) ? 'create' : 'update';
 		$end = ($new) ? $start + 3 : 1;
@@ -388,8 +388,6 @@ class fm_dns_records {
 		$status = BuildSelect($action . '[_NUM_][record_status]', 'status__NUM_', $statusopt, $record_status);
 		$field_values['class'] = $record_status;
 		
-		$class = buildSelect($action . '[_NUM_][record_class]', 'class__NUM_', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class'), $record_class);
-
 		if ($type == 'PTR') {
 			$domain_map = getNameFromID($parent_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
 		}
@@ -411,7 +409,6 @@ class fm_dns_records {
 				$field_values['data']['Record'] = '><input size="40" type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
 			}
 			$field_values['data']['TTL'] = '><input style="width: 35px;" type="text" name="' . $action . '[_NUM_][record_ttl]" value="' . $record_ttl . '" onkeydown="return validateTimeFormat(event, this)" />';
-			$field_values['data']['Class'] = '>' . $class;
 			
 			if ($type == 'CAA') {
 				$field_values['data']['Flags'] = '>' . buildSelect($action . '[_NUM_][record_params]', '_NUM_', $__FM_CONFIG['records']['caa_flags'], $record_params);
@@ -532,7 +529,6 @@ class fm_dns_records {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
 			$field_values['data']['Record'] = '>' . $record_name . '<span class="grey">.' . $domain . '</span>';
 			$field_values['data']['TTL'] = '>' . $record_ttl;
-			$field_values['data']['Class'] = '>' . $record_class;
 			
 			if ($type == 'NAPTR') {
 				$field_values['data']['Order'] = '>' . $record_weight;

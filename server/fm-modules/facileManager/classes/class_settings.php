@@ -51,7 +51,7 @@ class fm_settings {
 				
 				if ($key == 'mail_from' && isEmailAddressValid($data) === false) return sprintf(_('%s is not a valid e-mail address.'), $data);
 				if (in_array($key, $ports)) {
-					if (!verifyNumber($data, 1, 65535, false)) return _('Invalid port number specified.');
+					if ($data && !verifyNumber($data, 1, 65535, false)) return _('Invalid port number specified.');
 				}
 				
 				if (isset($data_array)) $data = $data_array;
@@ -237,6 +237,7 @@ class fm_settings {
 		} else $ldap_group_require_options_style = $ldap_group_require_checked = null;
 		$ldap_group_dn = getOption('ldap_group_dn');
 		$ldap_group_attribute = getOption('ldap_group_attribute');
+		$ldap_group_search_dn = getOption('ldap_group_search_dn');
 
 		$ldap_user_template = getOption('ldap_user_template');
 		$ldap_user_template_list = buildSelect('ldap_user_template', 'ldap_user_template', $this->buildUserList(), $ldap_user_template);
@@ -469,6 +470,15 @@ class fm_settings {
 								</div>
 								<div class="choices">
 									<input name="ldap_group_attribute" id="ldap_group_attribute" type="text" value="' . $ldap_group_attribute . '" size="40" />
+								</div>
+							</div>
+							<div id="setting-row">
+								<div class="description">
+									<label for="ldap_group_search_dn">' . _('Search Start DN') . '</label>
+									<p>' . _('The DN to begin the user/group search from in the event searching the entire Active Directory is not allowed (optional).') . '</p>
+								</div>
+								<div class="choices">
+									<input name="ldap_group_search_dn" id="ldap_group_search_dn" type="text" value="' . $ldap_group_search_dn . '" size="40" />
 								</div>
 							</div>
 						</div>

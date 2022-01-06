@@ -30,6 +30,13 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.ph
 
 $selected_zone = 0;
 
+/** Fix absence of $_POST['submit'] */
+if (count($_POST)) {
+	if (!array_key_exists('submit', $_POST) && array_key_exists('action', $_POST)) {
+		$_POST['submit'] = __('Save');
+	}
+}
+
 /** Process ad-hoc zone creations and record imports */
 if (array_key_exists('submit', $_POST)) {
 	switch($_POST['submit']) {
@@ -63,7 +70,9 @@ $button = null;
 if ($available_zones) {
 	$zone_options = buildSelect('domain_id', 'zone_import_domain_list', $available_zones, $selected_zone);
 	if (currentUserCan('run_tools') && currentUserCan('manage_records', $_SESSION['module'])) {
-		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="' . __('Import Zones') . '" class="button text-change" /></p>';
+		$button = '<p class="step"><input id="import-records" name="submit" type="submit" value="';
+		$button .= ($selected_zone) ? __('Import Records') : __('Import Zones');
+		$button .= '" class="button text-change" /></p>';
 	}
 } else {
 	$zone_options = __('You need to define one or more zones first.');
