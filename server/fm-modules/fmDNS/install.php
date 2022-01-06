@@ -238,8 +238,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_run_as_predefined` enum('named','bind','daemon','as defined:') NOT NULL DEFAULT 'named',
   `server_run_as` varchar(50) DEFAULT NULL,
   `server_root_dir` varchar(255) NOT NULL,
-  `server_chroot_dir` VARCHAR(255) NULL DEFAULT NULL,
+  `server_chroot_dir` VARCHAR(255) DEFAULT NULL,
   `server_zones_dir` varchar(255) NOT NULL,
+  `server_slave_zones_dir` varchar(255) DEFAULT NULL,
   `server_config_file` varchar(255) NOT NULL DEFAULT '/etc/named.conf',
   `server_url_server_type` enum('httpd','lighttpd','nginx') DEFAULT NULL,
   `server_url_config_file` varchar(255) DEFAULT NULL,
@@ -391,15 +392,6 @@ INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id
 WHERE NOT EXISTS
 	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
 	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'auth-nxdomain' AND server_serial_no = '0'
-	);
-INSERTSQL;
-
-	$inserts[] = <<<INSERTSQL
-INSERT INTO `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` (account_id, cfg_parent, cfg_name, cfg_data, cfg_status) 
-	SELECT '1', '0', 'cleaning-interval', '120', 'active' FROM DUAL
-WHERE NOT EXISTS
-	(SELECT * FROM `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}config` WHERE 
-	account_id = '1' AND cfg_parent = '0' AND cfg_name = 'cleaning-interval' AND server_serial_no = '0'
 	);
 INSERTSQL;
 

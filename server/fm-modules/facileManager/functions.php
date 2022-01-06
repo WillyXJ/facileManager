@@ -2902,8 +2902,9 @@ function hasExceededMaxInputVars() {
  */
 function checkMaxInputVars() {
 	if ($required_input_vars = hasExceededMaxInputVars()) {
-		fMDie(sprintf(_('PHP max_input_vars (%1$d) has been reached and %2$s or more are required. Please increase the limit to fulfill this request. One method is to set the following in %3$s.htaccess:') .
-			'<p><code>php_value max_input_vars %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH));
+		fMDie(sprintf(_('PHP max_input_vars (%1$d) has been reached and %2$s or more are required. Please increase the limit to fulfill this request. Two possible methods include setting the following:') .
+			'<p>%3$s.htaccess:<br /><code>php_value max_input_vars %2$s</code></p>
+			<p>%3$s.user.ini:<br /><code>max_input_vars = %2$s</code></p>', ini_get('max_input_vars'), $required_input_vars, ABSPATH));
 	}
 }
 

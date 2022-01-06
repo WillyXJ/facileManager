@@ -31,12 +31,12 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
-		'version'							=> '5.1.0',
-		'client_version'					=> '4.1.0',
+		'version'							=> '5.2.0',
+		'client_version'					=> '5.2.0',
 		'description'						=> __('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.', 'fmDNS'),
 		'prefix'							=> 'dns_',
 		'required_dns_version'				=> '9.3',
-		'required_fm_version'				=> '4.1.0',
+		'required_fm_version'				=> '4.2.0',
 		'min_client_auto_upgrade_version'	=> '2.2'
 	);
 
@@ -46,7 +46,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['reload']		= sprintf('<i class="fa fa-refresh preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Reload Zone'));
 }
 if (isset($fm_name)) {
-	$__FM_CONFIG['module']['icons']['sub_delete']	= sprintf('<i id="__ID__" class="fa fa-window-close delete subelement_remove" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
+	$__FM_CONFIG['module']['icons']['sub_delete']	= sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i id="__ID__" class="fa fa-window-close delete subelement_remove" aria-hidden="true"></i></a>', _('Delete'));
 }
 
 $__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
@@ -106,6 +106,7 @@ $__FM_CONFIG['soa']['soa_expire']			= '2w';
 $__FM_CONFIG['ns']['named_root_dir']		= '/var/named';
 $__FM_CONFIG['ns']['named_chroot_dir']		= '/var/named/chroot';
 $__FM_CONFIG['ns']['named_zones_dir']		= '/etc/named/zones';
+$__FM_CONFIG['ns']['named_slave_zones_dir']	= '/var/cache/bind';
 $__FM_CONFIG['ns']['named_config_file']		= '/etc/named.conf';
 
 /** Logging Channel Options */
