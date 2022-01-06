@@ -1,4 +1,4 @@
-5.2.0 (2021-??-??)
+5.2.0 (2022-01-06)
 ==================
 * Both   - [improvement] Added support for separate slave/stub zone directory. (Issue #540)
 * Server - [improvement] Removed record class support and defaults to INternet. (Issue #516)
