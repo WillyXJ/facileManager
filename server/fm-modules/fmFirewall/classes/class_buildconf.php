@@ -82,7 +82,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$policy_result = $fmdb->last_result;
 					
 					$function = $server_type . 'BuildConfig';
-					$config .= $this->$function($policy_result, $policy_count, $server_result[0]);
+					$config .= $this->$function($policy_result, $policy_count, $server_result[0]) . "\n\n";
 					unset($policy_result);
 				}
 			}
@@ -522,9 +522,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		
 		$config['filter'][] = $config['nat'][] = 'COMMIT';
-		$config['filter'][] = $config['nat'][] = "\n\n";
-		
-		return trim(implode("\n", $config['nat']) . implode("\n", $config['filter']));
+
+		return trim(implode("\n", $config[$policy_result[0]->policy_type]));
 	}
 	
 	
@@ -780,9 +779,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	
 	function ipfilterBuildConfig($policy_result, $count) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_services;
 		
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		if (!class_exists(('fm_module_services'))) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		}
 
 		$fw_actions = array('pass' => 'pass',
 							'block' => 'block',
@@ -990,9 +991,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	
 	function ipfwBuildConfig($policy_result, $count) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_services;
 		
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		if (!class_exists(('fm_module_services'))) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		}
 
 		$fw_actions = array('pass' => 'allow',
 							'block' => 'deny',
