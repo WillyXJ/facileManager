@@ -1,3 +1,7 @@
+4.2.1 (2022-??-??)
+==================
+* Server - [bug] Fixed PHP errors during installation process. (Issue #548)
+
 4.2.0 (2022-01-06)
 ==================
 * Server - [improvement] Updated max_input_vars error message to include additional methods

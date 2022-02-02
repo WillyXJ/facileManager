@@ -95,7 +95,7 @@ function generateConfig() {
 	
 	$dbpass = str_replace("'", "\'", $dbpass);
 
-	if ($install_enable_ssl) {
+	if (isset($install_enable_ssl)) {
 		$ssl_config = <<<CFG
 /** Database SSL connection settings (optional) */
 \$__FM_CONFIG['db']['key'] = '{$ssl['key']}';
