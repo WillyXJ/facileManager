@@ -673,6 +673,7 @@ function detectOSDistro() {
 		$distros = array(
 			'Arch'       => '/etc/arch-release',
 			'ALT'        => '/etc/altlinux-release',
+            'Debian'     => '/etc/debian_version',
 			'Sabayon'    => '/etc/sabayon-release',
 			'Slackware'  => '/etc/slackware-version;/etc/slackware-release',
 			'SUSE'       => '/etc/SuSE-release;/etc/UnitedLinux-release',
