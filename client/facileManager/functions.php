@@ -267,6 +267,19 @@ function installFM($proto, $compress) {
 	/** Get server name from input */
 	$server_location = getServerPath($serverhost);
 	extract($server_location);
+
+    /** URL/Hostname facileManager will use to talk to this client **/
+	echo "Please enter the server name of the $module_name module:\n";
+	echo "    Examples incldue:\n";
+	echo "\t$module_name\n";
+	echo "\t$module_name.mydomain.com\n";
+	echo "Please enter the server name of the $module_name module: ";
+	if (defined('HOST')) {
+		$data['server_name'] = HOST;
+		echo HOST . "\n";
+	} else {
+		$data['server_name'] = trim(fgets(STDIN));
+	}
 	
 	$data['config'] = array();
 
@@ -296,6 +309,8 @@ function installFM($proto, $compress) {
 	}
 	
 	$data['config'][] = array('FMHOST', 'facileManager server', $hostname . '/' . $path);
+
+	$data['config'][] = array('HOST', 'facileManager module url', $data['server_name']);
 	
 	/** Account key **/
 	$key = 'default';
@@ -322,8 +337,6 @@ function installFM($proto, $compress) {
 	}
 
 	/** Server serial number **/
-	$data['server_name'] = gethostname();
-
 	$data['server_os'] = PHP_OS;
 	$data['server_os_distro'] = detectOSDistro();
 	echo fM('Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ');
