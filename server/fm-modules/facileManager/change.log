@@ -1,6 +1,7 @@
 4.2.1 (2022-??-??)
 ==================
 * Server - [bug] Fixed PHP errors during installation process. (Issue #548)
+* Client - [bug] Fixed user grep when adding ssh user. (Issue #553)
 
 4.2.0 (2022-01-06)
 ==================
