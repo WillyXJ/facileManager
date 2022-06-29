@@ -1,5 +1,6 @@
-4.2.1 (2022-??-??)
+4.3.0 (2022-??-??)
 ==================
+* Server - [improvement] Local auth now works even when LDAP auth is enabled. (Issue #546)
 * Server - [bug] Fixed PHP errors during installation process. (Issue #548)
 * Client - [bug] Fixed user grep when adding ssh user. (Issue #553)
 
