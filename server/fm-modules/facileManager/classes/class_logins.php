@@ -257,8 +257,9 @@ class fm_login {
 		$fm_db_version = getOption('fm_db_version');
 		$auth_method = ($fm_db_version >= 18) ? getOption('auth_method') : true;
 		if ($auth_method) {
-			/** Default Super Admin? */
-			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_auth_type`=1 ORDER BY user_id ASC LIMIT 1");
+			/** Default Super Admin? ... Will Use Builtin Auth when Default Auth Method is LDAP but user is defined with 'facileManager/Builtin' */
+			//$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_auth_type`=1 ORDER BY user_id ASC LIMIT 1");
+			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_login` = '$user_login' and `user_auth_type`=1 and `user_status`='active'");
 			if ($fmdb->last_result[0]->user_login == $user_login) {
 				$auth_method = 1;
 			}
