@@ -540,6 +540,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
+
+			#~ Only filter rules until NAT is supported
+			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
 			$line = $label = $keep_state = $uid = null;
 			
@@ -791,11 +794,14 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
+
+			#~ Only filter rules until NAT is supported
+			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
 			$line = $keep_state = null;
 			
 			$rule_number = $i + 1;
-			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
 			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
@@ -1003,17 +1009,23 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$cmd = 'ipfw -q add';
 		
-		$config[] = 'ipfw -q -f flush';
-		$config[] = $cmd . ' check-state';
-		$config[] = null;
+		#~ Only filter rules until NAT is supported
+		if ($policy_result[$i]->policy_type == 'filter') {
+			$config[] = 'ipfw -q -f flush';
+			$config[] = $cmd . ' check-state';
+			$config[] = null;
+		}
 		
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
+
+			#~ Only filter rules until NAT is supported
+			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
 			$line = $keep_state = $uid = null;
 			
 			$rule_number = $i + 1;
-			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
 			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
