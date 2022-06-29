@@ -119,7 +119,7 @@ class fm_dhcp_leases {
 	 * @param array $lease Lease info
 	 * @return null
 	 */
-	function displayRow($ip, $lease, $result) {
+	function displayRow($ip, $lease) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$edit_status = $checkbox = null;
