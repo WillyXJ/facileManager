@@ -1,4 +1,4 @@
-4.3.0 (2022-??-??)
+4.3.0 (2022-06-29)
 ==================
 * Server - [improvement] Local auth now works even when LDAP auth is enabled. (Issue #546)
 * Server - [bug] Fixed PHP errors during installation process. (Issue #548)
