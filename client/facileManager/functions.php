@@ -959,7 +959,7 @@ function addUser($user_info, $passwd_users) {
 	}
 	
 	if (!$retval) {
-		$ssh_dir = trim(shell_exec('grep ' . escapeshellarg($user_name) . " /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
+		$ssh_dir = trim(shell_exec('grep -w ' . escapeshellarg($user_name) . " /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
 		if ($ssh_dir && $ssh_dir != '/') {
 			createDir($ssh_dir, $user_name);
 			return $ssh_dir;
