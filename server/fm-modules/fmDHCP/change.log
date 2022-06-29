@@ -1,6 +1,7 @@
-0.5.1 (2022-??-??)
+0.6.0 (2021-??-??)
 ==================
 * Server - [bug] Fixed issue where leases were not displayed. (Issue #555)
+* Server - [improvement] Removed unused dashboard.
 
 0.5.0 (2021-09-14)
 ==================
