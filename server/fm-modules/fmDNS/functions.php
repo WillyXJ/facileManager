@@ -1272,7 +1272,7 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		$ptr_array['domain_mapping'] = 'reverse';
 		$ptr_array['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
 
-		$copy_fields = array('soa_id', 'domain_view', 'domain_type');
+		$copy_fields = array('soa_id', 'domain_view', 'domain_type', 'domain_template_id', 'domain_name_servers');
 		foreach ($copy_fields as $field) {
 			$ptr_array[$field] = $result[0]->$field;
 		}
