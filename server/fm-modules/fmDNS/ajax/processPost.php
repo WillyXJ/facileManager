@@ -102,6 +102,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
+			$object = __('domain group');
+			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups';
+			$prefix = 'group_';
 			break;
 		case 'logging':
 			$post_class = $fm_module_logging;
