@@ -724,6 +724,8 @@ class fm_dns_zones {
 	
 	function displayRow($row, $map, $server_reload_allowed) {
 		global $fmdb, $__FM_CONFIG;
+
+		$classes = array();
 		
 		/** Zones */
 		if ($map != 'groups') {
@@ -955,7 +957,7 @@ HTML;
 			}
 		}
 		
-		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $domain_name;
+		$domain_name = ($domain_name && function_exists('idn_to_utf8')) ? idn_to_utf8($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $domain_name;
 		
 		/** Process multiple views */
 		if (strpos($domain_view, ';')) {
@@ -1283,7 +1285,7 @@ HTML;
 		
 		$return = $limited_ids = null;
 		if (isset($user_capabilities)) {
-			$limited_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? 'AND domain_id IN (' . join(',', $this->getZoneAccessIDs($user_capabilities[$_SESSION['module']]['access_specific_zones'])) . ')' : null;
+			$limited_ids = (isset($user_capabilities[$_SESSION['module']]) && (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0])) ? 'AND domain_id IN (' . join(',', $this->getZoneAccessIDs($user_capabilities[$_SESSION['module']]['access_specific_zones'])) . ')' : null;
 		}
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', $limited_ids . ' AND domain_template="no" ORDER BY domain_name');
 		if ($fmdb->num_rows) {
@@ -1540,7 +1542,7 @@ HTML;
 		$start = 0;
 		$return = array();
 		
-		if ($extra == 'all' && !@in_array(0, $exclude)) {
+		if ($extra == 'all' && $exclude && !@in_array(0, $exclude)) {
 			$start = 1;
 			$return = array(array(__('All Zones'), 0));
 		}

@@ -1051,7 +1051,7 @@ FORM;
 	function getConfig($server_id, $config_opt = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$return = '';
 		
 		/** Get the data from $config_opt */
 		$query = "SELECT cfg_id,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND server_id='{$server_id}' AND cfg_type='global' AND cfg_name='$config_opt' ORDER BY cfg_id ASC";

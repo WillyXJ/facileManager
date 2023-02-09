@@ -1,3 +1,7 @@
+2.2.0 (2023-??-??)
+==================
+* Both - [improvement] Added PHP 8.2 support. (Issue #558)
+
 2.1.0 (2021-09-14)
 ==================
 * Server - [improvement] Server configs can now be previewed when a client upgrade is available.

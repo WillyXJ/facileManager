@@ -90,7 +90,7 @@ class fm_module_tools extends fm_shared_module_tools {
 					$soa_array['soa_append'] = 'yes';
 				} else $soa_array['soa_append'] = 'no';
 			}
-			$soa_array['soa_ttl'] = (count($raw_ttl)) ? trim(preg_replace('/;(.+?)+/', '', $raw_ttl[1])) : $tmp_neg_cache;
+			$soa_array['soa_ttl'] = (is_array($raw_ttl) && count($raw_ttl)) ? trim(preg_replace('/;(.+?)+/', '', $raw_ttl[1])) : $tmp_neg_cache;
 			
 			$soa_row = '<h4>SOA:</h4><p class="soa_import">';
 			

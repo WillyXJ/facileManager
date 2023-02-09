@@ -275,7 +275,7 @@ class fm_module_rpz {
 	/**
 	 * Deletes the selected rpz channel/category
 	 */
-	function delete($id, $server_serial_no = 0, $type) {
+	function delete($id, $server_serial_no, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');

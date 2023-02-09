@@ -237,6 +237,8 @@ class fm_dns_acls {
 
 	function displayRow($row) {
 		global $__FM_CONFIG;
+
+		$classes = array();
 		
 		if ($row->acl_status == 'disabled') $classes[] = 'disabled';
 		
@@ -291,7 +293,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$acl_id = $acl_parent_id = 0;
-		$acl_name = $acl_addresses = $acl_comment = null;
+		$acl_name = $acl_addresses = $acl_comment = '';
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && array_key_exists('add_form', $_POST)) {
@@ -301,7 +303,7 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
-		$acl_addresses = str_replace(',', "\n", rtrim(str_replace(' ', '', $acl_addresses), ';'));
+		$acl_addresses = str_replace(',', "\n", rtrim(str_replace(' ', '', (string) $acl_addresses), ';'));
 
 		/** Get field length */
 		$acl_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
@@ -496,7 +498,7 @@ HTML;
 			$temp_acls[] = $temp_acl_array['id'];
 		}
 		$i = count($available_acls);
-		foreach (explode(',', $saved_acls) as $saved_acl) {
+		foreach (explode(',', (string) $saved_acls) as $saved_acl) {
 			if (!$saved_acl) continue;
 			if (array_search($saved_acl, $temp_acls) === false) {
 				$available_acls[$i]['id'] = $saved_acl;

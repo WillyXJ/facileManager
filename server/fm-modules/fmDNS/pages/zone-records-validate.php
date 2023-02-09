@@ -137,7 +137,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 		unset($value['soa_template_chosen']);
 	}
 	foreach ($value as $id => $array) {
-		if (count($input_error[$id]['errors'])) {
+		if (isset($input_error[$id]['errors']) && count($input_error[$id]['errors'])) {
 			$img = $__FM_CONFIG['icons']['fail'];
 			$action = __('None');
 		} else {
@@ -265,7 +265,7 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 				}
 			}
 			
-			if (!count($messages['errors'])) {
+			if (!isset($messages['errors']) || !count($messages['errors'])) {
 				$html .= buildInputReturn($action, $id, $key, $val);
 			} else $html = null;
 		}
@@ -320,7 +320,7 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 				}
 			}
 			
-			if (!count($messages['errors'])) {
+			if (!isset($messages['errors']) || !count($messages['errors'])) {
 				$html .= buildInputReturn($action, $id, $key, $val);
 			} else $html = null;
 		}

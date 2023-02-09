@@ -435,6 +435,8 @@ HTML;
 		global $__FM_CONFIG;
 		
 		@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $flag_bits);
+		$tcp_flag_mask = (int) $tcp_flag_mask;
+		$tcp_flag_settings = (int) $tcp_flag_settings;
 		$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
 		$service_tcp_flags['mask'] = $service_tcp_flags['settings'] = null;
 		

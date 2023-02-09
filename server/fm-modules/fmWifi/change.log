@@ -1,3 +1,7 @@
+0.4.0 (2023-??-??)
+==================
+* Both - [improvement] Added PHP 8.2 support. (Issue #558)
+
 0.3.1 (2020-11-27)
 ==================
 * Server - [bug] Fixed PHP errors.

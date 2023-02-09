@@ -1,3 +1,7 @@
+0.7.0 (2023-??-??)
+==================
+* Both - [improvement] Added PHP 8.2 support. (Issue #558)
+
 0.6.0 (2022-06-29)
 ==================
 * Server - [improvement] Removed unused dashboard.

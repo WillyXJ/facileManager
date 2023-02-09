@@ -48,7 +48,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['negated']				= sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exclamation-circle block" aria-hidden="true"></i></a>', __('Negated'));
 }
 
-$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge((array) $__FM_CONFIG['module']['icons'], (array) $__FM_CONFIG['icons']);
 
 /** TCP Flags */
 $__FM_CONFIG['tcp_flags']				= array('URG' => 1, 'ACK' => 2, 'PSH' => 4,
@@ -124,6 +124,6 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmFire
 											'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'policies'=>'policy', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'servers'=>'server',
 											'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'services'=>'service', 'fm_' . $__FM_CONFIG['fmFirewall']['prefix'] . 'time'=>'time'
 											);
-$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge((array) $__FM_CONFIG['clean']['prefixes'], (array) $__FM_CONFIG['module']['clean']['prefixes']);
 
 ?>

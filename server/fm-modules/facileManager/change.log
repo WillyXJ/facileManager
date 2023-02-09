@@ -1,3 +1,7 @@
+4.4.0 (2023-??-??)
+==================
+* Both - [improvement] Added PHP 8.2 support. (Issue #558)
+
 4.3.0 (2022-06-29)
 ==================
 * Server - [improvement] Local auth now works even when LDAP auth is enabled. (Issue #546)

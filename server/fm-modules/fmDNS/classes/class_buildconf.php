@@ -727,7 +727,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$data = $fmdb->last_result[0];
 				extract(get_object_vars($data), EXTR_SKIP);
 			}
-			
+			/** Ensure $data is an object */
+			if (!is_object($data)) {
+				$data = (object)[];
+			}
+
 			if ($server_type == 'url-only') {
 				$_POST['action'] = 'buildconf';
 				return $this->buildServerConfig($_POST);

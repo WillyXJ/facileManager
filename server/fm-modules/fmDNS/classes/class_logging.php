@@ -418,7 +418,7 @@ class fm_module_logging {
 	/**
 	 * Deletes the selected logging channel/category
 	 */
-	function delete($id, $server_serial_no = 0, $type) {
+	function delete($id, $server_serial_no, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Check if channel is currently associated with category */
@@ -660,6 +660,8 @@ FORM;
 	function availableCategories($cfg_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$previously_used = array();
+		
 		/** Get previously used categories */
 		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_isparent='yes' AND cfg_name='category' AND cfg_type='logging' ORDER BY cfg_name,cfg_data ASC";
 		$result = $fmdb->get_results($query);
@@ -750,7 +752,7 @@ FORM;
 	function getChannel($cfg_id, $channel_opt = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$return = '';
 		
 		/** Determine what type of channel destination is used */
 		if (!$channel_opt) {

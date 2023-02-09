@@ -391,7 +391,8 @@ HTML;
 	function availableOptions($action, $server_serial_no, $option_type = 'global', $config_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$temp_array = $return = null;
+		$temp_array = array();
+		$return = null;
 		
 		if ($action == 'add') {
 //			if (isset($_POST['view_id'])) {

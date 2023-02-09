@@ -311,8 +311,10 @@ class fm_wifi_wlans {
 		/** Reassigned children */
 		$query = "$sql_start config_parent_id=0 WHERE config_parent_id={$post['config_id']} AND config_is_parent='yes'";
 		$result = $fmdb->query($query);
-		$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
-		$result = $fmdb->query($query);
+		if (is_array($post['config_children'])) {
+			$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
+			$result = $fmdb->query($query);
+		}
 
 		/** Server changed so configuration needs to be built */
 		setBuildUpdateConfigFlag(getWLANServers($item_id), 'yes', 'build');
@@ -683,7 +685,7 @@ HTML;
 	function getConfig($config_id, $config_opt = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$return = '';
 		
 		/** Get the data from $config_opt */
 		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND config_parent_id='{$config_id}' AND config_name='$config_opt' ORDER BY config_id ASC";

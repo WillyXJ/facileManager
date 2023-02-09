@@ -1069,14 +1069,14 @@ function buildSQLRecords($record_type, $domain_id) {
 			`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
 			`soa_template`='no' AND `soa_status`='active'";
 		$result = $fmdb->get_results($soa_query);
-		if (!$fmdb->num_rows) return null;
+		if (!$fmdb->num_rows) return array();
 		
 		foreach (get_object_vars($result[0]) as $key => $val) {
 			$sql_results[$result[0]->soa_id][$key] = $val;
 		}
 		array_shift($sql_results[$result[0]->soa_id]);
 		array_shift($sql_results[$result[0]->soa_id]);
-		return $sql_results;
+		return (array) $sql_results;
 	} else {
 		$valid_domain_ids = 'IN (' . join(',', getZoneParentID($domain_id)) . ')';
 		
@@ -1114,7 +1114,7 @@ function buildSQLRecords($record_type, $domain_id) {
 				$sql_results[$results[$i]->record_id]['record_skipped'] = ($fmdb->num_rows) ? 'on' : 'off';
 			}
 		}
-		return $sql_results;
+		return (array) $sql_results;
 	}
 }
 
