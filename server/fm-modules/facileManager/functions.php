@@ -3313,7 +3313,7 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 	global $fm_name;
 	
 	/** Check if super admin */
-	if (@array_key_exists('do_everything', $allowed_capabilities[$fm_name])) return true;
+	if (@array_key_exists('do_everything', (array) $allowed_capabilities[$fm_name])) return true;
 		
 	/** Handle multiple capabilities */
 	if (is_array($capability)) {
@@ -3328,7 +3328,7 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 	}
 	
 	/** Check capability */
-	if (@array_key_exists($capability, $allowed_capabilities[$module])) {
+	if (@array_key_exists($capability, (array) $allowed_capabilities[$module])) {
 		if (is_array($allowed_capabilities[$module][$capability])) {
 			/** Explode module groups */
 			foreach ($allowed_capabilities[$module][$capability] as $cap_id) {
