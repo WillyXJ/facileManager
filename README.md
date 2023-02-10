@@ -27,7 +27,7 @@ Prerequisites
 
 facileManager (server) requires the following:
 
-* PHP 5.5.0 or later with MySQL support
+* PHP 5.5.0 - 7.4 with MySQL support
 * MySQL 5.0 or later
   * Required MySQL user privileges on the database include
 
@@ -40,7 +40,7 @@ facileManager (server) requires the following:
 fM client requires the following:
 
 * ISC BIND 9.3 or later (for the fmDNS module only)
-* PHP 5.0 or later
+* PHP 5.0 - 7.4
 * A running web server if using http(s) update methods
   * The install script supports the following web servers:
     * httpd
