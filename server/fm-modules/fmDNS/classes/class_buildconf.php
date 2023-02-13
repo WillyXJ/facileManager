@@ -317,7 +317,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Merge arrays */
 			$master_array = array_merge($global_master_array, $server_master_array);
 
-			/** Format ACL config */
+			/** Format Masters config */
 			foreach ($master_array as $master_name => $master_data) {
 				list($master_item, $master_ports, $master_comment) = $master_data;
 				if ($master_comment) {

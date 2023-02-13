@@ -233,16 +233,7 @@ class fm_dns_records {
 	/**
 	 * Displays the form to add new record
 	 */
-	function printRecordsForm($data = '', $action = 'create', $record_type, $domain_id) {
-		$ucf_action = ucfirst($action);
-		
-		if (!empty($_POST)) {
-			if (is_array($_POST))
-				extract($_POST);
-		} elseif (@is_object($data[0])) {
-			extract(get_object_vars($data[0]));
-		}
-		
+	function printRecordsForm($record_type, $domain_id) {
 		$table_info = array('class' => 'display_results');
 
 		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');

@@ -657,8 +657,10 @@ class fm_dns_zones {
 			
 			/** Force buildconf for all built DNS servers if zone has been built */
 			$fmdb->query("SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds WHERE domain_id=" . sanitize($domain_id));
-			foreach ((array) $fmdb->last_result as $tmp_build_array) {
-				$tmp_built_dns_servers[] = $tmp_build_array->server_serial_no;
+			if ($fmdb->num_rows) {
+				foreach ($fmdb->last_result as $tmp_build_array) {
+					$tmp_built_dns_servers[] = $tmp_build_array->server_serial_no;
+				}
 			}
 			if (is_array($tmp_built_dns_servers)) {
 				setBuildUpdateConfigFlag(implode(',', $tmp_built_dns_servers), 'yes', 'build');
