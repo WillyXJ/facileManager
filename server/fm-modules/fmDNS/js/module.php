@@ -201,7 +201,7 @@ $(document).ready(function() {
 	/* Zone subelement deletes */
 	$("#table_edits").delegate("i.subelement_remove", "click tap", function(e) {
 		var $this 		= $(this);
-		var $subelement		= $this.parent().attr("class");
+		var $subelement		= $this.parent().parent().attr("class");
 		item_type		= $("#table_edits").attr("name");
 		item_id			= $this.attr("id");
 
