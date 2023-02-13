@@ -262,7 +262,7 @@ class fm_login {
 		if ($auth_method) {
 			/** Use Builtin Auth when Default Auth Method is LDAP but user is defined with 'facileManager/Builtin' */
 			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_login` = '$user_login' and `user_auth_type`=1 and `user_status`='active'");
-			if ($fmdb->last_result[0]->user_login == $user_login) {
+			if (is_array($fmdb->last_result) && $fmdb->last_result[0]->user_login == $user_login) {
 				$auth_method = 1;
 			}
 
@@ -560,7 +560,7 @@ This link expires in %s.',
 			if ($ldap_bind) {
 				if ($ldap_group_require) {
 					if (strpos($ldap_dn, '@') !== false) {
-						if (isset($ldap_group_search_dn)) {
+						if (isset($ldap_group_search_dn) && !empty($ldap_group_search_dn)) {
 							$ldap_dn = $ldap_group_search_dn;
 						} else {
 							/** Convert AD ldap_dn to real ldap_dn */
