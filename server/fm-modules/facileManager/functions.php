@@ -2459,7 +2459,7 @@ function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
  * @return array
  */
 function makePlainText($text, $make_array = false) {
-	$text = strip_tags($text);
+	$text = strip_tags((string) $text);
 	$text = trim($text);
 	
 	if ($make_array == true) return explode("\n", $text);

@@ -296,7 +296,8 @@ class fm_shared_module_servers {
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
-		$options[] = $response = null;
+		$options[] = null;
+		$response = '';
 		
 		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 		
