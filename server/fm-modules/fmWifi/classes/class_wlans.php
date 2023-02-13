@@ -368,7 +368,7 @@ class fm_wifi_wlans {
 		
 		$edit_status = $edit_actions = $checkbox = $icons = null;
 		
-		if (currentUserCan('manage_hosts', $_SESSION['module'])) {
+		if (currentUserCan('manage_wlans', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';

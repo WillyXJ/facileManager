@@ -21,7 +21,7 @@
 */
 
 /** Ensure user can use this page */
-$required_permission[] = 'manage_wlan_wlan_users';
+$required_permission[] = 'manage_wlan_users';
 if (!currentUserCan(array_merge($required_permission, array('view_all')), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_wlan_users.php');
