@@ -56,7 +56,7 @@ class fm_module_tools extends fm_shared_module_tools {
 		/** Handle unsupported message */
 		if ($generate_count || $origin_count) {
 			$unsupported[] = sprintf('<h4>%s:</h4>', __('Unsupported Entries'));
-			$unsupported[] = '<p class="soa_import">' . sprintf(__('%s currently does not support importing $GENERATE and $ORIGIN entries which were found in your zone file.'), $fm_name) . '</p>';
+			$unsupported[] = '<p class="soa_import">' . sprintf(__('%s currently does not support importing $GENERATE and $ORIGIN entries which were found in your zone file.'), $_SESSION['module']) . '</p>';
 			$unsupported = implode("\n", $unsupported);
 		} else $unsupported = null;
 		
