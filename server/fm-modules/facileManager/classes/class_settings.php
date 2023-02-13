@@ -439,6 +439,7 @@ class fm_settings {
 								<p>' . _('Distinguished Name syntax.') . '</p>
 								<p><i>OpenLDAP</i> - uid=&lt;username&gt;,ou=people,dc=domain,dc=local<br />
 								<i>Windows</i> - &lt;username&gt;@domain.local</p>
+								<p><i>&lt;username&gt;</i> will be automatically replaced with the username entered at the login page.</p>
 							</div>
 							<div class="choices">
 								<input name="ldap_dn" id="ldap_dn" type="text" value="' . $ldap_dn . '" size="40" placeholder="uid=&lt;username&gt;,ou=people,dc=domain,dc=local" />
