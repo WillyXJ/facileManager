@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed the ability to enable/disable zone groups.
 * Server - [bug] Fixed removal of cloned zones and ACL elements.
+* Server - [bug] View reordering bars no longer show with one view.
 * Both - [improvement] Added PHP 8.2 support. (Issue #558)
 
 5.2.1 (2022-06-29)
