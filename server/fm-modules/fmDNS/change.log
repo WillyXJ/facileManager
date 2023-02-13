@@ -1,6 +1,8 @@
 5.3.0 (2023-??-??)
 ==================
 * Both - [improvement] Added PHP 8.2 support. (Issue #558)
+* Server - [improvement] Deleting an incomplete zone that was never built no longer triggers
+           config builds.
 * Server - [bug] Fixed the ability to enable/disable zone groups.
 * Server - [bug] Fixed removal of cloned zones and ACL elements.
 * Server - [bug] View reordering bars no longer show with one view.

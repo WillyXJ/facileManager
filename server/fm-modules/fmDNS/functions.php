@@ -553,13 +553,17 @@ function buildFullIPAddress($partial_ip, $domain) {
  * @param id $domain_id Domain ID to check
  * @return boolean
  */
-function reloadAllowed($domain_id = null) {
+function reloadAllowed($domain_id = null, $server_serial_no = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'active', 'server_', 'server_status');
 	if ($fmdb->num_rows) {
 		if ($domain_id) {
-			$query = 'SELECT domain_id FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id . ' LIMIT 1';
+			$query = 'SELECT domain_id FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id;
+			if ($server_serial_no) {
+				$query .= ' AND server_serial_no=' . $server_serial_no;
+			}
+			$query .= ' LIMIT 1';
 			$result = $fmdb->get_results($query);
 			$reload_allowed = ($fmdb->num_rows) ? true : false;
 		} else $reload_allowed = true;
@@ -666,7 +670,6 @@ function getZoneServers($domain_id, $server_types = array('masters')) {
 	$serial_no = null;
 	
 	if ($domain_id) {
-		/** Force buildconf for all associated DNS servers */
 		if ($domain_template_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
 			$domain_id = $domain_template_id;
 		}

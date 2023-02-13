@@ -655,13 +655,19 @@ class fm_dns_zones {
 				}
 			}
 			
+			/** Force buildconf for all built DNS servers if zone has been built */
+			$fmdb->query("SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds WHERE domain_id=" . sanitize($domain_id));
+			foreach ((array) $fmdb->last_result as $tmp_build_array) {
+				$tmp_built_dns_servers[] = $tmp_build_array->server_serial_no;
+			}
+			if (is_array($tmp_built_dns_servers)) {
+				setBuildUpdateConfigFlag(implode(',', $tmp_built_dns_servers), 'yes', 'build');
+			}
+			
 			/** Delete associated records from fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds */
 			if (basicDelete('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'track_builds', $domain_id, 'domain_id', false) === false) {
 				return formatError(sprintf(__('The zone could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'track_builds'));
 			}
-			
-			/** Force buildconf for all associated DNS servers */
-			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 			
 			/** Delete cloned zones */
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
