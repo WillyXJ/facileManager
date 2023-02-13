@@ -33,12 +33,12 @@ class fm_wifi_wlan_users {
 	 * @return null
 	 */
 	function rows($result, $page, $total_pages, $type = 'wlan_users') {
-		global $fmdb;
+		global $fmdb, $required_permission;
 		
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		
-		if (currentUserCan('manage_' . $type, $_SESSION['module'])) {
+		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
 		}
 
@@ -202,13 +202,13 @@ class fm_wifi_wlan_users {
 	 * @return null
 	 */
 	function displayRow($row) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $required_permission;
 		
 		$class = ($row->wlan_user_status == 'disabled') ? 'disabled' : null;
 		
 		$edit_status = $edit_actions = $checkbox = null;
 		
-		if (currentUserCan('manage_hosts', $_SESSION['module'])) {
+		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->wlan_user_status == 'active') ? 'disabled' : 'active';
@@ -312,7 +312,7 @@ HTML;
 			});
 		</script>',
 				$popup_header,
-				$fm_users->printUsersForm($data, $action, array('user_login', 'user_password' => $GLOBALS['PWD_STRENGTH']), 'wlan_users', null, null, null, false, 'embed'),
+				$fm_users->printUsersForm($data, $action, array('editable'=>'user_login', 'user_password' => $GLOBALS['PWD_STRENGTH']), 'wlan_users', null, null, null, false, 'embed'),
 				__('MAC Address'), $wlan_user_mac,
 				__('Associated WLANs'), $assoc_wlans,
 				_('Comment'), $wlan_user_comment,
@@ -341,7 +341,7 @@ HTML;
 		$post['wlan_user_comment'] = sanitize($post['wlan_user_comment']);
 		$post['wlan_ids'] = (in_array('0', $post['wlan_ids'])) ? 0 : join(';', $post['wlan_ids']);
 
-		if (empty($post['wlan_user_login'])) return __('No username is defined.');
+		if ($post['action'] == 'add' && empty($post['wlan_user_login'])) return __('No username is defined.');
 		if ($post['action'] == 'add' && empty($post['wlan_user_password'])) return __('No password is defined.');
 		if ($post['user_password'] != $post['cpassword']) return _('Passwords do not match.');
 		if (empty($post['wlan_user_password'])) unset($post['wlan_user_password']);
