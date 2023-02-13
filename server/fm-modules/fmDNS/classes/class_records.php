@@ -744,7 +744,7 @@ HTML;
 	function getSkippedRecordIDs($domain_id) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$skipped_records = null;
+		$skipped_records = array();
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped', $domain_id, 'record_', 'domain_id');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
