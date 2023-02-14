@@ -320,9 +320,16 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
-		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
+		$tmp_key = _('None');
+		if ($post['keys']) {
+			$tmp_key = array();
+			foreach (explode(',', $post['keys']) as $key_id) {
+				$tmp_key[] = getNameFromID(str_replace('key_', '', $key_id), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
+			}
+			$tmp_key = join(',', $tmp_key);
+		}
 		$tmp_runas = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : $post['server_run_as_predefined'];
-		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nKey: {$tmp_key}\nType: {$post['server_type']}\n" .
+		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nKeys: {$tmp_key}\nType: {$post['server_type']}\n" .
 					"Run-as: {$tmp_runas}\nUpdate Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}\n" .
 					"Server Root: {$post['server_root_dir']}\nServer Chroot: {$post['server_chroot_dir']}\n" .
 					"Zone file directory: {$post['server_zones_dir']}");
