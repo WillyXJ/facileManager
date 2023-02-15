@@ -30,9 +30,9 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
-	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : null;
+	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : '';
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
-	$query = "SELECT def_option,def_type,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
+	$query = "SELECT def_option,def_type,def_multiple_values,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	$result = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		if (strpos($result[0]->def_type, 'address_match_element') !== false) {
@@ -144,6 +144,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					</script>', __('Option Value'), sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_port, sprintf(__('This option requires BIND %s or later.'), '9.9'), $cfg_data_dscp, $cfg_data, $result[0]->def_type, $available_masters);
 		} elseif (strpos($result[0]->def_type, 'key_id') !== false) {
 			$available_items = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no, 'tsig-keys');
+			$multiple = ($result[0]->def_multiple_values == 'yes') ? 'true' : 'false';
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
@@ -156,12 +157,12 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 							}).length===0) 
 							{return {id:term, text:term};} 
 						},
-						multiple: true,
+						multiple: %s,
 						width: "200px",
 						tokenSeparators: [",", " ", ";"],
 						data: %s
 					});
-					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_items);
+					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $multiple, $available_items);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			$checkbox = null;
 			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST)) {

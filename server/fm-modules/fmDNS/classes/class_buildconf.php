@@ -89,7 +89,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_name`='directory'";
 			$config_dir_result = $fmdb->get_results($query);
-			$logging = $keys = $servers = null;
+			$logging = $keys = $servers = '';
 			
 
 			/** Build keys config */
@@ -825,7 +825,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	function buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir = null, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_servers;
 		
-		$error = null;
+		$error = '';
 		
 		include(ABSPATH . 'fm-includes/version.php');
 		
@@ -833,7 +833,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 		$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 		
-		$files = null;
+		$files = array();
 		$zones = '// This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 		$server_id = getServerID($server_serial_no, $_SESSION['module']);
 		
@@ -848,7 +848,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 
 		/** Build zones */
-		$group_sql = null;
+		$group_sql = '';
 		if ($server_group_ids = $fm_module_servers->getServerGroupIDs($server_id)) {
 			foreach ($server_group_ids as $group_id) {
 				$group_sql .= " OR (`domain_name_servers`='0' OR `domain_name_servers`='g_{$group_id}' OR `domain_name_servers` LIKE 'g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id};%' OR `domain_name_servers` LIKE '%;g_{$group_id}')";
@@ -907,7 +907,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
 					$zones .= 'zone "' . trimFullStop($domain_name) . "\" {\n";
 					$zones .= "\ttype $domain_type;\n";
-					$default_file_ext = $file_ext = null;
+					$default_file_ext = $file_ext = '';
 					
 					/** Are there multiple zones with the same name? */
 					if (isset($zone_result[$i]->parent_domain_id)) {
@@ -930,7 +930,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zone_data_dir = ($server_slave_zones_dir && $domain_type == 'slave') ? $server_slave_zones_dir : $server_zones_dir;
 							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
 							$zones .= "\tfile \"$zone_data_dir/$domain_type/$domain_name_file\";\n";
-							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
+							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
 							$files[$zone_data_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
@@ -943,7 +943,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type, $server_group_ids). (string) $auto_zone_options;
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
 					}
 					$zones .= "};\n";
 
@@ -2058,18 +2058,18 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		extract(get_object_vars($zone_array), EXTR_OVERWRITE);
-		
+
 		$domain_name_servers = explode(';', $domain_name_servers);
 		if (!count($domain_name_servers) || in_array('0', $domain_name_servers) || 
 				$domain_type != 'master' || in_array('s_' . $server_id, $domain_name_servers)) {
-			return array($domain_type, null);
+			return array($domain_type, '');
 		}
 		
 		foreach ($domain_name_servers as $ids) {
 			if ($ids == '0' || strpos($ids, 's_') !== false) continue;
 			
 			if (strpos($ids, 'g_') !== false) {
-				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', preg_replace('/\D/', null, $ids), 'group_', 'group_id');
+				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', preg_replace('/\D/', '', $ids), 'group_', 'group_id');
 				if ($fmdb->num_rows) {
 					extract(get_object_vars($fmdb->last_result[0]));
 					
@@ -2077,7 +2077,7 @@ HTML;
 					$group_slaves = explode(';', $group_slaves);
 					
 					if (in_array($server_id, $group_masters)) {
-						return array($domain_type, null);
+						return array($domain_type, '');
 					}
 					
 					if (in_array($server_id, $group_slaves)) {
@@ -2087,7 +2087,7 @@ HTML;
 			}
 		}
 		
-		return array($domain_type, null);
+		return array($domain_type, '');
 	}
 	
 	/**

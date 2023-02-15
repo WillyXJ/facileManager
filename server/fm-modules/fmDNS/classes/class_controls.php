@@ -224,7 +224,8 @@ HTML;
 		
 		$control_id = 0;
 		$control_ip = $control_addresses = $control_comment = null;
-		$control_port = $control_keys = null;
+		$control_port = null;
+		$control_keys = '';
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -236,7 +237,7 @@ HTML;
 		
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', (string) $control_addresses), ';'));
 		if ($type == 'controls') {
-			$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty', 'AND key_type="tsig"'), explode(';', (string) $control_keys), 1, null, true, null, null, __('Select one or more keys'));
+			$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty', 'AND key_type="tsig"'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
 			$control_key_form = sprintf('<tr>
 					<th width="33&#37;" scope="row"><label for="control_keys">%s</label></th>
 					<td width="67&#37;">%s</td>

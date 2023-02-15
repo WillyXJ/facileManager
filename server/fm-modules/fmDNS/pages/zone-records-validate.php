@@ -96,6 +96,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	global $__FM_CONFIG;
 	
 	$html = null;
+	$value = array();
 	
 	extract($domain_info, EXTR_PREFIX_ALL, 'domain');
 	

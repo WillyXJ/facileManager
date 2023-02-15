@@ -237,7 +237,6 @@ HTML;
 		
 		$master_id = $parent_id = $master_key_id = 0;
 		$master_name = $master_addresses = $master_comment = $master_port = $master_dscp = null;
-		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && array_key_exists('add_form', $_POST)) {

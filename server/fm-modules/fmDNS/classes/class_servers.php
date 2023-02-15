@@ -261,7 +261,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	function updateServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$rows_affected = 0;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -298,7 +298,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
 		}
 
-		$return[] = (!$fmdb->rows_affected) ? true : false;
+		$rows_affected += $fmdb->rows_affected;
 		
 		/** Process config options */
 		$sql_insert = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET ";
@@ -312,11 +312,11 @@ class fm_module_servers extends fm_shared_module_servers {
 				return formatError(__('Could not update the server options because a database error occurred.'), 'sql');
 			}
 			
-			$return[] = (!$fmdb->rows_affected) ? true : false;
+			$rows_affected += $fmdb->rows_affected;
 		}
 		
 		/** Return if there are no changes */
-		if (!$fmdb->rows_affected && array_search(false, $return) === false) return true;
+		if (!$rows_affected) return true;
 
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
