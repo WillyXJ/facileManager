@@ -25,13 +25,13 @@ class fm_module_options {
 	/**
 	 * Displays the option list
 	 */
-	function rows($result, $page, $total_pages) {
+	function rows($result, $page, $total_pages, $required_permission) {
 		global $fmdb;
 		
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
 		}
 
@@ -53,7 +53,7 @@ class fm_module_options {
 		$title_array[] = array('title' => __('Option'), 'rel' => 'config_name');
 		$title_array[] = array('title' => __('Value'), 'rel' => 'config_data');
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
-		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		if (currentUserCan($required_permission, $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 		echo displayTableHeader($table_info, $title_array);
 
@@ -219,15 +219,11 @@ class fm_module_options {
 
 
 	function displayRow($row) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
-		
-		if (!class_exists('fm_dns_acls')) {
-			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		}
+		global $fmdb, $__FM_CONFIG, $required_permission;
 		
 		$disabled_class = ($row->config_status == 'disabled') ? ' class="disabled"' : null;
 		
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -392,7 +388,7 @@ HTML;
 	function availableOptions($action, $server_serial_no, $option_type = 'global', $config_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$temp_array = $return = null;
+		$temp_array = $return = array();
 		
 		if ($action == 'add') {
 //			if (isset($_POST['view_id'])) {
@@ -449,10 +445,9 @@ HTML;
 					$j++;
 				}
 			}
-			return $return;
 		}
 		
-		return;
+		return $return;
 	}
 	
 	
