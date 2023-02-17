@@ -361,7 +361,7 @@ class fm_users {
 		
 		/* Associated users with group */
 		$queries[] = "UPDATE `fm_users` SET `user_group`='0', `user_caps`=NULL WHERE `user_group`='{$post['group_id']}'";
-		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $post['group_users']) . "')";
+		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", (array) $post['group_users']) . "')";
 		foreach ($queries as $query) {
 			$fmdb->query($query);
 			if ($fmdb->sql_errors) {

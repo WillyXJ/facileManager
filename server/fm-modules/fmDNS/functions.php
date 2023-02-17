@@ -1179,7 +1179,7 @@ function getDNSSECExpiration($data, $type = 'calculated') {
 function moduleExplodeGroup($group_id, $capability) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$return = false;
+	$return = array();
 	
 	if ($capability == 'access_specific_zones') {
 		$group_id = substr($group_id, 2);
