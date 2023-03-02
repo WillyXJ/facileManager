@@ -471,18 +471,18 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 		
 		/** IPv4 checks */
 		if (strpos($ip_address, ':') === false) {
-			/** Valid CIDR? */
-			if ($cidr && !checkCIDR($cidr, 32)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
-			
 			/** Create full IP */
 			$ip_octets = explode('.', $ip_address);
 			if (count($ip_octets) < 4) {
 				$ip_octets = array_merge($ip_octets, array_fill(count($ip_octets), 4 - count($ip_octets), 0));
 			}
 			$ip_address = implode('.', $ip_octets);
+
+			/** Valid CIDR? */
+			if ($cidr && !checkCIDR($ip_address, $cidr, 32)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
 		} else {
 			/** IPv6 checks */
-			if ($cidr && !checkCIDR($cidr, 128)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
+			if ($cidr && !checkCIDR($ip_address, $cidr, 128)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
 		}
 		
 		if (verifyIPAddress($ip_address) === false) return sprintf(__('%s is not valid.'), $ip_address);
@@ -953,12 +953,22 @@ function getConfigAssoc($id, $type) {
  * @since 2.1
  * @package fmDNS
  *
- * @param string $cidr CIDR to check
+ * @param string $ip IP address
+ * @param string $prefix CIDR to check
  * @param integer $max_bits Maximum valid bits
  * @return boolean
  */
-function checkCIDR($cidr, $max_bits) {
-	return verifyNumber($cidr, 0, $max_bits);
+function checkCIDR($ip, $prefix, $max_bits) {
+	$netmask = verifyNumber($prefix, 0, $max_bits);
+
+	if (!$netmask) return $netmask;
+
+	/* Check if the ip is the network id 
+	 * Used from https://stackoverflow.com/questions/4931721/getting-list-ips-from-cidr-notation-in-php
+	*/
+	if ($ip != long2ip((ip2long($ip)) & ((-1 << (32 - (int)$prefix))))) return false;
+
+	return true;
 }
 
 

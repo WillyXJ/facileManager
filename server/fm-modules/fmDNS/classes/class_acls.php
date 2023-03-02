@@ -105,7 +105,7 @@ class fm_dns_acls {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
 		/** Cleans up acl_addresses for future parsing **/
-		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'acl_') && strpos($post['acl_addresses'], 'key_') === false) {
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'acl_') === false && strpos($post['acl_addresses'], 'key_') === false) {
 			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
 			if ($ip_check != $post['acl_addresses']) return $ip_check;
 		}
@@ -162,7 +162,7 @@ class fm_dns_acls {
 		}
 		
 		/** Cleans up acl_addresses for future parsing **/
-		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'key_') === false) {
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'acl_') === false && strpos($post['acl_addresses'], 'key_') === false) {
 			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
 			if ($ip_check != $post['acl_addresses']) return $ip_check;
 		}
