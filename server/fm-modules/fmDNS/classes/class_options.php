@@ -709,10 +709,12 @@ HTML;
 	 * @return string Return formated data
 	 */
 	function populateDefTypeDropdown($def_type, $cfg_data, $select_name = 'cfg_data', $options = null) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
-		
 		$raw_def_type_array = explode(')', str_replace('(', '', $def_type));
-		$saved_data = explode(' ', (string) $cfg_data);
+		if ($cfg_data) {
+			$saved_data = explode(' ', (string) $cfg_data);
+		} else {
+			$saved_data = array('', '');
+		}
 		$i = 0;
 		$dropdown = null;
 		foreach ($raw_def_type_array as $raw_def_type) {

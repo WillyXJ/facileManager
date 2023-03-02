@@ -33,6 +33,13 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : '';
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
 	$query = "SELECT def_option,def_type,def_multiple_values,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
+	if (array_key_exists('domain_id', $_POST)) {
+		$query .= " AND def_clause_support LIKE '%Z%'";
+	} elseif (array_key_exists('view_id', $_POST)) {
+		$query .= " AND def_clause_support LIKE '%V%'";
+	} else {
+		$query .= " AND def_clause_support LIKE '%O%'";
+	}
 	$result = $fmdb->get_results($query);
 	if ($fmdb->num_rows) {
 		if (strpos($result[0]->def_type, 'address_match_element') !== false) {
