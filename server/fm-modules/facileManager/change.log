@@ -3,6 +3,7 @@
 * Server - [security] Updated to jQuery-UI v1.13.2. (Issue #561)
 * Both   - [improvement] Added PHP 8.2 support. (Issue #558)
 * Server - [improvement] Additional description of LDAP DN parameters. (Issue #563)
+* Server - [improvement] Added additional spacing between delete and other action buttons.
 * Server - [bug] Fixed AD authentication when not specifying a Search Start DN. (Issue #565)
 
 4.3.0 (2022-06-29)
