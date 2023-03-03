@@ -2491,4 +2491,35 @@ function upgradefmDNS_520($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 5.3.0 */
+function upgradefmDNS_530($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '5.2.0', '<') ? upgradefmDNS_520($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( warn | fail | ignore )' WHERE `def_option` = 'check-names' AND `def_clause_support`='Z'";
+
+	/** Fix any incorrect check-names configs */
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_name`='check-names' AND `domain_id`!=0";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $result) {
+			$check_names = explode(' ', $result->cfg_data);
+			$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data`='" . $check_names[count($check_names)-1] . "' WHERE `cfg_id`=" . $result->cfg_id;
+		}
+	}
+
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '5.3.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
 ?>
