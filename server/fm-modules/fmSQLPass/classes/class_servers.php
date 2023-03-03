@@ -42,7 +42,8 @@ class fm_module_servers extends fm_shared_module_servers {
 			$table_info = array(
 							'class' => 'display_results',
 							'id' => 'table_edits',
-							'name' => 'servers'
+							'name' => 'servers',
+							'rel' => 'no-build'
 						);
 
 			$title_array = array(__('Hostname'), __('Type'), __('Groups'));
