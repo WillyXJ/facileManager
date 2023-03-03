@@ -1,6 +1,7 @@
 2.2.0 (2023-??-??)
 ==================
-* Both - [improvement] Added PHP 8.2 support. (Issue #558)
+* Both   - [improvement] Added PHP 8.2 support. (Issue #558)
+* Server - [bug] Object groups can no longer contain themselves.
 
 2.1.0 (2021-09-14)
 ==================

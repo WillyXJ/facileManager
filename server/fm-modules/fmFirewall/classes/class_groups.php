@@ -260,7 +260,7 @@ HTML;
 		$group_items_assigned = getGroupItems($group_items);
 
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name');
-		$group_items = buildSelect('group_items', 'group_items', availableGroupItems($group_type, 'available'), $group_items_assigned, 1, null, true, null, null, 'Select one or more ' . $group_type . 's');
+		$group_items = buildSelect('group_items', 'group_items', availableGroupItems($group_type, 'available', null, $group_id), $group_items_assigned, 1, null, true, null, null, 'Select one or more ' . $group_type . 's');
 		
 		$popup_title = $action == 'add' ? __('Add Group') : __('Edit Group');
 		$popup_header = buildPopup('header', $popup_title);
