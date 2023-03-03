@@ -2,6 +2,7 @@
 ==================
 * Both   - [improvement] Added PHP 8.2 support. (Issue #558)
 * Server - [bug] Object groups can no longer contain themselves.
+* Server - [bug] Grab bars no longer show when there is only one item.
 
 2.1.0 (2021-09-14)
 ==================

@@ -53,7 +53,7 @@ class fm_module_policies {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-			$title_array[] = array('class' => 'header-tiny');
+			if ($num_rows > 1) $title_array[] = array('class' => 'header-tiny');
 		}
 		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Location'), __('Source'), __('Destination'), __('Service'), __('Interface'),
 								__('Direction'), __('Time'), array('title' => _('Comment'), 'style' => 'width: 20%;')));
@@ -75,7 +75,7 @@ class fm_module_policies {
 					echo '</tbody><tbody>';
 					$grabbable = true;
 				}
-				$this->displayRow($results[$x], $type);
+				$this->displayRow($results[$x], $type, $num_rows);
 				$y++;
 			}
 		}
@@ -280,7 +280,7 @@ HTML;
 	}
 
 
-	function displayRow($row, $type) {
+	function displayRow($row, $type, $num_rows) {
 		global $__FM_CONFIG;
 		
 		$row_title = $options = null;
@@ -303,7 +303,7 @@ HTML;
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
-				$grab_bars = '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>';
+				$grab_bars = ($num_rows > 1) ? '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>' : null;
 			} else {
 				$checkbox = $grab_bars = '<td></td>';
 				$class[] = 'no-grab';
