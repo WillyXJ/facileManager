@@ -162,6 +162,7 @@ class fm_wifi_wlan_users {
 		/** Add entry to audit log */
 		$log_message = "Updated WLAN user '$old_name' to:\nName: {$post['wlan_user_login']}\nHardware Address: {$post['wlan_user_mac']}";
 		$log_message .= "\nComment: {$post['wlan_user_comment']}";
+		addLogEntry($log_message);
 		return true;
 	}
 	
