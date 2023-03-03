@@ -3,6 +3,7 @@
 * Both - [improvement] Added PHP 8.2 support. (Issue #558)
 * Server - [improvement] WLAN user names can be edited.
 * Server - [bug] Fixed limited user permission display issues.
+* Server - [bug] Removed the unused server group enable/disable button.
 
 0.3.1 (2020-11-27)
 ==================
