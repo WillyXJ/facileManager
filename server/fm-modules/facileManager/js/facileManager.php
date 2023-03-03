@@ -275,6 +275,7 @@ if (isset($__FM_CONFIG)) {
         item_id			= $row_id.attr("id");
         item_status		= $this.attr("rel");
         item_type		= $("#table_edits").attr("name");
+		item_build		= $("#table_edits").attr("rel");
         var url_var_type = getUrlVars()["type"];
         var server_serial_no	= getUrlVars()["server_serial_no"];
 
@@ -307,7 +308,7 @@ if (isset($__FM_CONFIG)) {
 					} else {
 						$this.attr("rel", "disabled");
 						$this.html("' . addslashes($__FM_CONFIG['icons']['disable']) . '");
-						if (item_type == "servers") {
+						if (item_type == "servers" && item_build != "no-build") {
 							if ($row_id.hasClass("attention") === false) {
 								$row_id.addClass("build");
 								$this.parent().find("a.edit_form_link").first().before("' . addslashes($__FM_CONFIG['module']['icons']['build']) . '");
