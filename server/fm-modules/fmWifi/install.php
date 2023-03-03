@@ -292,7 +292,8 @@ VALUES
 ('radius_server_auth_port', '( port )', 'no', 'no', NULL, NULL, 'global'),
 ('radius_server_acct_port', '( port )', 'no', 'no', NULL, NULL, 'global'),
 ('radius_server_ipv6', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global'),
-('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global')
+('ieee80211h', '( 0 | 1 )', 'no', 'yes', NULL, NULL, 'global'),
+('macaddr_acl', '( 0 | 1 | 2 )', 'no', 'yes', NULL, NULL, 'wlan')
 INSERTSQL;
 
 	$option_name = 'use_ebtables';

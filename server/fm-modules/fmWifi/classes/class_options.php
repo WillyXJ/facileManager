@@ -222,19 +222,23 @@ class fm_module_options {
 		global $fmdb, $__FM_CONFIG, $required_permission;
 		
 		$disabled_class = ($row->config_status == 'disabled') ? ' class="disabled"' : null;
+		$uneditable_options = array('ctrl_interface', 'ctrl_interface_group', 'wpa_passphrase');
 		
 		if (currentUserCan($required_permission, $_SESSION['module'])) {
-			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
-			$edit_status = '<td id="row_actions">';
-			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status .= '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+			if (!in_array($row->config_name, $uneditable_options)) {
+				$edit_status = '<td id="row_actions">';
+				$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '</td>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+			} else {
+				$edit_status = $checkbox = '<td></td>';
+			}
 		} else {
 			$edit_status = $checkbox = null;
 		}
@@ -244,12 +248,12 @@ class fm_module_options {
 		/** Parse address_match_element configs */
 		$config_data = $this->parseDefType($row->config_name, $row->config_data);
 		
-		$config_name = ($row->config_in_clause == 'yes') ? $row->config_name : '<b>' . $row->config_name . '</b>';
+		// $config_name = ($row->config_in_clause == 'yes') ? $row->config_name : '<b>' . $row->config_name . '</b>';
 
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_name"$disabled_class>
 			$checkbox
-			<td>$config_name</td>
+			<td>$row->config_name</td>
 			<td>$config_data</td>
 			<td>$comments</td>
 			$edit_status
