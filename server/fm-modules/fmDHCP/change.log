@@ -1,6 +1,7 @@
 0.7.0 (2023-??-??)
 ==================
-* Both - [improvement] Added PHP 8.2 support. (Issue #558)
+* Both   - [improvement] Added PHP 8.2 support. (Issue #558)
+* Server - [bug] Fixed config option item counts.
 
 0.6.0 (2022-06-29)
 ==================

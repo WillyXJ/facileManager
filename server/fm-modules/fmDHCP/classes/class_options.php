@@ -35,8 +35,10 @@ class fm_module_options {
 			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
 		}
 
+		$fmdb->num_rows = $num_rows;
+
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results sortable',
