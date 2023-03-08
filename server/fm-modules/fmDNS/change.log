@@ -11,6 +11,7 @@
 * Server - [bug] Removed the unused server group enable/disable button.
 * Server - [bug] Fixed check-names option for zones and global options. (Issue #571)
 * Server - [bug] Fixed ACL CIDR validation. (Issue #547)
+* Server - [bug] Fixed RPZ logging.
 
 5.2.1 (2022-06-29)
 ==================
