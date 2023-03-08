@@ -2,6 +2,7 @@
 ==================
 * Both   - [improvement] Added PHP 8.2 support. (Issue #558)
 * Server - [bug] Fixed config option item counts.
+* Server - [bug] Children can be added when creating object groups and networks.
 
 0.6.0 (2022-06-29)
 ==================

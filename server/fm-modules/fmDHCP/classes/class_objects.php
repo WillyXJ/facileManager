@@ -97,7 +97,7 @@ class fm_dhcp_objects {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post); exit;
+		// echo '<pre>';print_r($post); exit;
 		
 		/** Insert the parent */
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
@@ -200,6 +200,12 @@ class fm_dhcp_objects {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 		
+		if (is_array($post['config_children'])) {
+			$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
+			$query = "$sql_start config_parent_id={$child['config_parent_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
+			$result = $fmdb->query($query);
+		}
+
 		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware']}\nFixed Address: {$post['fixed-address']}";
 		$log_message .= "\nComment: {$post['config_comment']}";
 		addLogEntry($log_message);
