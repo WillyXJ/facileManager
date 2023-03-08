@@ -465,7 +465,7 @@ class fm_users {
 
 			$last_login = ($row->user_last_login == 0) ? _('Never') : date("F d, Y \a\\t H:i T", $row->user_last_login);
 			if ($row->user_ipaddr) {
-				$user_ipaddr = (verifyIPAddress($row->user_ipaddr) !== false) ? @gethostbyaddr($row->user_ipaddr) : $row->user_ipaddr;
+				$user_ipaddr = $row->user_ipaddr;
 			} else $user_ipaddr = _('None');
 
 			if ($row->user_auth_type == 2) {
