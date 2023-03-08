@@ -318,6 +318,8 @@ class fm_users {
 		$post['group_id'] = intval($post['group_id']);
 		if (!isset($post['group_id'])) return _('This is a malformed request.');
 		if (empty($post['group_name'])) return _('No group name defined.');
+
+		$group_name = sanitize($post['group_name']);
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_groups', 'group_name');
@@ -337,7 +339,7 @@ class fm_users {
 				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit . $sql_pwd, ', ');
+		$sql = rtrim($sql_edit, ', ');
 		
 		/** Process group permissions */
 		if (isset($post['process_user_caps']) && !isset($post['user_caps'])) $post['user_caps'] = array();
