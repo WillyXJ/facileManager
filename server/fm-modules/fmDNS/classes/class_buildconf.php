@@ -862,7 +862,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			((`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' $group_sql))
 			 $view_sql ORDER BY `domain_dnssec_parent_domain_id` DESC,`domain_clone_domain_id`,`domain_name` ASC";
 		$result = $fmdb->query($query);
-		if ($fmdb->num_rows) {
+		if ($fmdb->num_rows || $include_hint_zone) {
 			$count = $fmdb->num_rows;
 			$zone_result = $fmdb->last_result;
 

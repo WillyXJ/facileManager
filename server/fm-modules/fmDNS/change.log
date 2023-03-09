@@ -12,6 +12,8 @@
 * Server - [bug] Fixed check-names option for zones and global options. (Issue #571)
 * Server - [bug] Fixed ACL CIDR validation. (Issue #547)
 * Server - [bug] Fixed RPZ logging.
+* Server - [bug] Fixed config build for recursive-only server which had resulted in a
+           file not found error. (Issue #572)
 
 5.2.1 (2022-06-29)
 ==================
