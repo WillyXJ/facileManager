@@ -1,4 +1,4 @@
-1.7.0 (2023-??-??)
+1.7.0 (2023-03-09)
 ==================
 * Server - [improvement] Added PHP 8.2 support. (Issue #558)
 * Server - [bug] Unused server build icon no longer displays.

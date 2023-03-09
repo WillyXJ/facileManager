@@ -30,7 +30,7 @@ function upgradefmWifiSchema($module_name) {
 	$running_version = getOption('version', 0, 'fmWifi');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.2.1', '<') ? upgradefmWifi_021($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.4.0', '<') ? upgradefmWifi_040($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmWifi']['client_version'], 'auto', false, 0, 'fmWifi');

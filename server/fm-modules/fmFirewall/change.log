@@ -1,4 +1,4 @@
-2.2.0 (2023-??-??)
+2.2.0 (2023-03-09)
 ==================
 * Both   - [improvement] Added PHP 8.2 support. (Issue #558)
 * Server - [bug] Object groups can no longer contain themselves.

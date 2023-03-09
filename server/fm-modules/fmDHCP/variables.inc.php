@@ -31,12 +31,12 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmDHCP'] = array(
-		'version'							=> '0.6.0',
-		'client_version'					=> '0.3',
+		'version'							=> '0.7.0',
+		'client_version'					=> '0.7.0',
 		'description'						=> __('Easily manage one or more ISC DHCP servers through a web interface. No longer edit configuration files manually.', 'fmDHCP'),
 		'prefix'							=> 'dhcp_',
 		'required_daemon_version'			=> '4.1',
-		'required_fm_version'				=> '4.1.0',
+		'required_fm_version'				=> '4.4.0',
 		'min_client_auto_upgrade_version'	=> '0.1'
 	);
 
