@@ -642,7 +642,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					/** Include zones for view */
 					if (is_array($tmp_files)) {
 						/** Include view keys if present */
-						if (@array_key_exists($server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys', $data->files)) {
+						if (@array_key_exists($server_zones_dir . '/views.conf.' . sanitize($view_result[$i]->view_name, '-') . '.keys', (array) $data->files)) {
 							$config .= "\tinclude \"" . $server_zones_dir . "/views.conf." . sanitize($view_result[$i]->view_name, '-') . ".keys\";\n";
 						}
 						$config .= "\tinclude \"" . $server_zones_dir . '/zones.conf.' . sanitize($view_result[$i]->view_name, '-') . "\";\n";
@@ -654,7 +654,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$key_config = $view_config = $server_view_config = null;
 				}
 			} else {
-				/** Generate zones.all.conf */
+				/** Generate zones.conf.all */
 				list($files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir, $server_serial_no, 0, null, $include_hint_zone);
 				
 				/** Include all zones in one file */

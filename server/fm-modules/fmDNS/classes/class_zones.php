@@ -662,7 +662,7 @@ class fm_dns_zones {
 					$tmp_built_dns_servers[] = $tmp_build_array->server_serial_no;
 				}
 			}
-			if (is_array($tmp_built_dns_servers)) {
+			if (@is_array($tmp_built_dns_servers)) {
 				setBuildUpdateConfigFlag(implode(',', $tmp_built_dns_servers), 'yes', 'build');
 			}
 			
