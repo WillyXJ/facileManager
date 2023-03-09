@@ -236,8 +236,8 @@ class fm_dns_records {
 	function printRecordsForm($record_type, $domain_id) {
 		$table_info = array('class' => 'display_results');
 
-		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type)), 'more_records');
-		$return .= $this->getInputForm(strtoupper($record_type), true, $domain_id);
+		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type), 'no-actions'), 'more_records');
+		$return .= $this->getInputForm(strtoupper($record_type), true, $domain_id, null, 'no-actions');
 		$return .= sprintf('</tbody>
 		</table>
 		<p class="add_more add_records"><a id="add_records" href="#">+ %s</a></p>', __('Add more records'));
@@ -245,10 +245,12 @@ class fm_dns_records {
 		return $return;
 	}
 
-	function getHeader($type) {
+	function getHeader($type, $include = 'actions') {
 		global $zone_access_allowed;
 		
 		$show_value = true;
+		$rr_with_actions = array('A');
+
 		if ($type == 'SOA') {
 			$show_value = false;
 			$title_array[] = array('title' => __('Name'), 'rel' => 'soa_name');
@@ -342,7 +344,7 @@ class fm_dns_records {
 		
 		if (!in_array($type, array('SOA', 'DOMAIN', 'CUSTOM'))) $title_array[] = array('title' => __('Status'), 'rel' => 'record_status');
 		if (empty($_POST) || $type == 'DOMAIN') {
-			if ((currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+			if ((in_array($type, $rr_with_actions) || $include == 'actions') && (currentUserCan('manage_records', $_SESSION['module']) || currentUserCan('manage_zones', $_SESSION['module'])) && $zone_access_allowed) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		} else {
 			array_unshift($title_array, __('Action'));
 			array_unshift($title_array, array('title' => __('Valid'), 'style' => 'text-align: center;'));
@@ -351,7 +353,7 @@ class fm_dns_records {
 		return $title_array;
 	}
 
-	function getInputForm($type, $new, $parent_domain_id, $results = null, $start = 1) {
+	function getInputForm($type, $new, $parent_domain_id, $results = null, $include = 'actions', $start = 1) {
 		global $__FM_CONFIG, $zone_access_allowed;
 		
 		$form = $record_status = $record_name = $record_ttl = null;
@@ -360,7 +362,8 @@ class fm_dns_records {
 		$end = ($new) ? $start + 3 : 1;
 		$show_value = true;
 		$value_textarea = false;
-		
+
+		$rr_with_actions = array('A');
 		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
 		$priority = array('MX', 'SRV', 'KX', 'URI');
 		$weight = array('SRV', 'URI');
@@ -506,10 +509,12 @@ class fm_dns_records {
 			$field_values['data']['Status'] = '>' . $status;
 
 			if ($new) {
-				$field_values['data']['Actions'] = in_array($type, array('A')) ? ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . __('Create PTR') . '</label>' : null;
+				if (in_array($type, $rr_with_actions) || $include == 'actions') {
+					$field_values['data']['Actions'] = ' align="center"><label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />' . __('Create PTR') . '</label>';
+				}
 			} else {
 				$field_values['data']['Actions'] = ' align="center">';
-				if (in_array($type, array('A'))) {
+				if (in_array($type, $rr_with_actions)) {
 					$field_values['data']['Actions'] .= '<label><input type="checkbox" name="' . $action . '[_NUM_][PTR]" />';
 					$field_values['data']['Actions'] .= ($record_ptr_id) ? __('Update PTR') : __('Create PTR');
 					$field_values['data']['Actions'] .= '</label><br />';
