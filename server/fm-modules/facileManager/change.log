@@ -2,6 +2,8 @@
 ==================
 * Server - [improvement] Added support to hide unused module dashboards.
 * Server - [improvement] Added support for server list placeholder.
+* Server - [bug] A deactivated module cannot be activated unless the required version of
+           facileManager is installed.
 
 4.4.0 (2023-03-09)
 ==================
