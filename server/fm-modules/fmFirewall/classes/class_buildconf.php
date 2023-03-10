@@ -767,7 +767,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			} else {
 				$rule = implode(' ', $line);
 				$tcp_flags = (strpos($rule, 'tcp') !== false && strpos($rule, 'flags') === false) ? $policy_tcp_flags : null;
-				$config[] = $rule . " from $source_address to $destination_address" . $tcp_flags . $keep_state . $label;
+				$config[] = $rule . " from $source_address to $destination_address" . $tcp_flags . $uid . $keep_state . $label;
 			}
 			
 			$config[] = null;
@@ -775,7 +775,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$table[] = null;
 		
-		$config = array_merge($table, $config);
+		$config = array_merge($table, (array) $config);
 		
 		return str_replace('from any to any', 'all', implode("\n", $config)) . "\n\n";
 	}
@@ -992,7 +992,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$config[] = null;
 		}
 
-		return str_replace('from any to any', 'all', implode("\n", $config));
+		return str_replace('from any to any', 'all', implode("\n", (array) $config));
 	}
 	
 	
@@ -1201,7 +1201,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$config[] = null;
 		}
 		
-		return implode("\n", $config);
+		return implode("\n", (array) $config);
 	}
 	
 	
