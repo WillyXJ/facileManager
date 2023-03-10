@@ -3897,9 +3897,9 @@ function formatError($message, $option = null) {
  * @param array $class Additional classes to pass to the div
  * @return string
  */
-function buildServerSubMenu($server_serial_no = 0, $available_servers = null, $class = null) {
+function buildServerSubMenu($server_serial_no = 0, $available_servers = null, $class = null, $placeholder = null) {
 	if (!$available_servers) $available_servers = availableServers();
-	$server_list = buildSelect('server_serial_no', 'server_serial_no', $available_servers, $server_serial_no, 1, null, false, 'this.form.submit()');
+	$server_list = buildSelect('server_serial_no', 'server_serial_no', $available_servers, $server_serial_no, 1, null, false, 'this.form.submit()', null, $placeholder);
 	
 	$hidden_inputs = null;
 	foreach ($GLOBALS['URI'] as $param => $value) {
@@ -3944,6 +3944,12 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
 	
 	if (!is_array($include)) {
 		$include = (array) $include;
+	}
+	
+	if (in_array('null', $include)) {
+		$server_array[0][] = null;
+		$server_array[0][0][] = null;
+		$server_array[0][0][] = null;
 	}
 	
 	if (in_array('all', $include)) {

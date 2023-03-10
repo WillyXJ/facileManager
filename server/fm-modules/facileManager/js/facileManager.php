@@ -19,6 +19,7 @@ if (isset($__FM_CONFIG)) {
 		$("select").select2({minimumResultsForSearch: 10});
 		$("#bulk_action").select2({minimumResultsForSearch: -1, width: "120px", allowClear: true});
 		$("#server_serial_no").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "130px", "text-align": "left" }});
+		$("#server_serial_no_extended").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "230px", "text-align": "left", allowClear: true }});
 		$("#settings select").select2({
 			width: "200px",
 			minimumResultsForSearch: 10
