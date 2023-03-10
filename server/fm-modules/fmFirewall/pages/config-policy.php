@@ -82,7 +82,7 @@ printHeader();
 @printMenu();
 
 $avail_types = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
-$avail_servers = availableServers('serial', array('all'));
+$avail_servers = availableServers('serial', array('null', 'groups', 'servers'));
 $j = 0;
 /** Templates */
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_name', 'policy_', "AND policy_type='template'");
@@ -94,7 +94,7 @@ if ($fmdb->num_rows && !$fmdb->sql_errors) {
 		$j++;
 	}
 }
-$avail_servers = buildServerSubMenu($server_serial_no, $avail_servers);
+$avail_servers = buildServerSubMenu($server_serial_no, $avail_servers, null, 'Select a policy');
 
 $allowed_to_add = ($server_serial_no) ? currentUserCan('manage_policies', $_SESSION['module']) : false;
 echo printPageHeader((string) $response, null, $allowed_to_add, $type, null, 'noscroll');
@@ -109,37 +109,47 @@ echo <<<HTML
 
 HTML;
 
-/** Get template ID if appropriate */
-$template_id = 0;
-$template_id_sql = null;
-if ($server_serial_no[0] == 't') {
-	$template_id = preg_replace('/\D/', null, $server_serial_no);
-	$template_id_sql = "AND policy_template_id=$template_id";
-	$server_serial_no = 0;
+if ($server_serial_no) {
+	/** Get template ID if appropriate */
+	$template_id = 0;
+	$template_id_sql = null;
+	if ($server_serial_no[0] == 't') {
+		$template_id = preg_replace('/\D/', null, $server_serial_no);
+		$template_id_sql = "AND policy_template_id=$template_id";
+		$server_serial_no = 0;
+	}
+
+	$fmdb->num_rows = 0;
+
+	/** Get policies for server including templates */
+	$server_id = getServerID($server_serial_no, $_SESSION['module']);
+
+	$tmp_id = ($server_serial_no) ? $server_id : $template_id;
+	$template_ids = getTemplateIDs($tmp_id, $server_serial_no);
+
+	if (count($template_ids)) {
+		list($template_results, $template_id_count) = getTemplatePolicies($template_ids, $server_id, $template_id, $type);
+	}
+
+	$result = null;
+	if ($original_server_serial_no) {
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no='$server_serial_no' AND policy_type='$type' $template_id_sql");
+	}
+	$fmdb->num_rows += $template_id_count;
+	$template_results = array_merge((array) $template_results, (array) $fmdb->last_result);
+	$fmdb->last_result = $template_results;
+	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
+	if ($page > $total_pages) $page = $total_pages;
+	$fm_module_policies->rows($result, $type, $page, $total_pages);
+} else {
+	$avail_servers = str_replace('id="server_serial_no"', 'id="server_serial_no_extended"', $avail_servers);
+	printf('
+	<div>
+		<p>%s:</p>
+		%s
+	</div>',
+	__('Please choose a policy to view'), $avail_servers);
 }
-
-$fmdb->num_rows = 0;
-
-/** Get policies for server including templates */
-$server_id = getServerID($server_serial_no, $_SESSION['module']);
-
-$tmp_id = ($server_serial_no) ? $server_id : $template_id;
-$template_ids = getTemplateIDs($tmp_id, $server_serial_no);
-
-if (count($template_ids)) {
-	list($template_results, $template_id_count) = getTemplatePolicies($template_ids, $server_id, $template_id, $type);
-}
-
-$result = null;
-if ($original_server_serial_no) {
-	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no='$server_serial_no' AND policy_type='$type' $template_id_sql");
-}
-$fmdb->num_rows += $template_id_count;
-$template_results = array_merge((array) $template_results, (array) $fmdb->last_result);
-$fmdb->last_result = $template_results;
-$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
-if ($page > $total_pages) $page = $total_pages;
-$fm_module_policies->rows($result, $type, $page, $total_pages);
 
 printFooter();
 
