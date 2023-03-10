@@ -35,8 +35,10 @@ class fm_module_options {
 			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
 		}
 
+		$fmdb->num_rows = $num_rows;
+
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results sortable',
@@ -391,7 +393,8 @@ HTML;
 	function availableOptions($action, $server_serial_no, $option_type = 'global', $config_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$temp_array = $return = null;
+		$temp_array = array();
+		$return = null;
 		
 		if ($action == 'add') {
 //			if (isset($_POST['view_id'])) {

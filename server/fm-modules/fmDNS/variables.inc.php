@@ -31,12 +31,12 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
-		'version'							=> '5.2.1',
-		'client_version'					=> '5.2.0',
+		'version'							=> '5.3.0',
+		'client_version'					=> '5.3.0',
 		'description'						=> __('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.', 'fmDNS'),
 		'prefix'							=> 'dns_',
 		'required_dns_version'				=> '9.3',
-		'required_fm_version'				=> '4.2.0',
+		'required_fm_version'				=> '4.4.0',
 		'min_client_auto_upgrade_version'	=> '2.2'
 	);
 
@@ -49,7 +49,7 @@ if (isset($fm_name)) {
 	$__FM_CONFIG['module']['icons']['sub_delete']	= sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i id="__ID__" class="fa fa-window-close delete subelement_remove" aria-hidden="true"></i></a>', _('Delete'));
 }
 
-$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge((array) $__FM_CONFIG['module']['icons'], (array) $__FM_CONFIG['icons']);
 
 $__FM_CONFIG['records']['require_zone_rights'] = array('SOA', 'NS');
 $__FM_CONFIG['records']['cert_types'] = array(
@@ -135,7 +135,7 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmDNS'
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa'=>'soa', 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views'=>'view',
 											'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records_skipped'=>'record'
 											);
-$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge((array) $__FM_CONFIG['clean']['prefixes'], (array) $__FM_CONFIG['module']['clean']['prefixes']);
 
 /** Default values */
 $named_check_utils = findProgram('named-checkconf') ? findProgram('named-checkconf') . ', ' . findProgram('named-checkzone') : '/path/to/named-checkconf, /path/to/named-checkzone';

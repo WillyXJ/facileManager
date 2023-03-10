@@ -471,18 +471,18 @@ function verifyAndCleanAddresses($data, $subnets_allowed = 'subnets-allowed') {
 		
 		/** IPv4 checks */
 		if (strpos($ip_address, ':') === false) {
-			/** Valid CIDR? */
-			if ($cidr && !checkCIDR($cidr, 32)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
-			
 			/** Create full IP */
 			$ip_octets = explode('.', $ip_address);
 			if (count($ip_octets) < 4) {
 				$ip_octets = array_merge($ip_octets, array_fill(count($ip_octets), 4 - count($ip_octets), 0));
 			}
 			$ip_address = implode('.', $ip_octets);
+
+			/** Valid CIDR? */
+			if ($cidr && !checkCIDR($ip_address, $cidr, 32)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
 		} else {
 			/** IPv6 checks */
-			if ($cidr && !checkCIDR($cidr, 128)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
+			if ($cidr && !checkCIDR($ip_address, $cidr, 128)) return sprintf(__('%s is not valid.'), "$ip_address/$cidr");
 		}
 		
 		if (verifyIPAddress($ip_address) === false) return sprintf(__('%s is not valid.'), $ip_address);
@@ -553,13 +553,17 @@ function buildFullIPAddress($partial_ip, $domain) {
  * @param id $domain_id Domain ID to check
  * @return boolean
  */
-function reloadAllowed($domain_id = null) {
+function reloadAllowed($domain_id = null, $server_serial_no = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'active', 'server_', 'server_status');
 	if ($fmdb->num_rows) {
 		if ($domain_id) {
-			$query = 'SELECT domain_id FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id . ' LIMIT 1';
+			$query = 'SELECT domain_id FROM `fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds` WHERE domain_id=' . $domain_id;
+			if ($server_serial_no) {
+				$query .= ' AND server_serial_no=' . $server_serial_no;
+			}
+			$query .= ' LIMIT 1';
 			$result = $fmdb->get_results($query);
 			$reload_allowed = ($fmdb->num_rows) ? true : false;
 		} else $reload_allowed = true;
@@ -666,7 +670,6 @@ function getZoneServers($domain_id, $server_types = array('masters')) {
 	$serial_no = null;
 	
 	if ($domain_id) {
-		/** Force buildconf for all associated DNS servers */
 		if ($domain_template_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
 			$domain_id = $domain_template_id;
 		}
@@ -950,12 +953,22 @@ function getConfigAssoc($id, $type) {
  * @since 2.1
  * @package fmDNS
  *
- * @param string $cidr CIDR to check
+ * @param string $ip IP address
+ * @param string $prefix CIDR to check
  * @param integer $max_bits Maximum valid bits
  * @return boolean
  */
-function checkCIDR($cidr, $max_bits) {
-	return verifyNumber($cidr, 0, $max_bits);
+function checkCIDR($ip, $prefix, $max_bits) {
+	$netmask = verifyNumber($prefix, 0, $max_bits);
+
+	if (!$netmask) return $netmask;
+
+	/* Check if the ip is the network id 
+	 * Used from https://stackoverflow.com/questions/4931721/getting-list-ips-from-cidr-notation-in-php
+	*/
+	if ($ip != long2ip((ip2long($ip)) & ((-1 << (32 - (int)$prefix))))) return false;
+
+	return true;
 }
 
 
@@ -1069,14 +1082,14 @@ function buildSQLRecords($record_type, $domain_id) {
 			`soa_id`=(SELECT `soa_id` FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_id`='$domain_id') AND 
 			`soa_template`='no' AND `soa_status`='active'";
 		$result = $fmdb->get_results($soa_query);
-		if (!$fmdb->num_rows) return null;
+		if (!$fmdb->num_rows) return array();
 		
 		foreach (get_object_vars($result[0]) as $key => $val) {
 			$sql_results[$result[0]->soa_id][$key] = $val;
 		}
 		array_shift($sql_results[$result[0]->soa_id]);
 		array_shift($sql_results[$result[0]->soa_id]);
-		return $sql_results;
+		return (array) $sql_results;
 	} else {
 		$valid_domain_ids = 'IN (' . join(',', getZoneParentID($domain_id)) . ')';
 		
@@ -1114,7 +1127,7 @@ function buildSQLRecords($record_type, $domain_id) {
 				$sql_results[$results[$i]->record_id]['record_skipped'] = ($fmdb->num_rows) ? 'on' : 'off';
 			}
 		}
-		return $sql_results;
+		return (array) $sql_results;
 	}
 }
 
@@ -1176,7 +1189,7 @@ function getDNSSECExpiration($data, $type = 'calculated') {
 function moduleExplodeGroup($group_id, $capability) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$return = false;
+	$return = array();
 	
 	if ($capability == 'access_specific_zones') {
 		$group_id = substr($group_id, 2);

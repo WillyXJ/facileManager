@@ -203,11 +203,13 @@ function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_
 	}
 		
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='$group_type'" . $select_ids_sql . ' ' . $edit_group_id_sql);
-	$results = $fmdb->last_result;
 	$count = $fmdb->num_rows;
-	for ($i=0; $i<$fmdb->num_rows; $i++) {
-		$array[$i][] = $results[$i]->group_name;
-		$array[$i][] = 'g' . $results[$i]->group_id;
+	if ($fmdb->num_rows) {
+		$results = $fmdb->last_result;
+		for ($i=0; $i<$fmdb->num_rows; $i++) {
+			$array[$i][] = $results[$i]->group_name;
+			$array[$i][] = 'g' . $results[$i]->group_id;
+		}
 	}
 	
 	/** Services */

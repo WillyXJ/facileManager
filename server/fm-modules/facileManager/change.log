@@ -1,3 +1,15 @@
+4.4.0 (2023-03-09)
+==================
+* Server - [security] Updated to jQuery-UI v1.13.2. (Issue #561)
+* Both   - [improvement] Added PHP 8.2 support. (Issue #558)
+* Server - [improvement] Added additional description of LDAP DN parameters. (Issue #563)
+* Server - [improvement] Added additional spacing to delete the button.
+* Server - [improvement] Added option to show/hide the server build icon per module.
+* Server - [improvement] Admin->Users & Groups no longer tries to resolve client IP. (Issue #530)
+* Server - [bug] Fixed AD authentication when not specifying a Search Start DN. (Issue #565)
+* Server - [bug] When the user is trying to add an object and their session timed out, the
+           user is returned to the login page.
+
 4.3.0 (2022-06-29)
 ==================
 * Server - [improvement] Local auth now works even when LDAP auth is enabled. (Issue #546)

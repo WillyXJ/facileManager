@@ -105,10 +105,6 @@ if (function_exists('posix_getpwuid')) {
 	$__FM_CONFIG['webserver']['user_info'] = posix_getpwuid(posix_geteuid());
 }
 
-/** Array sorts */
-@sort($__FM_CONFIG['logging']['categories']);
-
-
 /** Constants */
 if (!defined('TMP_FILE_EXPORTS')) {
 	define('TMP_FILE_EXPORTS', sys_get_temp_dir());

@@ -30,7 +30,7 @@ function upgradefmWifiSchema($module_name) {
 	$running_version = getOption('version', 0, 'fmWifi');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.2.1', '<') ? upgradefmWifi_021($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.4.0', '<') ? upgradefmWifi_040($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmWifi']['client_version'], 'auto', false, 0, 'fmWifi');
@@ -231,6 +231,42 @@ INSERTSQL;
 	}
 	
 	setOption('version', '0.2.1', 'auto', false, 0, 'fmWifi');
+	
+	return true;
+}
+
+/** 0.4.0 */
+function upgradefmWifi_040($__FM_CONFIG, $running_version) {
+	global $fmdb, $module_name;
+	
+	/** Check if previous upgrades have run (to support n+1) **/
+	$success = version_compare($running_version, '0.2.1', '<') ? upgradefmWifi_021($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	/** Insert upgrade steps here **/
+	$queries[] = <<<INSERTSQL
+INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmWifi']['prefix']}functions` (
+`def_option`,
+`def_type`,
+`def_multiple_values`,
+`def_dropdown`,
+`def_int_range`,
+`def_minimum_version`,
+`def_option_type`
+)
+VALUES 
+('macaddr_acl', '( 0 | 1 | 2 )', 'no', 'yes', NULL, NULL, 'wlan')
+INSERTSQL;
+	
+	/** Create table schema */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	setOption('version', '0.4.0', 'auto', false, 0, 'fmWifi');
 	
 	return true;
 }

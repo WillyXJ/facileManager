@@ -154,7 +154,7 @@ HTML;
  * @package facileManager
  * @subpackage fmSQLPass
  */
-function getServerCredentials($account_id = 0, $server_serial_no) {
+function getServerCredentials($account_id, $server_serial_no) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers WHERE server_serial_no=$server_serial_no AND account_id=$account_id";

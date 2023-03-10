@@ -1,3 +1,8 @@
+1.7.0 (2023-03-09)
+==================
+* Server - [improvement] Added PHP 8.2 support. (Issue #558)
+* Server - [bug] Unused server build icon no longer displays.
+
 1.6.0 (2021-09-14)
 ==================
 * Server - [improvement] Password update outputs now use language files.

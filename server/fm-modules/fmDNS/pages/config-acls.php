@@ -29,23 +29,9 @@ $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST[
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
-	switch ($action) {
-	case 'add':
+	if (in_array($action, array('add', 'edit'))) {
 		if (!empty($_POST)) {
-			$result = $fm_dns_acls->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_dns_acls->update($_POST);
+			$result = ($action == 'add') ? $fm_dns_acls->add($_POST) : $fm_dns_acls->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;

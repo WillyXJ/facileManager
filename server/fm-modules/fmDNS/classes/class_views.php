@@ -52,7 +52,7 @@ class fm_dns_views {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
-				$this->displayRow($results[$x]);
+				$this->displayRow($results[$x], $num_rows);
 				$y++;
 			}
 		}
@@ -221,13 +221,13 @@ class fm_dns_views {
 	}
 
 
-	function displayRow($row) {
+	function displayRow($row, $num_rows) {
 		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->view_status == 'disabled') ? ' class="disabled"' : null;
 		$bars_title = __('Click and drag to reorder');
 		
-		$server_serial_no .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
+		$server_serial_no = $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		$icons = sprintf('<a href="config-options.php?view_id=%d%s" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s"></i></a>', $row->view_id, $server_serial_no, __('Configure Additional Options'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
@@ -239,7 +239,7 @@ class fm_dns_views {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
-			$grab_bars = '<i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i>';
+			$grab_bars = ($num_rows > 1) ? '<i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i>' : null;
 		} else {
 			$edit_status = $grab_bars = null;
 		}
@@ -263,7 +263,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$view_id = $view_order_id = 0;
-		$view_name = $view_root_dir = $view_zones_dir = $view_comment = null;
+		$view_name = $view_comment = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {

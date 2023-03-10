@@ -1,3 +1,20 @@
+5.3.0 (2023-03-09)
+==================
+* Both   - [improvement] Added PHP 8.2 support. (Issue #558)
+* Server - [improvement] Config builds are no longer triggered when deleting an unbuilt zone.
+* Server - [improvement] Removed the Actions column when adding records that do not have actions.
+* Server - [bug] Fixed the ability to enable/disable zone groups.
+* Server - [bug] Fixed removal of cloned zones and ACL elements.
+* Server - [bug] View reordering bars no longer show with one view.
+* Server - [bug] Zone import verification wording fix.
+* Server - [bug] Fixed log message for server changes.
+* Server - [bug] Removed the unused server group enable/disable button.
+* Server - [bug] Fixed check-names option for zones and global options. (Issue #571)
+* Server - [bug] Fixed ACL CIDR validation. (Issue #547)
+* Server - [bug] Fixed RPZ logging.
+* Server - [bug] Fixed config build for recursive-only server which had resulted in a
+           'file not found' error. (Issue #572)
+
 5.2.1 (2022-06-29)
 ==================
 * Server - [bug] Multiple CAA records can now exist with different types. (Issue #554)

@@ -655,13 +655,21 @@ class fm_dns_zones {
 				}
 			}
 			
+			/** Force buildconf for all built DNS servers if zone has been built */
+			$fmdb->query("SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds WHERE domain_id=" . sanitize($domain_id));
+			if ($fmdb->num_rows) {
+				foreach ($fmdb->last_result as $tmp_build_array) {
+					$tmp_built_dns_servers[] = $tmp_build_array->server_serial_no;
+				}
+			}
+			if (@is_array($tmp_built_dns_servers)) {
+				setBuildUpdateConfigFlag(implode(',', $tmp_built_dns_servers), 'yes', 'build');
+			}
+			
 			/** Delete associated records from fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds */
 			if (basicDelete('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'track_builds', $domain_id, 'domain_id', false) === false) {
 				return formatError(sprintf(__('The zone could not be removed from the %s table because a database error occurred.'), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'track_builds'));
 			}
-			
-			/** Force buildconf for all associated DNS servers */
-			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 			
 			/** Delete cloned zones */
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id');
@@ -724,6 +732,8 @@ class fm_dns_zones {
 	
 	function displayRow($row, $map, $server_reload_allowed) {
 		global $fmdb, $__FM_CONFIG;
+
+		$classes = array();
 		
 		/** Zones */
 		if ($map != 'groups') {
@@ -955,7 +965,7 @@ HTML;
 			}
 		}
 		
-		$domain_name = function_exists('idn_to_utf8') ? idn_to_utf8($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $domain_name;
+		$domain_name = ($domain_name && function_exists('idn_to_utf8')) ? idn_to_utf8($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) : $domain_name;
 		
 		/** Process multiple views */
 		if (strpos($domain_view, ';')) {
@@ -1283,7 +1293,7 @@ HTML;
 		
 		$return = $limited_ids = null;
 		if (isset($user_capabilities)) {
-			$limited_ids = (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0]) ? 'AND domain_id IN (' . join(',', $this->getZoneAccessIDs($user_capabilities[$_SESSION['module']]['access_specific_zones'])) . ')' : null;
+			$limited_ids = (isset($user_capabilities[$_SESSION['module']]) && (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0])) ? 'AND domain_id IN (' . join(',', $this->getZoneAccessIDs($user_capabilities[$_SESSION['module']]['access_specific_zones'])) . ')' : null;
 		}
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $domain_id, 'domain_', 'domain_clone_domain_id', $limited_ids . ' AND domain_template="no" ORDER BY domain_name');
 		if ($fmdb->num_rows) {
@@ -1540,7 +1550,7 @@ HTML;
 		$start = 0;
 		$return = array();
 		
-		if ($extra == 'all' && !@in_array(0, $exclude)) {
+		if ($extra == 'all' && $exclude && !@in_array(0, $exclude)) {
 			$start = 1;
 			$return = array(array(__('All Zones'), 0));
 		}

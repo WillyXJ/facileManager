@@ -238,6 +238,7 @@ class fm_dns_keys {
 		global $__FM_CONFIG;
 		
 		$edit_status = $checkbox = null;
+		$classes = array();
 		
 		if ($row->key_status == 'disabled') $classes[] = 'disabled';
 		if ($row->key_status == 'revoked') $classes[] = 'attention';

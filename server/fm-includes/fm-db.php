@@ -139,11 +139,14 @@ class fmdb {
 		global $__FM_CONFIG;
 		
 		if ($this->use_mysqli) {
+			/** Disable default mysqli reporting since it's changed in PHP 8.1 and fM handles its own error capturing */
+			mysqli_report(MYSQLI_REPORT_OFF);
+
 			$this->dbh = @mysqli_init();
 
 			/** Set SSL */
 			if (isset($__FM_CONFIG['db']['key'])) {
-				mysqli_ssl_set($this->dbh, $__FM_CONFIG['db']['key'], $__FM_CONFIG['db']['cert'], $__FM_CONFIG['db']['ca'], $__FM_CONFIG['db']['capth'], $__FM_CONFIG['db']['cipher']);
+				mysqli_ssl_set($this->dbh, $__FM_CONFIG['db']['key'], $__FM_CONFIG['db']['cert'], $__FM_CONFIG['db']['ca'], $__FM_CONFIG['db']['capath'], $__FM_CONFIG['db']['cipher']);
 			}
 
 			if (!@mysqli_real_connect($this->dbh, $dbhost, $dbuser, $dbpassword)) {

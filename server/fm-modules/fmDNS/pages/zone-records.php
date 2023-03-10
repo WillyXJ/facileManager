@@ -66,7 +66,7 @@ sort($supported_record_types);
 $supported_record_types[] = 'SOA';
 unset($supported_record_types[array_search('CUSTOM', $supported_record_types)]);
 
-$response = $form_data = $action = null;
+$response = null;
 if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
 	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id', 'AND record_type="URL"');
 	if ($fmdb->num_rows) {
@@ -186,7 +186,7 @@ if ($record_type == 'SOA') {
 	<h2>%s</h2>
 	%s
 	<p><input type="submit" name="submit" value="%s" class="button" /></p>
-</form></div>' . "\n", __('Add Record'), $fm_dns_records->printRecordsForm($form_data, $action, $record_type, $domain_id), __('Validate'));
+</form></div>' . "\n", __('Add Record'), $fm_dns_records->printRecordsForm($record_type, $domain_id), __('Validate'));
 	} else {
 		$body .= '<div class="existing-container no-bottom-margin">' . $record_rows;
 	}

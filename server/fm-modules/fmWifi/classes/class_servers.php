@@ -150,7 +150,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			$insert_id = $fmdb->insert_id;
 			
-			addLogEntry(__('Added an access point group with the following details') . ":\n" . __('Name') . ": {$post['group_name']}\n" . __('Associated APs') . ": ${post['log_message_member_servers']}\n" . _('Comment') . ": {$post['group_comment']}");
+			addLogEntry(__('Added an access point group with the following details') . ":\n" . __('Name') . ": {$post['group_name']}\n" . __('Associated APs') . ": {$post['log_message_member_servers']}\n" . _('Comment') . ": {$post['group_comment']}");
 			
 			return true;
 		}
@@ -403,11 +403,6 @@ HTML;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-				$edit_status .= '<a class="status_form_link" href="#" rel="';
-				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
-				$edit_status .= '">';
-				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-				$edit_status .= '</a>';
 //				$query = "SELECT domain_id FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND 
 //					(domain_name_servers='g_{$row->group_id}' OR domain_name_servers LIKE 'g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id}')";
 //				$result = $fmdb->get_results($query);
@@ -518,7 +513,7 @@ HTML;
 		
 		if ($type == 'servers') {
 			if ($action == 'edit') {
-				$available_interfaces = explode(';', $server_interfaces);
+				$available_interfaces = explode(';', (string) $server_interfaces);
 				$bridge_interfaces = buildSelect('server_bridge_interface', 'server_bridge_interface', $available_interfaces, $server_bridge_interface);
 				$wlan_interfaces = buildSelect('server_wlan_interface', 'server_wlan_interface', $available_interfaces, $server_wlan_interface);
 				$server_wlan_driver = buildSelect('server_wlan_driver', 'server_wlan_driver', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_wlan_driver'), $server_wlan_driver);
@@ -715,8 +710,6 @@ HTML;
 	function getServerGroups($server_id, $field = 'group_id') {
 		global $fmdb, $__FM_CONFIG;
 		
-		$array = false;
-		
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups` WHERE `account_id`='{$_SESSION['user']['account_id']}' AND `group_status`='active'
 			AND (group_members='s_$server_id' OR group_members LIKE 's_$server_id;%' OR group_members LIKE '%;s_$server_id;%' OR group_members LIKE '%;s_$server_id')";
 		$fmdb->get_results($query);
@@ -726,7 +719,7 @@ HTML;
 			}
 		}
 		
-		return $array;
+		return (isset($array)) ? $array : false;
 	}
 
 	/**
