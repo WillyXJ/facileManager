@@ -779,7 +779,7 @@ FORM;
 			);
 
 		/** Policy targets should only be available for template policies */
-		if ($_POST['server_serial_no'][0] == 't' || (is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
+		if ($_POST['server_serial_no'][0] == 't' || (@is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
 			/** Process multiple policy targets */
 			if (strpos($policy_targets, ';')) {
 				$policy_targets = explode(';', rtrim($policy_targets, ';'));

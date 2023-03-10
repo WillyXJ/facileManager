@@ -203,10 +203,9 @@ function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_
 	}
 		
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='$group_type'" . $select_ids_sql . ' ' . $edit_group_id_sql);
-	$results = $fmdb->last_result;
 	$list_groups_count = $list_services_count = 0;
 	for ($i=0; $i<$fmdb->num_rows; $i++) {
-		if ($results[$i]->group_type == 'object') {
+		if ($fmdb->last_result[$i]->group_type == 'object') {
 			$list_group_name = __('Groups');
 			$list_count = $list_groups_count;
 			$list_groups_count++;
@@ -215,8 +214,8 @@ function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_
 			$list_count = $list_services_count;
 			$list_services_count++;
 		}
-		$array[$list_group_name][$list_count][] = $results[$i]->group_name;
-		$array[$list_group_name][$list_count][] = 'g' . $results[$i]->group_id;
+		$array[$list_group_name][$list_count][] = $fmdb->last_result[$i]->group_name;
+		$array[$list_group_name][$list_count][] = 'g' . $fmdb->last_result[$i]->group_id;
 	}
 	
 	/** Objects/Services */
@@ -227,7 +226,6 @@ function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_
 	}
 		
 	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $group_type . 's', $group_type . '_name', $group_type . '_', $select_ids_sql);
-	$results = $fmdb->last_result;
 	$list_network_count = $list_host_count = 0;
 	if ($group_type == 'service') {
 		$j = count($array[__('Services')][$list_count]);
@@ -237,7 +235,7 @@ function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_
 	}
 	for ($i=0; $i<$fmdb->num_rows; $i++) {
 		if ($group_type == 'object') {
-			if ($results[$i]->object_type == 'network') {
+			if ($fmdb->last_result[$i]->object_type == 'network') {
 				$list_group_name = __('Networks');
 				$j = $list_network_count;
 				$list_network_count++;
@@ -247,8 +245,8 @@ function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_
 				$list_host_count++;
 			}
 		}
-		$array[$list_group_name][$j][] = ($group_type == 'service') ? $results[$i]->$name . ' (' . $results[$i]->service_type . ')' : $results[$i]->$name;
-		$array[$list_group_name][$j][] = substr($group_type, 0, 1) . $results[$i]->$id;
+		$array[$list_group_name][$j][] = ($group_type == 'service') ? $fmdb->last_result[$i]->$name . ' (' . $fmdb->last_result[$i]->service_type . ')' : $fmdb->last_result[$i]->$name;
+		$array[$list_group_name][$j][] = substr($group_type, 0, 1) . $fmdb->last_result[$i]->$id;
 		$j++;
 	}
 	
