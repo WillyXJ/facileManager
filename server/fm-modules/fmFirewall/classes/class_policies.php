@@ -57,7 +57,7 @@ class fm_module_policies {
 		}
 		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Location'), __('Source'), __('Destination'), __('Service'), __('Interface')));
 		if ($type == 'filter') {
-			$title_array = array_merge($title_array, array(__('Direction'), __('Time')));
+			$title_array = array_merge($title_array, array(__('Direction'), __('Time'), __('User')));
 		} elseif ($type == 'nat') {
 			$title_array = array_merge($title_array, array(__('Source Translation'), __('Destination Translation')));
 		}
@@ -328,6 +328,7 @@ HTML;
 		$services = ($row->policy_services) ? $this->formatPolicyIDs($row->policy_services) : 'any';
 		$interface = ($row->policy_interface) ? $row->policy_interface : 'any';
 		$policy_time = ($type == 'filter' && $row->policy_time) ? getNameFromID($row->policy_time, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name') : 'any';
+		$policy_uid = ($row->policy_uid) ? $row->policy_uid : 'any';
 
 		$source_translated = ($row->policy_source_translated) ? $this->formatPolicyIDs($row->policy_source_translated) : 'any';
 		$destination_translated = ($row->policy_destination_translated) ? $this->formatPolicyIDs($row->policy_destination_translated) : 'any';
@@ -362,6 +363,7 @@ HTML;
 				$type_lines = <<<HTML
 			<td>$row->policy_direction</td>
 			<td>$policy_time</td>
+			<td>$policy_uid</td>
 HTML;
 				break;
 			case 'nat':
