@@ -167,6 +167,7 @@ function isNewVersionAvailable($package, $version, $interval = 'schedule') {
 	$last_version_check = getOption('version_check', 0, $package);
 	if (!$software_update_interval = getOption('software_update_interval')) $software_update_interval = 'week';
 	if (!$last_version_check) {
+		unset($last_version_check);
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
 		$method = 'insert';
@@ -219,11 +220,14 @@ function sanitize($data, $replace = null) {
 		
 		return $data;
 	} else {
-		if ($fmdb->use_mysqli) {
-			return @mysqli_real_escape_string($fmdb->dbh, $data);
-		} else {
-			return @mysql_real_escape_string($data);
+		if (is_string($data)) {
+			if ($fmdb->use_mysqli) {
+				return @mysqli_real_escape_string($fmdb->dbh, $data);
+			} else {
+				return @mysql_real_escape_string($data);
+			}
 		}
+		return $data;
 	}
 }
 
@@ -280,12 +284,12 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 		<title>$title</title>
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
-		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui-1.10.2.min.css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui.min.css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/font-awesome/css/font-awesome.min.css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/tooltip.css" type="text/css" />
 		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-3.6.0.min.js"></script>
-		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-ui-1.10.2.min.js"></script>
+		<script src="{$GLOBALS['RELPATH']}fm-includes/js/jquery-ui.min.js"></script>
 		<script src="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.min.js" type="text/javascript"></script>
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/select2/select2.css?ver=$fm_version" type="text/css" />
 		$module_css
@@ -408,7 +412,7 @@ HTML;
 		</div>
 HTML;
 	
-		if (FM_INCLUDE_SEARCH === true) {
+		if (defined('FM_INCLUDE_SEARCH') && FM_INCLUDE_SEARCH === true) {
 			$search = '<div id="topheadpartright">
 			<a class="single_line search" href="#" title="' . _('Search this page') . '"><i class="fa fa-search fa-lg"></i></a>' .
 				displaySearchForm() . '</div>';
@@ -530,7 +534,7 @@ HTML;
 		}
 		
 		/** Build submenus */
-		if (!count($classes) && count($filtered_submenu[$slug]) > 1) {
+		if (!count($classes) && count((array) $filtered_submenu[$slug]) > 1) {
 			array_push($classes, 'has-sub');
 			foreach ($filtered_submenu[$slug] as $submenu_array) {
 				if (!empty($submenu_array[0])) {
@@ -863,7 +867,7 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 		}
 	} else {
 		for ($i = 0; $i < count($options); $i++) {
-			$selected = ($option_select == $options[$i] || @in_array($options[$i], $option_select)) ? ' selected' : '';
+			$selected = ($option_select == $options[$i] || (is_array($option_select) && @in_array($options[$i], $option_select))) ? ' selected' : '';
 			$type_options.="<option$selected>$options[$i]</option>\n";
 		}
 	}
@@ -959,7 +963,7 @@ function pingTest($server) {
 	} else {
 		$ping = shell_exec("$program -c 3 " . escapeshellarg($server) . " 2>/dev/null");
 	}
-	if (preg_match('/64 bytes from/', $ping)) {
+	if ($ping && preg_match('/64 bytes from/', $ping)) {
 		return true;
 	}
 	return false;
@@ -1504,8 +1508,6 @@ function isSerialized($data) {
  * @package facileManager
  */
 function getActiveModules($allowed_modules = false) {
-	global $fm_login;
-	
 	$modules = getOption('fm_active_modules', $_SESSION['user']['account_id']);
 	
 	if ($modules !== false) {
@@ -1569,7 +1571,7 @@ REMOVE;
 	$result = $fmdb->last_result;
 	for ($i=0; $i<=$count; $i++) {
 		$current_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
-		if (array_key_exists($module, $current_caps)) {
+		if (array_key_exists($module, (array) $current_caps)) {
 			unset($current_caps[$module]);
 			$fmdb->query("UPDATE `{$__FM_CONFIG['db']['name']}`.`fm_users` SET user_caps='" . serialize($current_caps) . "' WHERE user_id=" . $result[$i]->user_id);
 			if (!$fmdb->rows_affected) return false;
@@ -1793,7 +1795,7 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 
 	$page_links[] = '<div id="pagination" class="' . $classes . '">';
 	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
-	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', formatNumber($fmdb->num_rows)), formatNumber($fmdb->num_rows)));
+	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', $fmdb->num_rows), formatNumber($fmdb->num_rows)));
 
 	/** Previous link */
 	if ($page > 1 && $total_pages > 1) {
@@ -2280,7 +2282,7 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
  * @param integer $domain_id Domain ID to update DNS servers for
  * @return boolean
  */
-function setBuildUpdateConfigFlag($serial_no = null, $flag, $build_update, $__FM_CONFIG = null) {
+function setBuildUpdateConfigFlag($serial_no, $flag, $build_update, $__FM_CONFIG = null) {
 	global $fmdb;
 	
 	if (!$__FM_CONFIG) global $__FM_CONFIG;
@@ -2455,7 +2457,7 @@ function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
  * @return array
  */
 function makePlainText($text, $make_array = false) {
-	$text = strip_tags($text);
+	$text = strip_tags((string) $text);
 	$text = trim($text);
 	
 	if ($make_array == true) return explode("\n", $text);
@@ -2680,7 +2682,7 @@ function getUserCapabilities($user_id, $type = 'user') {
 	$user_capabilities = getNameFromID($user_id, 'fm_' . $type . 's', $type . '_', $type . '_id', $type . '_caps');
 	if (isSerialized($user_capabilities)) $user_capabilities = unserialize($user_capabilities);
 	
-	return $user_capabilities;
+	return (array) $user_capabilities;
 }
 
 
@@ -3153,8 +3155,12 @@ HTML;
  * @return int Number of dimensions
  */
 function countArrayDimensions($array) {
-	if (is_array(@reset($array))) {
-		$count = countArrayDimensions(reset($array)) + 1;
+	if (is_array($array)) {
+		if (is_array(@reset($array))) {
+			$count = countArrayDimensions(reset($array)) + 1;
+		} else {
+			$count = 1;
+		}
 	} else {
 		$count = 1;
 	}
@@ -3305,7 +3311,7 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 	global $fm_name;
 	
 	/** Check if super admin */
-	if (@array_key_exists('do_everything', $allowed_capabilities[$fm_name])) return true;
+	if (@array_key_exists('do_everything', (array) $allowed_capabilities[$fm_name])) return true;
 		
 	/** Handle multiple capabilities */
 	if (is_array($capability)) {
@@ -3320,7 +3326,7 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
 	}
 	
 	/** Check capability */
-	if (@array_key_exists($capability, $allowed_capabilities[$module])) {
+	if (@array_key_exists($capability, (array) $allowed_capabilities[$module])) {
 		if (is_array($allowed_capabilities[$module][$capability])) {
 			/** Explode module groups */
 			foreach ($allowed_capabilities[$module][$capability] as $cap_id) {
@@ -3928,7 +3934,7 @@ HTML;
 function availableServers($server_id_type = 'serial', $include = array('all'), $module = null) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$server_array = null;
+	$server_array = array();
 	
 	if (!$module) {
 		$module = $_SESSION['module'];

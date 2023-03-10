@@ -25,13 +25,13 @@ class fm_module_options {
 	/**
 	 * Displays the option list
 	 */
-	function rows($result, $page, $total_pages) {
+	function rows($result, $page, $total_pages, $required_permission) {
 		global $fmdb;
 		
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
 		}
 
@@ -53,7 +53,7 @@ class fm_module_options {
 		$title_array[] = array('title' => __('Option'), 'rel' => 'config_name');
 		$title_array[] = array('title' => __('Value'), 'rel' => 'config_data');
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
-		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		if (currentUserCan($required_permission, $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 		echo displayTableHeader($table_info, $title_array);
 
@@ -219,26 +219,26 @@ class fm_module_options {
 
 
 	function displayRow($row) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
-		
-		if (!class_exists('fm_dns_acls')) {
-			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		}
+		global $fmdb, $__FM_CONFIG, $required_permission;
 		
 		$disabled_class = ($row->config_status == 'disabled') ? ' class="disabled"' : null;
+		$uneditable_options = array('ctrl_interface', 'ctrl_interface_group', 'wpa_passphrase');
 		
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
-			$edit_status = '<td id="row_actions">';
-			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status .= '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+		if (currentUserCan($required_permission, $_SESSION['module'])) {
+			if (!in_array($row->config_name, $uneditable_options)) {
+				$edit_status = '<td id="row_actions">';
+				$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '</td>';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+			} else {
+				$edit_status = $checkbox = '<td></td>';
+			}
 		} else {
 			$edit_status = $checkbox = null;
 		}
@@ -248,12 +248,12 @@ class fm_module_options {
 		/** Parse address_match_element configs */
 		$config_data = $this->parseDefType($row->config_name, $row->config_data);
 		
-		$config_name = ($row->config_in_clause == 'yes') ? $row->config_name : '<b>' . $row->config_name . '</b>';
+		// $config_name = ($row->config_in_clause == 'yes') ? $row->config_name : '<b>' . $row->config_name . '</b>';
 
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_name"$disabled_class>
 			$checkbox
-			<td>$config_name</td>
+			<td>$row->config_name</td>
 			<td>$config_data</td>
 			<td>$comments</td>
 			$edit_status
@@ -392,7 +392,7 @@ HTML;
 	function availableOptions($action, $server_serial_no, $option_type = 'global', $config_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$temp_array = $return = null;
+		$temp_array = $return = array();
 		
 		if ($action == 'add') {
 //			if (isset($_POST['view_id'])) {
@@ -449,10 +449,9 @@ HTML;
 					$j++;
 				}
 			}
-			return $return;
 		}
 		
-		return;
+		return $return;
 	}
 	
 	

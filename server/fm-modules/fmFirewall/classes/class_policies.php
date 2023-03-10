@@ -53,7 +53,7 @@ class fm_module_policies {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-			$title_array[] = array('class' => 'header-tiny');
+			if ($num_rows > 1) $title_array[] = array('class' => 'header-tiny');
 		}
 		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Location'), __('Source'), __('Destination'), __('Service'), __('Interface')));
 		if ($type == 'filter') {
@@ -80,7 +80,7 @@ class fm_module_policies {
 					echo '</tbody><tbody>';
 					$grabbable = true;
 				}
-				$this->displayRow($results[$x], $type);
+				$this->displayRow($results[$x], $type, $num_rows);
 				$y++;
 			}
 		}
@@ -290,7 +290,7 @@ HTML;
 	}
 
 
-	function displayRow($row, $type) {
+	function displayRow($row, $type, $num_rows) {
 		global $__FM_CONFIG;
 		
 		$row_title = $options = null;
@@ -313,7 +313,7 @@ HTML;
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
-				$grab_bars = '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>';
+				$grab_bars = ($num_rows > 1) ? '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>' : null;
 			} else {
 				$checkbox = $grab_bars = '<td></td>';
 				$class[] = 'no-grab';
@@ -402,7 +402,8 @@ HTML;
 		$policy_services = $policy_source = $policy_destination = $policy_action = null;
 		$source_items = $destination_items = $services_items = null;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
-		$policy_packet_state_form = $policy_packet_state = $policy_time_form = null;
+		$policy_packet_state_form = $policy_time_form = null;
+		$policy_packet_state = '';
 		$target_tab = $policy_uid = $policy_uid_form = $policy_tcp_flags = null;
 		$policy_snat_type = $policy_services_translated = $policy_source_translated = $policy_destination_translated = null;
 		$policy_nat_bidirectional = null;
@@ -545,7 +546,7 @@ FORM;
 
 			/** Packet state */
 			$policy_packet_state_options = ($server_firewall_type) ? $__FM_CONFIG['fw']['policy_states'][$server_firewall_type] : null;
-			if ($_POST['server_serial_no'][0] == 't' || (is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
+			if ($_POST['server_serial_no'][0] == 't' || (isset($data) && is_object($data[0]) && $data[0]->server_serial_no[0] == 0 && $data[0]->policy_template_id)) {
 				$policy_packet_state_options = array();
 				foreach ($__FM_CONFIG['fw']['policy_states'] as $fw => $values) {
 					$i = 0;
@@ -905,11 +906,11 @@ FORM;
 			$post['policy_template_id'] = preg_replace('/\D/', null, $post['server_serial_no']);
 			$post['server_serial_no'] = 0;
 		}
-		$post['policy_source'] = implode(';', $post['source_items']);
-		$post['policy_destination'] = implode(';', $post['destination_items']);
-		$post['policy_services'] = implode(';', $post['services_items']);
-		$post['policy_packet_state'] = implode(',', $post['policy_packet_state']);
-		$post['policy_targets'] = implode(';', $post['policy_targets']);
+		$post['policy_source'] = implode(';', (array) $post['source_items']);
+		$post['policy_destination'] = implode(';', (array) $post['destination_items']);
+		$post['policy_services'] = implode(';', (array) $post['services_items']);
+		$post['policy_packet_state'] = implode(',', (array) $post['policy_packet_state']);
+		$post['policy_targets'] = implode(';', (array) $post['policy_targets']);
 		if (!$post['policy_targets']) $post['policy_targets'] = 0;
 		unset($post['source_items']);
 		unset($post['destination_items']);
@@ -1010,7 +1011,7 @@ FORM;
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result[0];
 			
-			if (trim($results->server_interfaces, ';')) {
+			if ($results->server_interfaces && trim($results->server_interfaces, ';')) {
 				$return = array_merge($return, explode(';', trim($results->server_interfaces, ';')));
 			}
 		}

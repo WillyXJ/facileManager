@@ -286,7 +286,7 @@ function processSetup() {
 	extract($_POST);
 
 	foreach ($ssl as $key=>$val) {
-		if ($install_enable_ssl) {
+		if (isset($install_enable_ssl)) {
 			$__FM_CONFIG['db'][$key] = $val;
 		} else {
 			unset($_POST['ssl']);

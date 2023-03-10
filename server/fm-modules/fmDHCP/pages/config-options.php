@@ -42,7 +42,7 @@ if (array_key_exists('item_id', $_GET)) {
 	$item_info = $fmdb->last_result;
 	
 	$display_option_type = ucfirst($item_info[0]->config_data);
-	$display_option_type_sql = "{$item_info[0]->config_type}' AND config_parent_id='$item_id' AND config_data!='";
+	$display_option_type_sql = "{$item_info[0]->config_type}' AND config_parent_id='$item_id' AND config_name!='config_children' AND config_data!='";
 	
 	$name = $item_info[0]->config_type;
 	$rel = $item_id;

@@ -64,7 +64,7 @@ class fm_module_templates {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-			$title_array[] = array('class' => 'header-tiny');
+			if ($num_rows > 1) $title_array[] = array('class' => 'header-tiny');
 		}
 		$title_array = array_merge((array) $title_array, array(__('Name'), __('Stack'), __('Targets'),
 								array('title' => _('Comment'), 'style' => 'width: 20%;')));
@@ -77,7 +77,7 @@ class fm_module_templates {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
-				$this->displayRow($results[$x], $type);
+				$this->displayRow($results[$x], $num_rows);
 				$y++;
 			}
 		}
@@ -304,9 +304,10 @@ class fm_module_templates {
 	 * @subpackage fmFirewall
 	 *
 	 * @param object $row Single data row from $results
+	 * @param integer $num_rows Number of rows in the result
 	 * @return null
 	 */
-	function displayRow($row) {
+	function displayRow($row, $num_rows) {
 		global $__FM_CONFIG;
 		
 //		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
@@ -324,7 +325,7 @@ class fm_module_templates {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
-			$grab_bars = '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>';
+			$grab_bars = ($num_rows > 1) ? '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>' : null;
 		}
 		
 		$stacks = $this->IDs2Name($row->policy_template_stack, 'policy');

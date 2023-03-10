@@ -45,12 +45,12 @@ if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action___d.png" border="0" alt="__Action__ (' . __('disabled') . ')" title="__Action__ (' . __('disabled') . ')" width="12" />';
 }
 
-$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge((array) $__FM_CONFIG['module']['icons'], (array) $__FM_CONFIG['icons']);
 
 /** Cleanup options */
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmModule']['prefix'] . 'table'=>'prefix');
 
-$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge((array) $__FM_CONFIG['clean']['prefixes'], (array) $__FM_CONFIG['module']['clean']['prefixes']);
 
 /** Module settings */
 $__FM_CONFIG['fmModule']['default']['options'] = @array(

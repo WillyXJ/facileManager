@@ -31,14 +31,17 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmDHCP'] = array(
-		'version'							=> '0.5.0',
-		'client_version'					=> '0.3',
+		'version'							=> '0.7.0',
+		'client_version'					=> '0.7.0',
 		'description'						=> __('Easily manage one or more ISC DHCP servers through a web interface. No longer edit configuration files manually.', 'fmDHCP'),
 		'prefix'							=> 'dhcp_',
 		'required_daemon_version'			=> '4.1',
-		'required_fm_version'				=> '4.1.0',
+		'required_fm_version'				=> '4.4.0',
 		'min_client_auto_upgrade_version'	=> '0.1'
 	);
+
+if($_SESSION['module'] == 'fmDHCP' && !defined('NO_DASH')) define('NO_DASH', true);
+$__FM_CONFIG['homepage'] = 'config-servers.php';
 
 /** Module-specific Images */
 if (isset($__FM_CONFIG['module']['path'])) {
@@ -46,7 +49,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['disabled']	= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action___d.png" border="0" alt="__Action__ (' . __('disabled') . ')" title="__Action__ (' . __('disabled') . ')" width="12" />';
 }
 
-$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge((array) $__FM_CONFIG['module']['icons'], (array) $__FM_CONFIG['icons']);
 
 $__FM_CONFIG['networks']['avail_types']    = array('subnets' => __('Subnets'), 'shared' => __('Shared Networks'));
 
@@ -54,7 +57,7 @@ $__FM_CONFIG['networks']['avail_types']    = array('subnets' => __('Subnets'), '
 $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmDHCP']['prefix'] . 'config'=>'config', 'fm_' . $__FM_CONFIG['fmDHCP']['prefix'] . 'servers'=>'server'
 											);
 
-$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge((array) $__FM_CONFIG['clean']['prefixes'], (array) $__FM_CONFIG['module']['clean']['prefixes']);
 
 $check_utils = findProgram('dhcpd') ? findProgram('dhcpd') : '/path/to/dhcpd';
 $__FM_CONFIG['fmDHCP']['default']['options'] = @array(

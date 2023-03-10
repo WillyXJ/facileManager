@@ -238,8 +238,8 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$time_weekdays = $time_weekdays_not = $time_monthdays_not = $time_contiguous = $time_id = 0;
-		$time_name = $time_comment = $time_zone = $time_weekdays = $time_monthdays = null;
-		$time_start_date = $time_start_time = $time_end_date = $time_end_time = null;
+		$time_name = $time_comment = $time_zone = $time_monthdays = '';
+		$time_start_date = $time_start_time = $time_end_date = $time_end_time = '';
 		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {

@@ -261,7 +261,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	function updateServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$rows_affected = 0;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -298,7 +298,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
 		}
 
-		$return[] = (!$fmdb->rows_affected) ? true : false;
+		$rows_affected += $fmdb->rows_affected;
 		
 		/** Process config options */
 		$sql_insert = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET ";
@@ -312,17 +312,24 @@ class fm_module_servers extends fm_shared_module_servers {
 				return formatError(__('Could not update the server options because a database error occurred.'), 'sql');
 			}
 			
-			$return[] = (!$fmdb->rows_affected) ? true : false;
+			$rows_affected += $fmdb->rows_affected;
 		}
 		
 		/** Return if there are no changes */
-		if (!$fmdb->rows_affected && array_search(false, $return) === false) return true;
+		if (!$rows_affected) return true;
 
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
-		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
+		$tmp_key = _('None');
+		if ($post['keys']) {
+			$tmp_key = array();
+			foreach (explode(',', $post['keys']) as $key_id) {
+				$tmp_key[] = getNameFromID(str_replace('key_', '', $key_id), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
+			}
+			$tmp_key = join(',', $tmp_key);
+		}
 		$tmp_runas = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : $post['server_run_as_predefined'];
-		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nKey: {$tmp_key}\nType: {$post['server_type']}\n" .
+		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nKeys: {$tmp_key}\nType: {$post['server_type']}\n" .
 					"Run-as: {$tmp_runas}\nUpdate Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}\n" .
 					"Server Root: {$post['server_root_dir']}\nServer Chroot: {$post['server_chroot_dir']}\n" .
 					"Zone file directory: {$post['server_zones_dir']}");
@@ -553,11 +560,6 @@ HTML;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-				$edit_status .= '<a class="status_form_link" href="#" rel="';
-				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
-				$edit_status .= '">';
-				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-				$edit_status .= '</a>';
 				$query = "SELECT domain_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND 
 					(domain_name_servers='g_{$row->group_id}' OR domain_name_servers LIKE 'g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id}')";
 				$result = $fmdb->get_results($query);
@@ -1051,7 +1053,7 @@ FORM;
 	function getConfig($server_id, $config_opt = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$return = '';
 		
 		/** Get the data from $config_opt */
 		$query = "SELECT cfg_id,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND server_id='{$server_id}' AND cfg_type='global' AND cfg_name='$config_opt' ORDER BY cfg_id ASC";

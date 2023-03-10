@@ -61,7 +61,7 @@ class fm_module_rpz {
 					echo '</tbody><tbody>';
 					$grabbable = true;
 				}
-				$this->displayRow($results[$x]);
+				$this->displayRow($results[$x], $num_rows);
 				$y++;
 			}
 		}
@@ -107,6 +107,9 @@ class fm_module_rpz {
 				$clean_data = sanitize($data, '_');
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
+				if ($key == 'cfg_comment') {
+					$log_message[] = sprintf('Comment: %s', $clean_data);
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -170,7 +173,7 @@ class fm_module_rpz {
 			return formatError(__('Could not add the response policy zone because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = sprintf("Added RPZ:\nZone: %s\n%s", $domain_name, join("\n", $log_message));
+		$log_message = sprintf("Added RPZ:\nZone: %s\n%s", $domain_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 		return true;
 	}
@@ -227,6 +230,9 @@ class fm_module_rpz {
 			if (in_array($key, $include)) {
 				$clean_data = sanitize($data);
 				$sql_values .= "$key='$clean_data', ";
+				if ($key == 'cfg_comment') {
+					$log_message[] = sprintf('Comment: %s', $clean_data);
+				}
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
@@ -265,7 +271,7 @@ class fm_module_rpz {
 			}
 		}
 		
-		$log_message = sprintf("Updated RPZ:\nZone: %s\n%s", $domain_name, join("\n", $log_message));
+		$log_message = sprintf("Updated RPZ:\nZone: %s\n%s", $domain_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 
 		return true;
@@ -275,7 +281,7 @@ class fm_module_rpz {
 	/**
 	 * Deletes the selected rpz channel/category
 	 */
-	function delete($id, $server_serial_no = 0, $type) {
+	function delete($id, $server_serial_no, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
@@ -297,7 +303,7 @@ class fm_module_rpz {
 	}
 
 
-	function displayRow($row) {
+	function displayRow($row, $num_rows) {
 		global $__FM_CONFIG, $fmdb;
 		
 		if ($row->cfg_status == 'disabled') $class[] = 'disabled';
@@ -315,7 +321,7 @@ class fm_module_rpz {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
 			if ($row->domain_id) {
-				$grab_bars = '<i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i>';
+				$grab_bars = ($num_rows > 1) ? '<i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i>' : null;
 			} else {
 				$grab_bars = null;
 				$class[] = 'no-grab';

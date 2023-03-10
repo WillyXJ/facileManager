@@ -318,6 +318,8 @@ class fm_users {
 		$post['group_id'] = intval($post['group_id']);
 		if (!isset($post['group_id'])) return _('This is a malformed request.');
 		if (empty($post['group_name'])) return _('No group name defined.');
+
+		$group_name = sanitize($post['group_name']);
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_groups', 'group_name');
@@ -337,7 +339,7 @@ class fm_users {
 				$sql_edit .= $key . "='" . sanitize($data) . "', ";
 			}
 		}
-		$sql = rtrim($sql_edit . $sql_pwd, ', ');
+		$sql = rtrim($sql_edit, ', ');
 		
 		/** Process group permissions */
 		if (isset($post['process_user_caps']) && !isset($post['user_caps'])) $post['user_caps'] = array();
@@ -361,7 +363,7 @@ class fm_users {
 		
 		/* Associated users with group */
 		$queries[] = "UPDATE `fm_users` SET `user_group`='0', `user_caps`=NULL WHERE `user_group`='{$post['group_id']}'";
-		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $post['group_users']) . "')";
+		$queries[] = "UPDATE `fm_users` SET `user_group`='{$post['group_id']}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", (array) $post['group_users']) . "')";
 		foreach ($queries as $query) {
 			$fmdb->query($query);
 			if ($fmdb->sql_errors) {
@@ -465,7 +467,7 @@ class fm_users {
 
 			$last_login = ($row->user_last_login == 0) ? _('Never') : date("F d, Y \a\\t H:i T", $row->user_last_login);
 			if ($row->user_ipaddr) {
-				$user_ipaddr = (verifyIPAddress($row->user_ipaddr) !== false) ? @gethostbyaddr($row->user_ipaddr) : $row->user_ipaddr;
+				$user_ipaddr = $row->user_ipaddr;
 			} else $user_ipaddr = _('None');
 
 			if ($row->user_auth_type == 2) {
@@ -576,7 +578,7 @@ HTML;
 			/** Get field length */
 			$field_length = getColumnLength('fm_users', 'user_login');
 			
-			$username_form = $action == 'add' ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" />' : '<span id="form_username">' . $user_login . '</span>';
+			$username_form = ($action == 'add' || array_search('user_login', $form_bits) == 'editable') ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" />' : '<span id="form_username">' . $user_login . '</span>';
 			$hidden .= '<input type="hidden" name="user_id" value="' . $user_id . '" />';
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_login">' . _('User Login') . '</label></th>

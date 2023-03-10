@@ -131,9 +131,11 @@ class fm_module_options {
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false || strpos($post['cfg_data'], 'key_') !== false || \
-			strpos($post['cfg_data'], 'domain_') !== false || \
-			strpos($post['cfg_data'], 'master_') !== false) ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
+			|| strpos($post['cfg_data'], 'key_') !== false
+			|| strpos($post['cfg_data'], 'domain_') !== false
+			|| strpos($post['cfg_data'], 'master_') !== false)
+			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Added option:\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -197,9 +199,11 @@ class fm_module_options {
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false || strpos($post['cfg_data'], 'key_') !== false || \
-			strpos($post['cfg_data'], 'domain_') !== false || \
-			strpos($post['cfg_data'], 'master_') !== false) ? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
+			|| strpos($post['cfg_data'], 'key_') !== false
+			|| strpos($post['cfg_data'], 'domain_') !== false
+			|| strpos($post['cfg_data'], 'master_') !== false)
+			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -477,7 +481,8 @@ HTML;
 	function availableOptions($action, $server_serial_no, $option_type = 'global', $cfg_name = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$temp_array = $return = null;
+		$temp_array = array();
+		$return = null;
 		
 		if ($action == 'add') {
 			if (isset($_POST['view_id'])) {
@@ -542,9 +547,10 @@ HTML;
 			$j=0;
 			for ($i=0; $i<$def_avail_result_count; $i++) {
 				$array_count_values = @array_count_values($temp_array);
-				if ((is_array($temp_array) && array_search($def_avail_result[$i]->def_option, $temp_array) === false) ||
-						!isset($temp_array) || $array_count_values[$def_avail_result[$i]->def_option] < $def_avail_result[$i]->def_max_parameters || 
-						$def_avail_result[$i]->def_max_parameters < 0) {
+				if ((is_array($temp_array) && array_search($def_avail_result[$i]->def_option, $temp_array) === false)
+					|| !isset($temp_array)
+					|| $array_count_values[$def_avail_result[$i]->def_option] < $def_avail_result[$i]->def_max_parameters
+					|| $def_avail_result[$i]->def_max_parameters < 0) {
 					$return[$j] = $def_avail_result[$i]->def_option;
 					$j++;
 				}
@@ -680,10 +686,13 @@ HTML;
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
 		
-		return (strpos($cfg_data, 'acl_') !== false || strpos($cfg_data, 'key_') !== false || \
-			strpos($cfg_data, 'domain_') !== false || strpos($def_type, 'address_match_element') !== false || \
-			strpos($cfg_data, 'master_') !== false || \
-			strpos($def_type, 'domain_name') !== false) ? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
+		return (strpos($cfg_data, 'acl_') !== false
+			|| strpos($cfg_data, 'key_') !== false
+			|| strpos($cfg_data, 'domain_') !== false
+			|| strpos($def_type, 'address_match_element') !== false
+			|| strpos($cfg_data, 'master_') !== false
+			|| strpos($def_type, 'domain_name') !== false)
+			? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
 	}
 	
 
@@ -700,10 +709,12 @@ HTML;
 	 * @return string Return formated data
 	 */
 	function populateDefTypeDropdown($def_type, $cfg_data, $select_name = 'cfg_data', $options = null) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
-		
 		$raw_def_type_array = explode(')', str_replace('(', '', $def_type));
-		$saved_data = explode(' ', $cfg_data);
+		if ($cfg_data) {
+			$saved_data = explode(' ', (string) $cfg_data);
+		} else {
+			$saved_data = array('', '');
+		}
 		$i = 0;
 		$dropdown = null;
 		foreach ($raw_def_type_array as $raw_def_type) {

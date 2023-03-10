@@ -1022,6 +1022,9 @@ a {
 	font-size: 18px;
 	color: #c0c0c0;
 }
+#row_actions a.delete {
+	margin-left: 1em;
+}
 #row_actions i.delete,
 i.delete {
 	color: #c11515;

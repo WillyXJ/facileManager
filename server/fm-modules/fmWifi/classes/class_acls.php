@@ -125,7 +125,7 @@ class fm_wifi_acls {
 
 		$insert_id = $fmdb->insert_id;
 
-		addLogEntry(__('Added a MAC ACL with the following details') . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated APs') . ": ${post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
+		addLogEntry(__('Added a MAC ACL with the following details') . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated APs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
 
 		return true;
 
@@ -193,7 +193,7 @@ class fm_wifi_acls {
 //		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
 		/** Add entry to audit log */
-		addLogEntry(sprintf(__('Updated MAC ACL \'%s\' with the following details'), $old_name) . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated APs') . ": ${post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
+		addLogEntry(sprintf(__('Updated MAC ACL \'%s\' with the following details'), $old_name) . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated APs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
 
 		return true;
 	}

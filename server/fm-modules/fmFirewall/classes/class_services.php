@@ -436,6 +436,8 @@ HTML;
 		if (!$flag_bits) return null;
 		
 		@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $flag_bits);
+		$tcp_flag_mask = (int) $tcp_flag_mask;
+		$tcp_flag_settings = (int) $tcp_flag_settings;
 		$service_tcp_flags['mask'] = $service_tcp_flags['settings'] = null;
 		
 		foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {

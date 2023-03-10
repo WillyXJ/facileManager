@@ -20,7 +20,11 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
+/** Ensure user can use this page */
+$required_permission[] = 'manage_wlans';
+
+/** Ensure user can use this page */
+if (!currentUserCan(array_merge($required_permission, array('view_all')), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
@@ -53,7 +57,7 @@ if (array_key_exists('item_id', $_GET)) {
 	$display_option_type_sql .= "') AND config_parent_id='0' AND config_is_parent='no";
 }
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
+if (currentUserCan($required_permission, $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$uri_params = generateURIParams(array('type', 'item_id', 'server_serial_no'), 'include');
 	
@@ -98,7 +102,7 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
+echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan($required_permission, $_SESSION['module']), $name, $rel);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
@@ -114,7 +118,7 @@ HTML;
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('config_id', $sort_field, 'config_name'), 'config_', "AND config_type IN ('$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_module_options->rows($result, $page, $total_pages);
+$fm_module_options->rows($result, $page, $total_pages, $required_permission);
 
 printFooter();
 

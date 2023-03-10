@@ -1,3 +1,12 @@
+0.4.0 (2023-03-09)
+==================
+* Both   - [improvement] Added PHP 8.2 support. (Issue #558)
+* Server - [improvement] WLAN user names can be edited.
+* Server - [bug] Fixed limited user permission display issues.
+* Server - [bug] Removed the unused server group enable/disable button.
+* Server - [bug] Fixed logging of WLAN user changes.
+* Server - [bug] macaddr_acl option can be edited.
+
 0.3.1 (2020-11-27)
 ==================
 * Server - [bug] Fixed PHP errors.

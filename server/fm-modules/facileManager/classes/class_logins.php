@@ -217,6 +217,9 @@ class fm_login {
 				
 			/** Check if they're logged in. */
 			if (isset($_SESSION['user']['logged_in']) && $_SESSION['user']['logged_in']) {
+				if (!isset($_SESSION['user']['last_login'])) {
+					$_SESSION['user']['last_login'] = 0;
+				}
 				/** Set the last login info */
 				if (strtotime("-1 hour") > $_SESSION['user']['last_login']) {
 					$_SESSION['user']['last_login'] = strtotime("-15 minutes");
@@ -257,9 +260,9 @@ class fm_login {
 		$fm_db_version = getOption('fm_db_version');
 		$auth_method = ($fm_db_version >= 18) ? getOption('auth_method') : true;
 		if ($auth_method) {
-			/** Default Super Admin? */
-			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_auth_type`=1 ORDER BY user_id ASC LIMIT 1");
-			if ($fmdb->last_result[0]->user_login == $user_login) {
+			/** Use Builtin Auth when Default Auth Method is LDAP but user is defined with 'facileManager/Builtin' */
+			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_login` = '$user_login' and `user_auth_type`=1 and `user_status`='active'");
+			if (is_array($fmdb->last_result) && $fmdb->last_result[0]->user_login == $user_login) {
 				$auth_method = 1;
 			}
 
@@ -272,11 +275,6 @@ class fm_login {
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_login`='$user_login' AND `user_password`='$user_password'");
 				}
 				if (!$fmdb->num_rows) {
-					if (useMySQLi()) {
-						@mysqli_free_result($result);
-					} else {
-						@mysql_free_result($result);
-					}
 					return false;
 				} else {
 					$user = $fmdb->last_result[0];
@@ -309,12 +307,6 @@ class fm_login {
 			
 					$this->setSession($user);
 
-					if (useMySQLi()) {
-						@mysqli_free_result($result);
-					} else {
-						@mysql_free_result($result);
-					}
-					
 					return true;
 				}
 			/** LDAP Authentication */
@@ -359,7 +351,9 @@ class fm_login {
 			// Init the session.
 			session_id($fmid);
 			@session_start();
-			$this->updateSessionDB($_SESSION['user']['name']);
+			if (isset($_SESSION['user']['name'])) {
+				$this->updateSessionDB($_SESSION['user']['name']);
+			}
 			@session_unset();
 			setcookie('fmid', '');
 			@session_destroy();
@@ -566,7 +560,7 @@ This link expires in %s.',
 			if ($ldap_bind) {
 				if ($ldap_group_require) {
 					if (strpos($ldap_dn, '@') !== false) {
-						if (isset($ldap_group_search_dn)) {
+						if (isset($ldap_group_search_dn) && !empty($ldap_group_search_dn)) {
 							$ldap_dn = $ldap_group_search_dn;
 						} else {
 							/** Convert AD ldap_dn to real ldap_dn */
@@ -727,11 +721,6 @@ This link expires in %s.',
 
 		$result = $fmdb->get_results("SELECT * FROM `fm_keys` WHERE `key_status`='active' AND `key_token`='$token' AND `account_id`='" . getAccountID($_POST['AUTHKEY']) . "'");
 		if (!$fmdb->num_rows) {
-			if (useMySQLi()) {
-				@mysqli_free_result($result);
-			} else {
-				@mysql_free_result($result);
-			}
 			return false;
 		}
 		$apikey = $fmdb->last_result[0];
@@ -744,22 +733,11 @@ This link expires in %s.',
 		
 		$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_template_only`='no' AND `user_id`=" . $apikey->user_id . " AND `account_id`='" . getAccountID($_POST['AUTHKEY']) . "'");
 		if (!$fmdb->num_rows) {
-			if (useMySQLi()) {
-				@mysqli_free_result($result);
-			} else {
-				@mysql_free_result($result);
-			}
 			return false;
 		}
 
 		$this->setSession($fmdb->last_result[0]);
 
-		if (useMySQLi()) {
-			@mysqli_free_result($result);
-		} else {
-			@mysql_free_result($result);
-		}
-		
 		return true;
 	}
 	

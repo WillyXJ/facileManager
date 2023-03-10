@@ -181,6 +181,8 @@ class fm_dns_masters {
 	function displayRow($row) {
 		global $__FM_CONFIG;
 		
+		$classes = array();
+		
 		if ($row->master_status == 'disabled') $classes[] = 'disabled';
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -235,7 +237,6 @@ HTML;
 		
 		$master_id = $parent_id = $master_key_id = 0;
 		$master_name = $master_addresses = $master_comment = $master_port = $master_dscp = null;
-		$ucaction = ucfirst($action);
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && array_key_exists('add_form', $_POST)) {
@@ -246,7 +247,7 @@ HTML;
 			if (isset($master_parent_id)) $parent_id = $_POST['parent_id'] = $master_parent_id;
 		}
 		
-		$master_addresses = str_replace(',', "\n", rtrim(str_replace(' ', '', $master_addresses), ';'));
+		$master_addresses = str_replace(',', "\n", rtrim(str_replace(' ', '', (string) $master_addresses), ';'));
 
 		/** Get field length */
 		$master_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_name');
@@ -408,7 +409,7 @@ HTML;
 			$temp_masters[] = $temp_master_array['id'];
 		}
 		$i = count($available_masters);
-		foreach (explode(',', $saved_masters) as $saved_master) {
+		foreach (explode(',', (string) $saved_masters) as $saved_master) {
 			if (!$saved_master) continue;
 			if (array_search($saved_master, $temp_masters) === false) {
 				$available_masters[$i]['id'] = $saved_master;

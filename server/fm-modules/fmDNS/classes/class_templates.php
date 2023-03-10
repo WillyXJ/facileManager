@@ -150,7 +150,7 @@ HTML;
 		echo $edit_status . "</tr>\n";
 	}
 	
-	function printForm($data = '', $action = 'add', $template_type) {
+	function printForm($data, $action, $template_type) {
 		$popup_title = $action == 'add' ? __('Add Template') : __('Edit Template');
 		$popup_header = buildPopup('header', $popup_title);
 		$force_action = $action == 'add' ? 'create' : 'update';

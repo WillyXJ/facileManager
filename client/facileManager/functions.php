@@ -129,7 +129,7 @@ if (in_array('install', $argv) || in_array('reinstall', $argv)) {
 		require($config_file);
 		if (defined('FMHOST') && defined('AUTHKEY') && defined('SERIALNO') && in_array('install', $argv)) {
 			$proto = (socketTest(FMHOST, 443)) ? 'https' : 'http';
-			$url = "${proto}://" . FMHOST . "admin-accounts.php?verify";
+			$url = "{$proto}://" . FMHOST . "admin-accounts.php?verify";
 			$data['compress'] = $compress;
 			$data['AUTHKEY'] = AUTHKEY;
 			$data['SERIALNO'] = SERIALNO;
@@ -310,7 +310,7 @@ function installFM($proto, $compress) {
 	
 	/** Test the authentication */
 	echo fM('  --> Checking account details...');
-	$url = "${proto}://${hostname}/${path}admin-accounts.php?verify";
+	$url = "{$proto}://{$hostname}/{$path}admin-accounts.php?verify";
 	$raw_data = getPostData($url, $data);
 	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	echo $raw_data . "\n\n";
@@ -334,7 +334,7 @@ function installFM($proto, $compress) {
 		$serialno = intval(trim(fgets(STDIN)));
 	}
 	
-	$url = "${proto}://${hostname}/${path}admin-servers.php?genserial";
+	$url = "{$proto}://{$hostname}/{$path}admin-servers.php?genserial";
 	
 	/** Process new server */
 	if (empty($serialno)) {
@@ -359,7 +359,7 @@ function installFM($proto, $compress) {
 	saveFMConfigFile($data);
 	
 	/** Complete installation */
-	$url = "${proto}://${hostname}/${path}admin-servers.php?install";
+	$url = "{$proto}://{$hostname}/{$path}admin-servers.php?install";
 	$raw_data = getPostData($url, $data);
 	
 	/** Add log entry */
@@ -959,7 +959,7 @@ function addUser($user_info, $passwd_users) {
 	}
 	
 	if (!$retval) {
-		$ssh_dir = trim(shell_exec('grep ' . escapeshellarg($user_name) . " /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
+		$ssh_dir = trim(shell_exec('grep -w ' . escapeshellarg($user_name) . " /etc/passwd | awk -F: '{print $6}'")) . '/.ssh';
 		if ($ssh_dir && $ssh_dir != '/') {
 			createDir($ssh_dir, $user_name);
 			return $ssh_dir;

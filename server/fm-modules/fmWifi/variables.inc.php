@@ -31,11 +31,11 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmWifi'] = array(
-		'version'							=> '0.3.1',
-		'client_version'					=> '0.3.1',
+		'version'							=> '0.4.0',
+		'client_version'					=> '0.4.0',
 		'description'						=> __('Manage wifi access points with hostapd.', 'fmWifi'),
 		'prefix'							=> 'wifi_',
-		'required_fm_version'				=> '4.0.1',
+		'required_fm_version'				=> '4.4.0',
 		'required_daemon_version'			=> '2.4',
 		'min_client_auto_upgrade_version'	=> '0.1'
 	);
@@ -50,7 +50,7 @@ $__FM_CONFIG['module']['icons']['ok']			= sprintf('<i class="fa fa-check-circle 
 $__FM_CONFIG['module']['icons']['notice']		= sprintf('<i class="fa fa-question-circle fa-lg notice" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
 $__FM_CONFIG['module']['icons']['block']		= sprintf('<i class="fa fa-ban fa-lg" alt="%1$s" title="%1$s" aria-hidden="true"></i>', __('Block Client'));
 
-$__FM_CONFIG['icons'] = @array_merge($__FM_CONFIG['module']['icons'], $__FM_CONFIG['icons']);
+$__FM_CONFIG['icons'] = @array_merge((array) $__FM_CONFIG['module']['icons'], (array) $__FM_CONFIG['icons']);
 
 $__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Access Points'), 'groups' => _('AP Groups'));
 $__FM_CONFIG['acls']['actions']           = array('accept' => __('Allow'), 'deny' => __('Deny'));
@@ -60,7 +60,7 @@ $__FM_CONFIG['module']['clean']['prefixes']	= array('fm_' . $__FM_CONFIG['fmWifi
 											'fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'servers'=>'server', 'fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'server_groups'=>'group',
 											'fm_' . $__FM_CONFIG['fmWifi']['prefix'] . 'wlan_users'=>'wlan_user',);
 
-$__FM_CONFIG['clean']['prefixes']			= @array_merge($__FM_CONFIG['clean']['prefixes'], $__FM_CONFIG['module']['clean']['prefixes']);
+$__FM_CONFIG['clean']['prefixes']			= @array_merge((array) $__FM_CONFIG['clean']['prefixes'], (array) $__FM_CONFIG['module']['clean']['prefixes']);
 
 /** Module settings */
 $__FM_CONFIG['fmWifi']['default']['options'] = @array(
