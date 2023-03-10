@@ -35,7 +35,7 @@ $__FM_CONFIG['fmFirewall'] = array(
 		'client_version'					=> '2.2.0',
 		'description'						=> __('Managing software firewalls should not be difficult. Manage one or more software firewall servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files individually.', 'fmFirewall'),
 		'prefix'							=> 'fw_',
-		'required_fm_version'				=> '4.5.0',
+		'required_fm_version'				=> '4.4.0',
 		'min_client_auto_upgrade_version'	=> '1.3'
 	);
 
