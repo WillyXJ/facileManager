@@ -1874,7 +1874,7 @@ HTML;
 			$defined_views = $fmdb->last_result;
 			
 			/** Format domain_view */
-			if (!$post['domain_view'] || in_array(0, $post['domain_view'])) {
+			if (!$post['domain_view'] || in_array(0, (array) $post['domain_view'])) {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
 				if ($fmdb->num_rows) {
 					/** Zone exists for views, but what about on the same server? */

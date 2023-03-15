@@ -187,7 +187,6 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 			$array = array(
 					'record_name' => $data['record_value'],
 					'record_ttl' => $data['record_ttl'],
-					'record_class' => $data['record_class'],
 					'record_value' => $data['record_name'] . $domain,
 					'record_comment' => $data['record_comment']
 					);
