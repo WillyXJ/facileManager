@@ -116,3 +116,16 @@ table.global-search-results thead th:first-child {
 div .global-search-results {
 	width: 700px;
 }
+
+#tabs.global-search-results span.menu_badge {
+	margin-left: 4px;
+	border-color: #8F8F8F;
+	background-color: #8F8F8F;
+	font-size: 10px;
+    padding: 0 7px;
+	height: 14px;
+	top: -1px;
+}
+#tabs.global-search-results span.menu_badge p {
+	margin-top: 0px;
+}
