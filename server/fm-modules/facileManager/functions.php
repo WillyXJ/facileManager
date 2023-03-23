@@ -3123,7 +3123,9 @@ function countServerUpdates() {
  */
 function displaySearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
-		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
+		$_GET['q'] = html_entity_decode(str_replace(array('%2522', '%22', '%2527', '%27', "'"), '"', $_GET['q']));
+		$cleaned_q = htmlentities($_GET['q']);
+		$placeholder = sprintf(_('Searched for %s'), $cleaned_q);
 		$search_remove = '<i class="search_remove fa fa-remove fa-lg text_icon" title="' . _('Clear this search') . '"></i>';
 		$display = ' style="display:block"';
 	} else {
@@ -3136,7 +3138,7 @@ function displaySearchForm($page_params = null) {
 		<div>
 			<div id="search_form">
 				<form id="search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
-					<input type="text" class="text_icon" placeholder="$placeholder" value="{$_GET['q']}" />
+					<input type="text" class="text_icon" placeholder="$placeholder" value="$cleaned_q" />
 					$search_remove
 				</form>
 			</div>
@@ -3213,18 +3215,25 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'defau
  * @return string
  */
 function createSearchSQL($fields = array(), $prefix = null) {
-	$search_query = null;
+	$search_query = '';
 	if (isset($_GET['q'])) {
+		$q = $_GET['q'];
+		$absolute_q = trim($q, '"');
 		$search_query = ' AND (';
-		$search_text = sanitize($_GET['q']);
+		if ("\"$absolute_q\"" == $q) {
+			$search_text = sprintf("='%s'", sanitize($absolute_q));
+		} else {
+			$search_text = sprintf("LIKE '%s'", '%' . sanitize($absolute_q) . '%');
+		}
 		foreach ($fields as $field) {
-			$search_query .= "$prefix$field LIKE '%$search_text%' OR ";
+			$search_query .= "$prefix$field $search_text OR ";
 		}
 		$search_query = rtrim($search_query, ' OR ') . ')';
 	}
 	
 	return $search_query;
 }
+
 
 
 /**
