@@ -372,7 +372,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								}
 								
 								if ($direction_group == 's-d') {
-									if (@array_key_exists($l, $group_array['s'])) {
+									if (@array_key_exists($l, (array) $group_array['s'])) {
 										$multiports[$k][] = $group_array['s'][$l] . ' --dport ' . $group_array['d'][$l];
 										unset($group_array);
 									}
@@ -417,7 +417,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Handle time restrictions */
 			$time_restrictions = null;
 			if ($policy_result[$i]->policy_time) {
-				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $policy_result[$i]->policy_time, 'time_', 'time_id', 'active');
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', substr($policy_result[$i]->policy_time, 1), 'time_', 'time_id', 'active');
 				if ($fmdb->num_rows) {
 					$time[] = '-m time';
 					$time_result = $fmdb->last_result[0];

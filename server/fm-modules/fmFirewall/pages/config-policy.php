@@ -22,6 +22,8 @@
 
 if (!currentUserCan(array('manage_policies', 'view_all'), $_SESSION['module'])) unAuth();
 
+define('FM_INCLUDE_SEARCH', true);
+
 /** Include module variables */
 if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
 
@@ -38,7 +40,7 @@ $original_server_serial_no = $server_serial_no;
 $valid = false;
 if (getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id')) {
 	$valid = true;
-} elseif ($server_serial_no[0] == 't' && getNameFromID(preg_replace('/\D/', null, $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_status')) {
+} elseif ($server_serial_no[0] == 't' && getNameFromID(preg_replace('/\D/', '', $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_status')) {
 	$valid = true;
 }
 
@@ -52,20 +54,9 @@ if (currentUserCan('manage_policies', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_policies->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
-				exit;
-			}
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_policies->update($_POST);
+			$result = ($action == 'add') ? $fm_module_policies->add($_POST) : $fm_module_policies->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -114,7 +105,7 @@ if ($server_serial_no) {
 	$template_id = 0;
 	$template_id_sql = null;
 	if ($server_serial_no[0] == 't') {
-		$template_id = preg_replace('/\D/', null, $server_serial_no);
+		$template_id = preg_replace('/\D/', '', $server_serial_no);
 		$template_id_sql = "AND policy_template_id=$template_id";
 		$server_serial_no = 0;
 	}

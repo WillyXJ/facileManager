@@ -38,34 +38,35 @@ class fm_module_groups {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
-		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="groups">%s</p>', _('There are no groups defined.'));
-		} else {
-			$table_info = array(
-							'class' => 'display_results',
-							'id' => 'table_edits',
-							'name' => 'groups'
-						);
+		$table_info = array(
+						'class' => 'display_results',
+						'id' => 'table_edits',
+						'name' => 'groups'
+					);
 
-			if (is_array($bulk_actions_list)) {
-				$title_array[] = array(
-									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
-									'class' => 'header-tiny header-nosort'
-								);
-			}
-			$title_array = array_merge((array) $title_array, array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;')));
-			if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		}
+		$title_array = array_merge((array) $title_array, array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;')));
+		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
-			echo displayTableHeader($table_info, $title_array);
-			
+		echo displayTableHeader($table_info, $title_array);
+		
+		if ($result) {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				$this->displayRow($results[$x], $type);
 				$y++;
 			}
-			
-			echo "</tbody>\n</table>\n";
+		}
+		
+		echo "</tbody>\n</table>\n";
+		if (!$result) {
+			printf('<p id="table_edits" class="noresult" name="groups">%s</p>', _('There are no groups defined.'));
 		}
 	}
 
@@ -180,12 +181,13 @@ class fm_module_groups {
 		
 		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $group_items = $checkbox = null;
+		$group_items = $checkbox = null;
+		$edit_status = sprintf('<span rel="g%s">%s</span>', $row->group_id, $__FM_CONFIG['module']['icons']['search']);
 		
 		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_objects';
 		
 		if (currentUserCan($permission, $_SESSION['module'])) {
-			$edit_status = '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status .= '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->group_id, 'group')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" /></td>';

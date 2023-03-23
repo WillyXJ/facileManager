@@ -28,20 +28,9 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	switch ($action) {
 	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_servers->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename']);
-				exit;
-			}
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_servers->update($_POST);
+			$result = ($action == 'add') ? $fm_module_servers->add($_POST) : $fm_module_servers->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;

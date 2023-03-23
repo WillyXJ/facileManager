@@ -90,9 +90,29 @@ select.select-stack option {
 	padding: 3px;
 }
 table tbody tr td.options {
-	white-space: nowrap;
 	text-align: right;
 }
 table tbody tr td.options i {
 	margin-left: 4px;
+}
+
+table[name="policies"] tbody tr td {
+	white-space: nowrap;
+}
+table[name="policies"] tbody tr td:nth-last-child(2) {
+	white-space: normal;
+}
+
+table.global-search-results thead {
+	font-size: 12px;
+}
+table.global-search-results thead th {
+	padding: 5px;
+}
+table.global-search-results thead th:first-child {
+	padding-left: 2em;
+}
+
+div .global-search-results {
+	width: 700px;
 }

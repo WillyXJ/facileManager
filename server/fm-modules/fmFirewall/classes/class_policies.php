@@ -198,7 +198,7 @@ HTML;
 			
 			$template_id_sql = null;
 			if ($post['server_serial_no'][0] == 't') {
-				$template_id = preg_replace('/\D/', null, $post['server_serial_no']);
+				$template_id = preg_replace('/\D/', '', $post['server_serial_no']);
 				$template_id_sql = " AND policy_template_id=$template_id";
 				$post['server_serial_no'] = 0;
 			}
@@ -321,18 +321,16 @@ HTML;
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
 		
-		$log = ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) ? str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']) : null;
-		$action = ($row->policy_type == 'filter') ? str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_action]) : null;
 		$source = ($row->policy_source) ? $this->formatPolicyIDs($row->policy_source) : 'any';
 		$destination = ($row->policy_destination) ? $this->formatPolicyIDs($row->policy_destination) : 'any';
 		$services = ($row->policy_services) ? $this->formatPolicyIDs($row->policy_services) : 'any';
 		$interface = ($row->policy_interface) ? $row->policy_interface : 'any';
-		$policy_time = ($type == 'filter' && $row->policy_time) ? getNameFromID($row->policy_time, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name') : 'any';
+		$policy_time = ($type == 'filter' && $row->policy_time) ? $this->formatPolicyIDs($row->policy_time) : 'any';
 		$policy_uid = ($row->policy_uid) ? $row->policy_uid : 'any';
 
 		$source_translated = ($row->policy_source_translated) ? $this->formatPolicyIDs($row->policy_source_translated) : 'any';
 		$destination_translated = ($row->policy_destination_translated) ? $this->formatPolicyIDs($row->policy_destination_translated) : 'any';
-		$services_translated = ($row->policy_services_translated) ? $this->formatPolicyIDs($row->policy_services_translated) : 'any';
+		// $services_translated = ($row->policy_services_translated) ? $this->formatPolicyIDs($row->policy_services_translated) : 'any';
 
 		$source = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_source_not) . ' ' . $source;
 		$destination = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_destination_not) . ' ' . $destination;
@@ -346,7 +344,15 @@ HTML;
 		if ($row->policy_tcp_flags) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-flag" aria-hidden="true"></i></a>', __('TCP flags defined'));
 		if ($row->policy_nat_bidirectional == 'yes' && $row->policy_snat_type == 'static') $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-arrows-h" aria-hidden="true"></i></a>', __('1:1 NAT'));
 		
+		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) $options[] = str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']);
+		if ($row->policy_type == 'filter') $options[] = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_action]);
+
+		/** Mark search terms */
 		$comments = nl2br($row->policy_comment);
+		if (isset($_GET['q'])) {
+			$comments = preg_replace_callback("/{$_GET['q']}/", 'markGlobalSearchMatch', $comments);
+		}
+
 		if ($row->server_serial_no) {
 			$location = getNameFromID($row->server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		} elseif ($row->policy_from_template) {
@@ -356,13 +362,18 @@ HTML;
 		}
 
 		if ($class) $class = 'class="' . join(' ', $class) . '"';
-		if ($options) $options = join('&nbsp;&nbsp;', $options);
+		if ($options) {
+			if (count($options) > 4) {
+				$options[2] .= '<br />';
+			}
+			$options = join(' ', $options);
+		}
 
 		switch ($type) {
 			case 'filter':
 				$type_lines = <<<HTML
 			<td>$row->policy_direction</td>
-			<td>$policy_time</td>
+			<td><span rel="t$row->policy_time">$policy_time</span></td>
 			<td>$policy_uid</td>
 HTML;
 				break;
@@ -378,7 +389,7 @@ HTML;
 		<tr id="$row->policy_id" name="$row->policy_name" $class $row_title>
 			$checkbox
 			$grab_bars
-			<td class="options">$options $log $action</td>
+			<td class="options">$options</td>
 			<td>$row->policy_name</td>
 			<td>$location</td>
 			<td>$source</td>
@@ -905,7 +916,7 @@ FORM;
 		
 		$post['server_serial_no'] = isset($post['server_serial_no']) ? $post['server_serial_no'] : $_REQUEST['server_serial_no'];
 		if ($post['server_serial_no'][0] == 't') {
-			$post['policy_template_id'] = preg_replace('/\D/', null, $post['server_serial_no']);
+			$post['policy_template_id'] = preg_replace('/\D/', '', $post['server_serial_no']);
 			$post['server_serial_no'] = 0;
 		}
 		$post['policy_source'] = implode(';', (array) $post['source_items']);
@@ -933,7 +944,7 @@ FORM;
 		
 		/** Get policy_order_id */
 		if (!isset($post['policy_order_id']) || $post['policy_order_id'] == 0) {
-			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['server_serial_no'], 'policy_', 'server_serial_no', 'ORDER BY policy_order_id DESC LIMIT 1');
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['server_serial_no'], 'policy_', 'server_serial_no', 'AND policy_type="' . sanitize($post['policy_type']) . '" ORDER BY policy_order_id DESC LIMIT 1');
 			if ($fmdb->num_rows) {
 				$result = $fmdb->last_result[0];
 				$post['policy_order_id'] = $result->policy_order_id + 1;
@@ -971,12 +982,25 @@ FORM;
 		$names = null;
 		foreach (explode(';', trim($ids, ';')) as $temp_id) {
 			if ($temp_id[0] == 's') {
-				$names[] = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
+				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
 			} elseif ($temp_id[0] == 'o') {
-				$names[] = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
+				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
+			} elseif ($temp_id[0] == 'g') {
+				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
+			} elseif ($temp_id[0] == 't') {
+				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 			} else {
-				$names[] = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
+				$tmp_name = $temp_id;
 			}
+			if (isset($_GET['q'])) {
+				$absolute_q = trim($_GET['q'], '"');
+				if ("\"$absolute_q\"" == $_GET['q']) {
+					$tmp_name = preg_replace_callback("/\b{$absolute_q}\b/", 'markGlobalSearchMatch', $tmp_name);
+				} else {
+					$tmp_name = preg_replace_callback("/{$_GET['q']}/", 'markGlobalSearchMatch', $tmp_name);
+				}
+			}
+			$names[] = sprintf('<span rel="%s">%s %s</span>', $temp_id, $tmp_name, $__FM_CONFIG['module']['icons']['search']);
 		}
 		
 		return implode("<br />\n", $names);
@@ -994,7 +1018,7 @@ FORM;
 			$results = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$return[$i+1][] = $results[$i]->time_name;
-				$return[$i+1][] = $results[$i]->time_id;
+				$return[$i+1][] = 't' . $results[$i]->time_id;
 			}
 		}
 		

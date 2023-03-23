@@ -128,10 +128,10 @@ function buildModuleHelpFile() {
 		<a class="list_title">Objects</a>
 		<div id="fmfw_objects">
 			<p>Much like an appliance firewall, objects need to be defined before they can be used in policies. All objects 
-			(<a href="__menu{Hosts}">Hosts</a> and <a href="__menu{Networks}">Networks</a>)
-			are managed from the <a href="__menu{Objects}">Objects</a> menu item. Give the object a name and
+			(Hosts and Networks)
+			are managed from the <a href="__menu{Addresses}">Addresses</a> menu item. Give the object a name and
 			specify the host or network address.</p>
-			<p><a href="__menu{Objects}">Object Groups</a> allow you to group object types together for easy policy 
+			<p><a href="__menu{Address Groups}">Address Groups</a> allow you to group object types together for easy policy 
 			creation. For example, you might want all of your web servers to be grouped together for a web server policy rule.</a>
 			<p><i>The 'Object Management' or 'Super Admin' permission is required to add, edit, and delete services and service groups.</i></p>
 			<br />
@@ -141,11 +141,10 @@ function buildModuleHelpFile() {
 		<a class="list_title">Services</a>
 		<div id="fmfw_services">
 			<p>Much like an appliance firewall, services need to be defined before they can be used in policies. All services 
-			(<a href="__menu{ICMP}">ICMP</a>, <a href="__menu{TCP}">TCP</a>,
-			<a href="__menu{UDP}">UDP</a>) are managed from the 
+			(ICMP, TCP, UDP) are managed from the 
 			<a href="__menu{Services}">Services</a> menu item. Give the service a name, specify the ports (or 
 			types/codes for ICMP) and any TCP flags.</p>
-			<p><a href="__menu{Services}">Service Groups</a> allow you to group services together for easy policy 
+			<p><a href="__menu{Service Groups}">Service Groups</a> allow you to group services together for easy policy 
 			creation. For example, you might want http and https to be grouped together for a web server.</a>
 			<p><i>The 'Service Management' or 'Super Admin' permission is required to add, edit, and delete services and service groups.</i></p>
 			<br />
@@ -352,16 +351,11 @@ function buildModuleMenu() {
 		addSubmenuPage('config-policy.php', __('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
 		addSubmenuPage('config-policy.php', __('Templates'), __('Policy Templates'), array('manage_policies', 'view_all'), $_SESSION['module'], 'templates-policy.php');
 
-	addObjectPage(__('Objects'), __('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', __('Groups'), __('Object Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', __('Hosts'), __('Host Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-host.php');
-		addSubmenuPage('object-groups.php', __('Networks'), __('Network Objects'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects-network.php');
-
-	addObjectPage(__('Services'), __('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
-		addSubmenuPage('service-groups.php', __('Groups'), __('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
-		addSubmenuPage('service-groups.php', __('ICMP'), __('ICMP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-icmp.php');
-		addSubmenuPage('service-groups.php', __('TCP'), __('TCP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-tcp.php');
-		addSubmenuPage('service-groups.php', __('UDP'), __('UDP Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services-udp.php');
+	addObjectPage(__('Objects'), __('Address Groups'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', __('Address Groups'), __('Address Groups'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', __('Addresses'), __('Addresses'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'objects.php');
+		addSubmenuPage('object-groups.php', __('Service Groups'), __('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
+		addSubmenuPage('object-groups.php', __('Services'), __('Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services.php');
 
 	addObjectPage(__('Time'), __('Time Restrictions'), array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
 }
@@ -442,6 +436,220 @@ function getTemplatePolicies($template_ids, $server_id = 0, $template_id = 0, $t
 	}
 	
 	return array($template_results, $template_id_count);
+}
+
+
+/**
+ * Marks global search matches
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param array $matches Search matches to mark
+ * 
+ * @return string
+ */
+function markGlobalSearchMatch($matches) {
+	return sprintf('<mark>%s</mark>', $matches[0]);
+}
+
+
+/**
+ * Gets global search results
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param string $item_id ID of item to search for
+ * 
+ * @return string
+ */
+function getGlobalSearchResults($item_id) {
+	global $__FM_CONFIG, $fmdb;
+	$results = array(
+		'Policies' => array(),
+		'Objects' => array()
+	);
+	$group_type = null;
+
+	/** Get item name */
+	if ($item_id[0] == 's') {
+		$tmp_name = getNameFromID(substr($item_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
+		$group_type = 'service';
+	} elseif ($item_id[0] == 'o') {
+		$tmp_name = getNameFromID(substr($item_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
+		$group_type = 'object';
+	} elseif ($item_id[0] == 'g') {
+		$tmp_name = getNameFromID(substr($item_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
+	} elseif ($item_id[0] == 't') {
+		$tmp_name = getNameFromID(substr($item_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
+	} else {
+		$tmp_name = $item_id;
+	}
+
+	$search_query = "(__FIELD__='$item_id' OR __FIELD__ LIKE '$item_id;%' OR __FIELD__ LIKE '%;$item_id;%' OR __FIELD__ LIKE '%;$item_id')";
+
+	/** Get results from groups table that utilizes the item_id */
+	if ($group_type) {
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='$group_type' AND " . str_replace('__FIELD__', 'group_items', $search_query));
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $row) {
+				$results['Objects'][] = $row;
+			}
+		}
+	}
+
+	/** Get results from policy table that utilizes the item_id */
+	$policy_search_fields = array('policy_source', 'policy_source_translated', 'policy_destination', 'policy_destination_translated', 'policy_services', 'policy_services_translated', 'policy_time');
+	$tmp_search_sql = '';
+	foreach ($policy_search_fields as $field) {
+		$tmp_search_sql .= ' OR ' . str_replace('__FIELD__', $field, $search_query);
+	}
+	$tmp_search_sql = substr($tmp_search_sql, 4);
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND ($tmp_search_sql)");
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $row) {
+			$results['Policies'][] = $row;
+		}
+	}
+
+	/** Unset any empty categories */
+	foreach ($results as $category => $records) {
+		if (!count($records)) unset($results[$category]);
+	}
+
+	/** Build the search result tabs */
+	$x = 1;
+	foreach ($results as $category => $records) {
+		$checked = ($x == 1) ? 'checked' : null;
+		$tab[] = sprintf('
+		<div id="tab">
+			<input type="radio" name="tab-group-1" id="tab-%1$d" %2$s />
+			<label for="tab-%1$d">%3$s (%4$s)</label>
+			<div id="tab-content">
+				%5$s
+			</div>
+		</div>
+		', $x, $checked, $category, count($records), displayGlobalSearchResults($category, $records, $tmp_name));
+		$x++;
+	}
+
+	$popup_header = buildPopup('header', __('Global Search') . ': ' . $tmp_name);
+	$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+	
+	$return_form = sprintf('
+	%s
+	%s
+%s',
+			$popup_header,
+			(isset($tab)) ? sprintf('<div id="tabs" class="global-search-results">%s</div>', implode("\n", $tab)) : sprintf('<p>%s</p>', __('This item is not used anywhere.')),
+			$popup_footer
+		);
+
+	return $return_form;
+
+}
+
+
+/**
+ * Displays global search results
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param string $category Search result category
+ * @param array $records Search results for the category
+ * @param string $search_term Search term queried
+ * 
+ * @return string
+ */
+function displayGlobalSearchResults($category, $records, $search_term = null) {
+	global $__FM_CONFIG;
+
+	$return = '';
+
+	$table_info = array(
+		'class' => 'display_results global-search-results',
+		'id' => 'table_edits'
+	);
+	if ($category == 'Policies') {
+		$title_array = array(__('Policy'));
+	} else {
+		$title_array = array(__('Name'));
+	}
+	if ($category != 'Time') {
+		$title_array[] = __('Type');
+	}
+	if ($category == 'Policies') {
+		$title_array[] = __('Rule Name');
+		$title_array[] = __('Rule Number');
+	}
+	$title_array = array_merge((array) $title_array, array(array('title' => _('Comment'), 'style' => 'width: 40%;')));
+	if ($category != 'Policies') $title_array[] = array('class' => 'header-tiny');
+
+	$return .= displayTableHeader($table_info, $title_array);
+
+	foreach ($records as $row) {
+		$rule_name = $rule_number = $name = $type = $comment = $global_search = null;
+		if (property_exists($row, 'group_name')) {
+			$name = parseMenuLinks(sprintf('<a href="__menu{%1$s}?q=\'%2$s\'">%2$s</a>', ($row->group_type == 'service') ? __('Service Groups') : __('Address Groups'), $row->group_name));
+			$type = ($row->group_type == 'service') ? __('Service Group') : __('Address Group');
+			$comment = $row->group_comment;
+			$global_search = sprintf('<td><span rel="g%s">%s</span></td>', $row->group_id, $__FM_CONFIG['module']['icons']['search']);
+		} elseif (property_exists($row, 'policy_name')) {
+			$name = getGlobalSearchPolicyName($row, $search_term);
+			$type = ($row->policy_type == 'filter') ? __('Filter') : __('NAT');
+			$comment = $row->policy_comment;
+			$rule_name = sprintf('<td>%s</td>', $row->policy_name);
+			$rule_number = sprintf('<td>%s</td>', $row->policy_order_id);
+		}
+		$return .= sprintf('<tr>
+			<td>%s</td>
+			<td>%s</td>
+			%s
+			%s
+			<td>%s</td>
+			%s
+		</tr>
+		',
+		$name, $type, $rule_name, $rule_number, $comment, $global_search);
+	}
+
+	$return .= "</tbody>\n</table>";
+
+	return $return;
+}
+
+
+/**
+ * Gets the policy name for a global search result
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param object $rule Rule data from search result
+ * @param string $search_term Search term queried
+ * 
+ * @return string
+ */
+function getGlobalSearchPolicyName($rule, $search_term = null) {
+	global $__FM_CONFIG;
+
+	$policy_name = ($rule->server_serial_no)
+		? getNameFromID($rule->server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name')
+		: getNameFromID($rule->policy_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
+
+	return parseMenuLinks(sprintf('<a href="__menu{%s}?server_serial_no=%s&type=%s%s">%s</a>',
+		__('Policies'),
+		($rule->policy_template_id) ? "t_{$rule->policy_template_id}" : $rule->server_serial_no,
+		$rule->policy_type,
+		($search_term) ? "&q='$search_term'" : null,
+		$policy_name
+	));
 }
 
 

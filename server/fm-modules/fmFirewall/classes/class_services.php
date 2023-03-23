@@ -25,13 +25,13 @@ class fm_module_services {
 	/**
 	 * Displays the service list
 	 */
-	function rows($result, $type, $page, $total_pages) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+		if (currentUserCan('manage_services', $_SESSION['module'])) {
 			$bulk_actions_list = array(_('Delete'));
 		}
 
@@ -51,7 +51,8 @@ class fm_module_services {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), _('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
+		// $title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), _('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
+		$title_array = array_merge((array) $title_array, array(__('Service Name'), __('Type'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
@@ -68,7 +69,7 @@ class fm_module_services {
 
 		echo "</tbody>\n</table></div></div>\n";
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="services">%s</p>', sprintf(__('There are no %s services defined.'), strtoupper($type)));
+			printf('<p id="table_edits" class="noresult" name="services">%s</p>', __('There are no services defined.'));
 		}
 	}
 
@@ -182,10 +183,11 @@ class fm_module_services {
 		
 		$disabled_class = ($row->service_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $checkbox = null;
+		$checkbox = null;
+		$edit_status = sprintf('<span rel="s%s">%s</span>', $row->service_id, $__FM_CONFIG['module']['icons']['search']);
 
 		if (currentUserCan('manage_services', $_SESSION['module'])) {
-			$edit_status = '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status .= '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->service_id, 'service')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->service_id .'" /></td>';
@@ -195,11 +197,13 @@ class fm_module_services {
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
 		
-		$edit_name = $row->service_name;
-		
 		/** Process TCP Flags */
 		if ($row->service_type == 'tcp') {
 			$service_tcp_flags = $this->getTCPFlags($row->service_tcp_flags);
+		} elseif ($row->service_type == 'icmp') {
+			$icmp_type = ($row->service_icmp_type == -1) ? 'any' : $row->service_icmp_type;
+			$icmp_code = ($row->service_icmp_code == -1) ? 'any' : $row->service_icmp_code;
+			$service_tcp_flags = "$icmp_type : $icmp_code";
 		} else $service_tcp_flags = null;
 		
 		echo <<<HTML
@@ -208,25 +212,16 @@ class fm_module_services {
 				<td>$row->service_name</td>
 
 HTML;
-		if ($row->service_type == 'icmp') {
-			$icmp_type = ($row->service_icmp_type == -1) ? 'any' : $row->service_icmp_type;
-			$icmp_code = ($row->service_icmp_code == -1) ? 'any' : $row->service_icmp_code;
-			echo <<<HTML
-				<td>$icmp_type</td>
-				<td>$icmp_code</td>
+		$src_ports = ($row->service_src_ports) ? str_replace(':', ' &rarr; ', $row->service_src_ports) : 'any';
+		$dest_ports = ($row->service_dest_ports) ? str_replace(':', ' &rarr; ', $row->service_dest_ports) : 'any';
+		
+		echo <<<HTML
+			<td>$row->service_type</td>
+			<td>$src_ports</td>
+			<td>$dest_ports</td>
+			<td>$service_tcp_flags</td>
 
 HTML;
-		} else {
-			$src_ports = ($row->service_src_ports) ? str_replace(':', ' &rarr; ', $row->service_src_ports) : 'any';
-			$dest_ports = ($row->service_dest_ports) ? str_replace(':', ' &rarr; ', $row->service_dest_ports) : 'any';
-			
-			echo <<<HTML
-				<td>$src_ports</td>
-				<td>$dest_ports</td>
-				<td>$service_tcp_flags</td>
-
-HTML;
-		}
 		$comments = nl2br($row->service_comment);
 		echo <<<HTML
 				<td>$comments</td>
@@ -239,8 +234,10 @@ HTML;
 	/**
 	 * Displays the form to add new service
 	 */
-	function printForm($data = '', $action = 'add', $type = 'icmp') {
+	function printForm($data = '', $action = 'add', $type = 'tcp') {
 		global $__FM_CONFIG;
+
+		if (!$type) $type = 'tcp';
 		
 		$service_id = 0;
 		$service_name = $service_tcp_flags = $service_comment = null;

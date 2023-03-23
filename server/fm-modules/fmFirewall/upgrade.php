@@ -262,6 +262,7 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='NEW,ESTABLISHED,RELATED' WHERE `policy_action`='pass' AND `policy_options` IN (2,3,7)";
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='ESTABLISHED,RELATED' WHERE `policy_action`!='pass' AND `policy_options` IN (2,3,7)";
 	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_type` `policy_type` ENUM('filter','nat') NOT NULL DEFAULT 'filter'";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_time`=CONCAT('t', policy_time) WHERE `policy_time` REGEXP '^[[:digit:]]+$'";
 
 	/** Create table schema */
 	if (count($table) && $table[0]) {

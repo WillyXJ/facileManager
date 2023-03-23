@@ -3,9 +3,11 @@
 * Server - [feature] Added support for NAT rules in iptables.
 * Server - [feature] Added support for defining UID in policy rules.
 * Server - [feature] Added support for setting TCP flags in policy rules.
+* Server - [feature] Added support for searching rules and objects.
 * Server - [improvement] Removed unused dashboard.
 * Server - [improvement] Firewall policy now displays a policy drop-down to choose from
            when no policy has been selected.
+* Server - [improvement] Consolidated addresses and services into the Objects menu.
 * Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
 * Server - [bug] Fixed PHP errors.
 
