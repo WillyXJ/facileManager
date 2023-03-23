@@ -33,9 +33,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				if (!empty($_FILES['import-file']['tmp_name'])) {
 					$block_style = 'style="display: block;"';
 					$response = $fm_module_tools->bulkZoneImportWizard();
-					if (strpos($output, 'You do not have permission') === false) {
-						$classes = 'wide';
-					}
 				}
 				break;
 			case 'dump-cache':

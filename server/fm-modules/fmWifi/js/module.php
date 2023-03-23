@@ -86,11 +86,7 @@ $(document).ready(function() {
 							}
 						} else {
 							$("#manage_item").fadeIn(200);
-							$("#manage_item_contents").fadeIn(200);
 							$("#manage_item_contents").html(response);
-							if ($("#manage_item_contents").width() >= 700) {
-								$("#manage_item_contents").addClass("wide");
-							}
 						}
 					}
 				}

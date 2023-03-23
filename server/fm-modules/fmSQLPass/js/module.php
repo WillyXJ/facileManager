@@ -21,7 +21,6 @@ $(document).ready(function() {
 		} else {
 			$("body").addClass("fm-noscroll");
 			$("#manage_item").fadeIn(200);
-			$("#manage_item_contents").fadeIn(200);
 			$("#manage_item_contents").html("<p>' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i></p>");
 		}
 		

@@ -83,7 +83,6 @@ function displayOptionPlaceholder(option_value) {
 function loadServerLeases() {
 	$("body").addClass("fm-noscroll");
 	$("#manage_item").fadeIn(200);
-	$("#manage_item_contents").fadeIn(200);
 	$("#manage_item_contents").html("<p>' . __('Pulling the leases from the server') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
 	var form_data = {
@@ -107,22 +106,17 @@ function loadServerLeases() {
 
 			if (response.toLowerCase().indexOf("no records") > -1) {
 				$("#manage_item").fadeOut(200);
-				$("#manage_item_contents").fadeOut(200);
 				$("body").removeClass("fm-noscroll");
 				return;
 			}
 			
 			if (response.toLowerCase().indexOf("popup-header") > -1) {
 				$("#manage_item_contents").html(response);
-				if ($("#manage_item_contents").width() >= 700) {
-					$("#manage_item_contents").addClass("wide");
-				}
 				return;
 			}
 			
 			$("#lease_container").html(response);
 			$("#manage_item").fadeOut(200);
-			$("#manage_item_contents").fadeOut(200);
 			$("#lease_container select").select2({minimumResultsForSearch: 10});
 			$("body").removeClass("fm-noscroll");
 			return;

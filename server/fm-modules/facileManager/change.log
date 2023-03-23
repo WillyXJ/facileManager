@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] Added support to hide unused module dashboards.
 * Server - [improvement] Added support for server list placeholder.
+* Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
 * Server - [bug] A deactivated module cannot be activated unless the required version of
            facileManager is installed.
 
