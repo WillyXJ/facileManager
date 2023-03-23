@@ -1,3 +1,7 @@
+5.4.0 (2023-??-??)
+==================
+* Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
+
 5.3.3 (2023-05-10)
 ==================
 * Server - [bug] Fixed ability to have the same zone defined multiple times with different

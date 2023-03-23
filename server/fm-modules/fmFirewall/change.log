@@ -1,3 +1,7 @@
+2.3.0 (2023-??-??)
+==================
+* Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
+
 2.2.0 (2023-03-09)
 ==================
 * Both   - [improvement] Added PHP 8.2 support. (Issue #558)
