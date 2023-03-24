@@ -109,8 +109,7 @@ class fm_module_services {
 			return formatError(__('Could not add the service because a database error occurred.'), 'sql');
 		}
 
-		addLogEntry("Added service:\nName: {$post['service_name']}\nType: {$post['service_type']}\n" .
-				"Update Method: {$post['service_update_method']}\nConfig File: {$post['service_config_file']}");
+		addLogEntry("Added service:\nName: {$post['service_name']}\nType: {$post['service_type']}");
 		return true;
 	}
 

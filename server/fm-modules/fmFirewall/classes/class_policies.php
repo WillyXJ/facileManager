@@ -154,7 +154,7 @@ HTML;
 				$sql_values .= "'$clean_data', ";
 				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
-						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
+						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data, 'names-only'));
 					} elseif ($key == 'policy_time') {
 						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 					} elseif ($key == 'policy_targets') {
@@ -237,9 +237,10 @@ HTML;
 			if (!in_array($key, $exclude)) {
 				$clean_data = sanitize($data);
 				$sql_edit .= $key . "='" . $clean_data . "', ";
-				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
+				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no', 'policy_source_not', 'policy_destination_not', 'policy_services_not'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
-						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data));
+						$not = (isset($post[$key . '_not']) && $post[$key . '_not']) ? $__FM_CONFIG['module']['icons']['negated'] . ' ' : '';
+						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data, 'names-only', $not));
 					} elseif ($key == 'policy_targets') {
 						$clean_data = str_replace("<br />\n", ', ', $this->formatServerIDs($clean_data));
 					} elseif ($key == 'policy_template_id') {
@@ -976,7 +977,7 @@ FORM;
 	}
 	
 	
-	function formatPolicyIDs($ids) {
+	function formatPolicyIDs($ids, $display = 'global-search', $not = '') {
 		global $__FM_CONFIG;
 		
 		$names = null;
@@ -992,7 +993,7 @@ FORM;
 			} else {
 				$tmp_name = $temp_id;
 			}
-			if (isset($_GET['q'])) {
+			if (isset($_GET['q']) && $display == 'global-search') {
 				$absolute_q = trim($_GET['q'], '"');
 				if ("\"$absolute_q\"" == $_GET['q']) {
 					$tmp_name = preg_replace_callback("/\b{$absolute_q}\b/", 'markGlobalSearchMatch', $tmp_name);
@@ -1000,7 +1001,7 @@ FORM;
 					$tmp_name = preg_replace_callback("/{$_GET['q']}/", 'markGlobalSearchMatch', $tmp_name);
 				}
 			}
-			$names[] = sprintf('<span rel="%s">%s %s</span>', $temp_id, $tmp_name, $__FM_CONFIG['module']['icons']['search']);
+			$names[] = ($display == 'global-search') ? sprintf('<span rel="%s">%s %s</span>', $temp_id, $tmp_name, $__FM_CONFIG['module']['icons']['search']) : $not . $tmp_name;
 		}
 		
 		return implode("<br />\n", $names);
