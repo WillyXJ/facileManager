@@ -1264,7 +1264,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$result = $fmdb->last_result[0];
 				
 				if ($result->object_type == 'network') {
-					$address_list[] = $result->object_address . '/' . $this->mask2cidr($result->object_mask);
+					$address_list[] = $result->object_address . '/' . mask2cidr($result->object_mask);
 				} else {
 					$address_list[] = $result->object_address;
 				}
@@ -1272,13 +1272,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		
 		return $address_list;
-	}
-	
-	
-	function mask2cidr($mask) {
-		$long = ip2long($mask);
-		$base = ip2long('255.255.255.255');
-		return 32 - log(($long ^ $base) +1, 2);
 	}
 	
 	

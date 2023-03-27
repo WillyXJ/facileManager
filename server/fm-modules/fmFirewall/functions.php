@@ -651,6 +651,24 @@ function getGlobalSearchPolicyName($rule, $search_term = null) {
 		$policy_name
 	));
 }
+	
+	
+/**
+ * Converts the netmask to cidr value
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param string $mask Mask to convert
+ * 
+ * @return string
+ */
+function mask2cidr($mask) {
+	$long = ip2long($mask);
+	$base = ip2long('255.255.255.255');
+	return 32 - log(($long ^ $base) +1, 2);
+}
 
 
 ?>

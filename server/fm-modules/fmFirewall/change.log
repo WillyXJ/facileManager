@@ -9,6 +9,7 @@
            when no policy has been selected.
 * Server - [improvement] Consolidated addresses and services into the Objects menu.
 * Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
+* Server - [improvement] Policy objects now have tooltips to expand on the contents.
 * Server - [bug] Fixed PHP errors.
 
 2.2.0 (2023-03-09)

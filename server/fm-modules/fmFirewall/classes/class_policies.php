@@ -337,13 +337,13 @@ HTML;
 		$destination = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_destination_not) . ' ' . $destination;
 		$services = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_services_not) . ' ' . $services;
 		
-		if ($row->policy_targets) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></a>', __('Policy targets defined'));
-		if ($row->policy_packet_state) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></a>', str_replace(',', ', ', $row->policy_packet_state));
-		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></a>', __('Matching fragment packets'));
-		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></a>', __('Quick processing cancels further rule processing upon match'));
-		if ($row->policy_uid) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-user" aria-hidden="true"></i></a>', __('User ID defined'));
-		if ($row->policy_tcp_flags) $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-flag" aria-hidden="true"></i></a>', __('TCP flags defined'));
-		if ($row->policy_nat_bidirectional == 'yes' && $row->policy_snat_type == 'static') $options[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-arrows-h" aria-hidden="true"></i></a>', __('1:1 NAT'));
+		if ($row->policy_targets) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>', __('Policy targets defined'));
+		if ($row->policy_packet_state) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></span>', str_replace(',', ', ', $row->policy_packet_state));
+		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></span>', __('Matching fragment packets'));
+		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></span>', __('Quick processing cancels further rule processing upon match'));
+		if ($row->policy_uid) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-user" aria-hidden="true"></i></span>', __('User ID defined'));
+		if ($row->policy_tcp_flags) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-flag" aria-hidden="true"></i></span>', __('TCP flags defined'));
+		if ($row->policy_nat_bidirectional == 'yes' && $row->policy_snat_type == 'static') $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-arrows-h" aria-hidden="true"></i></span>', __('1:1 NAT'));
 		
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) $options[] = str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']);
 		if ($row->policy_type == 'filter') $options[] = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_action]);
@@ -978,16 +978,34 @@ FORM;
 	
 	
 	function formatPolicyIDs($ids, $display = 'global-search', $not = '') {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fmdb;
 		
 		$names = null;
 		foreach (explode(';', trim($ids, ';')) as $temp_id) {
+			$group_objects = array();
+
+			if (in_array($temp_id[0], array('s', 'o', 'g'))) {
+				$tmp_info = $this->getObjectInfo($temp_id);
+				if (!count($tmp_info)) {
+					return null;
+				}
+			}
+
 			if ($temp_id[0] == 's') {
-				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
+				$tmp_name = $tmp_info[0]->service_name;
+				if (in_array($tmp_info[0]->service_type, array('tcp', 'udp'))) {
+					$tmp_object = $tmp_info[0]->service_type . '/';
+					list($tmp_src_port, $tmp_dest_port) = explode(':', $tmp_info[0]->service_dest_ports);
+					$group_objects[] = ($tmp_src_port == $tmp_dest_port) ? $tmp_object . $tmp_src_port : $tmp_object . $tmp_src_port . '-' . $tmp_dest_port;
+				}
 			} elseif ($temp_id[0] == 'o') {
-				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
+				$tmp_name = $tmp_info[0]->object_name;
+				$group_objects[] = $tmp_info[0]->object_address . '/' . mask2cidr($tmp_info[0]->object_mask);
 			} elseif ($temp_id[0] == 'g') {
-				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
+				$tmp_name = $tmp_info[0]->group_name;
+				foreach (explode(';', $tmp_info[0]->group_items) as $object_id) {
+					$group_objects[] = $this->getObjectInfo($object_id, 'name');
+				}
 			} elseif ($temp_id[0] == 't') {
 				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 			} else {
@@ -1001,6 +1019,8 @@ FORM;
 					$tmp_name = preg_replace_callback("/{$_GET['q']}/", 'markGlobalSearchMatch', $tmp_name);
 				}
 			}
+			if (count($group_objects)) $tmp_name = sprintf('<span class="tooltip-bottom" data-tooltip="%s">%s</span>', implode("\n", (array) $group_objects), $tmp_name);
+
 			$names[] = ($display == 'global-search') ? sprintf('<span rel="%s">%s %s</span>', $temp_id, $tmp_name, $__FM_CONFIG['module']['icons']['search']) : $not . $tmp_name;
 		}
 		
@@ -1117,6 +1137,29 @@ FORM;
 		return $list;
 	}
 
+
+	/**
+	 * Gets the objects name from its type and ID
+	 * 
+	 * @since 3.0
+	 * @package fmFirewall
+	 * 
+	 * @param string $id Object ID with type
+	 * @param string $include What info to retrieve
+	 * @return array
+	 */
+	function getObjectInfo($id, $include = 'all') {
+		global $__FM_CONFIG;
+
+		$tmp_db_table = array('s' => 'service',
+								'o' => 'object',
+								'g' => 'group');
+		$tmp_object_type = substr($id, 0, 1);
+
+		return ($include == 'all')
+			? basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $tmp_db_table[$tmp_object_type] . 's', substr($id, 1), $tmp_db_table[$tmp_object_type] . '_', $tmp_db_table[$tmp_object_type] . '_id')
+			: getNameFromID(substr($id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $tmp_db_table[$tmp_object_type] . 's', $tmp_db_table[$tmp_object_type] . '_', $tmp_db_table[$tmp_object_type] . '_id', $tmp_db_table[$tmp_object_type] . '_' . $include);
+	}
 }
 
 if (!isset($fm_module_policies))

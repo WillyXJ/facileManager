@@ -48,9 +48,7 @@ table.legend tr td {
 	padding: 2px 6px;
 }
 table.legend tr td span {
-	display: block;
-	margin-top: -15px;
-	margin-left: 18px;
+	margin-left: 5px;
 }
 
 p.checkbox_desc {
