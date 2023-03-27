@@ -1935,10 +1935,6 @@ a.subelement_edit img {
 	cursor: pointer;
 }
 
-.tooltip-top, .tooltip-bottom, .tooltip-left, .tooltip-right {
-	color: #aaa;
-}
-
 #config_check {
 	margin: 10px;
 	padding: 3px;
