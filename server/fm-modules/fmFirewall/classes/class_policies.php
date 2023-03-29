@@ -122,9 +122,9 @@ class fm_module_policies {
 					</tr>
 				</tbody>
 			</table>
-			</div></div>
 HTML;
 		}
+		echo '</div></div>';
 	}
 
 	/**
@@ -499,22 +499,19 @@ FORM;
 					<tr>
 						<th width="33&#37;" scope="row">%s</th>
 						<td width="67&#37;">
-							%s<br />
-							<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s /><label for="policy_source_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
+							<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s />%s %s
 						</td>
 					</tr>
 					<tr>
 						<th width="33&#37;" scope="row">%s</th>
 						<td width="67&#37;">
-							%s<br />
-							<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s /><label for="policy_destination_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
+							<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s />%s %s
 						</td>
 					</tr>
 					<tr>
 						<th width="33&#37;" scope="row">%s</th>
 						<td width="67&#37;">
-							%s<br />
-							<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s /><label for="policy_services_not">%s</label> <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>
+							<input name="policy_services_not" id="policy_services_not" value="!" type="checkbox" %s />%s %s
 						</td>
 					</tr>
 				',
@@ -522,9 +519,9 @@ FORM;
 				__('Policy Name'), $policy_name,
 				_('Comment'), $policy_comment,
 				$tab_two_label,
-				__('Source'), $source_items, $source_not_check, __('Negate'), __('Use this option to invert the match'),
-				__('Destination'), $destination_items, $destination_not_check, __('Negate'), __('Use this option to invert the match'),
-				__('Services'), $services_items, $service_not_check, __('Negate'), __('Use this option to invert the match')
+				__('Source'), $source_not_check, $__FM_CONFIG['module']['icons']['negated'], $source_items,
+				__('Destination'), $destination_not_check, $__FM_CONFIG['module']['icons']['negated'], $destination_items,
+				__('Services'), $service_not_check, $__FM_CONFIG['module']['icons']['negated'], $services_items
 		);
 	
 		
@@ -532,7 +529,7 @@ FORM;
 			/** Time restriction */
 			if ($server_firewall_type == 'iptables' || $_POST['server_serial_no'][0] == 't') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
-				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>',
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-top mini-icon" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></span>',
 						__('Supported firewalls:'), 'iptables'
 					) : null;
 				$policy_time_form .= sprintf('
@@ -546,7 +543,7 @@ FORM;
 
 			/** UID support */
 			if (in_array($server_firewall_type, array('iptables', 'ipfw', 'pf')) || $_POST['server_serial_no'][0] == 't') {
-				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>',
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-top mini-icon" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></span>',
 						__('Supported firewalls:'), 'iptables, ipfw, pf'
 					) : null;
 				$policy_uid_form = sprintf('
@@ -599,7 +596,7 @@ FORM;
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				if (in_array($server_firewall_type, $opt_array['firewalls']) || $_POST['server_serial_no'][0] == 't') {
 					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-					$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" style="color: unset;" data-tooltip="%s %s">%s</a>',
+					$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-bottom" style="color: unset;" data-tooltip="%s %s">%s</span>',
 							__('Supported firewalls:'), join(', ', $opt_array['firewalls']), $opt_array['desc']
 						) : $opt_array['desc'];
 					$options .= sprintf('<input name="policy_options[]" id="policy_options[%s]" value="%s" type="checkbox" %s /><label for="policy_options[%s]" style="white-space: unset">%s</label><br />' . "\n",
@@ -641,7 +638,7 @@ FORM;
 								%s
 							</tr>
 							<tr>
-								<th style="text-align: right;">%s <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></th>
+								<th style="text-align: right;">%s <span class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></th>
 								%s
 							</tr>
 							<tr>
@@ -978,11 +975,11 @@ FORM;
 	
 	
 	function formatPolicyIDs($ids, $display = 'global-search', $not = '') {
-		global $__FM_CONFIG, $fmdb;
+		global $__FM_CONFIG;
 		
 		$names = null;
 		foreach (explode(';', trim($ids, ';')) as $temp_id) {
-			$group_objects = array();
+			$tooltip_objects = $addl_search_terms = array();
 
 			if (in_array($temp_id[0], array('s', 'o', 'g'))) {
 				$tmp_info = $this->getObjectInfo($temp_id);
@@ -996,15 +993,20 @@ FORM;
 				if (in_array($tmp_info[0]->service_type, array('tcp', 'udp'))) {
 					$tmp_object = $tmp_info[0]->service_type . '/';
 					list($tmp_src_port, $tmp_dest_port) = explode(':', $tmp_info[0]->service_dest_ports);
-					$group_objects[] = ($tmp_src_port == $tmp_dest_port) ? $tmp_object . $tmp_src_port : $tmp_object . $tmp_src_port . '-' . $tmp_dest_port;
+					$tooltip_objects[] = ($tmp_src_port == $tmp_dest_port) ? $tmp_object . $tmp_src_port : $tmp_object . $tmp_src_port . '-' . $tmp_dest_port;
 				}
 			} elseif ($temp_id[0] == 'o') {
 				$tmp_name = $tmp_info[0]->object_name;
-				$group_objects[] = $tmp_info[0]->object_address . '/' . mask2cidr($tmp_info[0]->object_mask);
+				$tooltip_objects[] = $tmp_info[0]->object_address . '/' . mask2cidr($tmp_info[0]->object_mask);
 			} elseif ($temp_id[0] == 'g') {
 				$tmp_name = $tmp_info[0]->group_name;
 				foreach (explode(';', $tmp_info[0]->group_items) as $object_id) {
-					$group_objects[] = $this->getObjectInfo($object_id, 'name');
+					$tmp_child_name = $this->getObjectInfo($object_id, 'name');
+					$tooltip_objects[] = $tmp_child_name;
+					$addl_search_terms[] = $tmp_child_name;
+					if ($object_id[0] == 'g') {
+						$addl_search_terms = array_merge($addl_search_terms, $this->getObjectChildren($object_id, $addl_search_terms));
+					}
 				}
 			} elseif ($temp_id[0] == 't') {
 				$tmp_name = getNameFromID(substr($temp_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
@@ -1012,14 +1014,17 @@ FORM;
 				$tmp_name = $temp_id;
 			}
 			if (isset($_GET['q']) && $display == 'global-search') {
-				$absolute_q = trim($_GET['q'], '"');
-				if ("\"$absolute_q\"" == $_GET['q']) {
-					$tmp_name = preg_replace_callback("/\b{$absolute_q}\b/", 'markGlobalSearchMatch', $tmp_name);
-				} else {
-					$tmp_name = preg_replace_callback("/{$_GET['q']}/", 'markGlobalSearchMatch', $tmp_name);
+				foreach (explode('" "', str_replace('%20', ' ', trim($_GET['q'], '"'))) as $absolute_q) {
+					if ("\"$absolute_q\"" == "\"$tmp_name\"") {
+						$tmp_name = preg_replace_callback("/\b{$absolute_q}\b/", 'markGlobalSearchMatch', $tmp_name);
+					} elseif (in_array($absolute_q, $addl_search_terms)) {
+						$tmp_name = preg_replace_callback("/\b{$tmp_name}\b/", 'markGlobalSearchMatch', $tmp_name);
+					} else {
+						$tmp_name = preg_replace_callback("/{$_GET['q']}/", 'markGlobalSearchMatch', $tmp_name);
+					}
 				}
 			}
-			if (count($group_objects)) $tmp_name = sprintf('<span class="tooltip-bottom" data-tooltip="%s">%s</span>', implode("\n", (array) $group_objects), $tmp_name);
+			if (count($tooltip_objects)) $tmp_name = sprintf('<span class="tooltip-bottom" data-tooltip="%s">%s</span>', implode("\n", $tooltip_objects), $tmp_name);
 
 			$names[] = ($display == 'global-search') ? sprintf('<span rel="%s">%s %s</span>', $temp_id, $tmp_name, $__FM_CONFIG['module']['icons']['search']) : $not . $tmp_name;
 		}
@@ -1139,7 +1144,7 @@ FORM;
 
 
 	/**
-	 * Gets the objects name from its type and ID
+	 * Gets the object's info from its type and ID
 	 * 
 	 * @since 3.0
 	 * @package fmFirewall
@@ -1159,6 +1164,38 @@ FORM;
 		return ($include == 'all')
 			? basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $tmp_db_table[$tmp_object_type] . 's', substr($id, 1), $tmp_db_table[$tmp_object_type] . '_', $tmp_db_table[$tmp_object_type] . '_id')
 			: getNameFromID(substr($id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $tmp_db_table[$tmp_object_type] . 's', $tmp_db_table[$tmp_object_type] . '_', $tmp_db_table[$tmp_object_type] . '_id', $tmp_db_table[$tmp_object_type] . '_' . $include);
+	}
+
+
+	/**
+	 * Gets the objects name from its type and ID
+	 * 
+	 * @since 3.0
+	 * @package fmFirewall
+	 * 
+ 	 * @param string $item_id Item ID to query
+	 * @param string $results Empty array to append to
+	 * @return array
+	 */
+	function getObjectChildren($item_id, $results) {
+		global $__FM_CONFIG, $fmdb;
+
+		/** Get group results */
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', substr($item_id, 1), 'group_', 'group_id');
+		if ($fmdb->num_rows) {
+			foreach (explode(';', $fmdb->last_result[0]->group_items) as $child_id) {
+				$results[] = $this->getObjectInfo($child_id, 'name');
+				if ($child_id[0] == 'g') {
+					$nested_results = $this->getObjectChildren($child_id, $results);
+				}
+				if (count((array) $nested_results)) {
+					$results = array_merge($results, $nested_results);
+				}
+			}
+			return $results;
+		}
+
+		return array();
 	}
 }
 

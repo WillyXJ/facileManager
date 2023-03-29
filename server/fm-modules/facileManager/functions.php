@@ -3123,8 +3123,9 @@ function countServerUpdates() {
  */
 function displaySearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
+		$_GET['q'] = html_entity_decode(str_replace(array('%2520'), ' ', $_GET['q']));
 		$_GET['q'] = html_entity_decode(str_replace(array('%2522', '%22', '%2527', '%27', "'"), '"', $_GET['q']));
-		$cleaned_q = htmlentities($_GET['q']);
+		$cleaned_q = str_replace('%20', ' ', htmlentities($_GET['q']));
 		$placeholder = sprintf(_('Searched for %s'), $cleaned_q);
 		$search_remove = '<i class="search_remove fa fa-remove fa-lg text_icon" title="' . _('Clear this search') . '"></i>';
 		$display = ' style="display:block"';

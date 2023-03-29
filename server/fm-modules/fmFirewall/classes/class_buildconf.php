@@ -1303,18 +1303,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		 * currently there are no features that are version-dependent
 		 */
 		return true;
-		
-		extract($data);
-		
-		if ($server_type == 'bind9') {
-			$required_version = $__FM_CONFIG['fmFirewall']['required_dns_version'];
-		}
-		
-		if (version_compare($server_version, $required_version, '<')) {
-			return false;
-		}
-		
-		return true;
 	}
 
 

@@ -469,18 +469,15 @@ function markGlobalSearchMatch($matches) {
 function getGlobalSearchResults($item_id) {
 	global $__FM_CONFIG, $fmdb;
 	$results = array(
-		'Policies' => array(),
-		'Objects' => array()
+		__('Policies') => array(),
+		__('Objects') => array()
 	);
-	$group_type = null;
 
 	/** Get item name */
 	if ($item_id[0] == 's') {
 		$tmp_name = getNameFromID(substr($item_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
-		$group_type = 'service';
 	} elseif ($item_id[0] == 'o') {
 		$tmp_name = getNameFromID(substr($item_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
-		$group_type = 'object';
 	} elseif ($item_id[0] == 'g') {
 		$tmp_name = getNameFromID(substr($item_id, 1), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 	} elseif ($item_id[0] == 't') {
@@ -489,30 +486,13 @@ function getGlobalSearchResults($item_id) {
 		$tmp_name = $item_id;
 	}
 
-	$search_query = "(__FIELD__='$item_id' OR __FIELD__ LIKE '$item_id;%' OR __FIELD__ LIKE '%;$item_id;%' OR __FIELD__ LIKE '%;$item_id')";
-
-	/** Get results from groups table that utilizes the item_id */
-	if ($group_type) {
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='$group_type' AND " . str_replace('__FIELD__', 'group_items', $search_query));
-		if ($fmdb->num_rows) {
-			foreach ($fmdb->last_result as $row) {
-				$results['Objects'][] = $row;
-			}
-		}
+	/** Get nested parents */
+	$nested_parents = getNestedSearchResults($item_id, $results);
+	if (count($nested_parents[__('Objects')])) {
+		$results[__('Objects')] = array_merge($results[__('Objects')], $nested_parents[__('Objects')]);
 	}
-
-	/** Get results from policy table that utilizes the item_id */
-	$policy_search_fields = array('policy_source', 'policy_source_translated', 'policy_destination', 'policy_destination_translated', 'policy_services', 'policy_services_translated', 'policy_time');
-	$tmp_search_sql = '';
-	foreach ($policy_search_fields as $field) {
-		$tmp_search_sql .= ' OR ' . str_replace('__FIELD__', $field, $search_query);
-	}
-	$tmp_search_sql = substr($tmp_search_sql, 4);
-	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND ($tmp_search_sql)");
-	if ($fmdb->num_rows) {
-		foreach ($fmdb->last_result as $row) {
-			$results['Policies'][] = $row;
-		}
+	if (count($nested_parents[__('Policies')])) {
+		$results[__('Policies')] = array_merge($results[__('Policies')], $nested_parents[__('Policies')]);
 	}
 
 	/** Unset any empty categories */
@@ -652,7 +632,69 @@ function getGlobalSearchPolicyName($rule, $search_term = null) {
 	));
 }
 	
+
+/**
+ * Gets the nested results from an ID
+ *
+ * @since 3.0
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param string $item_id Item ID to query
+ * @param string $results Empty multidimensional array to append to
+ * 
+ * @return array
+ */
+function getNestedSearchResults($item_id, $results) {
+	global $__FM_CONFIG, $fmdb;
+
+	$tmp_results = $results;
+
+	$search_query = "(__FIELD__='$item_id' OR __FIELD__ LIKE '$item_id;%' OR __FIELD__ LIKE '%;$item_id;%' OR __FIELD__ LIKE '%;$item_id')";
+
+	/** Get group results */
+	foreach (array('service', 'object') as $group_type) {
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='$group_type' AND " . str_replace('__FIELD__', 'group_items', $search_query));
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $row) {
+				$results[__('Objects')][] = $row;
+				$nested_results = getNestedSearchResults('g' . $row->group_id, $tmp_results);
+				if (count($nested_results[__('Objects')])) {
+					$results[__('Objects')] = array_merge($results[__('Objects')], $nested_results[__('Objects')]);
+				}
+				if (count($nested_results[__('Policies')])) {
+					$results[__('Policies')] = array_merge($results[__('Policies')], $nested_results[__('Policies')]);
+				}
+			}
+		}
+	}
+
+	/** Get policy results */
+	$policy_search_fields = array('policy_source', 'policy_source_translated', 'policy_destination', 'policy_destination_translated', 'policy_services', 'policy_services_translated', 'policy_time');
+	$tmp_search_sql = '';
+	foreach ($policy_search_fields as $field) {
+		$tmp_search_sql .= ' OR ' . str_replace('__FIELD__', $field, $search_query);
+	}
+	$tmp_search_sql = substr($tmp_search_sql, 4);
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND ($tmp_search_sql)");
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $row) {
+			$found = false;
+			if (isset($nested_results[__('Policies')])) {
+				foreach ($nested_results[__('Policies')] as $array) {
+					if ($row->policy_id == $array->policy_id) $found = true;
+				}
+			}
+			if (!$found) {
+				$results[__('Policies')][] = $row;
+			}
+		}
+	}
 	
+	return $results;
+}
+
+
 /**
  * Converts the netmask to cidr value
  *
