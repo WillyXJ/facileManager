@@ -1,6 +1,7 @@
 5.3.1 (2023-??-??)
 ==================
 * Server - [bug] Fixed automatic PTR creates/updates. (Issue #573)
+* Server - [bug] Fixed slave cache truncation during server builds. (Issue #574)
 
 5.3.0 (2023-03-09)
 ==================
