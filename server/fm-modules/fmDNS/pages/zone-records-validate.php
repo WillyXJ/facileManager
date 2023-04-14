@@ -97,6 +97,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	
 	$html = null;
 	$value = array();
+	$GLOBALS['new_cname_rrs'] = array();
 	
 	extract($domain_info, EXTR_PREFIX_ALL, 'domain');
 	
@@ -133,6 +134,8 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 		}
 		if (is_array($value[$id])) $value[$id]['action'] = $action;
 	}
+
+	unset($GLOBALS['new_cname_rrs']);
 	
 	if (array_key_exists('soa_template_chosen', $value)) {
 		unset($value['soa_template_chosen']);
@@ -369,10 +372,17 @@ function verifyName($record_name, $id, $allow_null = true, $record_type = null) 
 	
 	if (!$allow_null && !strlen($record_name)) return false;
 	
-	/** Ensure singleton RR type */
+	/** Ensure singleton RR type from existing records */
 	$sql = $record_type != 'CNAME' ? " AND record_type='CNAME'" : " AND record_id!=$id";
 	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql AND record_status='active'", null, false, 'ASC', true);
 	if ($fmdb->last_result[0]->count) return false;
+
+	/** Ensure singleton RR type from new records */
+	if (in_array($record_name, $GLOBALS['new_cname_rrs'])) {
+		return false;
+	} elseif ($record_type == 'CNAME') {
+		$GLOBALS['new_cname_rrs'][] = $record_name;
+	}
 	
 	if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
 		return true;
