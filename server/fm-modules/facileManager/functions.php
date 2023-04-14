@@ -2087,8 +2087,8 @@ function verifySimpleVariable($data, $filter_type) {
  * @since 1.0
  * @package facileManager
  *
- * @param string $saved_options Settings pulled from the database
- * @param string $default_options Default settings
+ * @param array $saved_options Settings pulled from the database
+ * @param array $default_options Default settings
  * @return string
  */
 function buildSettingsForm($saved_options, $default_options) {
@@ -2161,7 +2161,7 @@ function buildSettingsForm($saved_options, $default_options) {
 ROW;
 	}
 	
-	return '<div id="settings-section">' . $option_rows . '</div>';
+	return ($option_rows) ? '<div id="settings-section">' . $option_rows . '</div>' : null;
 }
 
 

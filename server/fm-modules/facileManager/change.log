@@ -1,3 +1,7 @@
+4.4.1 (2023-??-??)
+==================
+* Server - [bug] Fixed module settings page when the has no settings.
+
 4.4.0 (2023-03-09)
 ==================
 * Server - [security] Updated to jQuery-UI v1.13.2. (Issue #561)
