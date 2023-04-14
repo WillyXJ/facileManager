@@ -178,7 +178,7 @@ function isNewVersionAvailable($package, $version, $interval = 'schedule') {
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
 	}
-	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
+	if ($last_version_check['timestamp'] < strtotime("1 $software_update_interval ago")) {
 		$data['software_update_tree'] = getOption('software_update_tree');
 		
 		/** Use file_get_contents if allowed else use POST */
@@ -192,7 +192,7 @@ function isNewVersionAvailable($package, $version, $interval = 'schedule') {
 			$result = unserialize($result);
 		}
 		
-		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, true, 0, $package);
+		setOption('version_check', array('timestamp' => time(), 'data' => $result), $method, true, 0, $package);
 		
 		return $result;
 	}

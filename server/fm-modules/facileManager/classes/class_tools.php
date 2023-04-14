@@ -99,7 +99,7 @@ class fm_tools {
 					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
 					return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
 				}
-				setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 days ago")), 'data' => null), 'update', true, 0, $module_name);
+				setOption('version_check', array('timestamp' => time(), 'data' => null), 'update', true, 0, $module_name);
 			}
 
 			addLogEntry(sprintf(_('%s was upgraded to %s.'), $module_name, $__FM_CONFIG[$module_name]['version']), $module_name);

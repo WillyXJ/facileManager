@@ -317,7 +317,13 @@ class fm_settings {
 			$software_update_checked = 'checked';
 			$software_update_options_style = 'style="display: block;"';
 			if (currentUserCan('manage_modules')) {
-				$software_update_list .= sprintf('<p><a name="force_software_check" id="force_software_check" class="button click_once" >%s</a></p>', _('Check Now'));
+				/** Get datetime formatting */
+				$date_format = getOption('date_format', $_SESSION['user']['account_id']);
+				$time_format = getOption('time_format', $_SESSION['user']['account_id']);
+
+				$updates_last_checked = getOption('version_check', 0, $fm_name);
+				$updates_last_checked = (intval($updates_last_checked['timestamp'])) ? sprintf('<b>%s:</b> %s', _('Last checked'), date($date_format . ' ' . $time_format . ' e', $updates_last_checked['timestamp'])) : null;
+				$software_update_list .= sprintf('<p><a name="force_software_check" id="force_software_check" class="button click_once" >%s</a></p><p><i class="ok">%s</i></p>', _('Check Now'), $updates_last_checked);
 			}
 		} else $software_update_checked = $software_update_options_style = null;
 
