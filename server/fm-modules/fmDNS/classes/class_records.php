@@ -358,6 +358,8 @@ class fm_dns_records {
 		
 		$form = $record_status = $record_name = $record_ttl = null;
 		$record_value = $record_comment = $record_priority = $record_weight = $record_port = null;
+		$record_params = $record_cert_type = $record_key_tag = $record_algorithm = $record_flags = null;
+		$record_os = $record_regex = $record_text = null;
 		$action = ($new) ? 'create' : 'update';
 		$end = ($new) ? $start + 3 : 1;
 		$show_value = true;
