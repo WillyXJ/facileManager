@@ -33,7 +33,7 @@ if (is_array($_POST) && count($_POST)) {
 	if (currentUserCan('manage_records', $_SESSION['module'])) {
 		if (array_key_exists('domain_id', $_POST) && array_key_exists('record_type', $_POST)) {
 			extract($_POST);
-			$additional_lines = $fm_dns_records->getInputForm($record_type, true, $domain_id, null, ($clicks * 4) + 5);
+			$additional_lines = $fm_dns_records->getInputForm($record_type, true, $domain_id, null, 'no-actions', ($clicks * 4) + 5);
 			echo $additional_lines;
 		}
 	}
