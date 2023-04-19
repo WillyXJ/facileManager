@@ -1,4 +1,4 @@
-5.3.2 (2023-??-??)
+5.3.2 (2023-04-19)
 ==================
 * Server - [bug] Fixed the ability to add more than four records. (Issue #575)
 * Server - [bug] Fixed PHP errors for PHP8 compatibility.

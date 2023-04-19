@@ -1,4 +1,4 @@
-4.5.0 (2023-??-??)
+4.5.0 (2023-04-19)
 ==================
 * Server - [improvement] The settings now displays the timestamp of the last software update check.
 * Server - [bug] Fixed module settings page when the has no settings.
