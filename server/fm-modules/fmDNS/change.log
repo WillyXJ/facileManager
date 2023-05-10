@@ -1,8 +1,9 @@
 5.3.3 (2023-05-??)
 ==================
-* Server - [bug] Fixed zone add/edit audit logging.
 * Server - [bug] Fixed ability to have the same zone defined multiple times with different
            name servers hosting it.
+* Server - [bug] Fixed zone add/edit audit logging.
+* Server - [bug] Multiple CNAME RR with the same name can be added in a disabled state.
 
 5.3.2 (2023-04-19)
 ==================

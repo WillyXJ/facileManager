@@ -209,7 +209,7 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 					$val = '@';
 					$data[$key] = $val;
 				}
-				if (!verifyName($val, $id, true, $record_type)) {
+				if ($data['record_status'] == 'active' && !verifyName($val, $id, true, $record_type)) {
 					$messages['errors'][$key] = __('Invalid');
 				}
 			}
