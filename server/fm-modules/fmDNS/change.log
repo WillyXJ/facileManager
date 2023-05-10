@@ -1,6 +1,25 @@
-5.4.0 (2023-??-??)
+5.?.0 (2023-??-??)
 ==================
 * Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
+
+5.3.3 (2023-05-10)
+==================
+* Server - [bug] Fixed ability to have the same zone defined multiple times with different
+           name servers hosting it.
+* Server - [bug] Fixed zone add/edit audit logging.
+* Server - [bug] Multiple CNAME RR with the same name can be added in a disabled state.
+
+5.3.2 (2023-04-19)
+==================
+* Server - [bug] Fixed the ability to add more than four records. (Issue #575)
+* Server - [bug] Fixed PHP errors for PHP8 compatibility.
+
+5.3.1 (2023-04-14)
+==================
+* Server - [bug] Fixed automatic PTR creates/updates. (Issue #573)
+* Server - [bug] Fixed slave cache truncation during server builds. (Issue #574)
+* Server - [bug] Multiple CNAME RR with the same name can no longer be created.
+* Server - [bug] Removed duplicate security logging category.
 
 5.3.0 (2023-03-09)
 ==================

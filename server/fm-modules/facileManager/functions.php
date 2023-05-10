@@ -178,7 +178,7 @@ function isNewVersionAvailable($package, $version, $interval = 'schedule') {
 		$last_version_check['timestamp'] = 0;
 		$last_version_check['data'] = null;
 	}
-	if (strtotime($last_version_check['timestamp']) < strtotime("1 $software_update_interval ago")) {
+	if ($last_version_check['timestamp'] < strtotime("1 $software_update_interval ago")) {
 		$data['software_update_tree'] = getOption('software_update_tree');
 		
 		/** Use file_get_contents if allowed else use POST */
@@ -192,7 +192,7 @@ function isNewVersionAvailable($package, $version, $interval = 'schedule') {
 			$result = unserialize($result);
 		}
 		
-		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s"), 'data' => $result), $method, true, 0, $package);
+		setOption('version_check', array('timestamp' => time(), 'data' => $result), $method, true, 0, $package);
 		
 		return $result;
 	}
@@ -2088,8 +2088,8 @@ function verifySimpleVariable($data, $filter_type) {
  * @since 1.0
  * @package facileManager
  *
- * @param string $saved_options Settings pulled from the database
- * @param string $default_options Default settings
+ * @param array $saved_options Settings pulled from the database
+ * @param array $default_options Default settings
  * @return string
  */
 function buildSettingsForm($saved_options, $default_options) {
@@ -2162,7 +2162,7 @@ function buildSettingsForm($saved_options, $default_options) {
 ROW;
 	}
 	
-	return '<div id="settings-section">' . $option_rows . '</div>';
+	return ($option_rows) ? '<div id="settings-section">' . $option_rows . '</div>' : null;
 }
 
 

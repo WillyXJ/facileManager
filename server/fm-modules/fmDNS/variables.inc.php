@@ -31,7 +31,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
-		'version'							=> '5.3.0',
+		'version'							=> '5.3.3',
 		'client_version'					=> '5.3.0',
 		'description'						=> __('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.', 'fmDNS'),
 		'prefix'							=> 'dns_',
@@ -124,7 +124,7 @@ $__FM_CONFIG['logging']['options']['print-time']		= array('', 'yes', 'no');
 $__FM_CONFIG['logging']['categories']					= array('client', 'config', 'database', 'default', 'delegation-only', 'dispatch', 'dnssec', 'general', 
 															'lame-servers', 'network', 'notify', 'queries', 'resolver', 'rpz', 'rate-limit', 'security', 'unmatched',
 															'update', 'update-security', 'xfer-in', 'xfer-out', 'query-errors', 'cname', 'zoneload', 'edns-disabled',
-															'security', 'dnstap', 'trust-anchor-telemetry', 'spill');
+															'dnstap', 'trust-anchor-telemetry', 'spill');
 $__FM_CONFIG['logging']['channels']['reserved']			= array('null', 'default_syslog', 'default_debug', 'default_stderr');
 
 

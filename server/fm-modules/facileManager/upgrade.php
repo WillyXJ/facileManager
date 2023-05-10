@@ -49,11 +49,11 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_402($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_450($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
-		setOption('version_check', array('timestamp' => date("Y-m-d H:i:s", strtotime("2 months ago")), 'data' => null), 'update', true, 0, $fm_name);
+		setOption('version_check', array('timestamp' => 0, 'data' => null), 'update', true, 0, $fm_name);
 	} else {
 		$errors = true;
 	}
@@ -523,7 +523,7 @@ function fmUpgrade_1201($database) {
 
 /** fM v1.2-rc1 **/
 function fmUpgrade_1202($database) {
-	global $fmdb, $fm_name;
+	global $fm_name;
 	
 	$success = true;
 	
@@ -553,8 +553,6 @@ function fmUpgrade_1202($database) {
 
 /** fM v2.0-beta1 **/
 function fmUpgrade_2002($database) {
-	global $fmdb, $fm_name;
-	
 	$success = true;
 	
 	/** Prereq */
@@ -572,7 +570,7 @@ function fmUpgrade_2002($database) {
 
 /** fM v2.0 **/
 function fmUpgrade_200($database) {
-	global $fmdb, $fm_name;
+	global $fmdb;
 	
 	$success = true;
 	
@@ -604,7 +602,7 @@ function fmUpgrade_200($database) {
 
 /** fM v2.1-beta1 **/
 function fmUpgrade_2101($database) {
-	global $fmdb, $fm_name;
+	global $fmdb;
 	
 	$success = true;
 	
@@ -640,7 +638,7 @@ function fmUpgrade_2101($database) {
 
 /** fM v3.0-rc1 **/
 function fmUpgrade_3001($database) {
-	global $fmdb, $fm_name;
+	global $fmdb;
 	
 	$success = true;
 	
@@ -708,7 +706,7 @@ function fmUpgrade_310($database) {
 
 /** fM v3.1.1 **/
 function fmUpgrade_311($database) {
-	global $fmdb, $fm_name;
+	global $fmdb;
 	
 	$success = true;
 	
@@ -735,7 +733,7 @@ function fmUpgrade_311($database) {
 
 /** fM v4.0.0-beta1 **/
 function fmUpgrade_4001($database) {
-	global $fmdb, $fm_name;
+	global $fmdb;
 	
 	$success = true;
 	
@@ -771,7 +769,7 @@ function fmUpgrade_4001($database) {
 
 /** fM v4.0.2 **/
 function fmUpgrade_402($database) {
-	global $fmdb, $fm_name;
+	global $fmdb;
 	
 	$success = true;
 	
@@ -791,6 +789,33 @@ function fmUpgrade_402($database) {
 	}
 
 	upgradeConfig('fm_db_version', 49, false);
+	
+	return $success;
+}
+
+
+/** fM v4.5.0 **/
+function fmUpgrade_450($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 49) ? fmUpgrade_402($database) : true;
+	
+	if ($success) {
+		$table[] = "DELETE FROM `$database`.`fm_options` WHERE `option_name`='version_check'";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 50, false);
 	
 	return $success;
 }

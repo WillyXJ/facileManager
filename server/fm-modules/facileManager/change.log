@@ -1,4 +1,4 @@
-4.5.0 (2022-??-??)
+4.?.0 (2022-??-??)
 ==================
 * Server - [improvement] Added support to hide unused module dashboards.
 * Server - [improvement] Added support for server list placeholder.
@@ -7,6 +7,11 @@
 * Server - [improvement] Tooltip display tweaks.
 * Server - [bug] A deactivated module cannot be activated unless the required version of
            facileManager is installed.
+
+4.5.0 (2023-04-19)
+==================
+* Server - [improvement] The settings now displays the timestamp of the last software update check.
+* Server - [bug] Fixed module settings page when the has no settings.
 
 4.4.0 (2023-03-09)
 ==================

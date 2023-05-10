@@ -933,7 +933,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
-							$files[$zone_data_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
+							if ($zone_file_contents != null) {
+								$files[$zone_data_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
+							}
 							unset($zone_file_contents);
 							break;
 						case 'stub':
