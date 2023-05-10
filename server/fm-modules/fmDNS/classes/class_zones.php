@@ -205,15 +205,12 @@ class fm_dns_zones {
 				break;
 			}
 			$domain_name_servers .= $val . ';';
-			if ($val[0] == 's') {
-				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			} elseif ($val[0] == 'g') {
-				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
-			}
+			$server_name = (strpos($val, 's_') !== false)
+				? getNameFromID(str_replace('s_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name')
+				: getNameFromID(str_replace('g_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 			$log_message_name_servers .= $val ? "$server_name; " : null;
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
-		if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
 
 		/** Get clone parent values */
 		if ($post['domain_clone_domain_id']) {
@@ -249,23 +246,6 @@ class fm_dns_zones {
 			$sql_fields = rtrim($sql_fields, ', ') . ')';
 			$sql_values = rtrim($sql_values, ', ');
 		} else {
-			/** Format domain_view */
-			$log_message_views = null;
-			if (is_array($post['domain_view'])) {
-				$domain_view = null;
-				foreach ($post['domain_view'] as $val) {
-					if ($val == 0 || $val == '') {
-						$domain_view = 0;
-						break;
-					}
-					$domain_view .= $val . ';';
-					$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-					$log_message_views .= $val ? "$view_name; " : null;
-				}
-				$post['domain_view'] = rtrim($domain_view, ';');
-			}
-			if (!$post['domain_view']) $post['domain_view'] = 0;
-			
 			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url');
 		
 			foreach ($post as $key => $data) {
@@ -273,7 +253,7 @@ class fm_dns_zones {
 					$sql_fields .= $key . ',';
 					if (is_array($data)) $data = implode(';', $data);
 					$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
-					if ($key == 'domain_view') $data = $log_message_views;
+					if ($key == 'domain_view') $data = rtrim($log_message_views, '; ');
 					if ($key == 'domain_name_servers') $data = rtrim($log_message_name_servers, '; ');
 					if ($key == 'soa_id') {
 						$soa_name = $data ? getNameFromID($data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name') : 'Custom';
@@ -430,8 +410,8 @@ class fm_dns_zones {
 		
 		/** Format domain_view */
 		$log_message_views = null;
-		if (is_array($post['domain_view'])) {
-			foreach ($post['domain_view'] as $val) {
+		if ($post['domain_view']) {
+			foreach (explode(';', $post['domain_view']) as $val) {
 				if ($val == 0) {
 					$domain_view = 0;
 					break;
@@ -451,11 +431,12 @@ class fm_dns_zones {
 				break;
 			}
 			$domain_name_servers .= $val . ';';
-			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$server_name = (strpos($val, 's_') !== false)
+				? getNameFromID(str_replace('s_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name')
+				: getNameFromID(str_replace('g_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 			$log_message_name_servers .= $val ? "$server_name; " : null;
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
-		if (!$post['domain_name_servers']) $post['domain_name_servers'] = 0;
 		
 		$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward');
 
@@ -464,8 +445,8 @@ class fm_dns_zones {
 				$data = sanitize($data);
 				
 				$sql_edit .= strlen($data) ? $key . "='$data', " : $key . '=NULL, ';
-				if ($key == 'domain_view') $data = $log_message_views;
-				if ($key == 'domain_name_servers') $data = $log_message_name_servers;
+				if ($key == 'domain_view') $data = trim($log_message_views, '; ');
+				if ($key == 'domain_name_servers') $data = trim($log_message_name_servers, '; ');
 				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 				if ($key == 'domain_default' && $data == 'yes') {
 					$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";

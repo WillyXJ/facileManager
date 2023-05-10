@@ -1,5 +1,6 @@
 5.3.3 (2023-05-??)
 ==================
+* Server - [bug] Fixed zone add/edit audit logging.
 * Server - [bug] Fixed ability to have the same zone defined multiple times with different
            name servers hosting it.
 
