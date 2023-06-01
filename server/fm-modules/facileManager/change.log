@@ -7,6 +7,8 @@
 * Server - [improvement] Tooltip display tweaks.
 * Server - [bug] A deactivated module cannot be activated unless the required version of
            facileManager is installed.
+* Server - [bug] Fixed user edits with PHP7.
+* Server - [bug] Fixed PHP errors.
 
 4.5.0 (2023-04-19)
 ==================

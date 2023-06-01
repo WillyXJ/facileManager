@@ -262,7 +262,7 @@ class fm_login {
 		if ($auth_method) {
 			/** Use Builtin Auth when Default Auth Method is LDAP but user is defined with 'facileManager/Builtin' */
 			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_login` = '$user_login' and `user_auth_type`=1 and `user_status`='active'");
-			if (is_array($fmdb->last_result) && $fmdb->last_result[0]->user_login == $user_login) {
+			if ($fmdb->num_rows && is_array($fmdb->last_result) && $fmdb->last_result[0]->user_login == $user_login) {
 				$auth_method = 1;
 			}
 
