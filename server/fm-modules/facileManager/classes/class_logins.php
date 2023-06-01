@@ -569,10 +569,13 @@ This link expires in %s.',
 						}
 						
 						/** Process AD group membership */
-						$ldap_group_response = $this->checkGroupMembership($ldap_connect, $this->getDN($ldap_connect, $username, $ldap_dn), $ldap_group_dn, $ldap_group_attribute);
-					} else {
-						/** Process LDAP group membership */
-						$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $username);
+						$ldap_dn = $this->getDN($ldap_connect, $username, $ldap_dn);
+					}
+
+					/** Process LDAP group membership */
+					$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $username);
+					if ($ldap_group_response !== true) {
+						$ldap_group_response = $this->checkGroupMembership($ldap_connect, $ldap_dn, $ldap_group_dn, $ldap_group_attribute);
 					}
 					
 					if ($ldap_group_response !== true) {
