@@ -1,3 +1,7 @@
+4.5.1 (2023-??-??)
+==================
+* Server - [bug] Fixed user edits with PHP7.
+
 4.5.0 (2023-04-19)
 ==================
 * Server - [improvement] The settings now displays the timestamp of the last software update check.
