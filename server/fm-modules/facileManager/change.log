@@ -1,6 +1,7 @@
 4.5.1 (2023-??-??)
 ==================
 * Server - [bug] Fixed user edits with PHP7.
+* Server - [bug] Fixed PHP errors.
 
 4.5.0 (2023-04-19)
 ==================
