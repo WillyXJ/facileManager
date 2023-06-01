@@ -26,8 +26,22 @@ if (defined('CLIENT')) {
     exit;
 }
 
-if (defined('NO_DASH') && isset($__FM_CONFIG['homepage'])) {
-    header('Location: ' . $__FM_CONFIG['homepage']);
+if (defined('NO_DASH')) {
+    if (isset($__FM_CONFIG['homepage'])) {
+        header('Location: ' . $__FM_CONFIG['homepage']);
+    } else {
+        list($filtered_menu, $filtered_submenu) = getCurrentUserMenu();
+        ksort($filtered_menu);
+        ksort($filtered_submenu);
+        
+        $i = 1;
+        foreach ($filtered_menu as $position => $main_menu_array) {
+            if (strpos($main_menu_array[4], '.php') !== false) {
+                header('Location: ' . $main_menu_array[4]);
+                break;
+            }
+        }
+    }
     exit;
 }
 
