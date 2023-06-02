@@ -6,6 +6,7 @@
 * Server - [improvement] Changes to the search bar to better support additional modules.
 * Server - [improvement] Tooltip display tweaks.
 * Server - [improvement] LDAP authentication with group membership support improved. (Issue #578)
+* Server - [improvement] Relocated the logs search filter form.
 * Server - [bug] A deactivated module cannot be activated unless the required version of
            facileManager is installed.
 * Server - [bug] Fixed user edits with PHP7.
