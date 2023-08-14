@@ -1221,7 +1221,7 @@ function checkPTRZone($ip, $domain_id) {
 	$octet = explode('.', $ip);
 	$zone = "'{$octet[2]}.{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[0]}.in-addr.arpa'";
 
-	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_status!='deleted'");
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_type='master' AND domain_status!='deleted'");
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
 		return array($result[0]->domain_id, null);
