@@ -1076,7 +1076,7 @@ FORM;
 		
 		$names = null;
 		foreach (explode(';', trim($ids, ';')) as $temp_id) {
-			$names[] = ($temp_id == 0) ? _('All Servers') : getNameFromID(preg_replace('/\D/', null, $temp_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$names[] = ($temp_id == 0) ? _('All Servers') : getNameFromID(preg_replace('/\D/', '', $temp_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		}
 		
 		return implode("<br />\n", $names);

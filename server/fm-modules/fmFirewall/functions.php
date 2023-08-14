@@ -71,7 +71,7 @@ function buildModuleToolbar() {
 	global $__FM_CONFIG;
 	
 	if (isset($_GET['server_serial_no']) && $_GET['server_serial_no']) {
-		$server_name = ($_GET['server_serial_no'][0] == 't') ? getNameFromID(preg_replace('/\D/', null, $_GET['server_serial_no']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name') : getNameFromID($_GET['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+		$server_name = ($_GET['server_serial_no'][0] == 't') ? getNameFromID(preg_replace('/\D/', '', $_GET['server_serial_no']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name') : getNameFromID($_GET['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		$domain_menu = sprintf('<div id="topheadpart">
 			<span class="single_line">%s:&nbsp;&nbsp; %s</span>
 		</div>', __('Firewall'), $server_name);
