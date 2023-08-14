@@ -1,6 +1,7 @@
 5.3.4 (2023-??-??)
 ==================
 * Server - [bug] Fixed an issue where automatic PTR records would not get created.
+* Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
 
 5.3.3 (2023-05-10)
 ==================

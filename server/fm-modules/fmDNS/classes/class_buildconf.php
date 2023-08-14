@@ -2010,7 +2010,7 @@ HTML;
 			return;
 		} else {
 			$def_multiple_values = $fmdb->last_result[0]->def_multiple_values;
-			$def_minimum_version = (isset($fmdb->last_result[0]->def_minimum_version)) ? $fmdb->last_result[0]->def_minimum_version : null;
+			$def_minimum_version = (isset($fmdb->last_result[0]->def_minimum_version)) ? $fmdb->last_result[0]->def_minimum_version : 0;
 		}
 
 		// Ensure minimum version is achieved
