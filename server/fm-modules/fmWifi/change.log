@@ -1,3 +1,7 @@
+0.4.1 (2023-??-??)
+==================
+* Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582)
+
 0.4.0 (2023-03-09)
 ==================
 * Both   - [improvement] Added PHP 8.2 support. (Issue #558)
