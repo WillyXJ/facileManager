@@ -113,6 +113,18 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 		if (isset($data['Delete'])) {
 			$action = _('Delete');
 			$html .= buildInputReturn('update', $id ,'record_status', 'deleted');
+			/** Delete associated PTR record */
+			$ptr_record_id = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', 'record_', 'record_id', 'record_ptr_id');
+			if ($ptr_record_id) {
+				/** Does the user have access to the reverse zone? */
+				$ptr_domain_id = getNameFromID($ptr_record_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', 'record_', 'ptr_record_id', 'domain_id');
+				$ptr_unauth = false;
+				if (!currentUserCan('manage_records', $_SESSION['module'])) $ptr_unauth = true;
+				if (!zoneAccessIsAllowed(array($ptr_domain_id))) $ptr_unauth = true;
+				if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) $ptr_unauth = true;
+				
+				if ($ptr_unauth == false) $html .= buildInputReturn('update', $ptr_record_id ,'record_status', 'deleted');
+			}
 			$value[$id] = $data;
 		} elseif (array_key_exists('record_skipped', $data) && $skips_allowed) {
 			if ($data['record_skipped'] == 'on') {

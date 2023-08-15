@@ -1,6 +1,9 @@
 5.4.0 (2023-??-??)
 ==================
 * Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
+* Server - [bug] Fixed an issue where automatic PTR records would not get created.
+* Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
+* Server - [bug] PTR records are now deleted with the linked A record. (Issue #580)
 
 5.3.3 (2023-05-10)
 ==================
