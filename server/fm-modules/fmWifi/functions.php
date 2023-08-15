@@ -540,7 +540,7 @@ function getHostedServers($configured_servers) {
 
 			/** Process server groups */
 			if ($server[0] == 'g') {
-				$group_servers = getNameFromID(preg_replace('/\D/', null, $server), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_members');
+				$group_servers = getNameFromID(preg_replace('/\D/', '', $server), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_members');
 
 				foreach (explode(';', $group_servers) as $server_id) {
 					if (!empty($server_id)) $servers_sql .= sprintf("'%s',", str_replace('s_', '', $server_id));
