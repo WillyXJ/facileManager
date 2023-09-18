@@ -1,7 +1,7 @@
 facileManager
 =============
                                           
-(c) 2013-2019 by facileManager project members.
+(c) 2013-2023 by facileManager project members.
 facileManager is free software released under the terms of GNU GPL v2.
 Please see LICENSE for license.
 
@@ -27,7 +27,7 @@ Prerequisites
 
 facileManager (server) requires the following:
 
-* PHP 5.5.0 - 7.4 with MySQL support
+* PHP 5.5.0+ with MySQL support
 * MySQL 5.0 or later
   * Required MySQL user privileges on the database include
 
@@ -40,7 +40,7 @@ facileManager (server) requires the following:
 fM client requires the following:
 
 * ISC BIND 9.3 or later (for the fmDNS module only)
-* PHP 5.0 - 7.4
+* PHP 5.0+
 * A running web server if using http(s) update methods
   * The install script supports the following web servers:
     * httpd
@@ -81,8 +81,8 @@ Client Installation
 
    `sudo mv facileManager/client/facileManager /usr/local/`
 
-2. For each module you wish to use, run the following to complete the client
-   installation.
+2. For each module you wish to use, run the following on each client to complete
+   the installation.
 
    `sudo php /usr/local/facileManager/<module_name>/client.php install`
 	
@@ -133,55 +133,3 @@ Alternatively, since v1.1, you can update the clients through the UI (servers
 page) or by running the following on the clients:
 
 `sudo php /usr/local/facileManager/<module_name>/client.php upgrade`
-
-
-Important Upgrade Notes
------------------------
-
-The client files have been consolidated and standardized starting with versions
-2.2 and 1.3 of fmDNS and fmFirewall respectively which cleans up some files and
-a lot of code to put the project in a better position going forward. However,
-this does require a manual upgrade of the client using the normal steps above
-and these additional steps.
-
-When upgrading from fmDNS <= 2.1.x or fmFirewall <= 1.2.x, remove the old client
-files with the following:
-
-`sudo rm -rf /usr/local/facileManager/*/{dns,fw}.php /usr/local/facileManager/*/www`
-
-You MUST also update the following based on your client's update method.
-
-1. Cron - update root's crontab to use client.php instead of dns.php or fw.php
-2. SSH  - update your sudoers file to use client.php instead of dns.php or fw.php
-3. HTTP - update your sudoers file to use client.php instead of dns.php or fw.php
-
-          and update the module symlink in your document root to use the www  
-          directory from the core files instead of the module directory.  
-
-          For example:  
-
-          sudo rm /var/www/html/<module_name>  
-          sudo ln -sf /usr/local/facileManager/www /var/www/html/fM  
-
-Alternatively, you can run the reinstall script which will ensure the proper
-files and configs will be in place, but it will **_not_** remove the old sudoers entries
-and document root symlinks.
-
-`sudo php /usr/local/facileManager/<module_name>/client.php reinstall`
-
-
-For a simple copy/paste manual fmDNS client upgrade process, follow these steps
-(these can be modified for other fM modules):
-
-```
-cd ~
-cp /usr/local/facileManager/config.inc.php .
-sudo rm -rf /usr/local/facileManager
-wget http://www.facilemanager.com/download/facilemanager-core-2.2.tar.gz http://www.facilemanager.com/download/module/fmdns-2.2.2.tar.gz
-tar zxf facilemanager-core-2.2.tar.gz
-tar zxf fmdns-2.2.2.tar.gz
-sudo mv facileManager/client/facileManager /usr/local
-rm -rf facile* fmdns*
-sudo mv config.inc.php /usr/local/facileManager
-sudo php /usr/local/facileManager/fmDNS/client.php reinstall
-```
