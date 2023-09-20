@@ -572,7 +572,7 @@ This link expires in %s.',
 						$ldap_group_response = $this->checkGroupMembership($ldap_connect, $this->getDN($ldap_connect, $username, $ldap_dn), $ldap_group_dn, $ldap_group_attribute);
 					} else {
 						/** Process LDAP group membership */
-						$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $username);
+						$ldap_group_response = @ldap_compare($ldap_connect, $ldap_group_dn, $ldap_group_attribute, $ldap_dn);
 					}
 					
 					if ($ldap_group_response !== true) {
