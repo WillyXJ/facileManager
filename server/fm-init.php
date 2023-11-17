@@ -111,7 +111,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 				if ($result === true) {
 					$message = sprintf('<p class="success">%s</p>', _('Your password reset email has been sent to the address on file.'));
 				} else {
-					$message = sprintf('<p class="failed">%s</p>', $result);
+					$message = sprintf('<div class="failed"><p>%s</p></div>', $result);
 				}
 				
 				if ($_POST['is_ajax']) {

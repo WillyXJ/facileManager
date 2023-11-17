@@ -128,7 +128,7 @@ class fm_login {
 	 * @package facileManager
 	 *
 	 * @param string $user_login Username to authenticate
-	 * @return boolean
+	 * @return boolean|void
 	 */
 	function processUserPwdResetForm($user_login = null) {
 		global $fmdb;
@@ -138,7 +138,10 @@ class fm_login {
 		$user_info = getUserInfo(sanitize($user_login), 'user_login');
 		
 		/** If the user is not found, just return lest we give away valid user accounts */
-		if ($user_info == false) return true;
+		if ($user_info == false) {
+			sleep(1);
+			return true;
+		}
 		
 		$fm_login = $user_info['user_id'];
 		$uniqhash = genRandomString(mt_rand(30, 50));
@@ -369,13 +372,16 @@ class fm_login {
 	 *
 	 * @param string $fm_login Username to send the mail to
 	 * @param string $uniq_hash Unique password reset hash
-	 * @return boolean
+	 * @return boolean|string
 	 */
 	function mailPwdResetLink($fm_login, $uniq_hash) {
 		global $fm_name;
 		
 		$user_info = getUserInfo($fm_login);
-		if (isEmailAddressValid($user_info['user_email']) === false) return _('There is no valid e-mail address associated with this user.');
+		if (isEmailAddressValid($user_info['user_email']) === false) {
+			sleep(1);
+			return true;
+		}
 		
 		$subject = sprintf(_('%s Password Reset'), $fm_name);
 		$from = getOption('mail_from');

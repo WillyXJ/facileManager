@@ -266,9 +266,11 @@ class fm_settings {
 		} else $mail_smtp_auth_checked = $mail_smtp_auth_options_style = null;
 
 		$mail_smtp_host = getOption('mail_smtp_host');
+		$mail_smtp_port = getOption('mail_smtp_port');
 		$mail_smtp_user = getOption('mail_smtp_user');
 		$mail_smtp_pass = getOption('mail_smtp_pass');
-		$mail_smtp_tls_checked = (getOption('mail_smtp_tls')) ? 'checked' : null;
+		$mail_smtp_tls = (getOption('mail_smtp_tls'));
+		$mail_smtp_tls_list = buildSelect('mail_smtp_tls', 'mail_smtp_tls', array('', 'SSL', 'TLS'), $mail_smtp_tls);
 		
 		$mail_from = getOption('mail_from');
 		
@@ -569,6 +571,15 @@ class fm_settings {
 								<input name="mail_smtp_host" id="mail_smtp_host" type="text" value="' . $mail_smtp_host . '" size="40" placeholder="smtp1.domain.com;smtp2.domain.com" />
 							</div>
 						</div>
+						<div id="setting-row">
+							<div class="description">
+								<label for="mail_smtp_port">' . _('Server Port') . '</label>
+								<p>' . _('SMTP server port to connect to.') . '</p>
+							</div>
+							<div class="choices">
+								<input name="mail_smtp_port" id="mail_smtp_port" type="text" value="' . $mail_smtp_port . '" size="40" placeholder="25" />
+							</div>
+						</div>
 						
 						<div id="setting-row">
 							<div class="description">
@@ -602,12 +613,12 @@ class fm_settings {
 						
 						<div id="setting-row">
 							<div class="description">
-								<label for="mail_smtp_tls">' . _('Enable TLS') . '</label>
-								<p>' . _('Use TLS with your SMTP server connection.') . '</p>
+								<label for="mail_smtp_tls">' . _('Secure Connection') . '</label>
+								<p>' . _('Use SSL or TLS with your SMTP server connection.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="mail_smtp_tls" id="mail_smtp_tls" type="checkbox" value="1" ' . $mail_smtp_tls_checked . ' /><label for="mail_smtp_tls">' . _('Enable TLS') . '</label>
-							</div>
+							' . $mail_smtp_tls_list . '
+						</div>
 						</div>
 	
 						<div id="setting-row">

@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_450($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_460($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -816,6 +816,33 @@ function fmUpgrade_450($database) {
 	}
 
 	upgradeConfig('fm_db_version', 50, false);
+	
+	return $success;
+}
+
+
+/** fM v4.6.0 **/
+function fmUpgrade_460($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 50) ? fmUpgrade_450($database) : true;
+	
+	if ($success) {
+		$table[] = "UPDATE `fm_options` SET `option_value`='TLS' WHERE `option_name`='mail_smtp_tls' and `option_value`=1";
+
+		/** Create table schema */
+		if (count($table) && $table[0]) {
+			foreach ($table as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 51, false);
 	
 	return $success;
 }
