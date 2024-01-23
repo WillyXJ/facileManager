@@ -79,7 +79,7 @@ for ($i=0; $i < count($argv); $i++) {
 
 	/** Get API parameters */
 	if ($api_call) {
-		foreach (array_unique(call_user_func_array('array_merge', $api_params)) as $param) {
+		foreach (array_unique(call_user_func_array('array_merge', array_values($api_params))) as $param) {
 			if (strncmp(strtolower($argv[$i]), $param . '=', strlen($param) + 1) == 0) {
 				$prefix = ($param == 'id') ? 'domain_' : 'record_';
 				if ($param == 'action') $prefix = null;
