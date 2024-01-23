@@ -12,6 +12,7 @@
 * Server - [improvement] LDAP authentication with group membership support improved. (Issue #578)
 * Server - [improvement] Relocated the logs search filter form.
 * Server - [improvement] Added server port and ssl security to mail settings.
+* Server - [improvement] Now detects Raspberry Pi OS.
 * Server - [bug] A deactivated module cannot be activated unless the required version of
            facileManager is installed.
 * Server - [bug] Fixed user edits with PHP7.
