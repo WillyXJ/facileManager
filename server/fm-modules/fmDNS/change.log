@@ -1,5 +1,6 @@
 5.3.4 (2023-??-??)
 ==================
+* Server - [improvement] @ used in record values will be translated as the zone name. (Issue #593)
 * Server - [bug] Fixed an issue where automatic PTR records would not get created.
 * Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
 * Server - [bug] PTR records are now deleted with the linked A record. (Issue #580)
