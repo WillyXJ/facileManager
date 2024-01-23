@@ -619,6 +619,8 @@ if (isset($__FM_CONFIG)) {
         var $this 		= $(this);
         user_id			= $this.attr("id");
 
+		$this.html("<i class=\"fa fa-spinner fa-spin\"></i>");
+
 		var form_data = {
 			user_id: user_id,
 			reset_pwd: true,
@@ -644,6 +646,7 @@ if (isset($__FM_CONFIG)) {
 							{ queue: false, duration: 200 }
 						);
 					});
+				$this.html(\'' . $__FM_CONFIG['icons']['pwd_reset'] . '\');
 				if (response.toLowerCase().indexOf("response_close") == -1) {
 					$("#response").delay(3000).fadeTo(200, 0.00, function() {
 						$("#response").slideUp(400);

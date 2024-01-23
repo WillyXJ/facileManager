@@ -13,6 +13,7 @@
 * Server - [improvement] Relocated the logs search filter form.
 * Server - [improvement] Added server port and ssl security to mail settings.
 * Server - [improvement] Now detects Raspberry Pi OS.
+* Server - [improvement] Upgraded to PHPMailer 6.9.1.
 * Server - [bug] A deactivated module cannot be activated unless the required version of
            facileManager is installed.
 * Server - [bug] Fixed user edits with PHP7.

@@ -3714,16 +3714,18 @@ function clearUpdateDir() {
 function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $images = null) {
 	global $fm_name;
 
-	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
+	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'PHPMailer.php';
 	if (!file_exists($phpmailer_file)) {
 		return _('Unable to send email - PHPMailer class is missing.');
-	} else {
-		require_once($phpmailer_file);
 	}
 
-	$mail = new PHPMailer;
+	require($phpmailer_file);
+	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'SMTP.php');
+	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'Exception.php');
+	$mail = new PHPMailer\PHPMailer\PHPMailer;
 
 	/** Set PHPMailer options from database */
+	if (getOption('show_errors')) $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
 	$mail->Host = getOption('mail_smtp_host');
 	$mail->Port = getOption('mail_smtp_port');
 	$mail->SMTPAuth = getOption('mail_smtp_auth');
