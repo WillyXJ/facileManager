@@ -1967,8 +1967,8 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $ids IDs to convert to names
-	 * @param id $type ID type to process
+	 * @param string $ids IDs to convert to names
+	 * @param string $type ID type to process
 	 * @return string
 	 */
 	function IDs2Name ($ids, $type) {
