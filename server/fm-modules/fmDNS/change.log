@@ -1,5 +1,6 @@
 5.4.0 (2023-??-??)
 ==================
+* Server - [feature] Added support for several more global option and logging parameters.
 * Server - [improvement] @ used in record values will be translated as the zone name. (Issue #593)
 * Server - [improvement] IPv4 reverse zones can now sort hierarchically. (Issue #411)
 * Server - [improvement] Forward zone hierarchically sorting supports two sub-domain levels.

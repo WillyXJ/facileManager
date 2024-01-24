@@ -124,7 +124,7 @@ $__FM_CONFIG['logging']['options']['print-time']		= array('', 'yes', 'no');
 $__FM_CONFIG['logging']['categories']					= array('client', 'config', 'database', 'default', 'delegation-only', 'dispatch', 'dnssec', 'general', 
 															'lame-servers', 'network', 'notify', 'queries', 'resolver', 'rpz', 'rate-limit', 'security', 'unmatched',
 															'update', 'update-security', 'xfer-in', 'xfer-out', 'query-errors', 'cname', 'zoneload', 'edns-disabled',
-															'dnstap', 'trust-anchor-telemetry', 'spill');
+															'dnstap', 'trust-anchor-telemetry', 'spill', 'nsid', 'rpz-passthru', 'server-stale', 'sslkeylog');
 $__FM_CONFIG['logging']['channels']['reserved']			= array('null', 'default_syslog', 'default_debug', 'default_stderr');
 
 
