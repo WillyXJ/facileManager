@@ -48,9 +48,6 @@ class fm_module_options {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		if (isset($_GET['type']) && sanitize($_GET['type']) == 'ratelimit') {
-			$title_array[] = array('title' => __('Zone'), 'rel' => 'domain_id');
-		}
 		$title_array[] = array('title' => __('Option'), 'rel' => 'cfg_name');
 		$title_array[] = array('title' => __('Value'), 'rel' => 'cfg_data');
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
@@ -136,7 +133,7 @@ class fm_module_options {
 			|| strpos($post['cfg_data'], 'domain_') !== false
 			|| strpos($post['cfg_data'], 'master_') !== false)
 			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
-		addLogEntry("Added option:\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
+		addLogEntry("Added option:\nType: {$post['cfg_type']}\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
 
@@ -259,18 +256,11 @@ class fm_module_options {
 		/** Parse address_match_element configs */
 		$cfg_data = $this->parseDefType($row->cfg_name, $row->cfg_data);
 		
-		$zone_row = null;
-		if (isset($_GET['type']) && sanitize($_GET['type']) == 'ratelimit') {
-			$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : '<span>All Zones</span>';
-			$zone_row = '<td>' . $domain_name . '</td>';
-			unset($domain_name);
-		}
 		$cfg_name = ($row->cfg_in_clause == 'yes') ? $row->cfg_name : '<b>' . $row->cfg_name . '</b>';
 
 		echo <<<HTML
 		<tr id="$row->cfg_id" name="$row->cfg_name"$disabled_class>
 			$checkbox
-			$zone_row
 			<td>$cfg_name</td>
 			<td>$cfg_data</td>
 			<td>$comments</td>
@@ -298,7 +288,7 @@ HTML;
 				if (isset($_POST['item_sub_type'])) {
 					$cfg_id_name = sanitize($_POST['item_sub_type']);
 				} else {
-					$cfg_id_name = isset($_POST['view_id']) ? 'view_id' : 'domain_id';
+					$cfg_id_name = (isset($_POST['view_id']) || strtolower($cfg_type) == 'ratelimit') ? 'view_id' : 'domain_id';
 				}
 				$data_holder = null;
 				$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
@@ -358,59 +348,6 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$addl_options = null;
-		if ($cfg_type == 'ratelimit') {
-			$available_zones = $fm_dns_zones->buildZoneJSON();
-
-			$addl_options = sprintf('<tr>
-					<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
-					<td width="67&#37;"><input type="hidden" name="domain_id" class="domain_name" value="%d" /><br />
-					<script>
-					$(".domain_name").select2({
-						createSearchChoice:function(term, data) { 
-							if ($(data).filter(function() { 
-								return this.text.localeCompare(term)===0; 
-							}).length===0) 
-							{return {id:term, text:term};} 
-						},
-						multiple: false,
-						width: "200px",
-						tokenSeparators: [",", " ", ";"],
-						data: %s
-					});
-					$(".domain_name").change(function(){
-						var $swap = $(this).parent().parent().next().find("td");
-						var form_data = {
-							server_serial_no: getUrlVars()["server_serial_no"],
-							cfg_type: getUrlVars()["type"],
-							cfg_name: $(this).parent().parent().next().find("td").find("select").val(),
-							get_available_options: true,
-							item_sub_type: "domain_id",
-							item_id: $(this).val(),
-							view_id: getUrlVars()["view_id"],
-							is_ajax: 1
-						};
-
-						$.ajax({
-							type: "POST",
-							url: "fm-modules/%s/ajax/getData.php",
-							data: form_data,
-							success: function(response) {
-								$swap.html(response);
-								
-								$("#manage select").select2({
-									width: "200px",
-									minimumResultsForSearch: 10
-								});
-							}
-						});
-					});
-					</script>
-				</tr>',
-					__('Zone'), $domain_id, $available_zones, $_SESSION['module']
-				);
-		}
-		
 		$return_form = sprintf('<script>
 			displayOptionPlaceholder("%s");
 		</script>
@@ -420,7 +357,6 @@ HTML;
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="cfg_type" value="%s" />
 			<input type="hidden" name="%s" value="%s" />
-			%s
 			<table class="form-table">
 				%s
 				<tr>
@@ -446,7 +382,6 @@ HTML;
 		</script>',
 				$cfg_data, $request_uri, $popup_header,
 				$action, $cfg_id, $cfg_type, $cfg_id_name, $cfg_type_id, $server_serial_no_field,
-				$addl_options,
 				__('Option Name'), $cfg_avail_options,
 				_('Comment'), $cfg_comment,
 				$popup_footer

@@ -2579,6 +2579,8 @@ INSERTSQL;
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'ZV' WHERE `def_option` = 'max-records'";
 	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option_type` = 'ratelimit'";
 
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domaain_id`!=0";
+
 	/** Run queries */
 	if (count($table) && $table[0]) {
 		foreach ($table as $schema) {
