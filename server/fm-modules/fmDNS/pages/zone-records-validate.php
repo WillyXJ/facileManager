@@ -78,6 +78,7 @@ printf('<div id="body_container">
 	<input type="hidden" name="domain_id" value="%d">
 	<input type="hidden" name="record_type" value="%s">
 	<input type="hidden" name="map" value="%s">
+	<input type="hidden" name="uri" value="%s">
 				%s
 			%s
 		</tbody>
@@ -87,7 +88,7 @@ printf('<div id="body_container">
 		<input type="submit" name="submit" value="%s" class="button primary" />
 	</p>
 </form>
-</div>', __('Record Validation'), $domain_id, $record_type, $map, $header, $body, __('Back'), __('Submit'));
+</div>', __('Record Validation'), $domain_id, $record_type, $map, $_POST['uri'], $header, $body, __('Back'), __('Submit'));
 
 printFooter();
 
