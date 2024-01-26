@@ -10,6 +10,7 @@
 * Server - [bug] PTR records are now deleted with the linked A record. (Issue #580)
 * Server - [bug] Fixed PHP errors. (Issue #596)
 * Server - [bug] Removed unnecessary zone selection from rate limit configuration options.
+* Server - [bug] Fixed CNAME singleton RR checks.
 * Client - [bug] Fixed PHP errors. (Issue #600)
 
 5.3.3 (2023-05-10)

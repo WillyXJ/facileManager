@@ -137,7 +137,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 			$value[$id] = $data;
 		} else {
 			$action = ucfirst($type);
-			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type, $append);
+			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type, $append, $data_array);
 			if (!isset($input_error[$id])) unset($input_error[$id]);
 			$html .= $valid_html;
 			if (is_array($valid_data)) {
@@ -192,7 +192,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	return $html;
 }
 
-function validateEntry($action, $id, $data, $record_type, $append) {
+function validateEntry($action, $id, $data, $record_type, $append, $data_array) {
 	$messages = null;
 	$html = null;
 	
@@ -221,7 +221,7 @@ function validateEntry($action, $id, $data, $record_type, $append) {
 					$val = '@';
 					$data[$key] = $val;
 				}
-				if ($data['record_status'] == 'active' && !verifyName($val, $id, true, $record_type)) {
+				if ($data['record_status'] == 'active' && !verifyName($val, $id, true, $record_type, $data_array)) {
 					$messages['errors'][$key] = __('Invalid');
 				}
 			}
@@ -379,15 +379,43 @@ function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
 	return $changes;
 }
 
-function verifyName($record_name, $id, $allow_null = true, $record_type = null) {
+function verifyName($record_name, $id, $allow_null = true, $record_type = null, $data_array = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	if (!$allow_null && !strlen($record_name)) return false;
 	
 	/** Ensure singleton RR type from existing records */
 	$sql = $record_type != 'CNAME' ? " AND record_type='CNAME'" : " AND record_id!=$id";
-	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql AND record_status='active'", null, false, 'ASC', true);
-	if ($fmdb->last_result[0]->count) return false;
+	basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id={$_POST['domain_id']} $sql AND record_status='active'", null, false, 'ASC');
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $res_array) {
+			if (is_array($_POST['update']) 
+				&& array_key_exists($res_array->record_id, $_POST['update']) 
+				&& (array_key_exists('Delete', $_POST['update'][$res_array->record_id]) 
+					|| $_POST['update'][$res_array->record_id]['record_status'] != 'active')) {
+				continue;
+			}
+			if (array_key_exists($res_array->record_id, $data_array)) {
+				if ($data_array[$res_array->record_id]['record_status'] == 'active') {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+	}
+	/** Ensure no updates create duplicate CNAME RR */
+	if (is_array($_POST['update']) && is_array($_POST['create']) && $record_type == 'CNAME') {
+		$tmp_array = array();
+		foreach ($_POST['update'] as $k => $v) {
+			if ($v['record_name'] == $record_name && $v['record_status'] == 'active' && !array_key_exists('Delete', $v)) $tmp_array[] = $_POST['update'][$k];
+		}
+		foreach ($_POST['create'] as $k => $v) {
+			if ($v['record_name'] == $record_name && $v['record_status'] == 'active') $tmp_array[] = $_POST['create'][$k];
+		}
+		if (count(array_column($tmp_array, 'record_status')) > 1) return false;
+		unset($tmp_array);
+	}
 
 	/** Ensure singleton RR type from new records */
 	if (in_array($record_name, $GLOBALS['new_cname_rrs'])) {
