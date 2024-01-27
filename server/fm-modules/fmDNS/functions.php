@@ -149,7 +149,7 @@ function buildModuleDashboard() {
 function buildModuleToolbar() {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
-	if (isset($_REQUEST['domain_id']) && !is_array($_REQUEST['domain_id'])) {
+	if (isset($_GET['domain_id']) && !is_array($_GET['domain_id'])) {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_REQUEST['domain_id'], 'domain_', 'domain_id');
 		extract(get_object_vars($fmdb->last_result[0]));
 		
@@ -770,6 +770,7 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', __('ACLs'), __('Access Control Lists'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
 		addSubmenuPage('config-servers.php', __('Keys'), __('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
 		addSubmenuPage('config-servers.php', __('Masters'), __('Masters'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-masters.php');
+		addSubmenuPage('config-servers.php', __('HTTP'), __('HTTP Endpoints'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-http.php');
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-servers.php', __('Logging'), __('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
 		addSubmenuPage('config-servers.php', __('Operations'), __('Operations'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
@@ -1328,6 +1329,33 @@ function resetURLServerConfigStatus($build_update = 'build') {
 
 	return;
 }
+
+/**
+ * Gets config item data from key
+ *
+ * @since 4.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param integer $config_id Config parent ID to retrieve children for
+ * @param string $return Array keys to populate and return
+ * @return string
+ */
+function getConfigChildren($config_id, $return = null) {
+	global $fmdb, $__FM_CONFIG;
+	
+	/** Get the data from $config_id */
+	$query = "SELECT cfg_name,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_parent='{$config_id}' ORDER BY cfg_id ASC";
+	$result = $fmdb->get_results($query);
+	if (!$fmdb->sql_errors && $fmdb->num_rows) {
+		foreach ($fmdb->last_result as $result) {
+			$return[$result->cfg_name] = $result->cfg_data;
+		}
+	}
+	
+	return $return;
+}
+
 
 
 ?>

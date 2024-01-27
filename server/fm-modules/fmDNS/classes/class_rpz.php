@@ -394,7 +394,7 @@ HTML;
 		$available_zones = $fm_dns_zones->buildZoneJSON('all', $excluded_domain_ids);
 
 		/** Get child elements */
-		$child_config = $this->getConfig($cfg_id, array_fill_keys(array('policy', 'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'qname-wait-recurse', 'nsip-wait-recurse', 'min-ns-dots'), null));
+		$child_config = getConfigChildren($cfg_id, array_fill_keys(array('policy', 'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'qname-wait-recurse', 'nsip-wait-recurse', 'min-ns-dots'), null));
 		if (array_key_exists('policy', $child_config)) {
 			@list($child_config['policy'], $cname_domain_name) = explode(' ', $child_config['policy']);
 		}
@@ -538,33 +538,6 @@ HTML;
 	}
 	
 	
-	/**
-	 * Gets config item data from key
-	 *
-	 * @since 4.0
-	 * @package facileManager
-	 * @subpackage fmDNS
-	 *
-	 * @param integer $config_id Config parent ID to retrieve children for
-	 * @param string $return Array keys to populate and return
-	 * @return string
-	 */
-	function getConfig($config_id, $return = null) {
-		global $fmdb, $__FM_CONFIG;
-		
-		/** Get the data from $config_id */
-		$query = "SELECT cfg_name,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_parent='{$config_id}' ORDER BY cfg_id ASC";
-		$result = $fmdb->get_results($query);
-		if (!$fmdb->sql_errors && $fmdb->num_rows) {
-			foreach ($fmdb->last_result as $result) {
-				$return[$result->cfg_name] = $result->cfg_data;
-			}
-		}
-		
-		return $return;
-	}
-
-
 	/**
 	 * Validates the submitted form
 	 *

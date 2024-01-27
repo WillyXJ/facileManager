@@ -2619,7 +2619,7 @@ function unAuth($link_display = 'show') {
  * @since 1.2
  * @package facileManager
  *
- * @param string $capability Capability name.
+ * @param string|array $capability Capability name.
  * @param string $module Module name to check capability for
  * @param string $extra_perm Extra capability to check
  * @return boolean
@@ -2742,7 +2742,7 @@ function addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug,
  *
  * @param string $menu_title Text used to display the menu item
  * @param string $page_title Text used to display the page title when the page loads
- * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string|array $capability Minimum capability required for the menu item to be visible to the user
  * @param string $module Module name the menu item is for
  * @param string $menu_slug Menu item slug name to used to reference this item
  * @param string $class Class name to apply to the menu item
@@ -2767,7 +2767,7 @@ function addObjectPage($menu_title, $page_title, $capability, $module, $menu_slu
  * @param string $parent_slug The slug name for the parent menu
  * @param string $menu_title Text used to display the menu item
  * @param string $page_title Text used to display the page title when the page loads
- * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string|array $capability Minimum capability required for the menu item to be visible to the user
  * @param string $module Module name the menu item is for
  * @param string $menu_slug Menu item slug name to used to reference this item
  * @param string $class Class name to apply to the menu item

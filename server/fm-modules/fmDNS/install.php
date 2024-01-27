@@ -127,7 +127,7 @@ TABLESQL;
 	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
-  `def_function` enum('options','logging','key','view') NOT NULL,
+  `def_function` enum('options','logging','key','view','http') NOT NULL,
   `def_option_type` enum('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global',
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
@@ -684,7 +684,10 @@ VALUES
 ('options', 'version', '( quoted_string | none )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL),
 ('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', NULL, 'yes', NULL),
-('options', 'zone-statistics', '( full | terse | none | yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL)
+('options', 'zone-statistics', '( full | terse | none | yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL),
+('http', 'endpoints', '( quoted_string )', 'yes', 'H', NULL, 'no', '9.18.0'),
+('http', 'listener-clients', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0')
 ;
 INSERTSQL;
 	
