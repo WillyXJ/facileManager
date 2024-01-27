@@ -5,11 +5,14 @@
 * Server - [improvement] IPv4 reverse zones can now sort hierarchically. (Issue #411)
 * Server - [improvement] Forward zone hierarchically sorting supports two sub-domain levels.
 * Server - [improvement] Added view name to the top bar. (Issue #602)
+* Server - [improvement] Users get returned to previous page with search criteria after managing
+           zone records.
 * Server - [bug] Fixed an issue where automatic PTR records would not get created.
 * Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
 * Server - [bug] PTR records are now deleted with the linked A record. (Issue #580)
 * Server - [bug] Fixed PHP errors. (Issue #596)
 * Server - [bug] Removed unnecessary zone selection from rate limit configuration options.
+* Server - [bug] Fixed CNAME singleton RR checks.
 * Client - [bug] Fixed PHP errors. (Issue #600)
 
 5.3.3 (2023-05-10)

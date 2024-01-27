@@ -149,7 +149,7 @@ function buildModuleDashboard() {
 function buildModuleToolbar() {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
-	if (isset($_REQUEST['domain_id'])) {
+	if (isset($_REQUEST['domain_id']) && !is_array($_REQUEST['domain_id'])) {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_REQUEST['domain_id'], 'domain_', 'domain_id');
 		extract(get_object_vars($fmdb->last_result[0]));
 		
