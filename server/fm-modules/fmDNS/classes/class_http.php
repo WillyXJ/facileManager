@@ -85,8 +85,14 @@ class fm_module_http {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+		$result = $fmdb->query($query);
+		foreach ($fmdb->last_result as $k => $def) {
+			$include_sub_configs[] = $def->def_option;
+		}
+
 		/** Validate entries */
-		$post = $this->validatePost($post);
+		$post = $this->validatePost($post, $include_sub_configs);
 		if (!is_array($post)) return $post;
 
 		/** Insert the parent */
@@ -94,11 +100,11 @@ class fm_module_http {
 		$sql_fields = '(';
 		$sql_values = null;
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'endpoints', 'listener-clients', 'streams-per-connection');
+		$include = array('cfg_isparent', 'cfg_type', 'server_serial_no', 'cfg_name', 'cfg_data', 'cfg_comment');
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
-			if (!in_array($key, $exclude)) {
+			if (in_array($key, $include)) {
 				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
 				if ($key == 'cfg_data' && empty($clean_data)) return __('No HTTP endpoint name defined.');
 				$sql_fields .= $key . ', ';
@@ -125,25 +131,22 @@ class fm_module_http {
 		$post['cfg_parent'] = $fmdb->insert_id;
 		$post['cfg_name'] = '';
 		unset($post['cfg_comment']);
-		$include = array('endpoints', 'listener-clients', 'streams-per-connection');
+		$include[] = 'cfg_parent';
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
 		$sql_values = '(';
 		
 		$i = 1;
-		foreach ($include as $handler) {
+		foreach ($include_sub_configs as $handler) {
 			$post['cfg_name'] = $handler;
 			$post['cfg_data'] = $post[$handler];
 			
 			foreach ($post as $key => $data) {
-				if (!in_array($key, $exclude)) {
-					$clean_data = sanitize($data);
-					if ($key == 'endpoints') $clean_data = trim($clean_data, '"');
-					if ($i) $sql_fields .= $key . ', ';
-					
-					$sql_values .= "'$clean_data', ";
-				}
+				if (!in_array($key, $include)) continue;
+				$clean_data = sanitize($data);
+				if ($i) $sql_fields .= $key . ', ';
+				$sql_values .= "'$clean_data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
@@ -181,8 +184,14 @@ class fm_module_http {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+		$result = $fmdb->query($query);
+		foreach ($fmdb->last_result as $k => $def) {
+			$include_sub_configs[] = $def->def_option;
+		}
+
 		/** Validate entries */
-		$post = $this->validatePost($post);
+		$post = $this->validatePost($post, $include_sub_configs);
 		if (!is_array($post)) return $post;
 
 		$endpoint_name = $post['cfg_data'];
@@ -215,7 +224,7 @@ class fm_module_http {
 		}
 
 		/** Update config children */
-		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'server_serial_no'));
+		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -225,7 +234,6 @@ class fm_module_http {
 			
 			foreach ($child as $key => $data) {
 				$clean_data = sanitize($data);
-				if ($key == 'endpoints') $clean_data = trim($clean_data, '"');
 				$sql_values .= "$key='$clean_data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
@@ -315,7 +323,7 @@ class fm_module_http {
 		$http_endpoint_name = $row->cfg_data;
 		$comments = nl2br($row->cfg_comment);
 
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $row->server_serial_no. '"', null, false, $sort_direction);
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no"', null, false);
 		foreach ($fmdb->last_result as $record) {
 			if ($record->cfg_data) {
 				(string) $options .= sprintf('<b>%s</b> %s<br />', $record->cfg_name, $record->cfg_data);
@@ -363,10 +371,31 @@ HTML;
 		}
 
 		/** Get child elements */
-		$child_config = getConfigChildren($cfg_id, array_fill_keys(array('endpoints', 'listener-clients', 'streams-per-connection'), null));
-		$endpoints = str_replace(array('"', "'"), '', (string) $child_config['endpoints']);
-		$listener_clients = $child_config['listener-clients'];
-		$streams_per_connection = $child_config['streams-per-connection'];
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+		$result = $fmdb->query($query);
+		foreach ($fmdb->last_result as $k => $def) {
+			$auto_fill_children[] = $def->def_option;
+			$valid_types = trim(str_replace(array('(', ')'), '', $def->def_type));
+				
+			switch ($valid_types) {
+				case 'integer':
+					$form_addl_html[$def->def_option] = 'maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)"';
+					break;
+				default:
+					$form_addl_html[$def->def_option] = null;
+			}
+		}
+		
+		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys($auto_fill_children, null));
+		foreach ($child_config as $k => $v) {
+			$child_config[$k] = str_replace(array('"', "'"), '', (string) $v);
+			$child_config_form[] = sprintf('
+				<tr>
+					<th width="33&#37;" scope="row"><label for="%s">%1$s</label></th>
+					<td width="67&#37;"><input name="%2$s" id="%2$s" type="text" value="%3$s" %4$s/></td>
+				</tr>', str_replace('-', ' ', $k), $k, $child_config[$k], $form_addl_html[$k]
+			);
+		}
 		
 		/** Get field length */
 		$http_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name');
@@ -381,28 +410,33 @@ HTML;
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="view_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
-			<table class="form-table">
-				<tr>
-					<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="endpoints">%s</label></th>
-					<td width="67&#37;"><input name="endpoints" id="endpoints" type="text" value="%s" size="40" placeholder="%s" /></td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="listener-clients">%s</label></th>
-					<td width="67&#37;"><input name="listener-clients" id="listener-clients" type="text" value="%s" maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="streams-per-connection">%s</label></th>
-					<td width="67&#37;"><input name="streams-per-connection" id="streams-per-connection" type="text" value="%s" maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="26">%s</textarea></td>
-				</tr>
-			</table>
+			<div id="tabs">
+				<div id="tab">
+					<input type="radio" name="tab-group-1" id="tab-1" checked />
+					<label for="tab-1">%s</label>
+					<div id="tab-content">
+						<table class="form-table">
+							<tr>
+								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
+								<td width="67&#37;"><textarea id="cfg_comment" name="cfg_comment" rows="4" cols="30">%s</textarea></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div id="tab">
+					<input type="radio" name="tab-group-1" id="tab-2" />
+					<label for="tab-2">%s</label>
+					<div id="tab-content">
+						<table class="form-table">
+							%s
+						</table>
+					</div>
+				</div>
+			</div>
 		%s
 		</form>
 		<script>
@@ -415,11 +449,11 @@ HTML;
 			});
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_type_id, $server_serial_no,
+				__('Basic'),
 				__('Endpoint Name'), $cfg_data, __('http-name'), $http_name_length,
-				__('Endpoints'), $endpoints, __('/dns-query'),
-				__('Listener Clients'), $listener_clients,
-				__('Streams per Connection'), $streams_per_connection,
 				_('Comment'), $cfg_comment,
+				__('Advanced'),
+				implode("\n", $child_config_form),
 				$popup_footer,
 			);
 
@@ -435,9 +469,10 @@ HTML;
 	 * @subpackage fmDNS
 	 *
 	 * @param array $post Posted array
+	 * @param array $include_sub_configs Array of sub configs to validate
 	 * @return array|boolean
 	 */
-	function validatePost($post) {
+	function validatePost($post, $include_sub_configs) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
@@ -452,7 +487,7 @@ HTML;
 		
 		foreach ($post as $key => $val) {
 			if (!$val) continue;
-			if (in_array($key, array('endpoints', 'listener-clients', 'streams-per-connection'))) {
+			if (in_array($key, $include_sub_configs)) {
 				$post2['cfg_name'] = $key;
 				$post2['cfg_data'] = $val;
 				$def_check = $fm_module_options->validateDefType($post2);

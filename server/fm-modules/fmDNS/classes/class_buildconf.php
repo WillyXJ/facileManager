@@ -2579,11 +2579,11 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 	function getHTTPEndpoints($view_id, $server_serial_no, $server_group_ids) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Check if rpz is supported by server_version */
+		/** Check if http is supported by server_version */
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		$unsupported_version = $this->versionCompatCheck('HTTP Endpoints', '9.18.0', $server_version);
 		
-		$global_config = $domain_rpz_config = $config_array = null;
+		$global_config = $config_array = null;
 		
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="http" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
 		if ($fmdb->num_rows) {
@@ -2627,7 +2627,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			$server_config_result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_config_count; $i++) {
-				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no"');
 				foreach ($fmdb->last_result as $record) {
 					$server_config[$server_config_result[$i]->cfg_data][$record->cfg_name] = $record->cfg_data;
 				}
@@ -2642,11 +2642,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		foreach ($config_array as $endpoint_name => $value_array) {
 			$global_config .= sprintf("http %s {\n", $endpoint_name);
 			foreach ($value_array as $param => $value) {
-				// if ($param == 'endpoints') {
-					// $global_config .= sprintf("\t%s { \"%s\"; };\n", $param, str_replace(';', '"; "', $value));
-				// } else {
-					$global_config .= $this->formatConfigOption($param, $value, null, null, "\t");
-				// }
+				if ($value) $global_config .= $this->formatConfigOption($param, $value, null, null, "\t");
 			}
 			$global_config .= "};\n";
 		}

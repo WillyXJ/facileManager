@@ -193,7 +193,7 @@ function buildModuleToolbar() {
  * @subpackage fmDNS
  */
 function buildModuleHelpFile() {
-	global $menu, $__FM_CONFIG;
+	global $menu, $__FM_CONFIG, $fm_name;
 	
 	$body = <<<HTML
 <h3>{$_SESSION['module']}</h3>
@@ -1338,14 +1338,15 @@ function resetURLServerConfigStatus($build_update = 'build') {
  * @subpackage fmDNS
  *
  * @param integer $config_id Config parent ID to retrieve children for
+ * @param string $config_type Type of configuration item
  * @param string $return Array keys to populate and return
  * @return string
  */
-function getConfigChildren($config_id, $return = null) {
+function getConfigChildren($config_id, $config_type = 'global', $return = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	/** Get the data from $config_id */
-	$query = "SELECT cfg_name,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_parent='{$config_id}' ORDER BY cfg_id ASC";
+	$query = "SELECT cfg_name,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$config_type}' AND cfg_parent='{$config_id}' ORDER BY cfg_id ASC";
 	$result = $fmdb->get_results($query);
 	if (!$fmdb->sql_errors && $fmdb->num_rows) {
 		foreach ($fmdb->last_result as $result) {

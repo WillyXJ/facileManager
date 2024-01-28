@@ -333,7 +333,7 @@ class fm_module_rpz {
 		$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : sprintf('<span>%s</span>', __('All Zones'));
 		$comments = nl2br($row->cfg_comment);
 
-		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $row->server_serial_no. '"', null, false, $sort_direction);
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $row->server_serial_no. '"', null, false);
 		foreach ($fmdb->last_result as $record) {
 			if ($record->cfg_data) {
 				if ($record->cfg_name == 'policy') {
@@ -394,7 +394,7 @@ HTML;
 		$available_zones = $fm_dns_zones->buildZoneJSON('all', $excluded_domain_ids);
 
 		/** Get child elements */
-		$child_config = getConfigChildren($cfg_id, array_fill_keys(array('policy', 'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'qname-wait-recurse', 'nsip-wait-recurse', 'min-ns-dots'), null));
+		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys(array('policy', 'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'qname-wait-recurse', 'nsip-wait-recurse', 'min-ns-dots'), null));
 		if (array_key_exists('policy', $child_config)) {
 			@list($child_config['policy'], $cname_domain_name) = explode(' ', $child_config['policy']);
 		}
