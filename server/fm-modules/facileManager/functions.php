@@ -3709,28 +3709,31 @@ function clearUpdateDir() {
  * @param string $altbody Email alternate body (plaintext)
  * @param string/array $from From name and address
  * @param array $images Images to embed in the email
- * @return boolean
+ * @return boolean|string
  */
 function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $images = null) {
 	global $fm_name;
 
-	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
+	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'PHPMailer.php';
 	if (!file_exists($phpmailer_file)) {
 		return _('Unable to send email - PHPMailer class is missing.');
-	} else {
-		require_once($phpmailer_file);
 	}
 
-	$mail = new PHPMailer;
+	require($phpmailer_file);
+	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'SMTP.php');
+	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'Exception.php');
+	$mail = new PHPMailer\PHPMailer\PHPMailer;
 
 	/** Set PHPMailer options from database */
+	if (getOption('show_errors')) $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
 	$mail->Host = getOption('mail_smtp_host');
+	$mail->Port = getOption('mail_smtp_port');
 	$mail->SMTPAuth = getOption('mail_smtp_auth');
 	if ($mail->SMTPAuth) {
 		$mail->Username = getOption('mail_smtp_user');
 		$mail->Password = getOption('mail_smtp_pass');
 	}
-	if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
+	if ($secure = getOption('mail_smtp_tls')) $mail->SMTPSecure = strtolower($secure);
 
 	if ($from) {
 		if (is_array($from)) {
@@ -3763,7 +3766,7 @@ function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $ima
 	$mail->IsSMTP();
 
 	if(!$mail->Send()) {
-		return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
+		return (getOption('show_errors')) ? sprintf(_('Mailer Error: %s'), $mail->ErrorInfo) : true;
 	}
 
 	return true;

@@ -685,7 +685,7 @@ function detectOSDistro() {
 			'Turbolinux' => '/etc/turbolinux-version'
 			);
 		
-		$raspberry_pi = array('Raspbian', 'Pidora');
+		$raspberry_pi = array('Raspbian', 'Raspberry Pi OS', 'Pidora');
 		
 		/** Debian-based systems */
 		if ($program = findProgram('lsb_release')) {
