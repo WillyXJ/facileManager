@@ -363,7 +363,7 @@ function detectDaemonVersion($return_array = false) {
  * @package facileManager
  * @subpackage fmWifi
  *
- * @return array
+ * @return array|string|bool
  */
 function getStartupScript($app) {
 	$distros = array(
@@ -392,9 +392,9 @@ function getStartupScript($app) {
 			'Slackware' => '/etc/rc.d/rc.dnsmasq restart'
 		)
 	);
-	$distros['hostapd']['Raspbian'] = $distros['hostapd']['Ubuntu'] = $distros['hostapd']['Fubuntu'] = $distros['hostapd']['Debian'];
-	$distros['dhcpcd']['Raspbian'] = $distros['dhcpcd']['Ubuntu'] = $distros['dhcpcd']['Fubuntu'] = $distros['dhcpcd']['Debian'];
-	$distros['dnsmasq']['Raspbian'] = $distros['dnsmasq']['Ubuntu'] = $distros['dnsmasq']['Fubuntu'] = $distros['dnsmasq']['Debian'];
+	$distros['hostapd']['Raspberry Pi'] = $distros['hostapd']['Ubuntu'] = $distros['hostapd']['Fubuntu'] = $distros['hostapd']['Debian'];
+	$distros['dhcpcd']['Raspberry Pi'] = $distros['dhcpcd']['Ubuntu'] = $distros['dhcpcd']['Fubuntu'] = $distros['dhcpcd']['Debian'];
+	$distros['dnsmasq']['Raspberry Pi'] = $distros['dnsmasq']['Ubuntu'] = $distros['dnsmasq']['Fubuntu'] = $distros['dnsmasq']['Debian'];
 	
 	$distros['hostapd']['Fedora'] = $distros['hostapd']['CentOS'] = $distros['hostapd']['ClearOS'] = $distros['hostapd']['Oracle'] = $distros['hostapd']['Scientific'] = $distros['hostapd']['Redhat'];
 	$distros['dhcpcd']['Fedora'] = $distros['dhcpcd']['CentOS'] = $distros['dhcpcd']['ClearOS'] = $distros['dhcpcd']['Oracle'] = $distros['dhcpcd']['Scientific'] = $distros['dhcpcd']['Redhat'];
