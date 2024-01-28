@@ -147,14 +147,21 @@ function buildModuleDashboard() {
  * @subpackage fmDNS
  */
 function buildModuleToolbar() {
-	global $__FM_CONFIG, $fmdb;
+	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
-	if (isset($_REQUEST['domain_id'])) {
-		$domain = displayFriendlyDomainName(getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+	if (isset($_REQUEST['domain_id']) && !is_array($_REQUEST['domain_id'])) {
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $_REQUEST['domain_id'], 'domain_', 'domain_id');
+		extract(get_object_vars($fmdb->last_result[0]));
+		
+		$domain = displayFriendlyDomainName($domain_name);
 		$icon = (getNameFromID($_REQUEST['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('&nbsp; <i class="mini-icon fa fa-lock" title="%s"></i>', __('Zone is secured with DNSSEC')) : null;
-		$domain_menu = '<div id="topheadpart">
-			<span class="single_line">' . __('Domain') . ':&nbsp;&nbsp; ' . $domain . $icon . '</span>
-		</div>';
+
+		if (!class_exists('fm_dns_zones')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+		}
+		$domain_menu = sprintf('<div id="topheadpart">
+			%s:&nbsp;&nbsp; %s%s<br />%s:&nbsp;&nbsp; %s
+		</div>', __('Domain'), $domain, $icon, __('View'), $fm_dns_zones->IDs2Name($domain_view, 'view'));
 		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id')) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
 			extract(get_object_vars($fmdb->last_result[0]));

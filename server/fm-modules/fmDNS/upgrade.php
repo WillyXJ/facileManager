@@ -2522,4 +2522,75 @@ function upgradefmDNS_530($__FM_CONFIG, $running_version) {
 	return true;
 }
 
+/** 6.0.0 */
+function upgradefmDNS_600($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '5.3.0', '<') ? upgradefmDNS_530($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$table[] = <<<INSERTSQL
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+	`def_function` ,
+	`def_option` ,
+	`def_type` ,
+	`def_multiple_values` ,
+	`def_clause_support`,
+	`def_zone_support`,
+	`def_dropdown`,
+	`def_minimum_version`
+	)
+VALUES 
+('options', 'dnskey-sig-validity', '( integer )', 'no', 'OVZ', 'M', 'no', '9.16.0'),
+('options', 'dnsrps-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
+('options', 'dnsrps-options', '( quoted_string )', 'yes', 'OV', NULL, 'no', '9.16.0'),
+('options', 'http-listener-clients', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'http-port', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'http-streams-per-connection', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'https-port', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'ipv4only-contact', '( quoted_string )', 'no', 'OV', NULL, 'no', '9.18.0'),
+('options', 'ipv4only-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.18.0'),
+('options', 'ipv4only-server', '( quoted_string )', 'no', 'OV', NULL, 'no', '9.18.0'),
+('options', 'max-ixfr-ratio', '( unlimited | percentage )', 'no', 'OVZ', 'M', 'no', '9.16.0'),
+('options', 'reuseport', '( yes | no )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'stale-answer-client-timeout', '( diabled | off | integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
+('options', 'stale-cache-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
+('options', 'stale-refresh-time', '( integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
+('options', 'tcp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'tcp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'udp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'udp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'check-svcb', '( yes | no )', 'no', 'OVZ', 'M', 'yes', '9.19.6'),
+('options', 'tls-port', '( integer )', 'no', 'O', NULL, 'no', '9.19.0'),
+('options', 'update-quota', '( integer )', 'no', 'O', NULL, 'no', '9.19.9'),
+('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'MS', 'no', '9.19.12'),
+('options', 'padding', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
+('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0')
+;
+INSERTSQL;
+	
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_multiple_values` = 'yes' WHERE `def_option` = 'dnssec-must-be-secure'";
+	$table[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` WHERE `def_option` = 'request-expire' AND `def_clause_support`='O";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_multiple_values` = 'yes' WHERE `def_option` = 'dlz'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option` IN ('allow-new-zones', 'fetch-quota-params', 
+		'fetches-per-server', 'fetches-per-zone', 'lmdb-mapsize', 'max-recursion-depth', 'max-recursion-queries', 'max-stale-ttl', 'message-compression', 'minimal-any', 
+		'new-zones-directory', 'no-case-compress', 'nocookie-udp-size', 'nta-lifetime', 'nta-recheck', 'nxdomain-redirect', 'prefetch', 'qname-minimization', 
+		'require-server-cookie', 'servfail-ttl', 'stale-answer-enable', 'stale-answer-ttl', 'synth-from-dnssec', 'v6-bias', 'validate-except')";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'ZV' WHERE `def_option` = 'max-records'";
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option_type` = 'ratelimit'";
+
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domaain_id`!=0";
+
+	/** Run queries */
+	if (count($table) && $table[0]) {
+		foreach ($table as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '6.0.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
 ?>

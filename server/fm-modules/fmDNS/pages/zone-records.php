@@ -104,12 +104,13 @@ $body .= sprintf('<h2>%s</h2>
 	%s
 	</div>
 </div>', __('Records'), $avail_types);
-	
+
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php">
 <input type="hidden" name="domain_id" value="' . $domain_id . '" />
 <input type="hidden" name="record_type" value="' . $record_type . '" />
-<input type="hidden" name="map" value="' . $map . '" />' . "\n";
+<input type="hidden" name="map" value="' . $map . '" />
+<input type="hidden" name="uri" value="' . $_SERVER['REQUEST_URI'] . '" />' . "\n";
 } else $form = null;
 
 if ($record_type == 'SOA') {

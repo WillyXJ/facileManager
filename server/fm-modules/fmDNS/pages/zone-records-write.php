@@ -119,7 +119,11 @@ if (isset($create) && is_array($create)) {
 }
 
 if (isset($record_type) && $domain_id && !isset($import_records)) {
-	header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);
+	if (isset($_POST['uri'])) {
+		header('Location: ' . $_POST['uri']);
+	} else {
+		header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);
+	}
 	exit;
 } else {
 	if ($domain_id) {
