@@ -130,9 +130,9 @@ class fm_module_templates {
 			}
 			$policy_servers .= $val . ';';
 			if ($val[0] == 's') {
-				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			} elseif ($val[0] == 'g') {
-				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 			}
 			$log_message_servers .= $val ? "$server_name; " : null;
 		}
@@ -232,9 +232,9 @@ class fm_module_templates {
 			}
 			$policy_servers .= $val . ';';
 			if ($val[0] == 's') {
-				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			} elseif ($val[0] == 'g') {
-				$server_name = getNameFromID(preg_replace('/\D/', null, $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 			}
 			$log_message_servers .= $val ? "$server_name; " : null;
 		}
@@ -602,7 +602,7 @@ HTML;
 							$table = 'server_group';
 							$type = 'group';
 						}
-						$name .= getNameFromID(preg_replace('/\D/', null, $id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table . 's', $type . '_', $type . '_id', $type . '_name') . ', ';
+						$name .= getNameFromID(preg_replace('/\D/', '', $id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table . 's', $type . '_', $type . '_id', $type . '_name') . ', ';
 					}
 					$name = rtrim($name, ', ');
 				}
@@ -611,7 +611,7 @@ HTML;
 					$table = 'server_group';
 					$type = 'group';
 				}
-				$name = getNameFromID(preg_replace('/\D/', null, $ids), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table . 's', $type . '_', $type . '_id', $type . '_name');
+				$name = getNameFromID(preg_replace('/\D/', '', $ids), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $table . 's', $type . '_', $type . '_id', $type . '_name');
 			}
 		} else $name = $all_text;
 		

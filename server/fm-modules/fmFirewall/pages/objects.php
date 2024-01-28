@@ -20,48 +20,26 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!isset($type)) {
-	header('Location: objects-host.php');
-	exit;
-}
-if (isset($_GET['type'])) {
-	header('Location: objects-' . sanitize(strtolower($_GET['type'])) . '.php');
-	exit;
-}
-
 if (!currentUserCan(array('manage_objects', 'view_all'), $_SESSION['module'])) unAuth();
 
-/** Ensure we have a valid type */
-if (!in_array($type, enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_type'))) {
-	header('Location: ' . $GLOBALS['basename']);
-	exit;
-}
+define('FM_INCLUDE_SEARCH', true);
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_objects.php');
 
 if (currentUserCan('manage_objects', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
+	$uri_params = generateURIParams(array('type', 'q', 'p'), 'include');
+
 	switch ($action) {
 	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_objects->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['object_type']);
-				exit;
-			}
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_objects->update($_POST);
+			$result = ($action == 'add') ? $fm_module_objects->add($_POST) : $fm_module_objects->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
 			} else {
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['object_type']);
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
 				exit;
 			}
 		}
@@ -72,13 +50,14 @@ if (currentUserCan('manage_objects', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-//$allowed_to_add = ($type == 'custom' && currentUserCan('manage_objects', $_SESSION['module'])) ? true : false;
-echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), $type, null, 'noscroll');
+$search_query = createSearchSQL(array('name', 'type', 'address', 'mask', 'comment'), 'object_');
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name', 'object_', "AND object_type='$type'");
+echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), 'host', null, 'noscroll');
+
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_name', 'object_', $search_query);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_module_objects->rows($result, $type, $page, $total_pages);
+$fm_module_objects->rows($result, $page, $total_pages);
 
 printFooter();
 

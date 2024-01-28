@@ -22,31 +22,24 @@
 
 if (!currentUserCan(array('manage_services', 'view_all'), $_SESSION['module'])) unAuth();
 
+define('FM_INCLUDE_SEARCH', true);
+
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
 
 if (currentUserCan('manage_services', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
+	$uri_params = generateURIParams(array('type', 'q', 'p'), 'include');
+
 	switch ($action) {
 	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_groups->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename']);
-				exit;
-			}
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_groups->update($_POST);
+			$result = ($action == 'add') ? $fm_module_groups->add($_POST) : $fm_module_groups->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
 			} else {
-				header('Location: ' . $GLOBALS['basename']);
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
 				exit;
 			}
 		}
@@ -57,11 +50,13 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
+$search_query = createSearchSQL(array('name', 'items', 'comment'), 'group_');
+
 $group_type = 'service';
 
 echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $group_type);
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='service'");
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name', 'group_', "AND group_type='$group_type'" . $search_query);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_module_groups->rows($result, $group_type, $page, $total_pages);

@@ -48,9 +48,7 @@ table.legend tr td {
 	padding: 2px 6px;
 }
 table.legend tr td span {
-	display: block;
-	margin-top: -15px;
-	margin-left: 18px;
+	margin-left: 5px;
 }
 
 p.checkbox_desc {
@@ -89,10 +87,43 @@ select.select-stack {
 select.select-stack option {
 	padding: 3px;
 }
-table.grab tbody tr td.options {
-	white-space: nowrap;
+table tbody tr td.options {
 	text-align: right;
 }
-table.grab tbody tr td.options i {
+table tbody tr td.options i {
 	margin-left: 4px;
+}
+
+table[name="policies"] tbody tr td {
+	white-space: nowrap;
+}
+table[name="policies"] tbody tr td:nth-last-child(2) {
+	white-space: normal;
+}
+
+table.global-search-results thead {
+	font-size: 12px;
+}
+table.global-search-results thead th {
+	padding: 5px;
+}
+table.global-search-results thead th:first-child {
+	padding-left: 2em;
+}
+
+div .global-search-results {
+	width: 700px;
+}
+
+#tabs.global-search-results span.menu_badge {
+	margin-left: 4px;
+	border-color: #8F8F8F;
+	background-color: #8F8F8F;
+	font-size: 10px;
+    padding: 0 7px;
+	height: 14px;
+	top: -1px;
+}
+#tabs.global-search-results span.menu_badge p {
+	margin-top: 0px;
 }

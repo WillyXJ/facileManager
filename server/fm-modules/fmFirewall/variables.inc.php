@@ -31,7 +31,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmFirewall'] = array(
-		'version'							=> '2.2.0',
+		'version'							=> '3.0.0',
 		'client_version'					=> '2.2.0',
 		'description'						=> __('Managing software firewalls should not be difficult. Manage one or more software firewall servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files individually.', 'fmFirewall'),
 		'prefix'							=> 'fw_',
@@ -39,13 +39,17 @@ $__FM_CONFIG['fmFirewall'] = array(
 		'min_client_auto_upgrade_version'	=> '1.3'
 	);
 
+if($_SESSION['module'] == 'fmFirewall' && !defined('NO_DASH')) define('NO_DASH', true);
+$__FM_CONFIG['homepage'] = 'config-servers.php';
+
 /** Images */
 if (isset($__FM_CONFIG['module']['path'])) {
-	$__FM_CONFIG['module']['icons']['action']['pass']		= '<i class="fa fa-arrow-up __action__" alt="__Action__" title="__Action__"></i>';
-	$__FM_CONFIG['module']['icons']['action']['block']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
-	$__FM_CONFIG['module']['icons']['action']['reject']		= '<i class="fa fa-times __action__" alt="__Action__" title="__Action__"></i>';
-	$__FM_CONFIG['module']['icons']['action']['log']		= '<i class="fa fa-file-text-o __action__" alt="__Action__" title="__Action__"></i>';
-	$__FM_CONFIG['module']['icons']['negated']				= sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exclamation-circle block" aria-hidden="true"></i></a>', __('Negated'));
+	$__FM_CONFIG['module']['icons']['action']['pass']		= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-arrow-up __action__" aria-hidden="true"></i></span>', __('Pass the packet'));
+	$__FM_CONFIG['module']['icons']['action']['block']		= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-times __action__" aria-hidden="true"></i></span>', __('Block the packet'));
+	$__FM_CONFIG['module']['icons']['action']['reject']		= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-times __action__" aria-hidden="true"></i></span>', __('Reject the packet'));
+	$__FM_CONFIG['module']['icons']['action']['log']		= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-file-text-o __action__" aria-hidden="true"></i></span>', __('Log the packet'));
+	$__FM_CONFIG['module']['icons']['negated']				= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exclamation-circle block" aria-hidden="true"></i></span>', __('Negated'));
+	$__FM_CONFIG['module']['icons']['search']				= sprintf('<a href="#" class="global-search tooltip-bottom"><i class="fa fa-search preview" alt="%1$s" title="%1$s" aria-hidden="true"></i></a>', __('Global Search'));
 }
 
 $__FM_CONFIG['icons'] = @array_merge((array) $__FM_CONFIG['module']['icons'], (array) $__FM_CONFIG['icons']);

@@ -65,24 +65,26 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$config_head = '# This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 			$config = $config_head;
 			
-			/** Get associated templates */
-			$template_ids = getTemplateIDs($server_id, $server_serial_no);
-			$template_id_count = 0;
-			if (count($template_ids)) {
-				list($template_results, $template_id_count) = getTemplatePolicies($template_ids, $server_id, 0, 'filter');
-			}
-			
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_order_id', 'policy_', "AND server_serial_no=$server_serial_no");
-			$fmdb->num_rows += $template_id_count;
-			if ($fmdb->num_rows) {
-				$template_results = array_merge((array) $template_results, (array) $fmdb->last_result);
-				$fmdb->last_result = $template_results;
-				$policy_count = $fmdb->num_rows;
-				$policy_result = $fmdb->last_result;
+			foreach (array('nat', 'filter') as $policy_type) {
+				/** Get associated templates */
+				$template_ids = getTemplateIDs($server_id, $server_serial_no);
+				$template_id_count = 0;
+				if (count($template_ids)) {
+					list($template_results, $template_id_count) = getTemplatePolicies($template_ids, $server_id, 0, $policy_type);
+				}
 				
-				$function = $server_type . 'BuildConfig';
-				$config .= $this->$function($policy_result, $policy_count, $server_result[0]);
-				unset($policy_result);
+				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', array('policy_type', 'policy_order_id'), 'policy_', "AND server_serial_no=$server_serial_no AND policy_type='$policy_type'");
+				$fmdb->num_rows += $template_id_count;
+				if ($fmdb->num_rows) {
+					$template_results = array_merge((array) $template_results, (array) $fmdb->last_result);
+					$fmdb->last_result = $template_results;
+					$policy_count = $fmdb->num_rows;
+					$policy_result = $fmdb->last_result;
+					
+					$function = $server_type . 'BuildConfig';
+					$config .= $this->$function($policy_result, $policy_count, $server_result[0]) . "\n\n";
+					unset($policy_result);
+				}
 			}
 
 			$data->files[$server_config_file] = $config;
@@ -182,46 +184,72 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	
 	
 	function iptablesBuildConfig($policy_result, $count, $server_result) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_time, $fm_module_services;
 		
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		if (!class_exists(('fm_module_time'))) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
+		}
+		if (!class_exists(('fm_module_services'))) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		}
 		
 		$fw_actions = array('pass' => 'ACCEPT',
 							'block' => 'DROP',
-							'reject' => 'REJECT');
+							'reject' => 'REJECT',
+							'hide' => 'MASQUERADE',
+							'snat' => 'SNAT',
+							'dnat' => 'DNAT');
 		
-		$config[] = '*filter';
-		$config[] = ':INPUT ACCEPT [0:0]';
-		$config[] = ':FORWARD ACCEPT [0:0]';
-		$config[] = ':OUTPUT ACCEPT [0:0]';
-		$config[] = '';
+		$config['nat'][] = '*nat';
+		$config['nat'][] = ':PREROUTING ACCEPT [0:0]';
+		$config['nat'][] = ':OUTPUT ACCEPT [0:0]';
+		$config['nat'][] = ':POSTROUTING ACCEPT [0:0]';
+		$config['nat'][] = null;
+		
+		$config['filter'][] = '*filter';
+		$config['filter'][] = ':INPUT ACCEPT [0:0]';
+		$config['filter'][] = ':FORWARD ACCEPT [0:0]';
+		$config['filter'][] = ':OUTPUT ACCEPT [0:0]';
+		$config['filter'][] = null;
 		
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$line = $keep_state = null;
+			$line = $keep_state = $uid = null;
 			$log_rule = false;
 			
 			$rule_number = $i + 1;
-			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
 			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
-			$config[] = '# ' . $rule_title;
+			$config[$policy_result[$i]->policy_type][] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
-			$config[] = '# ' . str_replace("\n", "\n# ", $rule_comment);
+			$config[$policy_result[$i]->policy_type][] = '# ' . str_replace("\n", "\n# ", $rule_comment);
 			unset($rule_comment);
 			
 			if ($policy_result[$i]->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) {
 				$log_rule = true;
 				$log_chain = 'RULE_' . $rule_number;
-				$config[] = '-N ' . $log_chain;
-				$config[] = '-A ' . strtoupper($policy_result[$i]->policy_direction) . 'PUT -j ' . $log_chain;
+				$config[$policy_result[$i]->policy_type][] = '-N ' . $log_chain;
+				$config[$policy_result[$i]->policy_type][] = '-A ' . strtoupper($policy_result[$i]->policy_direction) . 'PUT -j ' . $log_chain;
 			}
 			
-			$rule_chain = $log_rule ? $log_chain : $fw_actions[$policy_result[$i]->policy_action];
-			
 			$line[] = '-A';
-			$line[] = strtoupper($policy_result[$i]->policy_direction) . 'PUT';
+
+			/** Define chain */
+			if ($policy_result[$i]->policy_type == 'filter') {
+				$line[] = strtoupper($policy_result[$i]->policy_direction) . 'PUT';
+			} elseif ($policy_result[$i]->policy_type == 'nat') {
+				if ($policy_result[$i]->policy_snat_type == 'hide') {
+					$line[] = 'POSTROUTING';
+					$policy_result[$i]->policy_action = 'hide';
+				} elseif ($policy_result[$i]->policy_source_translated) {
+					$line[] = 'POSTROUTING';
+					$policy_result[$i]->policy_action = 'snat';
+				} elseif ($policy_result[$i]->policy_destination_translated || $policy_result[$i]->policy_services_translated) {
+					$line[] = 'PREROUTING';
+					$policy_result[$i]->policy_action = 'dnat';
+				}
+			}
 			if ($policy_result[$i]->policy_interface != 'any') {
 				if ($policy_result[$i]->policy_direction == 'in') {
 					$line[] = '-i ' . $policy_result[$i]->policy_interface;
@@ -229,6 +257,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$line[] = '-o ' . $policy_result[$i]->policy_interface;
 				}
 			}
+			
+			$rule_chain = $log_rule ? $log_chain : $fw_actions[$policy_result[$i]->policy_action];
 			
 			/** Handle keep-states */
 			if ($policy_result[$i]->policy_packet_state) {
@@ -248,22 +278,32 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			if ($temp_source = trim($policy_result[$i]->policy_source, ';')) {
 				$policy_source = $this->buildAddressList($temp_source);
 			} else $policy_source[] = null;
-			
+
+			unset($policy_source_translated);
+			if ($temp_source = trim($policy_result[$i]->policy_source_translated, ';')) {
+				$policy_source_translated = $this->buildAddressList($temp_source)[0];
+			} else $policy_source_translated = null;
 			
 			/** Handle destinations */
 			unset($policy_destination);
 			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
 				$policy_destination = $this->buildAddressList($temp_destination);
 			} else $policy_destination[] = null;
-			
-			
+
+			unset($policy_destination_translated);
+			if ($temp_destination = trim($policy_result[$i]->policy_destination_translated, ';')) {
+				$policy_destination_translated = $this->buildAddressList($temp_destination)[0];
+			} else $policy_destination_translated = null;
+
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'iptables');
+
 			/** Handle match inverses */
 			$source_not = ($policy_result[$i]->policy_source_not) ? '! ' : null;
 			$destination_not = ($policy_result[$i]->policy_destination_not) ? '! ' : null;
 			$services_not = ($policy_result[$i]->policy_services_not) ? '! ' : null;
 
 			/** Handle services */
-			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
 					$temp_services = null;
@@ -332,7 +372,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								}
 								
 								if ($direction_group == 's-d') {
-									if (@array_key_exists($l, $group_array['s'])) {
+									if (@array_key_exists($l, (array) $group_array['s'])) {
 										$multiports[$k][] = $group_array['s'][$l] . ' --dport ' . $group_array['d'][$l];
 										unset($group_array);
 									}
@@ -377,7 +417,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Handle time restrictions */
 			$time_restrictions = null;
 			if ($policy_result[$i]->policy_time) {
-				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', $policy_result[$i]->policy_time, 'time_', 'time_id', 'active');
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', substr($policy_result[$i]->policy_time, 1), 'time_', 'time_id', 'active');
 				if ($fmdb->num_rows) {
 					$time[] = '-m time';
 					$time_result = $fmdb->last_result[0];
@@ -415,21 +455,58 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$line[] = $time_restrictions;
 			}
 			
-			@sort($policy_services['processed']);
+			/** Handle UID */
+			if ($policy_result[$i]->policy_uid) {
+				$uid = ' -m owner --uid-owner ' . $policy_result[$i]->policy_uid;
+			}
 			
+			/** Build NAT rule */
+			$nat_rule = null;
+			if ($policy_result[$i]->policy_type == 'nat') {
+				/** SNAT */
+				if ($policy_source_translated) {
+					$nat_rule .= " --to-source $policy_source_translated";
+				}
+				/** DNAT */
+				if ($policy_destination_translated) {
+					$nat_rule .= " --to-destination $policy_destination_translated";
+				}
+				/** Services */
+				if ($policy_result[$i]->policy_services_translated) {
+					$temp_service_port = $policy_result[$i]->policy_services_translated;
+					if ($temp_service_port[0] == 's') {
+						$temp_service_id = substr($temp_service_port, 1);
+						$temp_service_port = null;
+						basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $temp_service_id, 'service_', 'service_id', 'active');
+						if ($fmdb->num_rows) {
+							$result = $fmdb->last_result[0];
+							/** Destination ports */
+							@list($start, $end) = explode(':', $result->service_dest_ports);
+							if ($start && $end) {
+								$temp_service_port = ($start == $end) ? $start : str_replace(':', '-', $result->service_dest_ports);
+							}
+						}
+					}
+					$nat_rule .= ($temp_service_port) ? ' --to-ports ' . $temp_service_port : null;
+				}
+			}
+
 			/** Build the rules */
 			foreach ($policy_source as $source_address) {
 				$source = ($source_address) ? ' -s ' . $source_not . $source_address : null;
 				foreach ($policy_destination as $destination_address) {
 					$destination = ($destination_address) ? ' -d ' . $destination_not . $destination_address : null;
 					if (is_array($policy_services['processed'])) {
-						foreach ($policy_services['processed'] as $line_array) {
+						foreach ($policy_services['processed'] as $protocol => $line_array) {
 							foreach ($line_array as $rule) {
-								$config[] = implode(' ', $line) . $source . $destination . $rule . $keep_state . $frag . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+								$tcp_flags = ($protocol == 'tcp' && strpos($rule, 'tcp-flags') === false) ? $policy_tcp_flags : null;
+								$config[$policy_result[$i]->policy_type][] = implode(' ', $line) . $source . $destination . $rule . $tcp_flags . $uid . $keep_state . $frag . ' -j ' . $fw_actions[$policy_result[$i]->policy_action] . $nat_rule;
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination . $keep_state . $frag . ' -j ' . $rule_chain;
+						$rule = implode(' ', $line);
+						$tcp_flags = (strpos($rule, 'tcp') !== false && strpos($rule, 'tcp-flags') === false) ? $policy_tcp_flags : null;
+						$config[$policy_result[$i]->policy_type][] = $rule . $source . $destination . $tcp_flags . $uid . $keep_state . $frag . ' -j ' . $rule_chain . $nat_rule;
 					}
 				}
 			}
@@ -437,24 +514,25 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			/** Handle logging */
 			if ($log_rule) {
-				$config[] = '-A ' . $log_chain . ' -j LOG --log-level info --log-prefix "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ': "';
-				$config[] = '-A ' . $log_chain . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
+				$config[$policy_result[$i]->policy_type][] = '-A ' . $log_chain . ' -j LOG --log-level info --log-prefix "' . $rule_title . ' - ' . strtoupper($policy_result[$i]->policy_action) . ': "';
+				$config[$policy_result[$i]->policy_type][] = '-A ' . $log_chain . ' -j ' . $fw_actions[$policy_result[$i]->policy_action];
 			}
 			
-			$config[] = null;
+			$config[$policy_result[$i]->policy_type][] = null;
 		}
 		
-		$config[] = 'COMMIT';
-		$config[] = null;
-		
-		return implode("\n", $config);
+		$config['filter'][] = $config['nat'][] = 'COMMIT';
+
+		return trim(implode("\n", $config[$policy_result[0]->policy_type]));
 	}
 	
 	
 	function pfBuildConfig($policy_result, $count) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_services;
 		
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		if (!class_exists(('fm_module_services'))) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		}
 
 		$fw_actions = array('pass' => 'pass',
 							'block' => 'block',
@@ -462,11 +540,14 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
+
+			#~ Only filter rules until NAT is supported
+			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
-			$line = $label = $keep_state = null;
+			$line = $label = $keep_state = $uid = null;
 			
 			$rule_number = $i + 1;
-			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
 			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
@@ -540,6 +621,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$destination_address .= 'any';
 			}
 			
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'ipfilter');
+
 			/** Handle services */
 			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
@@ -649,6 +733,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 			}
 			
+			/** Handle UID */
+			if ($policy_result[$i]->policy_uid) {
+				$uid = ' user { ' . $policy_result[$i]->policy_uid . ' }';
+			}
+			
 			/** Build the rules */
 			if (@is_array($policy_services['processed'])) {
 				foreach ($policy_services['processed'] as $protocol => $proto_array) {
@@ -668,14 +757,17 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$icmptypes = null;
 						}
 						
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . $keep_state . $label;
+						$tcp_flags = (strpos($protocol, 'tcp') !== false && strpos($rule_ports, 'flags') === false) ? $policy_tcp_flags : null;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $tcp_flags . $uid . $icmptypes . $keep_state . $label;
 						
 						if (strpos($protocol, 'icmp') !== false) break;
 					}
 				}
 				unset($policy_services);
 			} else {
-				$config[] = implode(' ', $line) . " from $source_address to $destination_address" . $keep_state . $label;
+				$rule = implode(' ', $line);
+				$tcp_flags = (strpos($rule, 'tcp') !== false && strpos($rule, 'flags') === false) ? $policy_tcp_flags : null;
+				$config[] = $rule . " from $source_address to $destination_address" . $tcp_flags . $uid . $keep_state . $label;
 			}
 			
 			$config[] = null;
@@ -683,16 +775,18 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$table[] = null;
 		
-		$config = array_merge($table, $config);
+		$config = array_merge($table, (array) $config);
 		
-		return str_replace('from any to any', 'all', implode("\n", $config));
+		return str_replace('from any to any', 'all', implode("\n", $config)) . "\n\n";
 	}
 	
 	
 	function ipfilterBuildConfig($policy_result, $count) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_services;
 		
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		if (!class_exists(('fm_module_services'))) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		}
 
 		$fw_actions = array('pass' => 'pass',
 							'block' => 'block',
@@ -700,11 +794,14 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
+
+			#~ Only filter rules until NAT is supported
+			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
 			$line = $keep_state = null;
 			
 			$rule_number = $i + 1;
-			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
 			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
@@ -737,14 +834,15 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$policy_source = $this->buildAddressList($temp_source);
 			} else $policy_source[] = 'any';
 			
-			
 			/** Handle destinations */
 			unset($policy_destination);
 			if ($temp_destination = trim($policy_result[$i]->policy_destination, ';')) {
 				$policy_destination = $this->buildAddressList($temp_destination);
 			} else $policy_destination[] = 'any';
 			
-			
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'ipfilter');
+
 			/** Handle services */
 			$services_not = ($policy_result[$i]->policy_services_not) ? '!' : null;
 			$tcp = $udp = $icmp = null;
@@ -824,6 +922,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
+											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $tcp_flags . $frag . $keep_state;
 										}
 									} elseif ($direction_group == 'any-d') {
@@ -836,6 +937,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 											} else {
 												$service_ports = $port;
 												$tcp_flags = null;
+											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
 											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $frag . $keep_state;
 										}
@@ -851,6 +955,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
+											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $service_ports . $destination . $destination_port . $direction_array['d'][$index] . $tcp_flags . $frag . $keep_state;
 										}
 									} elseif ($direction_group == 'flag_only') {
@@ -863,6 +970,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 												$service_ports = $port;
 												$tcp_flags = null;
 											}
+											if ($protocol == 'tcp' && !$tcp_flags) {
+												$tcp_flags = $policy_tcp_flags;
+											}
 											$config[] = implode(' ', $line) . " proto $protocol" . $source . $source_port . $destination . $destination_port . $service_ports . $tcp_flags . $frag . $keep_state;
 										}
 									}
@@ -870,7 +980,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							}
 						}
 					} else {
-						$config[] = implode(' ', $line) . $source . $destination. $frag . $keep_state;
+						$rule = implode(' ', $line);
+						$tcp_flags = (strpos($rule, 'tcp') !== false) ? $policy_tcp_flags : null;
+						$config[] = $rule . $source . $destination . $tcp_flags . $frag . $keep_state;
 					}
 				}
 			}
@@ -880,14 +992,16 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$config[] = null;
 		}
 
-		return str_replace('from any to any', 'all', implode("\n", $config));
+		return str_replace('from any to any', 'all', implode("\n", (array) $config));
 	}
 	
 	
 	function ipfwBuildConfig($policy_result, $count) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_services;
 		
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		if (!class_exists(('fm_module_services'))) {
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
+		}
 
 		$fw_actions = array('pass' => 'allow',
 							'block' => 'deny',
@@ -895,17 +1009,23 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$cmd = 'ipfw -q add';
 		
-		$config[] = 'ipfw -q -f flush';
-		$config[] = $cmd . ' check-state';
-		$config[] = null;
+		#~ Only filter rules until NAT is supported
+		if ($policy_result[$i]->policy_type == 'filter') {
+			$config[] = 'ipfw -q -f flush';
+			$config[] = $cmd . ' check-state';
+			$config[] = null;
+		}
 		
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
+
+			#~ Only filter rules until NAT is supported
+			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
-			$line = $keep_state = null;
+			$line = $keep_state = $uid = null;
 			
 			$rule_number = $i + 1;
-			$rule_title = 'fmFirewall Rule ' . $rule_number;
+			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
 			if ($policy_result[$i]->policy_name) $rule_title .= " ({$policy_result[$i]->policy_name})";
 			$config[] = '# ' . $rule_title;
 			$rule_comment = wordwrap($policy_result[$i]->policy_comment, 50, "\n");
@@ -951,8 +1071,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$destination_address = ($policy_result[$i]->policy_destination_not) ? 'not ' : null;
 			$destination_address .= (is_array($policy_destination)) ? implode(',', $policy_destination) : 'any';
 			
+			/** Handle policy tcp flags */
+			$policy_tcp_flags = $fm_module_services->getTCPFlags($policy_result[$i]->policy_tcp_flags, 'ipfw');
+
 			/** Handle services */
-			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
 					$temp_services = null;
@@ -1050,6 +1172,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 			}
 			
+			/** Handle UID */
+			if ($policy_result[$i]->policy_uid) {
+				$uid = ' uid ' . $policy_result[$i]->policy_uid;
+			}
+			
 			/** Build the rules */
 			if (@is_array($policy_services['processed'])) {
 				foreach ($policy_services['processed'] as $protocol => $proto_array) {
@@ -1060,18 +1187,21 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$source_ports = $destination_ports = null;
 						}
 		
-						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . $destination_address . str_replace('  ', ' ', $destination_ports) . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state;
+						$tcp_flags = ($protocol == 'tcp' && strpos($rule_ports, 'flags') === false) ? $policy_tcp_flags : null;
+						$config[] = implode(' ', $line) . " $protocol from " . $source_address . $source_ports . ' to ' . trim($destination_address . str_replace('  ', ' ', $destination_ports)) . $tcp_flags . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
 					}
 				}
 				unset($policy_services);
 			} else {
-				$config[] = implode(' ', $line) . " all from $source_address to $destination_address " . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state;
+				$rule = implode(' ', $line);
+				$tcp_flags = (strpos($rule, 'tcp') !== false) ? $policy_tcp_flags : null;
+				$config[] = $rule . " all from $source_address to $destination_address" . $tcp_flags . $icmptypes . ' ' . $established . $frag . $policy_result[$i]->policy_direction . $interface . $keep_state . $uid;
 			}
 			
 			$config[] = null;
 		}
 		
-		return implode("\n", $config);
+		return implode("\n", (array) $config);
 	}
 	
 	
@@ -1110,6 +1240,17 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$address_ids = explode(';', $addresses);
 		foreach ($address_ids as $temp_id) {
 			$temp = null;
+			if (verifyIPAddress($temp_id)) {
+				$address_list[] = $temp_id;
+				continue;
+			}
+			if (strpos($temp_id, '-') !== false) {
+				$ip_range = false;
+				foreach (explode('-', $temp_id) as $ip_address) {
+					$ip_range = (verifyIPAddress($ip_address)) ? true : false;
+				}
+				if ($ip_range) $address_list[] = $temp_id;
+			}
 			if ($temp_id[0] == 'g') {
 				$temp[] = $this->extractItemsFromGroup($temp_id);
 			} else {
@@ -1123,7 +1264,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$result = $fmdb->last_result[0];
 				
 				if ($result->object_type == 'network') {
-					$address_list[] = $result->object_address . '/' . $this->mask2cidr($result->object_mask);
+					$address_list[] = $result->object_address . '/' . mask2cidr($result->object_mask);
 				} else {
 					$address_list[] = $result->object_address;
 				}
@@ -1131,13 +1272,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		
 		return $address_list;
-	}
-	
-	
-	function mask2cidr($mask) {
-		$long = ip2long($mask);
-		$base = ip2long('255.255.255.255');
-		return 32 - log(($long ^ $base) +1, 2);
 	}
 	
 	
@@ -1168,18 +1302,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		 * return true until this function is actually required
 		 * currently there are no features that are version-dependent
 		 */
-		return true;
-		
-		extract($data);
-		
-		if ($server_type == 'bind9') {
-			$required_version = $__FM_CONFIG['fmFirewall']['required_dns_version'];
-		}
-		
-		if (version_compare($server_version, $required_version, '<')) {
-			return false;
-		}
-		
 		return true;
 	}
 
