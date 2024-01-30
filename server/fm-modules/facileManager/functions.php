@@ -216,11 +216,12 @@ function sanitize($data, $replace = null) {
 
 		$data = str_replace($strip_chars, '', $data);
 		$data = str_replace($replace_chars, $replace, $data);
-		$data = str_replace('--', '-', $data);
+		$data = str_replace($replace . $replace, $replace, $data);
 		
 		return $data;
 	} else {
 		if (is_string($data)) {
+			$data = htmlspecialchars(strip_tags($data), ENT_NOQUOTES);
 			if ($fmdb->use_mysqli) {
 				return @mysqli_real_escape_string($fmdb->dbh, $data);
 			} else {

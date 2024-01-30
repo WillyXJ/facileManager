@@ -28,8 +28,8 @@ printHeader();
 
 $response = isset($response) ? $response : null;
 
-$search_sql = $list = $log_search_query = $log_search_date_b = $log_search_date_e = null;
 extract($_REQUEST);
+$search_sql = null;
 
 /** Module search */
 if (isset($log_search_module) && is_array($log_search_module) && !in_array('All Modules', $log_search_module)) {
@@ -37,7 +37,6 @@ if (isset($log_search_module) && is_array($log_search_module) && !in_array('All 
 }
 /** User search */
 $default_timezone = getOption('timezone', $_SESSION['user']['account_id']);
-$list = null;
 if (isset($log_search_user) && is_array($log_search_user) && !in_array('0', $log_search_user)) {
 	$search_sql .= 'AND user_login IN ("' . join('","', $log_search_user) . '") ';
 }
