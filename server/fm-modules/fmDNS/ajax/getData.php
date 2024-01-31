@@ -218,14 +218,9 @@ if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == '
 	exit;
 }
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_rpz.php');
+foreach (glob(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_*.php') as $filename) {
+    include_once($filename);
+}
 
 /** Edits */
 $checks_array = array('servers' => 'manage_servers',
@@ -239,7 +234,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'domain' => 'manage_zones',
 					'soa' => 'manage_zones',
-					'rpz' => 'manage_zones'
+					'rpz' => 'manage_zones',
+					'http' => 'manage_servers'
 				);
 
 if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
@@ -305,7 +301,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$item_type = sanitize($_POST['item_sub_type']) . ' ';
 			break;
 		case 'rpz':
-			$post_class = $fm_module_rpz;
+		case 'http':
+			$post_class = ($_POST['item_type'] == 'rpz') ? $fm_module_rpz : $fm_module_http;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			break;

@@ -221,6 +221,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			unset($acl_result, $global_acl_array, $server_acl_array, $acl_array);
 
 
+			/** Build HTTP endpoints */
+			$config .= $this->getHTTPEndpoints(0, $server_serial_no, $server_group_ids);
+
+
 			/** Build Masters */
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=0 AND master_status="active" AND server_serial_no="0"');
 			if ($fmdb->num_rows) {
@@ -2039,6 +2043,8 @@ HTML;
 		
 		if ($server_info) {
 			$config .= str_replace(array('$ROOT', '$ZONES'), array($server_info->server_root_dir, $server_info->server_zones_dir), trim(rtrim(trim($cfg_info), ';')));
+		} else {
+			$config .= trim(rtrim(trim($cfg_info), ';'));
 		}
 		if ($def_multiple_values == 'yes' && strpos($cfg_info, '}') === false) {
 			$config .= $cfg_info ? '; }' : ' }';
@@ -2559,6 +2565,90 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 	}
 
 
+	/**
+	 * Formats the server http endpoint statements
+	 *
+	 * @since 6.0
+	 * @package fmDNS
+	 *
+	 * @param integer $view_id The view_id of the zone
+	 * @param integer $server_serial_no The server serial number for overrides
+	 * @param array $server_group_ids Array containing group server IDs
+	 * @return string
+	 */
+	function getHTTPEndpoints($view_id, $server_serial_no, $server_group_ids) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Check if http is supported by server_version */
+		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
+		$unsupported_version = $this->versionCompatCheck('HTTP Endpoints', '9.18.0', $server_version);
+		
+		$global_config = $config_array = null;
+		
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="http" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			if ($unsupported_version) return $unsupported_version;
+			$result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_config_count; $i++) {
+				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="0"');
+				foreach ($fmdb->last_result as $record) {
+					if ($record->cfg_data) {
+						$config_array[$result[$i]->cfg_data][$record->cfg_name] = $record->cfg_data;
+					}
+				}
+		
+			}
+			unset($result);
+		}
+		
+		$server_config = array();
+		/** Override with group-specific configs */
+		if (is_array($server_group_ids)) {
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', 'AND cfg_type="http" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				if ($unsupported_version) return $unsupported_version;
+				$server_config_result = $fmdb->last_result;
+				$global_config_count = $fmdb->num_rows;
+				for ($i=0; $i < $global_config_count; $i++) {
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+					foreach ($fmdb->last_result as $record) {
+						$server_config[$server_config_result[$i]->cfg_data][$record->cfg_name] = $record->cfg_data;
+					}
+				}
+				unset($server_config_result);
+			}
+		}
+
+		/** Override with server-specific configs */
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="http" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
+		if ($fmdb->num_rows) {
+			if ($unsupported_version) return $unsupported_version;
+			$server_config_result = $fmdb->last_result;
+			$global_config_count = $fmdb->num_rows;
+			for ($i=0; $i < $global_config_count; $i++) {
+				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no"');
+				foreach ($fmdb->last_result as $record) {
+					$server_config[$server_config_result[$i]->cfg_data][$record->cfg_name] = $record->cfg_data;
+				}
+			}
+			unset($server_config_result);
+		}
+
+		/** Merge arrays */
+		$config_array = array_replace_recursive((array)$config_array, $server_config);
+		unset($server_config);
+		
+		foreach ($config_array as $endpoint_name => $value_array) {
+			$global_config .= sprintf("http %s {\n", $endpoint_name);
+			foreach ($value_array as $param => $value) {
+				if ($value) $global_config .= $this->formatConfigOption($param, $value, null, null, "\t");
+			}
+			$global_config .= "};\n";
+		}
+		return ($global_config) ? $global_config . "\n" : null;
+	}
+	
 }
 
 if (!isset($fm_module_buildconf))

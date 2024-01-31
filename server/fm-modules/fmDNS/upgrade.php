@@ -2529,6 +2529,7 @@ function upgradefmDNS_600($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '5.3.0', '<') ? upgradefmDNS_530($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
+	$table[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','ratelimit','rrset','rpz','http')  NOT NULL DEFAULT 'global'";
 	$table[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 	`def_function` ,
@@ -2565,7 +2566,10 @@ VALUES
 ('options', 'update-quota', '( integer )', 'no', 'O', NULL, 'no', '9.19.9'),
 ('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'MS', 'no', '9.19.12'),
 ('options', 'padding', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
-('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0')
+('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
+('http', 'endpoints', '( quoted_string )', 'yes', 'H', NULL, 'no', '9.18.0'),
+('http', 'listener-clients', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0')
 ;
 INSERTSQL;
 	
