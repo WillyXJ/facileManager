@@ -20,6 +20,12 @@
 * Server - [bug] Fixed PHP errors.
 * Server - [bug] Fixed password reset message formatting.
 
+4.5.1 (2024-01-30)
+==================
+* Server - [security] Fixed authenticated variable manipulation leading to SQL Injection. (Issue #599)
+* Server - [security] Fixed privilege escalation via mass assignment. (Issue #599)
+* Server - [security] Fixed systemic cross-site scripting (XSS). (Issue #599)
+
 4.5.0 (2023-04-19)
 ==================
 * Server - [improvement] The settings now displays the timestamp of the last software update check.
