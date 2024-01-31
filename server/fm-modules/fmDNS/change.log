@@ -9,6 +9,8 @@
 * Server - [improvement] Added view name to the top bar. (Issue #602)
 * Server - [improvement] Users get returned to previous page with search criteria after managing
            zone records.
+* Server - [improvement] auto-dnssec has been replaced with dnssec-policy when enabling DNSSEC
+           on a zone. Only internal policies are supported at this time. (Issue #568)
 * Client - [improvement] Client now specifies named.conf.keys location with rndc. (Issue #389)
 * Server - [bug] Fixed an issue where automatic PTR records would not get created.
 * Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
