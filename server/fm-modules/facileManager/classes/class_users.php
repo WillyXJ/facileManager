@@ -253,8 +253,11 @@ class fm_users {
 		$post['user_id'] = (!isset($post['user_id']) || !$post['user_id']) ? $_SESSION['user']['id'] : intval($post['user_id']);
 
 		/** Authorized to update users? */
-		if ((!currentUserCan('manage_users') && $_SESSION['user']['id'] != $post['user_id']) || isset($post['user_login'])) {
-			return _('You do not have permission to make these changes.');
+		if ((!currentUserCan('manage_users') && ($_SESSION['user']['id'] != $post['user_id'] || isset($post['user_caps']))) 
+			|| ($_SESSION['user']['id'] != $post['user_id'] && $post['user_id'] == getDefaultAdminID()) 
+			|| isset($post['user_login'])
+			|| (isset($post['user_caps']) && $_SESSION['user']['id'] == $post['user_id'] && $_SESSION['user']['id'] == getDefaultAdminID())) {
+				return _('You do not have permission to make these changes.');
 		}
 
 		if (!empty($post['user_password'])) {
