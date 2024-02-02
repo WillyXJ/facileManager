@@ -48,7 +48,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'domain' => 'manage_zones',
 					'soa' => 'manage_zones',
 					'rpz' => 'manage_zones',
-					'http' => 'manage_servers'
+					'http' => 'manage_servers',
+					'tls' => 'manage_servers'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -118,7 +119,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'rpz':
 		case 'http':
-			$post_class = ($_POST['item_type'] == 'rpz') ? $fm_module_rpz : $fm_module_http;
+		case 'tls':
+			$post_class = ${'fm_module_' . $_POST['item_type']};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			$object = $_POST['item_type'];

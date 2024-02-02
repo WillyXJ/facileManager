@@ -598,7 +598,7 @@ function trimFullStop($value){
  * @package facileManager
  * @subpackage fmDNS
  *
- * @return integer
+ * @return integer|array
  */
 function getModuleBadgeCounts($type) {
 	global $fmdb, $__FM_CONFIG;
@@ -771,6 +771,7 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', __('Keys'), __('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
 		addSubmenuPage('config-servers.php', __('Masters'), __('Masters'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-masters.php');
 		addSubmenuPage('config-servers.php', __('HTTP'), __('HTTP Endpoints'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-http.php');
+		addSubmenuPage('config-servers.php', __('TLS'), __('TLS Connections'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-tls.php');
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-servers.php', __('Logging'), __('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
 		addSubmenuPage('config-servers.php', __('Operations'), __('Operations'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
@@ -1340,7 +1341,7 @@ function resetURLServerConfigStatus($build_update = 'build') {
  * @param integer $config_id Config parent ID to retrieve children for
  * @param string $config_type Type of configuration item
  * @param string $return Array keys to populate and return
- * @return string
+ * @return array|null
  */
 function getConfigChildren($config_id, $config_type = 'global', $return = null) {
 	global $fmdb, $__FM_CONFIG;
@@ -1354,9 +1355,51 @@ function getConfigChildren($config_id, $config_type = 'global', $return = null) 
 		}
 	}
 	
-	return $return;
+	return isset($return) ? $return : null;
 }
 
+
+/**
+ * Gets available items from type
+ *
+ * @since 4.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $type Config parent ID to retrieve children for
+ * @param string $default Type of configuration item
+ * @param string $addl_sql Array keys to populate and return
+ * @param string $prefix
+ * @return array|null
+ */
+function availableItems($type, $default = 'blank', $addl_sql = null, $prefix = null) {
+	global $fmdb, $__FM_CONFIG;
+	
+	$return = null;
+	
+	$j = 0;
+	if ($default == 'blank') {
+		$return[$j][] = '';
+		$return[$j][] = '';
+		$j++;
+	}
+	
+	$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' $addl_sql ORDER BY {$type}_name ASC";
+	$result = $fmdb->get_results($query);
+	if ($fmdb->num_rows) {
+		$results = $fmdb->last_result;
+		foreach ($fmdb->last_result as $results) {
+			if (property_exists($results, 'server_menu_display') && $results->server_menu_display == 'exclude') continue;
+			$type_name = $type . '_name';
+			$type_id   = $type . '_id';
+			$return[$j][] = $results->$type_name;
+			$return[$j][] = $prefix . $results->$type_id;
+			$j++;
+		}
+	}
+	
+	return $return;
+}
 
 
 ?>

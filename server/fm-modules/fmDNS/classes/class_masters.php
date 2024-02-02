@@ -302,10 +302,8 @@ HTML;
 				$popup_footer
 			);
 		} else {
-			global $fm_module_servers;
-			
 			$disabled = (strpos($master_addresses, 'master_') !== false) ? 'disabled' : null;
-			$master_keys = buildSelect('master_key_id', 'master_key_id', $fm_module_servers->availableItems('key', 'blank', 'AND key_type="tsig"'), explode(';', $master_key_id), 1, $disabled, false, null, null, __('Select a key'));
+			$master_keys = buildSelect('master_key_id', 'master_key_id', availableItems('key', 'blank', 'AND key_type="tsig"'), explode(';', $master_key_id), 1, $disabled, false, null, null, __('Select a key'));
 			
 			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s

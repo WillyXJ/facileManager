@@ -220,7 +220,7 @@ HTML;
 	 * Displays the form to add new control
 	 */
 	function printForm($data = '', $action = 'add', $type = 'controls') {
-		global $__FM_CONFIG, $fm_dns_acls, $fm_module_servers;
+		global $__FM_CONFIG, $fm_dns_acls;
 		
 		$control_id = 0;
 		$control_ip = $control_addresses = $control_comment = null;
@@ -237,7 +237,7 @@ HTML;
 		
 		$control_addresses = str_replace(';', "\n", rtrim(str_replace(' ', '', (string) $control_addresses), ';'));
 		if ($type == 'controls') {
-			$control_keys = buildSelect('control_keys', 'control_keys', $fm_module_servers->availableItems('key', 'nonempty', 'AND key_type="tsig"'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
+			$control_keys = buildSelect('control_keys', 'control_keys', availableItems('key', 'nonempty', 'AND key_type="tsig"'), explode(';', $control_keys), 1, null, true, null, null, __('Select one or more keys'));
 			$control_key_form = sprintf('<tr>
 					<th width="33&#37;" scope="row"><label for="control_keys">%s</label></th>
 					<td width="67&#37;">%s</td>

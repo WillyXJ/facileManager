@@ -20,10 +20,10 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_http {
+class fm_module_tls {
 	
 	/**
-	 * Displays the http endpoint list
+	 * Displays the tls connection list
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -46,10 +46,10 @@ class fm_module_http {
 		$table_info = array(
 						'class' => 'display_results',
 						'id' => 'table_edits',
-						'name' => 'http'
+						'name' => 'tls'
 					);
 
-		$title_array = array(array('title' => __('Endpoint Name')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		$title_array = array(array('title' => __('Connection Name')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		}
@@ -68,12 +68,12 @@ class fm_module_http {
 			
 		echo "</tbody>\n</table>\n";
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="http">%s</p>', __('There are no HTTP endpoints defined.'));
+			printf('<p id="table_edits" class="noresult" name="tls">%s</p>', __('There are no TLS connections defined.'));
 		}
 	}
 
 	/**
-	 * Adds the new endpoint
+	 * Adds the new connection
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -85,7 +85,7 @@ class fm_module_http {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls'";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
@@ -106,7 +106,7 @@ class fm_module_http {
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
 				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No HTTP endpoint name defined.');
+				if ($key == 'cfg_data' && empty($clean_data)) return __('No TLS connection name defined.');
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
 				if ($key == 'cfg_comment') {
@@ -165,14 +165,14 @@ class fm_module_http {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = sprintf("Added HTTP Endpoint:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
+		$log_message = sprintf("Added TLS Connection:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 		return true;
 	}
 	
 	
 	/**
-	 * Updates the selected endpoint
+	 * Updates the selected connection
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -184,7 +184,7 @@ class fm_module_http {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls'";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
@@ -207,7 +207,7 @@ class fm_module_http {
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
 				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No HTTP endpoint name defined.');
+				if ($key == 'cfg_data' && empty($clean_data)) return __('No TLS connection name defined.');
 				$sql_values .= "$key='$clean_data', ";
 				if ($key == 'cfg_comment') {
 					$log_message[] = sprintf('Comment: %s', $clean_data);
@@ -250,7 +250,7 @@ class fm_module_http {
 			}
 		}
 		
-		$log_message = sprintf("Updated HTTP Endpoint:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
+		$log_message = sprintf("Updated TLS Connection:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 
 		return true;
@@ -258,7 +258,7 @@ class fm_module_http {
 	
 	
 	/**
-	 * Deletes the selected http endpoint
+	 * Deletes the selected tls connection
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -284,7 +284,7 @@ class fm_module_http {
 			return formatError(__('This record could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("HTTP endpoint '%s' was deleted."), $tmp_name));
+			addLogEntry(sprintf(__("TLS connection '%s' was deleted."), $tmp_name));
 			return true;
 		}
 	}
@@ -323,7 +323,7 @@ class fm_module_http {
 		$http_endpoint_name = $row->cfg_data;
 		$comments = nl2br($row->cfg_comment);
 
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="http" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no"', null, false);
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="tls" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no"', null, false);
 		foreach ($fmdb->last_result as $record) {
 			if ($record->cfg_data) {
 				(string) $options .= sprintf('<b>%s</b> %s<br />', $record->cfg_name, $record->cfg_data);
@@ -333,7 +333,7 @@ class fm_module_http {
 		if ($class) $class = 'class="' . join(' ', $class) . '"';
 
 		echo <<<HTML
-		<tr id="$row->cfg_id" name="http" $class>
+		<tr id="$row->cfg_id" name="tls" $class>
 			<td>$http_endpoint_name</td>
 			<td>$options</td>
 			<td>$comments</td>
@@ -343,7 +343,7 @@ HTML;
 	}
 
 	/**
-	 * Displays the form to add/edit http types
+	 * Displays the form to add/edit tls connections
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -355,8 +355,8 @@ HTML;
 	 * @param integer $cfg_type_id
 	 * @return string
 	 */
-	function printForm($data = '', $action = 'add', $cfg_type = 'http', $cfg_type_id = null) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
+	function printForm($data = '', $action = 'add', $cfg_type = 'tls', $cfg_type_id = null) {
+		global $fmdb, $__FM_CONFIG, $fm_dns_zones, $fm_module_options;
 		
 		$cfg_id = 0;
 		$cfg_name = $cfg_data = $cfg_comment = null;
@@ -371,7 +371,7 @@ HTML;
 		}
 
 		/** Get child elements */
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls' ORDER BY def_id ASC";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
@@ -381,6 +381,12 @@ HTML;
 				case 'integer':
 					$form_addl_html[$def->def_option] = 'maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)"';
 					break;
+				case 'yes | no':
+					if (!class_exists('fm_module_options')) {
+						include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+					}
+					$form_addl_html[$def->def_option] = 'select:' . $def->def_type;
+					break;
 				default:
 					$form_addl_html[$def->def_option] = null;
 			}
@@ -389,18 +395,24 @@ HTML;
 		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys($auto_fill_children, null));
 		foreach ((array) $child_config as $k => $v) {
 			$child_config[$k] = str_replace(array('"', "'"), '', (string) $v);
+			if (isset($form_addl_html[$k]) && strpos($form_addl_html[$k], 'select:') !== false) {
+				$form_field = $fm_module_options->populateDefTypeDropdown(str_replace('select:', '', $form_addl_html[$k]), $child_config[$k], $k, 'include-blank');
+			} else {
+				$form_field = sprintf('<input name="%1$s" id="%1$s" type="text" value="%2$s" %3$s/>',
+					$k, $child_config[$k], $form_addl_html[$k]);
+			}
 			$child_config_form[] = sprintf('
 				<tr>
-					<th width="33&#37;" scope="row"><label for="%s">%1$s</label></th>
-					<td width="67&#37;"><input name="%2$s" id="%2$s" type="text" value="%3$s" %4$s/></td>
-				</tr>', str_replace('-', ' ', $k), $k, $child_config[$k], $form_addl_html[$k]
+					<th width="33&#37;" scope="row"><label for="%s">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>', $k, str_replace('-', ' ', $k), $form_field
 			);
 		}
 		
 		/** Get field length */
-		$http_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name');
+		$tls_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name');
 
-		$popup_title = $action == 'add' ? __('Add HTTP Endpoint') : __('Edit HTTP Endpoint');
+		$popup_title = $action == 'add' ? __('Add TLS Connection') : __('Edit TLS Connection');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
@@ -450,7 +462,7 @@ HTML;
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_type_id, $server_serial_no,
 				__('Basic'),
-				__('Endpoint Name'), $cfg_data, __('http-name'), $http_name_length,
+				__('Connection Name'), $cfg_data, __('tls-name'), $tls_name_length,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
 				implode("\n", $child_config_form),
@@ -477,10 +489,10 @@ HTML;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
-		$post['cfg_name'] = 'http-endpoint';
+		$post['cfg_name'] = 'tls-connection';
 		$post['cfg_data'] = trim($post['cfg_data']);
 		$post['cfg_comment'] = trim($post['cfg_comment']);
-		$post['cfg_type'] = 'http';
+		$post['cfg_type'] = 'tls';
 		$post['cfg_id'] = sanitize($post['cfg_id']);
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
@@ -489,6 +501,7 @@ HTML;
 			if (!$val) continue;
 			if (in_array($key, $include_sub_configs)) {
 				$post2['cfg_name'] = $key;
+				if (is_array($val)) $val = $val[0];
 				$post2['cfg_data'] = $val;
 				$def_check = $fm_module_options->validateDefType($post2);
 				if (!is_array($def_check)) {
@@ -504,7 +517,7 @@ HTML;
 
 }
 
-if (!isset($fm_module_http))
-	$fm_module_http = new fm_module_http();
+if (!isset($fm_module_tls))
+	$fm_module_tls = new fm_module_tls();
 
 ?>

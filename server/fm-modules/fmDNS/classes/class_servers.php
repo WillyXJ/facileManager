@@ -679,7 +679,7 @@ FORM;
 			/** Advanced tab */
 			$keys = $this->getConfig($server_id, 'keys');
 			$keys = ($keys) ? explode(',', $keys) : null;
-			$keys = buildSelect('keys', 'keys', $this->availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', true);
+			$keys = buildSelect('keys', 'keys', availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', true);
 			$transfers = str_replace(array('"', "'"), '', $this->getConfig($server_id, 'transfers'));
 			$bogus = $this->buildConfigOptions('bogus', $this->getConfig($server_id, 'bogus'));
 			$edns = $this->buildConfigOptions('edns', $this->getConfig($server_id, 'edns'));
@@ -807,8 +807,8 @@ FORM;
 			$group_slaves  = (isset($group_slaves)) ? explode(';', $group_slaves) : null;
 			
 			$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name');
-			$group_masters = buildSelect('group_masters', 'group_masters', $this->availableItems('server'), $group_masters, 1, null, true, null, null, __('Select master servers'));
-			$group_slaves = buildSelect('group_slaves', 'group_slaves', $this->availableItems('server'), $group_slaves, 1, null, true, null, null, __('Select slave servers'));
+			$group_masters = buildSelect('group_masters', 'group_masters', availableItems('server'), $group_masters, 1, null, true, null, null, __('Select master servers'));
+			$group_slaves = buildSelect('group_slaves', 'group_slaves', availableItems('server'), $group_slaves, 1, null, true, null, null, __('Select slave servers'));
 
 			$return_form .= sprintf('
 			<table class="form-table">
@@ -845,35 +845,6 @@ FORM;
 		return $return_form;
 	}
 	
-	function availableItems($type, $default = 'blank', $addl_sql = null, $prefix = null) {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return = null;
-		
-		$j = 0;
-		if ($default == 'blank') {
-			$return[$j][] = '';
-			$return[$j][] = '';
-			$j++;
-		}
-		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' $addl_sql ORDER BY {$type}_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			foreach ($fmdb->last_result as $results) {
-				if (property_exists($results, 'server_menu_display') && $results->server_menu_display == 'exclude') continue;
-				$type_name = $type . '_name';
-				$type_id   = $type . '_id';
-				$return[$j][] = $results->$type_name;
-				$return[$j][] = $prefix . $results->$type_id;
-				$j++;
-			}
-		}
-		
-		return $return;
-	}
-
 	function manageCache($server_id, $action) {
 		global $fmdb, $__FM_CONFIG;
 		

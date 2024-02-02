@@ -30,8 +30,9 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
-	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : '';
-	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
+	$cfg_data = isset($_POST['option_value']) ? sanitize($_POST['option_value']) : '';
+	if (isset($_POST['option_name'])) $_POST['option_name'] = sanitize($_POST['option_name']);
+	$server_serial_no = isset($_POST['server_serial_no']) ? intval($_POST['server_serial_no']) : 0;
 	$query = "SELECT def_option,def_type,def_multiple_values,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	if (array_key_exists('domain_id', $_POST)) {
 		$query .= " AND def_clause_support LIKE '%Z%'";
@@ -170,6 +171,59 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 						data: %s
 					});
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $multiple, $available_items);
+		} elseif (in_array($result[0]->def_option, array('listen-on', 'listen-on-v6'))) {
+			$cfg_add_match_elem = explode('{', rtrim($cfg_data, '}'));
+			$listen_params = array('port', 'proxy', 'http', 'tls');
+			$cfg_data_array = array_fill_keys($listen_params, null);
+			if (count($cfg_add_match_elem) > 1) {
+				$cfg_data = trim($cfg_add_match_elem[1]);
+				$cfg_add_match_elem = explode(' ', $cfg_add_match_elem[0]);
+				foreach ($listen_params as $param) {
+					$key = array_search($param, $cfg_add_match_elem);
+					if ($key !== false) {
+						$cfg_data_array[$param] = $cfg_add_match_elem[$key + 1];
+					}
+				}
+			}
+			$cfg_data = str_replace(array('{', '}', '; ', ';'), array('', '', ',', ','), $cfg_data);
+			// This section would be to allow keys to be selected, but an IP also needs to be defined
+			// $available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
+			// $available_masters = $fm_dns_masters->getMasterList($server_serial_no, 'all');
+			// $available_masters = array_merge($available_masters, $fm_dns_acls->getACLList($server_serial_no, 'tsig-keys'));
+			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no, 'none');
+			$http_endpoints = buildSelect('cfg_data_params[http]', 'cfg_data_params[http]', $fm_module_options->availableParents('http', 'http_', $server_serial_no, 'blank'), $cfg_data_array['http'], 1, null, false, null, 'cfg_drop_down', __('Select an endpoint'));
+			$tls_connections = buildSelect('cfg_data_params[tls]', 'cfg_data_params[tls]', $fm_module_options->availableParents('tls', 'tls_', $server_serial_no, 'blank'), $cfg_data_array['tls'], 1, null, false, null, 'cfg_drop_down', __('Select a connection'));
+
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;">
+					<label for="cfg_data_params[port]"><b>Port</b></label> <input type="text" id="cfg_data_params[port]" name="cfg_data_params[port]" value="%s" maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)" /><br />
+					<label for="cfg_data_params[proxy]"><b>Proxy</b></label> <input type="text" id="cfg_data_params[proxy]" name="cfg_data_params[proxy]" value="%s" /><br />
+					<label><b>HTTP</b></label>&nbsp;  <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>&nbsp; %s<br />
+					<label><b>TLS</b></label>&nbsp;  <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>&nbsp; %s<br />
+					<label for="cfg_data"><b>Address</b></label> <input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
+					<script>
+					$(".address_match_element").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: true,
+						width: "200px",
+						tokenSeparators: [",", ";"],
+						data: %s
+					});
+					$(".cfg_drop_down").select2({
+						width: "200px",
+						allowClear: true
+					});
+					</script>', __('Option Value'),
+						$cfg_data_array['port'], $cfg_data_array['proxy'],
+						sprintf(__('This option requires BIND %s or later.'), '9.18.0'), $http_endpoints,
+						sprintf(__('This option requires BIND %s or later.'), '9.18.0'), $tls_connections,
+						$cfg_data,
+						$available_acls);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			$checkbox = null;
 			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST)) {
@@ -235,7 +289,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'domain' => 'manage_zones',
 					'soa' => 'manage_zones',
 					'rpz' => 'manage_zones',
-					'http' => 'manage_servers'
+					'http' => 'manage_servers',
+					'tls' => 'manage_servers'
 				);
 
 if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
@@ -302,7 +357,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			break;
 		case 'rpz':
 		case 'http':
-			$post_class = ($_POST['item_type'] == 'rpz') ? $fm_module_rpz : $fm_module_http;
+		case 'tls':
+			$post_class = ${"fm_module_{$_POST['item_type']}"};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			break;

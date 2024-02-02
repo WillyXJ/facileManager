@@ -127,7 +127,7 @@ TABLESQL;
 	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
-  `def_function` enum('options','logging','key','view','http') NOT NULL,
+  `def_function` enum('options','logging','key','view','http','tls') NOT NULL,
   `def_option_type` enum('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global',
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
@@ -687,7 +687,16 @@ VALUES
 ('options', 'zone-statistics', '( full | terse | none | yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL),
 ('http', 'endpoints', '( quoted_string )', 'yes', 'H', NULL, 'no', '9.18.0'),
 ('http', 'listener-clients', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
-('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0')
+('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('tls', 'cert-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'key-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'ca-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'dhparam-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'ciphers', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'prefer-server-ciphers', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
+('tls', 'protocols', '( quoted_string )', 'yes', 'T', NULL, 'no', '9.18.0'),
+('tls', 'remote-hostname', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'session-tickets', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0')
 ;
 INSERTSQL;
 	
