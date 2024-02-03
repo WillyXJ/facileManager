@@ -524,7 +524,7 @@ HTML;
 		} else return false;
 		
 		switch(trim($def_option, "'")) {
-			case 'masters':
+			case 'primaries':
 			case 'also-notify':
 				$terminate = ',';
 				break;

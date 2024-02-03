@@ -2536,6 +2536,12 @@ INSERTSQL;
 
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domaain_id`!=0";
 	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` ADD `master_tls_id` INT NOT NULL DEFAULT '0' AFTER `master_key_id`";
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','master','slave','forward','stub') NOT NULL DEFAULT 'primary'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='primary' WHERE `domain_type`='master'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='secondary' WHERE `domain_type`='slave'";
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','forward','stub') NOT NULL DEFAULT 'primary'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_option` = 'primaries' WHERE `def_option` = 'masters'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name` = 'primaries' WHERE `cfg_name` = 'masters'";
 
 	/** Run queries */
 	if (count($queries) && $queries[0]) {

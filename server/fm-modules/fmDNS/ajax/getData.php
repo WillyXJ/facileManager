@@ -109,7 +109,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					});
 					</script>',
 					__('Option Value'), $available_classes, $available_types, $available_domains, $available_orders);
-		} elseif (in_array($result[0]->def_option, array('masters', 'also-notify'))) {
+		} elseif (in_array($result[0]->def_option, array('primaries', 'also-notify'))) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
 			$cfg_data_array = explode('{', rtrim($cfg_data, '}'));
 			$cfg_data_port = $cfg_data_dscp = null;

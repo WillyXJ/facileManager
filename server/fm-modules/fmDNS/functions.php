@@ -81,13 +81,13 @@ function buildModuleDashboard() {
 	$domain_results = $fmdb->last_result;
 	for ($i=0; $i<$domain_count; $i++) {
 		if (!getSOACount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master' && 
+				$domain_results[$i]->domain_type == 'primary' && 
 				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=SOA';
 			$errors .= '">' . displayFriendlyDomainName($domain_results[$i]->domain_name) . '</a> - ' . __('Zone does not have a SOA defined.') . "\n";
 		} elseif (!getNSCount($domain_results[$i]->domain_id) && !$domain_results[$i]->domain_clone_domain_id && 
-				$domain_results[$i]->domain_type == 'master' && 
+				$domain_results[$i]->domain_type == 'primary' && 
 				currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 			$errors .= '<a href="zone-records.php?map=' . $domain_results[$i]->domain_mapping . '&domain_id=' . $domain_results[$i]->domain_id;
 			if (currentUserCan('manage_zones', $_SESSION['module'])) $errors .= '&record_type=NS';
@@ -204,7 +204,7 @@ function buildModuleHelpFile() {
 			<p>Zones (aka domains) can be managed from the <a href="__menu{Zones}">Zones</a> menu item. From 
 			there you can add, edit {$__FM_CONFIG['icons']['edit']}, delete 
 			{$__FM_CONFIG['icons']['delete']}, and reload {$__FM_CONFIG['icons']['reload']} zones depending on your user permissions.</p>
-			<p>You can define a zone as a clone <i class="mini-icon fa fa-clone"></i> of another previously defined master zone.  The cloned zone will contain all of the same records
+			<p>You can define a zone as a clone <i class="mini-icon fa fa-clone"></i> of another previously defined primary zone.  The cloned zone will contain all of the same records
 			present in the parent zone.  This is useful if you have multiple zones with identical records as you won't have to repeat the record
 			definitions.  You can also skip records and define new ones inside clone zones for those that are slightly different than the parent.</p>
 			<p>Zones can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
@@ -244,8 +244,8 @@ function buildModuleHelpFile() {
 			in the record value. {$_SESSION['module']} will attemnpt to auto-detect whether or not the domain should be appended if no choice is
 			made at the time of record creation.</p>
 			<p><i>The 'Record Management' or 'Super Admin' permission is required to add, edit, and delete records.</i></p>
-			<p>When adding or updating a SOA record for a zone, the domain can be appended to the Master Server and Email Address if selected. This
-			means you could simply enter 'ns1' and 'username' for the Master Server and Email Address respectively. If you prefer to enter the entire
+			<p>When adding or updating a SOA record for a zone, the domain can be appended to the Primary Server and Email Address if selected. This
+			means you could simply enter 'ns1' and 'username' for the Primary Server and Email Address respectively. If you prefer to enter the entire
 			entry, make sure you select 'no' for Append Domain.</p>
 			<p>SOA records can also be saved as a template and applied to an unlimited number of zones. This can speed up your zone additions and
 			management. You can create a SOA template when managing zone records or you can completely manage them from 
@@ -318,12 +318,12 @@ function buildModuleHelpFile() {
 			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage keys.</i></p>
 			<br />
 			
-			<p><b>Masters</b><br />
-			Masters can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. To define the masters, 
-			go to Config &rarr; <a href="__menu{Masters}">Masters</a>.</p>
-			<p>Masters can then be used when defining zones and defining the <i>masters</i> and <i>also-notify</i> options.</p>
-			<p>Server-level masters always supercede global ones.</p>
-			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage the masters.</i></p>
+			<p><b>Primaries</b><br />
+			Primaries can be defined globally or server-based which is controlled by the servers drop-down menu in the upper right. To define the primaries, 
+			go to Config &rarr; <a href="__menu{Primaries}">Primaries</a>.</p>
+			<p>Primaries can then be used when defining zones and defining the <i>primaries</i> and <i>also-notify</i> options.</p>
+			<p>Server-level Primaries always supercede global ones.</p>
+			<p><i>The 'Server Management' or 'Super Admin' permission is required to manage the primaries.</i></p>
 			<br />
 			
 			<p><b>Options</b><br />
@@ -613,7 +613,7 @@ function getModuleBadgeCounts($type) {
 		if ($domain_count) $domain_results = $fmdb->last_result;
 		for ($i=0; $i<$domain_count; $i++) {
 			if ($domain_results[$i]->domain_template == 'no' && !$domain_results[$i]->domain_clone_domain_id && 
-					$domain_results[$i]->domain_type == 'master') {
+					$domain_results[$i]->domain_type == 'primary') {
 				if (currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_results[$i]->domain_id))) {
 					if (!getSOACount($domain_results[$i]->domain_id)) {
 						$badge_counts[$domain_results[$i]->domain_mapping]++;
@@ -671,7 +671,7 @@ function getModuleBadgeCounts($type) {
  * @param array $server_types Type of servers to pull
  * @return string
  */
-function getZoneServers($domain_id, $server_types = array('masters')) {
+function getZoneServers($domain_id, $server_types = array('primaries')) {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
 	$serial_no = null;
@@ -769,7 +769,7 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', __('Views'), __('Views'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-views.php');
 		addSubmenuPage('config-servers.php', __('ACLs'), __('Access Control Lists'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-acls.php');
 		addSubmenuPage('config-servers.php', __('Keys'), __('Keys'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-keys.php');
-		addSubmenuPage('config-servers.php', __('Masters'), __('Masters'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-masters.php');
+		addSubmenuPage('config-servers.php', __('Primaries'), __('Primaries'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-masters.php');
 		addSubmenuPage('config-servers.php', __('HTTP'), __('HTTP Endpoints'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-http.php');
 		addSubmenuPage('config-servers.php', __('TLS'), __('TLS Connections'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-tls.php');
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
@@ -1230,7 +1230,7 @@ function checkPTRZone($ip, $domain_id) {
 	$octet = explode('.', $ip);
 	$zone = "'{$octet[2]}.{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[1]}.{$octet[0]}.in-addr.arpa', '{$octet[0]}.in-addr.arpa'";
 
-	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_type='master' AND domain_status!='deleted'");
+	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $zone, 'domain_', 'domain_name', "OR domain_name IN ($zone) AND domain_type='primary' AND domain_status!='deleted'");
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
 		return array($result[0]->domain_id, null);

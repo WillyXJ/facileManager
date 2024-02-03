@@ -89,7 +89,7 @@ class fm_dns_zones {
 			for ($x=$start; $x<$all_num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				if (array_key_exists('attention', $_GET)) {
-					if (!$results[$x]->domain_clone_domain_id && $results[$x]->domain_type == 'master' && $results[$x]->domain_template == 'no' &&
+					if (!$results[$x]->domain_clone_domain_id && $results[$x]->domain_type == 'primary' && $results[$x]->domain_template == 'no' &&
 						(!getSOACount($results[$x]->domain_id) || !getNSCount($results[$x]->domain_id) || $results[$x]->domain_reload == 'yes' ||
 						$results[$x]->domain_dnssec == 'yes')) {
 							/** DNSSEC Check */
@@ -293,9 +293,9 @@ class fm_dns_zones {
 				$domain_forward = sanitize($post['domain_forward'][0]);
 				$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
 				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
-			} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
-				$result = $fmdb->query($query . "'masters', '" . $required_servers . "')");
-				$log_message .= formatLogKeyData('domain_', 'masters', $required_servers);
+			} elseif (in_array($post['domain_type'], array('secondary', 'stub'))) {
+				$result = $fmdb->query($query . "'primaries', '" . $required_servers . "')");
+				$log_message .= formatLogKeyData('domain_', 'primaries', $required_servers);
 			} elseif (isset($post['domain_redirect_url'])) {
 				if (!class_exists('fm_dns_records')) {
 					include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
@@ -337,8 +337,8 @@ class fm_dns_zones {
 		/* Set the server_build_config flag for servers */
 		if ((($post['domain_clone_domain_id'] || $post['domain_template_id']) &&
 			getSOACount($insert_id) && getNSCount($insert_id)) ||
-			$post['domain_type'] != 'master'){
-				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('masters', 'slaves')), 'yes', 'build');
+			$post['domain_type'] != 'primary'){
+				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('primaries', 'secondaries')), 'yes', 'build');
 		}
 		
 		/* Update the user/group limited access */
@@ -457,8 +457,8 @@ class fm_dns_zones {
 		$sql_edit .= "domain_reload='no', domain_check_config='yes'";
 		
 		/** Set the server_build_config flag for existing servers */
-		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'master') {
-			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
+		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'primary') {
+			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('primaries', 'secondaries')), 'yes', 'build');
 		}
 
 		/** Update the zone */
@@ -511,15 +511,15 @@ class fm_dns_zones {
 				}
 				$rows_affected += $fmdb->rows_affected;
 				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
-			} elseif (in_array($post['domain_type'], array('slave', 'stub'))) {
-				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'") !== false) {
-					basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='masters'"), 'cfg_data', $required_servers, 'cfg_id');
+			} elseif (in_array($post['domain_type'], array('secondary', 'stub'))) {
+				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='primaries'") !== false) {
+					basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='primaries'"), 'cfg_data', $required_servers, 'cfg_id');
 				} else {
-					$result = $fmdb->query($query . "'masters', '" . $required_servers . "')");
+					$result = $fmdb->query($query . "'primaries', '" . $required_servers . "')");
 				}
 				$rows_affected += $fmdb->rows_affected;
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-				$log_message .= formatLogKeyData('domain_', 'masters', $fm_dns_acls->parseACL($required_servers));
+				$log_message .= formatLogKeyData('domain_', 'primaries', $fm_dns_acls->parseACL($required_servers));
 			}
 		} else {
 			/** Remove all zone config options */
@@ -548,15 +548,15 @@ class fm_dns_zones {
 		if ($rows_affected + $fmdb->rows_affected == 0) return true;
 
 		/** Set the server_build_config flag for new servers */
-		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'master') {
-			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
+		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'primary') {
+			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('primaries', 'secondaries')), 'yes', 'build');
 		}
 
 		/** Delete associated records from fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds */
 		basicDelete('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'track_builds', $domain_id, 'domain_id', false);
 
 		/** Update the SOA serial number */
-		if ($post['domain_type'] == 'master') {
+		if ($post['domain_type'] == 'primary') {
 			$this->updateSOASerialNo($domain_id, getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'soa_serial_no'));
 		}
 
@@ -730,11 +730,11 @@ class fm_dns_zones {
 			$soa_count = getSOACount($row->domain_id);
 			$ns_count = getNSCount($row->domain_id);
 			$reload_allowed = $server_reload_allowed ? reloadAllowed($row->domain_id) : false;
-			if (!$soa_count && $row->domain_type == 'master') {
+			if (!$soa_count && $row->domain_type == 'primary') {
 				$response = __('The SOA record still needs to be created for this zone');
 				$classes[] = 'attention';
 			}
-			if (!$ns_count && $row->domain_type == 'master' && !$response) {
+			if (!$ns_count && $row->domain_type == 'primary' && !$response) {
 				$response = __('One or more NS records still needs to be created for this zone');
 				$classes[] = 'attention';
 			}
@@ -756,7 +756,7 @@ class fm_dns_zones {
 				}
 			}
 
-			if ($row->domain_type == 'master' && $row->domain_clone_domain_id == 0 && currentUserCan('manage_zones', $_SESSION['module'])) {
+			if ($row->domain_type == 'primary' && $row->domain_clone_domain_id == 0 && currentUserCan('manage_zones', $_SESSION['module'])) {
 				$add_new = displayAddNew($map, $row->domain_id, __('Clone this zone'), 'fa fa-clone');
 			}
 
@@ -788,12 +788,12 @@ class fm_dns_zones {
 
 			$edit_status = null;
 
-			if (!$soa_count && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
-			elseif (!$ns_count && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
+			if (!$soa_count && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
+			elseif (!$ns_count && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
 			else {
 				$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
 			}
-			if ($soa_count && $ns_count && $row->domain_type == 'master') {
+			if ($soa_count && $ns_count && $row->domain_type == 'primary') {
 				$edit_status = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $row->domain_id . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 			}
 			if (currentUserCan('manage_zones', $_SESSION['module']) && $zone_access_allowed) {
@@ -806,21 +806,21 @@ class fm_dns_zones {
 				$type .= '&load=zone';
 			}
 			$domain_name = displayFriendlyDomainName($row->domain_name);
-			$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . "\">$domain_name</a>" : $domain_name;
+			$edit_name = ($row->domain_type == 'primary') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . "\">$domain_name</a>" : $domain_name;
 			$domain_view = $this->IDs2Name($row->domain_view, 'view');
 
 			$record_count = null;
-			if ($row->domain_type == 'master') {
+			if ($row->domain_type == 'primary') {
 				$query = "SELECT COUNT(*) record_count FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}records WHERE account_id={$_SESSION['user']['account_id']} AND domain_id={$row->domain_id} AND record_status!='deleted'";
 				$fmdb->query($query);
 				$record_count = formatNumber($fmdb->last_result[0]->record_count);
 			}
 
-			if (in_array($row->domain_type, array('master', 'slave')) && (currentUserCan(array('manage_zones', 'view_all'), $_SESSION['module']) || $zone_access_allowed)) {
+			if (in_array($row->domain_type, array('primary', 'secondary')) && (currentUserCan(array('manage_zones', 'view_all'), $_SESSION['module']) || $zone_access_allowed)) {
 				$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->domain_id, __('Configure Additional Options'));
 			}
 
-			if ($row->domain_type == 'master') {
+			if ($row->domain_type == 'primary') {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $row->domain_id, 'record_', 'domain_id', 'AND record_type="URL" AND record_name="@"');
 				if ($fmdb->num_rows) {
 					$domain_redirect_url = $fmdb->last_result[0]->record_value;
@@ -981,9 +981,9 @@ HTML;
 			$domain_forward_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'")), ';'));
 			$domain_forward = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'");
 			$available_acls = $fm_dns_acls->buildACLJSON($domain_forward_servers, 0, 'none');
-		} elseif (in_array($domain_type, array('slave', 'stub'))) {
+		} elseif (in_array($domain_type, array('secondary', 'stub'))) {
 			$masters_show = 'block';
-			$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
+			$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='primaries'")), ';'));
 			if ($domain_master_servers) $available_masters = $fm_dns_masters->buildMasterJSON($domain_master_servers);
 		}
 		
@@ -1026,7 +1026,7 @@ HTML;
 		}
 		$clone_dname_dropdown = buildSelect('domain_clone_dname', 'domain_clone_dname', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_clone_dname'), $domain_clone_dname);
 		
-		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('master', 'slave'))) || !currentUserCan('manage_servers', $_SESSION['module']) ? null : sprintf('<tr class="include-with-template"><td></td><td><span><a href="config-options.php?domain_id=%d">%s</a></span></td></tr>', $domain_id, __('Configure Additional Options') . ' &raquo;');
+		$additional_config_link = ($action == 'create' || !in_array($domain_type, array('primary', 'secondary'))) || !currentUserCan('manage_servers', $_SESSION['module']) ? null : sprintf('<tr class="include-with-template"><td></td><td><span><a href="config-options.php?domain_id=%d">%s</a></span></td></tr>', $domain_id, __('Configure Additional Options') . ' &raquo;');
 		
 		$popup_title = $action == 'create' ? __('Add Zone') : __('Edit Zone');
 		$popup_header = buildPopup('header', $popup_title);
@@ -1069,7 +1069,7 @@ HTML;
 		</tr>', $template_name_show_hide, $default_checked, __('Make Default Template'));
 		} else {
 			$dynamic_checked = ($domain_dynamic == 'yes') ? 'checked' : null;
-			$dynamic_show = ($domain_type == 'master' || $domain_template_id) ? 'table-row' : 'none';
+			$dynamic_show = ($domain_type == 'primary' || $domain_template_id) ? 'table-row' : 'none';
 			$addl_zone_options = sprintf('<tr class="include-with-template" id="dynamic_updates" style="display: %s">
 			<th>%s</th>
 			<td><input type="checkbox" id="domain_dynamic" name="domain_dynamic" value="yes" %s /><label for="domain_dynamic"> %s</label></td>
@@ -1092,10 +1092,10 @@ HTML;
 			if (!$domain_dnssec_sig_expire) $domain_dnssec_sig_expire = null;
 			$domain_dnssec_sign_inline_checked = ($domain_dnssec_sign_inline == 'yes') ? 'checked' : null;
 			
-			$available_zones = array_reverse($this->availableZones('all', 'master', 'restricted'));
+			$available_zones = array_reverse($this->availableZones('all', 'primary', 'restricted'));
 			$available_zones[] = array(null, 0);
 			$available_zones = buildSelect('domain_dnssec_parent_domain_id', 'domain_dnssec_parent_domain_id', array_reverse($available_zones), $domain_dnssec_parent_domain_id);
-			$dnssec_show = ($domain_type == 'master' || $domain_template_id) ? 'table-row' : 'none';
+			$dnssec_show = ($domain_type == 'primary' || $domain_template_id) ? 'table-row' : 'none';
 
 			$addl_zone_options .= sprintf('<tr class="include-with-template" id="enable_dnssec" style="display: %s">
 			<th>%s</th>
@@ -1334,7 +1334,7 @@ HTML;
 			}
 		}
 		
-		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE domain_clone_domain_id='0' AND domain_mapping='$map' AND domain_type='master' AND domain_status='active' AND domain_template='no' $domain_id_sql ORDER BY domain_name ASC";
+		$query = "SELECT domain_id,domain_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE domain_clone_domain_id='0' AND domain_mapping='$map' AND domain_type='primary' AND domain_status='active' AND domain_template='no' $domain_id_sql ORDER BY domain_name ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$clone_results = $fmdb->last_result;
@@ -1366,7 +1366,7 @@ HTML;
 		$domain_details = $fmdb->last_result;
 		extract(get_object_vars($domain_details[0]), EXTR_SKIP);
 		
-		$name_servers = $this->getNameServers($domain_name_servers, array('masters'));
+		$name_servers = $this->getNameServers($domain_name_servers, array('primaries'));
 		
 		/** No name servers so return */
 		if (!$name_servers) return displayResponseClose(__('There are no DNS servers hosting this zone.'));
@@ -1457,7 +1457,7 @@ HTML;
 		return $response;
 	}
 
-	function getNameServers($domain_name_servers, $server_types = array('masters', 'slaves')) {
+	function getNameServers($domain_name_servers, $server_types = array('primaries', 'secondaries')) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Check domain_name_servers */
@@ -1710,9 +1710,9 @@ HTML;
 			$response[] = ' --> ' . __('Failed: Zone is not available for reload.');
 		}
 		
-		/** Ensure domain is master */
-		if (count($response) == 1 && $domain_type != 'master') {
-			$response[] = ' --> ' . __('Failed: Zone is not a master zone.');
+		/** Ensure domain is primary */
+		if (count($response) == 1 && $domain_type != 'primary') {
+			$response[] = ' --> ' . __('Failed: Zone is not a primary zone.');
 		}
 		
 		/** Ensure user is allowed to reload zone */
@@ -1927,7 +1927,7 @@ HTML;
 			if (!filter_var($post['domain_redirect_url'], FILTER_VALIDATE_URL)) {
 				return sprintf(__('%s is not a valid URL.'), $post['domain_redirect_url']);
 			}
-			$post['domain_type'] = 'master';
+			$post['domain_type'] = 'primary';
 		} else {
 			unset($post['domain_redirect_url']);
 		}
@@ -1938,7 +1938,7 @@ HTML;
 		}
 		
 		/** Cleans up acl_addresses for future parsing **/
-		$clean_fields = array('forwarders', 'masters');
+		$clean_fields = array('forwarders', 'primaries');
 		foreach ($clean_fields as $val) {
 			if (strpos($post['domain_required_servers'][$val], 'master_') === false) {
 				$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
@@ -1952,9 +1952,9 @@ HTML;
 		}
 		
 		/** Slave and stub zones require master servers */
-		if (in_array($post['domain_type'], array('slave', 'stub'))) {
-			if (empty($post['domain_required_servers']['masters'])) return __('No master servers defined.');
-			$post['domain_required_servers'] = $post['domain_required_servers']['masters'];
+		if (in_array($post['domain_type'], array('secondary', 'stub'))) {
+			if (empty($post['domain_required_servers']['primaries'])) return __('No master servers defined.');
+			$post['domain_required_servers'] = $post['domain_required_servers']['primaries'];
 		}
 
 		return $post;
@@ -2020,7 +2020,7 @@ HTML;
 	 * @return json array
 	 */
 	function buildZoneJSON($zones = 'all', $exclude = null, $additional_zones = null) {
-		$temp_zones = $this->availableZones('no-templates', array('master', 'slave', 'forward'), 'all', $zones, $exclude);
+		$temp_zones = $this->availableZones('no-templates', array('primary', 'secondary', 'forward'), 'all', $zones, $exclude);
 
 		if ($additional_zones) {
 			$temp_zones = array_merge($additional_zones, $temp_zones);

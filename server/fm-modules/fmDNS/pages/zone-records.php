@@ -282,7 +282,7 @@ function isValidDomain($domain_id) {
 	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		if ($result[0]->domain_type == 'master') return true;
+		if ($result[0]->domain_type == 'primary') return true;
 	}
 	
 	return false;

@@ -328,7 +328,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Merge arrays */
 			$master_array = array_merge($global_master_array, $server_master_array);
 
-			/** Format Masters config */
+			/** Format Primaries config */
 			foreach ($master_array as $master_name => $master_data) {
 				list($master_item, $master_ports, $master_comment) = $master_data;
 				if ($master_comment) {
@@ -336,7 +336,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$config .= '// ' . str_replace("\n", "\n// ", $comment) . "\n";
 					unset($comment);
 				}
-				$config .= 'masters "' . $master_name . '"' . $master_ports . " {\n";
+				$config .= 'primaries "' . $master_name . '"' . $master_ports . " {\n";
 				$config .= "\t" . $master_item;
 				if ($master_item) $config .= ';';
 				$config .= "\n};\n\n";
@@ -674,6 +674,16 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 			}
 
+			/** Handle masters|slaves vs primaries|secondaries */
+			if (version_compare($server_version, '9.13.0', '<')) {
+				$config = str_replace(array('primaries', 'primary', 'secondary'), array('masters', 'master', 'slave'), $config);
+				foreach ($files as $filename => $v) {
+					if (strpos($filename, 'zones.conf') !== false && !is_array($v)) {
+						$files[$filename] = str_replace(array('primaries', 'primary', 'secondary'), array('masters', 'master', 'slave'), $v);
+					}
+				}
+			}
+
 			/** Debian-based requires named.conf.local */
 			if (isDebianSystem($server_os_distro)) {
 				$data->files[dirname($server_config_file) . '/named.conf.local'] = array('contents' => $config, 'mode' => 0444, 'chown' => 'root');
@@ -885,7 +895,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 			for ($i=0; $i < $count; $i++) {
 				if ($zone_result[$i]->domain_type == 'url-redirect') {
-					$zone_result[$i]->domain_type = 'master';
+					$zone_result[$i]->domain_type = 'primary';
 				}
 				/** Is this a clone id? */
 				if ($zone_result[$i]->domain_clone_domain_id) $zone_result[$i] = $this->mergeZoneDetails($zone_result[$i], 'clone');
@@ -911,7 +921,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				
 				/** Valid SOA and NS records must exist */
 				if ((getSOACount($zone_result[$i]->domain_id) && getNSCount($zone_result[$i]->domain_id)) ||
-					$zone_result[$i]->domain_type != 'master') {
+					$zone_result[$i]->domain_type != 'primary') {
 
 					$domain_name_file = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
 					$domain_name = isset($zone_result[$i]->domain_name_file) ? $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name_file)) : $domain_name_file;
@@ -930,20 +940,20 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						if ($fmdb->num_rows) $file_ext = '.' . $zone_result[$i]->domain_id;
 					}
 					
-					if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
+					if ($domain_type == 'secondary' && $file_ext == $default_file_ext) {
 						$file_ext = '.' . $view_id;
 					}
 					unset($default_file_ext);
 					
 					switch($domain_type) {
-						case 'master':
-						case 'slave':
-							$zone_data_dir = ($server_slave_zones_dir && $domain_type == 'slave') ? $server_slave_zones_dir : $server_zones_dir;
+						case 'primary':
+						case 'secondary':
+							$zone_data_dir = ($server_slave_zones_dir && $domain_type == 'secondary') ? $server_slave_zones_dir : $server_zones_dir;
 							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
 							$zones .= "\tfile \"$zone_data_dir/$domain_type/$domain_name_file\";\n";
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
 							/** Build zone file */
-							$zone_file_contents = ($domain_type == 'master') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
+							$zone_file_contents = ($domain_type == 'primary') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
 							if ($zone_file_contents != null) {
 								$files[$zone_data_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
 							}
@@ -952,8 +962,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						case 'stub':
 							$zone_data_dir = ($server_slave_zones_dir) ? $server_slave_zones_dir : $server_zones_dir;
 							$zones .= "\tfile \"$zone_data_dir/stub/" . str_replace('{ZONENAME}', trimFullStop($domain_name) . $file_ext, $file_format) . "\";\n";
-							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='masters'")), ';'));
-							$zones .= "\tmasters { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
+							$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($zone_result[$i]->domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='primaries'")), ';'));
+							$zones .= "\tprimaries { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
 							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
@@ -1105,7 +1115,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								if ($fmdb->num_rows) $file_ext = '.' . $zone_result->domain_id;
 							}
 							
-							if ($domain_type == 'slave' && $file_ext == $default_file_ext) {
+							if ($domain_type == 'secondary' && $file_ext == $default_file_ext) {
 								$file_ext = $view_id . ".$default_file_ext";
 							}
 							unset($default_file_ext);
@@ -2081,7 +2091,7 @@ HTML;
 
 		$domain_name_servers = explode(';', $domain_name_servers);
 		if (!count($domain_name_servers) || in_array('0', $domain_name_servers) || 
-				$domain_type != 'master' || in_array('s_' . $server_id, $domain_name_servers)) {
+				$domain_type != 'primary' || in_array('s_' . $server_id, $domain_name_servers)) {
 			return array($domain_type, '');
 		}
 		
@@ -2101,7 +2111,7 @@ HTML;
 					}
 					
 					if (in_array($server_id, $group_slaves)) {
-						return array('slave', sprintf("\tmasters { %s };\n", $this->resolveServerGroupMasters($group_masters)));
+						return array('secondary', sprintf("\tprimaries { %s };\n", $this->resolveServerGroupMasters($group_masters)));
 					}
 				}
 			}
