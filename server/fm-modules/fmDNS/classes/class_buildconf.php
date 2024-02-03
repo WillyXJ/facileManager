@@ -247,6 +247,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							if (trim($address)) $global_master_array[$master_result[$i]->master_name] .= "\t" . $fm_dns_acls->parseACL($address);
 							if ($master_child_result[$j]->master_port) $global_master_array[$master_result[$i]->master_name] .= ' port ' . $master_child_result[$j]->master_port;
 							if ($master_child_result[$j]->master_key_id) $global_master_array[$master_result[$i]->master_name] .= ' key "' . $fm_dns_keys->parseKey('key_' . $master_child_result[$j]->master_key_id) . '"';
+							if ($master_child_result[$j]->master_tls_id && version_compare($server_version, '9.18.0', '>=')) $global_master_array[$master_result[$i]->master_name] .= ' tls "' . getNameFromID($master_child_result[$j]->master_tls_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active') . '"';
 							$global_master_array[$master_result[$i]->master_name] .= ";\n";
 						}
 					}
@@ -278,6 +279,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								if (trim($address)) $server_master_addresses .= "\t" . $fm_dns_acls->parseACL(trim($address));
 								if ($master_child_result[$i]->master_port) $server_master_addresses .= ' port ' . $master_child_result[$i]->master_port;
 								if ($master_child_result[$i]->master_key_id) $server_master_addresses .= ' key "' . $fm_dns_keys->parseKey('key_' . $master_child_result[$i]->master_key_id) . '"';
+								if ($master_child_result[$i]->master_tls_id && version_compare($server_version, '9.18.0', '>=')) $server_master_addresses .= ' tls "' . getNameFromID($master_child_result[$i]->master_tls_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active') . '"';
 								$server_master_addresses .= ";\n";
 							}
 						}
@@ -308,6 +310,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							if (trim($address)) $server_master_addresses .= "\t" . $fm_dns_acls->parseACL(trim($address));
 							if ($master_child_result[$i]->master_port) $server_master_addresses .= ' port ' . $master_child_result[$i]->master_port;
 							if ($master_child_result[$i]->master_key_id) $server_master_addresses .= ' key "' . $fm_dns_keys->parseKey('key_' . $master_child_result[$i]->master_key_id) . '"';
+							if ($master_child_result[$i]->master_tls_id && version_compare($server_version, '9.18.0', '>=')) $server_master_addresses .= ' tls "' . getNameFromID($master_child_result[$i]->master_tls_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active') . '"';
 							$server_master_addresses .= ";\n";
 						}
 					}

@@ -401,21 +401,24 @@ HTML;
 		if ($include == 'blank') {
 			$return[$i][] = '';
 			$return[$i][] = '';
+			$i++;
 		}
 		if ($include == 'none') {
 			$return[$i][] = 'None';
 			$return[$i][] = '0';
+			$i++;
 		}
 		
 		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE 
 				account_id='{$_SESSION['user']['account_id']}' AND cfg_status='active' AND cfg_isparent='yes' AND 
-				cfg_type='$cfg_type' AND server_serial_no='$server_serial_no' ORDER BY cfg_name,cfg_data ASC";
+				cfg_type='$cfg_type' AND server_serial_no IN ('0', '$server_serial_no') ORDER BY cfg_name,cfg_data ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
-			for ($j=$i; $j<$fmdb->num_rows; $j++) {
-				$return[$j][] = $results[$j]->cfg_data;
-				$return[$j][] = $prefix . $results[$j]->cfg_id;
+			for ($j=0; $j<$fmdb->num_rows; $j++) {
+				$return[$i][] = $results[$j]->cfg_data;
+				$return[$i][] = $prefix . $results[$j]->cfg_id;
+				$i++;
 			}
 		}
 		

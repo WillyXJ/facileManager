@@ -174,6 +174,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}mast
   `master_port` int(5) DEFAULT NULL,
   `master_dscp` int(5) DEFAULT NULL,
   `master_key_id` int(11) NOT NULL DEFAULT '0',
+  `master_tls_id` int(11) NOT NULL DEFAULT '0',
   `master_comment` text,
   `master_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`master_id`)

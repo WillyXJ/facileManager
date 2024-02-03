@@ -2535,6 +2535,7 @@ INSERTSQL;
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option_type` = 'ratelimit'";
 
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domaain_id`!=0";
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` ADD `master_tls_id` INT NOT NULL DEFAULT '0' AFTER `master_key_id`";
 
 	/** Run queries */
 	if (count($queries) && $queries[0]) {

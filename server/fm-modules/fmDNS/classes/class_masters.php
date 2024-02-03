@@ -235,7 +235,7 @@ HTML;
 	function printForm($data = '', $action = 'add') {
 		global $__FM_CONFIG;
 		
-		$master_id = $parent_id = $master_key_id = 0;
+		$master_id = $parent_id = $master_key_id = $master_tls_id = 0;
 		$master_name = $master_addresses = $master_comment = $master_port = $master_dscp = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
@@ -302,8 +302,14 @@ HTML;
 				$popup_footer
 			);
 		} else {
+			global $fm_module_options;
+
+			if (!class_exists('fm_module_options')) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+			}
 			$disabled = (strpos($master_addresses, 'master_') !== false) ? 'disabled' : null;
 			$master_keys = buildSelect('master_key_id', 'master_key_id', availableItems('key', 'blank', 'AND key_type="tsig"'), explode(';', $master_key_id), 1, $disabled, false, null, null, __('Select a key'));
+			$tls_connections = buildSelect('master_tls_id', 'master_tls_id', $fm_module_options->availableParents('tls', null, $server_serial_no, 'blank'), $master_tls_id, 1, null, false, null, 'cfg_drop_down', __('Select a connection'));
 			
 			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s
@@ -329,6 +335,10 @@ HTML;
 					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
+					<th width="33&#37;" scope="row"><label for="master_tls_id">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+				<tr>
 					<th width="33&#37;" scope="row"><label for="master_comment">%s</label></th>
 					<td width="67&#37;"><textarea id="master_comment" name="master_comment" rows="4" cols="26">%s</textarea></td>
 				</tr>
@@ -339,7 +349,8 @@ HTML;
 			$(document).ready(function() {
 				$("#manage select").select2({
 					width: "200px",
-					minimumResultsForSearch: 10
+					minimumResultsForSearch: 10,
+					allowClear: true
 				});
 				$(".address_match_element").select2({
 					createSearchChoice:function(term, data) { 
@@ -360,7 +371,9 @@ HTML;
 				$action, $master_id, $parent_id, $server_serial_no,
 				__('master Name'), getNameFromID($parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name'),
 				__('Matched Address List'), __('Choose an existing master or type a new one.'), $master_addresses, __('Port'), $master_port, $disabled, $disabled,
-				__('Key'), $master_keys, _('Comment'), $master_comment,
+				__('Key'), $master_keys,
+				__('TLS'), sprintf(__('This option requires BIND %s or later.'), '9.18.0'), $tls_connections,
+				_('Comment'), $master_comment,
 				$popup_footer,
 				$this->getPredefinedMasters('JSON', $master_addresses)
 			);
@@ -498,7 +511,7 @@ HTML;
 	 * @subpackage fmDNS
 	 *
 	 * @param array $post Array to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -518,6 +531,7 @@ HTML;
 		if (!$post['master_port']) unset($post['master_port']);
 		if (!$post['master_dscp']) unset($post['master_dscp']);
 		if (!$post['master_key_id']) unset($post['master_key_id']);
+		if (!$post['master_tls_id']) unset($post['master_tls_id']);
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['master_comment'] = trim($post['master_comment']);
@@ -530,7 +544,7 @@ HTML;
 			if (strpos($post['master_addresses'], 'master_') === false) {
 				if (!verifyIPAddress($post['master_addresses'])) return sprintf(__('%s is not a valid IP address.'), $post['master_addresses']);
 			} else {
-				unset($post['master_port'], $post['master_key_id']);
+				unset($post['master_port'], $post['master_key_id'], $post['master_tls_id']);
 			}
 		}
 		

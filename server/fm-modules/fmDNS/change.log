@@ -14,6 +14,7 @@
 * Server - [bug] Fixed PHP errors. (Issue #596)
 * Server - [bug] Removed unnecessary zone selection from rate limit configuration options.
 * Server - [bug] Fixed CNAME singleton RR checks.
+* Server - [bug] Keys can now be deselected from primaries.
 * Client - [bug] Fixed PHP errors. (Issue #600)
 
 5.3.3 (2023-05-10)
