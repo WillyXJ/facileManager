@@ -396,17 +396,26 @@ HTML;
 	
 	function availableParents($cfg_type, $prefix = null, $server_serial_no = 0, $include = 'none') {
 		global $fmdb, $__FM_CONFIG;
+
+		if (!is_array($include)) $include = array($include);
 		
 		$i=0;
-		if ($include == 'blank') {
+		if (in_array('blank', $include)) {
 			$return[$i][] = '';
 			$return[$i][] = '';
 			$i++;
 		}
-		if ($include == 'none') {
+		if (in_array('none', $include)) {
 			$return[$i][] = 'None';
 			$return[$i][] = '0';
 			$i++;
+		}
+		if (in_array('tls-default', $include)) {
+			foreach (array('none', 'ephemeral') as $param) {
+				$return[$i][] = $param;
+				$return[$i][] = $param;
+				$i++;
+			}
 		}
 		
 		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE 

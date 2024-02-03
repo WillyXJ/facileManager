@@ -560,7 +560,9 @@ HTML;
 					if ($key !== false) {
 						$cfg_id = str_replace(array('http_', 'tls_'), '', $tmp_array[$key + 1]);
 					}
-					$address = str_replace($tmp_array[$key + 1], getNameFromID($cfg_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active'), $address);
+					if (is_numeric($cfg_id)) {
+						$address = str_replace($tmp_array[$key + 1], getNameFromID($cfg_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active'), $address);
+					}
 				}
 				$formatted_acls[] = $address;
 			} else {
