@@ -395,6 +395,13 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			unset($logging);
 
 			
+			/** Get global config params that support multiple instances */
+			$def_query = 'SELECT def_option FROM fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'functions WHERE def_max_parameters!=1';
+			$def_results = $fmdb->query($def_query);
+			foreach ($fmdb->last_result as $k => $obj) {
+				$multi_def_params[] = $obj->def_option;
+			}
+
 			/** Build global configs */
 			$config .= "options {\n";
 			$config .= "\tdirectory \"" . str_replace('$ROOT', $server_root_dir, $config_dir_result[0]->cfg_data) . "\";\n";
@@ -403,7 +410,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $global_config_count; $i++) {
-					$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+					if (in_array($config_result[$i]->cfg_name, $multi_def_params)) {
+						$global_config[$config_result[$i]->cfg_name][] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+					} else {
+						$global_config[$config_result[$i]->cfg_name] = array($config_result[$i]->cfg_data, $config_result[$i]->cfg_comment);
+					}
 				}
 				unset($config_result, $global_config_count);
 			} else $global_config = array();
@@ -416,7 +427,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$server_config_result = $fmdb->last_result;
 					$config_count = $fmdb->num_rows;
 					for ($j=0; $j < $config_count; $j++) {
-						$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+						if (in_array($server_config_result[$j]->cfg_name, $multi_def_params)) {
+							$server_config[$server_config_result[$j]->cfg_name][] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+						} else {
+							$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+						}
 					}
 					unset($server_config_result, $global_config_count);
 				}
@@ -428,7 +443,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$server_config_result = $fmdb->last_result;
 				$config_count = $fmdb->num_rows;
 				for ($j=0; $j < $config_count; $j++) {
-					$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+					if (in_array($server_config_result[$j]->cfg_name, $multi_def_params)) {
+						$server_config[$server_config_result[$j]->cfg_name][] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+					} else {
+						$server_config[$server_config_result[$j]->cfg_name] = @array($server_config_result[$j]->cfg_data, $server_config_result[$j]->cfg_comment);
+					}
 				}
 				unset($server_config_result, $global_config_count);
 			}
@@ -440,12 +459,20 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$include_hint_zone = false;
 
 			foreach ($config_array as $cfg_name => $cfg_data) {
-				list($cfg_info, $cfg_comment) = $cfg_data;
+				if (!is_array($cfg_data[0])) {
+					list($cfg_info, $cfg_comment) = $cfg_data;
 
-				/** Include hint zone (root servers) */
-				if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
-				
-				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t");
+					/** Include hint zone (root servers) */
+					if ($cfg_name == 'recursion' && $cfg_info == 'yes') $include_hint_zone = true;
+					
+					$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t");
+				} else {
+					/** Handle multiple instances if param */
+					foreach ($cfg_data as $k => $multi_cfg_data) {
+						list($cfg_info, $cfg_comment) = $multi_cfg_data;
+						$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t");
+					}
+				}
 			}
 			/** Build global option includes */
 			$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids);
@@ -843,7 +870,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir = null, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
+	function buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir, $server_serial_no, $view_id = 0, $view_name = null, $include_hint_zone = false) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_servers;
 		
 		$error = '';
@@ -2023,7 +2050,7 @@ HTML;
 	 * @param string $server_root_dir Server root directory
 	 * @param string $tab How the tab should look
 	 * @param string $sql Additional SQL statement
-	 * @return string
+	 * @return string|void
 	 */
 	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment = null, $server_info = null, $tab = "\t\t", $sql = null) {
 		global $fmdb, $__FM_CONFIG, $fm_module_options;

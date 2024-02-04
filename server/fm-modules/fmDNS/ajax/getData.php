@@ -191,15 +191,15 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 			// $available_masters = $fm_dns_masters->getMasterList($server_serial_no, 'all');
 			// $available_masters = array_merge($available_masters, $fm_dns_acls->getACLList($server_serial_no, 'tsig-keys'));
 			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no, 'none');
-			$http_endpoints = buildSelect('cfg_data_params[http]', 'cfg_data_params[http]', $fm_module_options->availableParents('http', 'http_', $server_serial_no, 'blank'), $cfg_data_array['http'], 1, null, false, null, 'cfg_drop_down', __('Select an endpoint'));
 			$tls_connections = buildSelect('cfg_data_params[tls]', 'cfg_data_params[tls]', $fm_module_options->availableParents('tls', 'tls_', $server_serial_no, array('blank', 'tls-default')), $cfg_data_array['tls'], 1, null, false, null, 'cfg_drop_down', __('Select a connection'));
+			$http_endpoints = buildSelect('cfg_data_params[http]', 'cfg_data_params[http]', $fm_module_options->availableParents('http', 'http_', $server_serial_no, 'blank'), $cfg_data_array['http'], 1, null, false, null, 'cfg_drop_down', __('Select an endpoint'));
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;">
 					<label for="cfg_data_params[port]"><b>Port</b></label> <input type="text" id="cfg_data_params[port]" name="cfg_data_params[port]" value="%s" maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)" /><br />
-					<label for="cfg_data_params[proxy]"><b>Proxy</b></label> <input type="text" id="cfg_data_params[proxy]" name="cfg_data_params[proxy]" value="%s" /><br />
-					<label><b>HTTP</b></label>&nbsp;  <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>&nbsp; %s<br />
+					<label for="cfg_data_params[proxy]"><b>Proxy</b></label>&nbsp;  <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>&nbsp; <input type="text" id="cfg_data_params[proxy]" name="cfg_data_params[proxy]" value="%s" /><br />
 					<label><b>TLS</b></label>&nbsp;  <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>&nbsp; %s<br />
+					<label><b>HTTP</b></label>&nbsp;  <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>&nbsp; %s<br />
 					<label for="cfg_data"><b>Address</b></label> <input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
 					<script>
 					$(".address_match_element").select2({
@@ -219,9 +219,9 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 						allowClear: true
 					});
 					</script>', __('Option Value'),
-						$cfg_data_array['port'], $cfg_data_array['proxy'],
-						sprintf(__('This option requires BIND %s or later.'), '9.18.0'), $http_endpoints,
+						$cfg_data_array['port'], sprintf(__('This option requires BIND %s or later.'), '9.19.19'), $cfg_data_array['proxy'],
 						sprintf(__('This option requires BIND %s or later.'), '9.18.0'), $tls_connections,
+						sprintf(__('This option requires BIND %s or later.'), '9.18.0'), $http_endpoints,
 						$cfg_data,
 						$available_acls);
 		} elseif ($result[0]->def_dropdown == 'no') {

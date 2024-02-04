@@ -555,7 +555,10 @@ HTML;
 			}
 		}
 		if (is_array($tmp_cfg_data)) {
-			$tmp_cfg_data[] = '{ ' . trim(str_replace(',', $terminate, trim(sanitize($post['cfg_data']))), $terminate) . $terminate . '}';
+			if (!$post['cfg_data'] || $post['cfg_data'] == ',') $post['cfg_data'] = 'any';
+			if ($post['cfg_data']) {
+				$tmp_cfg_data[] = '{ ' . trim(str_replace(',', $terminate, trim(sanitize($post['cfg_data']))), $terminate) . $terminate . '}';
+			}
 			$post['cfg_data'] = join(' ', $tmp_cfg_data);
 			unset($tmp_cfg_data);
 		}
