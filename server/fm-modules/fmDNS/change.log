@@ -12,6 +12,8 @@
            zone records.
 * Client - [improvement] Client now specifies named.conf.keys location with rndc. (Issue #389)
 * Server - [improvement] Updated to use primary/secondary nomenclature.
+* Server - [improvement] Template and Name Server configs get copied to the new reverse zone
+           when automatically creating the zone from a PTR. (Issue #570)
 * Server - [bug] Fixed an issue where automatic PTR records would not get created.
 * Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
 * Server - [bug] PTR records are now deleted with the linked A record. (Issue #580)
