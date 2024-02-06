@@ -124,6 +124,18 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLESQL;
 
+$table[] = <<<TABLESQL
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}files` (
+  `file_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `file_name` VARCHAR(255) NOT NULL ,
+  `file_contents` text,
+  `file_comment` text,
+  `file_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLESQL;
+
 	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,

@@ -529,7 +529,7 @@ HTML;
 		if (isset($post['cfg_name'])) {
 			$def_option = sprintf("'%s'", sanitize($post['cfg_name']));
 		} elseif (isset($post['cfg_id'])) {
-			$def_option = getNameFromID(intval($post['cfg_id']), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_name', null, 'active');
+			$def_option = sprintf("'%s'", getNameFromID(intval($post['cfg_id']), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_name', null, 'active'));
 		} else return false;
 		
 		switch(trim($def_option, "'")) {
@@ -630,7 +630,8 @@ HTML;
 			|| strpos($cfg_data, 'master_') !== false
 			|| strpos($def_type, 'domain_name') !== false
 			|| strpos($cfg_data, 'http_') !== false
-			|| strpos($cfg_data, 'tls_') !== false)
+			|| strpos($cfg_data, 'tls_') !== false
+			|| strpos($cfg_data, 'file_') !== false)
 			? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
 	}
 	

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -22,7 +22,7 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_files.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 
@@ -32,7 +32,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			$result = $fm_dns_views->add($_POST);
+			$result = $fm_dns_files->add($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -45,7 +45,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_dns_views->update($_POST);
+			$result = $fm_dns_files->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -78,10 +78,10 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('view_order_id', 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'");
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', array('file_name'), 'file_', "AND server_serial_no='$server_serial_no'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_dns_views->rows($result, $page, $total_pages);
+$fm_dns_files->rows($result, $page, $total_pages);
 
 printFooter();
 

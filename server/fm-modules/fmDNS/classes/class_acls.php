@@ -565,6 +565,9 @@ HTML;
 					}
 				}
 				$formatted_acls[] = $address;
+			} elseif (strpos($address, 'file_') !== false) {
+				$id = trim(str_replace('file_', '', $address), '"');
+				$formatted_acls[] = sprintf('"$ROOT/%s.conf.d/%s"', $_SESSION['module'], getNameFromID($id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}files", 'file_', 'file_id', 'file_name', null, 'active'));
 			} else {
 				$formatted_acls[] = str_replace(';', '', $address);
 			}

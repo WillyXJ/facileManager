@@ -2,6 +2,7 @@
 ==================
 * Server - [feature] Added support for several more global option and logging parameters.
 * Server - [feature] Added support for HTTP endpoints and TLS connections.
+* Server - [feature] Additional files can be created and then included. (Issue #493)
 * Server - [improvement] @ used in record values will be translated as the zone name. (Issue #593)
 * Server - [improvement] IPv4 reverse zones can now sort hierarchically. (Issue #411)
 * Server - [improvement] Forward zone hierarchically sorting supports two sub-domain levels.

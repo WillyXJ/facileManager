@@ -49,7 +49,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'soa' => 'manage_zones',
 					'rpz' => 'manage_zones',
 					'http' => 'manage_servers',
-					'tls' => 'manage_servers'
+					'tls' => 'manage_servers',
+					'files' => 'manage_servers'
 				);
 $allowed_capabilities = array_unique($checks_array);
 

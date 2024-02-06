@@ -131,6 +131,16 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			unset($key_result, $key_config_count, $key_config, $servers, $keys);
 			
 			
+			/** Build extra files */
+			$group_ids_sql = ($server_group_ids) ? ', "g_' . implode('", "g_', $server_group_ids) . '"' : null;
+			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_name', 'file_', 'AND server_serial_no IN ("0", "' . $server_serial_no . '"' . $group_ids_sql . ') AND file_status="active"');
+			if ($fmdb->num_rows) {
+				foreach ($fmdb->last_result as $item_arr) {
+					$data->files[$server_root_dir . '/' . $_SESSION['module'] . '.conf.d/' . $item_arr->file_name] = array('contents' => $item_arr->file_contents, 'mode' => 0400);
+				}
+			}
+			
+			
 			/** Build Servers */
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_name="keys" AND cfg_data=""');
 			if ($fmdb->num_rows) {
@@ -2204,7 +2214,7 @@ HTML;
 	 * @param string  $server_root_dir Server root directory
 	 * @param integer $domain_id The ID of the zone
 	 * @param string  $clause Whether includes are inside or outside of clauses
-	 * @return array
+	 * @return string
 	 */
 	function getIncludeFiles($view_id, $server_serial_no, $server_group_ids = null, $domain_id = 0, $clause = 'inside') {
 		global $fmdb, $__FM_CONFIG;
@@ -2237,7 +2247,7 @@ HTML;
 					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, $tab);
 				}
 			}
-			return $include_files;
+			return $include_files . "\n";
 		} else {
 			return null;
 		}

@@ -186,10 +186,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 				}
 			}
 			$cfg_data = str_replace(array('{', '}', '; ', ';'), array('', '', ',', ','), $cfg_data);
-			// This section would be to allow keys to be selected, but an IP also needs to be defined
-			// $available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
-			// $available_masters = $fm_dns_masters->getMasterList($server_serial_no, 'all');
-			// $available_masters = array_merge($available_masters, $fm_dns_acls->getACLList($server_serial_no, 'tsig-keys'));
 			$available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no, 'none');
 			$tls_connections = buildSelect('cfg_data_params[tls]', 'cfg_data_params[tls]', $fm_module_options->availableParents('tls', 'tls_', $server_serial_no, array('blank', 'tls-default')), $cfg_data_array['tls'], 1, null, false, null, 'cfg_drop_down', __('Select a connection'));
 			$http_endpoints = buildSelect('cfg_data_params[http]', 'cfg_data_params[http]', $fm_module_options->availableParents('http', 'http_', $server_serial_no, 'blank'), $cfg_data_array['http'], 1, null, false, null, 'cfg_drop_down', __('Select an endpoint'));
@@ -224,15 +220,43 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 						sprintf(__('This option requires BIND %s or later.'), '9.18.0'), $http_endpoints,
 						$cfg_data,
 						$available_acls);
-		} elseif ($result[0]->def_dropdown == 'no') {
+		} elseif (in_array($result[0]->def_option, array('include'))) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_files.php');
+
+			$cfg_data = str_replace(array('\"', '"', "'"), '', $cfg_data);
+			$available_files = $fm_dns_files->buildJSON($cfg_data, $server_serial_no);
+
 			$checkbox = null;
 			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST)) {
 				$checked = getNameFromID($_POST['cfg_id'], "fm_{$__FM_CONFIG['fmDNS']['prefix']}config", 'cfg_', 'cfg_id', 'cfg_in_clause') == 'no' ? 'checked' : null;
 				$checkbox = sprintf('<br /><input name="cfg_in_clause" id="cfg_in_clause" type="checkbox" value="no" %s /><label for="cfg_in_clause">%s</label>', $checked, __('Define outside of global options clause'));
 			}
+
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
+					%s
+					<script>
+					$(".address_match_element").select2({
+						createSearchChoice:function(term, data) { 
+							if ($(data).filter(function() { 
+								return this.text.localeCompare(term)===0; 
+							}).length===0) 
+							{return {id:term, text:term};} 
+						},
+						multiple: true,
+						maximumSelectionSize: 1,
+						width: "200px",
+						tokenSeparators: [",", ";"],
+						data: %s
+					});
+					</script>', __('Option Value'),
+						$cfg_data,
+						$checkbox,
+						$available_files);
+		} elseif ($result[0]->def_dropdown == 'no') {
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
-					%s %s', __('Option Value'), str_replace(array('"', "'"), '', $cfg_data), $result[0]->def_type, $checkbox);
+					%s', __('Option Value'), str_replace(array('\"', '"', "'"), '', $cfg_data), $result[0]->def_type);
 		} else {
 			/** Build array of possible values */
 			$dropdown = $fm_module_options->populateDefTypeDropdown($result[0]->def_type, $cfg_data);
@@ -290,7 +314,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'soa' => 'manage_zones',
 					'rpz' => 'manage_zones',
 					'http' => 'manage_servers',
-					'tls' => 'manage_servers'
+					'tls' => 'manage_servers',
+					'files' => 'manage_servers'
 				);
 
 if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
