@@ -72,8 +72,8 @@ class fm_module_servers extends fm_shared_module_servers {
 				));
 		} elseif ($type == 'groups') {
 			$title_array = array_merge((array)$title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
-				array('title' => __('Master Servers'), 'class' => 'header-nosort'),
-				array('title' => __('Slave Servers'), 'class' => 'header-nosort'),
+				array('title' => __('Primary Servers'), 'class' => 'header-nosort'),
+				array('title' => __('Secondary Servers'), 'class' => 'header-nosort'),
 				));
 		}
 		$title_array[] = array(
@@ -250,8 +250,8 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
 		addLogEntry(__('Added server group') . ":\n" . __('Name') . ": {$post['group_name']}\n" .
-				__('Masters') . ": {$log_message_master_servers}\n" .
-				__('Slaves') . ": {$log_message_slave_servers}\n");
+				__('Primaries') . ": {$log_message_master_servers}\n" .
+				__('Secondaries') . ": {$log_message_slave_servers}\n");
 		return true;
 	}
 
@@ -407,8 +407,8 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (!$fmdb->rows_affected) return true;
 
 		addLogEntry(sprintf(__("Updated server group '%s' to"), $old_name) . ":\n" . __('Name') . ": {$post['group_name']}\n" .
-				__('Masters') . ": {$log_message_master_servers}\n" .
-				__('Slaves') . ": {$log_message_slave_servers}\n");
+				__('Primaries') . ": {$log_message_master_servers}\n" .
+				__('Secondaries') . ": {$log_message_slave_servers}\n");
 		
 		return true;
 	}
@@ -533,7 +533,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			}
 
 			if ($row->server_slave_zones_dir) {
-				$server_zones_dir = sprintf('<b>%s:</b> %s<br /><b>%s:</b> %s', __('Master'), $row->server_zones_dir, __('Slave/Stub'), $row->server_slave_zones_dir);
+				$server_zones_dir = sprintf('<b>%s:</b> %s<br /><b>%s:</b> %s', __('Primary'), $row->server_zones_dir, __('Secondary/Stub'), $row->server_slave_zones_dir);
 			} else {
 				$server_zones_dir = $row->server_zones_dir;
 			}
@@ -679,7 +679,7 @@ FORM;
 			/** Advanced tab */
 			$keys = $this->getConfig($server_id, 'keys');
 			$keys = ($keys) ? explode(',', $keys) : null;
-			$keys = buildSelect('keys', 'keys', $this->availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', true);
+			$keys = buildSelect('keys', 'keys', availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', true);
 			$transfers = str_replace(array('"', "'"), '', $this->getConfig($server_id, 'transfers'));
 			$bogus = $this->buildConfigOptions('bogus', $this->getConfig($server_id, 'bogus'));
 			$edns = $this->buildConfigOptions('edns', $this->getConfig($server_id, 'edns'));
@@ -792,8 +792,8 @@ FORM;
 				__('Config File'), $server_config_file, $__FM_CONFIG['ns']['named_config_file'], $server_config_file_length,
 				__('Server Root'), $server_root_dir, $__FM_CONFIG['ns']['named_root_dir'], $server_root_dir_length,
 				__('Server Chroot'), $server_chroot_dir, $__FM_CONFIG['ns']['named_chroot_dir'], $server_chroot_dir_length,
-				__('Master Zone File Directory'), $server_zones_dir, $__FM_CONFIG['ns']['named_zones_dir'], $server_zones_dir_length,
-				__('Slave Zone File Directory'), __('Optional. Some systems require a separate location for slave/stub zone data.'), $server_slave_zones_dir, $__FM_CONFIG['ns']['named_slave_zones_dir'], $server_zones_dir_length,
+				__('Primary Zone File Directory'), $server_zones_dir, $__FM_CONFIG['ns']['named_zones_dir'], $server_zones_dir_length,
+				__('Secondary Zone File Directory'), __('Optional. Some systems require a separate location for secondary/stub zone data.'), $server_slave_zones_dir, $__FM_CONFIG['ns']['named_slave_zones_dir'], $server_zones_dir_length,
 				__('Advanced'),
 				__('Keys'), $keys,
 				__('Bogus'), $bogus,
@@ -807,8 +807,8 @@ FORM;
 			$group_slaves  = (isset($group_slaves)) ? explode(';', $group_slaves) : null;
 			
 			$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name');
-			$group_masters = buildSelect('group_masters', 'group_masters', $this->availableItems('server'), $group_masters, 1, null, true, null, null, __('Select master servers'));
-			$group_slaves = buildSelect('group_slaves', 'group_slaves', $this->availableItems('server'), $group_slaves, 1, null, true, null, null, __('Select slave servers'));
+			$group_masters = buildSelect('group_masters', 'group_masters', availableItems('server'), $group_masters, 1, null, true, null, null, __('Select primary servers'));
+			$group_slaves = buildSelect('group_slaves', 'group_slaves', availableItems('server'), $group_slaves, 1, null, true, null, null, __('Select secondary servers'));
 
 			$return_form .= sprintf('
 			<table class="form-table">
@@ -835,7 +835,7 @@ FORM;
 					width: "230px"
 				});
 			});
-		</script>', __('Group Name'), $group_name, $group_name_length, __('Master Servers'), $group_masters, __('Slave Servers'), $group_slaves, $popup_footer);
+		</script>', __('Group Name'), $group_name, $group_name_length, __('Primary Servers'), $group_masters, __('Secondary Servers'), $group_slaves, $popup_footer);
 		} else {
 			$return_form = buildPopup('header', _('Error'));
 			$return_form .= sprintf('<h3>%s</h3><p>%s</p>', __('Oops!'), __('Invalid request.'));
@@ -845,35 +845,6 @@ FORM;
 		return $return_form;
 	}
 	
-	function availableItems($type, $default = 'blank', $addl_sql = null, $prefix = null) {
-		global $fmdb, $__FM_CONFIG;
-		
-		$return = null;
-		
-		$j = 0;
-		if ($default == 'blank') {
-			$return[$j][] = '';
-			$return[$j][] = '';
-			$j++;
-		}
-		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}{$type}s WHERE account_id='{$_SESSION['user']['account_id']}' AND {$type}_status='active' $addl_sql ORDER BY {$type}_name ASC";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			$results = $fmdb->last_result;
-			foreach ($fmdb->last_result as $results) {
-				if (property_exists($results, 'server_menu_display') && $results->server_menu_display == 'exclude') continue;
-				$type_name = $type . '_name';
-				$type_id   = $type . '_id';
-				$return[$j][] = $results->$type_name;
-				$return[$j][] = $prefix . $results->$type_id;
-				$j++;
-			}
-		}
-		
-		return $return;
-	}
-
 	function manageCache($server_id, $action) {
 		global $fmdb, $__FM_CONFIG;
 		

@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `domain_name_servers` varchar(255) NOT NULL DEFAULT '0',
   `domain_view` varchar(255) NOT NULL DEFAULT '0',
   `domain_mapping` enum('forward','reverse') NOT NULL DEFAULT 'forward',
-  `domain_type` enum('master','slave','forward','stub') NOT NULL DEFAULT 'master',
+  `domain_type` enum('primary','secondary','forward','stub') NOT NULL DEFAULT 'primary',
   `domain_clone_domain_id` int(11) NOT NULL DEFAULT '0',
   `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL,
   `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no',
@@ -124,10 +124,23 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 TABLESQL;
 
+$table[] = <<<TABLESQL
+CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}files` (
+  `file_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+  `account_id` int(11) NOT NULL DEFAULT '1',
+  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `file_location` ENUM('\$ROOT','\$ZONES') NOT NULL DEFAULT '\$ROOT'
+  `file_name` VARCHAR(255) NOT NULL ,
+  `file_contents` text,
+  `file_comment` text,
+  `file_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLESQL;
+
 	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
-  `def_function` enum('options','logging','key','view') NOT NULL,
+  `def_function` enum('options','logging','key','view','http','tls') NOT NULL,
   `def_option_type` enum('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global',
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
@@ -174,6 +187,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}mast
   `master_port` int(5) DEFAULT NULL,
   `master_dscp` int(5) DEFAULT NULL,
   `master_key_id` int(11) NOT NULL DEFAULT '0',
+  `master_tls_id` int(11) NOT NULL DEFAULT '0',
   `master_comment` text,
   `master_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`master_id`)
@@ -543,7 +557,7 @@ VALUES
 ('options', 'managed-keys-directory', '( quoted_string )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'masterfile-format', '( text | raw | map )', 'no', 'OVZ', 'MS', 'yes', NULL),
 ('options', 'masterfile-style', '( relative | full )', 'no', 'OZ', 'MS', 'no', '9.11.0'),
-('options', 'masters', '( { ipv4_address | ipv6_address } )', 'yes', 'OVZ', 'S', 'no', NULL),
+('options', 'primaries', '( { ipv4_address | ipv6_address } )', 'yes', 'OVZ', 'S', 'no', NULL),
 ('options', 'match-clients', '( address_match_element )', 'yes', 'V', NULL, 'no', NULL),
 ('options', 'match-destinations', '( address_match_element )', 'yes', 'V', NULL, 'no', NULL),
 ('options', 'match-mapped-addresses', '( yes | no )', 'no', 'O', NULL, 'yes', NULL),
@@ -684,7 +698,19 @@ VALUES
 ('options', 'version', '( quoted_string | none )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'zero-no-soa-ttl', '( yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL),
 ('options', 'zero-no-soa-ttl-cache', '( yes | no )', 'no', 'OV', NULL, 'yes', NULL),
-('options', 'zone-statistics', '( full | terse | none | yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL)
+('options', 'zone-statistics', '( full | terse | none | yes | no )', 'no', 'OVZ', 'MS', 'yes', NULL),
+('http', 'endpoints', '( quoted_string )', 'yes', 'H', NULL, 'no', '9.18.0'),
+('http', 'listener-clients', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('tls', 'cert-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'key-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'ca-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'dhparam-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'ciphers', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'prefer-server-ciphers', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
+('tls', 'protocols', '( quoted_string )', 'yes', 'T', NULL, 'no', '9.18.0'),
+('tls', 'remote-hostname', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'session-tickets', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0')
 ;
 INSERTSQL;
 	
@@ -723,7 +749,21 @@ VALUES
 ;
 INSERTSQL;
 
-	$inserts[] = <<<INSERTSQL
+  $inserts[] = <<<INSERTSQL
+INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option` ,
+`def_type` ,
+`def_clause_support`,
+`def_zone_support`,
+`def_max_parameters`
+)
+VALUES 
+('options', 'include', '( quoted_string )', 'OVZ', 'P', '-1')
+;
+INSERTSQL;
+
+  $inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_function` ,
 `def_option_type`,
@@ -737,7 +777,6 @@ INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` 
 )
 VALUES 
 ('options', 'ratelimit', 'responses-per-second', '( integer )', 'no', 'OV', 'no', '5', NULL),
-('options', 'global', 'include', '( quoted_string )', 'no', 'OVZ', 'no', '-1', NULL),
 ('options', 'global', 'disable-algorithms', 'domain { algorithm; [ algorithm; ] }', 'no', 'O', 'no', '-1', NULL),
 ('options', 'global', 'disable-ds-digests', 'domain { digest_type; [ digest_type; ] }', 'no', 'O', 'no', '-1', '9.10.0'),
 ('options', 'global', 'disable-empty-zone', '( quoted_string )', 'no', 'OV', 'no', '-1', NULL),

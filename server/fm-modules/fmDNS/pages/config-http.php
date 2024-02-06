@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -22,17 +22,18 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_http.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+$display_option_type_sql = 'http';
 
-$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
+	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			$result = $fm_dns_views->add($_POST);
+			$result = $fm_module_http->add($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -45,7 +46,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_dns_views->update($_POST);
+			$result = $fm_module_http->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -74,14 +75,16 @@ echo <<<HTML
 
 HTML;
 	
+$sort_direction = null;
+$sort_field = 'master_name';
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('view_order_id', 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'");
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='http-endpoint' AND domain_id=0 AND cfg_isparent='yes'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_dns_views->rows($result, $page, $total_pages);
+$fm_module_http->rows($result, $page, $total_pages);
 
 printFooter();
 

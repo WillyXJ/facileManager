@@ -25,17 +25,9 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_views.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_logging.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_controls.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_templates.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
-include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_rpz.php');
+foreach (glob(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_*.php') as $filename) {
+    include_once($filename);
+}
 
 /** Handle mass updates */
 if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
@@ -55,7 +47,10 @@ $checks_array = array('servers' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'domain' => 'manage_zones',
 					'soa' => 'manage_zones',
-					'rpz' => 'manage_zones'
+					'rpz' => 'manage_zones',
+					'http' => 'manage_servers',
+					'tls' => 'manage_servers',
+					'files' => 'manage_servers'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -124,10 +119,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$type = sanitize($_POST['item_type']) . 's';
 			break;
 		case 'rpz':
-			$post_class = $fm_module_rpz;
+		case 'http':
+		case 'tls':
+			$post_class = ${'fm_module_' . $_POST['item_type']};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$object = __('rpz');
+			$object = $_POST['item_type'];
 			$field_data = $prefix . 'data';
 			break;
 		default:

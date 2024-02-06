@@ -89,12 +89,12 @@ class fm_module_templates {
 		
 		$field_name = $prefix . '_name';
 		if ($prefix == 'domain') {
-			if (!getSOACount($row->domain_id) && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
-			elseif (!getNSCount($row->domain_id) && $row->domain_type == 'master' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
+			if (!getSOACount($row->domain_id) && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
+			elseif (!getNSCount($row->domain_id) && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
 			else {
 				$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
 			}
-			$edit_name = ($row->domain_type == 'master') ? "<a href=\"zone-records.php?map={$row->domain_mapping}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . '">' . displayFriendlyDomainName($row->$field_name) . "</a>" : displayFriendlyDomainName($row->$field_name);
+			$edit_name = ($row->domain_type == 'primary') ? "<a href=\"zone-records.php?map={$row->domain_mapping}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . '">' . displayFriendlyDomainName($row->$field_name) . "</a>" : displayFriendlyDomainName($row->$field_name);
 		} else {
 			$edit_name = $row->$field_name;
 		}

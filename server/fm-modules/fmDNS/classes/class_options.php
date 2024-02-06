@@ -131,7 +131,9 @@ class fm_module_options {
 		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
 			|| strpos($post['cfg_data'], 'key_') !== false
 			|| strpos($post['cfg_data'], 'domain_') !== false
-			|| strpos($post['cfg_data'], 'master_') !== false)
+			|| strpos($post['cfg_data'], 'master_') !== false
+			|| strpos($post['cfg_data'], 'http_') !== false
+			|| strpos($post['cfg_data'], 'tls_') !== false)
 			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Added option:\nType: {$post['cfg_type']}\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
@@ -199,7 +201,9 @@ class fm_module_options {
 		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
 			|| strpos($post['cfg_data'], 'key_') !== false
 			|| strpos($post['cfg_data'], 'domain_') !== false
-			|| strpos($post['cfg_data'], 'master_') !== false)
+			|| strpos($post['cfg_data'], 'master_') !== false
+			|| strpos($post['cfg_data'], 'http_') !== false
+			|| strpos($post['cfg_data'], 'tls_') !== false)
 			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
@@ -279,7 +283,7 @@ HTML;
 		if (!$cfg_type_id) $cfg_type_id = 0;
 		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
 		$ucaction = ucfirst($action);
-		$server_serial_no_field = $cfg_isparent = $cfg_parent = $cfg_data = null;
+		$server_serial_no_field = $cfg_isparent = $cfg_data = null;
 		
 		switch(strtolower($cfg_type)) {
 			case 'global':
@@ -325,7 +329,6 @@ HTML;
 		}
 		
 		$cfg_isparent = buildSelect('cfg_isparent', 'cfg_isparent', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_isparent'), $cfg_isparent, 1);
-		$cfg_parent = buildSelect('cfg_parent', 'cfg_parent', $this->availableParents($cfg_id, $cfg_type), $cfg_parent);
 		$avail_options_array = $this->availableOptions($action, $server_serial_no, $cfg_type, $cfg_name);
 		$cfg_avail_options = buildSelect('cfg_name', 'cfg_name', $avail_options_array, $cfg_name, 1, $disabled, false, 'displayOptionPlaceholder()');
 
@@ -391,21 +394,40 @@ HTML;
 	}
 	
 	
-	function availableParents($cfg_id, $cfg_type) {
+	function availableParents($cfg_type, $prefix = null, $server_serial_no = 0, $include = 'none') {
 		global $fmdb, $__FM_CONFIG;
+
+		if (!is_array($include)) $include = array($include);
 		
-		$return[0][] = 'None';
-		$return[0][] = '0';
+		$i=0;
+		if (in_array('blank', $include)) {
+			$return[$i][] = '';
+			$return[$i][] = '';
+			$i++;
+		}
+		if (in_array('none', $include)) {
+			$return[$i][] = 'None';
+			$return[$i][] = '0';
+			$i++;
+		}
+		if (in_array('tls-default', $include)) {
+			foreach (array('none', 'ephemeral') as $param) {
+				$return[$i][] = $param;
+				$return[$i][] = $param;
+				$i++;
+			}
+		}
 		
 		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE 
 				account_id='{$_SESSION['user']['account_id']}' AND cfg_status='active' AND cfg_isparent='yes' AND 
-				cfg_id!=$cfg_id AND cfg_type='$cfg_type' ORDER BY cfg_name,cfg_data ASC";
+				cfg_type='$cfg_type' AND server_serial_no IN ('0', '$server_serial_no') ORDER BY cfg_name,cfg_data ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
-			for ($i=0; $i<$fmdb->num_rows; $i++) {
-				$return[$i+1][] = $results[$i]->cfg_name . ' ' . $results[$i]->cfg_data;
-				$return[$i+1][] = $results[$i]->cfg_id;
+			for ($j=0; $j<$fmdb->num_rows; $j++) {
+				$return[$i][] = $results[$j]->cfg_data;
+				$return[$i][] = $prefix . $results[$j]->cfg_id;
+				$i++;
 			}
 		}
 		
@@ -504,6 +526,22 @@ HTML;
 		
 		if (is_array($post['cfg_data'])) $post['cfg_data'] = join(' ', $post['cfg_data']);
 		
+		if (isset($post['cfg_name'])) {
+			$def_option = sprintf("'%s'", sanitize($post['cfg_name']));
+		} elseif (isset($post['cfg_id'])) {
+			$def_option = sprintf("'%s'", getNameFromID(intval($post['cfg_id']), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_name', null, 'active'));
+		} else return false;
+		
+		switch(trim($def_option, "'")) {
+			case 'primaries':
+			case 'also-notify':
+				$terminate = ',';
+				break;
+			case 'listen-on':
+			case 'listen-on-v6':
+				$terminate = '; ';
+				break;
+		}
 		/** Handle masters and also-notify formats */
 		if ($post['cfg_data_port']) {
 			$tmp_cfg_data[] = 'port ' . $post['cfg_data_port'];
@@ -511,65 +549,29 @@ HTML;
 		if (!empty($post['cfg_data_dscp'])) {
 			$tmp_cfg_data[] = 'dscp ' . $post['cfg_data_dscp'];
 		}
+		if (isset($post['cfg_data_params']) && is_array($post['cfg_data_params'])) {
+			foreach ($post['cfg_data_params'] as $k => $v) {
+				if ($v) $tmp_cfg_data[] = "$k $v";
+			}
+		}
 		if (is_array($tmp_cfg_data)) {
-			$tmp_cfg_data[] = '{ ' . $post['cfg_data'] . ',}';
+			if (!$post['cfg_data'] || $post['cfg_data'] == ',') $post['cfg_data'] = 'any';
+			if ($post['cfg_data']) {
+				$tmp_cfg_data[] = '{ ' . trim(str_replace(',', $terminate, trim(sanitize($post['cfg_data']))), $terminate) . $terminate . '}';
+			}
 			$post['cfg_data'] = join(' ', $tmp_cfg_data);
 			unset($tmp_cfg_data);
 		}
-		unset($post['cfg_data_port'], $post['cfg_data_dscp']);
+		unset($post['cfg_data_port'], $post['cfg_data_dscp'], $post['cfg_data_params']);
 		$post['cfg_data'] = str_replace(',,', ',', $post['cfg_data']);
-		
-		if (isset($post['cfg_name'])) {
-			$def_option = "'{$post['cfg_name']}'";
-		} elseif (isset($post['cfg_id'])) {
-			$def_option = "(SELECT cfg_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE cfg_id = {$post['cfg_id']})";
-		} else return false;
 		
 		if (!isset($post['view_id'])) $post['view_id'] = 0;
 		if (!isset($post['domain_id'])) $post['domain_id'] = 0;
 		if (!isset($post['cfg_in_clause'])) $post['cfg_in_clause'] = 'yes';
 		
-		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
-		$result = $fmdb->get_results($query);
-		if ($fmdb->num_rows) {
-			if ($result[0]->def_dropdown == 'no') {
-				$valid_types = trim(str_replace(array('(', ')'), '', $result[0]->def_type));
-				
-				switch ($valid_types) {
-					case 'integer':
-					case 'seconds':
-					case 'minutes':
-						if (!verifyNumber($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid number.';
-						break;
-					case 'port':
-						if (!verifyNumber($post['cfg_data'], 0, 65535)) return $post['cfg_data'] . ' is an invalid port number.';
-						break;
-					case 'quoted_string':
-						$post['cfg_data'] = '"' . str_replace(array('"', "'"), '', $post['cfg_data']) . '"';
-						break;
-					case 'quoted_string | none':
-					case 'quoted_string | none | hostname':
-						$post['cfg_data'] = '"' . str_replace(array('"', "'"), '', $post['cfg_data']) . '"';
-						if ($post['cfg_data'] == '"none"') $post['cfg_data'] = 'none';
-						if ($post['cfg_data'] == '"hostname"') $post['cfg_data'] = 'hostname';
-						break;
-					case 'address_match_element':
-						/** Need to check for valid ACLs or IP addresses */
-						
-						break;
-					case 'ipv4_address | ipv6_address':
-						if (!verifyIPAddress($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid IP address.';
-						break;
-					case 'ipv4_address | *':
-					case 'ipv6_address | *':
-						if ($post['cfg_data'] != '*') {
-							if (!verifyIPAddress($post['cfg_data'])) return $post['cfg_data'] . ' is an invalid IP address.';
-						}
-						break;
-				}
-			}
-		}
-		
+		/** Validate against functions table */
+		$post = $this->validateDefType($post, $def_option);
+
 		return $post;
 	}
 	
@@ -626,7 +628,10 @@ HTML;
 			|| strpos($cfg_data, 'domain_') !== false
 			|| strpos($def_type, 'address_match_element') !== false
 			|| strpos($cfg_data, 'master_') !== false
-			|| strpos($def_type, 'domain_name') !== false)
+			|| strpos($def_type, 'domain_name') !== false
+			|| strpos($cfg_data, 'http_') !== false
+			|| strpos($cfg_data, 'tls_') !== false
+			|| strpos($cfg_data, 'file_') !== false)
 			? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
 	}
 	
@@ -668,6 +673,64 @@ HTML;
 		}
 		
 		return $dropdown;
+	}
+
+	/**
+	 * Validates def type
+	 *
+	 * @since 6.0.0
+	 * @package fmDNS
+	 *
+	 * @param array $post Option type to validate
+	 * @param string $def_option Optional definition type
+	 * @return string Return formated data
+	 */
+	function validateDefType($post, $def_option = null) {
+		global $fmdb, $__FM_CONFIG;
+
+		$def_option = ($def_option) ? $def_option : "'{$post['cfg_name']}'";
+		
+		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
+		$result = $fmdb->get_results($query);
+		if ($fmdb->num_rows) {
+			if ($result[0]->def_dropdown == 'no') {
+				$valid_types = trim(str_replace(array('(', ')'), '', $result[0]->def_type));
+				
+				switch ($valid_types) {
+					case 'integer':
+					case 'seconds':
+					case 'minutes':
+						if (!verifyNumber($post['cfg_data'])) return sprintf(__('%s is an invalid number.'), $post['cfg_data']);
+						break;
+					case 'port':
+						if (!verifyNumber($post['cfg_data'], 0, 65535)) return sprintf(__('%s is an invalid port number.'), $post['cfg_data']);
+						break;
+					case 'quoted_string':
+					case 'quoted_string | none':
+					case 'quoted_string | none | hostname':
+						$tmp_string = null;
+						foreach (explode(';', $post['cfg_data']) as $k => $v) {
+							$tmp_string[$k] = trim(str_replace('"', '', $v));
+						}
+						$post['cfg_data'] = '"' . implode('"; "', $tmp_string) . '"';
+						if (in_array($post['cfg_data'], array('"none"', '"hostname"'))) $post['cfg_data'] = str_replace('"', '', $post['cfg_data']);
+						break;
+					case 'address_match_element':
+						/** Need to check for valid ACLs or IP addresses */
+						
+						break;
+					case 'ipv4_address | ipv6_address':
+					case 'ipv4_address | *':
+					case 'ipv6_address | *':
+						if ($post['cfg_data'] != '*') {
+							if (!verifyIPAddress($post['cfg_data'])) return sprintf(__('%s is an invalid IP address.'), $post['cfg_data']);
+						}
+						break;
+				}
+			}
+		}
+
+		return $post;
 	}
 }
 
