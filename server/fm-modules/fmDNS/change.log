@@ -3,6 +3,7 @@
 * Server - [feature] Added support for several more global option and logging parameters.
 * Server - [feature] Added support for HTTP endpoints and TLS connections.
 * Server - [feature] Additional files can be created and then included. (Issue #493)
+* Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
 * Server - [improvement] @ used in record values will be translated as the zone name. (Issue #593)
 * Server - [improvement] IPv4 reverse zones can now sort hierarchically. (Issue #411)
 * Server - [improvement] Forward zone hierarchically sorting supports two sub-domain levels.
@@ -10,6 +11,9 @@
 * Server - [improvement] Users get returned to previous page with search criteria after managing
            zone records.
 * Server - [improvement] Updated to use primary/secondary nomenclature.
+* Server - [improvement] auto-dnssec has been replaced with dnssec-policy when enabling DNSSEC
+           on a zone. Only internal policies are supported at this time. (Issue #568)
+* Client - [improvement] Client now specifies named.conf.keys location with rndc. (Issue #389)
 * Server - [bug] Fixed an issue where automatic PTR records would not get created.
 * Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
 * Server - [bug] PTR records are now deleted with the linked A record. (Issue #580)

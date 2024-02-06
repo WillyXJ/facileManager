@@ -25,13 +25,13 @@ class fm_module_objects {
 	/**
 	 * Displays the object list
 	 */
-	function rows($result, $type, $page, $total_pages) {
+	function rows($result, $page, $total_pages) {
 		global $fmdb;
 		
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+		if (currentUserCan('manage_objects', $_SESSION['module'])) {
 			$bulk_actions_list = array(_('Delete'));
 		}
 
@@ -51,9 +51,7 @@ class fm_module_objects {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address')));
-		if ($type != 'host') $title_array[] = __('Netmask');
-		$title_array[] = array('title' => _('Comment'), 'style' => 'width: 40%;');
+		$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address'), __('Netmask'), array('title' => _('Comment'), 'style' => 'width: 40%;')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
@@ -70,7 +68,7 @@ class fm_module_objects {
 			
 		echo "</tbody>\n</table></div></div>\n";
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', sprintf(__('There are no %s objects defined.'), $type));
+			printf('<p id="table_edits" class="noresult" name="objects">%s</p>', __('There are no addresses defined.'));
 		}
 	}
 
@@ -190,10 +188,11 @@ class fm_module_objects {
 		
 		$disabled_class = ($row->object_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $checkbox = null;
+		$checkbox = null;
+		$edit_status = sprintf('<span rel="o%s">%s</span>', $row->object_id, $__FM_CONFIG['module']['icons']['search']);
 		
 		if (currentUserCan('manage_objects', $_SESSION['module'])) {
-			$edit_status = '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status .= '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->object_id, 'object')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->object_id .'" /></td>';
@@ -203,8 +202,6 @@ class fm_module_objects {
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
 		
-		$edit_name = $row->object_name;
-		$netmask = ($row->object_type != 'host') ? "<td>$row->object_mask</td>" : null;
 		$comments = nl2br($row->object_comment);
 		
 		echo <<<HTML
@@ -212,7 +209,7 @@ class fm_module_objects {
 				$checkbox
 				<td>$row->object_name</td>
 				<td>$row->object_address</td>
-				$netmask
+				<td>$row->object_mask</td>
 				<td>$comments</td>
 				$edit_status
 			</tr>
@@ -225,6 +222,8 @@ HTML;
 	 */
 	function printForm($data = '', $action = 'add', $type = 'host') {
 		global $__FM_CONFIG;
+
+		if (!$type) $type = 'host';
 		
 		$object_id = 0;
 		$object_name = $object_address = $object_comment = null;

@@ -191,10 +191,11 @@ class fm_module_time {
 		
 		$disabled_class = ($row->time_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $checkbox = null;
+		$checkbox = null;
+		$edit_status = sprintf('<span rel="t%s">%s</span>', $row->time_id, $__FM_CONFIG['module']['icons']['search']);
 		
 		if (currentUserCan('manage_time', $_SESSION['module'])) {
-			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->time_status == 'active') ? 'disabled' : 'active';
 			$edit_status .= '">';
@@ -213,7 +214,7 @@ class fm_module_time {
 		$date_range = $this->formatDates($row->time_start_date, $row->time_end_date);
 		
 		/** Format weekdays */
-		$weekdays .= str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->time_weekdays_not) . ' ' . $this->formatDays($row->time_weekdays);
+		$weekdays = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->time_weekdays_not) . ' ' . $this->formatDays($row->time_weekdays);
 
 		$comments = nl2br($row->time_comment);
 		
@@ -290,7 +291,7 @@ HTML;
 
 		$checked = ($time_contiguous) ? 'checked' : null;
 		$time_options = sprintf('<input name="time_contiguous" id="time_contiguous" value="yes" type="checkbox" %s /><label for="time_contiguous">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a><br />',
-			$checked, __('Use contiguous time'), __('When end time is smaller than start time, match this as a single time period instead distinct intervals.')
+			$checked, __('Use contiguous time'), __('When end time is smaller than start time, match this as a single time period instead of distinct intervals.')
 			);
 		
 		$popup_title = $action == 'add' ? __('Add Restriction') : __('Edit Restriction');

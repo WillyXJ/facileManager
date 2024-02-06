@@ -20,42 +20,26 @@
  +-------------------------------------------------------------------------+
 */
 
-if (!isset($type)) {
-	header('Location: services-icmp.php');
-	exit;
-}
-if (isset($_GET['type'])) {
-	header('Location: services-' . sanitize(strtolower($_GET['type'])) . '.php');
-	exit;
-}
-
 if (!currentUserCan(array('manage_services', 'view_all'), $_SESSION['module'])) unAuth();
+
+define('FM_INCLUDE_SEARCH', true);
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_services.php');
 
 if (currentUserCan('manage_services', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
+	$uri_params = generateURIParams(array('type', 'q', 'p'), 'include');
+
 	switch ($action) {
 	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_services->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
-				exit;
-			}
-		}
-		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_services->update($_POST);
+			$result = ($action == 'add') ? $fm_module_services->add($_POST) : $fm_module_services->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
 			} else {
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['service_type']);
+				header('Location: ' . $GLOBALS['basename'] . $uri_params);
 				exit;
 			}
 		}
@@ -66,13 +50,15 @@ if (currentUserCan('manage_services', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-//$allowed_to_add = ($type == 'custom' && currentUserCan('manage_services', $_SESSION['module'])) ? true : false;
-echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $type, null, 'noscroll');
+$search_query = createSearchSQL(array('name', 'type', 'src_ports', 'dest_ports', 'tcp_flags', 'comment'), 'service_');
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name', 'service_', "AND service_type='$type'");
+//$allowed_to_add = ($type == 'custom' && currentUserCan('manage_services', $_SESSION['module'])) ? true : false;
+echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), 'tcp', null, 'noscroll');
+
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_name', 'service_', $search_query);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_module_services->rows($result, $type, $page, $total_pages);
+$fm_module_services->rows($result, $page, $total_pages);
 
 printFooter();
 

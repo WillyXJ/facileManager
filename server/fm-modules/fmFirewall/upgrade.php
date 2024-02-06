@@ -32,7 +32,7 @@ function upgradefmFirewallSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '2.0', '<') ? upgradefmFirewall_200($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '3.0', '<') ? upgradefmFirewall_300($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmFirewall']['client_version'], 'auto', false, 0, 'fmFirewall');
@@ -262,6 +262,7 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='NEW,ESTABLISHED,RELATED' WHERE `policy_action`='pass' AND `policy_options` IN (2,3,7)";
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='ESTABLISHED,RELATED' WHERE `policy_action`!='pass' AND `policy_options` IN (2,3,7)";
 	$updates[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` CHANGE `policy_type` `policy_type` ENUM('filter','nat') NOT NULL DEFAULT 'filter'";
+	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_time`=CONCAT('t', policy_time) WHERE `policy_time` REGEXP '^[[:digit:]]+$'";
 
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -364,6 +365,49 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 	}
 
 	setOption('version', '2.0', 'auto', false, 0, 'fmFirewall');
+	
+	return true;
+}
+
+/** 3.0.0 */
+function upgradefmFirewall_300($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '2.0', '<') ? upgradefmFirewall_200($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_uid')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_uid` TEXT NULL DEFAULT NULL AFTER `policy_time`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_tcp_flags')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_tcp_flags` VARCHAR(5) NULL DEFAULT NULL AFTER `policy_options`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_source_translated')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_source_translated` TEXT NULL DEFAULT NULL AFTER `policy_source`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_destination_translated')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_destination_translated` TEXT NULL DEFAULT NULL AFTER `policy_destination`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_services_translated')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_services_translated` TEXT NULL DEFAULT NULL AFTER `policy_services`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_snat_type')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_snat_type` ENUM('static','hide') NOT NULL DEFAULT 'static' AFTER `policy_services_translated`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies", 'policy_nat_bidirectional')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_nat_bidirectional` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `policy_snat_type`";
+	}
+	
+	/** Create table schema */
+	if (isset($queries) && count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+			echo '<p>' . $fmdb->last_query . '</p>';
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+
+	setOption('version', '3.0.0', 'auto', false, 0, 'fmFirewall');
 	
 	return true;
 }

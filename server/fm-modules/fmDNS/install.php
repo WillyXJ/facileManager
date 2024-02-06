@@ -140,7 +140,7 @@ TABLESQL;
 	$table[] = <<<TABLESQL
 CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
   `def_id` int(11) NOT NULL AUTO_INCREMENT,
-  `def_function` enum('options','logging','key','view','http','tls') NOT NULL,
+  `def_function` enum('options','logging','key','view','http','tls','dnssec-policy') NOT NULL,
   `def_option_type` enum('global','ratelimit','rrset','rpz') NOT NULL DEFAULT 'global',
   `def_option` varchar(255) NOT NULL,
   `def_type` varchar(200) NOT NULL,
@@ -497,6 +497,7 @@ VALUES
 ('options', 'dnssec-loadkeys-interval', '( minutes )', 'no', 'OZ', 'MS', 'no', NULL),
 ('options', 'dnssec-lookaside', '( auto | no | domain trust-anchor domain )', 'no', 'OV', NULL, 'no', NULL),
 ('options', 'dnssec-must-be-secure', 'domain ( yes | no )', 'yes', 'OV', NULL, 'no', NULL),
+('options', 'dnssec-policy', '( default | insecure | none )', 'no', 'OVZ', 'MS', 'yes', '9.16.0'),
 ('options', 'dnssec-secure-to-insecure', '( yes | no )', 'no', 'OVZ', 'M', 'yes', NULL),
 ('options', 'dnssec-update-mode', '( maintain | no-resign )', 'no', 'OZ', 'MS', 'yes', '9.9.0'),
 ('options', 'dnssec-validation', '( yes | no | auto )', 'no', 'OV', NULL, 'yes', NULL),
@@ -710,7 +711,22 @@ VALUES
 ('tls', 'prefer-server-ciphers', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
 ('tls', 'protocols', '( quoted_string )', 'yes', 'T', NULL, 'no', '9.18.0'),
 ('tls', 'remote-hostname', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
-('tls', 'session-tickets', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0')
+('tls', 'session-tickets', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
+('dnssec-policy', 'cdnskey', '( yes | no )', 'no', 'D', NULL, 'yes', '9.16.0'),
+('dnssec-policy', 'cds-digest-types', '( string )', 'yes', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'dnskey-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'inline-signing', '( yes | no )', 'no', 'D', NULL, 'yes', '9.16.0'),
+('dnssec-policy', 'max-zone-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'nsec3param', '( [ iterations <integer> ] [ optout <boolean> ] [ salt-length <integer> ] )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'parent-ds-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'parent-propagation-delay', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'publish-safety', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'purge-keys', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'retire-safety', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-refresh', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-validity', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-validity-dnskey', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'zone-propagation-delay', '( duration )', 'no', 'D', NULL, 'no', '9.16.0')
 ;
 INSERTSQL;
 	

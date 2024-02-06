@@ -159,6 +159,9 @@ strong {
 	font-size: 8pt;
 }
 
+#message div {
+	width: 500px;
+}
 #message p {
 	margin: 1em 0 -.5em 0;
 	text-align: center;

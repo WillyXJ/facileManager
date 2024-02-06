@@ -60,49 +60,36 @@ $log_count = $fmdb->num_rows;
 $total_pages = ceil($log_count / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 if ($page < 1) $page = 1;
-$pagination = displayPagination($page, $total_pages);
 
 $log_search_module = isset($log_search_module) ? $log_search_module : _('All Modules');
 $log_search_user = isset($log_search_user) ? $log_search_user : 0;
 
-$module_list = buildSelect('log_search_module', 1, buildModuleList(), $log_search_module, 4, null, true);
-$user_list = buildSelect('log_search_user', 1, buildUserList(), $log_search_user, 4, null, true);
+$module_list = buildSelect('log_search_module', 'log_search_module', buildModuleList(), $log_search_module, 1, null, true, null, null, _('Filter Modules'));
+$user_list = buildSelect('log_search_user', 'log_search_user', buildUserList(), $log_search_user, 1, null, true, null, null, _('Filter Users'));
 
 $table_info = array('class' => 'display_results');
 $title_array = array(_('Timestamp'), _('Module'), _('User'), array('title' => _('Message'), 'style' => 'width: 50%;'));
-$header = displayTableHeader($table_info, $title_array);
 
-echo printPageHeader($response);
-printf('<form class="search-form" id="date-range" action="" method="get">
-		<table class="log_search_form" align="center">
-			<tbody>
-				<tr>
-					<td>%s</td>
-					<td>%s</td>
-					<td><input name="log_search_date_b" value="%s" type="text" class="datepicker" placeholder="%s" /></td>
-					<td><input name="log_search_date_e" value="%s" type="text" class="datepicker" placeholder="%s" /></td>
-					<td><input type="text" name="log_search_query" value="%s" placeholder="%s" /></td>
-					<td><input value="%s" type="submit" class="button" /></td>
-				</tr>
-			</tbody>
-		</table>
-		</form>
-		%s %s',
-		$module_list, $user_list,
+$search_form = sprintf('<form class="log_search_form" id="date-range" method="get">
+					<input name="log_search_date_b" value="%s" type="text" class="datepicker" placeholder="%s" />
+					<input name="log_search_date_e" value="%s" type="text" class="datepicker" placeholder="%s" />
+					%s
+					%s
+					<input type="text" name="log_search_query" value="%s" placeholder="%s" />
+					<input value="%s" type="submit" class="button" />
+		</form>',
 		$log_search_date_b, _('Date Begin'),
 		$log_search_date_e, _('Date End'),
+		$module_list, $user_list,
 		$log_search_query, _('Search Text'),
-		_('Search'),
-		$pagination, $header
+		_('Search')
 		);
 
+echo printPageHeader($response);
+echo displayPagination($page, $total_pages, array($search_form, null));
+echo displayTableHeader($table_info, $title_array);
+
 displayLogData($page, $search_sql);
-
-echo <<<HTML
-			</tbody>
-		</table>
-
-HTML;
 
 printFooter(null, $output);
 
@@ -118,14 +105,10 @@ function displayLogData($page, $search_sql = null) {
 	$fmdb->query($query);
 	$result = $fmdb->last_result;
 	$log_count = $fmdb->num_rows;
-	
-	if (!$log_count) {
-		printf('<tr><td colspan="4"><p class="no_results">%s</p></td></tr>', _('There are no log results.'));
-	}
 
 	for ($i=0; $i<$log_count; $i++) {
 		extract(get_object_vars($result[$i]), EXTR_OVERWRITE);
-		$log_data = nl2br(wordwrap($log_data, 80, "\n", true));
+		$log_data = nl2br($log_data);
 		if (isset($_POST['log_search_query'])) $log_data = str_replace($_POST['log_search_query'], '<span class="highlighted">' . $_POST['log_search_query'] . '</span>', $log_data);
 		$user_name = is_numeric($user_login) ? $fm_name : $user_login;
 		$log_timestamp = date($date_format . ' ' . $time_format . ' e', $log_timestamp);
@@ -138,6 +121,12 @@ function displayLogData($page, $search_sql = null) {
 				</tr>
 
 ROW;
+	}
+
+	echo "</tbody>\n</table>\n";
+	
+	if (!$log_count) {
+		printf('<p id="table_edits" class="noresult">%s</p>', __('There are no log results.'));
 	}
 }
 

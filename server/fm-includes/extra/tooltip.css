@@ -67,14 +67,15 @@
 	z-index: 1000;
 	padding: 12px;
 	width: 265px;
-	background-color: #D0D0D0;
-	color: #000;
+	background-color: #464646;
+	color: #fff;
 	content: attr(data-tooltip);
-	font-size: 14px;
+	font-size: 12px;
 	line-height: 1.2;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
+	white-space: pre-line;
 }
 
 /* Directions */
@@ -95,7 +96,7 @@
 .tooltip-top:before {
 	margin-left: -6px;
 	margin-bottom: -12px;
-	border-top-color: #D0D0D0;
+	border-top-color: #464646;
 }
 
 /* Horizontally align top/bottom tooltips */
@@ -135,7 +136,7 @@
 	margin-right: -12px;
 	margin-bottom: 0;
 	border-top-color: transparent;
-	border-left-color: #D0D0D0;
+	border-left-color: #464646;
 }
 
 .tooltip-left:hover:before,
@@ -159,7 +160,7 @@
 	margin-top: -12px;
 	margin-bottom: 0;
 	border-top-color: transparent;
-	border-bottom-color: #D0D0D0;
+	border-bottom-color: #464646;
 }
 
 .tooltip-bottom:hover:before,
@@ -182,7 +183,7 @@
 	margin-bottom: 0;
 	margin-left: -12px;
 	border-top-color: transparent;
-	border-right-color: #D0D0D0;
+	border-right-color: #464646;
 }
 
 .tooltip-right:hover:before,

@@ -19,6 +19,7 @@ if (isset($__FM_CONFIG)) {
 		$("select").select2({minimumResultsForSearch: 10});
 		$("#bulk_action").select2({minimumResultsForSearch: -1, width: "120px", allowClear: true});
 		$("#server_serial_no").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "130px", "text-align": "left" }});
+		$("#server_serial_no_extended").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "230px", "text-align": "left", allowClear: true }});
 		$("#settings select").select2({
 			width: "200px",
 			minimumResultsForSearch: 10
@@ -169,7 +170,6 @@ if (isset($__FM_CONFIG)) {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$this.parent().parent().removeClass("response");
@@ -195,9 +195,6 @@ if (isset($__FM_CONFIG)) {
 					return false;
 				}
 				$("#manage_item_contents").html(response);
-				if ($("#manage_item_contents").width() >= 700) {
-					$("#manage_item_contents").addClass("wide");
-				}
 				$(".datepicker").datepicker();
 				$(".form-table input:text, .form-table select").first().focus();
 				$(".popup-wait").hide();
@@ -225,7 +222,6 @@ if (isset($__FM_CONFIG)) {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$row_id.parent().parent().parent().removeClass("response");
@@ -256,9 +252,6 @@ if (isset($__FM_CONFIG)) {
 					return false;
 				}
 				$("#manage_item_contents").html(response);
-				if ($("#manage_item_contents").width() >= 700) {
-					$("#manage_item_contents").addClass("wide");
-				}
 				$(".datepicker").datepicker();
 				$(".form-table input, .form-table select").first().focus();
 				$(".popup-wait").hide();
@@ -334,11 +327,7 @@ if (isset($__FM_CONFIG)) {
 						}
 					} else {
 						$("#manage_item").fadeIn(200);
-						$("#manage_item_contents").fadeIn(200);
 						$("#manage_item_contents").html(response);
-						if ($("#manage_item_contents").width() >= 700) {
-							$("#manage_item_contents").addClass("wide");
-						}
 					}
 				}
 			}
@@ -402,11 +391,7 @@ if (isset($__FM_CONFIG)) {
 							}
 						} else {
 							$("#manage_item").fadeIn(200);
-							$("#manage_item_contents").fadeIn(200);
 							$("#manage_item_contents").html(response);
-							if ($("#manage_item_contents").width() >= 700) {
-								$("#manage_item_contents").addClass("wide");
-							}
 						}
 					}
 				}
@@ -434,8 +419,7 @@ if (isset($__FM_CONFIG)) {
     $("#manage_item_contents").delegate("#cancel_button, .close", "click tap", function(e) {
 		e.preventDefault();
 		$("#manage_item").fadeOut(200);
-		$("#manage_item_contents").fadeOut(200).html();
-		$("#manage_item_contents").removeClass("wide");
+		$("#manage_item_contents").html();
 		$("body").removeClass("fm-noscroll");
 		var link = $(this).attr("href");
 		if (link) {
@@ -544,7 +528,6 @@ if (isset($__FM_CONFIG)) {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$("#response").fadeOut();
 		
 		var form_data = {
@@ -591,9 +574,8 @@ if (isset($__FM_CONFIG)) {
 				$("#popup_response").fadeIn(200);
 				
 				if (response == "Success") {
-					$("#manage_item_contents").delay(2000).fadeOut(200, function() {
+					$("#manage_item").delay(2000).fadeOut(200, function() {
 						$("#manage_item_contents").html();
-						$("#manage_item").fadeOut(200);
 						$("body").removeClass("fm-noscroll");
 					});
 				} else {
@@ -637,6 +619,8 @@ if (isset($__FM_CONFIG)) {
         var $this 		= $(this);
         user_id			= $this.attr("id");
 
+		$this.html("<i class=\"fa fa-spinner fa-spin\"></i>");
+
 		var form_data = {
 			user_id: user_id,
 			reset_pwd: true,
@@ -662,6 +646,7 @@ if (isset($__FM_CONFIG)) {
 							{ queue: false, duration: 200 }
 						);
 					});
+				$this.html(\'' . $__FM_CONFIG['icons']['pwd_reset'] . '\');
 				if (response.toLowerCase().indexOf("response_close") == -1) {
 					$("#response").delay(3000).fadeTo(200, 0.00, function() {
 						$("#response").slideUp(400);
@@ -685,7 +670,6 @@ if (isset($__FM_CONFIG)) {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i></p>");
 		
 		$.ajax({
@@ -892,11 +876,7 @@ if (isset($__FM_CONFIG)) {
 		
 							$("body").addClass("fm-noscroll");
 							$("#manage_item").fadeIn(200);
-							$("#manage_item_contents").fadeIn(200);
 							$("#manage_item_contents").html(response);
-							if ($("#manage_item_contents").width() >= 700) {
-								$("#manage_item_contents").addClass("wide");
-							}
 							
 							$("#response").delay(300).fadeTo(200, 0.00, function() {
 								$("#response").slideUp(400);
@@ -953,7 +933,6 @@ if (isset($__FM_CONFIG)) {
 			if (confirm("Are you sure you want to " + $("#bulk_action").val().toLowerCase() + " these selected " + item_type + "?")) {
 				$("body").addClass("fm-noscroll");
 				$("#manage_item").fadeIn(200);
-				$("#manage_item_contents").fadeIn(200);
 				$("#manage_item_contents").html("<p>' . _('Processing Bulk Action') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 		
 				var form_data = {
@@ -977,9 +956,6 @@ if (isset($__FM_CONFIG)) {
 							return false;
 						}
 						$("#manage_item_contents").html(response);
-						if ($("#manage_item_contents").width() >= 700) {
-							$("#manage_item_contents").addClass("wide");
-						}
 					}
 				});
 			}
@@ -993,7 +969,6 @@ if (isset($__FM_CONFIG)) {
 			$this.find("i").addClass("fa-spin");
 			$("body").addClass("fm-noscroll");
 			$("#manage_item").fadeIn(200);
-			$("#manage_item_contents").fadeIn(200);
 			$("#manage_item_contents").html("<p>' . _('Processing Updates') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
 			var form_data = {
@@ -1013,9 +988,6 @@ if (isset($__FM_CONFIG)) {
 					}
 					$this.find("i").removeClass("fa-spin");
 					$("#manage_item_contents").html(response);
-					if ($("#manage_item_contents").width() >= 700) {
-						$("#manage_item_contents").addClass("wide");
-					}
 					if (response.toLowerCase().indexOf("failed") == -1 && 
 						response.toLowerCase().indexOf("one or more errors") == -1 && 
 						response.toLowerCase().indexOf("you are not authorized") == -1 && 
@@ -1220,7 +1192,6 @@ if (isset($__FM_CONFIG)) {
 						} else {
 							$("body").addClass("fm-noscroll");
 							$("#manage_item").fadeIn(200);
-							$("#manage_item_contents").fadeIn(200);
 							$("#manage_item_contents").html(\'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('header', __('Sort Order Results')))) . '\' + response + \'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('footer', _('OK'), array('cancel_button' => 'cancel')))) . '\');
 						}
 					}

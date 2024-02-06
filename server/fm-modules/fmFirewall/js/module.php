@@ -74,6 +74,51 @@ $(document).ready(function() {
 		});
 	});
 	
+	/* Global search */
+	$("#table_edits,#manage_item_contents").delegate("a.global-search", "click tap", function(e) {
+		var $this 		= $(this);
+		item_type		= $("#table_edits").attr("name");
+		item_sub_type	= $this.attr("name");
+		item_id			= $this.parent().attr("rel");
+		var server_serial_no	= getUrlVars()["server_serial_no"];
+		var queryParameters = {}, queryString = location.search.substring(1),
+			re = /([^&=]+)=([^&]*)/g, m;
+		while (m = re.exec(queryString)) {
+			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+		}
+
+		$("body").addClass("fm-noscroll");
+		$("#manage_item").fadeIn(200);
+		$(".popup-wait").show();
+
+		var form_data = {
+			global_find: true,
+			item_type: item_type,
+			item_sub_type: item_sub_type,
+			item_id: item_id,
+			server_serial_no: server_serial_no,
+			request_uri: queryParameters,
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/facileManager/ajax/getData.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				}
+				$("#manage_item_contents").html(response);
+				$(".popup-wait").hide();
+			}
+		});
+
+		return false;
+	});
+
 });
 ';
 ?>

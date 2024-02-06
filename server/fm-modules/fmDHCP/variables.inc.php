@@ -40,9 +40,6 @@ $__FM_CONFIG['fmDHCP'] = array(
 		'min_client_auto_upgrade_version'	=> '0.1'
 	);
 
-if($_SESSION['module'] == 'fmDHCP' && !defined('NO_DASH')) define('NO_DASH', true);
-$__FM_CONFIG['homepage'] = 'config-servers.php';
-
 /** Module-specific Images */
 if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['active']		= '<img src="' . $__FM_CONFIG['module']['path']['images'] . '/__action__.png" border="0" alt="__Action__" title="__Action__" width="12" />';

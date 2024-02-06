@@ -1,3 +1,25 @@
+4.6.0 (2023-??-??)
+==================
+* Server - [security] Password reset mailing errors now only show when "Show Errors" is
+           enabled. (Issue #592)
+* Server - [security] Users with invalid email addresses will error silently during
+           password resets. (Issue #592)
+* Server - [improvement] Added support to hide unused module dashboards.
+* Server - [improvement] Added support for server list placeholder.
+* Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
+* Server - [improvement] Changes to the search bar to better support additional modules.
+* Server - [improvement] Tooltip display tweaks.
+* Server - [improvement] LDAP authentication with group membership support improved. (Issue #578)
+* Server - [improvement] Relocated the logs search filter form.
+* Server - [improvement] Added server port and ssl security to mail settings.
+* Server - [improvement] Now detects Raspberry Pi OS.
+* Server - [improvement] Upgraded to PHPMailer 6.9.1.
+* Server - [bug] A deactivated module cannot be activated unless the required version of
+           facileManager is installed.
+* Server - [bug] Fixed user edits with PHP7.
+* Server - [bug] Fixed PHP errors.
+* Server - [bug] Fixed password reset message formatting.
+
 4.5.1 (2024-01-30)
 ==================
 * Server - [security] Fixed authenticated variable manipulation leading to SQL Injection. (Issue #599)

@@ -121,12 +121,17 @@ if (count($modules)) {
 			}
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
 				if (!in_array($module_name, getActiveModules())) {
-					$activate_link = sprintf('<span class="activate_link"><a href="?action=activate&module=%s">%s</a></span>' . "\n", $module_name, _('Activate')) . $uninstall_link;
+					if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version'], '<')) {
+						$activate_link .= sprintf('<p>' . _('%s v%s or later is required.') . '</p>', $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
+					} else {
+						$activate_link = sprintf('<span class="activate_link"><a href="?action=activate&module=%s">%s</a></span>' . "\n", $module_name, _('Activate'));
+					}
+					$activate_link .= $uninstall_link;
 				}
 			} else {
 				include(ABSPATH . 'fm-includes/version.php');
 				if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version'], '<')) {
-					$upgrade_link .= sprintf('<span class="upgrade_link">' . _('%s v%s or later is required<br />before this module can be upgraded.') . '</span>', $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
+					$upgrade_link .= sprintf('<span class="upgrade_link">' . _('%s v%s or later is required<br />to upgrade this module.') . '</span>', $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
 				}
 				$activate_link = $uninstall_link;
 				$class[] = 'upgrade';

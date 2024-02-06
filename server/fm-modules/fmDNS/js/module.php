@@ -46,7 +46,6 @@ $(document).ready(function() {
 		$(this).addClass("fa-spin");
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . __('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
 		var form_data = {
@@ -85,7 +84,6 @@ $(document).ready(function() {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$("#manage_item_contents").html("<p>' . __('Processing Reload') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
 		var form_data = {
@@ -130,7 +128,6 @@ $(document).ready(function() {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$this.parent().parent().removeClass("response");
@@ -158,9 +155,6 @@ $(document).ready(function() {
 					return false;
 				}
 				$("#manage_item_contents").html(response);
-				if ($("#manage_item_contents").width() >= 700) {
-					$("#manage_item_contents").addClass("wide");
-				}
 				$(".datepicker").datepicker();
 				$(".form-table input:text, .form-table select").first().focus();
 				$(".popup-wait").hide();
@@ -259,7 +253,6 @@ $(document).ready(function() {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").fadeIn(200);
 		$(".popup-wait").show();
 		$("#response").fadeOut();
 		$("#body_container").removeClass("response");
@@ -282,9 +275,6 @@ $(document).ready(function() {
 					return false;
 				}
 				$("#manage_item_contents").html(response);
-				if ($("#manage_item_contents").width() >= 700) {
-					$("#manage_item_contents").addClass("wide");
-				}
 				$(".datepicker").datepicker();
 				$(".form-table input, .form-table select").first().focus();
 				$(".popup-wait").hide();
@@ -579,7 +569,6 @@ function displayOptionPlaceholder(option_value) {
 function loadDynamicZone() {
 	$("body").addClass("fm-noscroll");
 	$("#manage_item").fadeIn(200);
-	$("#manage_item_contents").fadeIn(200);
 	$("#manage_item_contents").html("<p>' . __('Pulling the latest zone data from the server') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
 	var form_data = {
@@ -601,15 +590,11 @@ function loadDynamicZone() {
 
 			if (response.toLowerCase().indexOf("no records") > -1) {
 				$("#manage_item").fadeOut(200);
-				$("#manage_item_contents").fadeOut(200);
 				$("body").removeClass("fm-noscroll");
 				return;
 			}
 			
 			$("#manage_item_contents").html(response);
-			if ($("#manage_item_contents").width() >= 700) {
-				$("#manage_item_contents").addClass("wide");
-			}
 		}
 	});
 

@@ -53,7 +53,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		exit;
 	}
 	
-	if (array_key_exists('add_form', $_POST)) {
+	if (array_key_exists('global_find', $_POST)) {
+		if (array_key_exists('item_id', $_POST)) {
+			echo getGlobalSearchResults(sanitize($_POST['item_id']));
+			exit;
+		} else returnError();
+	} elseif (array_key_exists('add_form', $_POST)) {
 		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {

@@ -312,9 +312,12 @@ HTML;
 function printFooter($classes = null, $text = null, $block_style = null) {
 	echo <<<FOOT
 	</div>
-<div class="manage_form_container" id="manage_item" $block_style></div>
-<div class="manage_form_contents $classes" id="manage_item_contents" $block_style>
-$text
+<div class="manage_form_container" id="manage_item" $block_style>
+	<div class="manage_form_container_flex">
+		<div class="manage_form_contents $classes" id="manage_item_contents">
+		$text
+		</div>
+	</div>
 </div>
 </body></html>
 FOOT;
@@ -479,8 +482,6 @@ HTML;
  * @package facileManager
  */
 function printMenu() {
-	global $__FM_CONFIG, $menu, $submenu;
-	
 	$main_menu_html = null;
 	
 	list($filtered_menu, $filtered_submenu) = getCurrentUserMenu();
@@ -3123,7 +3124,10 @@ function countServerUpdates() {
  */
 function displaySearchForm($page_params = null) {
 	if (isset($_GET['q'])) {
-		$placeholder = sprintf(_('Searched for %s'), sanitize($_GET['q']));
+		$_GET['q'] = html_entity_decode(str_replace(array('%2520'), ' ', $_GET['q']));
+		$_GET['q'] = html_entity_decode(str_replace(array('%2522', '%22', '%2527', '%27', "'"), '"', $_GET['q']));
+		$cleaned_q = str_replace('%20', ' ', htmlentities($_GET['q']));
+		$placeholder = sprintf(_('Searched for %s'), $cleaned_q);
 		$search_remove = '<i class="search_remove fa fa-remove fa-lg text_icon" title="' . _('Clear this search') . '"></i>';
 		$display = ' style="display:block"';
 	} else {
@@ -3136,7 +3140,7 @@ function displaySearchForm($page_params = null) {
 		<div>
 			<div id="search_form">
 				<form id="search" method="GET" action="{$GLOBALS['basename']}?{$page_params}">
-					<input type="text" class="text_icon" placeholder="$placeholder" value="{$_GET['q']}" />
+					<input type="text" class="text_icon" placeholder="$placeholder" value="$cleaned_q" />
 					$search_remove
 				</form>
 			</div>
@@ -3213,18 +3217,25 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'defau
  * @return string
  */
 function createSearchSQL($fields = array(), $prefix = null) {
-	$search_query = null;
+	$search_query = '';
 	if (isset($_GET['q'])) {
+		$q = $_GET['q'];
+		$absolute_q = trim($q, '"');
 		$search_query = ' AND (';
-		$search_text = sanitize($_GET['q']);
+		if ("\"$absolute_q\"" == $q) {
+			$search_text = sprintf("='%s'", sanitize($absolute_q));
+		} else {
+			$search_text = sprintf("LIKE '%s'", '%' . sanitize($absolute_q) . '%');
+		}
 		foreach ($fields as $field) {
-			$search_query .= "$prefix$field LIKE '%$search_text%' OR ";
+			$search_query .= "$prefix$field $search_text OR ";
 		}
 		$search_query = rtrim($search_query, ' OR ') . ')';
 	}
 	
 	return $search_query;
 }
+
 
 
 /**
@@ -3699,28 +3710,31 @@ function clearUpdateDir() {
  * @param string $altbody Email alternate body (plaintext)
  * @param string/array $from From name and address
  * @param array $images Images to embed in the email
- * @return boolean
+ * @return boolean|string
  */
 function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $images = null) {
 	global $fm_name;
 
-	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class.phpmailer.php';
+	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'PHPMailer.php';
 	if (!file_exists($phpmailer_file)) {
 		return _('Unable to send email - PHPMailer class is missing.');
-	} else {
-		require_once($phpmailer_file);
 	}
 
-	$mail = new PHPMailer;
+	require($phpmailer_file);
+	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'SMTP.php');
+	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'Exception.php');
+	$mail = new PHPMailer\PHPMailer\PHPMailer;
 
 	/** Set PHPMailer options from database */
+	if (getOption('show_errors')) $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
 	$mail->Host = getOption('mail_smtp_host');
+	$mail->Port = getOption('mail_smtp_port');
 	$mail->SMTPAuth = getOption('mail_smtp_auth');
 	if ($mail->SMTPAuth) {
 		$mail->Username = getOption('mail_smtp_user');
 		$mail->Password = getOption('mail_smtp_pass');
 	}
-	if (getOption('mail_smtp_tls')) $mail->SMTPSecure = 'tls';
+	if ($secure = getOption('mail_smtp_tls')) $mail->SMTPSecure = strtolower($secure);
 
 	if ($from) {
 		if (is_array($from)) {
@@ -3753,7 +3767,7 @@ function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $ima
 	$mail->IsSMTP();
 
 	if(!$mail->Send()) {
-		return sprintf(_('Mailer Error: %s'), $mail->ErrorInfo);
+		return (getOption('show_errors')) ? sprintf(_('Mailer Error: %s'), $mail->ErrorInfo) : true;
 	}
 
 	return true;
@@ -3898,9 +3912,9 @@ function formatError($message, $option = null) {
  * @param array $class Additional classes to pass to the div
  * @return string
  */
-function buildServerSubMenu($server_serial_no = 0, $available_servers = null, $class = null) {
+function buildServerSubMenu($server_serial_no = 0, $available_servers = null, $class = null, $placeholder = null) {
 	if (!$available_servers) $available_servers = availableServers();
-	$server_list = buildSelect('server_serial_no', 'server_serial_no', $available_servers, $server_serial_no, 1, null, false, 'this.form.submit()');
+	$server_list = buildSelect('server_serial_no', 'server_serial_no', $available_servers, $server_serial_no, 1, null, false, 'this.form.submit()', null, $placeholder);
 	
 	$hidden_inputs = null;
 	foreach ($GLOBALS['URI'] as $param => $value) {
@@ -3945,6 +3959,12 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
 	
 	if (!is_array($include)) {
 		$include = (array) $include;
+	}
+	
+	if (in_array('null', $include)) {
+		$server_array[0][] = null;
+		$server_array[0][0][] = null;
+		$server_array[0][0][] = null;
 	}
 	
 	if (in_array('all', $include)) {

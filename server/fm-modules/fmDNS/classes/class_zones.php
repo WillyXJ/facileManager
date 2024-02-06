@@ -320,7 +320,7 @@ class fm_dns_zones {
 
 		/** Add DNSSEC inline signing zone options */
 		if ($post['domain_dnssec_sign_inline'] == 'yes') {
-			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'auto-dnssec' => 'maintain') as $param => $val) {
+			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'dnssec-policy' => 'default') as $param => $val) {
 				$result = $fmdb->query($query . "'$param', '$val')");
 				$log_message .= formatLogKeyData('domain_', $param, $val);
 
@@ -531,7 +531,7 @@ class fm_dns_zones {
 
 		/** Add DNSSEC inline signing zone options */
 		if ($post['domain_dnssec_sign_inline'] == 'yes') {
-			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'auto-dnssec' => 'maintain') as $param => $val) {
+			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'dnssec-policy' => 'default') as $param => $val) {
 				if (!getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='$param'")) {
 					$result = $fmdb->query($query . "'$param', '$val')");
 				}
@@ -1117,7 +1117,7 @@ HTML;
 				sprintf(__('The dnssec-signzone and dnssec-keygen utilities must be installed on %s in order for this to work.'), php_uname('n')), $dnssec_style,
 				__('Signature Expiry Override (optional)'), __('Days'), $domain_dnssec_sig_expire, getOption('dnssec_expiry', $_SESSION['user']['account_id'], $_SESSION['module']),
 				sprintf(__('Enter the number of days to expire the signature if different from what is defined in the %s.'), _('Settings')),
-				$domain_dnssec_sign_inline_checked, __('Automatically resign the zone'), __('This enables the inline-signing, auto-dnssec, and key-directory options which allows BIND to automatically resign the zone.'),
+				$domain_dnssec_sign_inline_checked, __('Automatically resign the zone'), __('This enables the inline-signing, dnssec-policy, and key-directory options which allows BIND to automatically resign the zone.'),
 				$dnssec_generate_ds_checked, __('Generate DS RR during signing'),
 				$dnssec_ds_style, __('Include DS RR in selected parent zone'), $available_zones
 			);

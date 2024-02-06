@@ -30,18 +30,10 @@ if (!empty($_POST)) {
 		$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
 		switch ($action) {
 		case 'add':
-			$result = $fm_module_templates->add($_POST);
+		case 'edit':
+			$result = ($action == 'add') ? $fm_module_templates->add($_POST) : $fm_module_templates->update($_POST);
 			if ($result !== true) {
 				$response = displayResponseClose($result);
-			} else {
-				header('Location: ' . $GLOBALS['basename']);
-				exit;
-			}
-			break;
-		case 'edit':
-			$update_status = $fm_module_templates->update($_POST);
-			if ($update_status !== true) {
-				$response = displayResponseClose($update_status);
 			} else {
 				header('Location: ' . $GLOBALS['basename']);
 				exit;
