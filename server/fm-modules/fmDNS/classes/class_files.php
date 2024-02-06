@@ -49,7 +49,7 @@ class fm_dns_files {
 						'name' => 'files'
 					);
 
-		$title_array = array(array('title' => __('File Name')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		$title_array = array(array('title' => __('File Name')), array('title' => __('File Location')), array('title' => _('Comment'), 'class' => 'header-nosort'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 			if ($num_rows > 1) $table_info['class'] .= ' grab1';
@@ -91,18 +91,18 @@ class fm_dns_files {
 		
 		extract($post, EXTR_SKIP);
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}files` (`account_id`, `server_serial_no`, `file_name`, `file_contents`, `file_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$file_name', '$file_contents', '$file_comment')";
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}files` (`account_id`, `server_serial_no`, `file_location`, `file_name`, `file_contents`, `file_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$file_location', '$file_name', '$file_contents', '$file_comment')";
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
-			return formatError(__('Could not add the file because a database error occurred.'), 'sql');
+			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 
 		$tmp_server_name = _('All Servers');
 		if ($server_serial_no) {
 			$tmp_server_name = (strpos($server_serial_no, 'g_') !== false) ? 'Group: ' . getNameFromID(str_replace('g_', '', $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name') : 'Server: ' . getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		}
-		addLogEntry("Added File:\nName: $file_name\n$tmp_server_name\nComment: $file_comment");
+		addLogEntry("Added File:\nName: $file_name\nLocation: {$post['file_location']}\n$tmp_server_name\nComment: $file_comment");
 		return true;
 	}
 
@@ -123,13 +123,13 @@ class fm_dns_files {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'file_id', 'page');
+		$include = array('server_serial_no', 'file_location', 'file_name', 'file_contents', 'file_comment');
 
 		$sql_edit = null;
 		
 		foreach ($post as $key => $data) {
-			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+			if (in_array($key, $include)) {
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -140,13 +140,13 @@ class fm_dns_files {
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
-			return formatError(__('Could not update the file because a database error occurred.'), 'sql');
+			return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 		}
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		addLogEntry("Updated File '$old_name' to the following:\nName: {$post['file_name']}\nComment: {$post['file_comment']}");
+		addLogEntry("Updated File '$old_name' to the following:\nName: {$post['file_name']}\nLocation: {$post['file_location']}\nComment: {$post['file_comment']}");
 		return true;
 	}
 	
@@ -225,6 +225,7 @@ class fm_dns_files {
 		echo <<<HTML
 		<tr id="$row->file_id" name="$row->file_name"$disabled_class>
 			<td>$row->file_name</td>
+			<td>$row->file_location</td>
 			<td>$comments</td>
 			$edit_status
 		</tr>
@@ -246,7 +247,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$file_id = 0;
-		$file_name = $file_contents = $file_comment = null;
+		$file_location = $file_name = $file_contents = $file_comment = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -256,8 +257,13 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 		
+		/** Strip file extension */
+		$file_name = @pathinfo($file_name)['filename'];
+
 		/** Get field length */
 		$file_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_name');
+
+		$file_location = buildSelect('file_location', 'file_location', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_location'), $file_location);
 		
 		$popup_title = $action == 'add' ? __('Add File') : __('Edit File');
 		$popup_header = buildPopup('header', $popup_title);
@@ -271,23 +277,37 @@ HTML;
 			<input type="hidden" name="server_serial_no" value="%s" />
 			<table class="form-table">
 				<tr>
-					<th width="33&#37;" scope="row"><label for="file_name">%s</label></th>
-					<td width="67&#37;"><input name="file_name" id="file_name" type="text" value="%s" size="40" placeholder="internal" maxlength="%d" /></td>
+					<th width="33&#37;" scope="row"><label for="file_location">%s</label></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="file_name">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a> </th>
+					<td width="67&#37;"><input name="file_name" id="file_name" type="text" value="%s" size="40" placeholder="custom-file" maxlength="%d" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="file_contents">%s</label></th>
-					<td width="67&#37;"><textarea id="file_contents" name="file_contents" rows="10" cols="30">%s</textarea></td>
+					<td width="67&#37;"><textarea id="file_contents" name="file_contents" rows="10" cols="40">%s</textarea></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="file_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="file_comment" name="file_comment" rows="4" cols="30">%s</textarea></td>
+					<td width="67&#37;"><textarea id="file_comment" name="file_comment" rows="4" cols="40">%s</textarea></td>
 				</tr>
 			</table>
 		%s
-		</form>',
+		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					minimumResultsForSearch: 10,
+					allowClear: true,
+					width: "200px"
+				});
+			});
+		</script>',
 				$popup_header,
 				$action, $file_id, $server_serial_no,
-				__('File Name'), $file_name, $file_name_length,
+				__('File Location'), $file_location,
+				__('File Name'), __('The extension will be automatically appended based on file location.'), $file_name, $file_name_length,
 				__('Contents'), $file_contents,
 				_('Comment'), $file_comment, $popup_footer
 			);
@@ -310,22 +330,32 @@ HTML;
 		
 		if (!$post['files_id']) unset($post['files_id']);
 		else $post['files_id'] = intval($post['files_id']);
+
+		foreach($post as $k => $v) {
+			if ($k == 'file_name') continue;
+			$post[$k] = sanitize($v);
+		}
 		
-		$post['file_name'] = trim(basename(sanitize(trim($post['file_name']))), '.');
+		$pathinfo = pathinfo($post['file_name']);
+		if (isset($pathinfo['extension'])) $post['file_name'] = $pathinfo['filename'];
+		$post['file_name'] = trim(basename(sanitize(trim($post['file_name']), '-')), '.');
 		if (empty($post['file_name'])) return __('No file name defined.');
+
+		/** Set the extension */
+		$post['file_name'] .= ($post['file_location'] == '$ZONES') ? '.hosts' : '.conf';
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_name');
 		if ($field_length !== false && strlen($post['file_name']) > $field_length) return sprintf(__('File name is too long (maximum %s characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', $post['file_name'], 'file_', 'file_name');
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', $post['file_name'], 'file_', 'file_name', "AND file_location='{$post['file_location']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->file_id != $post['file_id']) return __('This file already exists.');
 		}
 		
-		$post['file_comment'] = trim($post['file_comment']);
+		$post['file_comment'] = sanitize(trim($post['file_comment']));
 		
 		return $post;
 	}
@@ -340,9 +370,10 @@ HTML;
 	 *
 	 * @param string $saved_item
 	 * @param integer $server_serial_no
+	 * @param integer $domain_id
 	 * @return array|string
 	 */
-	function buildJSON($saved_item, $server_serial_no = 0) {
+	function buildJSON($saved_item, $server_serial_no = 0, $domain_id = 0) {
 		global $fmdb, $__FM_CONFIG, $fm_module_servers;
 
 		$list = array();
@@ -351,8 +382,9 @@ HTML;
 		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
 
 		$group_ids_sql = ($server_group_ids) ? ', "g_' . implode('", "g_', $server_group_ids) . '"' : null;
+		$file_location = ($domain_id) ? '$ZONES' : '$ROOT';
 
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_name', 'file_', 'AND server_serial_no IN ("0", "' . $server_serial_no . '"' . $group_ids_sql . ') AND file_status="active"');
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_name', 'file_', 'AND server_serial_no IN ("0", "' . $server_serial_no . '"' . $group_ids_sql . ') AND file_location="' . $file_location . '" AND file_status="active"');
 		for ($j=0; $j<$fmdb->num_rows; $j++) {
 			$list[$j]['id'] = 'file_' . $fmdb->last_result[$j]->file_id;
 			$list[$j]['text'] = $fmdb->last_result[$j]->file_name;

@@ -224,15 +224,18 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_files.php');
 
 			$cfg_data = str_replace(array('\"', '"', "'"), '', $cfg_data);
-			$available_files = $fm_dns_files->buildJSON($cfg_data, $server_serial_no);
+			$domain_id = (array_key_exists('domain_id', $_POST)) ? intval($_POST['domain_id']) : 0;
+			$available_files = $fm_dns_files->buildJSON($cfg_data, $server_serial_no, $domain_id);
 
-			$checkbox = null;
-			if ($_POST['option_name'] == 'include' && strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST)) {
+			$checkbox = $tooltip = null;
+			if (strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST) && !array_key_exists('domain_id', $_POST)) {
 				$checked = getNameFromID($_POST['cfg_id'], "fm_{$__FM_CONFIG['fmDNS']['prefix']}config", 'cfg_', 'cfg_id', 'cfg_in_clause') == 'no' ? 'checked' : null;
 				$checkbox = sprintf('<br /><input name="cfg_in_clause" id="cfg_in_clause" type="checkbox" value="no" %s /><label for="cfg_in_clause">%s</label>', $checked, __('Define outside of global options clause'));
+			} elseif (array_key_exists('domain_id', $_POST)) {
+				$tooltip = sprintf(' <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('This file will be appended to the zone file as an $INCLUDE statement.'));
 			}
 
-			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label>%s</th>
 					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
 					%s
 					<script>
@@ -249,7 +252,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 						tokenSeparators: [",", ";"],
 						data: %s
 					});
-					</script>', __('Option Value'),
+					</script>', __('Option Value'), $tooltip,
 						$cfg_data,
 						$checkbox,
 						$available_files);

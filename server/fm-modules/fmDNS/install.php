@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}file
   `file_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+  `file_location` ENUM('\$ROOT','\$ZONES') NOT NULL DEFAULT '\$ROOT'
   `file_name` VARCHAR(255) NOT NULL ,
   `file_contents` text,
   `file_comment` text,
@@ -748,7 +749,21 @@ VALUES
 ;
 INSERTSQL;
 
-	$inserts[] = <<<INSERTSQL
+  $inserts[] = <<<INSERTSQL
+INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option` ,
+`def_type` ,
+`def_clause_support`,
+`def_zone_support`,
+`def_max_parameters`
+)
+VALUES 
+('options', 'include', '( quoted_string )', 'OVZ', 'P', '-1')
+;
+INSERTSQL;
+
+  $inserts[] = <<<INSERTSQL
 INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
 `def_function` ,
 `def_option_type`,
@@ -762,7 +777,6 @@ INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` 
 )
 VALUES 
 ('options', 'ratelimit', 'responses-per-second', '( integer )', 'no', 'OV', 'no', '5', NULL),
-('options', 'global', 'include', '( quoted_string )', 'no', 'OVZ', 'no', '-1', NULL),
 ('options', 'global', 'disable-algorithms', 'domain { algorithm; [ algorithm; ] }', 'no', 'O', 'no', '-1', NULL),
 ('options', 'global', 'disable-ds-digests', 'domain { digest_type; [ digest_type; ] }', 'no', 'O', 'no', '-1', '9.10.0'),
 ('options', 'global', 'disable-empty-zone', '( quoted_string )', 'no', 'OV', 'no', '-1', NULL),

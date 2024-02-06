@@ -136,7 +136,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_name', 'file_', 'AND server_serial_no IN ("0", "' . $server_serial_no . '"' . $group_ids_sql . ') AND file_status="active"');
 			if ($fmdb->num_rows) {
 				foreach ($fmdb->last_result as $item_arr) {
-					$data->files[$server_root_dir . '/' . $_SESSION['module'] . '.conf.d/' . $item_arr->file_name] = array('contents' => $item_arr->file_contents, 'mode' => 0400);
+					$data->files[str_replace(array('$ROOT', '$ZONES'), array($server_root_dir, $server_zones_dir), $item_arr->file_location) . '/include.d/' . $item_arr->file_name] = array('contents' => $item_arr->file_contents, 'mode' => 0400);
 				}
 			}
 			
@@ -990,7 +990,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zones .= "\tfile \"$zone_data_dir/$domain_type/$domain_name_file\";\n";
 							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
 							/** Build zone file */
-							$zone_file_contents = ($domain_type == 'primary') ? $this->buildZoneFile($zone_result[$i], $server_serial_no) : null;
+							$zone_file_contents = ($domain_type == 'primary') ? $this->buildZoneFile($zone_result[$i], $server_serial_no, $server_group_ids) : null;
 							if ($zone_file_contents != null) {
 								$files[$zone_data_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
 							}
@@ -1048,7 +1048,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildZoneFile($domain, $server_serial_no) {
+	function buildZoneFile($domain, $server_serial_no, $server_group_ids) {
 		global $__FM_CONFIG, $fmdb;
 		
 		/** Get datetime formatting */
@@ -1072,6 +1072,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			}
 		}
 		
+		/** Build includes */
+		$domain_id = (isset($domain->parent_domain_id)) ? $domain->parent_domain_id : $domain->domain_id;
+		$zone_file .= ltrim(str_replace(array('include ', ';'), array('$INCLUDE ', null), $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_id)));
+
 		/** Sign the zone? */
 		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes' && $domain->domain_dnssec_sign_inline == 'no') {
 			$zone_file = $this->dnssecSignZone($domain, $zone_file);
@@ -1965,8 +1969,8 @@ HTML;
 			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
 		}
 
-		/** Build includes */
-		$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_ids);
+		// /** Build includes */
+		// $config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_ids);
 
 		return $config;
 	}
@@ -2212,7 +2216,7 @@ HTML;
 	 * @param integer $server_serial_no The server serial number for overrides
 	 * @param array   $server_group_ids The array containing server group IDs for overrides
 	 * @param string  $server_root_dir Server root directory
-	 * @param integer $domain_id The ID of the zone
+	 * @param integer|array $domain_id The ID of the zone
 	 * @param string  $clause Whether includes are inside or outside of clauses
 	 * @return string
 	 */
@@ -2247,7 +2251,7 @@ HTML;
 					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, $tab);
 				}
 			}
-			return $include_files . "\n";
+			return str_replace(array('$ROOT', '$ZONES'), array(getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir', null, 'active'), getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_zones_dir', null, 'active')), $include_files) . "\n";
 		} else {
 			return null;
 		}
