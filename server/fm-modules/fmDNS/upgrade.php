@@ -2471,7 +2471,7 @@ function upgradefmDNS_600($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '5.3.0', '<') ? upgradefmDNS_530($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','ratelimit','rrset','rpz','http','tls')  NOT NULL DEFAULT 'global'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','ratelimit','rrset','rpz','http','tls','dnssec-policy')  NOT NULL DEFAULT 'global'";
 	$queries[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 	`def_function` ,
@@ -2484,6 +2484,8 @@ INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 	`def_minimum_version`
 	)
 VALUES 
+('options', 'check-svcb', '( yes | no )', 'no', 'OVZ', 'M', 'yes', '9.19.6'),
+('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'MS', 'no', '9.19.12'),
 ('options', 'dnskey-sig-validity', '( integer )', 'no', 'OVZ', 'M', 'no', '9.16.0'),
 ('options', 'dnsrps-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
 ('options', 'dnsrps-options', '( quoted_string )', 'yes', 'OV', NULL, 'no', '9.16.0'),
@@ -2495,23 +2497,21 @@ VALUES
 ('options', 'ipv4only-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.18.0'),
 ('options', 'ipv4only-server', '( quoted_string )', 'no', 'OV', NULL, 'no', '9.18.0'),
 ('options', 'max-ixfr-ratio', '( unlimited | percentage )', 'no', 'OVZ', 'M', 'no', '9.16.0'),
+('options', 'padding', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
 ('options', 'reuseport', '( yes | no )', 'no', 'O', NULL, 'no', '9.18.0'),
 ('options', 'stale-answer-client-timeout', '( diabled | off | integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
 ('options', 'stale-cache-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
 ('options', 'stale-refresh-time', '( integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
+('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
 ('options', 'tcp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
 ('options', 'tcp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'tls-port', '( integer )', 'no', 'O', NULL, 'no', '9.19.0'),
 ('options', 'udp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
 ('options', 'udp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'check-svcb', '( yes | no )', 'no', 'OVZ', 'M', 'yes', '9.19.6'),
-('options', 'tls-port', '( integer )', 'no', 'O', NULL, 'no', '9.19.0'),
 ('options', 'update-quota', '( integer )', 'no', 'O', NULL, 'no', '9.19.9'),
 ('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'MS', 'no', '9.19.12'),
 ('options', 'padding', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
 ('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
-('http', 'endpoints', '( quoted_string )', 'yes', 'T', NULL, 'no', '9.18.0'),
-('http', 'listener-clients', '( integer )', 'no', 'T', NULL, 'no', '9.18.0'),
-('http', 'streams-per-connection', '( integer )', 'no', 'T', NULL, 'no', '9.18.0'),
 ('tls', 'cert-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
 ('tls', 'key-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
 ('tls', 'ca-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
@@ -2520,7 +2520,26 @@ VALUES
 ('tls', 'prefer-server-ciphers', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
 ('tls', 'protocols', '( quoted_string )', 'yes', 'T', NULL, 'no', '9.18.0'),
 ('tls', 'remote-hostname', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
-('tls', 'session-tickets', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0')
+('tls', 'session-tickets', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
+('http', 'endpoints', '( quoted_string )', 'yes', 'H', NULL, 'no', '9.18.0'),
+('http', 'listener-clients', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('options', 'dnssec-policy', '( default | insecure | none )', 'no', 'OVZ', 'MS', 'yes', '9.16.0'),
+('dnssec-policy', 'cdnskey', '( yes | no )', 'no', 'D', NULL, 'yes', '9.16.0'),
+('dnssec-policy', 'cds-digest-types', '( string )', 'yes', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'dnskey-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'inline-signing', '( yes | no )', 'no', 'D', NULL, 'yes', '9.16.0'),
+('dnssec-policy', 'max-zone-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'nsec3param', '( [ iterations <integer> ] [ optout <boolean> ] [ salt-length <integer> ] )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'parent-ds-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'parent-propagation-delay', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'publish-safety', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'purge-keys', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'retire-safety', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-refresh', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-validity', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-validity-dnskey', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'zone-propagation-delay', '( duration )', 'no', 'D', NULL, 'no', '9.16.0')
 ;
 INSERTSQL;
 	
