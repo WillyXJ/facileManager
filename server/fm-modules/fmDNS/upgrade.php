@@ -2542,7 +2542,7 @@ INSERTSQL;
 	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','forward','stub') NOT NULL DEFAULT 'primary'";
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_option` = 'primaries' WHERE `def_option` = 'masters'";
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name` = 'primaries' WHERE `cfg_name` = 'masters'";
-
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = REPLACE(def_zone_support, 'M', 'P')";
 	/** Run queries */
 	if (count($queries) && $queries[0]) {
 		foreach ($queries as $schema) {
