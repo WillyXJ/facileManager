@@ -491,7 +491,7 @@ function getPostData($url, $data) {
 		echo "\n\n" . curl_error($ch);
 	}
 	curl_close($ch);
-	return $result;
+	return ltrim($result);
 }
 
 
