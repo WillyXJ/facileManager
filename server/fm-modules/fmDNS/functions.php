@@ -926,31 +926,35 @@ function getZoneParentID($domain_id) {
 function getConfigAssoc($id, $type) {
 	global $fmdb, $__FM_CONFIG;
 
-	$return = null;
-
 	/** Config options */
-	$query = "SELECT cfg_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND 
-			(cfg_data='{$type}_{$id}' OR cfg_data LIKE '{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id}' OR
-			cfg_data='!{$type}_{$id}' OR cfg_data LIKE '!{$type}_{$id};%' OR cfg_data LIKE '%;!{$type}_{$id};%' OR cfg_data LIKE '%;!{$type}_{$id}')";
-	$result = $fmdb->get_results($query);
-	if ($fmdb->num_rows) {
-		return true;
-	}
+	$queries[] = "SELECT cfg_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND (
+			cfg_data='{$type}_{$id}' OR cfg_data LIKE '{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id};%' OR cfg_data LIKE '%;{$type}_{$id}' OR
+			cfg_data='!{$type}_{$id}' OR cfg_data LIKE '!{$type}_{$id};%' OR cfg_data LIKE '%;!{$type}_{$id};%' OR cfg_data LIKE '%;!{$type}_{$id}' OR
+			cfg_data LIKE '{$type}_{$id},%' OR cfg_data LIKE '%,{$type}_{$id},%' OR cfg_data LIKE '%,{$type}_{$id}' OR
+			cfg_data LIKE '!{$type}_{$id},%' OR cfg_data LIKE '%,!{$type}_{$id},%' OR cfg_data LIKE '%,!{$type}_{$id}' OR
+			cfg_data='\"{$type}_{$id}\"' OR cfg_data LIKE '%{$type} {$type}_{$id}' OR cfg_data LIKE '%{$type} {$type}_{$id} %'
+		)";
 
 	/** Controls */
-	$query = "SELECT control_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}controls WHERE account_id='{$_SESSION['user']['account_id']}' AND control_status!='deleted' AND 
-			(control_addresses='{$type}_{$id}' OR control_addresses LIKE '{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id}')";
-	$result = $fmdb->get_results($query);
-	if ($fmdb->num_rows) {
-		return true;
-	}
+	$queries[] = "SELECT control_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}controls WHERE account_id='{$_SESSION['user']['account_id']}' AND control_status!='deleted' AND (
+			control_addresses='{$type}_{$id}' OR control_addresses LIKE '{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id};%' OR control_addresses LIKE '%;{$type}_{$id}'
+		)";
 
 	/** Masters */
-	$query = "SELECT master_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}masters WHERE account_id='{$_SESSION['user']['account_id']}' AND master_status!='deleted' AND 
-			(master_addresses='{$type}_{$id}' OR master_addresses LIKE '{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id}')";
-	$result = $fmdb->get_results($query);
-	if ($fmdb->num_rows) {
-		return true;
+	$queries[] = "SELECT master_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}masters WHERE account_id='{$_SESSION['user']['account_id']}' AND master_status!='deleted' AND (
+			master_addresses='{$type}_{$id}' OR master_addresses LIKE '{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id};%' OR master_addresses LIKE '%;{$type}_{$id}'
+		)";
+
+	/** ACLs */
+	$queries[] = "SELECT acl_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}acls WHERE account_id='{$_SESSION['user']['account_id']}' AND acl_status!='deleted' AND (
+			acl_addresses='{$type}_{$id}' OR acl_addresses LIKE '{$type}_{$id};%' OR acl_addresses LIKE '%;{$type}_{$id};%' OR acl_addresses LIKE '%;{$type}_{$id}' OR
+			acl_addresses='!{$type}_{$id}' OR acl_addresses LIKE '!{$type}_{$id};%' OR acl_addresses LIKE '%;!{$type}_{$id};%' OR acl_addresses LIKE '%;!{$type}_{$id}'
+		)";
+
+	foreach ($queries as $query) {
+		if ($fmdb->get_results($query)) {
+			return true;
+		}
 	}
 
 	return false;

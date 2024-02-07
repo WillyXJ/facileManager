@@ -223,6 +223,11 @@ class fm_dns_keys {
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Are there any corresponding configs? */
+		if (getConfigAssoc($id, 'key')) {
+			return formatError(__('This item is still being referenced and could not be deleted.'), 'sql');
+		}
+
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', $id, 'key_', 'deleted', 'key_id') === false) {
 			return formatError(__('This key could not be deleted because a database error occurred.'), 'sql');

@@ -211,6 +211,11 @@ class fm_dns_acls {
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Are there any corresponding configs? */
+		if (getConfigAssoc($id, 'acl')) {
+			return formatError(__('This item is still being referenced and could not be deleted.'), 'sql');
+		}
+
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
 		$log_message = sprintf(__("ACL '%s' was deleted"), $tmp_name);
 		if (!$tmp_name) {
@@ -226,7 +231,7 @@ class fm_dns_acls {
 			}
 		}
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $id, 'acl_', 'deleted', 'acl_id') === false) {
-			return formatError(__('This ACL could not be deleted because a database error occurred.'), 'sql');
+			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry($log_message);
@@ -567,7 +572,7 @@ HTML;
 				$formatted_acls[] = $address;
 			} elseif (strpos($address, 'file_') !== false) {
 				$id = trim(str_replace('file_', '', $address), '"');
-				$formatted_acls[] = getNameFromID($id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}files", 'file_', 'file_id', 'file_location', null, 'active') . '/include.d/' . getNameFromID($id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}files", 'file_', 'file_id', 'file_name', null, 'active');
+				$formatted_acls[] = sprintf('"%s/include.d/%s"', getNameFromID($id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}files", 'file_', 'file_id', 'file_location', null, 'active'), getNameFromID($id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}files", 'file_', 'file_id', 'file_name', null, 'active'));
 			} else {
 				$formatted_acls[] = str_replace(';', '', $address);
 			}

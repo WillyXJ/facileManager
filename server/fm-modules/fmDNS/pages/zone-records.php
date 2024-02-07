@@ -250,9 +250,12 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 				}
 			}
 			if (!$search_query) {
-				$custom_tip = __('Add your own custom records');
-				$select = ($record_type == 'CUSTOM') ? ' class="selected"' : '';
-				$custom_rr = '<span' . $select . '><a' . $select . ' href="zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=CUSTOM" class="tooltip-left" data-tooltip="' . $custom_tip . '"><i class="fa fa-window-maximize" aria-hidden="true"></i></a></span>';
+				$custom_tip = __('Add your own custom records or include a file');
+				$classes[] = 'tooltip-left';
+				if ($record_type == 'CUSTOM') {
+					$select = $classes[] = 'selected';
+				} else $select = null;
+				$custom_rr = '<span class="' . $select . '"><a href="zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=CUSTOM" class="' . join(' ', $classes) . '" data-tooltip="' . $custom_tip . '"><i class="fa fa-window-maximize" aria-hidden="true"></i></a></span>';
 			}
 			$menu_selects = <<<MENU
 			$menu_selects

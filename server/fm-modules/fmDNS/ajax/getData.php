@@ -225,7 +225,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 
 			$cfg_data = str_replace(array('\"', '"', "'"), '', $cfg_data);
 			$domain_id = (array_key_exists('domain_id', $_POST)) ? intval($_POST['domain_id']) : 0;
-			$available_files = $fm_dns_files->buildJSON($cfg_data, $server_serial_no, $domain_id);
+			$available_files = $fm_dns_files->buildJSON($cfg_data, $server_serial_no);
 
 			$checkbox = $tooltip = null;
 			if (strtolower($_POST['cfg_type']) == 'global' && !array_key_exists('view_id', $_POST) && !array_key_exists('domain_id', $_POST)) {
@@ -236,7 +236,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 			}
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label>%s</th>
-					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" /><br />
+					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" />
 					%s
 					<script>
 					$(".address_match_element").select2({

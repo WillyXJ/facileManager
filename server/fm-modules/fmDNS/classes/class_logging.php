@@ -452,14 +452,12 @@ class fm_module_logging {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" name="' . $channel_category . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->cfg_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
-			if ($channel_category == 'channel' && is_array($this->getAssocCategories($row->cfg_id))) {
-				$edit_status .= null;
-			} else {
+			if ($channel_category != 'channel' || !is_array($this->getAssocCategories($row->cfg_id))) {
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->cfg_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			}
 			$edit_status .= '</td>';

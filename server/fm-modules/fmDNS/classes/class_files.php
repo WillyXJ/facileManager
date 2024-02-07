@@ -164,27 +164,16 @@ class fm_dns_files {
 	function delete($id) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Are there any associated zones? */
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', "AND (`domain_view`=$id or `domain_view` LIKE '$id;%' or `domain_view` LIKE '%;$id' or `domain_view` LIKE '%;$id;%')");
-		if ($fmdb->num_rows) {
-			return __('There are zones associated with this file.');
+		/** Are there any corresponding configs? */
+		if (getConfigAssoc($id, 'file')) {
+			return formatError(__('This item is still being referenced and could not be deleted.'), 'sql');
 		}
-		
-		/** Are there any corresponding configs to delete? */
-		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND view_id=' . $id);
-		if ($fmdb->num_rows) {
-			/** Delete corresponding configs */
-			if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $id, 'cfg_', 'deleted', 'view_id') === false) {
-				return formatError(__('The corresponding configs could not be deleted.'), 'sql');
-			}
-		}
-		
+
 		/** Delete file */
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_', 'file_id', 'file_name');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', $id, 'file_', 'deleted', 'file_id') === false) {
-			return formatError(__('This file could not be deleted because a database error occurred.'), 'sql');
+			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
-//			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry("Deleted file '$tmp_name'.");
 			return true;
 		}
@@ -209,12 +198,14 @@ class fm_dns_files {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->file_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->file_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!getConfigAssoc($row->file_id, 'file')) {
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->file_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->file_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			}
 			$edit_status .= '</td>';
 		} else {
 			$edit_status = null;
@@ -306,8 +297,8 @@ HTML;
 		</script>',
 				$popup_header,
 				$action, $file_id, $server_serial_no,
-				__('File Location'), $file_location,
-				__('File Name'), __('The extension will be automatically appended based on file location.'), $file_name, $file_name_length,
+				__('Location'), $file_location,
+				__('Name'), __('The extension will be automatically appended based on file location.'), $file_name, $file_name_length,
 				__('Contents'), $file_contents,
 				_('Comment'), $file_comment, $popup_footer
 			);

@@ -272,16 +272,21 @@ class fm_module_http {
 	function delete($id, $server_serial_no, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Are there any corresponding configs? */
+		if (getConfigAssoc($id, 'http')) {
+			return formatError(__('This item is still being referenced and could not be deleted.'), 'sql');
+		}
+
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 
 		/** Delete associated children */
 		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_parent') === false) {
-			return formatError(__('This record could not be deleted because a database error occurred.'), 'sql');
+			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		}
 		
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'cfg_', 'deleted', 'cfg_id') === false) {
-			return formatError(__('This record could not be deleted because a database error occurred.'), 'sql');
+			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("HTTP endpoint '%s' was deleted."), $tmp_name));
@@ -308,13 +313,15 @@ class fm_module_http {
 		$server_serial_no .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
-			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->cfg_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			if (!getConfigAssoc($row->cfg_id, 'http')) {
+				$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->cfg_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+			}
 			$edit_status .= '</td>';
 		} else {
 			$edit_status = null;

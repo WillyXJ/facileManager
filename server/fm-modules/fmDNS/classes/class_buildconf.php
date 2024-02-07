@@ -1625,7 +1625,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmDNS
 	 *
 	 * @param array $raw_data Array containing named files and contents
-	 * @return string
+	 * @return string|void
 	 */
 	function processConfigsChecks($files_array) {
 		global $__FM_CONFIG;
@@ -1648,7 +1648,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
 		$tmp_dir = rtrim($fm_temp_directory, '/') . '/' . $_SESSION['module'] . '_' . date("YmdHis") . '/';
 		system('rm -rf ' . $tmp_dir);
-		$debian_system = isDebianSystem($files_array['server_os_distro']);
 		
 		/** Create temporary directory structure */
 		foreach ($files_array['files'] as $file => $file_properties) {
@@ -1692,7 +1691,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		if (!$die) {
 			/** Run named-checkconf */
-			$named_checkconf_cmd = findProgram('sudo') . ' -n ' . findProgram('named-checkconf') . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
+			$named_checkconf_cmd = findProgram('sudo') . ' -n ' . $named_checkconf . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
 			exec($named_checkconf_cmd, $named_checkconf_results, $retval);
 			/** Remove key-directory statements for config checks */
 			foreach ($named_checkconf_results as $key => $val) {
@@ -1720,7 +1719,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				if (array($zone_files)) {
 					foreach ($zone_files as $view => $zones) {
 						foreach ($zones as $zone_name => $zone_file) {
-							$named_checkzone_cmd = findProgram('sudo') . ' -n ' . findProgram('named-checkzone') . ' -t ' . $tmp_dir . ' ' . $zone_name . ' ' . $zone_file . ' 2>&1';
+							$named_checkzone_cmd = findProgram('sudo') . ' -n ' . $named_checkzone . ' -t ' . $tmp_dir . ' ' . $zone_name . ' ' . $zone_file . ' 2>&1';
 							exec($named_checkzone_cmd, $results, $retval);
 							if ($retval) {
 								$class = 'class="error"';
@@ -1964,13 +1963,14 @@ HTML;
 		unset($global_config, $server_config);
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
+			if ($cfg_name == 'include') continue;
 			list($cfg_info, $cfg_comment) = $cfg_data;
 
 			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t", " AND def_zone_support LIKE '%" . strtoupper(substr($domain_type, 0, 1)) . "%'");
 		}
 
-		// /** Build includes */
-		// $config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_ids);
+		/** Build includes */
+		$config .= $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_ids);
 
 		return $config;
 	}
@@ -2246,12 +2246,12 @@ HTML;
 		if (is_array($include_config)) {
 			$include_files = null;
 			foreach ($include_config as $cfg_name => $value_array) {
-				foreach ($value_array as $domain_name => $cfg_data) {
+				foreach ($value_array as $cfg_data) {
 					list($cfg_info, $cfg_comment) = $cfg_data;
 					$include_files .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, $tab);
 				}
 			}
-			return str_replace(array('$ROOT', '$ZONES'), array(getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir', null, 'active'), getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_zones_dir', null, 'active')), $include_files) . "\n";
+			return str_replace(array('$ROOT', '$ZONES'), array(getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir', null, 'active'), getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_zones_dir', null, 'active')), $include_files);
 		} else {
 			return null;
 		}

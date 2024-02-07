@@ -74,11 +74,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
 	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
-	$item_type = $_POST['item_type'];
+	$item_type = sanitize($_POST['item_type']);
 	$prefix = substr($item_type, 0, -1) . '_';
 	
 	/* Determine which class we need to deal with */
-	switch($_POST['item_type']) {
+	switch($item_type) {
 		case 'servers':
 			$post_class = $fm_module_servers;
 			$object = __('server');
@@ -111,24 +111,24 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
-			$server_serial_no = $type = sanitize($_POST['item_type']);
+			$server_serial_no = $type = $item_type;
 			break;
 		case 'domain':
 			$post_class = $fm_module_templates;
-			$server_serial_no = $_POST['item_type'];
-			$type = sanitize($_POST['item_type']) . 's';
+			$server_serial_no = $item_type;
+			$type = $item_type . 's';
 			break;
 		case 'rpz':
 		case 'http':
 		case 'tls':
-			$post_class = ${'fm_module_' . $_POST['item_type']};
+			$post_class = ${'fm_module_' . $item_type};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$object = $_POST['item_type'];
+			$object = $item_type;
 			$field_data = $prefix . 'data';
 			break;
 		default:
-			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
+			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$item_type}"};
 			$object = substr($item_type, 0, -1);
 	}
 	
@@ -145,7 +145,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'delete':
 			if (isset($id)) {
-				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
+				exit(parseAjaxOutput($post_class->delete($id, $server_serial_no, $type)));
 			}
 			break;
 		case 'edit':
