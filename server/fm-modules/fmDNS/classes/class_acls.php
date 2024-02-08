@@ -67,48 +67,13 @@ class fm_dns_acls {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
-		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', $field_length), $field_length);
-		
-		$post['acl_comment'] = trim($post['acl_comment']);
-		
-		/** Does the record already exist for this account? */
-		if (array_key_exists('acl_name', $post)) {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', sanitize($post['acl_name']), 'acl_', 'acl_name');
-			if ($fmdb->num_rows) return __('This ACL already exists.');
-		} else {
-			if (!$post['acl_addresses']) {
-				if (!$post['acl_bulk']) {
-					return __('No ACL address defined.') . $post['acl_comment'];
-				} else {
-					$tmp_post = $post;
-					unset($tmp_post['acl_bulk']);
-					foreach (explode("\n", $post['acl_bulk']) as $tmp_acl_line) {
-						list($tmp_post['acl_addresses'], $tmp_post['acl_comment']) = explode(';', str_replace(',', ';', trim($tmp_acl_line)));
-
-						// Prevent never-ending loop
-						if (!$tmp_post['acl_addresses']) return __('No ACL address defined.');
-
-						$result = $this->add($tmp_post);
-						if ($result !== true) return $result;
-					}
-					return true;
-				}
-			}
-		}
+		/** Validate post */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls`";
 		$sql_fields = '(';
 		$sql_values = null;
-		
-		$post['account_id'] = $_SESSION['user']['account_id'];
-
-		/** Cleans up acl_addresses for future parsing **/
-		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'acl_') === false && strpos($post['acl_addresses'], 'key_') === false) {
-			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
-			if ($ip_check != $post['acl_addresses']) return $ip_check;
-		}
 		
 		$exclude = array('submit', 'action', 'server_id', 'acl_bulk');
 
@@ -132,7 +97,7 @@ class fm_dns_acls {
 
 		$log_message = sprintf(__("Added ACL:\nName: %s\nComment: %s"), $post['acl_name'], $post['acl_comment']);
 		if (isset($post['acl_parent_id'])) {
-			$log_message = sprintf(__("%s was added to the %s ACL"), $post['acl_addresses'], getNameFromID($post['acl_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'));
+			$log_message = sprintf(__("'%s' was added to the '%s' ACL"), $post['acl_addresses'], getNameFromID($post['acl_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'));
 		}
 		addLogEntry($log_message);
 		return true;
@@ -144,32 +109,9 @@ class fm_dns_acls {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
-		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', $field_length), $field_length);
-		
-		/** Does the record already exist for this account? */
-		if (array_key_exists('acl_name', $post)) {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', sanitize($post['acl_name']), 'acl_', 'acl_name');
-			if ($fmdb->num_rows) {
-				$result = $fmdb->last_result;
-				if ($result[0]->acl_id != $post['acl_id']) return __('This ACL already exists.');
-			}
-			
-			if (empty($post['acl_name'])) return __('No ACL name defined.');
-		} else {
-			if (!$post['acl_addresses']) return __('No ACL address defined.');
-		}
-		
-		/** Cleans up acl_addresses for future parsing **/
-		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'acl_') === false && strpos($post['acl_addresses'], 'key_') === false) {
-			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
-			if ($ip_check != $post['acl_addresses']) return $ip_check;
-		}
-		
-		$post['acl_comment'] = trim($post['acl_comment']);
-		
-		$post['account_id'] = $_SESSION['user']['account_id'];
+		/** Validate post */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 		
 		$exclude = array('submit', 'action', 'server_id');
 
@@ -198,7 +140,7 @@ class fm_dns_acls {
 		if (!$old_name) {
 			$tmp_parent_id = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_parent_id');
 			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-			$log_message = sprintf(__("%s was updated to %s on the %s ACL"), $old_address, $post['acl_addresses'], $tmp_name);
+			$log_message = sprintf(__("'%s' was updated to '%s' on the '%s' ACL"), $old_address, $post['acl_addresses'], $tmp_name);
 		}
 		addLogEntry($log_message);
 		return true;
@@ -222,7 +164,7 @@ class fm_dns_acls {
 			$tmp_parent_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_parent_id');
 			$tmp_address = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses');
 			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-			$log_message = sprintf(__("%s was deleted from the %s ACL"), $tmp_address, $tmp_name);
+			$log_message = sprintf(__("'%s' was deleted from the '%s' ACL"), $tmp_address, $tmp_name);
 		} else {
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET `acl_status`='deleted' WHERE account_id='{$_SESSION['user']['account_id']}' AND `acl_parent_id`='" . sanitize($id) . "'";
 			$fmdb->query($query);
@@ -355,6 +297,15 @@ HTML;
 			);
 		} else {
 			$acl_elements = $this->getACLList($server_serial_no, 'all', "AND acl_id!='$acl_parent_id'");
+			/** Remove used elements from the dropdown */
+			$previously_used_addresses = $this->getACLElements($acl_parent_id, 'ids-only');
+			if (is_array($previously_used_addresses)) {
+				foreach ($acl_elements as $k => $item) {
+					if (in_array($item['id'], $previously_used_addresses)) {
+						unset($acl_elements[$k]);
+					}
+				}
+			}
 			$found = false;
 			foreach ($acl_elements as $item) {
 				if ($acl_addresses == $item['id']) {
@@ -622,9 +573,10 @@ HTML;
 	 * @subpackage fmDNS
 	 *
 	 * @param integer $acl_id ACL ID to query
+	 * @param string $format What format to return (display|ids-only)
 	 * @return array
 	 */
-	function getACLElements($acl_parent_id) {
+	function getACLElements($acl_parent_id, $format = 'display') {
 		global $fmdb, $__FM_CONFIG;
 		
 		$return = null;
@@ -633,24 +585,97 @@ HTML;
 			$count = $fmdb->num_rows;
 			$element_array = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
-				$element_id = $element_array[$i]->acl_id;
-				$return[$element_id]['element_addresses'] = $this->parseACL($element_array[$i]->acl_addresses);
-				
-				/** Delete permitted? */
-				if (currentUserCan(array('manage_servers'), $_SESSION['module'])) {
-					$return[$element_id]['element_edit'] = '<a class="subelement_edit" name="acl" href="#" id="' . $element_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-					$return[$element_id]['element_delete'] = ' ' . str_replace('__ID__', $element_id, $__FM_CONFIG['module']['icons']['sub_delete']);
-				} else {
-					$return[$element_id]['element_delete'] = $return[$element_id]['element_edit'] = null;
+				if ($format == 'display') {
+					$element_id = $element_array[$i]->acl_id;
+					$return[$element_id]['element_addresses'] = $this->parseACL($element_array[$i]->acl_addresses);
+					
+					/** Delete permitted? */
+					if (currentUserCan(array('manage_servers'), $_SESSION['module'])) {
+						$return[$element_id]['element_edit'] = '<a class="subelement_edit" name="acl" href="#" id="' . $element_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+						$return[$element_id]['element_delete'] = ' ' . str_replace('__ID__', $element_id, $__FM_CONFIG['module']['icons']['sub_delete']);
+					} else {
+						$return[$element_id]['element_delete'] = $return[$element_id]['element_edit'] = null;
+					}
+					
+					/** Element Comment */
+					$return[$element_id]['element_comment'] = $element_array[$i]->acl_comment;
+				} elseif ($format == 'ids-only') {
+					$return[] = $element_array[$i]->acl_addresses;
 				}
-				
-				/** Element Comment */
-				$return[$element_id]['element_comment'] = $element_array[$i]->acl_comment;
 			}
 		}
 		return $return;
 	}
 	
+	/**
+	 * Validates the submitted form
+	 *
+	 * @since 6.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $post Posted array
+	 * @return array|string
+	 */
+	function validatePost($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		/** Check name field length */
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_name');
+		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', $field_length), $field_length);
+		
+		$post['acl_addresses'] = sanitize($post['acl_addresses']);
+		if (isset($post['acl_bulk'])) $post['acl_bulk'] = sanitize($post['acl_bulk']);
+		$post['acl_comment'] = sanitize(trim($post['acl_comment']));
+		$post['account_id'] = $_SESSION['user']['account_id'];
+		$post['acl_id'] = intval($post['acl_id']);
+		$post['acl_parent_id'] = intval($post['acl_parent_id']);
+
+		/** Does the record already exist for this account? */
+		if (array_key_exists('acl_name', $post)) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $post['acl_name'], 'acl_', 'acl_name');
+			if ($fmdb->num_rows) return __('This ACL already exists.');
+		} else {
+			if (!$post['acl_addresses']) {
+				if (!$post['acl_bulk']) {
+					return __('No ACL address defined.') . $post['acl_comment'];
+				} else {
+					$tmp_post = $post;
+					unset($tmp_post['acl_bulk']);
+					foreach (explode("\n", $post['acl_bulk']) as $tmp_acl_line) {
+						list($tmp_post['acl_addresses'], $tmp_post['acl_comment']) = explode(';', str_replace(',', ';', trim($tmp_acl_line)));
+
+						// Prevent never-ending loop
+						if (!$tmp_post['acl_addresses']) return __('No ACL address defined.');
+
+						$result = $this->add($tmp_post);
+						if ($result !== true) return $result;
+					}
+					return true;
+				}
+			}
+		}
+
+		/** Cleans up acl_addresses for future parsing **/
+		if (!in_array($post['acl_addresses'], $this->getPredefinedACLs(null, null, 'names-only')) && strpos($post['acl_addresses'], 'acl_') === false && strpos($post['acl_addresses'], 'key_') === false) {
+			$ip_check = verifyAndCleanAddresses($post['acl_addresses']);
+			if ($ip_check != $post['acl_addresses']) return $ip_check;
+		}
+
+		if ($post['acl_addresses'] && $post['acl_parent_id']) {
+			if ($post['action'] == 'add' || ($post['action'] == 'edit' && $post['acl_addresses'] != getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses'))) {
+				$previously_used_addresses = $this->getACLElements(intval($post['acl_parent_id']), 'ids-only');
+				if (is_array($previously_used_addresses)) {
+					if (in_array($post['acl_addresses'], $previously_used_addresses)) {
+						return sprintf(__("'%s' is already defined in the ACL."), $post['acl_addresses']);
+					}
+				}
+			}
+		}
+		
+		return $post;
+	}
+
 }
 
 if (!isset($fm_dns_acls))

@@ -26,6 +26,7 @@
 * Server - [bug] Keys can now be deselected from primaries.
 * Server - [bug] Configuration options that support multiple instances now get built.
 * Server - [bug] Keys, ACLs, and logging channels can no longer be deleted when they are referenced.
+* Server - [bug] Duplicate ACL elements can no longer be assigned to an ACL.
 * Client - [bug] Fixed PHP errors. (Issue #600)
 
 5.3.3 (2023-05-10)
