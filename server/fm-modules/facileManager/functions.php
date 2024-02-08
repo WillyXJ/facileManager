@@ -411,7 +411,7 @@ HTML;
 		$process_all_text = _('Process all available updates now');
 		$process_all = <<<HTML
 		<div id="topheadpartright" style="display: none;">
-			<a class="single_line process_all_updates" href="#" title="$process_all_text"><i class="fa fa-refresh fa-lg"></i></a>
+			<a class="single_line process_all_updates tooltip-bottom" href="#" data-tooltip="$process_all_text"><i class="fa fa-refresh fa-lg"></i></a>
 			<span class="update_count"></span>
 		</div>
 HTML;
