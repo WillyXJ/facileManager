@@ -19,6 +19,7 @@
 * Server - [bug] Fixed user edits with PHP7.
 * Server - [bug] Fixed PHP errors.
 * Server - [bug] Fixed password reset message formatting.
+* Server - [bug] Fixed extra newline in client calls that can break the client. (Issue #606)
 
 4.5.1 (2024-01-30)
 ==================
