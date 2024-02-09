@@ -51,7 +51,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 		exit(1);
 	}
 	$data['server_version'] = $app_version;
-	$data['server_interfaces'] = implode(';', getInterfaceNames(PHP_OS));
+	$data['server_interfaces'] = implode(';', getInterfaceNames());
 	
 	echo fM("\n  --> Detection complete.  Continuing installation.\n\n");
 	

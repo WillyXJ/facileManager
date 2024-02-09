@@ -188,7 +188,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
  *
  * @param string $url URL to post data to
  * @param array $data Data to post
- * @return array
+ * @return boolean
  */
 function buildConf($url, $data) {
 	global $proto, $debug;
@@ -478,7 +478,7 @@ function configureAPMode($mode) {
  * @subpackage fmWifi
  *
  * @param $string $wdev Wireless device name
- * @return boolean
+ * @return array
  */
 function configureAPBridge($wdev) {
 	global $module_name, $data;
@@ -614,7 +614,7 @@ bridge_ports %s %s',
  * @subpackage fmWifi
  *
  * @param $string $wdev Wireless device name
- * @return boolean
+ * @return array
  */
 function configureAPRouter($wdev) {
 	global $module_name, $data;

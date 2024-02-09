@@ -76,10 +76,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', array('policy_type', 'policy_order_id'), 'policy_', "AND server_serial_no=$server_serial_no AND policy_type='$policy_type'");
 				$fmdb->num_rows += $template_id_count;
 				if ($fmdb->num_rows) {
-					$template_results = array_merge((array) $template_results, (array) $fmdb->last_result);
-					$fmdb->last_result = $template_results;
 					$policy_count = $fmdb->num_rows;
-					$policy_result = $fmdb->last_result;
+					$policy_result = array_merge((array) $template_results, (array) $fmdb->last_result);
 					
 					$function = $server_type . 'BuildConfig';
 					$config .= $this->$function($policy_result, $policy_count, $server_result[0]) . "\n\n";
@@ -1134,7 +1132,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								if ($l) break;
 								
 								if ($direction_group == 's-d') {
-									if (@array_key_exists($l, $group_array['s'])) {
+									if (@array_key_exists($l, (array) $group_array['s'])) {
 										$multiports[$k][] = ' ' . $services_not . $group_array['s'][$l] . '; ' . $services_not . $group_array['d'][$l];
 										unset($group_array);
 									}

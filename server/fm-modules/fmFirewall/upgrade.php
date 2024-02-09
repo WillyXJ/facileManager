@@ -402,7 +402,6 @@ function upgradefmFirewall_300($__FM_CONFIG, $running_version) {
 	if (isset($queries) && count($queries) && $queries[0]) {
 		foreach ($queries as $schema) {
 			$fmdb->query($schema);
-			echo '<p>' . $fmdb->last_query . '</p>';
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}

@@ -736,10 +736,6 @@ FORM;
 					<th width="33&#37;" scope="row"><label for="policy_source_translated">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="policy_source_translated" class="source_address_match_element" value="%s" /></td>
 				</tr>
-				<tr class="static_snat" %s>
-					<th width="33&#37;" scope="row"><label for="policy_nat_bidirectional">%s</label></th>
-					<td width="67&#37;">%s</td>
-				</tr>
 			</table>
 			<br />
 			<h4><input name="policy_dnat" id="policy_dnat" type="checkbox" %s /> <label for="policy_dnat">%s</label></h4>
@@ -759,7 +755,6 @@ FORM;
 				$policy_snat_checked, __('Source Address Translation'), $snat_style,
 				__('Translation Type'), $policy_snat_type,
 				$static_snat_style, __('Translated Address'), $policy_source_translated,
-				$static_snat_style, __('Bi Directional'), $policy_nat_bidirectional,
 				$policy_dnat_checked, __('Destination Address Translation'), $dnat_style,
 				__('Translated Address'), $policy_destination_translated,
 				__('Translated Port'), $policy_services_translated

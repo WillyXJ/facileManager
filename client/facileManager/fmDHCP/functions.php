@@ -110,7 +110,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
  *
  * @param string $url URL to post data to
  * @param array $data Data to post
- * @return array
+ * @return boolean
  */
 function buildConf($url, $data) {
 	global $proto, $debug;
@@ -224,7 +224,7 @@ function moduleInitWebRequest() {
  * @package facileManager
  * @subpackage fmDHCP
  *
- * @return array
+ * @return array|null
  */
 function detectServerType() {
 	$supported_servers = array('dhcpd'=>'dhcpd');
@@ -244,7 +244,7 @@ function detectServerType() {
  * @package facileManager
  * @subpackage fmDHCP
  *
- * @return array
+ * @return array|string|null
  */
 function detectDaemonVersion($return_array = false) {
 	$server = detectServerType();
@@ -268,7 +268,7 @@ function detectDaemonVersion($return_array = false) {
  * @package facileManager
  * @subpackage fmDHCP
  *
- * @return array
+ * @return array|boolean
  */
 function getStartupScript($app) {
 	$distros = array(

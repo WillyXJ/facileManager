@@ -555,7 +555,7 @@ function dumpZone($domain, $zonefile) {
  * @since 3.0
  * @package fmDNS
  *
- * @param array $rndc_actions rndc actions to run
+ * @param array|string $rndc_actions rndc actions to run
  * @return boolean
  */
 function runRndcActions($rndc_actions = array()) {
@@ -653,7 +653,7 @@ function validateAPIParam($param, $value) {
  *
  * @param string $param Parameter name
  * @param string $value Parameter value
- * @return boolean
+ * @return array
  */
 function setURLConfig() {
 	global $module_name;
@@ -713,7 +713,7 @@ function setURLConfig() {
  * @return boolean
  */
 function enableURL() {
-	global $module_name, $url, $data;
+	global $module_name, $url, $data, $debug;
 
 	if (!array_key_exists('server_name', $data)) {
 		$data['server_name'] = gethostname();

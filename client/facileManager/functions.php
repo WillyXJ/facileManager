@@ -640,7 +640,7 @@ function generateSerialNo($url, $data) {
  * @since 1.0
  * @package facileManager
  *
- * @return string
+ * @return array|boolean
  */
 function detectWebServer() {
 	$httpd_choices = array(
@@ -806,7 +806,7 @@ function initWebRequest() {
  * @param string $update_method User entered update method
  * @param array $data Data array containing client information
  * @param string $url URL to post data to
- * @return string
+ * @return string|void
  */
 function processUpdateMethod($module_name, $update_method, $data, $url) {
 	global $argv;
@@ -844,8 +844,6 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			else echo fM("  --> The crontab has been created.\n");
 			
 			return 'cron';
-
-			break;
 		/** ssh */
 		case 's':
 			$raw_data = getPostData(str_replace('genserial', 'ssh=user', $url), $data);
@@ -891,8 +889,6 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'ssh';
-			
-			break;
 		/** http(s) */
 		case 'h':
 			/** Detect which web server is running */
@@ -919,8 +915,6 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 			addSudoersConfig($module_name, $sudoers_line, $user);
 
 			return 'http';
-
-			break;
 	}
 }
 
@@ -933,7 +927,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
  *
  * @param array $user_info User information to add
  * @param array $passwd_users Array of existing system users
- * @return boolean
+ * @return boolean|string
  */
 function addUser($user_info, $passwd_users) {
 	list($user_name, $user_comment) = $user_info;
@@ -1457,7 +1451,6 @@ function getInterfaceNames() {
 			break;
 		default:
 			return null;
-			break;
 	}
 	
 	exec($command . ' | awk "{print \$1}" | sort | uniq', $interfaces);
@@ -1497,7 +1490,6 @@ function getInterfaceAddresses($interface = null) {
 			break;
 		default:
 			return null;
-			break;
 	}
 	
 	exec($command . $interface . ' | grep inet | awk \'{print $2}\' | egrep -v \'127.0.0.1|^::1|^169.254.\' | sort | uniq', $addresses);
@@ -1513,7 +1505,7 @@ function getInterfaceAddresses($interface = null) {
  * @package facileManager
  *
  * @param string|array $packages Package names to install
- * @return array
+ * @return boolean
  */
 function installPackage($packages) {
 	if (!is_array($packages)) {
@@ -1707,7 +1699,7 @@ function getWebServerInfo() {
  *
  * @param string $url URL to query
  * @param array $data Information to submit
- * @return boolean
+ * @return void
  */
 function addToConfigFile($config_file, $content, $break_on_string = null) {
 	global $module_name, $data;
