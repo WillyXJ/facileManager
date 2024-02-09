@@ -2562,6 +2562,7 @@ INSERTSQL;
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_option` = 'primaries' WHERE `def_option` = 'masters'";
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'P' WHERE `def_option` = 'include'";
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name` = 'primaries' WHERE `cfg_name` = 'masters'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = REPLACE(def_zone_support, 'M', 'P')";
 	$queries[] = <<<TABLESQL
 	CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}files` (
 	  `file_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
