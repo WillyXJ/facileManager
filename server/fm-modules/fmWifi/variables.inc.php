@@ -31,11 +31,11 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmWifi'] = array(
-		'version'							=> '0.4.0',
-		'client_version'					=> '0.4.0',
+		'version'							=> '0.5.0',
+		'client_version'					=> '0.5.0',
 		'description'						=> __('Manage wifi access points with hostapd.', 'fmWifi'),
 		'prefix'							=> 'wifi_',
-		'required_fm_version'				=> '4.4.0',
+		'required_fm_version'				=> '4.6.0',
 		'required_daemon_version'			=> '2.4',
 		'min_client_auto_upgrade_version'	=> '0.1'
 	);

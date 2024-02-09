@@ -1,4 +1,4 @@
-3.0.0 (2021-??-??)
+3.0.0 (2024-02-09)
 ==================
 * Server - [feature] Added support for NAT rules in iptables.
 * Server - [feature] Added support for defining UID in policy rules.

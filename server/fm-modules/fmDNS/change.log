@@ -1,4 +1,4 @@
-5.4.0 (2023-??-??)
+6.0.0 (2024-02-09)
 ==================
 * Server - [feature] Added support for several more global option and logging parameters.
 * Server - [feature] Added support for HTTP endpoints and TLS connections.
@@ -10,13 +10,11 @@
 * Server - [improvement] Added view name to the top bar. (Issue #602)
 * Server - [improvement] Users get returned to previous page with search criteria after managing
            zone records.
-* Client - [improvement] Client now specifies named.conf.keys location with rndc. (Issue #389)
 * Server - [improvement] Updated to use primary/secondary nomenclature.
 * Server - [improvement] Template and Name Server configs get copied to the new reverse zone
            when automatically creating the zone from a PTR. (Issue #570)
 * Server - [improvement] auto-dnssec has been replaced with dnssec-policy when enabling DNSSEC
            on a zone. Only internal policies are supported at this time. (Issue #568)
-* Client - [improvement] Client now specifies named.conf.keys location with rndc. (Issue #389)
 * Server - [bug] Fixed an issue where automatic PTR records would not get created.
 * Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582 #583)
 * Server - [bug] PTR records are now deleted with the linked A record. (Issue #580)
@@ -27,6 +25,7 @@
 * Server - [bug] Configuration options that support multiple instances now get built.
 * Server - [bug] Keys, ACLs, and logging channels can no longer be deleted when they are referenced.
 * Server - [bug] Duplicate ACL elements can no longer be assigned to an ACL.
+* Client - [improvement] Client now specifies named.conf.keys location with rndc. (Issue #389)
 * Client - [bug] Fixed PHP errors. (Issue #600)
 
 5.3.3 (2023-05-10)

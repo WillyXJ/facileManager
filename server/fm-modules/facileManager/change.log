@@ -1,4 +1,4 @@
-4.6.0 (2023-??-??)
+4.6.0 (2024-02-09)
 ==================
 * Server - [security] Password reset mailing errors now only show when "Show Errors" is
            enabled. (Issue #592)
