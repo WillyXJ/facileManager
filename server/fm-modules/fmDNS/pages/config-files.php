@@ -84,5 +84,3 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_dns_files->rows($result, $page, $total_pages);
 
 printFooter();
-
-?>

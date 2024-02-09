@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -1048,7 +1048,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @since 1.0
 	 * @package fmDNS
 	 */
-	function buildZoneFile($domain, $server_serial_no, $server_group_ids) {
+	function buildZoneFile($domain, $server_serial_no, $server_group_ids = null) {
 		global $__FM_CONFIG, $fmdb;
 		
 		/** Get datetime formatting */
@@ -1832,7 +1832,7 @@ HTML;
 	 * @since 1.3
 	 * @package fmDNS
 	 *
-	 * @return string
+	 * @return array
 	 */
 	function getHintZone() {
 		$local_hint_zone = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/extra/named.root';
@@ -2169,7 +2169,7 @@ HTML;
 	 *
 	 * @param array $zone_array The zone data
 	 * @param integer $server_id The server id to check
-	 * @return array
+	 * @return string
 	 */
 	function resolveServerGroupMasters($masters) {
 		global $__FM_CONFIG;
@@ -2293,7 +2293,7 @@ HTML;
 	 * @package fmDNS
 	 *
 	 * @param string $soa SOA value
-	 * @return integer
+	 * @return integer|string
 	 */
 	function getSOASeconds($soa) {
 		if (!preg_match('/\d[a-zA-Z]/', $soa)) {
@@ -2459,7 +2459,6 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 				break;
 			default:
 				return null;
-				break;
 		}
 
 		$config = sprintf($config, $comment, str_replace('*', '(^.*|\.)', str_replace('.', '\.', $hostname)), $url);
@@ -2714,5 +2713,3 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 
 if (!isset($fm_module_buildconf))
 	$fm_module_buildconf = new fm_module_buildconf();
-
-?>

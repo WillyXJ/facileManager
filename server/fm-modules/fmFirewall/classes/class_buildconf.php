@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -172,9 +172,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$data = $result[0];
 			extract(get_object_vars($data), EXTR_SKIP);
 			
-			$reset_build = setBuildUpdateConfigFlag($server_serial_no, 'no', 'build');
-			$reset_update = setBuildUpdateConfigFlag($server_serial_no, 'no', 'update');
-//			$msg = (!setBuildUpdateConfigFlag($server_serial_no, 'no', 'build') && !setBuildUpdateConfigFlag($server_serial_no, 'no', 'update')) ? "Could not update the backend database.\n" : "Success.\n";
+			$retval = setBuildUpdateConfigFlag($server_serial_no, 'no', 'build');
+			$retval = setBuildUpdateConfigFlag($server_serial_no, 'no', 'update');
 			$msg = "Success.\n";
 		} else $msg = "Server is not found.\n";
 		
@@ -527,7 +526,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	}
 	
 	
-	function pfBuildConfig($policy_result, $count) {
+	function pfBuildConfig($policy_result, $count, $server_result) {
 		global $fmdb, $__FM_CONFIG, $fm_module_services;
 		
 		if (!class_exists(('fm_module_services'))) {
@@ -686,7 +685,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								if ($l) break;
 								
 								if ($direction_group == 's-d') {
-									if (@array_key_exists($l, $group_array['s'])) {
+									if (is_array($group_array['s']) && array_key_exists($l, $group_array['s'])) {
 										$s_equals = (strpos($group_array['s'][$l], ':') === false) ? '= ' : null;
 										$d_equals = (strpos($group_array['d'][$l], ':') === false) ? '= ' : null;
 										
@@ -1310,5 +1309,3 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 if (!isset($fm_module_buildconf))
 	$fm_module_buildconf = new fm_module_buildconf();
-
-?>

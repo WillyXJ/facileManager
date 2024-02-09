@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -188,5 +188,3 @@ printf('
 		$update_core, getPageTitle(), $module_display);
 
 printFooter(null, $output);
-
-?>

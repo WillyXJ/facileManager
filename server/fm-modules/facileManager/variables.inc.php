@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -113,5 +113,3 @@ if (!defined('TMP_FILE_EXPORTS')) {
 /** PWD_STRENGTH */
 if (class_exists('fmdb')) $auth_fm_pw_strength = getOption('auth_fm_pw_strength');
 $GLOBALS['PWD_STRENGTH'] = (isset($auth_fm_pw_strength) && !empty($auth_fm_pw_strength)) ? $auth_fm_pw_strength : 'strong';
-
-?>

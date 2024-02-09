@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -583,8 +583,6 @@ function runRndcActions($rndc_actions = array()) {
  *
  * @since 3.0
  * @package fmDNS
- *
- * @return boolean
  */
 function addChrootFiles() {
 	if (file_exists('/usr/libexec/setup-named-chroot.sh') && !exec('grep -c ' . escapeshellarg('named.conf.keys') . ' /usr/libexec/setup-named-chroot.sh')) {
@@ -598,8 +596,6 @@ function addChrootFiles() {
  *
  * @since 4.0
  * @package fmDNS
- *
- * @return boolean
  */
 function callAPI($url, $data) {
 	list($url, $data) = loadAPICredentials($url, $data);
@@ -627,7 +623,6 @@ function callAPI($url, $data) {
  *
  * @param string $param Parameter name
  * @param string $value Parameter value
- * @return boolean
  */
 function validateAPIParam($param, $value) {
 	$api_quick_validation = array(
@@ -737,6 +732,3 @@ function enableURL() {
 
 	exit(fM("\nConfiguration complete.\n"));
 }
-
-
-?>

@@ -3,6 +3,9 @@
 * Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
 * Server - [bug] Fixed additional PHP8 compatibility errors. (Issue #582)
 * Server - [bug] Fixed init scripts for Raspberry Pi.
+* Server - [bug] Fixed PHP errors.
+* Server - [bug] Fixed AP group updates.
+* Client - [bug] Removed unused variable reference.
 
 0.4.0 (2023-03-09)
 ==================

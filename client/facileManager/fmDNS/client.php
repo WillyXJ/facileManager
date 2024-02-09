@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -163,5 +163,3 @@ if ($dump_zone) {
 $retval = ($api_call) ? callAPI($url, $data) : buildConf($url, $data);
 
 if (!$retval) exit(1);
-
-?>

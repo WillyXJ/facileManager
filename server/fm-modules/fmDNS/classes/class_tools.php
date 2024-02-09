@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -642,7 +642,7 @@ BODY;
 	 * @param string $action Action to take on the record
 	 * @param integer $id Unique ID
 	 * @param string $checked Check the tickbox
-	 * @return boolean
+	 * @return string
 	 */
 	function displayImportRow($array, $action, $id, $checked = null) {
 		$editable = ($action == _('Delete')) ? false : true;
@@ -740,7 +740,7 @@ BODY;
 	 * @since 3.0
 	 * @package fmDNS
 	 *
-	 * @return boolean
+	 * @return string
 	 */
 	function bulkZoneImportWizard() {
 		global $__FM_CONFIG, $fmdb, $fm_name, $fm_dns_views, $fm_dns_zones, $fm_dns_records;
@@ -996,5 +996,3 @@ BODY;
 
 if (!isset($fm_module_tools))
 	$fm_module_tools = new fm_module_tools();
-
-?>

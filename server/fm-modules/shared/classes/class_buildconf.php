@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -28,7 +28,7 @@ class fm_shared_module_buildconf {
 	 * @package facileManager
 	 *
 	 * @param array $raw_data Array containing files and contents
-	 * @return string
+	 * @return array
 	 */
 	function processConfigs($raw_data) {
 		$preview = $check_status = null;
@@ -140,7 +140,7 @@ class fm_shared_module_buildconf {
 	 * @package facileManager
 	 *
 	 * @param array $post_data Array containing data posted by client
-	 * @return string
+	 * @return string|array|void
 	 */
 	function buildCronConfigs($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -203,8 +203,8 @@ class fm_shared_module_buildconf {
 			$data = $result[0];
 			extract(get_object_vars($data), EXTR_SKIP);
 			
-			$reset_build = setBuildUpdateConfigFlag($server_serial_no, 'no', 'build');
-			$reset_update = setBuildUpdateConfigFlag($server_serial_no, 'no', 'update');
+			$ret_val = setBuildUpdateConfigFlag($server_serial_no, 'no', 'build');
+			$ret_val = setBuildUpdateConfigFlag($server_serial_no, 'no', 'update');
 			$msg = "Success.\n";
 			
 			if (method_exists($fm_module_buildconf, 'moduleUpdateReloadFlags')) {
@@ -250,5 +250,3 @@ class fm_shared_module_buildconf {
 	
 	
 }
-
-?>

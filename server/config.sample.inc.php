@@ -21,5 +21,3 @@ $__FM_CONFIG['db']['name'] = 'facileManager';
 // $__FM_CONFIG['db']['cipher'] = null;
 
 require_once(ABSPATH . 'fm-modules/facileManager/functions.php');
-
-?>

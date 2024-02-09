@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -159,7 +159,7 @@ HTML;
 	 *
 	 * @param string $id ID to delete
 	 * @param integer $server_serial_no Server serial number to delete from
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
@@ -187,7 +187,7 @@ HTML;
 	 * @subpackage fmDHCP
 	 *
 	 * @param integer $server_serial_no Server serial number to query
-	 * @return null
+	 * @return string
 	 */
 	function getServerLeases($server_serial_no) {
 		$command_args = '-l dump -o web';
@@ -232,70 +232,7 @@ HTML;
 			unset($_REQUEST['request_uri']['server_serial_no']);
 		}
 		
-		return $fm_dhcp_item->printForm(null, 'add', 'host', array('config_data' => $hostname, 'fixed_address' => $ip, 'hardware_address_entry' => array('ethernet', $hardware)));
-
-		$popup_title = __('Convert Lease');
-		$popup_header = buildPopup('header', $popup_title);
-		$popup_footer = buildPopup('footer');
-		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="object-hosts.php">
-		%s
-			<input type="hidden" name="lease_info" value="%s" />
-			<input type="hidden" name="server_serial_no" value="%s" />
-			<table class="form-table">
-				%s
-				<tr>
-					<th width="33&#37;" scope="row"><label for="config_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="config_comment" name="config_comment" rows="4" cols="30"></textarea></td>
-				</tr>
-			</table>
-		%s
-		</form>
-		<script>
-			$(document).ready(function() {
-				$("#manage select").select2({
-					width: "200px",
-					minimumResultsForSearch: 10
-				});
-			});
-		</script>',
-				$popup_header, $ip, $server_serial_no,
-				$fm_dhcp_item->printForm(null, 'add', 'host', array('config_data' => $hostname, 'fixed_address' => $ip, 'hardware_address_entry' => array('ethernet', $hardware))),
-				_('Comment'),
-				$popup_footer
-			);
-
-		return $return_form;
-
-
-
-
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
-		%s
-			<input type="hidden" name="lease_info" value="%s" />
-			<input type="hidden" name="server_serial_no" value="%s" />
-			<table class="form-table">
-				<tr>
-					<th width="33&#37;" scope="row"><label for="config_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="config_comment" name="config_comment" rows="4" cols="30">%s</textarea></td>
-				</tr>
-			</table>
-		%s
-		</form>
-		<script>
-			$(document).ready(function() {
-				$("#manage select").select2({
-					width: "200px",
-					minimumResultsForSearch: 10
-				});
-			});
-		</script>',
-				$popup_header, sanitize($_POST['item_id']), $server_serial_no,
-				_('Comment'), $config_comment,
-				$popup_footer
-			);
-
-		return $return_form;
+		return $fm_dhcp_item->printForm(array(), 'add', 'host', array('config_data' => $hostname, 'fixed_address' => $ip, 'hardware_address_entry' => array('ethernet', $hardware)));
 	}
 	
 	
@@ -370,5 +307,3 @@ HTML;
 
 if (!isset($fm_dhcp_leases))
 	$fm_dhcp_leases = new fm_dhcp_leases();
-
-?>

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -542,7 +542,7 @@ HTML;
 	 * @subpackage fmDNS
 	 *
 	 * @param array $data POSTed data
-	 * @return array
+	 * @return array|string
 	 */
 	private function generateDNSSECKeys($data) {
 		global $__FM_CONFIG;
@@ -604,7 +604,7 @@ HTML;
 	 * @subpackage fmDNS
 	 *
 	 * @param array $data POSTed data
-	 * @return array or string
+	 * @return array|string
 	 */
 	private function revokeDNSSECKey($data) {
 		global $fmdb, $__FM_CONFIG;
@@ -642,7 +642,6 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $ids IDs to convert to names
 	 * @return string
 	 */
 	function buildFilterMenu() {
@@ -673,5 +672,3 @@ HTML;
 
 if (!isset($fm_dns_keys))
 	$fm_dns_keys = new fm_dns_keys();
-
-?>

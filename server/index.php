@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -57,6 +57,3 @@ if (function_exists('includeModuleFile')) {
 		@include(includeModuleFile($_SESSION['module'], $GLOBALS['basename']));
 	} else throwHTTPError('404');
 }
-
-
-?>

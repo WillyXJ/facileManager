@@ -228,4 +228,3 @@ function loadAPStatus(APid) {
 }
 
 ';
-?>

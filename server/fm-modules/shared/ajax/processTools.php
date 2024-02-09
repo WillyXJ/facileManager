@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -47,5 +47,3 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	echo buildPopup('header', _('Error'));
 	printf("<p>%s</p>\n", _('You are not authorized to run these tools.'));
 }
-
-?>

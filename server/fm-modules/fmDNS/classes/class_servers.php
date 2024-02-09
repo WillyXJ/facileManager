@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -34,7 +34,6 @@ class fm_module_servers extends fm_shared_module_servers {
 		$results = $fmdb->last_result;
 
 		$bulk_actions_list = null;
-//		if (currentUserCan('manage_servers', $_SESSION['module'])) $bulk_actions_list = array('Enable', 'Disable', 'Delete', 'Upgrade');
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -459,8 +458,6 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			return formatError(__('This server group could not be deleted.'), 'sql');
 		}
-
-		return __('There is something wrong with your request.');
 	}
 
 
@@ -883,7 +880,7 @@ FORM;
 	 * @param array $result Database results
 	 * @param integer $count Number of db results
 	 * @param integer $server_id Server ID to remove from assignments
-	 * @return boolean
+	 * @return boolean|string
 	 */
 	function updateNameServerAssignments($result, $count, $server_id) {
 		global $fmdb, $__FM_CONFIG;
@@ -915,7 +912,7 @@ FORM;
 	 * @subpackage fmDNS
 	 *
 	 * @param integer $server_id Server ID to lookup
-	 * @return array
+	 * @return array|boolean
 	 */
 	function getServerGroupIDs($server_id) {
 		global $fmdb, $__FM_CONFIG;
@@ -942,7 +939,7 @@ FORM;
 	 * @subpackage fmDNS
 	 *
 	 * @param integer $group_id Group ID to lookup
-	 * @return array
+	 * @return array|boolean
 	 */
 	function getGroupServerIDs($group_id) {
 		global $fmdb, $__FM_CONFIG;
@@ -967,7 +964,7 @@ FORM;
 	 *
 	 * @param integer $server_serial_no Server serial number to query by
 	 * @param string $server_id Server/Group ID to query by
-	 * @return array
+	 * @return array|string
 	 */
 	function deleteServerSpecificConfigs($server_serial_no, $server_id) {
 		global $fmdb, $__FM_CONFIG;
@@ -1071,7 +1068,7 @@ FORM;
 	 * @subpackage fmDNS
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	private function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -1148,5 +1145,3 @@ FORM;
 
 if (!isset($fm_module_servers))
 	$fm_module_servers = new fm_module_servers();
-
-?>

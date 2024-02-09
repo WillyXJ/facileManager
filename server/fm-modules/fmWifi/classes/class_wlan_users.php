@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -87,7 +87,7 @@ class fm_wifi_wlan_users {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -95,7 +95,6 @@ class fm_wifi_wlan_users {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post); exit;
 		
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}wlan_users` (`account_id`, `wlan_user_login`, `wlan_user_password`, `wlan_user_comment`, `wlan_user_mac`, `wlan_ids`) 
 				VALUES('{$_SESSION['user']['account_id']}', '{$post['wlan_user_login']}', '{$post['wlan_user_password']}', '{$post['wlan_user_comment']}', '{$post['wlan_user_mac']}', '{$post['wlan_ids']}')";
@@ -122,7 +121,7 @@ class fm_wifi_wlan_users {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -130,7 +129,6 @@ class fm_wifi_wlan_users {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post);exit;
 		
 		$exclude = array('submit', 'action', 'user_id', 'type');
 
@@ -174,7 +172,7 @@ class fm_wifi_wlan_users {
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $id ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
@@ -331,10 +329,10 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validatePost($post) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fmdb;
 
 		$post['wlan_user_login'] = sanitize($post['user_login']);
 		$post['wlan_user_password'] = sanitize($post['user_password']);
@@ -373,5 +371,3 @@ HTML;
 
 if (!isset($fm_wifi_wlan_users))
 	$fm_wifi_wlan_users = new fm_wifi_wlan_users();
-
-?>

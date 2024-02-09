@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -88,10 +88,9 @@ class fm_dhcp_objects {
 	 * @subpackage fmDHCP
 	 *
 	 * @param array $post $_POST data
-	 * @param string $type Object type
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
-	function add($post, $type) {
+	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Validate entries */
@@ -112,12 +111,6 @@ class fm_dhcp_objects {
 		
 		if (empty($name)) return __('No name defined.');
 		
-//		/** Ensure unique channel names */
-//		if (!$this->validateChannel($post)) return __('This channel already exists.');
-		
-//		if ($post['config_destination'] == 'file') {
-//			if (empty($post['config_file_path'][0])) return __('No file path defined.');
-//		}
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_type', 'config_name', 'config_comment', 'config_parent_id'), $this->getIncludedFields());
 		
 		/** Insert the category parent */
@@ -161,25 +154,8 @@ class fm_dhcp_objects {
 		
 		$i = 1;
 		foreach ($include as $handler) {
-//			$post['config_data'] = $post[$handler];
-//			/** Logic checking */
-//			if ($handler == 'config_destination' && $post[$handler] == 'syslog') {
-//				$post['config_data'] = $post['config_syslog'];
-//			} elseif ($handler == 'config_destination' && $post[$handler] == 'file') {
-//				list($file_path, $file_versions, $file_size, $file_size_spec) = $post['config_file_path'];
-//				$filename = str_replace('"', '', $file_path);
-//				$post['config_data'] = '"' . $filename . '"';
-//				if ($file_versions) $post['config_data'] .= ' versions ' . $file_versions;
-//				if (!empty($file_size) && $file_size > 0) $post['config_data'] .= ' size ' . $file_size . $file_size_spec;
-//			}
-//			if ($handler == 'config_destination') {
-//				$post['config_name'] = $post['config_destination'];
-//			} elseif (in_array($handler, array('print-category', 'print-severity', 'print-time')) && !sanitize($post['config_data'])) {
-//				continue;
-//			} else {
-				$child['config_name'] = $handler;
-				$child['config_data'] = $post[$handler];
-//			}
+			$child['config_name'] = $handler;
+			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
 				$clean_data = sanitize($data);
@@ -220,7 +196,7 @@ class fm_dhcp_objects {
 	 * @subpackage fmDHCP
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -228,7 +204,6 @@ class fm_dhcp_objects {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post);exit;
 		
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
@@ -277,25 +252,8 @@ class fm_dhcp_objects {
 		
 		foreach ($include as $handler) {
 			$sql_values = null;
-//			$post['config_data'] = $post[$handler];
-//			/** Logic checking */
-//			if ($handler == 'config_destination' && $post[$handler] == 'syslog') {
-//				$post['config_data'] = $post['config_syslog'];
-//			} elseif ($handler == 'config_destination' && $post[$handler] == 'file') {
-//				list($file_path, $file_versions, $file_size, $file_size_spec) = $post['config_file_path'];
-//				$filename = str_replace('"', '', $file_path);
-//				$post['config_data'] = '"' . $filename . '"';
-//				if ($file_versions) $post['config_data'] .= ' versions ' . $file_versions;
-//				if (!empty($file_size) && $file_size > 0) $post['config_data'] .= ' size ' . $file_size . $file_size_spec;
-//			}
-//			if ($handler == 'config_destination') {
-//				$post['config_name'] = $post['config_destination'];
-//			} elseif (in_array($handler, array('print-category', 'print-severity', 'print-time')) && !sanitize($post['config_data'])) {
-//				continue;
-//			} else {
-				$child['config_name'] = $handler;
-				$child['config_data'] = $post[$handler];
-//			}
+			$child['config_name'] = $handler;
+			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
 				$clean_data = sanitize($data);
@@ -320,49 +278,6 @@ class fm_dhcp_objects {
 		}
 
 		return true;
-		exit;
-		
-		$result = $fmdb->query($query);
-		
-		if ($fmdb->sql_errors) {
-			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
-		}
-		
-		
-		
-		
-		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun');
-
-		$sql_edit = null;
-		
-		/** Loop through all posted keys and values to build SQL statement */
-		foreach ($post as $key => $data) {
-			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
-			}
-		}
-		$sql = rtrim($sql_edit, ',');
-		
-		/** Update the server */
-		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
-		
-		if ($fmdb->sql_errors) {
-			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
-		}
-		
-		/** Return if there are no changes */
-		if (!$fmdb->rows_affected) return true;
-
-		/** Server changed so configuration needs to be built */
-		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
-		
-		/** Add entry to audit log */
-		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nType: {$post['server_type']}\n" .
-					"Update Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}");
-		return true;
 	}
 	
 	/**
@@ -373,7 +288,7 @@ class fm_dhcp_objects {
 	 * @subpackage fmDHCP
 	 *
 	 * @param integer $id ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
@@ -978,7 +893,7 @@ HTML;
 	 * @subpackage fmDHCP
 	 *
 	 * @param integer $number Number to start counting at
-	 * @param string $values Array containing existing values
+	 * @param array $values Array containing existing values
 	 * @return string
 	 */
 	function getRangeInputForm($number = 1, $values = null) {
@@ -1004,7 +919,7 @@ HTML;
 	 * @subpackage fmDHCP
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validateObjectPost($post) {
 		global $__FM_CONFIG;
@@ -1067,5 +982,3 @@ HTML;
 
 if (!isset($fm_dhcp_objects))
 	$fm_dhcp_objects = new fm_dhcp_objects();
-
-?>

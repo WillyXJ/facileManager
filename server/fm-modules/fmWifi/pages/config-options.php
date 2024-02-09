@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -129,9 +129,7 @@ printFooter();
  * @package facileManager
  * @subpackage fmWifi
  *
- * @param integer $server_serial_no Selected server serial number
- * @param array $available_servers Available servers for the list
- * @param array $class Additional classes to pass to the div
+ * @param integer $item_id
  * @return string
  */
 function buildObjectsSubMenu($item_id = 0) {
@@ -143,10 +141,8 @@ function buildObjectsSubMenu($item_id = 0) {
 		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
 	}
 	
-	$class = $class ? 'class="' . join(' ', (array) $class) . '"' : null;
-
 	$return = <<<HTML
-	<div id="configtypesmenu" $class>
+	<div id="configtypesmenu">
 		<form action="{$GLOBALS['basename']}" method="GET">
 		$hidden_inputs
 		$object_list
@@ -157,5 +153,3 @@ HTML;
 	return $return;
 }
 
-
-?>

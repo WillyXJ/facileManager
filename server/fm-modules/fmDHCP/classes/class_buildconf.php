@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -31,7 +31,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmDHCP
 	 *
 	 * @param array $raw_data Array containing files and contents
-	 * @return string
+	 * @return string|array|void
 	 */
 	function buildServerConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -316,7 +316,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmDHCP
 	 *
 	 * @param array $raw_data Array containing files and contents
-	 * @return string
+	 * @return string|void
 	 */
 	function buildCronConfigs($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -393,7 +393,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmDHCP
 	 *
 	 * @param array $files_array Array containing files and contents
-	 * @return string
+	 * @return string|void
 	 */
 	function processConfigsChecks($files_array) {
 		global $__FM_CONFIG;
@@ -475,5 +475,3 @@ HTML;
 
 if (!isset($fm_module_buildconf))
 	$fm_module_buildconf = new fm_module_buildconf();
-
-?>

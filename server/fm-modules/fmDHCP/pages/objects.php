@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -24,7 +24,6 @@ if (!isset($type)) {
 	header('Location: object-hosts.php');
 	exit;
 }
-//if (isset($_GET['type'])) header('Location: config-' . sanitize(strtolower($_GET['type'])) . '.php');
 
 /** Ensure user can use this page */
 if (!currentUserCan(array_merge($required_permission, array('view_all')), $_SESSION['module'])) unAuth();
@@ -54,7 +53,7 @@ if (currentUserCan($required_permission, $_SESSION['module'])) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_dhcp_item->update($_POST, $type);
+			$result = $fm_dhcp_item->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -96,5 +95,3 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_dhcp_item->rows($result, $page, $total_pages, $type);
 
 printFooter();
-
-?>

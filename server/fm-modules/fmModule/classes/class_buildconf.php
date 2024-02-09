@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -145,5 +145,3 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 if (!isset($fm_module_buildconf))
 	$fm_module_buildconf = new fm_module_buildconf();
-
-?>

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -42,7 +42,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		}
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
-								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
 		}
@@ -448,17 +448,12 @@ HTML;
 				break;
 			case 'OpenBSD':
 				return array();
-				return array('pf');
-				break;
 			case 'Darwin':
 				return array('ipfw');
-				break;
 			case 'SunOS':
 				return array('ipfilter');
-				break;
 			case 'Linux':
 				return array('iptables');
-				break;
 		}
 		
 		return $all_firewalls;
@@ -468,5 +463,3 @@ HTML;
 
 if (!isset($fm_module_servers))
 	$fm_module_servers = new fm_module_servers();
-
-?>

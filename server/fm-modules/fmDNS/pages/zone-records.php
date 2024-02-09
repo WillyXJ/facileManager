@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -198,7 +198,7 @@ echo $body . '</div>' . "\n";
 printFooter();
 
 
-function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'forward', $supported_record_types, $search_query = null) {
+function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'forward', $supported_record_types = array(), $search_query = null) {
 	global $fmdb, $__FM_CONFIG;
 	
 	$menu_selects = $menu_sub_selects = null;
@@ -290,5 +290,3 @@ function isValidDomain($domain_id) {
 	
 	return false;
 }
-
-?>

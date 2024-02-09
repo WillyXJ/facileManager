@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -96,7 +96,7 @@ class fm_module_templates {
 	 * @subpackage fmfmFirewall
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -177,7 +177,7 @@ class fm_module_templates {
 	 * @subpackage fmfmFirewall
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -281,7 +281,7 @@ class fm_module_templates {
 	 * @subpackage fmFirewall
 	 *
 	 * @param integer $server_id Server ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($id) {
 		global $fmdb, $__FM_CONFIG;
@@ -316,7 +316,7 @@ class fm_module_templates {
 		$bars_title = __('Click and drag to reorder');
 		
 		if (currentUserCan('manage_policies', $_SESSION['module'])) {
-			$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 //			$edit_status .= '<a class="status_form_link" href="#" rel="';
 //			$edit_status .= ($row->policy_status == 'active') ? 'disabled' : 'active';
 //			$edit_status .= '">';
@@ -652,5 +652,3 @@ HTML;
 
 if (!isset($fm_module_templates))
 	$fm_module_templates = new fm_module_templates();
-
-?>

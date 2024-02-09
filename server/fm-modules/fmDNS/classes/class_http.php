@@ -513,5 +513,3 @@ HTML;
 
 if (!isset($fm_module_http))
 	$fm_module_http = new fm_module_http();
-
-?>

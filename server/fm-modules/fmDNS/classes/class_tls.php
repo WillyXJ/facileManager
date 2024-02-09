@@ -526,5 +526,3 @@ HTML;
 
 if (!isset($fm_module_tls))
 	$fm_module_tls = new fm_module_tls();
-
-?>

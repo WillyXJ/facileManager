@@ -655,4 +655,3 @@ function validateTimeFormat(event, that) {
 	}
 }
 ';
-?>

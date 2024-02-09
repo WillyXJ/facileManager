@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -808,7 +808,7 @@ function initWebRequest() {
  * @param string $url URL to post data to
  * @return string
  */
-function processUpdateMethod($module_name, $update_method = null, $data, $url) {
+function processUpdateMethod($module_name, $update_method, $data, $url) {
 	global $argv;
 	
 	/** Update via cron or http/s? */
@@ -977,7 +977,7 @@ function addUser($user_info, $passwd_users) {
  * @package facileManager
  *
  * @param string $log_data Data to add to the log file
- * @return boolean
+ * @return void
  */
 function addLogEntry($log_data) {
 	global $module_name;
@@ -1120,7 +1120,7 @@ function downloadfMFile($file, $proxy_info, $module = false) {
 		addLogEntry($message . "\n" . curl_error($ch));
 		
 		curl_close($ch);
-		exit($retval);
+		exit(1);
 	}
 	
 	curl_close($ch);
@@ -1799,5 +1799,3 @@ function getLineWithString($filename, $needle) {
 	}
 	return null;
 }
-
-?>

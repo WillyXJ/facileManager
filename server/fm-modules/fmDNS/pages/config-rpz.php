@@ -147,5 +147,3 @@ $fmdb->num_rows = $tmp_num_rows;
 $fm_module_rpz->rows($fmdb->num_rows, $page, $total_pages);
 
 printFooter();
-
-?>

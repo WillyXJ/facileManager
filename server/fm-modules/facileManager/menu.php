@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -55,5 +55,3 @@ $menu[70] = array(_('Settings'), _('General Settings'), 'manage_settings', $fm_n
 
 $badge_counts = (!defined('AJAX')) ? getBadgeCounts('modules') + getBadgeCounts('core') : null;
 $menu[99] = array(_('Modules'), _('Module Configuration'), 'manage_modules', $fm_name, 'admin-modules.php', null, $badge_counts, true);
-
-?>

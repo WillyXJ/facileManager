@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -557,7 +557,7 @@ function buildFullIPAddress($partial_ip, $domain) {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @param id $domain_id Domain ID to check
+ * @param int $domain_id Domain ID to check
  * @return boolean
  */
 function reloadAllowed($domain_id = null, $server_serial_no = null) {
@@ -667,7 +667,7 @@ function getModuleBadgeCounts($type) {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @param id $domain_id Domain ID to check
+ * @param integer $domain_id Domain ID to check
  * @param array $server_types Type of servers to pull
  * @return string
  */
@@ -792,7 +792,7 @@ function buildModuleMenu() {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @param id $domain_name Domain name to convert to utf8
+ * @param string $domain_name Domain name to convert to utf8
  * @return string
  */
 function displayFriendlyDomainName($domain_name) {
@@ -810,9 +810,9 @@ function displayFriendlyDomainName($domain_name) {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @param id $domain_id Domain ID to check
+ * @param int $domain_id Domain ID to check
  * @param string $level How deep to traverse (clone, template)
- * @return integer
+ * @return integer|void
  */
 function getParentDomainID($domain_id, $level = 'clone') {
 	global $__FM_CONFIG;
@@ -894,8 +894,8 @@ function zoneAccessIsAllowed($domain_ids, $included_action = null) {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @param array $domain_id Domain ID to check
- * @return integer
+ * @param int $domain_id Domain ID to check
+ * @return array
  */
 function getZoneParentID($domain_id) {
 	global $__FM_CONFIG;
@@ -1160,7 +1160,7 @@ function buildSQLRecords($record_type, $domain_id) {
 function compareValues($data_array, $sql_records) {
 	$changes = array();
 	foreach ($data_array as $key => $val) {
-		$diff = array_diff_assoc($data_array[$key], $sql_records[$key]);
+		$diff = array_diff_assoc((array) $data_array[$key], (array) $sql_records[$key]);
 		if ($diff) {
 			$changes[$key] = $diff;
 		}
@@ -1177,7 +1177,7 @@ function compareValues($data_array, $sql_records) {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @param array $data Domain details array
+ * @param array|object $data Domain details array
  * @param string $type What expiration should be processed
  * @return integer
  */
@@ -1198,7 +1198,7 @@ function getDNSSECExpiration($data, $type = 'calculated') {
  *
  * @param string $group_id Group ID
  * @param string $capability Capability to process
- * @return integer
+ * @return array
  */
 function moduleExplodeGroup($group_id, $capability) {
 	global $fmdb, $__FM_CONFIG;
@@ -1406,5 +1406,3 @@ function availableItems($type, $default = 'blank', $addl_sql = null, $prefix = n
 	return $return;
 }
 
-
-?>

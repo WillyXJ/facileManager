@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -347,5 +347,3 @@ HTML;
 
 if (!isset($fm_dns_controls))
 	$fm_dns_controls = new fm_dns_controls();
-
-?>

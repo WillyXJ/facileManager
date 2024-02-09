@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -88,7 +88,7 @@ class fm_wifi_acls {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -96,7 +96,6 @@ class fm_wifi_acls {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post); exit;
 		
 		/** Server groups */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls`";
@@ -148,7 +147,7 @@ class fm_wifi_acls {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -156,7 +155,6 @@ class fm_wifi_acls {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post);exit;
 		
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls` SET ";
@@ -206,7 +204,7 @@ class fm_wifi_acls {
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $id ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
@@ -505,9 +503,6 @@ HTML;
 		}
 		$wlan_aps = array_unique($wlan_aps);
 		
-//		echo '<pre>';
-//		var_dump($wlan_aps); exit;
-		
 		$block = false;
 		$ebtables = getOption('use_ebtables', $_SESSION['user']['account_id'], $_SESSION['module']);
 		if ($ebtables === false) {
@@ -538,5 +533,3 @@ HTML;
 
 if (!isset($fm_wifi_acls))
 	$fm_wifi_acls = new fm_wifi_acls();
-
-?>

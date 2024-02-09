@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -1944,33 +1944,6 @@ HTML;
 
 
 /**
- * Checks if PEAR is installed
- *
- * @since 1.0
- * @package facileManager
- *
- * @param string $package Additional PEAR package to check
- * @return boolean
- */
-/**
-function isPearInstalled($packages = null){
-	require_once 'System.php';
-	if (!class_exists('System', false)) return false;
-	
-	if ($packages) {
-		$packages = is_array($packages) ? $packages : array($packages);
-		foreach ($packages as $pear_package) {
-			exec(findProgram('pear') . ' info ' . $pear_package, $output, $retval);
-			if ($retval) return false;
-		}
-	}
-	
-	return true;
-}
- */
-
-
-/**
  * Checks if an email address is valid
  *
  * @since 1.0
@@ -2011,7 +1984,7 @@ function isSiteSecure(){
  *
  * @param string $tbl_name Table name to check
  * @param string $column_name Column name to check
- * @return integer
+ * @return string
  */
 function getColumnLength($tbl_name, $column_name) {
 	global $fmdb;
@@ -2438,7 +2411,7 @@ function getBadgeCounts($type) {
  * @since 1.1
  * @package facileManager
  *
- * @return array
+ * @return string
  */
 function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 	if (is_array($bulk_actions_list)) {
@@ -2564,7 +2537,7 @@ function handleSortOrder() {
  * @since 1.2
  * @package facileManager
  *
- * @param string $strip Text to strip out
+ * @param string|array) $strip Text to strip out
  * @param string $key Logging key
  * @param string $data Logging data
  * @return string
@@ -2623,7 +2596,7 @@ function unAuth($link_display = 'show') {
  *
  * @param string|array $capability Capability name.
  * @param string $module Module name to check capability for
- * @param string $extra_perm Extra capability to check
+ * @param string|array $extra_perm Extra capability to check
  * @return boolean
  */
 function currentUserCan($capability, $module = 'facileManager', $extra_perm = null) {
@@ -3382,7 +3355,7 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
  * @return boolean
  */
 function isDebianSystem($os) {
-	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu', 'raspbian'));
+	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu', 'raspbian', 'raspberry pi os'));
 }
 
 
@@ -3398,7 +3371,7 @@ function isDebianSystem($os) {
  * @param integer $port Remote port to connect to
  * @param string $client_check 'include' or 'skip' the client file check
  * @param string $response Response to include a close button or plaintext
- * @return boolean
+ * @return array|string
  */
 function runRemoteCommand($host_array, $command, $format = 'silent', $port = 22, $client_check = 'include', $response = 'close') {
 	global $fm_name;
@@ -3572,7 +3545,7 @@ function is_writable_r($dir, $exclude = array()) {
  * @package facileManager
  *
  * @param string $file File to download
- * @return array
+ * @return array|string
  */
 function downloadfMFile($file) {
 	global $__FM_CONFIG;
@@ -3944,7 +3917,7 @@ HTML;
  * @package facileManager
  *
  * @param string $server_id_type What server ID should be used (serial|id)
- * @param array $include What items to include
+ * @param array|string $include What items to include
  * @param string $module Module name to limit list to
  * @return array
  */
@@ -4016,7 +3989,7 @@ function availableServers($server_id_type = 'serial', $include = array('all'), $
  * @package facileManager
  *
  * @param string $type What is not defined
- * @return array
+ * @return string
  */
 function noSSHDefined($type = 'user') {
 	if ($type == 'user') {
@@ -4187,5 +4160,3 @@ function throwAPIError($code) {
 		}
 	return array($code, $message);
 }
-
-?>

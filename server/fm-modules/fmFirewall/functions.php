@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -28,21 +28,7 @@
  * @subpackage fmFirewall
  */
 function moduleFunctionalCheck() {
-	global $fmdb, $__FM_CONFIG;
-	$html_checks = null;
-	$checks = array();
-	
-	/** Count active database servers */
-//	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : '<p>You currently have no active database servers defined.  <a href="' . getMenuURL('Servers') . '">Click here</a> to define one or more to manage.</p>';
-	
-	/** Count groups */
-//	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_')) ? null : '<p>You currently have no database server groups defined.  <a href="' . getMenuURL('Server Groups'). '">Click here</a> to define one or more.</p>';
-	
-	foreach ($checks as $val) {
-		$html_checks .= $val;
-	}
-	
-	return $html_checks;
+	return null;
 }
 
 /**
@@ -711,6 +697,3 @@ function mask2cidr($mask) {
 	$base = ip2long('255.255.255.255');
 	return 32 - log(($long ^ $base) +1, 2);
 }
-
-
-?>

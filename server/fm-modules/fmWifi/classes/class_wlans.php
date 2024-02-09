@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -88,7 +88,7 @@ class fm_wifi_wlans {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -96,7 +96,6 @@ class fm_wifi_wlans {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post); exit;
 		
 		/** Insert the parent */
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
@@ -110,12 +109,6 @@ class fm_wifi_wlans {
 		
 		if (empty($name)) return __('No name defined.');
 		
-//		/** Ensure unique channel names */
-//		if (!$this->validateChannel($post)) return __('This channel already exists.');
-		
-//		if ($post['config_destination'] == 'file') {
-//			if (empty($post['config_file_path'][0])) return __('No file path defined.');
-//		}
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps', 'config_type'));
 		
 		/** Insert the category parent */
@@ -217,7 +210,7 @@ class fm_wifi_wlans {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -225,7 +218,6 @@ class fm_wifi_wlans {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-//		echo '<pre>';print_r($post);exit;
 		
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
@@ -274,25 +266,8 @@ class fm_wifi_wlans {
 		
 		foreach ($include as $handler) {
 			$sql_values = null;
-//			$post['config_data'] = $post[$handler];
-//			/** Logic checking */
-//			if ($handler == 'config_destination' && $post[$handler] == 'syslog') {
-//				$post['config_data'] = $post['config_syslog'];
-//			} elseif ($handler == 'config_destination' && $post[$handler] == 'file') {
-//				list($file_path, $file_versions, $file_size, $file_size_spec) = $post['config_file_path'];
-//				$filename = str_replace('"', '', $file_path);
-//				$post['config_data'] = '"' . $filename . '"';
-//				if ($file_versions) $post['config_data'] .= ' versions ' . $file_versions;
-//				if (!empty($file_size) && $file_size > 0) $post['config_data'] .= ' size ' . $file_size . $file_size_spec;
-//			}
-//			if ($handler == 'config_destination') {
-//				$post['config_name'] = $post['config_destination'];
-//			} elseif (in_array($handler, array('print-category', 'print-severity', 'print-time')) && !sanitize($post['config_data'])) {
-//				continue;
-//			} else {
-				$child['config_name'] = $handler;
-				$child['config_data'] = $post[$handler];
-//			}
+			$child['config_name'] = $handler;
+			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
 				$clean_data = sanitize($data);
@@ -330,7 +305,7 @@ class fm_wifi_wlans {
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $id ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
@@ -732,10 +707,10 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validatePost($post) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fmdb;
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
@@ -880,7 +855,7 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param array $wlan_ids WLAN IDs to translate
-	 * @return array
+	 * @return string
 	 */
 	function getWLANLoggingNames($wlan_ids) {
 		global $__FM_CONFIG, $fmdb;
@@ -904,7 +879,7 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $server_serial_no Server serial number to update
-	 * @return array
+	 * @return void
 	 */
 	function updateWLANInfo($server_serial_no) {
 		global $__FM_CONFIG, $fmdb;
@@ -919,5 +894,3 @@ HTML;
 
 if (!isset($fm_wifi_wlans))
 	$fm_wifi_wlans = new fm_wifi_wlans();
-
-?>

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -35,7 +35,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			$result = $fm_module_servers->add($_POST, $type);
+			$result = $fm_module_servers->add($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -47,7 +47,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_servers->update($_POST, $type);
+			$result = $fm_module_servers->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -88,5 +88,3 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_module_servers->rows($result, $type, $page, $total_pages);
 
 printFooter();
-
-?>

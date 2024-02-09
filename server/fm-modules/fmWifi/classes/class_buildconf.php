@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -31,7 +31,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmWifi
 	 *
 	 * @param array $raw_data Array containing files and contents
-	 * @return string
+	 * @return string|void
 	 */
 	function buildServerConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -67,11 +67,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 			$function = $server_type . 'BuildConfig';
 			$data = $this->$function($header, $server_result[0]);
-
-//			$data->files[$server_config_file] = $config;
-//			if (is_array($files)) {
-//				$data->files = array_merge($data->files, $files);
-//			}
 			
 			return array(get_object_vars($data), null);
 		}
@@ -281,7 +276,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmWifi
 	 *
 	 * @param array $raw_data Array containing files and contents
-	 * @return string
+	 * @return string|void
 	 */
 	function buildCronConfigs($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -359,7 +354,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 *
 	 * @param object $server_info Server information
 	 * @param string $ssid SSID
-	 * @return boolean
+	 * @return string
 	 */
 	function getPSKFilename($server_info, $ssid) {
 		return dirname($server_info->server_config_file) . '/' . $server_info->server_type . '-psk-' . $_SESSION['module'] . '-' . sanitize($ssid, '_');
@@ -375,7 +370,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @param string $header Header message for the file
 	 * @param object $server_info Server information
 	 * @param string $wlan_id SSID
-	 * @return boolean
+	 * @return array
 	 */
 	function buildPSKFile($header, $server_info, $wlan_id) {
 		global $fmdb, $__FM_CONFIG;
@@ -412,7 +407,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @param object $server_info Server information
 	 * @param string $wlan_id SSID
 	 * @param array $mac_files MAC accept/deny filenames
-	 * @return boolean
+	 * @return array
 	 */
 	function buildACLFiles($header, $server_info, $wlan_id, $mac_files) {
 		global $fmdb, $__FM_CONFIG;
@@ -446,5 +441,3 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 if (!isset($fm_module_buildconf))
 	$fm_module_buildconf = new fm_module_buildconf();
-
-?>

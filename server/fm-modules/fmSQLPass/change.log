@@ -1,6 +1,7 @@
 1.8.0 (2023-??-??)
 ==================
 * Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.
+* Server - [bug] Fixed PHP errors.
 
 1.7.0 (2023-03-09)
 ==================

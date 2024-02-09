@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -83,7 +83,6 @@ class fm_module_options {
 		if (!is_array($post)) return $post;
 		
 		if (empty($post['config_name'])) return false;
-//		print_r($post);exit;
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', sanitize($post['config_name']), 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' AND server_serial_no='{$post['server_serial_no']}'");
@@ -476,7 +475,7 @@ HTML;
 			}
 		}
 		
-		$post = $this->validateDefType($post, $def_option);
+		$post = $this->validateDefType($post);
 		
 		return $post;
 	}
@@ -488,7 +487,7 @@ HTML;
 	 * @since 0.1
 	 * @package fmWifi
 	 *
-	 * @param string $def_option Option type to validate
+	 * @param array $def_option Option type to validate
 	 * @return string Return formated data
 	 */
 	function validateDefType($post) {
@@ -597,5 +596,3 @@ HTML;
 
 if (!isset($fm_module_options))
 	$fm_module_options = new fm_module_options();
-
-?>

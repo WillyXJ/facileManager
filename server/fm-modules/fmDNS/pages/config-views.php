@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -84,5 +84,3 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_dns_views->rows($result, $page, $total_pages);
 
 printFooter();
-
-?>

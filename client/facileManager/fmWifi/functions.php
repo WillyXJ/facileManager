@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -153,7 +153,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 		list($data['server_wlan_interface'], $data['server_bridge_interface']) = configureAPMode($data['server_mode']);
 	}
 	
-	$data['server_interfaces'] = implode(';', getInterfaceNames(PHP_OS));
+	$data['server_interfaces'] = implode(';', getInterfaceNames());
 
 	/** Handle the update method */
 	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
@@ -319,7 +319,7 @@ function moduleInitWebRequest() {
  * @package facileManager
  * @subpackage fmWifi
  *
- * @return array
+ * @return array|null
  */
 function detectServerType() {
 	$supported_servers = array('hostapd'=>'hostapd');
@@ -339,7 +339,7 @@ function detectServerType() {
  * @package facileManager
  * @subpackage fmWifi
  *
- * @return array
+ * @return array|string|null
  */
 function detectDaemonVersion($return_array = false) {
 	$server = detectServerType();
@@ -407,12 +407,6 @@ function getStartupScript($app) {
 			foreach ($distros[$app][$os] as $rcscript) {
 				$script = preg_split('/\s+/', $rcscript);
 				if (file_exists($script[0])) {
-					if ($chroot_environment) {
-						if (strpos($distros[$app][$os][count($distros[$app][$os])-1], $script[0]) !== false) {
-							return $distros[$app][$os][count($distros[$app][$os])-1];
-						}
-					}
-					
 					return $rcscript;
 				}
 			}
@@ -855,7 +849,7 @@ function apClientStats() {
  * @param string $dev Device the clients are on
  * @return string
  */
-function apGetClients($style = 'quiet', $dev) {
+function apGetClients($style = 'quiet', $dev = null) {
 	if (!$dev) {
 		return null;
 	}
@@ -894,7 +888,7 @@ function apGetClients($style = 'quiet', $dev) {
  * @subpackage fmWifi
  *
  * @param array $bad_macs Array of MAC address to block
- * @param boolena $ebtables Additionally block with ebtables
+ * @param boolean $ebtables Additionally block with ebtables
  * @return string
  */
 function apBlockClient($bad_macs, $ebtables = false) {
@@ -951,6 +945,3 @@ function apBlockClient($bad_macs, $ebtables = false) {
 	
 	exit;
 }
-
-
-?>

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -32,7 +32,7 @@ class fm_dhcp_networks extends fm_dhcp_objects {
 	 * @subpackage fmDHCP
 	 *
 	 * @param integer $id ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
@@ -255,7 +255,7 @@ HTML;
 	 * @subpackage fmDHCP
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -316,5 +316,3 @@ HTML;
 	}
 
 }
-
-?>

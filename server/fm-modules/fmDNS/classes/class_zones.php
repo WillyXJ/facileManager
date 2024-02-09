@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -2017,7 +2017,7 @@ HTML;
 	 *
 	 * @param string $zones Include all zones in the list
 	 * @param array $exclude Domain IDs to exclude
-	 * @return json array
+	 * @return string|array
 	 */
 	function buildZoneJSON($zones = 'all', $exclude = null, $additional_zones = null) {
 		$temp_zones = $this->availableZones('no-templates', array('primary', 'secondary', 'forward'), 'all', $zones, $exclude);
@@ -2349,7 +2349,7 @@ HTML;
 	 * @param int $group_id Zone group ID
 	 * @param array $domain_ids Domain ID
 	 * @param string $action Add or Remove
-	 * @return array
+	 * @return string|boolean
 	 */
 	function setZoneGroupMembers($group_id, $domain_ids, $action = 'add') {
 		global $fmdb, $__FM_CONFIG;
@@ -2387,7 +2387,7 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param int $ids User capability IDs
+	 * @param array $ids User capability IDs
 	 * @return array
 	 */
 	function getZoneAccessIDs($ids) {
@@ -2413,8 +2413,8 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param int $ids Domain IDs
-	 * @return array
+	 * @param array $ids Domain IDs
+	 * @return string
 	 */
 	function getZoneLogDomainNames($ids) {
 		global $__FM_CONFIG;
@@ -2458,5 +2458,3 @@ HTML;
 
 if (!isset($fm_dns_zones))
 	$fm_dns_zones = new fm_dns_zones();
-
-?>

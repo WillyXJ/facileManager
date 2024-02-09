@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -27,4 +27,3 @@ $fm_user_caps[$fm_name] = array(
 		'run_tools'			=> _('Run Tools'),
 		'manage_settings'	=> _('Manage Settings')
 	);
-

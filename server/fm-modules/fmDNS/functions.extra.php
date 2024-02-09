@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -89,6 +89,3 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 ', __('Limit access to the following zones:'), $zones_list);
 	
 }
-
-
-?>

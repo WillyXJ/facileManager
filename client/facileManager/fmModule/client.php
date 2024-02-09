@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -48,5 +48,3 @@ if (file_exists($fm_client_functions)) {
 $retval = buildConf($url, $data);
 
 if (!$retval) exit(1);
-
-?>

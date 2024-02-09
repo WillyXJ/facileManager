@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -30,19 +30,7 @@
  * @return string
  */
 function moduleFunctionalCheck() {
-	global $fmdb, $__FM_CONFIG;
 	return null;
-	$html_checks = null;
-	$checks = array();
-	
-	/** Perform checks to display in yellow bar */
-	$checks[] = ($something == true) ? null : sprintf('<p>' . __('moduleFunctionalCheck() failed. User message goes here. <a href="%s">Click here</a> to define a linked page.') . '</p>', getMenuURL(__('Menu Title 2')));
-
-	foreach ($checks as $val) {
-		$html_checks .= $val;
-	}
-	
-	return $html_checks;
 }
 
 /**
@@ -309,7 +297,7 @@ function buildModuleToolbar() {
  * @return none
  */
 function buildModuleHelpFile() {
-	global $__FM_CONFIG;
+	global $__FM_CONFIG, $fm_name;
 	
 	$body = <<<HTML
 <h3>{$_SESSION['module']}</h3>
@@ -476,7 +464,6 @@ function buildModuleMenu() {
 		addSubmenuPage('config-wlans.php', __('ACLs'), __('ACLs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-acls.php');
 
 		addSubmenuPage('index.php', __('WLANs'), __('WLANs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'index.php', null, 5);
-//		addSubmenuPage('index.php', __('Access Points'), __('Access Points'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-acls.php');
 
 	addSettingsPage($_SESSION['module'], sprintf(__('%s Settings'), $_SESSION['module']), array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }
@@ -489,7 +476,7 @@ function buildModuleMenu() {
  * @package facileManager
  * @subpackage fmWifi
  *
- * @param id $id WLAN ID to check
+ * @param int $id WLAN ID to check
  * @return string
  */
 function getWLANServers($id) {
@@ -647,6 +634,3 @@ function availableWLANs() {
 	
 	return $array;
 }
-
-
-?>

@@ -546,7 +546,7 @@ HTML;
 	 * @subpackage fmDNS
 	 *
 	 * @param array $post Posted array
-	 * @return array|boolean
+	 * @return array|string|boolean
 	 */
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -571,5 +571,3 @@ HTML;
 
 if (!isset($fm_module_rpz))
 	$fm_module_rpz = new fm_module_rpz();
-
-?>

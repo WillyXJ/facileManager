@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -110,7 +110,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG, $fm_name;
@@ -200,7 +200,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -210,35 +210,16 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (!is_array($post)) return $post;
 		
 		if (array_key_exists('group_name', $_POST)) {
-			$new_domain_ids = $post['group_domain_ids'];
-			
-			/** Get current domain_ids for group */
-			$current_domain_ids = $this->getZoneGroupMembers($post['group_id']);
-			
-			/** Remove group from domain_ids for group */
-			$remove_domain_ids = array_diff($current_domain_ids, $new_domain_ids);
-			$retval = $this->setZoneGroupMembers($post['group_id'], $remove_domain_ids, 'remove');
-			if ($retval !== true) {
-				return $retval;
-			}
-			
-			/** Add group to domain_ids */
-			$add_domain_ids = array_diff($new_domain_ids, $current_domain_ids);
-			$retval = $this->setZoneGroupMembers($post['group_id'], $add_domain_ids);
-			if ($retval !== true) {
-				return $retval;
-			}
-			
 			/** Update group_name */
-			$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domain_groups` SET `group_name`='" . $post['group_name'] . "', `group_comment`='" . $post['group_comment'] . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `group_id`='" . $post['group_id'] . "'";
+			$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups` SET `group_name`='" . $post['group_name'] . "', `group_comment`='" . $post['group_comment'] . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `group_id`='" . $post['group_id'] . "'";
 			$fmdb->query($query);
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the zone group because a database error occurred.') . $fmdb->last_query, 'sql');
 			}
 
-			$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups', 'group_', 'group_id', 'group_name');
-			$log_message = sprintf(__('Updated a zone group (%s) with the following details'), $old_name) . "\n";
-			addLogEntry($log_message . __('Name') . ": {$post['group_name']}\n" . __('Associated Zones') . ": " . $this->getZoneLogDomainNames($new_domain_ids) . "\n" . _('Comment') . ": {$post['group_comment']}");
+			$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+			$log_message = sprintf(__('Updated AP group (%s) with the following details'), $old_name) . "\n";
+			addLogEntry($log_message . __('Name') . ": {$post['group_name']}\n" . __('Member APs') . ": " . $post['log_message_member_servers'] . "\n" . _('Comment') . ": {$post['group_comment']}");
 			return true;
 		}
 
@@ -282,7 +263,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $server_id Server ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($server_id, $type) {
 		global $fmdb, $__FM_CONFIG;
@@ -330,7 +311,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @subpackage fmWifi
 	 *
 	 * @param object $row Single data row from $results
-	 * @param strong $type Type of form row to display
+	 * @param string $type Type of form row to display
 	 * @return null
 	 */
 	function displayRow($row, $type) {
@@ -627,7 +608,7 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -730,7 +711,7 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $server_serial_no Server serial number to lookup
-	 * @return array
+	 * @return array|string
 	 */
 	function getServerInfo($server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
@@ -762,7 +743,7 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param integer $server_id Server ID to query
-	 * @return array
+	 * @return string|void
 	 */
 	function getAPStats($server_id, $command_args) {
 		global $fmdb, $__FM_CONFIG;
@@ -781,7 +762,7 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmWifi
 	 *
-	 * @param integer $server_id Server ID to lookup
+	 * @param string $server_id Server ID to lookup
 	 * @return array
 	 */
 	function getServerNames($server_id) {
@@ -795,9 +776,6 @@ HTML;
 				$ap_names = array_merge($ap_names, $this->getServerNames($server_id));
 			}
 			return $ap_names;
-		} else {
-			$table = 'servers';
-			$prefix = 'server_';
 		}
 		
 		$ap_names[] = getNameFromID(str_replace('s_', '', $server_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
@@ -809,5 +787,3 @@ HTML;
 
 if (!isset($fm_module_servers))
 	$fm_module_servers = new fm_module_servers();
-
-?>

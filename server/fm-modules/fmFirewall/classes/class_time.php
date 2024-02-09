@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -31,7 +31,7 @@ class fm_module_time {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_' . $type . 's', $_SESSION['module'])) {
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list = array(_('Delete'));
 		}
 
@@ -455,5 +455,3 @@ HTML;
 
 if (!isset($fm_module_time))
 	$fm_module_time = new fm_module_time();
-
-?>

@@ -87,5 +87,3 @@ if ($page > $total_pages) $page = $total_pages;
 $fm_module_http->rows($result, $page, $total_pages);
 
 printFooter();
-
-?>

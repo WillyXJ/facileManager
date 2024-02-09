@@ -20,6 +20,7 @@
 * Server - [bug] Fixed PHP errors.
 * Server - [bug] Fixed password reset message formatting.
 * Server - [bug] Fixed extra newline in client calls that can break the client. (Issue #606)
+* Client - [bug] Fixed PHP errors. (Issue #608)
 
 4.5.1 (2024-01-30)
 ==================

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -855,9 +855,9 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $domain_id domain_id to set
-	 * @param id $record_type Record type to check
-	 * @param id $action Add or update
+	 * @param int $domain_id domain_id to set
+	 * @param string $record_type Record type to check
+	 * @param string $action Add or update
 	 * @return null
 	 */
 	function processSOAUpdates($domain_id, $record_type, $action) {
@@ -997,5 +997,3 @@ HTML;
 
 if (!isset($fm_dns_records))
 	$fm_dns_records = new fm_dns_records();
-
-?>

@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -138,7 +138,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 			$value[$id] = $data;
 		} else {
 			$action = ucfirst($type);
-			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type, $append, $data_array);
+			list($valid_data, $valid_html, $input_error[$id]) = validateEntry($type, $id, $data, $record_type, $append, $data_array, $domain_info);
 			if (!isset($input_error[$id])) unset($input_error[$id]);
 			$html .= $valid_html;
 			if (is_array($valid_data)) {
@@ -193,7 +193,7 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 	return $html;
 }
 
-function validateEntry($action, $id, $data, $record_type, $append, $data_array) {
+function validateEntry($action, $id, $data, $record_type, $append, $data_array, $domain_info) {
 	$messages = null;
 	$html = null;
 	
@@ -260,7 +260,7 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array) 
 			if ($record_type == 'PTR') {
 				if ($key == 'record_name') {
 					if ($domain_map == 'reverse') {
-						if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain)) === false) {
+						if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain_info['name'])) === false) {
 							$messages['errors'][$key] = __('Invalid record');
 						}
 					} else {
@@ -306,8 +306,8 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array) 
 			}
 			if (in_array($key, array('soa_master_server', 'soa_email_address'))) {
 				$val = rtrim($val, '.');
-				if (strpos($_POST['update'][$id]['soa_master_server'], $domain) && strpos($_POST['update'][$id]['soa_email_address'], $domain)) {
-					$new_val = rtrim(str_replace($domain, '', $val), '.');
+				if (strpos($_POST['update'][$id]['soa_master_server'], $domain_info['name']) && strpos($_POST['update'][$id]['soa_email_address'], $domain_info['name'])) {
+					$new_val = rtrim(str_replace($domain_info['name'], '', $val), '.');
 					if ($new_val != rtrim($val, '.')) {
 						$data['soa_append'] = 'yes';
 					}
@@ -370,7 +370,7 @@ function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
 					unset($sql_records[$i][$key]);
 				}
 			}
-			$changes[$i] = array_merge($sql_records[$i], $raw_changes[$i]);
+			$changes[$i] = array_merge((array) $sql_records[$i], (array) $raw_changes[$i]);
 		}
 	} else {
 		return false;
@@ -506,5 +506,3 @@ function verifyTTL($ttl) {
 	
 	return true;
 }
-
-?>

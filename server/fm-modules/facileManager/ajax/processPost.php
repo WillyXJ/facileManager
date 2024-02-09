@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -241,5 +241,3 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		include($include_file);
 	}
 }
-
-?>

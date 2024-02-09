@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -295,12 +295,6 @@ function getStartupScript($app) {
 			foreach ($distros[$app][$os] as $rcscript) {
 				$script = preg_split('/\s+/', $rcscript);
 				if (file_exists($script[0])) {
-					if ($chroot_environment) {
-						if (strpos($distros[$app][$os][count($distros[$app][$os])-1], $script[0]) !== false) {
-							return $distros[$app][$os][count($distros[$app][$os])-1];
-						}
-					}
-					
 					return $rcscript;
 				}
 			}
@@ -428,6 +422,3 @@ function deleteLease($leasefile, $remove_lease) {
 
 	exit;
 }
-
-
-?>

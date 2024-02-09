@@ -1,7 +1,7 @@
 <?php
 /*
  +-------------------------------------------------------------------------+
- | Copyright (C) 2013-2019 The facileManager Team                          |
+ | Copyright (C) The facileManager Team                                    |
  |                                                                         |
  | This program is free software; you can redistribute it and/or           |
  | modify it under the terms of the GNU General Public License             |
@@ -89,7 +89,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @subpackage fmModule
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function add($post) {
 		global $fmdb, $__FM_CONFIG, $fm_name;
@@ -145,7 +145,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @subpackage fmModule
 	 *
 	 * @param array $post $_POST data
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
@@ -195,7 +195,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @subpackage fmModule
 	 *
 	 * @param integer $server_id Server ID to delete
-	 * @return boolean or string
+	 * @return boolean|string
 	 */
 	function delete($server_id) {
 		global $fmdb, $__FM_CONFIG;
@@ -443,5 +443,3 @@ HTML;
 
 if (!isset($fm_module_servers))
 	$fm_module_servers = new fm_module_servers();
-
-?>
