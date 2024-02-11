@@ -1,3 +1,7 @@
+6.0.0 (2024-02-11)
+==================
+* Server - [bug] Fixed upgrade process. (Issue #609)
+
 6.0.0 (2024-02-09)
 ==================
 * Server - [feature] Added support for several more global option and logging parameters.

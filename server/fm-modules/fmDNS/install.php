@@ -663,7 +663,7 @@ VALUES
 ('options', 'tcp-clients', '( integer )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'tcp-idle-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.12.0'),
 ('options', 'tcp-initial-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.12.0'),
-('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
+('options', 'tcp-keepalive', '( integer )', 'no', 'OS', NULL, 'no', '9.16.0'),
 ('options', 'tcp-keepalive-timeout', '( integer )', 'no', 'O', NULL, 'no', '9.12.0'),
 ('options', 'tcp-listen-queue', '( integer )', 'no', 'O', NULL, 'no', NULL),
 ('options', 'tcp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),

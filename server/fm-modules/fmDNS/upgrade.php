@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '6.0.0', '<') ? upgradefmDNS_600($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '6.0.1', '<') ? upgradefmDNS_601($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -589,20 +589,6 @@ function upgradefmDNS_111($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-
-	if (count($updates) && $updates[0]) {
-		foreach ($updates as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-
 	if (!setOption('fmDNS_client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false)) return false;
 		
 	setOption('version', '1.1', 'auto', false, 0, 'fmDNS');
@@ -646,20 +632,6 @@ TABLESQL;
 		}
 	}
 
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-
-	if (count($updates) && $updates[0]) {
-		foreach ($updates as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-	
 	/** Force rebuild of server configs for Issue #75 */
 	$current_module = $_SESSION['module'];
 	@session_start();
@@ -802,20 +774,6 @@ function upgradefmDNS_123($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-
-	if (count($updates) && $updates[0]) {
-		foreach ($updates as $schema) {
-			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-		
 	setOption('version', '1.2.3', 'auto', false, 0, 'fmDNS');
 	
 	return true;
@@ -2464,15 +2422,32 @@ function upgradefmDNS_530($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 6.0.0 */
-function upgradefmDNS_600($__FM_CONFIG, $running_version) {
+/** 6.0.1 */
+function upgradefmDNS_601($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '5.3.0', '<') ? upgradefmDNS_530($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE  `def_function` `def_function` ENUM('options', 'logging', 'key', 'view', 'http', 'tls', 'dnssec-policy')  NOT NULL DEFAULT 'global'";
-	$queries[] = <<<INSERTSQL
+	/** Fix bad 6.0.0 upgrades */
+	if (version_compare($running_version, '6.0.0', '=')) {
+		$queries[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` WHERE `def_function` IN('http','tls','dnssec-policy','')";
+		$queries[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` WHERE `def_option` IN ('checkds','padding','tcp-keepalive')";
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE  `def_function` `def_function` ENUM('options', 'logging', 'key', 'view', 'http', 'tls', 'dnssec-policy')  NOT NULL";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domain_id`!=0";
+		$queries[] = <<<TABLESQL
+	CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}files` (
+	  `file_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	  `account_id` int(11) NOT NULL DEFAULT '1',
+	  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
+	  `file_location` ENUM('\$ROOT') NOT NULL DEFAULT '\$ROOT',
+	  `file_name` VARCHAR(255) NOT NULL,
+	  `file_contents` text,
+	  `file_comment` text,
+	  `file_status` ENUM( 'active', 'disabled', 'deleted') NOT NULL DEFAULT 'active'
+	) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+TABLESQL;
+$queries[] = <<<INSERTSQL
 INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 	`def_function` ,
 	`def_option` ,
@@ -2484,34 +2459,9 @@ INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
 	`def_minimum_version`
 	)
 VALUES 
-('options', 'check-svcb', '( yes | no )', 'no', 'OVZ', 'M', 'yes', '9.19.6'),
-('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'MS', 'no', '9.19.12'),
-('options', 'dnskey-sig-validity', '( integer )', 'no', 'OVZ', 'M', 'no', '9.16.0'),
-('options', 'dnsrps-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
-('options', 'dnsrps-options', '( quoted_string )', 'yes', 'OV', NULL, 'no', '9.16.0'),
-('options', 'http-listener-clients', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'http-port', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'http-streams-per-connection', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'https-port', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'ipv4only-contact', '( quoted_string )', 'no', 'OV', NULL, 'no', '9.18.0'),
-('options', 'ipv4only-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.18.0'),
-('options', 'ipv4only-server', '( quoted_string )', 'no', 'OV', NULL, 'no', '9.18.0'),
-('options', 'max-ixfr-ratio', '( unlimited | percentage )', 'no', 'OVZ', 'M', 'no', '9.16.0'),
+('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'PS', 'no', '9.19.12'),
 ('options', 'padding', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
-('options', 'reuseport', '( yes | no )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'stale-answer-client-timeout', '( diabled | off | integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
-('options', 'stale-cache-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
-('options', 'stale-refresh-time', '( integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
-('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
-('options', 'tcp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'tcp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'tls-port', '( integer )', 'no', 'O', NULL, 'no', '9.19.0'),
-('options', 'udp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'udp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
-('options', 'update-quota', '( integer )', 'no', 'O', NULL, 'no', '9.19.9'),
-('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'MS', 'no', '9.19.12'),
-('options', 'padding', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
-('options', 'tcp-keepalive', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
+('options', 'tcp-keepalive', '( integer )', 'no', 'OS', NULL, 'no', '9.16.0'),
 ('tls', 'cert-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
 ('tls', 'key-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
 ('tls', 'ca-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
@@ -2524,7 +2474,85 @@ VALUES
 ('http', 'endpoints', '( quoted_string )', 'yes', 'H', NULL, 'no', '9.18.0'),
 ('http', 'listener-clients', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
 ('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
-('options', 'dnssec-policy', '( default | insecure | none )', 'no', 'OVZ', 'MS', 'yes', '9.16.0'),
+('dnssec-policy', 'cdnskey', '( yes | no )', 'no', 'D', NULL, 'yes', '9.16.0'),
+('dnssec-policy', 'cds-digest-types', '( string )', 'yes', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'dnskey-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'inline-signing', '( yes | no )', 'no', 'D', NULL, 'yes', '9.16.0'),
+('dnssec-policy', 'max-zone-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'nsec3param', '( [ iterations <integer> ] [ optout <boolean> ] [ salt-length <integer> ] )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'parent-ds-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'parent-propagation-delay', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'publish-safety', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'purge-keys', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'retire-safety', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-refresh', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-validity', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'signatures-validity-dnskey', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
+('dnssec-policy', 'zone-propagation-delay', '( duration )', 'no', 'D', NULL, 'no', '9.16.0')
+;
+INSERTSQL;
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = REPLACE(def_zone_support, 'M', 'P')";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OS' WHERE `def_option_type` = 'tcp-keepalive'";
+
+		/** Run queries */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+			}
+		}
+	} else {
+		/** Clean 6.0.0 upgrades */
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` CHANGE  `def_function` `def_function` ENUM('options', 'logging', 'key', 'view', 'http', 'tls', 'dnssec-policy')  NOT NULL";
+		$queries[] = <<<INSERTSQL
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+	`def_function` ,
+	`def_option` ,
+	`def_type` ,
+	`def_multiple_values` ,
+	`def_clause_support`,
+	`def_zone_support`,
+	`def_dropdown`,
+	`def_minimum_version`
+	)
+VALUES 
+('options', 'check-svcb', '( yes | no )', 'no', 'OVZ', 'P', 'yes', '9.19.6'),
+('options', 'checkds', '( explicit | integer )', 'no', 'Z', 'PS', 'no', '9.19.12'),
+('options', 'dnskey-sig-validity', '( integer )', 'no', 'OVZ', 'P', 'no', '9.16.0'),
+('options', 'dnsrps-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
+('options', 'dnsrps-options', '( quoted_string )', 'yes', 'OV', NULL, 'no', '9.16.0'),
+('options', 'http-listener-clients', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'http-port', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'http-streams-per-connection', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'https-port', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'ipv4only-contact', '( quoted_string )', 'no', 'OV', NULL, 'no', '9.18.0'),
+('options', 'ipv4only-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.18.0'),
+('options', 'ipv4only-server', '( quoted_string )', 'no', 'OV', NULL, 'no', '9.18.0'),
+('options', 'max-ixfr-ratio', '( unlimited | percentage )', 'no', 'OVZ', 'P', 'no', '9.16.0'),
+('options', 'padding', '( integer )', 'no', 'S', NULL, 'no', '9.16.0'),
+('options', 'reuseport', '( yes | no )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'stale-answer-client-timeout', '( diabled | off | integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
+('options', 'stale-cache-enable', '( yes | no )', 'no', 'OV', NULL, 'yes', '9.16.0'),
+('options', 'stale-refresh-time', '( integer )', 'no', 'OV', NULL, 'no', '9.16.0'),
+('options', 'tcp-keepalive', '( integer )', 'no', 'OS', NULL, 'no', '9.16.0'),
+('options', 'tcp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'tcp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'tls-port', '( integer )', 'no', 'O', NULL, 'no', '9.19.0'),
+('options', 'udp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'udp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
+('options', 'update-quota', '( integer )', 'no', 'O', NULL, 'no', '9.19.9'),
+('tls', 'cert-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'key-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'ca-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'dhparam-file', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'ciphers', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'prefer-server-ciphers', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
+('tls', 'protocols', '( quoted_string )', 'yes', 'T', NULL, 'no', '9.18.0'),
+('tls', 'remote-hostname', '( quoted_string )', 'no', 'T', NULL, 'no', '9.18.0'),
+('tls', 'session-tickets', '( yes | no )', 'no', 'T', NULL, 'yes', '9.18.0'),
+('http', 'endpoints', '( quoted_string )', 'yes', 'H', NULL, 'no', '9.18.0'),
+('http', 'listener-clients', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('http', 'streams-per-connection', '( integer )', 'no', 'H', NULL, 'no', '9.18.0'),
+('options', 'dnssec-policy', '( default | insecure | none )', 'no', 'OVZ', 'PS', 'yes', '9.16.0'),
 ('dnssec-policy', 'cdnskey', '( yes | no )', 'no', 'D', NULL, 'yes', '9.16.0'),
 ('dnssec-policy', 'cds-digest-types', '( string )', 'yes', 'D', NULL, 'no', '9.16.0'),
 ('dnssec-policy', 'dnskey-ttl', '( duration )', 'no', 'D', NULL, 'no', '9.16.0'),
@@ -2543,47 +2571,48 @@ VALUES
 ;
 INSERTSQL;
 	
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_multiple_values` = 'yes' WHERE `def_option` = 'dnssec-must-be-secure'";
-	$queries[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` WHERE `def_option` = 'request-expire' AND `def_clause_support`='O";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_multiple_values` = 'yes' WHERE `def_option` = 'dlz'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option` IN ('allow-new-zones', 'fetch-quota-params', 
-		'fetches-per-server', 'fetches-per-zone', 'lmdb-mapsize', 'max-recursion-depth', 'max-recursion-queries', 'max-stale-ttl', 'message-compression', 'minimal-any', 
-		'new-zones-directory', 'no-case-compress', 'nocookie-udp-size', 'nta-lifetime', 'nta-recheck', 'nxdomain-redirect', 'prefetch', 'qname-minimization', 
-		'require-server-cookie', 'servfail-ttl', 'stale-answer-enable', 'stale-answer-ttl', 'synth-from-dnssec', 'v6-bias', 'validate-except')";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'ZV' WHERE `def_option` = 'max-records'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option_type` = 'ratelimit'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_multiple_values` = 'yes' WHERE `def_option` = 'dnssec-must-be-secure'";
+		$queries[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` WHERE `def_option` = 'request-expire' AND `def_clause_support`='O";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_multiple_values` = 'yes' WHERE `def_option` = 'dlz'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option` IN ('allow-new-zones', 'fetch-quota-params', 
+			'fetches-per-server', 'fetches-per-zone', 'lmdb-mapsize', 'max-recursion-depth', 'max-recursion-queries', 'max-stale-ttl', 'message-compression', 'minimal-any', 
+			'new-zones-directory', 'no-case-compress', 'nocookie-udp-size', 'nta-lifetime', 'nta-recheck', 'nxdomain-redirect', 'prefetch', 'qname-minimization', 
+			'require-server-cookie', 'servfail-ttl', 'stale-answer-enable', 'stale-answer-ttl', 'synth-from-dnssec', 'v6-bias', 'validate-except')";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'ZV' WHERE `def_option` = 'max-records'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option_type` = 'ratelimit'";
 
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domain_id`!=0";
-	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` ADD `master_tls_id` INT NOT NULL DEFAULT '0' AFTER `master_key_id`";
-	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','master','slave','forward','stub') NOT NULL DEFAULT 'primary'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='primary' WHERE `domain_type`='master'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='secondary' WHERE `domain_type`='slave'";
-	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','forward','stub') NOT NULL DEFAULT 'primary'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_option` = 'primaries' WHERE `def_option` = 'masters'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'P' WHERE `def_option` = 'include'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name` = 'primaries' WHERE `cfg_name` = 'masters'";
-	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = REPLACE(def_zone_support, 'M', 'P')";
-	$queries[] = <<<TABLESQL
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domain_id`!=0";
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` ADD `master_tls_id` INT NOT NULL DEFAULT '0' AFTER `master_key_id`";
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','master','slave','forward','stub') NOT NULL DEFAULT 'primary'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='primary' WHERE `domain_type`='master'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='secondary' WHERE `domain_type`='slave'";
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','forward','stub') NOT NULL DEFAULT 'primary'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_option` = 'primaries' WHERE `def_option` = 'masters'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'P' WHERE `def_option` = 'include'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name` = 'primaries' WHERE `cfg_name` = 'masters'";
+		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = REPLACE(def_zone_support, 'M', 'P')";
+		$queries[] = <<<TABLESQL
 	CREATE TABLE IF NOT EXISTS `fm_{$__FM_CONFIG['fmDNS']['prefix']}files` (
-	  `file_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+	  `file_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	  `account_id` int(11) NOT NULL DEFAULT '1',
 	  `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
 	  `file_location` ENUM('\$ROOT') NOT NULL DEFAULT '\$ROOT',
-	  `file_name` VARCHAR(255) NOT NULL ,
+	  `file_name` VARCHAR(255) NOT NULL,
 	  `file_contents` text,
 	  `file_comment` text,
-	  `file_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
+	  `file_status` ENUM( 'active', 'disabled', 'deleted') NOT NULL DEFAULT 'active'
 	) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 TABLESQL;
 	
-	/** Run queries */
-	if (count($queries) && $queries[0]) {
-		foreach ($queries as $schema) {
-			$fmdb->query($schema);
+		/** Run queries */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+			}
 		}
 	}
 
-	setOption('version', '6.0.0', 'auto', false, 0, 'fmDNS');
+	setOption('version', '6.0.1', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }
