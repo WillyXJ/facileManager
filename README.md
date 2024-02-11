@@ -1,7 +1,7 @@
 facileManager
 =============
                                           
-(c) 2013-2023 by facileManager project members.
+(c) by facileManager project members.
 facileManager is free software released under the terms of GNU GPL v2.
 Please see LICENSE for license.
 
