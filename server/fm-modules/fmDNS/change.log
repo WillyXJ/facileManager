@@ -1,4 +1,8 @@
-6.0.0 (2024-02-11)
+6.0.2 (2024-02-12)
+==================
+* Server - [bug] Fixed zone reloads with server groups defined. (Issue #610)
+
+6.0.1 (2024-02-11)
 ==================
 * Server - [bug] Fixed upgrade process. (Issue #609)
 
