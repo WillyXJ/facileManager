@@ -1366,7 +1366,7 @@ HTML;
 		$domain_details = $fmdb->last_result;
 		extract(get_object_vars($domain_details[0]), EXTR_SKIP);
 		
-		$name_servers = $this->getNameServers($domain_name_servers, array('primaries'));
+		$name_servers = $this->getNameServers($domain_name_servers, array('masters'));
 		
 		/** No name servers so return */
 		if (!$name_servers) return displayResponseClose(__('There are no DNS servers hosting this zone.'));
@@ -1376,7 +1376,7 @@ HTML;
 		$response = null;
 		$failures = false;
 		for ($i=0; $i<$name_server_count; $i++) {
-			unset($post_result);
+			if (isset($post_result)) unset($post_result);
 			switch($name_servers[$i]->server_update_method) {
 				case 'cron':
 					/** Add records to fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_reloads */
@@ -1457,7 +1457,7 @@ HTML;
 		return $response;
 	}
 
-	function getNameServers($domain_name_servers, $server_types = array('primaries', 'secondaries')) {
+	function getNameServers($domain_name_servers, $server_types = array('masters', 'slaves')) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Check domain_name_servers */
