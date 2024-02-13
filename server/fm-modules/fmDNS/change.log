@@ -1,4 +1,4 @@
-6.0.2 (2024-02-12)
+6.0.2 (2024-02-13)
 ==================
 * Server - [bug] Fixed zone reloads with server groups defined. (Issue #610)
 
