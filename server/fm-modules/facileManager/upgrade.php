@@ -62,7 +62,7 @@ function fmUpgrade($database) {
 	
 	/** Upgrade any necessary modules */
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_tools.php');
-	$module_list = $fmdb->get_results("SELECT module_name FROM fm_options WHERE option_name='version'");
+	$module_list = $fmdb->get_results("SELECT module_name,option_value FROM fm_options WHERE option_name='version'");
 	$num_rows = $fmdb->num_rows;
 	for ($x=0; $x<$num_rows; $x++) {
 		$module_name = $module_list[$x]->module_name;
@@ -865,7 +865,7 @@ function upgradeConfig($field, $value, $logit = true) {
 		return false;
 	}
 
-	session_id($_COOKIE['myid']);
+	@session_id($_COOKIE['myid']);
 	@session_start();
 	unset($_SESSION['user']['fm_perms']);
 	session_write_close();

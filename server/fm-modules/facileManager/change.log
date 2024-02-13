@@ -1,3 +1,7 @@
+4.6.1 (2024-02-13)
+==================
+* Server - [bug] Fixed PHP errors during upgrade.
+
 4.6.0 (2024-02-09)
 ==================
 * Server - [security] Password reset mailing errors now only show when "Show Errors" is
