@@ -712,7 +712,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			}
 
 			/** Handle masters|slaves vs primaries|secondaries */
-			if (version_compare($server_version, '9.13.0', '<')) {
+			if (version_compare($server_version, '9.16.12', '<')) {
 				$config = str_replace(array('primaries', 'primary', 'secondary'), array('masters', 'master', 'slave'), $config);
 				foreach ($files as $filename => $v) {
 					if (strpos($filename, 'zones.conf') !== false && !is_array($v)) {
