@@ -34,8 +34,8 @@ if (is_array($_POST) && count($_POST)) {
 	if ($domain_id && $zone_access_allowed) {
 		echo buildPopup('header', __('Zone Reload Results'));
 		
-		if (isset($_POST['domain_id']) && !empty($_POST['domain_id'])) {
-			$response = sprintf('<pre>%s</pre>', makePlainText($fm_dns_zones->buildZoneConfig($_POST['domain_id'])));
+		if (isset($domain_id) && !empty($domain_id)) {
+			$response = sprintf('<pre>%s</pre>', makePlainText($fm_dns_zones->buildZoneConfig($domain_id)));
 		}
 		
 		echo $response . "<br />\n";

@@ -798,6 +798,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				list($data->files, $message) = $this->buildZoneDefinitions($server_zones_dir, $server_slave_zones_dir, $server_serial_no);
 			} else {
 				/** Build zone files for $domain_id */
+				$server_version = getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version');
 				$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . sanitize($domain_id) . " OR `domain_clone_domain_id`=" . sanitize($domain_id) . ") ";
 				if ($SERIALNO != -1) {
 					$server_id = getServerID($server_serial_no, $_SESSION['module']);
@@ -848,7 +849,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 //							if ($fmdb->num_rows) $file_ext = $zone_result[$i]->domain_id . ".$file_ext";
 							
 							/** Build zone file */
-							$data->files[$server_zones_dir . '/' . $zone_result[$i]->domain_type . '/' . str_replace('{ZONENAME}', $domain_name . $file_ext, $file_format)] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
+							$domain_type = ($zone_result[$i]->domain_type == 'primary' && version_compare($server_version, '9.16.12', '<')) ? 'master' : $zone_result[$i]->domain_type;
+							$data->files[$server_zones_dir . '/' . $domain_type . '/' . str_replace('{ZONENAME}', $domain_name . $file_ext, $file_format)] = $this->buildZoneFile($zone_result[$i], $server_serial_no);
 						}
 					}
 
