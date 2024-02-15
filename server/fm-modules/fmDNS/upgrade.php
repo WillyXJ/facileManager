@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '6.0.1', '<') ? upgradefmDNS_601($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '6.0.3', '<') ? upgradefmDNS_603($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2613,6 +2613,48 @@ TABLESQL;
 	}
 
 	setOption('version', '6.0.1', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
+
+/** 6.0.3 */
+function upgradefmDNS_603($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '6.0.1', '<') ? upgradefmDNS_601($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( primary | secondary | response ) ( warn | fail | ignore )',`def_clause_support`='OV',`def_max_parameters`='-1' WHERE `def_option` = 'check-names' AND `def_zone_support` IS NULL";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | primary | secondary )',`def_clause_support`='OV' WHERE `def_option` = 'ixfr-from-differences'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_dropdown` = 'yes' WHERE `def_option` = 'masterfile-style'";
+	$queries[] = <<<INSERTSQL
+	INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+		`def_function` ,
+		`def_option` ,
+		`def_type` ,
+		`def_multiple_values` ,
+		`def_clause_support`,
+		`def_zone_support`,
+		`def_dropdown`,
+		`def_minimum_version`
+		)
+	VALUES 
+	('options', 'ixfr-from-differences', '( yes | no )', 'no', 'Z', 'PS', 'yes', NULL)
+	;
+	INSERTSQL;
+
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data` = REPLACE(REPLACE(cfg_data, 'master', 'primary'), 'slave', 'secondary') WHERE `cfg_name`='check-names'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data` = REPLACE(REPLACE(cfg_data, 'master', 'primary'), 'slave', 'secondary') WHERE `cfg_name`='ixfr-from-differences'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_build_config`='yes' WHERE `server_installed`='yes' AND `server_status`='active'";
+
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '6.0.3', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }

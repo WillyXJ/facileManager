@@ -1,3 +1,9 @@
+6.0.3 (2024-02-??)
+==================
+* Server - [bug] Fixed minimum version for use of primary/secondary.
+* Server - [bug] Updated check-names to use primary/secondary.
+* Server - [bug] Fixed zone file location for bind version split at 9.16.12 (forces build config).
+
 6.0.2 (2024-02-13)
 ==================
 * Server - [bug] Fixed zone reloads with server groups defined. (Issue #610)

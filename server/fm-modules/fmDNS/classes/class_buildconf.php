@@ -894,6 +894,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$files = array();
 		$zones = '// This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";
 		$server_id = getServerID($server_serial_no, $_SESSION['module']);
+		$server_version = getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version');
 		
 		/** Build hint zone (root servers) */
 		if ($include_hint_zone) {
@@ -992,6 +993,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'primary') ? $this->buildZoneFile($zone_result[$i], $server_serial_no, $server_group_ids) : null;
 							if ($zone_file_contents != null) {
+								if (version_compare($server_version, '9.16.12', '<')) {
+									$domain_type = 'master';
+								}
 								$files[$zone_data_dir . '/' . $domain_type . '/' . $domain_name_file] = array('contents' => $zone_file_contents, 'syntax_check' => $zone_result[$i]->domain_check_config);
 							}
 							unset($zone_file_contents);
