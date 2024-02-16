@@ -1,4 +1,8 @@
-6.0.3 (2024-02-??)
+6.0.4 (2024-02-??)
+==================
+* Server - [bug] When deleting an A record with a link PTR the reverse zone now gets flagged for reload.
+
+6.0.3 (2024-02-14)
 ==================
 * Server - [bug] Fixed minimum version for use of primary/secondary.
 * Server - [bug] Updated check-names to use primary/secondary.

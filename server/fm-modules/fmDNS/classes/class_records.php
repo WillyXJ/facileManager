@@ -145,7 +145,11 @@ class fm_dns_records {
 	function update($domain_id, $id, $record_type, $array, $skipped_record = false) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
 		
-		$domain_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+		/** Get correct domain name */
+		$record_domain_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'domain_id');
+		$_domain_id = ($record_domain_id == $domain_id) ? $domain_id : $record_domain_id;
+
+		$domain_name = displayFriendlyDomainName(getNameFromID($_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$record_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_name');
 		$log_message = "Updated a record ($record_name) with the following details:\nDomain: $domain_name\n";
 
@@ -199,8 +203,8 @@ class fm_dns_records {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$domain_id_array = array($domain_id);
-		if ($record_type == 'SOA' && !$domain_id) {
+		$domain_id_array = array($_domain_id);
+		if ($record_type == 'SOA' && !$_domain_id) {
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_id', 'domain_', "AND soa_id='$id'");
 			if ($fmdb->num_rows) {
 				unset($domain_id_array);
@@ -736,7 +740,7 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $domain_id Domain ID to check
+	 * @param int $domain_id Domain ID to check
 	 * @return array
 	 */
 	function getSkippedRecordIDs($domain_id) {
@@ -796,9 +800,8 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $soa_id SOA ID to assign
-	 * @param id $domain_id Domain ID to assign to
-	 * @return boolean
+	 * @param int $soa_id SOA ID to assign
+	 * @param int $domain_id Domain ID to assign to
 	 */
 	function assignSOA($soa_id, $domain_id) {
 		global $__FM_CONFIG, $fm_dns_zones;
@@ -901,8 +904,8 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
-	 * @param id $domain_id domain_id to get
-	 * @return null
+	 * @param int $domain_id domain_id to get
+	 * @return string
 	 */
 	function getServerZoneData($domain_id) {
 		global $__FM_CONFIG, $fmdb;
