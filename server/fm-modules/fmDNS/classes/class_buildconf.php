@@ -54,7 +54,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
 
-		$GLOBALS['built_domain_ids'] = null;
+		$GLOBALS['built_domain_ids'] = array();
 		
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		if (!$server_version) {
@@ -1604,7 +1604,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	function setBuiltDomainIDs($server_serial_no, $built_domain_ids) {
 		global $fmdb, $__FM_CONFIG;
 
-		if (!empty($built_domain_ids)) {
+		if (count((array) $built_domain_ids)) {
 			/** Delete old records first */
 			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false);
 			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_reloads', $server_serial_no, 'server_serial_no', false);

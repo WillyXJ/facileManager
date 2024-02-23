@@ -1,6 +1,7 @@
 6.0.4 (2024-02-??)
 ==================
 * Server - [bug] When deleting an A record with a link PTR the reverse zone now gets flagged for reload.
+* Server - [bug] Fixed PHP error on buildconf. (Issue #611)
 
 6.0.3 (2024-02-14)
 ==================
