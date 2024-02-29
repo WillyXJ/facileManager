@@ -1847,7 +1847,7 @@ HTML;
 
 		/** Ensure domain_name_servers is set */
 		if (!$post['domain_name_servers']) {
-			$post['domain_name_servers'][] = 0;
+			$post['domain_name_servers'] = array(0);
 		}
 		
 		/** Does the record already exist for this account? */
