@@ -1,3 +1,7 @@
+4.7.0 (2024-0?-??)
+==================
+* Both   - [improvement] Updated facilemanager.com references to use https.
+
 4.6.1 (2024-02-13)
 ==================
 * Server - [bug] Fixed PHP errors during upgrade.

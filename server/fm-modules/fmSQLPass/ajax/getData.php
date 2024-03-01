@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmSQLPass: Change database user passwords across multiple servers.      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmsqlpass/                         |
+ | https://www.facilemanager.com/modules/fmsqlpass/                         |
  +-------------------------------------------------------------------------+
  | Displays module forms                                                   |
  +-------------------------------------------------------------------------+

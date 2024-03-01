@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmWifi: Easily manage hostapd on one or more systems                    |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmWifi/                            |
+ | https://www.facilemanager.com/modules/fmWifi/                            |
  +-------------------------------------------------------------------------+
 */
 

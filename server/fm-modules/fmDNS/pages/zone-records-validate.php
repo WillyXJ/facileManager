@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
  | Processes zone record updates                                           |
  +-------------------------------------------------------------------------+
