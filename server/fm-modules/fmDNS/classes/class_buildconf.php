@@ -1340,7 +1340,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$record_start = str_pad($record_name, 25) . $separator . $record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
 
 				// Swap @ for domain_name in values
-				$record_result[$i]->record_value = str_replace('@', $domain_name, $record_result[$i]->record_value);
+				// $record_result[$i]->record_value = str_replace('@', $domain_name, $record_result[$i]->record_value);
 				
 				switch($record_result[$i]->record_type) {
 					case 'A':

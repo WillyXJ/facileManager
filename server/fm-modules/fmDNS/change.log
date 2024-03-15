@@ -1,7 +1,8 @@
-6.0.4 (2024-02-??)
+6.0.4 (2024-03-??)
 ==================
 * Server - [bug] When deleting an A record with a link PTR the reverse zone now gets flagged for reload.
 * Server - [bug] Fixed PHP errors. (Issue #611 #612 #613 #616)
+* Server - [bug] Reverted @ conversion in record values. (#593 #617)
 
 6.0.3 (2024-02-14)
 ==================
