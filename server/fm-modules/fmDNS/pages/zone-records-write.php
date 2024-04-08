@@ -55,10 +55,12 @@ if (isset($update) && is_array($update)) {
 		}
 		
 		/** Auto-detect IPv4 vs IPv6 A records */
-		if ($record_type == 'A' && strrpos($data['record_value'], ':')) $record_type = 'AAAA';
-		elseif ($record_type == 'AAAA' && !strrpos($data['record_value'], ':')) $record_type = 'A';
+		if (isset($data['record_value'])) {
+			if ($record_type == 'A' && strrpos($data['record_value'], ':')) $record_type = 'AAAA';
+			elseif ($record_type == 'AAAA' && !strrpos($data['record_value'], ':')) $record_type = 'A';
+		}
 		
-		if ($record_type != 'PTR' && $data['record_status'] == 'deleted') {
+		if (in_array($record_type, array('A', 'AAAA')) && $data['record_status'] == 'deleted') {
 			$data['PTR'] = $domain_id;
 		}
 		
@@ -198,7 +200,6 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 
 		global $fm_dns_records;
 		if ($operation == 'update') {
-			$array['domain_id'] = $data['PTR'];
 			$fm_dns_records->update($data['PTR'], $old_record->record_ptr_id, 'PTR', $array);
 			
 			if ($fmdb->rows_affected) return;

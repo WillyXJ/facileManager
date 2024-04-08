@@ -54,7 +54,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
 
-		$GLOBALS['built_domain_ids'] = null;
+		$GLOBALS['built_domain_ids'] = array();
 		
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		if (!$server_version) {
@@ -1080,7 +1080,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		/** Build includes */
 		$domain_id = (isset($domain->parent_domain_id)) ? $domain->parent_domain_id : $domain->domain_id;
-		$zone_file .= ltrim(str_replace(array('include ', ';'), array('$INCLUDE ', null), $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_id)));
+		$zone_file .= ltrim(str_replace(array('include ', ';'), array('$INCLUDE ', ''), $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_id)));
 
 		/** Sign the zone? */
 		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes' && $domain->domain_dnssec_sign_inline == 'no') {
@@ -1340,7 +1340,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$record_start = str_pad($record_name, 25) . $separator . $record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
 
 				// Swap @ for domain_name in values
-				$record_result[$i]->record_value = str_replace('@', $domain_name, $record_result[$i]->record_value);
+				// $record_result[$i]->record_value = str_replace('@', $domain_name, $record_result[$i]->record_value);
 				
 				switch($record_result[$i]->record_type) {
 					case 'A':
@@ -1604,7 +1604,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	function setBuiltDomainIDs($server_serial_no, $built_domain_ids) {
 		global $fmdb, $__FM_CONFIG;
 
-		if (!empty($built_domain_ids)) {
+		if (count((array) $built_domain_ids)) {
 			/** Delete old records first */
 			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_builds', $server_serial_no, 'server_serial_no', false);
 			basicDelete('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'track_reloads', $server_serial_no, 'server_serial_no', false);
@@ -2259,7 +2259,7 @@ HTML;
 			}
 			return str_replace(array('$ROOT', '$ZONES'), array(getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_root_dir', null, 'active'), getNameFromID($server_serial_no, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers", 'server_', 'server_serial_no', 'server_zones_dir', null, 'active')), $include_files);
 		} else {
-			return null;
+			return '';
 		}
 	}
 	

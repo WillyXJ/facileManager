@@ -674,7 +674,7 @@ function getModuleBadgeCounts($type) {
 function getZoneServers($domain_id, $server_types = array('primaries')) {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
-	$serial_no = null;
+	$serial_no = '';
 	
 	if ($domain_id) {
 		if ($domain_template_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
