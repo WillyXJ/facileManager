@@ -118,7 +118,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 
 		$assoc_group_ids = $fm_module_servers->getServerGroups($server_data->server_id);
-		$config_aps_group_sql = null;
+		$config_aps_group_sql = '';
 		
 		foreach(preg_filter('/^/', 'g_', $assoc_group_ids) as $group_id) {
 			$config_aps_group_sql .= " OR config_aps='$group_id' OR config_aps LIKE '$group_id;%' OR config_aps LIKE '%;$group_id;%' OR config_aps LIKE '%;$group_id'";

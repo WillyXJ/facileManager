@@ -131,7 +131,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			$page = _('Servers');
 			break;
 	}
-	$output = null;
+	$output = '';
 	if (is_array($_POST['item_id'])) {
 		foreach ($_POST['item_id'] as $id) {
 			$result = $bulk_class->$bulk_function($id, $_POST['bulk_action']);

@@ -28,8 +28,6 @@ class fm_dns_records {
 	function rows($result, $record_type, $domain_id, $page) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
-		
 		$results = $fmdb->last_result;
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		$end = $_SESSION['user']['record_count'] * $page > $fmdb->num_rows ? $fmdb->num_rows : $_SESSION['user']['record_count'] * $page;
@@ -161,7 +159,7 @@ class fm_dns_records {
 		$excluded_keys = array('record_skipped', 'PTR');
 		$null_keys = array('record_key_tag');
 		
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($array as $key => $data) {
 			if (in_array($key, $excluded_keys)) continue;

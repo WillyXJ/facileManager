@@ -212,7 +212,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		for ($i=0; $i<$count; $i++) {
 			if ($policy_result[$i]->policy_status != 'active') continue;
 			
-			$line = $keep_state = $uid = null;
+			$line = array();
+			$keep_state = $uid = null;
 			$log_rule = false;
 			
 			$rule_number = $i + 1;
@@ -303,7 +304,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Handle services */
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
-					$temp_services = null;
+					$temp_services = array();
 					if ($temp_id[0] == 'g') {
 						$temp_services[] = $this->extractItemsFromGroup($temp_id);
 					} else {
@@ -458,7 +459,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			}
 			
 			/** Build NAT rule */
-			$nat_rule = null;
+			$nat_rule = '';
 			if ($policy_result[$i]->policy_type == 'nat') {
 				/** SNAT */
 				if ($policy_source_translated) {
@@ -541,7 +542,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			#~ Only filter rules until NAT is supported
 			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
-			$line = $label = $keep_state = $uid = null;
+			$line = array();
+			$label = $keep_state = $uid = null;
 			
 			$rule_number = $i + 1;
 			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
@@ -625,7 +627,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
-					$temp_services = null;
+					$temp_services = array();
 					if ($temp_id[0] == 'g') {
 						$temp_services[] = $this->extractItemsFromGroup($temp_id);
 					} else {
@@ -795,7 +797,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			#~ Only filter rules until NAT is supported
 			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
-			$line = $keep_state = null;
+			$line = array();
+			$keep_state = null;
 			
 			$rule_number = $i + 1;
 			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
@@ -845,7 +848,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$tcp = $udp = $icmp = null;
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
-					$temp_services = null;
+					$temp_services = array();
 					if ($temp_id[0] == 'g') {
 						$temp_services[] = $this->extractItemsFromGroup($temp_id);
 					} else {
@@ -1019,7 +1022,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			#~ Only filter rules until NAT is supported
 			if ($policy_result[$i]->policy_type != 'filter') continue;
 			
-			$line = $keep_state = $uid = null;
+			$line = array();
+			$keep_state = $uid = null;
 			
 			$rule_number = $i + 1;
 			$rule_title = sprintf('fmFirewall %s rule %s', $policy_result[$i]->policy_type, $rule_number);
@@ -1074,7 +1078,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Handle services */
 			if ($assigned_services = trim($policy_result[$i]->policy_services, ';')) {
 				foreach (explode(';', $assigned_services) as $temp_id) {
-					$temp_services = null;
+					$temp_services = array();
 					if ($temp_id[0] == 'g') {
 						$temp_services[] = $this->extractItemsFromGroup($temp_id);
 					} else {
@@ -1232,11 +1236,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	function buildAddressList($addresses) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$address_list = null;
+		$address_list = array();
 		
 		$address_ids = explode(';', $addresses);
 		foreach ($address_ids as $temp_id) {
-			$temp = null;
+			$temp = array();
 			if (verifyIPAddress($temp_id)) {
 				$address_list[] = $temp_id;
 				continue;

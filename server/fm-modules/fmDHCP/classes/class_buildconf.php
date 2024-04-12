@@ -97,7 +97,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	private function dhcpdBuildConfig($server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$config = null;
+		$config = '';
 
 		/** Build items */
 		foreach (array('global', 'peer', 'shared', 'subnet', 'group', 'host') as $item) {
@@ -127,7 +127,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	private function dhcpdBuildConfigItems($type, $parent_id = 0, $tab = null, $peers = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$config = $peer_type = null;
+		$config = $peer_type = '';
 		
 		$parent = ($type == 'global') ? 'no' : 'yes';
 		

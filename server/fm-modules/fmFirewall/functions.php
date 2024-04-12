@@ -163,11 +163,12 @@ function moduleAddServer($action) {
 function availableGroupItems($group_type, $list_type, $select_ids = null, $edit_group_id = null) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$array = null;
+	$array = array();
 	$name = $group_type . '_name';
 	$id = $group_type . '_id';
 	
-	$service_ids = $group_ids = $edit_group_id_sql = null;
+	$service_ids = $group_ids = array();
+	$edit_group_id_sql = null;
 	
 	if (is_array($select_ids) && count($select_ids)) {
 		foreach ($select_ids as $temp_id) {

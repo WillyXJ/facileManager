@@ -29,7 +29,7 @@ printHeader();
 $response = isset($response) ? $response : null;
 
 extract($_REQUEST);
-$search_sql = null;
+$search_sql = '';
 
 /** Module search */
 if (isset($log_search_module) && is_array($log_search_module) && !in_array('All Modules', $log_search_module)) {

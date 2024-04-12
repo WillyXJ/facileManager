@@ -482,7 +482,7 @@ function buildModuleMenu() {
 function getWLANServers($id) {
 	global $__FM_CONFIG, $fmdb;
 	
-	$serial_no = null;
+	$serial_no = array();
 	
 	if ($id) {
 		/** Force buildconf for all associated servers */
@@ -584,7 +584,7 @@ function secondsToTime($seconds) {
 function buildWLANSubMenu($item_id = 0, $server_serial_no = 0, $class = null) {
 	$list = buildSelect('item_id', 'item_id', availableWLANs(), $item_id, 1, null, false, 'this.form.submit()');
 	
-	$hidden_inputs = null;
+	$hidden_inputs = '';
 	foreach ($GLOBALS['URI'] as $param => $value) {
 		if ($param == 'item_id') continue;
 		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";

@@ -201,7 +201,7 @@ printFooter();
 function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'forward', $supported_record_types = array(), $search_query = null) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$menu_selects = $menu_sub_selects = null;
+	$menu_selects = $menu_sub_selects = '';
 	
 	$q = isset($_GET['q']) ? '&q=' . sanitize($_GET['q']) : null;
 	

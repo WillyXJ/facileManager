@@ -100,7 +100,7 @@ class fm_wifi_wlans {
 		/** Insert the parent */
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
@@ -221,7 +221,7 @@ class fm_wifi_wlans {
 		
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
@@ -265,7 +265,7 @@ class fm_wifi_wlans {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
-			$sql_values = null;
+			$sql_values = '';
 			$child['config_name'] = $handler;
 			$child['config_data'] = $post[$handler];
 			
@@ -341,7 +341,8 @@ class fm_wifi_wlans {
 		
 		$class = ($row->config_status == 'disabled') ? 'disabled' : null;
 		
-		$edit_status = $edit_actions = $checkbox = $icons = null;
+		$edit_status = $checkbox = null;
+		$icons = array();
 		
 		if (currentUserCan('manage_wlans', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -355,8 +356,6 @@ class fm_wifi_wlans {
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
 		}
 		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
-		
-		$edit_status = $edit_actions . $edit_status;
 		
 		if ($class) $class = 'class="' . $class . '"';
 		if (is_array($icons)) {
@@ -400,7 +399,7 @@ class fm_wifi_wlans {
 		
 		$associated_aps = _('All Servers');
 		if ($row->config_aps) {
-			$associated_aps = null;
+			$associated_aps = array();
 			foreach (explode(';', $row->config_aps) as $server_id) {
 				if ($server_id[0] == 'g') {
 					$table = 'server_groups';
@@ -457,7 +456,7 @@ HTML;
 		$ignore_broadcast_ssid_checked = $ieee80211n_checked = $ieee80211ac_checked = $ieee80211d_checked = null;
 		$wmm_enabled_checked = $auth_algs_checked = $macaddr_acl_checked = null;
 		
-		$config_id = $config_parent_id = $config_aps = 0;
+		$config_id = $config_aps = 0;
 		$config_name = $config_comment = $config_data = $channel = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$country_code = 'US';

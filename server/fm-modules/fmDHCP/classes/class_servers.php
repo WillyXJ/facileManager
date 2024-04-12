@@ -40,7 +40,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		
-		$bulk_actions_list = null;
+		$bulk_actions_list = array();
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -113,7 +113,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -164,7 +164,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
@@ -242,7 +242,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$os_image = setOSIcon($row->server_os_distro);
 		
-		$edit_status = $edit_actions = null;
+		$edit_status = $edit_actions = '';
 		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;

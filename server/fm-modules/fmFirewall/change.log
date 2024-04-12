@@ -1,3 +1,7 @@
+3.0.1 (2024-03-??)
+==================
+* Server - [bug] Fixed PHP 8 errors.
+
 3.0.0 (2024-02-09)
 ==================
 * Server - [feature] Added support for NAT rules in iptables.

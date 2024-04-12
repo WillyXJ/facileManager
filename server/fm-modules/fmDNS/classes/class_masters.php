@@ -73,7 +73,7 @@ class fm_dns_masters {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$exclude = array('submit', 'action', 'server_id');
 
@@ -475,7 +475,7 @@ HTML;
 	function getMasterElements($master_parent_id) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
-		$return = null;
+		$return = array();
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', $master_parent_id, 'master_', 'master_parent_id', 'ORDER BY master_id');
 		if ($fmdb->num_rows) {
 			if (!class_exists('fm_dns_acls')) {

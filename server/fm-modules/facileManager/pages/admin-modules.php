@@ -23,7 +23,7 @@ if (!currentUserCan('manage_modules')) unAuth();
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 
-$output = $avail_modules = $response = $update_core = null;
+$output = $avail_modules = $response = $update_core = '';
 $allow_update_core = true;
 $import_output = sprintf('<p>%s <i class="fa fa-spinner fa-spin"></i></p>', _('Processing...'));
 
@@ -107,7 +107,7 @@ if (count($modules)) {
 		/** Include module variables */
 		@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
 		
-		$activate_link = $upgrade_link = $status_options = null;
+		$activate_link = $upgrade_link = $status_options = '';
 		$class = array();
 		
 		$uninstall_link = sprintf('<a href="?action=uninstall&module=%s"><span class="not_installed" onClick="return del(\'%s\');">%s</span></a>' . "\n", $module_name, _('Are you sure you want to delete this module?'), _('Uninstall'));

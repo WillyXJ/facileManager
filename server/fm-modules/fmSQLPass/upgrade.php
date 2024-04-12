@@ -70,7 +70,7 @@ function upgradefmSQLPass_01004($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers` CHANGE  `server_type`  `server_type` ENUM(  'MySQL',  'PostgreSQL',  'MSSQL' ) NOT NULL ";
 
-	$inserts = $updates = null;
+	$inserts = $updates = array();
 
 
 	/** Create table schema */
@@ -136,7 +136,7 @@ function upgradefmSQLPass_01008($__FM_CONFIG, $running_version) {
 			$user_caps = null;
 			/** Update user capabilities */
 			$j = 1;
-			$temp_caps = null;
+			$temp_caps = array();
 			foreach ($fm_user_caps['fmSQLPass'] as $slug => $trash) {
 				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
 				if (@array_key_exists('fmSQLPass', $user_caps)) {
@@ -186,7 +186,7 @@ function upgradefmSQLPass_01009($__FM_CONFIG, $running_version) {
 		for ($i=0; $i<$count; $i++) {
 			$user_caps = null;
 			/** Update user capabilities */
-			$temp_caps = null;
+			$temp_caps = array();
 			foreach ($fm_user_caps['fmSQLPass'] as $slug => $trash) {
 				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
 				if (@array_key_exists('fmSQLPass', $user_caps)) {

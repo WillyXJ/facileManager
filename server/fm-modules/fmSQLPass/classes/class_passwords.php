@@ -92,7 +92,8 @@ HTML;
 		
 		sleep(1);
 		extract($_POST);
-		$error = $verbose_output = null;
+		$error = null;
+		$verbose_output = '';
 		
 		/** Initial error checking */
 		if (!isset($group)) $error = __('No groups are selected.');

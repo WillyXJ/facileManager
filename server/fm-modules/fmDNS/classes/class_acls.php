@@ -73,7 +73,7 @@ class fm_dns_acls {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$exclude = array('submit', 'action', 'server_id', 'acl_bulk');
 
@@ -115,7 +115,7 @@ class fm_dns_acls {
 		
 		$exclude = array('submit', 'action', 'server_id');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . sanitize($data) . "', ";
@@ -211,7 +211,7 @@ class fm_dns_acls {
 		}
 		$edit_addresses = nl2br(str_replace(',', "\n", $row->acl_addresses));
 		$edit_addresses = $this->getACLElements($row->acl_id);
-		$element_names = $element_comment = null;
+		$element_names = $element_comment = '';
 		foreach ($edit_addresses as $element_id => $element_array) {
 			$comment = $element_array['element_comment'] ? $element_array['element_comment'] : '&nbsp;';
 			$element_names .= '<p class="subelement' . $element_id . '"><span>' . $element_array['element_addresses'] . 
@@ -473,7 +473,7 @@ HTML;
 		global $__FM_CONFIG, $fm_dns_keys;
 		
 		$acls = explode(',', $address_match_list);
-		$formatted_acls = null;
+		$formatted_acls = array();
 		foreach ($acls as $address) {
 			if (strpos($address, 'key_') !== false) {
 				if (!class_exists('fm_dns_keys')) {
@@ -579,7 +579,7 @@ HTML;
 	function getACLElements($acl_parent_id, $format = 'display') {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$return = array();
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $acl_parent_id, 'acl_', 'acl_parent_id', 'ORDER BY acl_id');
 		if ($fmdb->num_rows) {
 			$count = $fmdb->num_rows;

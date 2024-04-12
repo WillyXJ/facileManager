@@ -267,7 +267,7 @@ class fm_users {
 			$sql_pwd = "`user_password`='" . password_hash($post['user_password'], PASSWORD_DEFAULT) . "',";
 		} else $sql_pwd = null;
 		
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax', 'process_user_caps', 'type');
 
@@ -333,7 +333,7 @@ class fm_users {
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) return _('This group already exists.');
 		
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		$exclude = array('submit', 'action', 'group_id', 'user_caps', 'is_ajax', 'process_user_caps', 'type', 'group_users');
 
@@ -436,7 +436,7 @@ class fm_users {
 			$id = $row->user_id;
 			$default_id = getDefaultAdminID();
 			if (currentUserCan('manage_users') && $_SESSION['user']['id'] != $row->user_id) {
-				$edit_status = null;
+				$edit_status = '';
 				if ($row->user_template_only == 'yes' && (currentUserCan('do_everything') || (!userCan($row->user_id, 'do_everything')))) {
 					$edit_status .= '<a class="copy_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['copy'] . '</a>';
 					$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -493,7 +493,7 @@ class fm_users {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			} else {
-				$edit_status = $id = null;
+				$edit_status = $id = '';
 			}
 			$star = (groupCan($row->group_id, 'do_everything')) ? $__FM_CONFIG['icons']['star'] : null;
 			
@@ -509,7 +509,7 @@ class fm_users {
 			<td>" . nl2br($row->group_comment) . "</td>";
 			$name = $row->group_name;
 		} elseif ($type == 'keys') {
-			$edit_status = $id = $user_column = null;
+			$edit_status = $id = $user_column = '';
 			$can_manage_users = currentUserCan('manage_users');
 			if ($can_manage_users || $row->user_id == $_SESSION['user']['id']) {
 				$id = $row->key_id;
@@ -731,7 +731,7 @@ HTML;
 			
 			$user_is_super_admin = $perm_function($id, 'do_everything');
 			
-			$fm_perm_boxes = $perm_boxes = null;
+			$fm_perm_boxes = $perm_boxes = '';
 			$i = 1;
 			$fm_user_caps = getAvailableUserCapabilities();
 			foreach ($fm_user_caps[$fm_name] as $key => $title) {
@@ -768,7 +768,7 @@ PERM;
 			/** Process module permissions */
 			$active_modules = getActiveModules();
 			foreach ($active_modules as $module_name) {
-				$module_perm_boxes = null;
+				$module_perm_boxes = '';
 				$i = 1;
 				if (array_key_exists($module_name, $fm_user_caps)) {
 					foreach ($fm_user_caps[$module_name] as $key => $title) {

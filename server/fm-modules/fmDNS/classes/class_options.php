@@ -97,7 +97,7 @@ class fm_module_options {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -169,7 +169,7 @@ class fm_module_options {
 		
 		$exclude = array('submit', 'action', 'cfg_id');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -281,8 +281,7 @@ HTML;
 		
 		$cfg_id = $domain_id = 0;
 		if (!$cfg_type_id) $cfg_type_id = 0;
-		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
-		$ucaction = ucfirst($action);
+		$cfg_name = $cfg_comment = null;
 		$server_serial_no_field = $cfg_isparent = $cfg_data = null;
 		
 		switch(strtolower($cfg_type)) {
@@ -294,7 +293,6 @@ HTML;
 				} else {
 					$cfg_id_name = (isset($_POST['view_id']) || strtolower($cfg_type) == 'ratelimit') ? 'view_id' : 'domain_id';
 				}
-				$data_holder = null;
 				$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 				$server_serial_no_field = '<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />';
 				$request_uri = 'config-options.php';
@@ -306,18 +304,6 @@ HTML;
 					$request_uri = rtrim($request_uri, '&');
 				}
 				$disabled = $action == 'add' ? null : 'disabled';
-				break;
-			case 'logging':
-				$name_holder = 'severity';
-				$name_note = null;
-				$data_holder = 'dynamic';
-				$data_note = null;
-				break;
-			case 'keys':
-				$name_holder = 'key';
-				$name_note = null;
-				$data_holder = 'rndc-key';
-				$data_note = null;
 				break;
 		}
 		
@@ -439,7 +425,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$temp_array = array();
-		$return = null;
+		$return = array();
 		
 		if ($action == 'add') {
 			if (isset($_POST['view_id'])) {
@@ -656,9 +642,9 @@ HTML;
 			$saved_data = array('', '');
 		}
 		$i = 0;
-		$dropdown = null;
+		$dropdown = '';
 		foreach ($raw_def_type_array as $raw_def_type) {
-			$def_type_items = null;
+			$def_type_items = array();
 			if (strlen(trim($raw_def_type))) {
 				$raw_items = explode('|', $raw_def_type);
 				if ($options == 'include-blank') {
@@ -708,11 +694,11 @@ HTML;
 					case 'quoted_string':
 					case 'quoted_string | none':
 					case 'quoted_string | none | hostname':
-						$tmp_string = null;
+						$tmp_array = array();
 						foreach (explode(';', $post['cfg_data']) as $k => $v) {
-							$tmp_string[$k] = trim(str_replace('"', '', $v));
+							$tmp_array[$k] = trim(str_replace('"', '', $v));
 						}
-						$post['cfg_data'] = '"' . implode('"; "', $tmp_string) . '"';
+						$post['cfg_data'] = '"' . implode('"; "', $tmp_array) . '"';
 						if (in_array($post['cfg_data'], array('"none"', '"hostname"'))) $post['cfg_data'] = str_replace('"', '', $post['cfg_data']);
 						break;
 					case 'address_match_element':

@@ -1430,7 +1430,7 @@ function versionCheck($app_version, $serverhost, $compress) {
  * @return string
  */
 function getInterfaceNames() {
-	$interfaces = null;
+	$interfaces = array();
 	
 	switch(PHP_OS) {
 		case 'Linux':
@@ -1469,7 +1469,7 @@ function getInterfaceNames() {
  * @return string
  */
 function getInterfaceAddresses($interface = null) {
-	$addresses = null;
+	$addresses = array();
 	
 	switch(PHP_OS) {
 		case 'Linux':

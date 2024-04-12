@@ -84,7 +84,7 @@ class fm_module_time {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -132,7 +132,7 @@ class fm_module_time {
 		$exclude = array('submit', 'action', 'time_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config',
 						'time_start_time_hour', 'time_start_time_min', 'time_end_time_hour', 'time_end_time_min');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -272,7 +272,7 @@ HTML;
 
 		/** Weekdays */
 		$weekdays_not_check = ($time_weekdays_not) ? 'checked' : null;
-		$weekdays_form = null;
+		$weekdays_form = '';
 		foreach ($__FM_CONFIG['weekdays'] as $day => $bit) {
 			$weekdays_form .= '<label><input type="checkbox" name="time_weekdays[' . $bit . ']" ';
 			if ($bit & $time_weekdays) $weekdays_form .= 'checked';
@@ -443,7 +443,7 @@ HTML;
 		if (!$weekdays_bits || $weekdays_bits == array_sum($__FM_CONFIG['weekdays'])) {
 			return __('Everyday');
 		} else {
-			$weekdays = null;
+			$weekdays = '';
 			foreach ($__FM_CONFIG['weekdays'] as $day => $bit) {
 				if ($weekdays_bits & $bit) $weekdays .= $day . ', ';
 			}

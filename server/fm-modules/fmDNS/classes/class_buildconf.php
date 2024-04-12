@@ -49,7 +49,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$files = array();
 		$server_serial_no = sanitize($post_data['SERIALNO']);
-		$message = null;
+		$message = '';
 		extract($post_data);
 		if (!isset($fm_module_servers)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 		$server_group_ids = $fm_module_servers->getServerGroupIDs(getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id'));
@@ -180,7 +180,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$server_acl_result = $fmdb->last_result;
 					$acl_config_count = $fmdb->num_rows;
 					for ($i=0; $i < $acl_config_count; $i++) {
-						$server_acl_addresses = null;
+						$server_acl_addresses = array();
 						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $server_acl_result[$i]->acl_id . ' AND acl_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
 						$acl_child_result = $fmdb->last_result;
 						for ($j=0; $j < $fmdb->num_rows; $j++) {
@@ -200,7 +200,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$server_acl_result = $fmdb->last_result;
 				$acl_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $acl_config_count; $i++) {
-					$server_acl_addresses = null;
+					$server_acl_addresses = array();
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $server_acl_result[$i]->acl_id . ' AND acl_status="active"');
 					$acl_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
@@ -280,7 +280,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$server_master_result = $fmdb->last_result;
 					$master_config_count = $fmdb->num_rows;
 					for ($i=0; $i < $master_config_count; $i++) {
-						$server_master_addresses = $server_master_ports = null;
+						$server_master_addresses = $server_master_ports = '';
 						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $server_master_result[$i]->master_id . ' AND master_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
 						$master_child_result = $fmdb->last_result;
 						for ($j=0; $j < $fmdb->num_rows; $j++) {
@@ -311,7 +311,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$server_master_result = $fmdb->last_result;
 				$master_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $master_config_count; $i++) {
-					$server_master_addresses = $server_master_ports = null;
+					$server_master_addresses = $server_master_ports = '';
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $server_master_result[$i]->master_id . ' AND master_status="active"');
 					$master_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
@@ -382,7 +382,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 								if ($child_result[$j]->cfg_data && $child_result[$j]->cfg_data != $child_result[$j]->cfg_name) $logging .= ' ' . $child_result[$j]->cfg_data;
 								$logging .= ";\n";
 							} else {
-								$channels = null;
+								$channels = '';
 								foreach (explode(';', $child_result[$j]->cfg_data) as $channel) {
 									if (is_numeric($channel)) {
 										$channel = getNameFromID($channel, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
@@ -1224,7 +1224,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	function buildSOA($domain) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$zone_file = null;
+		$zone_file = '';
 		
 		$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE 
 			domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND s.account_id='{$_SESSION['user']['account_id']}'
@@ -1267,7 +1267,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	function buildRecords($domain, $server_serial_no, $default_ttl) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$zone_file = $skipped_records = null;
+		$zone_file = $skipped_records = '';
 		$domain_name_trim = trimFullStop($domain->domain_name);
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		if (!$server_version) {
@@ -1721,7 +1721,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 			/** Run named-checkzone */
 			if (!$retval) {
-				$named_checkzone_results = null;
+				$named_checkzone_results = '';
 				if (array($zone_files)) {
 					foreach ($zone_files as $view => $zones) {
 						foreach ($zones as $zone_name => $zone_file) {
@@ -1927,7 +1927,7 @@ HTML;
 		}
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
-		$config = null;
+		$config = '';
 		
 		$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name', 'cfg_', "AND cfg_type='global' AND domain_id IN ('" . join("','", $domain_ids) . "') AND server_serial_no='0' AND cfg_status='active'");
 		if ($fmdb->num_rows) {
@@ -1998,7 +1998,8 @@ HTML;
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		$unsupported_version = $this->versionCompatCheck('Response Rate Limiting', '9.9.4', $server_version);
 		
-		$ratelimits = $ratelimits_domains = $rate_config_array = null;
+		$ratelimits = $ratelimits_domains = '';
+		$rate_config_array = array();
 		
 		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', 'server_serial_no', 'cfg_name'), 'cfg_', 'AND cfg_type="ratelimit" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
 		if ($fmdb->num_rows) {
@@ -2075,7 +2076,7 @@ HTML;
 	function formatConfigOption($cfg_name, $cfg_info, $cfg_comment = null, $server_info = null, $tab = "\t\t", $sql = null) {
 		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
-		$config = null;
+		$config = '';
 		
 		$query = "SELECT def_multiple_values,def_minimum_version FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}' $sql";
 		$fmdb->get_results($query);
@@ -2326,7 +2327,8 @@ HTML;
 	function getRRSetOrder($view_id, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$rrsets = $config = null;
+		$rrsets = '';
+		$config = array();
 		
 		/** Use server-specific configs if present */
 		foreach (array($server_serial_no, 0) as $serial_no) {
@@ -2491,7 +2493,8 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		$unsupported_version = $this->versionCompatCheck('Response Policy Zones', '9.10.0', $server_version);
 		
-		$global_rpz_config = $domain_rpz_config = $config_array = null;
+		$global_rpz_config = $domain_rpz_config = '';
+		$config_array = array();
 		
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="rpz" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
 		if ($fmdb->num_rows) {
@@ -2649,7 +2652,8 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
 		$unsupported_version = $this->versionCompatCheck($friendly_name, '9.18.0', $server_version);
 		
-		$global_config = $config_array = null;
+		$global_config = '';
+		$config_array = array();
 		
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
 		if ($fmdb->num_rows) {

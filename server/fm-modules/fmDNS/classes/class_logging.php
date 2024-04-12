@@ -71,7 +71,7 @@ class fm_module_logging {
 		/** Insert the parent */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
@@ -188,7 +188,7 @@ class fm_module_logging {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		if (!isset($post['cfg_data'])) return __('No channel selected.');
 
@@ -231,7 +231,7 @@ class fm_module_logging {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -296,7 +296,7 @@ class fm_module_logging {
 		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
 					'print-severity', 'print-time');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -325,7 +325,7 @@ class fm_module_logging {
 			
 			$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 			$sql_fields = '(';
-			$sql_values = null;
+			$sql_values = '';
 			
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
@@ -468,7 +468,7 @@ class fm_module_logging {
 		$edit_name .= $row->cfg_data;
 		
 		if ($channel_category == 'category') {
-			$channels = null;
+			$channels = '';
 			$assoc_channels = $this->getAssocChannels($row->cfg_id);
 			foreach ($assoc_channels as $channel) {
 				if (is_numeric($channel)) {
@@ -499,7 +499,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$cfg_id = 0;
-		$cfg_name = $cfg_root_dir = $cfg_zones_dir = $cfg_comment = null;
+		$cfg_name = $cfg_comment = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$cfg_data = null;
 		
@@ -709,7 +709,7 @@ FORM;
 		if (!$cfg_id) return null;
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$return = array();
 		
 		$query = "SELECT cfg_id,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_parent='{$cfg_id}' ORDER BY cfg_id ASC";
 		$result = $fmdb->get_results($query);
@@ -729,7 +729,7 @@ FORM;
 	function getAssocCategories($cfg_id) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return = null;
+		$return = array();
 		
 		$query = "SELECT cfg_id,cfg_parent FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND 
 				(cfg_data={$cfg_id} OR cfg_data LIKE '{$cfg_id};%' OR cfg_data LIKE '%;{$cfg_id};%' OR cfg_data LIKE '%;{$cfg_id}') ORDER BY cfg_id ASC";
@@ -754,7 +754,7 @@ FORM;
 		
 		/** Determine what type of channel destination is used */
 		if (!$channel_opt) {
-			$dest_opt = null;
+			$dest_opt = '';
 			foreach ($__FM_CONFIG['logging']['options']['destinations'] as $opt) {
 				$dest_opt .= "'$opt',";
 			}

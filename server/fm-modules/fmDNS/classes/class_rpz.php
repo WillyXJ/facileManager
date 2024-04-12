@@ -87,7 +87,7 @@ class fm_module_rpz {
 		/** Insert the parent */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$exclude = array('submit', 'action', 'cfg_id', 'tab-group-1', 'policy', 'cname_domain_name',
 					'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'min-ns-dots',
@@ -221,7 +221,7 @@ class fm_module_rpz {
 
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
-		$sql_values = null;
+		$sql_values = '';
 		
 		$include = array('cfg_isparent', 'cfg_name', 'cfg_type', 'cfg_comment', 'domain_id');
 		
@@ -249,7 +249,7 @@ class fm_module_rpz {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
-			$sql_values = null;
+			$sql_values = '';
 			$child['cfg_name'] = $handler;
 			$child['cfg_data'] = $post[$handler];
 			

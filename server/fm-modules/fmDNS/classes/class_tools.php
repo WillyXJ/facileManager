@@ -363,7 +363,7 @@ HTML;
 				}
 			} elseif (in_array('TXT', $parts)) {
 				$key = array_search('TXT', $parts);
-				$txt_record = null;
+				$txt_record = '';
 				for ($i=$key + 1; $i<count($parts); $i++) {
 					$txt_record .= $parts[$i] . ' ';
 				}
@@ -493,7 +493,7 @@ HTML;
 		
 		if (count($rows)) {
 			ksort($rows);
-			$table = null;
+			$table = '';
 			foreach ($rows as $rr_type => $row) {
 				switch ($rr_type) {
 					case 'CERT':
@@ -873,14 +873,14 @@ BODY;
 						$rr['record_cert_type'] = $rr_fields[4];
 						$rr['record_key_tag'] = $rr_fields[5];
 						$rr['record_algorithm'] = $rr_fields[6];
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=7; $i<count($rr_fields); $i++) {
 							$txt_record[] = $rr_fields[$i];
 						}
 						$rr['record_value'] = join("\n", $txt_record);
 						break;
 					case 'DHCID':
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=4; $i<count($rr_fields); $i++) {
 							$txt_record[] = $rr_fields[$i];
 						}
@@ -889,7 +889,7 @@ BODY;
 					case 'DLV':
 						$rr['record_key_tag'] = $rr_fields[4];
 						$rr['record_algorithm'] = $rr_fields[5];
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=6; $i<count($rr_fields); $i++) {
 							$txt_record[] = $rr_fields[$i];
 						}
@@ -899,7 +899,7 @@ BODY;
 						$rr['record_key_tag'] = $rr_fields[4];
 						$rr['record_algorithm'] = $rr_fields[5];
 						$rr['record_cert_type'] = $rr_fields[6];
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=7; $i<count($rr_fields); $i++) {
 							$txt_record[] = $rr_fields[$i];
 						}
@@ -909,7 +909,7 @@ BODY;
 					case 'KEY':
 						$rr['record_flags'] = $rr_fields[4];
 						$rr['record_algorithm'] = $rr_fields[6];
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=7; $i<count($rr_fields); $i++) {
 							$txt_record[] = $rr_fields[$i];
 						}
@@ -932,7 +932,7 @@ BODY;
 						$rr['record_value'] = $rr_fields[9];
 						break;
 					case 'OPENPGPKEY':
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=4; $i<count($rr_fields); $i++) {
 							$txt_record[] = $rr_fields[$i];
 						}
@@ -945,7 +945,7 @@ BODY;
 						$rr['record_priority'] = $rr_fields[4];
 						$rr['record_weight'] = $rr_fields[5];
 						$rr['record_port'] = $rr_fields[6];
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=7; $i<count($rr_fields); $i++) {
 							$txt_record[] = $rr_fields[$i];
 						}
@@ -963,7 +963,7 @@ BODY;
 						$rr['record_value'] = $rr_fields[7];
 						break;
 					case 'TXT':
-						$txt_record = null;
+						$txt_record = array();
 						for ($i=4; $i<count($rr_fields); $i++) {
 							$txt_record .= $rr_fields[$i] . ' ';
 						}

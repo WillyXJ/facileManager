@@ -170,13 +170,13 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 			$domain_pieces = array_reverse(explode('.', $rev_domain));
 			$domain_parts = count($domain_pieces);
 
-			$subnet_ips = null;
+			$subnet_ips = '';
 			for ($i=2; $i<$domain_parts; $i++) {
 				if (strpos($domain_pieces[$i], '-')) break;
 				$subnet_ips .= $domain_pieces[$i] . '.';
 			}
 			$record_octets = array_reverse(explode('.', substr($data['record_value'], strlen($subnet_ips))));
-			$temp_record_value = null;
+			$temp_record_value = '';
 			for ($j=0; $j<count($record_octets); $j++) {
 				$temp_record_value .= $record_octets[$j] . '.';
 			}

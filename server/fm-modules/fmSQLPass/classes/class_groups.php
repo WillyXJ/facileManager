@@ -92,7 +92,7 @@ class fm_sqlpass_groups {
 		
 		$exclude = array('submit', 'action', 'group_id', 'page');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -146,7 +146,7 @@ class fm_sqlpass_groups {
 					AND (server_groups={$row->group_id} OR server_groups LIKE '{$row->group_id};%' OR server_groups LIKE '%;{$row->group_id};%' 
 					OR server_groups LIKE '%;{$row->group_id}')";
 		if ($result = $fmdb->query($query)) {
-			$assoc_servers = null;
+			$assoc_servers = '';
 			$result = $fmdb->last_result;
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$assoc_servers .= $result[$i]->server_name . ', ';
@@ -185,7 +185,6 @@ HTML;
 		
 		$group_id = 0;
 		$group_name = null;
-		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($data))

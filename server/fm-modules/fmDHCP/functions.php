@@ -31,7 +31,7 @@
  */
 function moduleFunctionalCheck() {
 	global $fmdb, $__FM_CONFIG;
-	$html_checks = null;
+	$html_checks = '';
 	$checks = array();
 	
 	/** Perform checks to display in yellow bar */

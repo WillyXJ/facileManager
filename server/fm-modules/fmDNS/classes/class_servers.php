@@ -33,7 +33,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		$bulk_actions_list = null;
+		$bulk_actions_list = array();
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -115,7 +115,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -150,7 +150,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if ($post['server_type'] != 'url-only') {
 			$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 			$sql_fields = '(`server_id`, `cfg_type`, `cfg_name`, `cfg_data`)';
-			$sql_values = null;
+			$sql_values = '';
 			foreach ($config_opts as $option) {
 				$clean_data = sanitize($post[$option]);
 				$sql_values .= "('$new_server_id', 'global', '$option', '$clean_data'), ";
@@ -192,7 +192,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if ($fmdb->num_rows) return __('This group name already exists.');
 		
 		/** Process group masters */
-		$log_message_master_servers = null;
+		$log_message_master_servers = '';
 		foreach ($post['group_masters'] as $val) {
 			if ($val == 0) {
 				$group_masters = 0;
@@ -207,7 +207,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
 
 		/** Process group slaves */
-		$log_message_slave_servers = null;
+		$log_message_slave_servers = '';
 		foreach ($post['group_slaves'] as $val) {
 			if ($val == 0) {
 				$group_slaves = 0;
@@ -223,7 +223,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -279,7 +279,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			$post['server_run_as_predefined'] = 'as defined:';
 		}
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -352,7 +352,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if ($fmdb->num_rows) return __('This group name already exists.');
 		
 		/** Process group masters */
-		$log_message_master_servers = null;
+		$log_message_master_servers = '';
 		foreach ((array) $post['group_masters'] as $val) {
 			if ($val == 0) {
 				$group_masters = 0;
@@ -367,7 +367,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
 
 		/** Process group slaves */
-		$log_message_slave_servers = null;
+		$log_message_slave_servers = '';
 		foreach ((array) $post['group_slaves'] as $val) {
 			if ($val == 0) {
 				$group_slaves = 0;
@@ -383,7 +383,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
-		$sql_edit = null;
+		$sql_edit = '';
 		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type');
 
 		foreach ($post as $key => $data) {
@@ -466,7 +466,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$class = ($row->server_status == 'disabled' || $row->group_status == 'disabled') ? 'disabled' : null;
 		
-		$edit_status = $edit_actions = $runas = $update_method = null;
+		$edit_status = $edit_actions = $runas = $update_method = '';
 		
 		if ($type == 'servers') {
 			$os_image = ($row->server_type == 'remote') ? '<i class="fa fa-globe fa-2x grey" style="font-size: 1.5em" title="' . __('Remote server') . '" aria-hidden="true"></i>' : setOSIcon($row->server_os_distro);
@@ -886,7 +886,7 @@ FORM;
 		global $fmdb, $__FM_CONFIG;
 		
 		for ($i=0; $i < $count; $i++) {
-			$serverids = null;
+			$serverids = '';
 			foreach (explode(';', $result[$i]->domain_name_servers) as $server) {
 				if ($server == $server_id) continue;
 				$serverids .= $server . ';';

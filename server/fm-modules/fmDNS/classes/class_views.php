@@ -162,7 +162,7 @@ class fm_dns_views {
 		
 		$exclude = array('submit', 'action', 'view_id', 'page');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

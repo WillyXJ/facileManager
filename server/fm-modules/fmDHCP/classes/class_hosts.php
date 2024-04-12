@@ -68,7 +68,8 @@ class fm_dhcp_hosts extends fm_dhcp_objects {
 		
 		$class = ($row->config_status == 'disabled') ? 'disabled' : null;
 		
-		$edit_status = $edit_actions = $checkbox = $icons = $fixed_address = null;
+		$edit_status = $checkbox = $fixed_address = '';
+		$icons = array();
 		
 		if (currentUserCan('manage_hosts', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -82,8 +83,6 @@ class fm_dhcp_hosts extends fm_dhcp_objects {
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
 		}
 		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
-		
-		$edit_status = $edit_actions . $edit_status;
 		
 		if ($class) $class = 'class="' . $class . '"';
 		if (is_array($icons)) {
