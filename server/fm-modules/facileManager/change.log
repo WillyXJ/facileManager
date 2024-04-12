@@ -1,3 +1,7 @@
+4.6.2 (2024-03-??)
+==================
+* Server - [bug] Fixed PHP errors. (Issue #621)
+
 4.6.1 (2024-02-13)
 ==================
 * Server - [bug] Fixed PHP errors during upgrade.

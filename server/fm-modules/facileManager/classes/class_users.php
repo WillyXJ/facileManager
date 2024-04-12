@@ -859,7 +859,7 @@ PERM;
 	function getGroupUsers($group_id = null, $include = 'id-only') {
 		global $fmdb, $__FM_CONFIG;
 		
-		$user_list = null;
+		$user_list = array();
 		
 		if ($group_id == null) {
 			basicGetList('fm_users', 'user_login', 'user_', "AND user_template_only='no' AND user_id!={$_SESSION['user']['id']} AND (user_caps IS NULL OR user_caps NOT LIKE '%do_everything%')");
