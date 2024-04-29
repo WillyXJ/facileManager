@@ -473,7 +473,7 @@ HTML;
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
 				implode("\n", $child_config_form),
-				$popup_footer,
+				$popup_footer
 			);
 
 		return $return_form;
