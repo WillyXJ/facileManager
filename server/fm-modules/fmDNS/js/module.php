@@ -363,14 +363,14 @@ $(document).ready(function() {
 			$("#dynamic_updates").slideUp();
 			$("#enable_dnssec").slideUp();
 			$("#define_redirect_url").slideUp();
-		} else if ($(this).val() == "slave" || $(this).val() == "stub") {
+		} else if ($(this).val() == "secondary" || $(this).val() == "stub") {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").show("slow");
 			$("#define_soa").slideUp();
 			$("#dynamic_updates").slideUp();
 			$("#enable_dnssec").slideUp();
 			$("#define_redirect_url").slideUp();
-		} else if ($(this).val() == "master" || $(this).val() == "url-redirect") {
+		} else if ($(this).val() == "primary" || $(this).val() == "url-redirect") {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").slideUp();
 			$("#define_soa").show("slow");

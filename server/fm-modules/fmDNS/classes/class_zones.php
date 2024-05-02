@@ -1191,7 +1191,7 @@ HTML;
 				__('Zone Map'), $zone_maps,
 				__('Zone Type'), $domain_types,
 				$forwarders_show, $forward_dropdown, __('Define forwarders'), $domain_forward_servers,
-				$masters_show, __('Define masters'), $domain_master_servers,
+				$masters_show, __('Define primaries'), $domain_master_servers,
 				__('Redirect to URL'), __('Requests to this zone will be redirected to the specified URL'),
 				__('Clone Of (optional)'), $clone, $clone_override_show, $clone_dname_checked,
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
