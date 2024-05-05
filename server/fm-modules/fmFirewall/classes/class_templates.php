@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | https://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
@@ -107,7 +107,7 @@ class fm_module_templates {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -213,7 +213,7 @@ class fm_module_templates {
 		
 		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		$log_message = "Updated a policy template for with the following details:\n";
 
@@ -312,7 +312,7 @@ class fm_module_templates {
 		
 //		$disabled_class = ($row->policy_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$edit_status = $edit_actions = $checkbox = $grab_bars = null;
+		$edit_status = $checkbox = $grab_bars = null;
 		$bars_title = __('Click and drag to reorder');
 		
 		if (currentUserCan('manage_policies', $_SESSION['module'])) {
@@ -356,19 +356,18 @@ HTML;
 	 *
 	 * @param array $data Either $_POST data or returned SQL results
 	 * @param string $action Add or edit
-	 * @return string
+	 * @return string|void
 	 */
 	function printForm($data = '', $action = 'add') {
 		$popup_title = $action == 'add' ? __('Add Template') : __('Edit Template');
 		$popup_header = buildPopup('header', $popup_title);
-		$force_action = $action == 'add' ? 'create' : 'update';
+		$action == 'add' ? 'create' : 'update';
 
 		global $fm_module_policies;
 
 		$policy_id = 0;
 		$policy_targets = -1;
 		$policy_name = $policy_comment = null;
-		$ucaction = ucfirst($action);
 
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -577,8 +576,8 @@ HTML;
 	 * @package facileManager
 	 * @subpackage fmFirewall
 	 *
-	 * @param id $ids IDs to convert to names
-	 * @param id $type ID type to process
+	 * @param string $ids IDs to convert to names
+	 * @param string $type ID type to process
 	 * @return string
 	 */
 	function IDs2Name($ids, $type) {
@@ -596,7 +595,7 @@ HTML;
 				$ids_array = explode(';', rtrim($ids, ';'));
 				if (in_array('0', $ids_array)) $name = $all_text;
 				else {
-					$name = null;
+					$name = '';
 					foreach ($ids_array as $id) {
 						if ($id[0] == 'g') {
 							$table = 'server_group';

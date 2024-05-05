@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | https://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
@@ -46,7 +46,7 @@ function upgradefmFirewall_01003($__FM_CONFIG, $running_version) {
 	
 	$table[] = "ALTER TABLE  `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` ADD  `server_client_version` VARCHAR( 150 ) NULL AFTER  `server_installed` ";
 	
-	$inserts = $updates = null;
+	$inserts = $updates = array();
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -113,7 +113,7 @@ function upgradefmFirewall_01005($__FM_CONFIG, $running_version) {
 			$user_caps = null;
 			/** Update user capabilities */
 			$j = 1;
-			$temp_caps = null;
+			$temp_caps = array();
 			foreach ($fm_user_caps['fmFirewall'] as $slug => $trash) {
 				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
 				if (@array_key_exists('fmFirewall', $user_caps)) {
@@ -167,7 +167,7 @@ function upgradefmFirewall_01006($__FM_CONFIG, $running_version) {
 		for ($i=0; $i<$count; $i++) {
 			$user_caps = null;
 			/** Update user capabilities */
-			$temp_caps = null;
+			$temp_caps = array();
 			foreach ($fm_user_caps['fmFirewall'] as $slug => $trash) {
 				$user_caps = isSerialized($result[$i]->user_caps) ? unserialize($result[$i]->user_caps) : $result[$i]->user_caps;
 				if (@array_key_exists('fmFirewall', $user_caps)) {
@@ -199,7 +199,7 @@ function upgradefmFirewall_111($__FM_CONFIG, $running_version) {
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD INDEX `idx_policy_account_id` (`account_id`)";
 	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD INDEX `idx_policy_status` (`policy_status`)";
 	
-	$inserts = $updates = null;
+	$inserts = $updates = array();
 	
 	/** Create table schema */
 	if (count($table) && $table[0]) {
@@ -255,7 +255,7 @@ function upgradefmFirewall_1401($__FM_CONFIG, $running_version) {
 		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` ADD `policy_packet_state` TEXT NULL DEFAULT NULL AFTER `policy_options`";
 	}
 	
-	$inserts = $updates = null;
+	$inserts = $updates = array();
 	
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_type`='filter'";
 	$updates[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='NEW' WHERE `policy_action`='pass'";
@@ -339,7 +339,7 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 	}
 	
 	/** Set packet state on all "pass" rules */
-	$serial_nos = null;
+	$serial_nos = array();
 	$result = $fmdb->get_results("SELECT `server_serial_no` FROM `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` WHERE `server_type`='ipfilter'");
 	if ($fmdb->num_rows) {
 		foreach ($fmdb->last_result as $server) {
@@ -347,7 +347,7 @@ function upgradefmFirewall_200($__FM_CONFIG, $running_version) {
 		}
 		$table[] = "UPDATE `fm_{$__FM_CONFIG['fmFirewall']['prefix']}policies` SET `policy_packet_state`='keep state' WHERE `server_serial_no` IN (" . join(',', $serial_nos) . ") AND `policy_action`='pass'";
 	}
-	$serial_nos = null;
+	$serial_nos = array();
 	$result = $fmdb->get_results("SELECT `server_serial_no` FROM `fm_{$__FM_CONFIG['fmFirewall']['prefix']}servers` WHERE `server_type`='ipfw'");
 	if ($fmdb->num_rows) {
 		foreach ($fmdb->last_result as $server) {

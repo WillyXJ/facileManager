@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -83,7 +83,7 @@ class fm_login {
 	 * @package facileManager
 	 *
 	 * @param string $message Message to display to the user
-	 * @return string
+	 * @return void
 	 */
 	function printUserForm($message = null) {
 		/** Should not be here if there is no mail_enable defined or if not using builtin auth */

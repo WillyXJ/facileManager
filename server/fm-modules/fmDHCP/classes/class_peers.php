@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDHCP: Easily manage one or more ISC DHCP servers                      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | https://www.facilemanager.com/modules/fmdhcp/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -68,7 +68,7 @@ class fm_dhcp_peers extends fm_dhcp_objects {
 		
 		$class = ($row->config_status == 'disabled') ? 'disabled' : null;
 		
-		$edit_status = $edit_actions = $checkbox = $icons = null;
+		$edit_status = $checkbox = '';
 		
 		if (currentUserCan('manage_peers', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -81,8 +81,6 @@ class fm_dhcp_peers extends fm_dhcp_objects {
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
 		}
-		
-		$edit_status = $edit_actions . $edit_status;
 		
 		$primary = getNameFromID($this->getConfig($row->config_id, 'address'), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . ':' . $this->getConfig($row->config_id, 'port');
 		$secondary = getNameFromID($this->getConfig($row->config_id, 'peer-address'), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . ':' . $this->getConfig($row->config_id, 'peer-port');

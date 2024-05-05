@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -32,7 +32,7 @@ class fm_module_settings {
 		$exclude = array('save', 'item_type');
 		
 		$log_message = $log_message_head = _('Set options to the following:') . "\n";
-		$new_array = null;
+		$new_array = array();
 		$result = false;
 		
 		foreach ($_POST as $key => $data) {
@@ -82,7 +82,7 @@ class fm_module_settings {
 				}
 		
 				if (is_array($option_value)) {
-					$log_value = null;
+					$log_value = '';
 					foreach ($option_value as $line) {
 						if (trim($line)) {
 							$log_value .= "$line, ";

@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | https://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
@@ -139,7 +139,7 @@ HTML;
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -229,7 +229,7 @@ HTML;
 		
 		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		$log_message = "Updated a firewall policy for " . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . " with the following details:\n";
 
@@ -294,14 +294,16 @@ HTML;
 	function displayRow($row, $type, $num_rows) {
 		global $__FM_CONFIG;
 		
-		$row_title = $options = null;
+		$row_title = null;
+		$options = array();
 		if ($row->policy_status == 'disabled') {
 			$class[] = 'disabled';
 			$row_title = sprintf('title="%s"', __('Rule is disabled'));
 		}
 		if ($row->policy_from_template) $class[] = 'notice';
 		
-		$edit_status = $checkbox = $grab_bars = null;
+		$edit_status = '';
+		$checkbox = $grab_bars = null;
 		$bars_title = __('Click and drag to reorder');
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -578,7 +580,7 @@ FORM;
 
 			/** Process TCP Flags */
 			@list($tcp_flag_mask, $tcp_flag_settings) = explode(':', $policy_tcp_flags);
-			$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = null;
+			$tcp_flags_mask_form = $tcp_flags_settings_form = $tcp_flags_head = '';
 			foreach ($__FM_CONFIG['tcp_flags'] as $flag => $bit) {
 				$tcp_flags_head .= '<th title="' . $flag .'">' . $flag . "</th>\n";
 				
@@ -592,7 +594,7 @@ FORM;
 			}
 			
 			/** Parse options */
-			$options = null;
+			$options = '';
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				if (in_array($server_firewall_type, $opt_array['firewalls']) || $_POST['server_serial_no'][0] == 't') {
 					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
@@ -972,7 +974,7 @@ FORM;
 	function formatPolicyIDs($ids, $display = 'global-search', $not = '') {
 		global $__FM_CONFIG;
 		
-		$names = null;
+		$names = array();
 		foreach (explode(';', trim($ids, ';')) as $temp_id) {
 			$tooltip_objects = $addl_search_terms = array();
 
@@ -1069,7 +1071,7 @@ FORM;
 	function formatServerIDs($ids) {
 		global $__FM_CONFIG;
 		
-		$names = null;
+		$names = array();
 		foreach (explode(';', trim($ids, ';')) as $temp_id) {
 			$names[] = ($temp_id == 0) ? _('All Servers') : getNameFromID(preg_replace('/\D/', '', $temp_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		}

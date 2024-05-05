@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmSQLPass: Change database user passwords across multiple servers.      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmsqlpass/                         |
+ | https://www.facilemanager.com/modules/fmsqlpass/                         |
  +-------------------------------------------------------------------------+
 */
 
@@ -84,7 +84,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}servers`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$log_message = "Added a database server with the following details:\n";
 
@@ -105,7 +105,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		/** Convert groups and policies arrays into strings */
 		if (isset($post['server_groups']) && is_array($post['server_groups'])) {
-			$temp_var = null;
+			$temp_var = '';
 			foreach ($post['server_groups'] as $id) {
 				$temp_var .= $id . ';';
 			}
@@ -128,7 +128,7 @@ class fm_module_servers extends fm_shared_module_servers {
 				if ($key == 'server_groups') {
 					if ($post['server_groups']) {
 						$group_array = explode(';', $post['server_group']);
-						$clean_data = null;
+						$clean_data = '';
 						foreach ($group_array as $group_id) {
 							$clean_data .= getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name') . '; ';
 						}
@@ -178,14 +178,14 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$exclude = array('submit', 'action', 'server_id', 'page');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$log_message = "Updated a database server ($old_name) with the following details:\n";
 		
 		/** Convert groups and policies arrays into strings */
 		if (isset($post['server_groups']) && is_array($post['server_groups'])) {
-			$temp_var = null;
+			$temp_var = '';
 			foreach ($post['server_groups'] as $id) {
 				$temp_var .= $id . ';';
 			}
@@ -206,7 +206,7 @@ class fm_module_servers extends fm_shared_module_servers {
 				if ($key == 'server_groups') {
 					if ($data) {
 						$group_array = explode(';', $data);
-						$clean_data = null;
+						$clean_data = '';
 						foreach ($group_array as $group_id) {
 							$clean_data .= getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name') . '; ';
 						}
@@ -288,7 +288,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		/** Get group associations */
 		$groups_array = explode(';', $row->server_groups);
-		$groups = null;
+		$groups = '';
 		foreach ($groups_array as $group_id) {
 			$group_name = getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 			$groups .= "$group_name\n";
@@ -321,7 +321,7 @@ HTML;
 		
 		/** Build groups options */
 		basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name', 'group_');
-		$group_options = null;
+		$group_options = array();
 		if ($fmdb->num_rows) {
 			for ($i=0; $i<$fmdb->num_rows; $i++) {
 				$group_options[$i][] = $fmdb->last_result[$i]->group_name;
@@ -419,7 +419,7 @@ HTML;
 	function getServerTypes() {
 		global $__FM_CONFIG;
 		
-		$fm_supported_servers = null;
+		$fm_supported_servers = array();
 		$db_support = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_type');
 		
 		foreach ($db_support as $db_type) {

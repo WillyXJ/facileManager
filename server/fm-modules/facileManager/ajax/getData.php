@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
  | Displays forms                                                          |
  +-------------------------------------------------------------------------+
@@ -90,7 +90,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 			$form_bits = array('user_password');
 		}
 
-		$form_data = null;
+		$form_data = array();
 		if ($id) {
 			basicGet('fm_users', $id, 'user_', 'user_id');
 			$results = $fmdb->last_result;

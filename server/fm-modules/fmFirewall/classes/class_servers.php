@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | https://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
@@ -33,7 +33,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		$bulk_actions_list = null;
+		$bulk_actions_list = array();
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -100,7 +100,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -188,7 +188,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			'module_name', 'module_type', 'config', 'SERIALNO',
 			'update_from_client', 'dryrun');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -250,7 +250,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$os_image = setOSIcon($row->server_os_distro);
 		
-		$edit_status = $edit_actions = null;
+		$edit_status = $edit_actions = '';
 		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
@@ -310,9 +310,8 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$server_id = 0;
-		$server_name = $runas = $server_type = $server_update_port = null;
+		$server_name = $server_type = $server_update_port = null;
 		$server_update_method = $server_config_file = $server_os = null;
-		$ucaction = ucfirst($action);
 		$server_installed = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -322,16 +321,7 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 
-		/** Show/hide divs */
-		if (isset($server_run_as_predefined) && $server_run_as_predefined == 'as defined:') {
-			$runashow = 'block';
-		} else {
-			$runashow = 'none';
-			$server_run_as = null;
-		}
 		$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
-		
-		$disabled = ($server_installed == 'yes') ? 'disabled' : null;
 		
 		if ($server_installed == 'yes') {
 			if (strpos($server_update_method, 'http') === false) {

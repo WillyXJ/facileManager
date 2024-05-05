@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmwifi/                            |
+ | https://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -40,7 +40,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		
-		$bulk_actions_list = null;
+		$bulk_actions_list = array();
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -126,7 +126,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			/** Server groups */
 			$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups`";
 			$sql_fields = '(';
-			$sql_values = null;
+			$sql_values = '';
 
 			$post['account_id'] = $_SESSION['user']['account_id'];
 			
@@ -160,7 +160,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -225,7 +225,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
@@ -321,7 +321,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$os_image = setOSIcon($row->server_os_distro);
 		
-		$edit_status = $edit_actions = null;
+		$edit_status = $edit_actions = '';
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
@@ -434,11 +434,10 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$server_id = $group_id = 0;
-		$server_name = $runas = $server_type = $server_update_port = null;
-		$server_update_method = $server_config_file = $server_os = null;
+		$server_name = $server_update_port = null;
+		$server_update_method = $server_config_file = null;
 		$group_name = $group_members = $group_comment = $server_mode = null;
 		$server_wlan_driver = $server_wlan_interface = $wlan_interface = null;
-		$ucaction = ucfirst($action);
 		$server_installed = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -448,13 +447,6 @@ HTML;
 			extract(get_object_vars($data[0]));
 		}
 
-		/** Show/hide divs */
-		if (isset($server_run_as_predefined) && $server_run_as_predefined == 'as defined:') {
-			$runashow = 'block';
-		} else {
-			$runashow = 'none';
-			$server_run_as = null;
-		}
 		$server_update_port_style = ($server_update_method == 'cron') ? 'style="display: none;"' : 'style="display: block;"';
 		
 		$disabled = ($server_installed == 'yes') ? 'disabled' : null;
@@ -632,7 +624,7 @@ HTML;
 			}
 			
 			/** Process group masters */
-			$log_message_member_servers = null;
+			$log_message_member_servers = '';
 			foreach ($post['group_members'] as $val) {
 				if (!$val) {
 					$group_members = 0;
@@ -715,7 +707,6 @@ HTML;
 	 */
 	function getServerInfo($server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
-		$data = null;
 		
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_serial_no, 'server_', 'server_serial_no');
 		if ($fmdb->num_rows) {
@@ -747,7 +738,6 @@ HTML;
 	 */
 	function getAPStats($server_id, $command_args) {
 		global $fmdb, $__FM_CONFIG;
-		$data = null;
 		
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_id, 'server_', 'server_id');
 		if ($fmdb->num_rows) {

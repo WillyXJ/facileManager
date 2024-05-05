@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDHCP: Easily manage one or more ISC DHCP servers                      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | https://www.facilemanager.com/modules/fmdhcp/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -131,7 +131,7 @@ printFooter();
 function buildObjectsSubMenu($item_id = 0) {
 	$object_list = buildSelect('item_id', 'item_id', availableObjects(), $item_id, 1, null, false, 'this.form.submit()');
 	
-	$hidden_inputs = null;
+	$hidden_inputs = '';
 	foreach ($GLOBALS['URI'] as $param => $value) {
 		if ($param == 'item_id') continue;
 		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";

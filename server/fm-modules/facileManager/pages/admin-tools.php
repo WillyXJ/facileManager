@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -25,7 +25,7 @@ if (!class_exists('fm_tools')) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 }
 
-$admin_tools = $output = $block_style = $classes = null;
+$admin_tools = null;
 $response = isset($response) ? $response : null;
 $tools_option = array();
 $import_output = sprintf('<p>%s <i class="fa fa-spinner fa-spin"></i></p>', _('Processing...'));
@@ -91,4 +91,4 @@ echo <<<HTML
 	</div>
 HTML;
 
-printFooter($classes, $output, $block_style);
+printFooter();

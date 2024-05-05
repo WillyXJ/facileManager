@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
 */
 
@@ -29,7 +29,7 @@
  */
 function moduleFunctionalCheck() {
 	global $fmdb, $__FM_CONFIG;
-	$html_checks = null;
+	$html_checks = '';
 	
 	/** Count active name servers */
 	$checks[] = (basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_id', 'server_', 'active')) ? null : sprintf('<p>' . _('You currently have no active servers defined. <a href="%s">Click here</a> to define one or more to manage.') . '</p>', getMenuURL(_('Servers')));
@@ -57,7 +57,7 @@ function moduleFunctionalCheck() {
 function buildModuleDashboard() {
 	global $fmdb, $__FM_CONFIG;
 
-	$dashboard = $errors = null;
+	$errors = '';
 	
 	/** Name server stats */
 	if (currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -528,12 +528,12 @@ function buildFullIPAddress($partial_ip, $domain) {
 	$domain_pieces = array_reverse(explode('.', $domain));
 	$domain_parts = count($domain_pieces);
 	
-	$subnet_ips = null;
+	$subnet_ips = '';
 	for ($i=2; $i<$domain_parts; $i++) {
 		$subnet_ips .= $domain_pieces[$i] . '.';
 	}
 	$record_octets = array_reverse(explode('.', str_replace($subnet_ips, '', $partial_ip)));
-	$temp_record_value = null;
+	$temp_record_value = '';
 	for ($j=0; $j<count($record_octets); $j++) {
 		$temp_record_value .= $record_octets[$j] . '.';
 	}
@@ -674,7 +674,7 @@ function getModuleBadgeCounts($type) {
 function getZoneServers($domain_id, $server_types = array('primaries')) {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
-	$serial_no = '';
+	$serial_no = array();
 	
 	if ($domain_id) {
 		if ($domain_template_id = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
@@ -712,7 +712,7 @@ function getZoneServers($domain_id, $server_types = array('primaries')) {
 function setDefaultOverrideOptions() {
 	global $fm_module_options;
 	
-	$config = null;
+	$config = '';
 	$server_os_distro = isDebianSystem($_POST['server_os_distro']) ? 'debian' : strtolower($_POST['server_os_distro']);
 	
 	switch ($server_os_distro) {
@@ -1000,7 +1000,7 @@ function checkCIDR($ip, $prefix, $max_bits) {
 function buildViewSubMenu($view_id = 0, $server_serial_no = 0, $class = null) {
 	$server_list = buildSelect('view_id', 'view_id', availableViews(), $view_id, 1, null, false, 'this.form.submit()');
 	
-	$hidden_inputs = null;
+	$hidden_inputs = '';
 	foreach ($GLOBALS['URI'] as $param => $value) {
 		if ($param == 'view_id') continue;
 		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
@@ -1380,7 +1380,7 @@ function getConfigChildren($config_id, $config_type = 'global', $return = null) 
 function availableItems($type, $default = 'blank', $addl_sql = null, $prefix = null) {
 	global $fmdb, $__FM_CONFIG;
 	
-	$return = null;
+	$return = array();
 	
 	$j = 0;
 	if ($default == 'blank') {

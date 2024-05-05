@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
 */
 
@@ -126,7 +126,7 @@ class fm_dns_keys {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['key_created'] = strtotime('now');
@@ -190,7 +190,7 @@ class fm_dns_keys {
 		
 		$exclude = array('submit', 'action', 'key_id');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -242,7 +242,7 @@ class fm_dns_keys {
 	function displayRow($row, $type) {
 		global $__FM_CONFIG;
 		
-		$edit_status = $checkbox = null;
+		$edit_status = $checkbox = '';
 		$classes = array();
 		
 		if ($row->key_status == 'disabled') $classes[] = 'disabled';
@@ -268,7 +268,7 @@ class fm_dns_keys {
 		}
 		
 		$edit_name = $row->key_name;
-		$rows = null;
+		$rows = '';
 		
 		if ($type == 'tsig') {
 			$key_view = ($row->key_view) ? getNameFromID($row->key_view, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
@@ -361,7 +361,7 @@ HTML;
 			$key_secret_placeholder = __('The private key and associated DNSKEY RR will be automatically generated if this field is left blank.');
 			$key_signing_checked = ($key_signing == 'yes') ? 'checked' : null;
 
-			$key_options = null;
+			$key_options = '';
 			
 			if ($action == 'add') {
 				$key_options = sprintf('
@@ -489,7 +489,7 @@ HTML;
 	function parseKey($keys, $glue = '"; "') {
 		global $__FM_CONFIG;
 		
-		$formatted_keys = null;
+		$formatted_keys = array();
 		foreach (explode(',', $keys) as $key_id) {
 			$key_id = str_replace('key_', '', $key_id);
 			$formatted_keys[] = getNameFromID($key_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}keys", 'key_', 'key_id', 'key_name', null, 'active');
@@ -512,7 +512,7 @@ HTML;
 	function getKeyAlgorithms($type = 'tsig') {
 		global $__FM_CONFIG;
 		
-		$available_keys = null;
+		$available_keys = array();
 		$all_keys = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_algorithm');
 		
 		foreach ($all_keys as $key) {

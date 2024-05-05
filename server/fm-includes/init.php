@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -42,7 +42,7 @@ function checkAppVersions($single_check = true) {
 	
 	require(ABSPATH . 'fm-includes/version.php');
 
-	$requirement_check = null;
+	$requirement_check = '';
 	$error = false;
 	
 	/** PHP Version */

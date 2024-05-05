@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
 */
 
@@ -162,7 +162,7 @@ class fm_dns_views {
 		
 		$exclude = array('submit', 'action', 'view_id', 'page');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

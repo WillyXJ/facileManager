@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
 */
 
@@ -125,7 +125,7 @@ class fm_dns_files {
 		
 		$include = array('server_serial_no', 'file_location', 'file_name', 'file_contents', 'file_comment');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {

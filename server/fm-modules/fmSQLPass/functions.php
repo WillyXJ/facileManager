@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmSQLPass: Change database user passwords across multiple servers.      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmsqlpass/                         |
+ | https://www.facilemanager.com/modules/fmsqlpass/                         |
  +-------------------------------------------------------------------------+
 */
 
@@ -29,7 +29,7 @@
  */
 function moduleFunctionalCheck() {
 	global $fmdb, $__FM_CONFIG;
-	$html_checks = null;
+	$html_checks = '';
 	$checks = array();
 	
 	/** Count active database servers */

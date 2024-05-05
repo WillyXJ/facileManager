@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
  | Processes admin logs page                                               |
  +-------------------------------------------------------------------------+
@@ -29,7 +29,7 @@ printHeader();
 $response = isset($response) ? $response : null;
 
 extract($_REQUEST);
-$search_sql = null;
+$search_sql = '';
 
 /** Module search */
 if (isset($log_search_module) && is_array($log_search_module) && !in_array('All Modules', $log_search_module)) {

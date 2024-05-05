@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmwifi/                            |
+ | https://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -132,7 +132,7 @@ class fm_wifi_wlan_users {
 		
 		$exclude = array('submit', 'action', 'user_id', 'type');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
@@ -205,7 +205,7 @@ class fm_wifi_wlan_users {
 		
 		$class = ($row->wlan_user_status == 'disabled') ? 'disabled' : null;
 		
-		$edit_status = $edit_actions = $checkbox = null;
+		$edit_status = $checkbox = null;
 		
 		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -219,11 +219,9 @@ class fm_wifi_wlan_users {
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->wlan_user_id .'" /></td>';
 		}
 		
-		$edit_status = $edit_actions . $edit_status;
-		
 		$associated_wlans = __('All WLANs');
 		if ($row->wlan_ids) {
-			$associated_wlans = null;
+			$associated_wlans = array();
 			foreach (explode(';', $row->wlan_ids) as $id) {
 				$associated_wlans[] = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
 			}

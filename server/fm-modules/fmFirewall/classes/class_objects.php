@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | https://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
@@ -84,7 +84,7 @@ class fm_module_objects {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}objects`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -128,7 +128,7 @@ class fm_module_objects {
 		
 		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -228,7 +228,6 @@ HTML;
 		$object_id = 0;
 		$object_name = $object_address = $object_comment = null;
 		$object_mask = null;
-		$ucaction = ucfirst($action);
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))

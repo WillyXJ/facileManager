@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDHCP: Easily manage one or more ISC DHCP servers                      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | https://www.facilemanager.com/modules/fmdhcp/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -101,7 +101,7 @@ class fm_dhcp_objects {
 		/** Insert the parent */
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
@@ -207,7 +207,7 @@ class fm_dhcp_objects {
 		
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
@@ -251,7 +251,7 @@ class fm_dhcp_objects {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
-			$sql_values = null;
+			$sql_values = '';
 			$child['config_name'] = $handler;
 			$child['config_data'] = $post[$handler];
 			
@@ -324,7 +324,8 @@ class fm_dhcp_objects {
 		
 		$class = ($row->config_status == 'disabled') ? 'disabled' : null;
 		
-		$edit_status = $edit_actions = $icons = null;
+		$edit_status = '';
+		$icons = array();
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>' : null;
 		
@@ -338,8 +339,6 @@ class fm_dhcp_objects {
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="icons"><i class="icons fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
 		}
-		
-		$edit_status = $edit_actions . $edit_status;
 		
 		if ($class) $class = 'class="' . $class . '"';
 		if (is_array($icons)) {
@@ -381,7 +380,8 @@ HTML;
 		$unique_form = $this->printObjectForm($data, $action, $type, array_merge((array) $addl_vars, array('on_off' => $on_off, 'allow_deny_ignore' => $allow_deny_ignore, 'yes_no' => $yes_no)));
 		
 		$config_id = $config_parent_id = 0;
-		$config_name = $config_comment = $children = $config_children = $parents = null;
+		$config_name = $config_comment = $children = $parents = null;
+		$config_children = array();
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {

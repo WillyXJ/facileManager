@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | https://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
@@ -82,7 +82,7 @@ class fm_module_groups {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}groups`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -123,7 +123,7 @@ class fm_module_groups {
 		
 		$exclude = array('submit', 'action', 'group_id', 'AUTHKEY');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -181,7 +181,8 @@ class fm_module_groups {
 		
 		$disabled_class = ($row->group_status == 'disabled') ? ' class="disabled"' : null;
 		
-		$group_items = $checkbox = null;
+		$group_items = array();
+		$checkbox = null;
 		$edit_status = sprintf('<span rel="g%s">%s</span>', $row->group_id, $__FM_CONFIG['module']['icons']['search']);
 		
 		$permission = ($row->group_type == 'service') ? 'manage_services' : 'manage_objects';
@@ -249,7 +250,6 @@ HTML;
 		
 		$group_id = 0;
 		$group_name = $group_items = $group_comment = null;
-		$ucaction = ucfirst($action);
 		$uc_group_type = ucfirst($group_type) . 's';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {

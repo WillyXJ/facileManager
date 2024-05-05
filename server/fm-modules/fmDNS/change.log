@@ -1,3 +1,9 @@
+6.0.5 (2024-03-??)
+==================
+* Server - [bug] Fixed multiple PHP8 errors.
+* Server - [bug] Fixed PHP5 errors. (Issue #626)
+* Server - [bug] Fixed ability to define primaries in a secondary zone. (Issue #627)
+
 6.0.4 (2024-03-15)
 ==================
 * Server - [bug] When deleting an A record with a link PTR the reverse zone now gets flagged for reload.

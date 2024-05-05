@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDHCP: Easily manage one or more ISC DHCP servers                      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | https://www.facilemanager.com/modules/fmdhcp/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -122,7 +122,7 @@ class fm_dhcp_leases {
 	function displayRow($ip, $lease) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$edit_status = $checkbox = null;
+		$edit_status = $checkbox = '';
 		extract($lease);
 		
 		if (currentUserCan('manage_leases', $_SESSION['module'])) {
@@ -131,9 +131,6 @@ class fm_dhcp_leases {
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $ip .'" /></td>';
 		}
-		
-		/** Temporary until deletes work */
-//		$edit_status = $checkbox = null;
 		
 		echo <<<HTML
 		<tr id="$ip|$hostname|$hardware" name="leases">

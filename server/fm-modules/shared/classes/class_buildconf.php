@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -31,7 +31,7 @@ class fm_shared_module_buildconf {
 	 * @return array
 	 */
 	function processConfigs($raw_data) {
-		$preview = $check_status = null;
+		$preview = $check_status = '';
 		
 		if (method_exists($this, 'processConfigsChecks')) {
 			$check_status = $this->processConfigsChecks($raw_data);

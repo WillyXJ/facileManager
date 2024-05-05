@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmwifi/                            |
+ | https://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -100,7 +100,7 @@ class fm_wifi_acls {
 		/** Server groups */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
@@ -158,7 +158,7 @@ class fm_wifi_acls {
 		
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}acls` SET ";
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_comment'] = trim($post['config_comment']);
@@ -237,7 +237,7 @@ class fm_wifi_acls {
 		
 		$class = ($row->acl_status == 'disabled') ? 'disabled' : null;
 		
-		$edit_status = $edit_actions = $checkbox = null;
+		$edit_status = $checkbox = null;
 		
 		if (currentUserCan('manage_hosts', $_SESSION['module'])) {
 			$edit_status = '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -251,15 +251,13 @@ class fm_wifi_acls {
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->acl_id .'" /></td>';
 		}
 		
-		$edit_status = $edit_actions . $edit_status;
-		
 		if ($class) $class = 'class="' . $class . '"';
 		
 		$acl_action = $__FM_CONFIG['acls']['actions'][$row->acl_action];
 		
 		$associated_wlans = __('All WLANs');
 		if ($row->wlan_ids) {
-			$associated_wlans = null;
+			$associated_wlans = array();
 			foreach (explode(';', $row->wlan_ids) as $id) {
 				$associated_wlans[] = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
 			}
@@ -404,7 +402,7 @@ HTML;
 		return $post;
 		
 		
-		$log_message_member_wlans = null;
+		$log_message_member_wlans = '';
 		foreach ($post['wlan_ids'] as $val) {
 			if (!$val) {
 				$wlan_members = 0;
@@ -474,13 +472,6 @@ HTML;
 		/** Add the deny to the ACL database */
 		$add_acl = $this->add($post);
 		
-//		sleep(2);
-		
-		
-		// foreach ap hosting the ssid do
-		//   client.php buildconf
-		//   client.php block=mac
-		
 		/** Get APs hosting $wlan */
 		$wlan_ap_ids = getNameFromID($wlan, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_data', 'config_aps', null, 'AND config_name="ssid" AND config_status="active"');
 		$wlan_aps = array();
@@ -496,7 +487,6 @@ HTML;
 				$wlan_aps[] = $server_info->server_name;
 			}
 		} else {
-			$associated_aps = null;
 			foreach (explode(';', $wlan_ap_ids) as $server_id) {
 				$wlan_aps = array_merge($wlan_aps, $fm_module_servers->getServerNames($server_id));
 			}

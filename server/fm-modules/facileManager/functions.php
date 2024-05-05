@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -149,7 +149,7 @@ function isUpgradeAvailable() {
  * @package facileManager
  */
 function isNewVersionAvailable($package, $version, $interval = 'schedule') {
-	$fm_site_url = 'http://www.facilemanager.com/check/';
+	$fm_site_url = 'https://www.facilemanager.com/check/';
 	
 	$data['package'] = $package;
 	$data['version'] = $version;
@@ -334,7 +334,7 @@ function getTopHeader($help) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
-	$module_toolbar = $fm_new_version_available = $account_menu = $user_account_menu = $module_menu = $module_version_info = null;
+	$fm_new_version_available = $account_menu = $user_account_menu = $module_menu = $module_version_info = null;
 	
 	if ($help != 'help-file') {
 		$auth_method = getOption('auth_method');
@@ -370,7 +370,7 @@ HTML;
 		
 		/** Build app dropdown menu */
 		$modules = getAvailableModules();
-		$avail_modules = null;
+		$avail_modules = '';
 		
 		if (count($modules)) {
 			foreach ($modules as $module_name) {
@@ -482,7 +482,7 @@ HTML;
  * @package facileManager
  */
 function printMenu() {
-	$main_menu_html = null;
+	$main_menu_html = '';
 	
 	list($filtered_menu, $filtered_submenu) = getCurrentUserMenu();
 	ksort($filtered_menu);
@@ -595,7 +595,7 @@ $main_menu_html
 			</ul>
 		</div>
 		<div id="donate" class="grey">
-			<p><a href="http://www.facilemanager.com/donate/" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
+			<p><a href="https://www.facilemanager.com/donate/" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
 		</div>
 	</div>
 
@@ -834,7 +834,7 @@ function enumMYSQLSelect($tbl_name, $column_name, $sort = 'unsorted') {
  */
 function buildSelect($select_name, $select_id, $options, $option_select = null, $size = '1', $disabled = '', $multiple = false, $onchange = null, $classes = null, $placeholder = null) {
 	if (!$placeholder) $placeholder = _('Select an option');
-	$type_options = null;
+	$type_options = '';
 	if (countArrayDimensions($options) == 3) {
 		foreach ($options as $optgroup => $optarray) {
 			if (is_string($optgroup)) $type_options .= '<optgroup label="' . $optgroup . '">';
@@ -1037,6 +1037,7 @@ function getPostData($url, $data = null, $post = 'post', $options = array()) {
 		CURLOPT_SSL_VERIFYPEER => false,
 		CURLOPT_SSL_VERIFYHOST => false,
 		CURLOPT_FAILONERROR => true,
+		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_URL => $url
 	);
 	
@@ -1089,7 +1090,7 @@ function getUserInfo($fm_login, $field = 'user_id') {
  */
 function genRandomString($length) {
 	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	$string = null;
+	$string = '';
 	for ($p = 0; $p < $length; $p++) {
 		$string .= $characters[mt_rand(0, strlen($characters)-1)];
 	}
@@ -1105,23 +1106,17 @@ function genRandomString($length) {
  */
 function convertURIToArray() {
 	$uri = explode('?', $_SERVER['REQUEST_URI']);
-//	echo '<pre>';
-//	print_r($uri);
 	if (count($uri) > 1) {
 		$raw_params = explode('&', $uri[1]);
-//		print_r($raw_params);
 		
 		for ($i=0; $i<count($raw_params); $i++) {
 			if (strpos($raw_params[$i], '=')) {
 				$param = explode('=', $raw_params[$i]);
 				$return_array[$param[0]] = $param[1];
-//		print_r($param);
 			} else {
 				$return_array[$raw_params[$i]] = null;
 			}
 		}
-//		print_r($return_array);
-//		exit;
 		return $return_array;
 	}
 	
@@ -1376,7 +1371,7 @@ function addLogEntry($log_data, $module = null) {
 function getAvailableModules() {
 	global $fm_name;
 	
-	$modules = null;
+	$modules = array();
 	$module_dir = ABSPATH . 'fm-modules';
 	if ($handle = opendir($module_dir)) {
 		$blacklist = array('.', '..', 'shared', strtolower($fm_name));
@@ -1614,7 +1609,7 @@ function formatSize($size) {
  * @return string
  */
 function buildDateMenu($date = null) {
-	$uri = $hidden = null;
+	$uri = $hidden = '';
 	foreach ($GLOBALS['URI'] as $key => $value) {
 		if (empty($key)) continue;
 		if ($key == 'date') continue;
@@ -1658,7 +1653,7 @@ HTML;
  * @package facileManager
  *
  * @param string $module Module to use
- * @return int
+ * @return int|void
  */
 function generateSerialNo($module = null) {
 	global $fmdb, $__FM_CONFIG;
@@ -1696,7 +1691,7 @@ function generateSerialNo($module = null) {
  *
  * @param int $server_id Server ID to process
  * @param string $module Module to use
- * @return string
+ * @return string|void
  */
 function getServerSerial($server_id, $module = null) {
 	global $fmdb, $__FM_CONFIG;
@@ -1719,7 +1714,7 @@ function getServerSerial($server_id, $module = null) {
  *
  * @param int $server_serial_no Server serial number to process
  * @param string $module Module to use
- * @return string
+ * @return string|void
  */
 function getServerID($server_serial_no, $module = null) {
 	global $fmdb, $__FM_CONFIG;
@@ -1769,7 +1764,7 @@ function arrayKeysExist($keys, $array) {
 function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null, $position = 'left') {
 	global $fmdb;
 	
-	$page_params = null;
+	$page_params = '';
 	foreach ($GLOBALS['URI'] as $key => $val) {
 		if (!$key || $key == 'p') continue;
 		$page_params .= $key . '=' . $val . '&';
@@ -1836,7 +1831,7 @@ function buildPaginationCountMenu($server_serial_no = 0, $class = null) {
 	
 	$record_count = buildSelect('rc', 'rc', $__FM_CONFIG['limit']['records'], $_SESSION['user']['record_count'], 1, null, false, 'this.form.submit()');
 	
-	$hidden_inputs = null;
+	$hidden_inputs = '';
 	foreach ($GLOBALS['URI'] as $param => $value) {
 		if ($param == 'rc') continue;
 		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";
@@ -2067,14 +2062,14 @@ function verifySimpleVariable($data, $filter_type) {
  * @return string
  */
 function buildSettingsForm($saved_options, $default_options) {
-	$option_rows = $current_parent = null;
+	$option_rows = $current_parent = '';
 	
 	foreach ($default_options as $option => $options_array) {
 		$option_row_head = null;
 		$option_value = array_key_exists($option, $saved_options) ? $saved_options[$option] : $options_array['default_value'];
 		
 		if (is_array($option_value)) {
-			$temp_value = null;
+			$temp_value = '';
 			foreach ($option_value as $value) {
 				$temp_value .= $value . "\n";
 			}
@@ -2119,7 +2114,7 @@ function buildSettingsForm($saved_options, $default_options) {
 			if ($current_parent) {
 				$option_row_head = "</div>\n";
 			}
-			$current_parent = null;
+			$current_parent = '';
 		}
 		$option_rows .= <<<ROW
 			$option_row_head
@@ -2221,7 +2216,7 @@ function setOSIcon($server_os) {
  * @param string $name Name value of plus sign
  * @param string $rel Rel value of plus sign
  * @param string $scroll Scroll or noscroll
- * @return string
+ * @return void
  */
 function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null) {
 	global $__FM_CONFIG;
@@ -2411,13 +2406,12 @@ function getBadgeCounts($type) {
  * @since 1.1
  * @package facileManager
  *
- * @return string
+ * @return string|void
  */
 function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
 	if (is_array($bulk_actions_list)) {
-		$bulk_actions[] = null;
 		
-		return buildSelect($id, 'bulk_action', array_merge($bulk_actions, $bulk_actions_list), null, 1, '', false, null, null, _('Bulk Actions')) . 
+		return buildSelect($id, 'bulk_action', array_merge(array(''), $bulk_actions_list), null, 1, '', false, null, null, _('Bulk Actions')) . 
 			'<input type="submit" name="bulk_apply" id="bulk_apply" value="' . _('Apply') . '" class="button" />' . "\n";
 	}
 }
@@ -2459,7 +2453,7 @@ function displayTableHeader($table_info, $head_values, $tbody_id = null) {
 	
 	$sort_direction = isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']) ? strtolower($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction']) : 'asc';
 	
-	$parameters = null;
+	$parameters = '';
 	if (is_array($table_info)) {
 		foreach ($table_info as $parameter => $value) {
 			$parameters .= ' ' . $parameter . '="' . $value . '"';
@@ -2469,7 +2463,7 @@ function displayTableHeader($table_info, $head_values, $tbody_id = null) {
 	$html .= "<thead>\n<tr>\n";
 	
 	foreach ($head_values as $thead) {
-		$parameters = null;
+		$parameters = '';
 		if (is_array($thead)) {
 			$temp_array = $thead;
 			$thead = null;
@@ -3243,7 +3237,7 @@ function __($text, $domain = null) {
 function getAvailableUserCapabilities() {
 	global $fm_name;
 	
-	$fm_user_caps = null;
+	$fm_user_caps = array();
 	
 	if (file_exists(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'extra' . DIRECTORY_SEPARATOR . 'capabilities.inc.php')) {
 		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'extra' . DIRECTORY_SEPARATOR . 'capabilities.inc.php');
@@ -3566,7 +3560,7 @@ function downloadfMFile($file) {
 		CURLOPT_TIMEOUT			=> 3600,
 		CURLOPT_HEADER			=> false,
 		CURLOPT_FOLLOWLOCATION	=> true,
-		CURLOPT_SSL_VERIFYPEER  => false,
+		CURLOPT_SSL_VERIFYPEER  => true,
 		CURLOPT_RETURNTRANSFER  => true
 	);
 	
@@ -3607,7 +3601,7 @@ function downloadfMFile($file) {
  * @param array $package Package names to extract
  */
 function extractPackage($package) {
-	$message = null;
+	$message = '';
 	
 	if (!is_array($package)) {
 		$package = array($package);
@@ -3804,7 +3798,7 @@ function displayResponseClose($message) {
  * @return string
  */
 function generateURIParams($params = array(), $direction = 'include', $character = '?', $null_params = array()) {
-	$uri_params = null;
+	$uri_params = array();
 	
 	foreach ($GLOBALS['URI'] as $param => $val) {
 		if (in_array($param, (array) $null_params)) return null;
@@ -3815,7 +3809,7 @@ function generateURIParams($params = array(), $direction = 'include', $character
 		}
 		$uri_params[] = "$param=$val";
 	}
-	if ($uri_params) $uri_params = $character . implode('&', $uri_params);
+	$uri_params = ($uri_params) ? $character . implode('&', $uri_params) : '';
 	
 	return $uri_params;
 }
@@ -3828,7 +3822,7 @@ function generateURIParams($params = array(), $direction = 'include', $character
  * @package facileManager
  *
  * @param array $selected Selected option type
- * @param string $avail_types Available option types
+ * @param array $avail_types Available option types
  * @param array $null_params
  * @param array $params
  * @param string $direction
@@ -3838,7 +3832,7 @@ function generateURIParams($params = array(), $direction = 'include', $character
 function buildSubMenu($selected, $avail_types, $null_params = array(), $params = array('type', 'action', 'id', 'status'), $direction = 'exclude', $character = '&') {
 	global $__FM_CONFIG;
 	
-	$menu_selects = null;
+	$menu_selects = '';
 	
 	$uri_params = generateURIParams($params, $direction, $character, $null_params);
 	
@@ -3889,7 +3883,7 @@ function buildServerSubMenu($server_serial_no = 0, $available_servers = null, $c
 	if (!$available_servers) $available_servers = availableServers();
 	$server_list = buildSelect('server_serial_no', 'server_serial_no', $available_servers, $server_serial_no, 1, null, false, 'this.form.submit()', null, $placeholder);
 	
-	$hidden_inputs = null;
+	$hidden_inputs = '';
 	foreach ($GLOBALS['URI'] as $param => $value) {
 		if ($param == 'server_serial_no') continue;
 		$hidden_inputs .= '<input type="hidden" name="' . $param . '" value="' . $value . '" />' . "\n";

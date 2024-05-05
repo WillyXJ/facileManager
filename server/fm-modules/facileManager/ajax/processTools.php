@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/                                           |
+ | https://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
  | Processes admin tools                                                   |
  +-------------------------------------------------------------------------+
@@ -48,8 +48,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				
 				echo $response;
 				exit;
-				
-				break;
 			case 'module_upgrade':
 				$module_name = isset($_POST['item']) ? sanitize($_POST['item']) : null;
 				$response = buildPopup('header', _('Upgrading Module'));
@@ -59,8 +57,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				
 				echo $response;
 				exit;
-				
-				break;
 			case 'db-cleanup':
 				$response = buildPopup('header', _('Database Clean Up Results'));
 				$response .= '<p>' . $fm_tools->cleanupDatabase() . '</p>';
@@ -84,8 +80,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				
 				echo $response;
 				exit;
-
-				break;
 		}
 	}
 } else {

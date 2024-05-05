@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDHCP: Easily manage one or more ISC DHCP servers                      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdhcp/                            |
+ | https://www.facilemanager.com/modules/fmdhcp/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -31,7 +31,7 @@
  */
 function moduleFunctionalCheck() {
 	global $fmdb, $__FM_CONFIG;
-	$html_checks = null;
+	$html_checks = '';
 	$checks = array();
 	
 	/** Perform checks to display in yellow bar */

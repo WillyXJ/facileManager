@@ -1,3 +1,7 @@
+0.8.1 (2024-03-??)
+==================
+* Server - [bug] Fixed PHP 8 errors.
+
 0.8.0 (2024-02-09)
 ==================
 * Server - [improvement] CSS/jQuery tweaks to improve the popup boxes.

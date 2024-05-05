@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmfirewall/                        |
+ | https://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 
@@ -444,7 +444,7 @@ INSERTSQL;
 	/** Process groups */
 	foreach ($groups as $array) {
 		list($group_type, $item_array, $group_name, $comment) = $array;
-		$group_ids = null;
+		$group_ids = array();
 		foreach ($item_array as $item) {
 			list($protocol, $name) = explode('|', $item);
 			if ($protocol == 'group') {

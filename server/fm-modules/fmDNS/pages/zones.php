@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
 */
 
@@ -87,7 +87,7 @@ if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			if (!is_array($raw_data)) {
 				$zone_contents = unserialize($raw_data);
 			} else {
-				$zone_contents = null;
+				$zone_contents = '';
 				foreach ($raw_data['files'] as $filename => $contents) {
 					$zone_contents .= $contents . "\n\n";
 				}

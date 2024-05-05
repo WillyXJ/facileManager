@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
  | Processes zone record updates                                           |
  +-------------------------------------------------------------------------+
@@ -64,7 +64,7 @@ $table_info = array('class' => 'display_results no-left-pad');
 $header_array = $fm_dns_records->getHeader(strtoupper($record_type));
 $header = displayTableHeader($table_info, $header_array);
 
-$body = null;
+$body = '';
 foreach($_POST as $name => $array) {
 	if (in_array($name, array('create', 'update'))) $body .= createOutput($domain_info, $record_type, $array, $name, $header_array, $append);
 }
@@ -96,7 +96,7 @@ printFooter();
 function createOutput($domain_info, $record_type, $data_array, $type, $header_array, $append) {
 	global $__FM_CONFIG;
 	
-	$html = null;
+	$html = '';
 	$value = array();
 	$GLOBALS['new_cname_rrs'] = array();
 	
@@ -183,8 +183,8 @@ function createOutput($domain_info, $record_type, $data_array, $type, $header_ar
 }
 
 function validateEntry($action, $id, $data, $record_type, $append, $data_array, $domain_info) {
-	$messages = null;
-	$html = null;
+	$messages = array();
+	$html = '';
 	
 	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';

@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmSQLPass: Change database user passwords across multiple servers.      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmsqlpass/                         |
+ | https://www.facilemanager.com/modules/fmsqlpass/                         |
  +-------------------------------------------------------------------------+
 */
 
@@ -92,7 +92,8 @@ HTML;
 		
 		sleep(1);
 		extract($_POST);
-		$error = $verbose_output = null;
+		$error = null;
+		$verbose_output = '';
 		
 		/** Initial error checking */
 		if (!isset($group)) $error = __('No groups are selected.');

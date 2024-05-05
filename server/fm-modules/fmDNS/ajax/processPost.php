@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
  | Processes form posts                                                    |
  +-------------------------------------------------------------------------+
@@ -222,7 +222,7 @@ echo $unpriv_message;
 function processBulkDomainIDs($domain_id_array) {
 	global $fm_dns_zones;
 
-	$return = null;
+	$return = '';
 	if (is_array($domain_id_array)) {
 		foreach ($domain_id_array as $domain_id) {
 			if (!is_numeric($domain_id)) continue;

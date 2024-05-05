@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmwifi/                            |
+ | https://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -97,7 +97,7 @@ class fm_module_options {
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -163,7 +163,7 @@ class fm_module_options {
 		
 		$exclude = array('submit', 'action', 'config_id');
 
-		$sql_edit = null;
+		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -268,14 +268,12 @@ HTML;
 		
 		$config_id = $domain_id = 0;
 		if (!$config_type_id) $config_type_id = 0;
-		$config_name = $config_root_dir = $config_zones_dir = $config_comment = null;
-		$ucaction = ucfirst($action);
+		$config_name = $config_comment = null;
 		$server_serial_no_field = $config_is_parent = $config_parent_id = $config_data = $config_id_name = null;
 		
 		if (isset($_POST['item_sub_type'])) {
 			$config_id_name = sanitize($_POST['item_sub_type']);
 		}
-		$data_holder = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$server_serial_no_field = '<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />';
 		$request_uri = 'config-options.php';
@@ -319,8 +317,6 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$addl_options = null;
-
 		$return_form = sprintf('<script>
 			displayOptionPlaceholder("%s");
 		</script>
@@ -332,7 +328,6 @@ HTML;
 			<input type="hidden" name="%s" value="%s" />
 			%s
 			<table class="form-table">
-				%s
 				<tr>
 					<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
 					<td width="67&#37;">%s</td>
@@ -356,7 +351,6 @@ HTML;
 		</script>',
 				$config_data, $request_uri, $popup_header,
 				$action, $config_id, $config_type, $config_id_name, $config_type_id, $server_serial_no_field,
-				$addl_options,
 				__('Option Name'), $config_avail_options,
 				_('Comment'), $config_comment,
 				$popup_footer
@@ -577,9 +571,9 @@ HTML;
 		$raw_def_type_array = explode(')', str_replace('(', '', $def_type));
 		$saved_data = explode(' ', $config_data);
 		$i = 0;
-		$dropdown = null;
+		$dropdown = '';
 		foreach ($raw_def_type_array as $raw_def_type) {
-			$def_type_items = null;
+			$def_type_items = array();
 			if (strlen(trim($raw_def_type))) {
 				$raw_items = explode('|', $raw_def_type);
 				foreach ($raw_items as $item) {

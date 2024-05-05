@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDHCP: Easily manage one or more ISC DHCP servers                      |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmDHCP/                            |
+ | https://www.facilemanager.com/modules/fmDHCP/                            |
  +-------------------------------------------------------------------------+
 */
 
@@ -333,7 +333,7 @@ function dumpLeases($leasefile) {
 	}
 	
 	/** Break up each lease into a multidimensional array */
-	$new_leases = null;
+	$new_leases = array();
 	foreach ($leases[0] as $lease_data) {
 		$pattern = '/^lease\s+(.*?)\s+{.*starts \d+ (.*?);.*ends \d+ (.*?);.*binding state (.*?);.*ethernet (.*?);(.*client-hostname "(.*?)";)/s';
 		$pattern = '/^lease\s+(.*?)\s+{.*starts \d+ (.*?);.*ends \d+ (.*?);.*  binding state (.*?);.*ethernet (.*?);/s';

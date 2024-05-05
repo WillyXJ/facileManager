@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
 */
 
@@ -98,7 +98,7 @@ class fm_module_tls {
 		/** Insert the parent */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = null;
+		$sql_values = '';
 		
 		$include = array('cfg_isparent', 'cfg_type', 'server_serial_no', 'cfg_name', 'cfg_data', 'cfg_comment');
 		
@@ -199,7 +199,7 @@ class fm_module_tls {
 
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
-		$sql_values = null;
+		$sql_values = '';
 		
 		$include = array('cfg_isparent', 'cfg_data', 'cfg_type', 'cfg_comment');
 		
@@ -228,7 +228,7 @@ class fm_module_tls {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
-			$sql_values = null;
+			$sql_values = '';
 			$child['cfg_name'] = $handler;
 			$child['cfg_data'] = $post[$handler];
 			
@@ -473,7 +473,7 @@ HTML;
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
 				implode("\n", $child_config_form),
-				$popup_footer,
+				$popup_footer
 			);
 
 		return $return_form;

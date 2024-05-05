@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
 */
 
@@ -38,7 +38,7 @@ class fm_dns_zones {
 								'class' => 'header-tiny header-nosort'
 							);
 		} else {
-			$checkbox = $bulk_actions_list = null;
+			$checkbox = $bulk_actions_list = '';
 		}
 
 		if (array_key_exists('attention', $_GET)) {
@@ -131,7 +131,7 @@ class fm_dns_zones {
 			/** Zone groups */
 			$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domain_groups`";
 			$sql_fields = '(';
-			$sql_values = null;
+			$sql_values = '';
 
 			$post['account_id'] = $_SESSION['user']['account_id'];
 			
@@ -173,15 +173,15 @@ class fm_dns_zones {
 		/** Zones */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains`";
 		$sql_fields = '(';
-		$sql_values = $domain_name_servers = $domain_views = null;
+		$sql_values = $domain_name_servers = $domain_views = '';
 		
 		$log_message = __('Added a zone with the following details') . ":\n";
 
 		/** Format domain_view */
-		$log_message_views = null;
+		$log_message_views = '';
 		$domain_view_array = explode(';', $post['domain_view']);
 		if (is_array($domain_view_array)) {
-			$domain_view = null;
+			$domain_view = '';
 			foreach ($domain_view_array as $val) {
 				if ($val == 0 || $val == '') {
 					$domain_view = 0;
@@ -197,7 +197,7 @@ class fm_dns_zones {
 		if (!$post['domain_view']) $post['domain_view'] = 0;
 
 		/** Format domain_name_servers */
-		$log_message_name_servers = null;
+		$log_message_name_servers = '';
 		foreach ($post['domain_name_servers'] as $val) {
 			if ($val == '0') {
 				$domain_name_servers = 0;
@@ -397,7 +397,7 @@ class fm_dns_zones {
 
 		$dbupdate_error_msg = __('Could not update the zone because a database error occurred.');
 		
-		$sql_edit = $domain_name_servers = $domain_view = null;
+		$sql_edit = $domain_name_servers = $domain_view = '';
 		
 		$old_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$log_message = "Updated a zone ($old_name) with the following details:\n";
@@ -409,7 +409,7 @@ class fm_dns_zones {
 		}
 		
 		/** Format domain_view */
-		$log_message_views = null;
+		$log_message_views = '';
 		if ($post['domain_view']) {
 			foreach (explode(';', $post['domain_view']) as $val) {
 				if ($val == 0) {
@@ -424,7 +424,7 @@ class fm_dns_zones {
 		}
 		
 		/** Format domain_name_servers */
-		$log_message_name_servers = null;
+		$log_message_name_servers = '';
 		foreach ($post['domain_name_servers'] as $val) {
 			if ($val == '0') {
 				$domain_name_servers = 0;
@@ -723,7 +723,8 @@ class fm_dns_zones {
 			$zone_access_allowed = zoneAccessIsAllowed(array($row->domain_id));
 
 			if ($row->domain_status == 'disabled') $classes[] = 'disabled';
-			$response = $add_new = $icons = null;
+			$response = $add_new = '';
+			$icons = array();
 
 			$checkbox = (currentUserCan('reload_zones', $_SESSION['module'])) ? '<td></td>' : null;
 
@@ -761,7 +762,7 @@ class fm_dns_zones {
 			}
 
 			$clones = $this->cloneDomainsList($row->domain_id);
-			$clone_names = $clone_types = $clone_views = $clone_counts = null;
+			$clone_names = $clone_types = $clone_views = $clone_counts = '';
 			foreach ($clones as $clone_id => $clone_array) {
 				$clone_names .= '<p class="subelement' . $clone_id . '"><span><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
 						'</a></span>' . $clone_array['clone_options'] . $clone_array['dnssec'] . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
@@ -809,7 +810,7 @@ class fm_dns_zones {
 			$edit_name = ($row->domain_type == 'primary') ? "<a href=\"zone-records.php?map={$map}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . "\">$domain_name</a>" : $domain_name;
 			$domain_view = $this->IDs2Name($row->domain_view, 'view');
 
-			$record_count = null;
+			$record_count = '';
 			if ($row->domain_type == 'primary') {
 				$query = "SELECT COUNT(*) record_count FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}records WHERE account_id={$_SESSION['user']['account_id']} AND domain_id={$row->domain_id} AND record_status!='deleted'";
 				$fmdb->query($query);
@@ -971,7 +972,7 @@ HTML;
 		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableServers('id'), $domain_name_servers, 1, null, true);
 
 		$forwarders_show = $masters_show = 'none';
-		$domain_forward_servers = $domain_master_servers = $domain_forward = null;
+		$domain_forward_servers = $domain_master_servers = $domain_forward = '';
 		$available_acls = $available_masters = json_encode(array());
 		if ($action == 'create') {
 			$available_masters = $fm_dns_masters->buildMasterJSON($domain_master_servers);
@@ -1190,7 +1191,7 @@ HTML;
 				__('Zone Map'), $zone_maps,
 				__('Zone Type'), $domain_types,
 				$forwarders_show, $forward_dropdown, __('Define forwarders'), $domain_forward_servers,
-				$masters_show, __('Define masters'), $domain_master_servers,
+				$masters_show, __('Define primaries'), $domain_master_servers,
 				__('Redirect to URL'), __('Requests to this zone will be redirected to the specified URL'),
 				__('Clone Of (optional)'), $clone, $clone_override_show, $clone_dname_checked,
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
@@ -1272,7 +1273,7 @@ HTML;
 	function cloneDomainsList($domain_id) {
 		global $fmdb, $__FM_CONFIG, $user_capabilities;
 		
-		$return = $limited_ids = null;
+		$return = $limited_ids = array();
 		if (isset($user_capabilities)) {
 			$limited_ids = (isset($user_capabilities[$_SESSION['module']]) && (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0])) ? 'AND domain_id IN (' . join(',', $this->getZoneAccessIDs($user_capabilities[$_SESSION['module']]['access_specific_zones'])) . ')' : null;
 		}
@@ -1373,7 +1374,7 @@ HTML;
 		
 		/** Loop through name servers */
 		$name_server_count = $fmdb->num_rows;
-		$response = null;
+		$response = '';
 		$failures = false;
 		for ($i=0; $i<$name_server_count; $i++) {
 			if (isset($post_result)) unset($post_result);
@@ -1663,7 +1664,7 @@ HTML;
 			$domain_pieces = array_reverse(explode('.', $domain_name));
 			$domain_parts = count($domain_pieces);
 			
-			$reverse_ips = null;
+			$reverse_ips = '';
 			for ($i=0; $i<$domain_parts; $i++) {
 				$reverse_ips .= $domain_pieces[$i] . '.';
 			}
@@ -1870,8 +1871,8 @@ HTML;
 				}
 			}
 			if (is_array($post['domain_view'])) {
-				$domain_view = null;
-				$domain_servers_sql = null;
+				$domain_view = '';
+				$domain_servers_sql = '';
 				if ($post['domain_name_servers']) {
 					foreach (sanitize($post['domain_name_servers']) as $val) {
 						$domain_servers_sql .= "domain_name_servers='$val' OR domain_name_servers LIKE '$val;%' OR domain_name_servers LIKE '%;$val;%' OR domain_name_servers LIKE '%;$val' OR ";
@@ -1986,7 +1987,7 @@ HTML;
 				$ids_array = explode(';', rtrim($ids, ';'));
 				if (in_array('0', $ids_array)) $name = $all_text;
 				else {
-					$name = null;
+					$name = '';
 					foreach ($ids_array as $id) {
 						if ($id[0] == 'g') {
 							$table = 'server_group';
@@ -2055,7 +2056,7 @@ HTML;
 
 		$available_views = availableViews('active');
 		if (currentUserCan('do_everything', $_SESSION['module']) || (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0] == '0')) $available_groups = $this->availableGroups();
-		$filters = null;
+		$filters = '';
 		
 		if (count($available_views) > 1) {
 			$filters .= buildSelect('domain_view', 'domain_view', $available_views, $domain_view, 1, null, true, null, null, __('Filter Views'));
@@ -2224,7 +2225,7 @@ HTML;
 	function printGroupsForm($data, $action) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$return_form = $group_name = $group_comment = null;
+		$return_form = $group_name = $group_comment = '';
 		$group_id = 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -2419,7 +2420,7 @@ HTML;
 	function getZoneLogDomainNames($ids) {
 		global $__FM_CONFIG;
 		
-		$log_message_domains = null;
+		$log_message_domains = '';
 		foreach ($ids as $id) {
 			$log_message_domains .= getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') . "\n";
 		}

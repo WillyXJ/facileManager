@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDNS: Easily manage one or more ISC BIND servers                       |
  +-------------------------------------------------------------------------+
- | http://www.facilemanager.com/modules/fmdns/                             |
+ | https://www.facilemanager.com/modules/fmdns/                             |
  +-------------------------------------------------------------------------+
  | Displays module forms                                                   |
  +-------------------------------------------------------------------------+
@@ -65,7 +65,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif (strpos($result[0]->def_type, 'domain_select') !== false) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
-			$temp_addl_zones = null;
+			$temp_addl_zones = array();
 
 			/** Check for non-hosted zones */
 			foreach (explode(',', $cfg_data) as $temp_zone_id) {
@@ -127,7 +127,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 			// $available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
 			// $available_masters = $fm_dns_masters->getMasterList($server_serial_no, 'all');
 			// $available_masters = array_merge($available_masters, $fm_dns_acls->getACLList($server_serial_no, 'tsig-keys'));
-			$available_masters = null;
 			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no, $available_masters);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
