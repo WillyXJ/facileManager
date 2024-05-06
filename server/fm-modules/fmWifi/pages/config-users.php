@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmWifi: Easily manage one or more access points                         |
  +-------------------------------------------------------------------------+
- | https://www.facilemanager.com/modules/fmwifi/                            |
+ | http://www.facilemanager.com/modules/fmwifi/                            |
  +-------------------------------------------------------------------------+
 */
 

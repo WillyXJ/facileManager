@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | https://www.facilemanager.com/                                           |
+ | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -1083,7 +1083,7 @@ function fM($message) {
  * @param boolean $module Whether or not this is a module download
  */
 function downloadfMFile($file, $proxy_info, $module = false) {
-	$base_url = 'https://www.facilemanager.com/download/';
+	$base_url = 'http://www.facilemanager.com/download/';
 	if ($module) $base_url .= 'module/';
 	$base_url .= $file;
 	
@@ -1101,7 +1101,7 @@ function downloadfMFile($file, $proxy_info, $module = false) {
 		CURLOPT_TIMEOUT			=> 3600,
 		CURLOPT_HEADER			=> false,
 		CURLOPT_FOLLOWLOCATION	=> true,
-		CURLOPT_SSL_VERIFYPEER  => true,
+		CURLOPT_SSL_VERIFYPEER  => false,
 		CURLOPT_RETURNTRANSFER  => true
 	);
 	@curl_setopt_array($ch, ($options + $proxy_info));

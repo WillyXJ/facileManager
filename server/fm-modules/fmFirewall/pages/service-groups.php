@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmFirewall: Easily manage one or more software firewalls                |
  +-------------------------------------------------------------------------+
- | https://www.facilemanager.com/modules/fmfirewall/                        |
+ | http://www.facilemanager.com/modules/fmfirewall/                        |
  +-------------------------------------------------------------------------+
 */
 

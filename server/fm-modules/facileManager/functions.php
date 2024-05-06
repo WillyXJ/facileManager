@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | https://www.facilemanager.com/                                           |
+ | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -149,7 +149,7 @@ function isUpgradeAvailable() {
  * @package facileManager
  */
 function isNewVersionAvailable($package, $version, $interval = 'schedule') {
-	$fm_site_url = 'https://www.facilemanager.com/check/';
+	$fm_site_url = 'http://www.facilemanager.com/check/';
 	
 	$data['package'] = $package;
 	$data['version'] = $version;
@@ -595,7 +595,7 @@ $main_menu_html
 			</ul>
 		</div>
 		<div id="donate" class="grey">
-			<p><a href="https://www.facilemanager.com/donate/" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
+			<p><a href="http://www.facilemanager.com/donate/" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
 		</div>
 	</div>
 
@@ -3560,7 +3560,7 @@ function downloadfMFile($file) {
 		CURLOPT_TIMEOUT			=> 3600,
 		CURLOPT_HEADER			=> false,
 		CURLOPT_FOLLOWLOCATION	=> true,
-		CURLOPT_SSL_VERIFYPEER  => true,
+		CURLOPT_SSL_VERIFYPEER  => false,
 		CURLOPT_RETURNTRANSFER  => true
 	);
 	

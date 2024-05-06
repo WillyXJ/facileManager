@@ -15,7 +15,7 @@
  +-------------------------------------------------------------------------+
  | facileManager: Easy System Administration                               |
  +-------------------------------------------------------------------------+
- | https://www.facilemanager.com/                                           |
+ | http://www.facilemanager.com/                                           |
  +-------------------------------------------------------------------------+
 */
 
@@ -173,7 +173,7 @@ MODULE;
 HTML;
 } else {
 	$module_display = sprintf(_('<p>There are no modules detected. You must first install the files in %s and then return to this page.</p>') . "\n", '<code>' . ABSPATH . 'fm-modules</code>');
-	$module_display .= sprintf(_('<p>If you don\'t have any modules, you can download them from the %smodule directory</a>.</p>') . "\n", '<a href="https://www.facilemanager.com/modules/">');
+	$module_display .= sprintf(_('<p>If you don\'t have any modules, you can download them from the %smodule directory</a>.</p>') . "\n", '<a href="http://www.facilemanager.com/modules/">');
 }
 
 printf('

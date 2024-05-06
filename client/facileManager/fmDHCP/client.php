@@ -16,7 +16,7 @@
  | facileManager: Easy System Administration                               |
  | fmDHCP: Easily manage one or more ISC DHCP servers                      |
  +-------------------------------------------------------------------------+
- | https://www.facilemanager.com/modules/fmDHCP/                            |
+ | http://www.facilemanager.com/modules/fmDHCP/                            |
  +-------------------------------------------------------------------------+
 */
 
