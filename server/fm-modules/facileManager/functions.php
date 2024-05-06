@@ -1037,7 +1037,6 @@ function getPostData($url, $data = null, $post = 'post', $options = array()) {
 		CURLOPT_SSL_VERIFYPEER => false,
 		CURLOPT_SSL_VERIFYHOST => false,
 		CURLOPT_FAILONERROR => true,
-		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_URL => $url
 	);
 	

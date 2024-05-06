@@ -1,7 +1,7 @@
 4.6.2 (2024-03-??)
 ==================
 * Server - [bug] Fixed PHP errors. (Issue #621)
-* Both   - [improvement] Updated facilemanager.com references to use https.
+* Both   - [bug] Fixed curl function to follow redirects.
 
 4.6.1 (2024-02-13)
 ==================
