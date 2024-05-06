@@ -1,4 +1,4 @@
-6.0.5 (2024-03-??)
+6.0.5 (2024-05-05)
 ==================
 * Server - [bug] Fixed multiple PHP8 errors.
 * Server - [bug] Fixed PHP5 errors. (Issue #626)
