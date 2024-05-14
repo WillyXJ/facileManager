@@ -1273,7 +1273,8 @@ HTML;
 	function cloneDomainsList($domain_id) {
 		global $fmdb, $__FM_CONFIG, $user_capabilities;
 		
-		$return = $limited_ids = array();
+		$return = array();
+		$limited_ids = '';
 		if (isset($user_capabilities)) {
 			$limited_ids = (isset($user_capabilities[$_SESSION['module']]) && (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) && !array_key_exists('view_all', $user_capabilities[$_SESSION['module']]) && $user_capabilities[$_SESSION['module']]['access_specific_zones'][0])) ? 'AND domain_id IN (' . join(',', $this->getZoneAccessIDs($user_capabilities[$_SESSION['module']]['access_specific_zones'])) . ')' : null;
 		}
