@@ -698,7 +698,7 @@ function getZoneServers($domain_id, $server_types = array('primaries')) {
 		}
 	}
 	
-	return $serial_no;
+	return (string) $serial_no;
 }
 
 
