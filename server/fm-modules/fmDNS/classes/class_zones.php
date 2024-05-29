@@ -295,7 +295,11 @@ class fm_dns_zones {
 				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
 			} elseif (in_array($post['domain_type'], array('secondary', 'stub'))) {
 				$result = $fmdb->query($query . "'primaries', '" . $required_servers . "')");
-				$log_message .= formatLogKeyData('domain_', 'primaries', $required_servers);
+				global $fm_dns_acls;
+				if (!class_exists('fm_dns_acls')) {
+					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+				}
+				$log_message .= formatLogKeyData('domain_', 'primaries', $fm_dns_acls->parseACL($required_servers));
 			} elseif (isset($post['domain_redirect_url'])) {
 				if (!class_exists('fm_dns_records')) {
 					include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
@@ -1152,7 +1156,7 @@ HTML;
 							( address_match_element )
 						</div>
 						<div id="define_masters" style="display: %s">
-							<input type="hidden" name="domain_required_servers[masters]" id="domain_required_servers" class="address_match_element" data-placeholder="%s" value="%s" /><br />
+							<input type="hidden" name="domain_required_servers[primaries]" id="domain_required_servers" class="address_match_element" data-placeholder="%s" value="%s" /><br />
 							( address_match_element )
 						</div>
 						<div id="define_redirect_url" style="display: none">

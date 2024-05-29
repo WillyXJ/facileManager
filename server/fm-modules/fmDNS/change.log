@@ -1,6 +1,8 @@
 6.0.6 (2024-05-??)
 ==================
 * Server - [bug] Fixed PHP8 errors. (Issue #629 #630)
+* Server - [bug] Fixed inability to create secondary and stub zones. (Issue #631)
+* Server - [bug] Fixed log message for new zones.
 
 6.0.5 (2024-05-05)
 ==================
