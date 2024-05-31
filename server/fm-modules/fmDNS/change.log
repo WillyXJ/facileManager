@@ -1,4 +1,4 @@
-6.0.6 (2024-05-??)
+6.0.6 (2024-05-31)
 ==================
 * Server - [bug] Fixed PHP8 errors. (Issue #629 #630)
 * Server - [bug] Fixed inability to create secondary and stub zones. (Issue #631)
