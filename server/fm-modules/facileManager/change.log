@@ -1,3 +1,7 @@
+4.6.3 (2024-07-??)
+==================
+* Server - [bug] Fixed an issue where some module tools would not work. (Issue #633)
+
 4.6.2 (2024-05-05)
 ==================
 * Server - [bug] Fixed PHP errors. (Issue #621)

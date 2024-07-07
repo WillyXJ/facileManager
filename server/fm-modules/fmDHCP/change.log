@@ -1,3 +1,7 @@
+0.8.2 (2024-07-??)
+==================
+* Server - [bug] Fixed an issue where some JavaScript would not run.
+
 0.8.1 (2024-05-05)
 ==================
 * Server - [bug] Fixed PHP 8 errors.

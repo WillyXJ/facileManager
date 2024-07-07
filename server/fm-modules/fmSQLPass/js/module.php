@@ -2,6 +2,12 @@
 if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
+if (!isset($_SESSION['module'])) {
+	session_start();
+	$_SESSION['module'] = basename(dirname(dirname(__FILE__)));
+	session_write_close();
+}
+
 header("Content-Type: text/javascript");
 
 echo '
