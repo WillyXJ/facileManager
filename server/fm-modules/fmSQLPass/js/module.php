@@ -2,9 +2,10 @@
 if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
-if (!isset($_SESSION['module'])) {
+$module_name = basename(dirname(dirname(__FILE__)));
+if (!isset($_SESSION['module']) || $_SESSION['module'] != $module_name) {
 	session_start();
-	$_SESSION['module'] = basename(dirname(dirname(__FILE__)));
+	$_SESSION['module'] = $module_name;
 	session_write_close();
 }
 
