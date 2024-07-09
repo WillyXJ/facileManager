@@ -152,7 +152,7 @@ class fm_dhcp_objects {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'config_children'));
 		
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
