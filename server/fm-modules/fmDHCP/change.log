@@ -1,6 +1,7 @@
 0.9.0 (2024-??-??)
 ==================
 * Server - [improvement] Added logging for object add/edit.
+* Server - [improvement] Added global authoritative option. (Issue #632)
 * Server - [bug] Fixed pool creation without being a member.
 
 0.8.1 (2024-05-05)

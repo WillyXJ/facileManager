@@ -122,6 +122,7 @@ VALUES
 ('options', 'host', NULL, 'fixed-address', '( address_match_element )', 'no', 'no', 1, 'forward', NULL),
 ('options', 'subnet', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL),
 ('options', 'shared', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL),
+('options', 'global', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL),
 ('options', 'global', NULL, 'bootp', '( allow | deny | ignore )', 'no', 'yes', 1, 'reverse', NULL),
 ('options', 'global', NULL, 'booting', '( allow | deny | ignore )', 'no', 'yes', 1, 'reverse', NULL),
 ('options', 'global', NULL, 'duplicates', '( allow | deny | ignore )', 'no', 'yes', 1, 'reverse', NULL),

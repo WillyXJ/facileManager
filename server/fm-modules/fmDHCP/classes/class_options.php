@@ -399,7 +399,7 @@ HTML;
 				$config_id_sql = null;
 			}
 			
-			$query = "SELECT config_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE config_data!='' AND config_status IN (
+			$query = "SELECT DISTINCT config_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE config_data!='' AND config_status IN (
 						'active', 'disabled'
 					) AND account_id='{$_SESSION['user']['account_id']}' AND (
 						(server_serial_no='$server_serial_no' $config_id_sql)
