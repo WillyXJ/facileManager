@@ -96,7 +96,6 @@ class fm_dhcp_objects {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-		// echo '<pre>';print_r($post); exit;
 		
 		/** Insert the parent */
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
@@ -164,10 +163,9 @@ class fm_dhcp_objects {
 			$child['config_data'] = sanitize($post[$handler]);
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
 				if ($i) $sql_fields .= $key . ', ';
 				
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';

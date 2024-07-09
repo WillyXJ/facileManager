@@ -4,6 +4,7 @@
 * Server - [improvement] Added global authoritative option. (Issue #632)
 * Server - [bug] Fixed pool creation without being a member.
 * Server - [bug] Fixed an issue where 'config_children' was created as a configuration option.
+* Server - [bug] Fixed incorrect sanitization of quoted strings.
 
 0.8.1 (2024-05-05)
 ==================
