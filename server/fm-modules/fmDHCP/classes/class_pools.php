@@ -193,7 +193,7 @@ HTML;
 		$post = $this->validateObjectPost($post);
 		if (!is_array($post)) return $post;
 
-		if (empty($post['config_parent_id'])) return __('No network is defined.');
+		if (empty($post['config_parent_id'])) $post['config_parent_id'] = 0;
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_type='" . rtrim($post['config_type'], 's') . "' AND config_name='" . rtrim($post['config_type'], 's') . "' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
