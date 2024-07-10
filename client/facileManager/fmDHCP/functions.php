@@ -328,8 +328,8 @@ function dumpLeases($leasefile) {
 	
 	/** Pretty display */
 	if ($output_type == 'human') {
-		echo "MAC\t\t\tIP\t\tHostname\tState\tExpires\n";
-		echo str_repeat('=', 80) . "\n";
+		$header = sprintf("%s %s %s %s %s\n", str_pad('MAC', 18, ' '), str_pad('IP Address', 18, ' '), str_pad('Hostname', 18, ' '), str_pad('State', 7, ' '), str_pad('Expires', 20, ' '));
+		echo $header . str_repeat('=', strlen($header)) . "\n";
 	}
 	
 	/** Break up each lease into a multidimensional array */
@@ -352,7 +352,7 @@ function dumpLeases($leasefile) {
 			/** Skip expired */
 			if (strtotime($new_leases[$ip]['ends']) < strtotime('now')) continue;
 			
-			echo "{$new_leases[$ip]['hardware']}\t$ip\t{$new_leases[$ip]['hostname']}\t\t{$new_leases[$ip]['state']}\t{$new_leases[$ip]['ends']}\n";
+			printf("%s %s %s %s %s\n", str_pad($new_leases[$ip]['hardware'], 18, ' '), str_pad($ip, 18, ' '), str_pad(strlen($new_leases[$ip]['hostname']) > 18 ? substr($new_leases[$ip]['hostname'], 0, 15) . '...' : $new_leases[$ip]['hostname'], 18, ' '), str_pad($new_leases[$ip]['state'], 7, ' '), $new_leases[$ip]['ends']);
 		}
 	}
 	
