@@ -164,113 +164,121 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$config_name = 'failover peer';
 				} else {
 					// Get option prefix
-					$fmdb->get_results('SELECT def_prefix FROM fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'functions WHERE def_option_type="' . $type . '" AND def_option="' . $config_name . '"');
+					$fmdb->get_results('SELECT def_prefix,def_direction FROM fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'functions WHERE def_option_type="' . $type . '" AND def_option="' . $config_name . '"');
 					if ($fmdb->num_rows && $fmdb->last_result[0]->def_prefix) {
 						$config_name = $fmdb->last_result[0]->def_prefix . ' ' . $config_name;
 					}
+					$direction = $fmdb->num_rows ? $fmdb->last_result[0]->def_direction : null;
 				}
-				$config .= $tab . $config_name;
-				unset($config_name);
-				if (!in_array($type, array('group', 'pool'))) {
-					if ($type == 'shared') {
-						$config .= '-network';
-					}
-					$config_data = $config_result[$i]->config_data;
-					if ($type == 'peer') {
-						$config_data = "\"$config_data\"";
-					}
-					$config .= ' ' . $config_data;
-					unset($config_data);
-				}
-				
-				if ($parent == 'yes') {
-					$config .= " {\n";
 
-					/** Get details */
-					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id` ASC,`config_name`,`config_data', 'config_', 'AND config_type="' . $type . '" AND config_parent_id="' . $config_result[$i]->config_id . '" AND config_status="active"');
-					if ($fmdb->num_rows) {
-						$child_result = $fmdb->last_result;
-						$count2 = $fmdb->num_rows;
-						if ($type == 'peer' && $peers && (in_array($config_result[$i]->config_id, $peers['primary']) || in_array($config_result[$i]->config_id, $peers['secondary']))) {
-							$config .= "$tab\t";
-							$peer_type = in_array($config_result[$i]->config_id, $peers['primary']) ? 'primary' : 'secondary';
-							$config .= "$peer_type;\n";
-						}
-						for ($j=0; $j < $count2; $j++) {
-							if ($child_result[$j]->config_data) {
-								$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions` WHERE `def_option`='{$child_result[$j]->config_name}'");
-								if (in_array($child_result[$j]->config_name, array('peer-address', 'peer-port'))) {
-									$child_result[$j]->config_name = str_replace('-', ' ', $child_result[$j]->config_name);
-								}
-								$direction = $fmdb->num_rows ? $fmdb->last_result[0]->def_direction : null;
-								$option_prefix = ($fmdb->last_result[0]->def_prefix) ? $fmdb->last_result[0]->def_prefix . ' ' : null;
-								if (strpos($child_result[$j]->config_data, ';') !== false) {
-									$lines = explode(';', $child_result[$j]->config_data);
-									foreach ($lines as $line) {
-										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ' ' . trim($line) . ";\n";
-									}
-								} elseif ($direction == 'reverse') {
-									$config .= "$tab\t$option_prefix" . $child_result[$j]->config_data . ' ' . $child_result[$j]->config_name . ";\n";
-								} elseif ($direction == 'empty') {
-									if ($child_result[$j]->config_data == 'on') {
-										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ";\n";
-									}
-								} elseif ($type == 'peer' && $child_result[$j]->config_name == 'load-balancing') {
-									if ($peer_type == 'primary') {
-										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_data . ";\n";
-									}
-								} else {
-									if ($peer_type == 'secondary') {
-										if (in_array($child_result[$j]->config_name, array('mclt'))) {
-											continue;
-										}
-										if (strpos($child_result[$j]->config_name, 'peer') !== false) {
-											$child_result[$j]->config_name = substr($child_result[$j]->config_name, 5);
-										} elseif (in_array($child_result[$j]->config_name, array('address', 'port'))) {
-											$child_result[$j]->config_name = 'peer ' . $child_result[$j]->config_name;
-										}
-									}
-									if ($type == 'peer' && strpos($child_result[$j]->config_name, 'address') !== false) {
-										$server_name = getNameFromID($child_result[$j]->config_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-										$dns_rr_lookup = dns_get_record($server_name, DNS_A);
-										if (!is_array($dns_rr_lookup) || !isset($dns_rr_lookup[0]['ip'])) {
-											$server_address = getNameFromID($child_result[$j]->config_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_address');
-											if ($server_address) {
-												$server_name = $server_address;
-											}
-											unset($server_address);
-										}
-										$child_result[$j]->config_data = $server_name;
-										unset($server_name);
-									}
-									if ($child_result[$j]->config_name == 'failover peer') {
-										$child_result[$j]->config_data = '"' . getNameFromID($child_result[$j]->config_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') . '"';
-									}
-									$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ' ' . $child_result[$j]->config_data . ";\n";
-								}
-							}
-						}
-					}
-
-					/** Nested items? */
-					$newtab = $tab . "\t";
-					if (!in_array($type, array('host', 'peer'))) {
-						$nested_items[] = 'host';
-						if (!in_array($type, array('host', 'group'))) $nested_items[] = 'group';
-						if (!in_array($type, array('host', 'pool'))) $nested_items[] = 'pool';
-						if (!in_array($type, array('host', 'subnet'))) $nested_items[] = 'subnet';
-						foreach (array_reverse(array_unique($nested_items)) as $subitem) {
-							$sub_config = $this->dhcpdBuildConfigItems($subitem, $config_result[$i]->config_id, $newtab);
-							if (trim($sub_config)) {
-								$config .= $sub_config;
-							}
-						}
-					}
-
-					/** Close */
-					$config .= "$tab}";
+				if ($direction == 'empty') {
+					$config .= $tab . $config_name . ';';
+				} elseif ($direction == 'reverse') {
+					$config .= $tab . $config_result[$i]->config_data . ' ' . $config_name . ';';
 				} else {
-					$config .= ';';
+					$config .= $tab . $config_name;
+					unset($config_name);
+					if (!in_array($type, array('group', 'pool'))) {
+						if ($type == 'shared') {
+							$config .= '-network';
+						}
+						$config_data = $config_result[$i]->config_data;
+						if ($type == 'peer') {
+							$config_data = "\"$config_data\"";
+						}
+						$config .= ' ' . $config_data;
+						unset($config_data);
+					}
+					
+					if ($parent == 'yes') {
+						$config .= " {\n";
+
+						/** Get details */
+						basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_id` ASC,`config_name`,`config_data', 'config_', 'AND config_type="' . $type . '" AND config_parent_id="' . $config_result[$i]->config_id . '" AND config_status="active"');
+						if ($fmdb->num_rows) {
+							$child_result = $fmdb->last_result;
+							$count2 = $fmdb->num_rows;
+							if ($type == 'peer' && $peers && (in_array($config_result[$i]->config_id, $peers['primary']) || in_array($config_result[$i]->config_id, $peers['secondary']))) {
+								$config .= "$tab\t";
+								$peer_type = in_array($config_result[$i]->config_id, $peers['primary']) ? 'primary' : 'secondary';
+								$config .= "$peer_type;\n";
+							}
+							for ($j=0; $j < $count2; $j++) {
+								if ($child_result[$j]->config_data) {
+									$fmdb->get_results("SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions` WHERE `def_option`='{$child_result[$j]->config_name}'");
+									if (in_array($child_result[$j]->config_name, array('peer-address', 'peer-port'))) {
+										$child_result[$j]->config_name = str_replace('-', ' ', $child_result[$j]->config_name);
+									}
+									$direction = $fmdb->num_rows ? $fmdb->last_result[0]->def_direction : null;
+									$option_prefix = ($fmdb->last_result[0]->def_prefix) ? $fmdb->last_result[0]->def_prefix . ' ' : null;
+									if (strpos($child_result[$j]->config_data, ';') !== false) {
+										$lines = explode(';', $child_result[$j]->config_data);
+										foreach ($lines as $line) {
+											$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ' ' . trim($line) . ";\n";
+										}
+									} elseif ($direction == 'reverse') {
+										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_data . ' ' . $child_result[$j]->config_name . ";\n";
+									} elseif ($direction == 'empty') {
+										if ($child_result[$j]->config_data == 'on') {
+											$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ";\n";
+										}
+									} elseif ($type == 'peer' && $child_result[$j]->config_name == 'load-balancing') {
+										if ($peer_type == 'primary') {
+											$config .= "$tab\t$option_prefix" . $child_result[$j]->config_data . ";\n";
+										}
+									} else {
+										if ($peer_type == 'secondary') {
+											if (in_array($child_result[$j]->config_name, array('mclt'))) {
+												continue;
+											}
+											if (strpos($child_result[$j]->config_name, 'peer') !== false) {
+												$child_result[$j]->config_name = substr($child_result[$j]->config_name, 5);
+											} elseif (in_array($child_result[$j]->config_name, array('address', 'port'))) {
+												$child_result[$j]->config_name = 'peer ' . $child_result[$j]->config_name;
+											}
+										}
+										if ($type == 'peer' && strpos($child_result[$j]->config_name, 'address') !== false) {
+											$server_name = getNameFromID($child_result[$j]->config_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+											$dns_rr_lookup = dns_get_record($server_name, DNS_A);
+											if (!is_array($dns_rr_lookup) || !isset($dns_rr_lookup[0]['ip'])) {
+												$server_address = getNameFromID($child_result[$j]->config_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_address');
+												if ($server_address) {
+													$server_name = $server_address;
+												}
+												unset($server_address);
+											}
+											$child_result[$j]->config_data = $server_name;
+											unset($server_name);
+										}
+										if ($child_result[$j]->config_name == 'failover peer') {
+											$child_result[$j]->config_data = '"' . getNameFromID($child_result[$j]->config_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') . '"';
+										}
+										$config .= "$tab\t$option_prefix" . $child_result[$j]->config_name . ' ' . $child_result[$j]->config_data . ";\n";
+									}
+								}
+							}
+						}
+
+						/** Nested items? */
+						$newtab = $tab . "\t";
+						if (!in_array($type, array('host', 'peer'))) {
+							$nested_items[] = 'host';
+							if (!in_array($type, array('host', 'group'))) $nested_items[] = 'group';
+							if (!in_array($type, array('host', 'pool'))) $nested_items[] = 'pool';
+							if (!in_array($type, array('host', 'subnet'))) $nested_items[] = 'subnet';
+							foreach (array_reverse(array_unique($nested_items)) as $subitem) {
+								$sub_config = $this->dhcpdBuildConfigItems($subitem, $config_result[$i]->config_id, $newtab);
+								if (trim($sub_config)) {
+									$config .= $sub_config;
+								}
+							}
+						}
+
+						/** Close */
+						$config .= "$tab}";
+					} else {
+						$config .= ';';
+					}
 				}
 			}
 			unset($config_result, $count, $child_result, $count2);
