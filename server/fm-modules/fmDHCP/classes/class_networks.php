@@ -109,7 +109,7 @@ HTML;
 	 *
 	 * @param array $data Either $_POST data or returned SQL results
 	 * @param string $action Add or edit
-	 * @return string
+	 * @return string|void
 	 */
 	function printObjectForm($data = '', $action = 'add', $type = 'subnet', $addl_vars = null) {
 		$function = 'print' . ucfirst($type) . 'Form';

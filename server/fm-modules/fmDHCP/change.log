@@ -8,7 +8,9 @@
 * Server - [bug] Fixed an issue where 'config_children' was created as a configuration option.
 * Server - [bug] Fixed incorrect sanitization of quoted strings.
 * Server - [bug] Fixed global option configuration entries.
+* Server - [bug] Fixed incorrect automatic population of fields when adding a new object. (Issue #632)
 * Client - [improvement] Output formatting changes.
+* Both   - [feature] Added ability to quickly delete all leases from a server. (Issue #632)
 
 0.8.1 (2024-05-05)
 ==================

@@ -768,7 +768,7 @@ HTML;
 		$return = '';
 		
 		/** Get the data from $config_opt */
-		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND config_parent_id='{$config_id}' AND config_name='$config_opt' ORDER BY config_id ASC";
+		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND (config_parent_id='{$config_id}' AND config_parent_id!='0') AND config_name='$config_opt' ORDER BY config_id ASC";
 		$result = $fmdb->get_results($query);
 		if (!$fmdb->sql_errors && $fmdb->num_rows) {
 			$results = $fmdb->last_result;
