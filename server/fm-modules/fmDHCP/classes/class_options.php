@@ -489,7 +489,7 @@ HTML;
 			unset($post['host']);
 		}
 		
-		$post = $this->validateDefType($post);
+		$post = $this->validateDefType($post, $def_option);
 		
 		return $post;
 	}
@@ -504,10 +504,12 @@ HTML;
 	 * @param string $def_option Option type to validate
 	 * @return string Return formated data
 	 */
-	function validateDefType($post) {
+	function validateDefType($post, $def_option = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$post['config_name']}'";
+		$def_option = ($def_option) ? $def_option : "'{$post['config_name']}'";
+
+		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			if ($result[0]->def_dropdown == 'no') {
@@ -517,10 +519,10 @@ HTML;
 					case 'integer':
 					case 'seconds':
 					case 'minutes':
-						if (!verifyNumber($post['config_data'])) return $post['config_data'] . ' is an invalid number.';
+						if (!verifyNumber($post['config_data'])) return sprintf(__('%s is an invalid number.'), $post['config_data']);
 						break;
 					case 'port':
-						if (!verifyNumber($post['config_data'], 0, 65535)) return $post['config_data'] . ' is an invalid port number.';
+						if (!verifyNumber($post['config_data'], 0, 65535)) return sprintf(__('%s is an invalid port number.'), $post['config_data']);
 						break;
 					case 'quoted_string':
 						$post['config_data'] = '"' . str_replace(array('"', "'"), '', $post['config_data']) . '"';
@@ -528,14 +530,14 @@ HTML;
 					case 'address_match_element':
 						/** Need to check for valid ACLs or IP addresses */
 						
-						break;
+						// break;
 					case 'ipv4_address | ipv6_address':
-						if (!verifyIPAddress($post['config_data'])) return $post['config_data'] . ' is an invalid IP address.';
+						if (!verifyIPAddress($post['config_data'])) return sprintf(__('%s is an invalid IP address.'), $post['config_data']);
 						break;
 					case 'ipv4_address | *':
 					case 'ipv6_address | *':
 						if ($post['config_data'] != '*') {
-							if (!verifyIPAddress($post['config_data'])) return $post['config_data'] . ' is an invalid IP address.';
+							if (!verifyIPAddress($post['config_data'])) return sprintf(__('%s is an invalid IP address.'), $post['config_data']);
 						}
 						break;
 				}
