@@ -981,7 +981,7 @@ function addLogEntry($log_data) {
 	
 	$log_data = explode("\n", trim($log_data));
 	foreach ($log_data as $log_line) {
-		@file_put_contents($log_file, $date . ' ' . $module_name . ': ' . trim($log_line) . "\n", FILE_APPEND | LOCK_EX);
+		if (trim($log_line)) @file_put_contents($log_file, $date . ' ' . $module_name . ': ' . trim($log_line) . "\n", FILE_APPEND | LOCK_EX);
 	}
 }
 

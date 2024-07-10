@@ -1,3 +1,7 @@
+4.6.3 (2024-??-??)
+==================
+* Client - [bug] Prevent blank lines from getting logged.
+
 4.6.2 (2024-05-05)
 ==================
 * Server - [bug] Fixed PHP errors. (Issue #621)
