@@ -41,39 +41,36 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-   -D             Name of zone to dump (required by dump-zone)
-   -f             Filename hosting the zone data (required by dump-zone)
-   -z|zones       Build all associated zone files
-     dump-cache   Dump the DNS cache
-     dump-zone    Dump the specified zone data to STDOUT
-     clear-cache  Clear the DNS cache
-     id=XX        Specify the individual DomainID to build and reload
+   -D                         Name of zone to dump (required by dump-zone)
+   -f                         Filename hosting the zone data (required by dump-zone)
+   -z|zones                   Build all associated zone files
+     dump-cache               Dump the DNS cache
+     dump-zone                Dump the specified zone data to STDOUT
+     clear-cache              Clear the DNS cache
+     id=XX                    Specify the individual DomainID to build and reload
 	 
-     setHost      Invokes the API functionality
-     action=XX    Defines API action to take on a record (add, update, delete)
-     type=XX      Defines the RR type (A, AAAA, CNAME, DNAME, MX, NS, PTR, TXT)
-     name=XX      Defines the name of the RR
-     value=XX     Defines the value of the RR
-     ttl=XX       Defines the TTL of the RR
-     priority=XX  Defines the priority of the RR (MX only)
-     append=XX    Defines whether to append the domain or not (yes, no)
-     comment=XX   Defines the record comment
-     status=XX    Defines the record status (active, disabled)
-     newname=XX   Defines the new record name (when action=update)
-     newvalue=XX  Defines the new record value (when action=update)
+     setHost                  Invokes the API functionality
+     action=XX                Defines API action to take on a record (add, update, delete)
+     type=XX                  Defines the RR type (A, AAAA, CNAME, DNAME, MX, NS, PTR, TXT)
+     name=XX                  Defines the name of the RR
+     value=XX                 Defines the value of the RR
+     ttl=XX                   Defines the TTL of the RR
+     priority=XX              Defines the priority of the RR (MX only)
+     append=XX                Defines whether to append the domain or not (yes, no)
+     comment=XX               Defines the record comment
+     status=XX                Defines the record status (active, disabled)
+     newname=XX               Defines the new record name (when action=update)
+     newvalue=XX              Defines the new record value (when action=update)
 
-    install url-only 
-        Will install the client app to be a URL RR web server only
-
-    enable url
-        Enables the URL RR web server support on a previous installation
+     install url-only         Installs the client app to be a URL RR web server only
+     enable url               Enables the URL RR web server support on a previous installation
   
 HELP;
 }
 
 
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
-	global $argv, $module_name;
+	global $argv, $module_name, $update_method;
 	
 	extract($server_location);
 

@@ -52,6 +52,20 @@ $cron		= (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 
 $apitest	= (in_array('apitest', $argv)) ? true : false;
 
+/** Get long options */
+for ($i=0; $i < count($argv); $i++) {
+	if ($argv[$i] == '-m' || $argv[$i] == 'method') {
+		$update_choices = array('cron', 'ssh', 'http');
+		if (in_array($argv[$i+1], $update_choices)) {
+			$update_method = $argv[$i+1][0];
+		} else {
+			echo fM("Invalid option for {$argv[$i]}.\n");
+			exit(1);
+		}
+		break;
+	}
+}
+
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
 /** Display the client version */
@@ -61,7 +75,7 @@ if (in_array('-v', $argv) || in_array('version', $argv)) {
 
 /** Check if PHP version requirement is met */
 if (version_compare(PHP_VERSION, '5.0.0', '<')) {
-	echo fM('Your server is running PHP version ' . PHP_VERSION . " but PHP >= 5.0.0 is required.\n");
+	echo fM('This system has PHP version ' . PHP_VERSION . " installed and PHP >= 5.0.0 is required.\n");
 	exit(1);
 }
 
@@ -199,17 +213,18 @@ function printHelp () {
 	
 	echo <<<HELP
 php {$argv[0]} [options]
-  -b|buildconf   Build server configuration and associated files
-  -c|cron        Run in cron mode
-  -d|debug       Enter debug mode for more output
-  -h|help        Display this help
-  -n|dryrun      Do not save any files - just output what will happen
-  -p|purge       Delete old configuration files before writing
-  -s|no-ssl      Do not use SSL to retrieve the configs
-  -v|version     Display the client version
-     no-sudoers  Do not create/update the sudoers file at install time
-     no-update   Do not update the server configuration from the client
-     apitest     Perform basic API functionality tests
+
+  -b|buildconf                Build server configuration and associated files
+  -c|cron                     Run in cron mode
+  -d|debug                    Enter debug mode for more output
+  -h|help                     Display this help
+  -n|dryrun                   Do not save any files - just output what will happen
+  -p|purge                    Delete old configuration files before writing
+  -s|no-ssl                   Do not use SSL to retrieve the configs
+  -v|version                  Display the client version
+     no-sudoers               Do not create/update the sudoers file at install time
+     no-update                Do not update the server configuration from the client
+     apitest                  Perform basic API functionality tests
 
 HELP;
 
@@ -225,9 +240,10 @@ HELP;
 	
 	echo <<<HELP
   
-     install     Install the client components
-     upgrade     Upgrade the client components
-     reinstall   Reinstall the client components
+     install                  Install the client components
+  -m|method (cron|ssh|http)   Update method the client should be installed to use
+     upgrade                  Upgrade the client components
+     reinstall                Reinstall the client components
 
 HELP;
 	exit;
@@ -813,7 +829,7 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 	
 	/** Update via cron or http/s? */
 	$update_choices = array('c', 's', 'h');
-	while (!isset($update_method)) {
+	while (!isset($update_method) || !in_array($update_method, $update_choices)) {
 		echo fM('Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ');
 		$update_method = trim(strtolower(fgets(STDIN)));
 		
@@ -1427,7 +1443,7 @@ function versionCheck($app_version, $serverhost, $compress) {
  * @since 3.2.1
  * @package facileManager
  *
- * @return string
+ * @return array
  */
 function getInterfaceNames() {
 	$interfaces = array();

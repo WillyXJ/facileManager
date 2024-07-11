@@ -41,15 +41,15 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-     block=XX    Specify the MAC address to block (option may be used more than once)
-	               Example: client.php block=00:11:22:aa:bb:cc
-  -e|ebtables    Block the MAC with ebtables
-	               Example: client.php block=00:11:22:aa:bb:cc -e
-  -o             Specify the output type (human|web) (default: human)
-                   Example: client.php -l dump -o human
-     show-clients  Show connected clients
-     status      Get status of access point
-     status-all  Get full status of access point
+     block=XX                 Specify the MAC address to block (option may be used more than once)
+                                Example: client.php block=00:11:22:aa:bb:cc
+  -e|ebtables                 Block the MAC with ebtables
+                                Example: client.php block=00:11:22:aa:bb:cc -e
+  -o (human|web)              Specify the output type (default: human)
+                                Example: client.php -o web
+     show-clients             Show connected clients
+     status                   Get status of access point
+     status-all               Get full status of access point
 
 HELP;
 }
@@ -66,7 +66,7 @@ HELP;
  * @return array
  */
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
-	global $argv;
+	global $argv, $update_method;
 	
 	/**
 	 * Add any module-specific installation checks here

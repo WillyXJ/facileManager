@@ -41,11 +41,11 @@ function printModuleHelp () {
 	global $argv;
 	
 	echo <<<HELP
-    -l           Specify what to do with the leases (dump|delete)
-                   Examples: client.php -l dump
-                             client.php -l delete=10.1.1.100
-    -o           Specify the output type (human|web) (default: human)
-                   Example: client.php -l dump -o human
+  -l (dump|delete)            Specify what to do with the leases
+                                Examples: client.php -l dump
+                                          client.php -l delete=10.1.1.100
+  -o (human|web)              Specify the output type (default: human)
+                                Example: client.php -l dump -o human
 
 HELP;
 }
@@ -62,7 +62,7 @@ HELP;
  * @return array
  */
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
-	global $argv;
+	global $argv, $update_method;
 	
 	/**
 	 * Add any module-specific installation checks here

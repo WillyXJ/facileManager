@@ -1,5 +1,6 @@
 4.6.3 (2024-??-??)
 ==================
+* Client - [improvement] Added client install -m|method parameter. (Issue #605)
 * Client - [bug] Prevent blank lines from getting logged.
 
 4.6.2 (2024-05-05)

@@ -1,3 +1,7 @@
+3.1.0 (2024-??-??)
+==================
+* Client - [improvement] Added support for client install -m|method parameter. (Issue #605)
+
 3.0.1 (2024-05-05)
 ==================
 * Server - [bug] Fixed PHP 8 errors.

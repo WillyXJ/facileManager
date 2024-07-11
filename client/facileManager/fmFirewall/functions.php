@@ -30,7 +30,7 @@
 
 
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
-	global $argv;
+	global $argv, $update_method;
 	
 	extract($server_location);
 

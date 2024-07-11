@@ -40,7 +40,7 @@
  * @return array
  */
 function installFMModule($module_name, $proto, $compress, $data, $server_location, $url) {
-	global $argv;
+	global $argv, $update_method;
 	
 	/**
 	 * Add any module-specific installation checks here
