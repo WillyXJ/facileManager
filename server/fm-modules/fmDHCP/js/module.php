@@ -41,6 +41,39 @@ $(document).ready(function() {
 		return false;
 	});
 
+	$("#purge-leases").click(function() {
+		if (confirm("' . __('Are you sure you want to delete all leases?') . '")) {
+			$("#manage_item").fadeIn(200);
+			$("#manage_item_contents").html("<p>' . __('Processing') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
+
+			var server_serial_no	= getUrlVars()["server_serial_no"];
+			var form_data = {
+				server_serial_no: server_serial_no,
+				item_type: "purge-leases"
+			};
+			$.ajax({
+				type: "POST",
+				url: "fm-modules/facileManager/ajax/processPost.php",
+				data: form_data,
+				success: function(response)
+				{
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+						doLogout();
+						return false;
+					} else {
+						if (response.length > 0) {
+							$("#manage_item_contents").html(response);
+						} else {
+							window.location = response;
+						}
+					}
+				}
+			});
+		}
+		
+		return false;
+	});
+	
 });
 
 function displayOptionPlaceholder(option_value) {
@@ -80,50 +113,50 @@ function displayOptionPlaceholder(option_value) {
 	});
 }
 
-function loadServerLeases() {
-	$("body").addClass("fm-noscroll");
-	$("#manage_item").fadeIn(200);
-	$("#manage_item_contents").html("<p>' . __('Pulling the leases from the server') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
+// function loadServerLeases() {
+// 	$("body").addClass("fm-noscroll");
+// 	$("#manage_item").fadeIn(200);
+// 	$("#manage_item_contents").html("<p>' . __('Pulling the leases from the server') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
 
-	var form_data = {
-		get_leases: true,
-		server_serial_no: getUrlVars()["server_serial_no"],
-		is_ajax: 1
-	};
+// 	var form_data = {
+// 		get_leases: true,
+// 		server_serial_no: getUrlVars()["server_serial_no"],
+// 		is_ajax: 1
+// 	};
 
-	$.ajax({
-		type: "POST",
-		url: "fm-modules/facileManager/ajax/getData.php",
-		data: form_data,
-		success: function(response)
-		{
-			$("body").removeClass("fm-noscroll");
+// 	$.ajax({
+// 		type: "POST",
+// 		url: "fm-modules/facileManager/ajax/getData.php",
+// 		data: form_data,
+// 		success: function(response)
+// 		{
+// 			$("body").removeClass("fm-noscroll");
 			
-			if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
-				doLogout();
-				return false;
-			}
+// 			if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+// 				doLogout();
+// 				return false;
+// 			}
 
-			if (response.toLowerCase().indexOf("no records") > -1) {
-				$("#manage_item").fadeOut(200);
-				$("body").removeClass("fm-noscroll");
-				return;
-			}
+// 			if (response.toLowerCase().indexOf("no records") > -1) {
+// 				$("#manage_item").fadeOut(200);
+// 				$("body").removeClass("fm-noscroll");
+// 				return;
+// 			}
 			
-			if (response.toLowerCase().indexOf("popup-header") > -1) {
-				$("#manage_item_contents").html(response);
-				return;
-			}
+// 			if (response.toLowerCase().indexOf("popup-header") > -1) {
+// 				$("#manage_item_contents").html(response);
+// 				return;
+// 			}
 			
-			$("#lease_container").html(response);
-			$("#manage_item").fadeOut(200);
-			$("#lease_container select").select2({minimumResultsForSearch: 10});
-			$("body").removeClass("fm-noscroll");
-			return;
-		}
-	});
+// 			$("#lease_container").html(response);
+// 			$("#manage_item").fadeOut(200);
+// 			$("#lease_container select").select2({minimumResultsForSearch: 10});
+// 			$("body").removeClass("fm-noscroll");
+// 			return;
+// 		}
+// 	});
 
-	return false;
-}
+// 	return false;
+// }
 
 ';

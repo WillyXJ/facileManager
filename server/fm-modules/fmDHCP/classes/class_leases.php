@@ -61,7 +61,8 @@ class fm_dhcp_leases {
 			$fmdb->num_rows = 0;
 		}
 		
-		echo displayPagination(1, 1, @buildBulkActionMenu($bulk_actions_list));
+		$delete_all_button = ($fmdb->num_rows) ? sprintf('<input type="submit" name="submit" id="purge-leases" value="%s" class="button">', __('Delete All')) : '';
+		echo displayPagination(1, 1, array(@buildBulkActionMenu($bulk_actions_list), $delete_all_button));
 		
 		$table_info = array(
 						'class' => 'display_results',
@@ -162,16 +163,27 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		list($ip, $hostname, $hardware) = explode('|', $id);
+		$server_name = getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		
 		$command_args = '-l delete=' . $ip;
 		
 		$remote_execute_results = $this->manageLeases($server_serial_no, $command_args);
 
+		// Log messages
+		if ($ip == 'all') {
+			$log['success'] = sprintf(__('Deleted all leases from %s.'), $server_name);
+			$log['failed']  = sprintf(__('Failed to delete all leases from %s.'), $server_name);
+		} else {
+			$log['success'] = sprintf(__("Lease '%s' was deleted from %s."), $ip, $server_name);
+			$log['failed']  = sprintf(__("Failed to delete lease '%s' from %s."), $ip, $server_name);
+		}
+
 		if (!is_array($remote_execute_results)) {
+			addLogEntry($log['failed'] . ' ' . $remote_execute_results);
 			return $remote_execute_results;
 		}
 		
-		addLogEntry(sprintf(__("Lease '%s' was deleted from %s."), $ip, getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name')));
+		addLogEntry($log['success']);
 		return true;
 	}
 

@@ -371,7 +371,7 @@ function dumpLeases($leasefile) {
  * @package fmDNS
  *
  * @param string $leasefile Filename of lease file
- * @param string $remove_lease IP address to delete
+ * @param string $remove_lease IP address to delete (or all)
  * @return boolean
  */
 function deleteLease($leasefile, $remove_lease) {
@@ -380,7 +380,8 @@ function deleteLease($leasefile, $remove_lease) {
 	if ($debug) {
 		echo fM("Deleting $remove_lease from $leasefile...\n");
 	}
-	$pattern = '/^lease ' . $remove_lease . '(.*?)}$/sm';
+	$lease_pattern = ($remove_lease == 'all') ? '' : $remove_lease;
+	$pattern = '/^lease ' . $lease_pattern . '(.*?)}$/sm';
 	$current_content = file_get_contents($leasefile);
 	$new_content = preg_replace($pattern, '', $current_content);
 	
