@@ -902,7 +902,14 @@ function getNameFromID($id, $table, $prefix, $field, $data, $account_id = null, 
 	basicGet($table, $id, $prefix, $field, $status, $account_id);
 	if ($fmdb->num_rows) {
 		$result = $fmdb->last_result;
-		if (isset($result[0]->$data)) return $result[0]->$data;
+		if (is_array($data)) {
+			foreach ($data as $name) {
+				if (isset($result[0]->$name)) $array[] = $result[0]->$name;
+			}
+			if (is_array($array)) return $array;
+		} else {
+			if (isset($result[0]->$data)) return $result[0]->$data;
+		}
 	}
 	
 	return false;

@@ -146,8 +146,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 					exit(sprintf(__('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
 					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $field_data);
-					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+					list($tmp_type, $tmp_name, $tmp_parent_id) = getNameFromID($id, 'fm_' . $table, $prefix, $field, array($prefix . 'type', $field_data, $prefix . 'parent_id'));
+					$tmp_parent_name = (isset($tmp_parent_id)) ? getNameFromID($tmp_parent_id, 'fm_' . $table, $prefix, $prefix . 'id', $prefix . 'data') : null;
+					addLogEntry(sprintf(__('Set %s %s %s (%s) status to %s.'), $tmp_parent_name, $tmp_type, $object, $tmp_name, sanitize($_POST['item_status'])));
 					exit('Success');
 				}
 			}
