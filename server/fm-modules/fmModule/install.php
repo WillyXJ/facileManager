@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
-) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
+) ENGINE = INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 

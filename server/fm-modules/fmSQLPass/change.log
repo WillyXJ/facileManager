@@ -1,3 +1,7 @@
+1.9.0 (2024-??-??)
+==================
+* Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
+
 1.8.1 (2024-05-05)
 ==================
 * Server - [bug] Fixed PHP 8 errors.

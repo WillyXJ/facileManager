@@ -36,7 +36,7 @@ $__FM_CONFIG['fmDHCP'] = array(
 		'description'						=> __('Easily manage one or more ISC DHCP servers through a web interface. No longer edit configuration files manually.', 'fmDHCP'),
 		'prefix'							=> 'dhcp_',
 		'required_daemon_version'			=> '4.1',
-		'required_fm_version'				=> '4.6.0',
+		'required_fm_version'				=> '4.7.0',
 		'min_client_auto_upgrade_version'	=> '0.1'
 	);
 if($_SESSION['module'] == 'fmDHCP' && !defined('NO_DASH')) define('NO_DASH', true);

@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}acls
   `acl_comment` text,
   `acl_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active',
   PRIMARY KEY (`acl_id`)
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 	
 	$table[] = <<<TABLESQL
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}conf
   `cfg_status` enum('hidden','active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`cfg_id`),
   KEY `idx_domain_id` (`domain_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}cont
   `control_comment` text,
   `control_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`control_id`)
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 	
 	$table[] = <<<TABLESQL
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `domain_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`domain_id`),
   KEY `idx_domain_status` (`domain_status`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `group_comment` text NOT NULL,
   `group_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 $table[] = <<<TABLESQL
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}file
   `file_contents` text,
   `file_comment` text,
   `file_status` ENUM( 'active', 'disabled', 'deleted') NOT NULL DEFAULT 'active'
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}func
   `def_minimum_version` VARCHAR(20) NULL,
   PRIMARY KEY (`def_id`),
   KEY `idx_def_option` (`def_option`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}keys
   `key_signing` enum('yes','no') NOT NULL DEFAULT 'no',
   `key_status` enum('active','disabled','revoked','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`key_id`)
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}mast
   `master_comment` text,
   `master_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`master_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
-) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
+) ENGINE = INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -280,7 +280,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `group_slaves` text NOT NULL,
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -325,7 +325,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}view
   `view_name` VARCHAR(255) NOT NULL ,
   `view_comment` text,
   `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 

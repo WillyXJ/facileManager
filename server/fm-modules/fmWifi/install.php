@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}acls
   `acl_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`acl_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
-) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
+) ENGINE = INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}conf
   `config_comment` text,
   `config_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`config_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}func
   `def_minimum_version` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`def_id`),
   KEY `idx_def_option` (`def_option`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
-) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
+) ENGINE = INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `group_comment` text,
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}stat
   `stat_last_report` INT(10) NOT NULL DEFAULT '0',
   `stat_info` TEXT,
   PRIMARY KEY (`server_serial_no`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 	
 	$table[] = <<<TABLESQL
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}wlan
   `wlan_user_comment` varchar(255) DEFAULT NULL,
   `wlan_user_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`wlan_user_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 	
 	

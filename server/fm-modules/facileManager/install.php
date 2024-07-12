@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_accounts` (
   `account_key` varchar(255) NOT NULL,
   `account_name` VARCHAR(255) NOT NULL ,
   `account_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_groups` (
   `group_comment` text,
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_options` (
   `option_name` varchar(50) NOT NULL,
   `option_value` text NOT NULL,
   PRIMARY KEY (`option_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -266,7 +266,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_pwd_resets` (
   `pwd_login` int(11) NOT NULL,
   `pwd_timestamp` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`pwd_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -287,7 +287,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_users` (
   `user_template_only` enum('yes','no') NOT NULL DEFAULT 'no',
   `user_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`user_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 $table[] = <<<TABLESQL
@@ -300,7 +300,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_keys` (
   `key_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`key_id`),
   UNIQUE KEY `idx_key_token` (`key_token`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 

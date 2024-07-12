@@ -1,5 +1,6 @@
 0.9.0 (2024-??-??)
 ==================
+* Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
 * Client - [improvement] Added support for client install -m|method parameter. (Issue #605)
 
 0.8.1 (2024-05-05)

@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}
   `group_pwd_change` int(10) DEFAULT NULL,
   `group_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG['fmSQLPass']['prefix']}
   `server_credentials` text,
   `server_status` enum('active','disabled','deleted') NOT NULL,
   PRIMARY KEY (`server_id`)
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 
 

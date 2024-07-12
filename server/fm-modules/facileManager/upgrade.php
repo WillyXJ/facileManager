@@ -49,7 +49,7 @@ function fmUpgrade($database) {
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_460($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_470($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -91,11 +91,11 @@ function fmUpgrade($database) {
 function fmUpgrade_100($database) {
 	global $fmdb;
 	
-	$table[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_ipaddr`  `user_ipaddr` VARCHAR( 255 ) NULL DEFAULT NULL ";
+	$queries[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_ipaddr`  `user_ipaddr` VARCHAR( 255 ) NULL DEFAULT NULL ";
 	
 	/** Create table schema */
-	if (count($table) && $table[0]) {
-		foreach ($table as $schema) {
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
 			$fmdb->query($schema);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
@@ -117,11 +117,11 @@ function fmUpgrade_101($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_force_pwd_change` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_ipaddr` ";
+		$queries[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_force_pwd_change` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_ipaddr` ";
 		
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -143,12 +143,12 @@ function fmUpgrade_104($database) {
 	$success = ($GLOBALS['running_db_version'] < 14) ? fmUpgrade_101($database) : true;
 	
 	if ($success) {
-		$table = $inserts = $updates = null;
+		$queries = $inserts = $updates = null;
 		
 		/** Schema change */
 		if ($GLOBALS['running_db_version'] < 14) {
-			$table[] = "ALTER TABLE `$database`. `fm_logs` ENGINE = INNODB";
-			$table[] = "ALTER TABLE `$database`. `fm_perms` ADD  `perm_extra` TEXT NULL ";
+			$queries[] = "ALTER TABLE `$database`. `fm_logs` ENGINE = INNODB";
+			$queries[] = "ALTER TABLE `$database`. `fm_perms` ADD  `perm_extra` TEXT NULL ";
 		}
 		if ($GLOBALS['running_db_version'] < 15) {
 			$inserts[] = <<<INSERTSQL
@@ -180,7 +180,7 @@ INSERTSQL;
 		";
 		}
 		if ($GLOBALS['running_db_version'] < 17) {
-			$table[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_status`  `user_status` ENUM(  'active',  'disabled',  'deleted' ) NOT NULL DEFAULT  'active'";
+			$queries[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_status`  `user_status` ENUM(  'active',  'disabled',  'deleted' ) NOT NULL DEFAULT  'active'";
 		}
 		if ($GLOBALS['running_db_version'] < 18) {
 			if ($GLOBALS['running_db_version'] >= 15) {
@@ -238,7 +238,7 @@ INSERTSQL;
 			}
 
 			/** Update timestamp fields with unix epoch seconds */
-			$table[] = "ALTER TABLE  `$database`.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
+			$queries[] = "ALTER TABLE  `$database`.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM `$database`.`fm_logs`";
 			$all_results = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
@@ -248,7 +248,7 @@ INSERTSQL;
 			}
 			$updates[] = "ALTER TABLE  `$database`.`fm_logs` CHANGE  `log_timestamp`  `log_timestamp` INT( 10 ) NOT NULL DEFAULT  '0'";
 			
-			$table[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_last_login`  `user_last_login` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
+			$queries[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_last_login`  `user_last_login` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM `$database`.`fm_users`";
 			$all_results = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
@@ -258,7 +258,7 @@ INSERTSQL;
 			}
 			$updates[] = "ALTER TABLE  `$database`.`fm_users` CHANGE  `user_last_login`  `user_last_login` INT( 10 ) NOT NULL DEFAULT  '0'";
 			
-			$table[] = "ALTER TABLE  `$database`.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
+			$queries[] = "ALTER TABLE  `$database`.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` VARCHAR( 20 ) NOT NULL DEFAULT  '0'";
 			$query = "SELECT * FROM `$database`.`fm_pwd_resets`";
 			$all_results = $fmdb->get_results($query);
 			$count = $fmdb->num_rows;
@@ -268,13 +268,13 @@ INSERTSQL;
 			}
 			$updates[] = "ALTER TABLE  `$database`.`fm_pwd_resets` CHANGE  `pwd_timestamp`  `pwd_timestamp` INT( 10 ) NOT NULL DEFAULT  '0'";
 
-			$table[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_auth_type` INT( 1 ) NOT NULL DEFAULT  '1' AFTER  `user_email` ";
-			$table[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_template_only` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_force_pwd_change` ";
+			$queries[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_auth_type` INT( 1 ) NOT NULL DEFAULT  '1' AFTER  `user_email` ";
+			$queries[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_template_only` ENUM(  'yes',  'no' ) NOT NULL DEFAULT  'no' AFTER  `user_force_pwd_change` ";
 		}
 		
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -310,7 +310,7 @@ function fmUpgrade_105($database) {
 	$success = ($GLOBALS['running_db_version'] < 18) ? fmUpgrade_104($database) : true;
 	
 	if ($success) {
-		$table = $inserts = $updates = null;
+		$queries = $inserts = $updates = null;
 
 		$tmp = sys_get_temp_dir();
 		/** Schema change */
@@ -346,11 +346,11 @@ function fmUpgrade_106($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_default_module` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `user_email` ";
+		$queries[] = "ALTER TABLE  `$database`.`fm_users` ADD  `user_default_module` VARCHAR( 255 ) NULL DEFAULT NULL AFTER  `user_email` ";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -416,12 +416,12 @@ function fmUpgrade_1201($database) {
 	
 	if ($success) {
 		/** Schema change */
-		$table[] = "ALTER TABLE  `$database`.`fm_options` ADD  `module_name` VARCHAR( 255 ) NULL AFTER  `account_id` ";
-		$table[] = "ALTER TABLE  `fm_users` ADD  `user_caps` TEXT NULL AFTER  `user_auth_type` ";
+		$queries[] = "ALTER TABLE  `$database`.`fm_options` ADD  `module_name` VARCHAR( 255 ) NULL AFTER  `account_id` ";
+		$queries[] = "ALTER TABLE  `fm_users` ADD  `user_caps` TEXT NULL AFTER  `user_auth_type` ";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -583,11 +583,11 @@ function fmUpgrade_200($database) {
 			if (!setOption('auth_fm_pw_strength', ucfirst($pw_strength))) return false;
 		}
 		
-		$table[] = "DELETE FROM `$database`.`fm_options` WHERE option_name='fm_user_caps'";
+		$queries[] = "DELETE FROM `$database`.`fm_options` WHERE option_name='fm_user_caps'";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -610,7 +610,7 @@ function fmUpgrade_2101($database) {
 	$success = ($GLOBALS['running_db_version'] < 42) ? fmUpgrade_200($database) : true;
 	
 	if ($success) {
-		$table[] = "CREATE TABLE IF NOT EXISTS `$database`.`fm_groups` (
+		$queries[] = "CREATE TABLE IF NOT EXISTS `$database`.`fm_groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL DEFAULT '1',
   `group_name` varchar(128) NOT NULL,
@@ -619,11 +619,11 @@ function fmUpgrade_2101($database) {
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8";
-		$table[] = "ALTER TABLE `$database`.`fm_users` ADD `user_group` INT(11) DEFAULT NULL AFTER `user_email`";
+		$queries[] = "ALTER TABLE `$database`.`fm_users` ADD `user_group` INT(11) DEFAULT NULL AFTER `user_email`";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -646,11 +646,11 @@ function fmUpgrade_3001($database) {
 	$success = ($GLOBALS['running_db_version'] < 43) ? fmUpgrade_2101($database) : true;
 	
 	if ($success) {
-		$table[] = "ALTER TABLE `$database`.`fm_users` ADD `user_comment` VARCHAR(255) NULL DEFAULT NULL AFTER `user_email`";
+		$queries[] = "ALTER TABLE `$database`.`fm_users` ADD `user_comment` VARCHAR(255) NULL DEFAULT NULL AFTER `user_email`";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -673,11 +673,11 @@ function fmUpgrade_310($database) {
 	$success = ($GLOBALS['running_db_version'] < 45) ? fmUpgrade_3001($database) : true;
 	
 	if ($success) {
-		$table[] = "ALTER TABLE `$database`.`fm_logs` CHANGE `user_id` `user_login` VARCHAR(255) NOT NULL DEFAULT '0'";
+		$queries[] = "ALTER TABLE `$database`.`fm_logs` CHANGE `user_id` `user_login` VARCHAR(255) NOT NULL DEFAULT '0'";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -741,7 +741,7 @@ function fmUpgrade_4001($database) {
 	$success = ($GLOBALS['running_db_version'] < 47) ? fmUpgrade_311($database) : true;
 	
 	if ($success) {
-		$table[] = "CREATE TABLE IF NOT EXISTS `$database`.`fm_keys` (
+		$queries[] = "CREATE TABLE IF NOT EXISTS `$database`.`fm_keys` (
 			`key_id` int(11) NOT NULL,
 			`account_id` int(11) NOT NULL DEFAULT '1',
 			`user_id` int(11) NOT NULL,
@@ -753,8 +753,8 @@ function fmUpgrade_4001($database) {
 		  ) ENGINE=MyISAM DEFAULT CHARSET=utf8";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -777,11 +777,11 @@ function fmUpgrade_402($database) {
 	$success = ($GLOBALS['running_db_version'] < 48) ? fmUpgrade_4001($database) : true;
 	
 	if ($success) {
-		$table[] = "ALTER TABLE `$database`.`fm_keys` MODIFY `key_id` int(11) NOT NULL AUTO_INCREMENT";
+		$queries[] = "ALTER TABLE `$database`.`fm_keys` MODIFY `key_id` int(11) NOT NULL AUTO_INCREMENT";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -804,11 +804,11 @@ function fmUpgrade_450($database) {
 	$success = ($GLOBALS['running_db_version'] < 49) ? fmUpgrade_402($database) : true;
 	
 	if ($success) {
-		$table[] = "DELETE FROM `$database`.`fm_options` WHERE `option_name`='version_check'";
+		$queries[] = "DELETE FROM `$database`.`fm_options` WHERE `option_name`='version_check'";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -831,11 +831,11 @@ function fmUpgrade_460($database) {
 	$success = ($GLOBALS['running_db_version'] < 50) ? fmUpgrade_450($database) : true;
 	
 	if ($success) {
-		$table[] = "UPDATE `fm_options` SET `option_value`='TLS' WHERE `option_name`='mail_smtp_tls' and `option_value`=1";
+		$queries[] = "UPDATE `fm_options` SET `option_value`='TLS' WHERE `option_name`='mail_smtp_tls' and `option_value`=1";
 
 		/** Create table schema */
-		if (count($table) && $table[0]) {
-			foreach ($table as $schema) {
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
 				$fmdb->query($schema);
 				if (!$fmdb->result || $fmdb->sql_errors) return false;
 			}
@@ -843,6 +843,38 @@ function fmUpgrade_460($database) {
 	}
 
 	upgradeConfig('fm_db_version', 51, false);
+	
+	return $success;
+}
+
+
+/** fM v4.7.0 **/
+function fmUpgrade_470($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 51) ? fmUpgrade_460($database) : true;
+	
+	if ($success) {
+		$result = $fmdb->get_results("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{$database}' AND ENGINE = 'MyISAM'");
+		if ($fmdb->num_rows) {
+			foreach ($result as $table) {
+				$queries[] = "ALTER TABLE {$table->TABLE_NAME} ENGINE=INNODB";
+			}
+		}
+		
+		/** Create table schema */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 52, false);
 	
 	return $success;
 }

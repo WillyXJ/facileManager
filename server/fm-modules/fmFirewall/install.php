@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}grou
   `group_comment` text,
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`group_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}obje
   `object_comment` text,
   `object_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`object_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
-) ENGINE = MYISAM  DEFAULT CHARSET=utf8;
+) ENGINE = INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `service_comment` text,
   `service_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`service_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$table[] = <<<TABLESQL
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}time
   `time_comment` text,
   `time_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`time_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 ;
 TABLESQL;
 
 	$inserts[] = <<<INSERTSQL
