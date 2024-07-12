@@ -252,7 +252,7 @@ class fm_login {
 	 *
 	 * @param string $user_login Username to authenticate
 	 * @param string $user_password Password to authenticate with
-	 * @return boolean
+	 * @return boolean|array
 	 */
 	function checkPassword($user_login, $user_password) {
 		global $fmdb, $__FM_CONFIG, $fm_name;
@@ -487,6 +487,8 @@ This link expires in %s.',
 		setcookie('fmid', session_id(), strtotime('+1 week'));
 		$this->updateSessionDB($_SESSION['user']['name']);
 		session_write_close();
+
+		addLogEntry(sprintf(_('Logged in from %s.'), $_SESSION['user']['ipaddr']));
 	}
 	
 	
