@@ -85,6 +85,7 @@ $search_form = sprintf('<form class="log_search_form" id="date-range" method="ge
 		_('Search')
 		);
 
+$fmdb->num_rows = $log_count;
 echo printPageHeader($response);
 echo displayPagination($page, $total_pages, array($search_form, null));
 echo displayTableHeader($table_info, $title_array);
