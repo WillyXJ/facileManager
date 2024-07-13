@@ -170,7 +170,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 						$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(ucfirst(getNameFromID($_POST['item_id'][0], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping'))));
 
 						echo buildPopup('header', __('Reload Results')) . '<pre>';
-						echo processBulkDomainIDs($_POST['item_id']);
+						echo transformOutput(processBulkDomainIDs($_POST['item_id']));
 						echo "\n" . ucfirst($_POST['bulk_action']) . ' is complete.</pre>' . $popup_footer;
 						break;
 					case 'enable':

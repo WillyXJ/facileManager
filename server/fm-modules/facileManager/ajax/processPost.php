@@ -138,6 +138,10 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 			if (!is_int($result)) $output .= $result . "\n";
 		}
 	}
+
+	// Graphic highlighting
+	$output = transformOutput($output);
+
 	if (isset($output)) $output = "<pre>$output</pre>\n";
 	$output .= "<p class=\"complete\">" . _('Complete') . '.</p>';
 	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $output . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL($page));
@@ -171,6 +175,9 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 		include($include_file);
 	}
 	
+	// Graphic highlighting
+	$result = transformOutput($result);
+
 	$result .= "</pre>\n<p class=\"complete\">" . _('All updates have been processed.') . "</p>\n";
 	session_start();
 	unset($_SESSION['display-rebuild-all']);

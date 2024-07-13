@@ -110,6 +110,15 @@ class fm_shared_module_tools {
 		}
 		
 		@unlink($temp_ssh_key);
+
+		// Graphic highlighting
+		$return = str_replace(
+			array(_('success'), _('failed'), _('skipping')), 
+			array(
+				$__FM_CONFIG['icons']['ok'], 
+				$__FM_CONFIG['icons']['fail'], 
+				$__FM_CONFIG['icons']['caution']), 
+			$return);
 		
 		return $return . "</pre>\n";
 	}

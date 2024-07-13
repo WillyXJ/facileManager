@@ -59,3 +59,33 @@ function returnUnAuth($window = true) {
 	}
 	exit;
 }
+
+
+/**
+ * Hightlights failures and successes
+ * 
+ * @since 4.7.0
+ * @package facileManager
+ * 
+ * @param $text Text to transform
+ * @return string
+ */
+function transformOutput($text) {
+	global $__FM_CONFIG;
+
+	foreach (explode("\n", $text) as $line) {
+		if (strpos(strtolower($line), _('failed')) !== false) {
+			$line = str_replace('-->', '', $line);
+			$line = sprintf(' %s %s', $__FM_CONFIG['icons']['fail'], trim($line));
+		} elseif (strpos(strtolower($line), _('successful')) !== false) {
+			$line = str_replace('-->', '', $line);
+			$line = sprintf(' %s %s', $__FM_CONFIG['icons']['ok'], trim($line));
+		} elseif (strpos(strtolower($line), _('notice')) !== false) {
+			$line = str_replace('-->', '', $line);
+			$line = sprintf(' %s %s', $__FM_CONFIG['icons']['caution'], trim($line));
+		}
+		$tmp_output[] = str_replace('-->', $__FM_CONFIG['icons']['ok'], $line);
+	}
+
+	return join("\n", $tmp_output);
+}

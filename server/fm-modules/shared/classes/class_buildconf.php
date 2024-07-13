@@ -236,10 +236,10 @@ class fm_shared_module_buildconf {
 			'binary' => sprintf('<div id="config_check" class="info"><p>%s</p></div>', 
 							sprintf(_('The %s binary cannot be found on %s. If it was installed, these configs could be checked for syntax.'), $binary, $uname)),
 			'writeable' => sprintf(_('%s is not writeable by %s so the configuration checks cannot be performed.'), $fm_temp_directory, $__FM_CONFIG['webserver']['user_info']['name']),
-			'sudo' => sprintf(_('The webserver user (%s) on %s does not have permission to run the following command:%sThe following error ocurred:%s'),
+			'sudo' => sprintf(_("The webserver user (%s) on %s does not have permission to run the following command:\n%s\nThe following error ocurred:\n%s\n"),
 							$__FM_CONFIG['webserver']['user_info']['name'], $uname,
 							'<br /><pre>' . $checkconf_cmd . '</pre><p>',
-							'<pre>' . $checkconf_results . '</pre>'),
+							'</p><pre>' . $checkconf_results . '</pre>'),
 			'errors' => sprintf('%s<br /><pre>%s</pre>', _('Your configuration contains one or more errors:'), $checkconf_results),
 			'warning' => sprintf('%s<br /><pre>%s</pre>', _('Your configuration is loadable, but contains one or more warnings:'), $checkconf_results),
 			'loadable' => _('Your configuration is loadable.')

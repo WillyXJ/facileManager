@@ -241,7 +241,7 @@ class fm_shared_module_servers {
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 			}
 			foreach (makePlainText($this->buildServerConfig($server_serial_no), true) as $line) {
-				$response[] = ' --> ' . $line;
+				if (trim($line)) $response[] = trim($line);
 			}
 		}
 		
@@ -292,7 +292,7 @@ class fm_shared_module_servers {
 		
 		/** Check serial number */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', sanitize($serial_no), 'server_', 'server_serial_no');
-		if (!$fmdb->num_rows) return displayResponseClose(_('This server is not found.'));
+		if (!$fmdb->num_rows) return displayResponseClose(_('Failed: This server is not found.'));
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
@@ -319,7 +319,9 @@ class fm_shared_module_servers {
 				if (method_exists($fm_module_buildconf, 'processConfigsChecks')) {
 					$response .= @$fm_module_buildconf->processConfigsChecks($raw_data);
 				}
-				if (strpos($response, 'error') !== false) return buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
+				if (strpos($response, 'error') !== false) {
+					return (isset($_POST['action']) && in_array($_POST['action'], array('bulk', 'process-all-updates'))) ? _('Failed') . ': ' . str_replace("\n", "\n" . _('Failed') . ': ', makePlainText($response)) : buildPopup('header', $friendly_action . ' Results') . $response . $popup_footer;
+				}
 			}
 
 			if (getOption('purge_config_files', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
@@ -334,7 +336,7 @@ class fm_shared_module_servers {
 					setBuildUpdateConfigFlag($serial_no, 'conf', 'update');
 					$response = sprintf('<p>%s</p>'. "\n", _('This server will be updated on the next cron run.'));
 				} else {
-					$response = sprintf('<p>%s</p>'. "\n", _('This server receives updates via cron - please manage the server manually.'));
+					$response = sprintf('<p>%s</p>'. "\n", _('Notice: This server receives updates via cron - please manage the server manually.'));
 				}
 				break;
 			case 'http':
@@ -358,7 +360,7 @@ class fm_shared_module_servers {
 				if (!is_array($post_result)) {
 					/** Something went wrong */
 					if (empty($post_result)) {
-						return displayResponseClose(sprintf(_('It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
+						return displayResponseClose(sprintf(_('Failed: It appears %s does not have php configured properly within httpd or httpd is not running.'), $server_name));
 					}
 					return displayResponseClose($post_result);
 				} else {

@@ -1,5 +1,6 @@
 6.1.0 (2024-??-??)
 ==================
+* Server - [improvement] Added graphic highlighting to bulk actions. (Issue #604)
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
 * Server - [bug] Fixed PHP8 errors.
 * Client - [improvement] Added support for client install -m|method parameter. (Issue #605)

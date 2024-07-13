@@ -38,6 +38,9 @@ if (is_array($_POST) && count($_POST)) {
 			$response = sprintf('<pre>%s</pre>', makePlainText($fm_dns_zones->buildZoneConfig($domain_id)));
 		}
 		
+		// Graphic highlighting
+		$response = transformOutput($response);
+
 		echo $response . "<br />\n";
 	} else {
 		echo buildPopup('header', _('Error'));

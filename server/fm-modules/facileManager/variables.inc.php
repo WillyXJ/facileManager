@@ -43,7 +43,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Images */
 $__FM_CONFIG['icons']['fail']			= sprintf('<i class="fa fa-times fa-lg fail" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Failed'));
-$__FM_CONFIG['icons']['caution']		= sprintf('<img src="fm-modules/%1$s/images/orangequestion.jpg" border="0" alt="%2$s" title="%2$s" width="20" />', $fm_name, _('Caution'));
+$__FM_CONFIG['icons']['caution']		= sprintf('<i class="fa fa-exclamation-triangle fa-lg notice" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Caution'));
 $__FM_CONFIG['icons']['ok']				= sprintf('<i class="fa fa-check fa-lg ok" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
 $__FM_CONFIG['icons']['edit']			= sprintf('<i class="fa fa-pencil-square-o preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Edit'));
 $__FM_CONFIG['icons']['delete']			= sprintf('<i class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));

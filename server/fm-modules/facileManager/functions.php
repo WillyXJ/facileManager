@@ -2424,7 +2424,7 @@ function buildBulkActionMenu($bulk_actions_list = null, $id = 'bulk_action') {
  *
  * @param string $text Text to clean up
  * @param boolean $make_array Whether the output should be an array or not
- * @return array
+ * @return array|string
  */
 function makePlainText($text, $make_array = false) {
 	$text = strip_tags((string) $text);
