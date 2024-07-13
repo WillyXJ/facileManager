@@ -3,6 +3,7 @@
 * Server - [security] Added authentication logging.
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
 * Server - [bug] Fixed admin logs item count.
+* Server - [bug] Fixed PHP8 errors.
 * Client - [improvement] Added client install -m|method parameter. (Issue #605)
 * Client - [bug] Prevent blank lines from getting logged.
 

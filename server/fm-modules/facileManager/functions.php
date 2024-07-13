@@ -3348,7 +3348,7 @@ function userGroupCan($id, $capability, $module = 'facileManager', $extra_perm =
  * @return boolean
  */
 function isDebianSystem($os) {
-	return in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu', 'raspbian', 'raspberry pi os'));
+	return ($os) ? in_array(strtolower($os), array('debian', 'ubuntu', 'fubuntu', 'raspbian', 'raspberry pi os')) : false;
 }
 
 
