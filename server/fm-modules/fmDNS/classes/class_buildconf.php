@@ -245,7 +245,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				$master_result = $fmdb->last_result;
 				$count = $fmdb->num_rows;
 				for ($i=0; $i < $count; $i++) {
-					$global_master_array[$master_result[$i]->master_name] = $global_master_ports = null;
+					$global_master_array[$master_result[$i]->master_name] = $global_master_ports = '';
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $master_result[$i]->master_id . ' AND master_status="active" AND server_serial_no="0"');
 					$child_count = $fmdb->num_rows;
 					if ($child_count) {
@@ -2349,7 +2349,7 @@ HTML;
 				list($cfg_info, $cfg_comment) = $cfg_data;
 				$rrsets .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info);
 			}
-			$rrsets = str_replace($cfg_name, null, $rrsets);
+			$rrsets = str_replace($cfg_name, '', $rrsets);
 		}
 		return ($rrsets) ? "\trrset-order {\n{$rrsets}\t};\n" : null;
 	}
