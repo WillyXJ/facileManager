@@ -1,3 +1,7 @@
+4.7.0 (2024-??-??)
+==================
+* Server - [improvement] Added additional CSS highlighting.
+
 4.6.2 (2024-05-05)
 ==================
 * Server - [bug] Fixed PHP errors. (Issue #621)
