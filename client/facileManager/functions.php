@@ -29,7 +29,7 @@
 
 error_reporting(0);
 $compress = true;
-$whoami = 'root';
+$privileged_user = 'root';
 $url = null;
 
 if (!isset($module_name) && isset($_POST['module'])) $module_name = $_POST['module'];
@@ -51,6 +51,7 @@ $buildconf	= (in_array('-b', $argv) || in_array('buildconf', $argv)) ? true : fa
 $cron		= (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 
 $apitest	= (in_array('apitest', $argv)) ? true : false;
+$no_ssl		= ($proto == 'http') ? true : false;
 
 /** Get long options */
 for ($i=0; $i < count($argv); $i++) {
@@ -81,7 +82,7 @@ if (version_compare(PHP_VERSION, '5.0.0', '<')) {
 
 /** Check if zlib exists */
 if (!function_exists('gzuncompress')) {
-	if ($debug) echo fM("PHP 'zlib' module is missing; therefore, I'm not using compression and will attempt to enforce ssl.\n");
+	if ($debug) echo fM("PHP 'zlib' module is missing; therefore, compression cannot be used and enforcing SSL with be attempted.\n");
 	$compress = false;
 	$proto = 'https';
 }
@@ -89,12 +90,12 @@ if (!function_exists('gzuncompress')) {
 /** Check if openssl exists */
 if ($proto == 'https') {
 	$proto = function_exists('openssl_open') ? 'https' : 'http';
-	if (($debug) && $proto == 'http') echo fM("PHP 'openssl' module is missing; therefore, I'm not using ssl.\n");
+	if (($debug) && $proto == 'http') echo fM("PHP 'openssl' module is missing; therefore, SSL cannot be used.\n");
 }
 
 /** Check if curl exists */
 if (!function_exists('curl_init')) {
-	echo fM("PHP 'curl' module is missing; therefore, I'm not able to continue.\n");
+	echo fM("PHP 'curl' module is missing. Aborting.\n");
 	exit(1);
 }
 
@@ -106,8 +107,8 @@ if (!function_exists('sys_get_temp_dir')) {
 }
 
 /** Check running user */
-if (exec(findProgram('whoami')) != $whoami && !$dryrun && count($argv)) {
-	echo fM("This script must run as $whoami.\n");
+if (exec(findProgram('whoami')) != $privileged_user && !$dryrun && count($argv)) {
+	echo fM("This script must run as $privileged_user.\n");
 	exit(1);
 }
 
@@ -257,7 +258,7 @@ HELP;
  * @package facileManager
  */
 function installFM($proto, $compress) {
-	global $argv, $module_name, $data;
+	global $argv, $module_name, $data, $no_ssl;
 	
 	unset($data['SERIALNO']);
 
@@ -287,22 +288,38 @@ function installFM($proto, $compress) {
 	$data['config'] = array();
 
 	/** Run tests */
-	echo fM("  --> Testing $hostname via https...");
-	if (!$port) $port = 443;
-	if (socketTest($hostname, $port)) {
-		echo "ok\n";
-		$proto = 'https';
-	} else {
-		echo "failed\n";
-		echo fM("  --> Testing $hostname via http...");
-		if ($port == 443) $port = 80;
+	$connection_test_success = false;
+	if (isset($proto_def)) {
+		if (!$port) {
+			$port = ($proto_def == 'https') ? 443 : 80;
+		}
+		echo fM("  --> Testing $hostname:$port via $proto_def...");
 		if (socketTest($hostname, $port)) {
 			echo "ok\n";
-			$proto = 'http';
+			$proto = $proto_def;
+			$connection_test_success = true;
 		} else {
 			echo "failed\n\n";
-			echo fM("Cannot access $hostname with http or https.  Please correct this before proceeding.\n");
-			exit(1);
+		}
+	}
+	if (!$connection_test_success) {
+		if (!$no_ssl) echo fM("  --> Testing $hostname via https...");
+		if (!$no_ssl && !$port) $port = 443;
+		if (!$no_ssl && socketTest($hostname, $port)) {
+			echo "ok\n";
+			$proto = 'https';
+		} else {
+			echo "failed\n";
+			echo fM("  --> Testing $hostname via http...");
+			if ($port == 443) $port = 80;
+			if (socketTest($hostname, $port)) {
+				echo "ok\n";
+				$proto = 'http';
+			} else {
+				echo "failed\n\n";
+				echo fM("Cannot access $hostname with http or https.  Please correct this before proceeding.\n");
+				exit(1);
+			}
 		}
 	}
 	
@@ -518,8 +535,10 @@ function getPostData($url, $data) {
  * @package facileManager
  */
 function getServerPath($server) {
-	$server = str_replace('http://', '', $server);
-	$server = str_replace('https://', '', $server);
+	if (strpos($server, '://') !== false) {
+		$return['proto_def'] = substr($server, 0, strpos($server, '://'));
+	}
+	$server = str_replace(array('http://', 'https://'), '', $server);
 	$server_array = explode('/', $server);
 	
 	$return['hostname'] = $server_array[0];
@@ -1015,6 +1034,8 @@ function addLogEntry($log_data) {
  * @return boolean
  */
 function installFiles($files = array(), $dryrun = false, $chown_dirs = array(), $user = 'root') {
+	global $debug;
+	
 	/** Process the files */
 	if (count($files)) {
 		foreach($files as $filename => $fileinfo) {

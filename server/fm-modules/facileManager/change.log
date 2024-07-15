@@ -6,6 +6,8 @@
 * Server - [bug] Fixed admin logs item count.
 * Server - [bug] Fixed PHP8 errors.
 * Client - [improvement] Added client install -m|method parameter. (Issue #605)
+* Client - [improvement] Changed error messages for better clarity.
+* Client - [improvement] Provide better installation connection tests.
 * Client - [bug] Prevent blank lines from getting logged.
 
 4.6.2 (2024-05-05)
