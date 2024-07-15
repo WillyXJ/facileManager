@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] Added additional CSS highlighting.
 * Server - [bug] Fixed PHP8 errors.
+* Client - [improvement] Provide better rndc action checks.
 
 4.6.2 (2024-05-05)
 ==================
