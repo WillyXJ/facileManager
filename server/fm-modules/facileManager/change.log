@@ -1,6 +1,7 @@
 4.7.0 (2024-??-??)
 ==================
 * Server - [improvement] Added additional CSS highlighting.
+* Server - [bug] Fixed PHP8 errors.
 
 4.6.2 (2024-05-05)
 ==================

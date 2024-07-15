@@ -267,7 +267,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					if ($master_result[$i]->master_dscp && version_compare($server_version, '9.10', '>=')) {
 						$global_master_ports .= ' dscp ' . $master_result[$i]->master_dscp;
 					}
-					$global_master_array[$master_result[$i]->master_name] = array(rtrim(ltrim($global_master_array[$master_result[$i]->master_name], "\t"), ";\n"), $global_master_ports, $master_result[$i]->master_comment);
+					$global_master_array[$master_result[$i]->master_name] = array(rtrim(ltrim((string) $global_master_array[$master_result[$i]->master_name], "\t"), ";\n"), $global_master_ports, $master_result[$i]->master_comment);
 					unset($master_child_result);
 				}
 			} else $global_master_array = array();
