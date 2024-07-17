@@ -112,7 +112,7 @@ if (isset($__FM_CONFIG)) {
 					} else {
 						$("#password").focus();
 					}
-					$("#login_form").effect("shake", { times:3 }, 15);	
+					$("#login_form table").effect("shake");	
 				} else if (response.indexOf("failed") >=0) {
 					$("#message").html(response);
 				} else {

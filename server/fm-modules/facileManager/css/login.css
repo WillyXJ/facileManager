@@ -10,6 +10,12 @@ body {
 	width: 500px;
 }
 
+form {
+	width: 500px;
+	position: absolute;
+	top: 35%;
+}
+
 form table {
 	box-shadow: 0 0 5px black;
 	border-collapse: collapse;
@@ -125,11 +131,6 @@ strong {
 	white-space: nowrap;
 }
 
-#fm-branding {
-	position: absolute;
-	bottom: 60%;
-}
-
 #fm-branding img {
 	height: 48px;
 }
@@ -140,11 +141,6 @@ strong {
 	left: 10px;
 	bottom: 13px;
 	font-size: 30px;
-}
-
-#login_form {
-	position: absolute;
-	top: 40%;
 }
 
 #footer {
@@ -159,12 +155,10 @@ strong {
 	font-size: 8pt;
 }
 
-#message div {
-	width: 500px;
-}
-#message p {
-	margin: 1em 0 -.5em 0;
-	text-align: center;
+#message {
+	max-height: 310px;
+	overflow-y: scroll;
+	margin: 1em 0 0;
 }
 
 .failed {

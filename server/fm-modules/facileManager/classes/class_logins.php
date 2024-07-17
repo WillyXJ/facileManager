@@ -70,7 +70,7 @@ class fm_login {
 		<div id="message">%7$s</div>
 		</form>
 		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'),
-				_('Password'), $forgot_link, $login_message);
+				_('Password'), $forgot_link, nl2br($login_message));
 		
 		exit(printFooter());
 	}

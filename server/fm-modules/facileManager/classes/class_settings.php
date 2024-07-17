@@ -508,7 +508,7 @@ class fm_settings {
 								<p>' . _('An optional message to display on the login page.') . '</p>
 							</div>
 							<div class="choices">
-								<input name="login_message" id="login_message" type="text" value="' . $login_message . '" size="40" />
+								<textarea name="login_message" id="login_message" type="text" cols="40">' . $login_message . '</textarea>
 							</div>
 						</div>
 					</div>

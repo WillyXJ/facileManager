@@ -702,6 +702,7 @@ tbody {
 #pagination input,
 #search_form_container,
 #settings input:not([type="submit"]):not([type="button"]),
+#settings textarea,
 .log_search_form input[type="text"] {
 	line-height: 20px;
 	font-size: 12px;
