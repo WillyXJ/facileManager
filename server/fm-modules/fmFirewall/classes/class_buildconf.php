@@ -52,12 +52,27 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			/** Disabled server */
 			if ($GLOBALS['basename'] != 'preview.php') {
 				if ($server_status != 'active') {
-					$error = "Server is $server_status.\n";
+					$error = sprintf(_('Server is %s.'), $server_status) . "\n";
+					if (isset($post_data['preview'])) {
+						return $error;
+					}
 					if ($compress) echo gzcompress(serialize($error));
 					else echo serialize($error);
-
+					
 					exit;
 				}
+			}
+			
+			/** Missing configuration file */
+			if (empty(trim($server_config_file))) {
+				$error = _('This server does not have a configuration file defined.') . "\n";
+				if (isset($post_data['preview'])) {
+					return $error;
+				}
+				if ($compress) echo gzcompress(serialize($error));
+				else echo serialize($error);
+				
+				exit;
 			}
 			
 			include(ABSPATH . 'fm-includes/version.php');
@@ -100,7 +115,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		
 		/** Bad server */
-		$error = "Server is not found.\n";
+		$error = _('Server is not found.') . "\n";
+		if (isset($post_data['preview'])) {
+			return $error;
+		}
 		if ($compress) echo gzcompress(serialize($error));
 		else echo serialize($error);
 	}

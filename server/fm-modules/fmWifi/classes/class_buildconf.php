@@ -31,7 +31,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmWifi
 	 *
 	 * @param array $raw_data Array containing files and contents
-	 * @return string|void
+	 * @return array|string|void
 	 */
 	function buildServerConfig($post_data) {
 		global $fmdb, $__FM_CONFIG;
@@ -54,7 +54,22 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			
 			/** Disabled server */
 			if ($server_status != 'active') {
-				$error = "Server is $server_status.\n";
+				$error = sprintf(_('Server is %s.'), $server_status) . "\n";
+				if (isset($post_data['preview'])) {
+					return $error;
+				}
+				if ($compress) echo gzcompress(serialize($error));
+				else echo serialize($error);
+				
+				exit;
+			}
+			
+			/** Missing configuration file */
+			if (empty(trim($server_config_file))) {
+				$error = _('This server does not have a configuration file defined.') . "\n";
+				if (isset($post_data['preview'])) {
+					return $error;
+				}
 				if ($compress) echo gzcompress(serialize($error));
 				else echo serialize($error);
 				
@@ -72,7 +87,10 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		}
 		
 		/** Bad server */
-		$error = "Server is not found.\n";
+		$error = _('Server is not found.') . "\n";
+		if (isset($post_data['preview'])) {
+			return $error;
+		}
 		if ($compress) echo gzcompress(serialize($error));
 		else echo serialize($error);
 	}

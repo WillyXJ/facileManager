@@ -102,6 +102,15 @@ class fm_shared_module_buildconf {
 				exit;
 			}
 			
+			/** Missing configuration file */
+			if (empty(trim($server_config_file))) {
+				$error = "This server does not have a configuration file defined.\n";
+				if ($compress) echo gzcompress(serialize($error));
+				else echo serialize($error);
+				
+				exit;
+			}
+			
 			include(ABSPATH . 'fm-includes/version.php');
 			
 			$config = '# This file was built using ' . $_SESSION['module'] . ' ' . $__FM_CONFIG[$_SESSION['module']]['version'] . ' on ' . date($date_format . ' ' . $time_format . ' e') . "\n\n";

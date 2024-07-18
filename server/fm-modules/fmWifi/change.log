@@ -1,6 +1,8 @@
 0.6.0 (2024-??-??)
 ==================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
+* Server - [bug] Configuration can no longer be built when the server does not have a
+           configuration file defined.
 * Client - [improvement] Added client install -o|options parameter. (Issue #605)
 
 0.5.1 (2024-05-05)

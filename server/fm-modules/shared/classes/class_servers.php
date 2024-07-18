@@ -299,6 +299,8 @@ class fm_shared_module_servers {
 		$options[] = null;
 		$response = '';
 		
+		if (!$server_config_file) return displayResponseClose(_('Failed: This server does not have a configuration file defined.'));
+
 		$popup_footer = buildPopup('footer', 'OK', array('cancel_button' => 'cancel'));
 		
 		if ($action == 'buildconf') {

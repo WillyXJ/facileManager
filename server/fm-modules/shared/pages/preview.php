@@ -44,6 +44,7 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	$data['SERIALNO'] = $server_serial_no;
 	$data['compress'] = 0;
 	$data['dryrun'] = true;
+	$data['preview'] = true;
 
 	basicGet('fm_accounts', $_SESSION['user']['account_id'], 'account_', 'account_id');
 	$account_result = $fmdb->last_result;
@@ -57,10 +58,11 @@ if (array_key_exists('server_serial_no', $_GET) && is_numeric($_GET['server_seri
 	
 	$function = 'build' . ucfirst($config) . 'Config';
 
-	list($raw_data, $message) = $fm_module_buildconf->$function($data);
+	$raw_data = $fm_module_buildconf->$function($data);
+	if (is_array($raw_data)) list($raw_data, $message) = $raw_data;
 
 	if (!is_array($raw_data)) {
-		$preview = unserialize($raw_data);
+		$preview = isSerialized($raw_data) ? unserialize($raw_data) : $raw_data;
 	} else {
 		list($preview, $check_status) = $fm_module_buildconf->processConfigs($raw_data);
 	}

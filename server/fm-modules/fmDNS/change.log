@@ -3,6 +3,8 @@
 * Server - [improvement] Added graphic highlighting to bulk actions. (Issue #604)
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
 * Server - [bug] Fixed PHP8 errors.
+* Server - [bug] Configuration can no longer be built when the server does not have a
+           configuration file defined.
 * Client - [improvement] Added client install -o|options parameter. (Issue #605)
 * Client - [improvement] Added support to automatically install bind9.
 
