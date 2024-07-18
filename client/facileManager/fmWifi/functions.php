@@ -82,7 +82,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	}
 
 	echo fM('  --> Running version tests...');
-	$app = detectDaemonVersion(true);
+	$app = detectAppVersion(true);
 	if ($app === null) {
 		echo "failed\n\n";
 		echo fM("Cannot find a supported AP servers - please check the README document for supported AP servers.\n");
@@ -155,12 +155,6 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	
 	$data['server_interfaces'] = implode(';', getInterfaceNames());
 
-	/** Handle the update method */
-	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
-
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	
 	/** Add AP status cron */
 	$tmpfile = sys_get_temp_dir() . '/crontab.' . $module_name;
 	$entry_exists = intval(trim(shell_exec('crontab -l 2>/dev/null | grep ' . escapeshellarg($module_name) . ' | grep -c status-all')));
@@ -172,7 +166,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 		$cron_update = system($cmd, $retval);
 		unlink($tmpfile);
 		
-		if ($retval) echo fM("  --> The crontab cannot be created.\n  --> $cmd\n");
+		if ($retval) echo fM("  --> The status crontab cannot be created.\n  --> $cmd\n");
 	}
 	
 	return $data;
@@ -341,7 +335,7 @@ function detectServerType() {
  *
  * @return array|string|null
  */
-function detectDaemonVersion($return_array = false) {
+function detectAppVersion($return_array = false) {
 	$server = detectServerType();
 	$flags = array('hostapd'=>'-v 2>&1 | head -1 | awk "{print \$NF}" | sed \'s/v//\'');
 	
@@ -944,4 +938,25 @@ function apBlockClient($bad_macs, $ebtables = false) {
 	apStatus('all');
 	
 	exit;
+}
+
+
+/**
+ * Attempts to install required packages
+ *
+ * @since 6.5.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $url URL to post data to
+ * @param array $data Array of existing installation data
+ * @return array
+ */
+function moduleInstallApp($url, $data) {
+	$packages = array('hostapd', 'iw');
+	$services[] = (isDebianSystem($data['server_os_distro'])) ? 'hostapd' : '';
+	
+	installApp($packages, $services);
+
+	return addServer($url, $data, true);
 }

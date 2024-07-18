@@ -81,7 +81,7 @@ if ($delete_lease && !$lease) {
 }
 
 /** Check if running supported version */
-$data['server_version'] = detectDaemonVersion();
+$data['server_version'] = detectAppVersion();
 
 /** Dump the leases */
 if ($dump_leases || $delete_lease) {

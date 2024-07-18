@@ -129,7 +129,7 @@ if ($api_call) {
 }
 
 /** Check if running supported version */
-$data['server_version'] = detectDaemonVersion();
+$data['server_version'] = detectAppVersion();
 
 /** Enable URL hosting */
 if ($enable_url) {

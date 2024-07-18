@@ -35,7 +35,7 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	extract($server_location);
 
 	echo fM('  --> Detecting firewall...');
-	$app = detectFWVersion(true);
+	$app = detectAppVersion(true);
 	if ($app === null) {
 		echo "failed\n\n";
 		echo fM("Cannot find a supported firewall - please check the README document for supported firewalls.  Aborting.\n");
@@ -52,14 +52,6 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	}
 	$data['server_version'] = $app_version;
 	$data['server_interfaces'] = implode(';', getInterfaceNames());
-	
-	echo fM("\n  --> Detection complete.  Continuing installation.\n\n");
-	
-	/** Handle the update method */
-	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
-
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	
 	return $data;
 }
@@ -139,7 +131,7 @@ function detectServerType() {
 }
 
 
-function detectFWVersion($return_array = false) {
+function detectAppVersion($return_array = false) {
 	$fw = detectServerType();
 	$fw_flags = array('iptables' => '-V | awk -Fv "{print \$NF}"',
 						'pf' => null,

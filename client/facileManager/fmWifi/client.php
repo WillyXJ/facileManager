@@ -98,7 +98,7 @@ if ($ebtables && $block) {
 }
 
 /** Check if running supported version */
-$data['server_version'] = detectDaemonVersion();
+$data['server_version'] = detectAppVersion();
 
 /** Get system status */
 if ($get_status) {

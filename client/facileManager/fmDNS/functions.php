@@ -80,31 +80,14 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 		$data = array_merge($data, setURLConfig());
 	} else {
 		echo fM('  --> Running version tests...');
-		$app = detectDaemonVersion(true);
-		if ($app === null) {
-			echo "failed\n\n";
-			echo fM("Cannot find a supported DNS server - please check the README document for supported DNS servers.  Aborting.\n");
-			exit(1);
-		}
-		extract($app);
-		$data['server_type'] = $server['type'];
-		if (versionCheck($app_version, $proto . '://' . $hostname . '/' . $path, $compress) == true) {
+		if (versionCheck($data['server_version'], $proto . '://' . $hostname . '/' . $path, $compress) == true) {
 			echo "ok\n";
 		} else {
 			echo "failed\n\n";
-			echo "$app_version is not supported.\n";
+			echo "{$data['server_version']} is not supported.\n";
 			exit(1);
 		}
-		$data['server_version'] = $app_version;
-		
-		echo fM("\n  --> Tests complete.  Continuing installation.\n\n");
 	}
-	
-	/** Handle the update method */
-	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
-
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	
 	return $data;
 }
@@ -306,7 +289,7 @@ function moduleAddServer() {
 }
 
 
-function detectDaemonVersion($return_array = false) {
+function detectAppVersion($return_array = false) {
 	$dns_server = detectServerType();
 	$dns_flags = array('named'=>'-v | sed "s/BIND //"');
 	
@@ -728,4 +711,25 @@ function enableURL() {
 	}
 
 	exit(fM("\nConfiguration complete.\n"));
+}
+
+
+/**
+ * Attempts to install required packages
+ *
+ * @since 6.5.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $url URL to post data to
+ * @param array $data Array of existing installation data
+ * @return array
+ */
+function moduleInstallApp($url, $data) {
+	$packages[] = (isDebianSystem($data['server_os_distro'])) ? 'bind9' : 'bind';
+	$services[] = (isDebianSystem($data['server_os_distro'])) ? 'bind9' : '';
+	
+	installApp($packages, $services);
+
+	return addServer($url, $data, true);
 }

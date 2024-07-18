@@ -53,20 +53,6 @@ $cron		= (in_array('-c', $argv) || in_array('cron', $argv)) ? true : false;
 $apitest	= (in_array('apitest', $argv)) ? true : false;
 $no_ssl		= ($proto == 'http') ? true : false;
 
-/** Get long options */
-for ($i=0; $i < count($argv); $i++) {
-	if ($argv[$i] == '-m' || $argv[$i] == 'method') {
-		$update_choices = array('cron', 'ssh', 'http');
-		if (in_array($argv[$i+1], $update_choices)) {
-			$update_method = $argv[$i+1][0];
-		} else {
-			echo fM("Invalid option for {$argv[$i]}.\n");
-			exit(1);
-		}
-		break;
-	}
-}
-
 if ($debug) error_reporting(E_ALL ^ E_NOTICE);
 
 /** Display the client version */
@@ -242,7 +228,13 @@ HELP;
 	echo <<<HELP
   
      install                  Install the client components
-  -m|method (cron|ssh|http)   Update method the client should be installed to use
+  -o|options                  Installation options comma-delimited to avoid prompts
+                                Valid options: 
+                                    FMHOST    fM host url
+                                    SERIALNO  Server serial number (or 0 to auto-generate)
+                                    method    Update method to use (cron, ssh, http)
+                                Examples: install -o FMHOST=https://example.com/fm/,method=cron
+                                          install options FMHOST=fm.example.com,SERIALNO=0,method=ssh
      upgrade                  Upgrade the client components
      reinstall                Reinstall the client components
 
@@ -258,8 +250,37 @@ HELP;
  * @package facileManager
  */
 function installFM($proto, $compress) {
-	global $argv, $module_name, $data, $no_ssl;
+	global $argv, $module_name, $data, $no_ssl, $debug;
 	
+	/** Get long options */
+	for ($i=0; $i < count($argv); $i++) {
+		if ($argv[$i] == '-o' || $argv[$i] == 'options') {
+			$install_options = trim($argv[$i+1], '"');
+			if ($debug) echo fM("Setting install options ($install_options).\n");
+			foreach (explode(',', $install_options) as $full_option) {
+				list($key, $value) = explode('=', trim($full_option));
+				$key = strtoupper($key);
+				$value = strtolower($value);
+				if (!defined($key)) {
+					if ($key == 'METHOD') {
+						$choices = array('cron', 'ssh', 'http');
+						if (in_array($value, $choices)) {
+							$value = $value[0];
+						} else {
+							echo fM("Invalid value for {$key}.\n");
+							exit(1);
+						}
+					}
+					if ($debug) echo fM("$key = $value\n");
+					define($key, $value);
+				} else {
+					if ($debug) echo fM("$key is already defined in config.inc.php.\n");
+				}
+			}
+			break;
+		}
+	}
+
 	unset($data['SERIALNO']);
 
 	echo fM("Welcome to the $module_name installer.\n\n");
@@ -361,7 +382,7 @@ function installFM($proto, $compress) {
 	$data['server_os_distro'] = detectOSDistro();
 	echo fM('Please enter the serial number for ' . $data['server_name'] . ' (or leave blank to create new): ');
 	if (defined('SERIALNO')) {
-		$serialno = $data['server_serial_no'] = SERIALNO;
+		$serialno = $data['server_serial_no'] = intval(SERIALNO);
 		echo SERIALNO . "\n";
 	} else {
 		$serialno = intval(trim(fgets(STDIN)));
@@ -370,7 +391,7 @@ function installFM($proto, $compress) {
 	$url = "{$proto}://{$hostname}/{$path}admin-servers.php?genserial";
 	
 	/** Process new server */
-	if (empty($serialno)) {
+	if (empty($serialno) || $serialno < 1) {
 		/** Generate new serial number */
 		echo fM('  --> Generating new serial number: ');
 		$serialno = $data['server_serial_no'] = generateSerialNo($url, $data);
@@ -378,16 +399,22 @@ function installFM($proto, $compress) {
 	}
 
 	/** Add new server */
-	echo fM('  --> Adding ' . $data['server_name'] . ' to the database...');
-	$add_server_result = addServer($url, $data);
-	extract($add_server_result, EXTR_OVERWRITE);
-	echo fM($add_result);
+	$data = addServer($url, $data);
 
 	$data['SERIALNO'] = $serialno;
 	$data['config'][] = array('SERIALNO', 'Server unique serial number', $serialno);
 
-	$data = installFMModule($module_name, $proto, $compress, $data, $server_location, $url);
+	/** Get module-specific data */
+	if (function_exists('installFMModule')) {
+		$data = installFMModule($module_name, $proto, $compress, $data, $server_location, $url);
+	}
 
+	/** Handle the update method */
+	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
+
+	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
+	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+	
 	/** Save the file */
 	saveFMConfigFile($data);
 	
@@ -849,8 +876,13 @@ function processUpdateMethod($module_name, $update_method, $data, $url) {
 	/** Update via cron or http/s? */
 	$update_choices = array('c', 's', 'h');
 	while (!isset($update_method) || !in_array($update_method, $update_choices)) {
-		echo fM('Will ' . $data['server_name'] . ' get updates via cron, ssh, or http(s) [c|s|h]? ');
-		$update_method = trim(strtolower(fgets(STDIN)));
+		echo fM("\nWill {$data['server_name']} get updates via cron, ssh, or http(s) [c|s|h]? ");
+		if (defined('METHOD')) {
+			$update_method = METHOD;
+			echo METHOD . "\n";
+		} else {
+			$update_method = trim(strtolower(fgets(STDIN)));
+		}
 		
 		/** Must be a valid option */
 		if (!in_array($update_method, $update_choices)) unset($update_method);
@@ -1380,9 +1412,11 @@ function findFile($file, $addl_path = null) {
  * @param array $data Data to post
  * @return array
  */
-function addServer($url, $data) {
-	$app = array(null, null);
+function addServer($url, $data, $repeat = false) {
+	$app = array();
 	
+	echo fM('  --> Adding ' . $data['server_name'] . ' to the database...');
+
 	/** Get module-specific data */
 	if (function_exists('moduleAddServer')) {
 		$module_data = moduleAddServer();
@@ -1397,24 +1431,33 @@ function addServer($url, $data) {
 	}
 	if ($app === null) {
 		echo "failed\n\n";
-		echo fM("Cannot find a supported application to manage - please check the README document for supported applications.  Aborting.\n");
-		exit(1);
+		echo fM("Cannot find a supported application to manage - please check the README document for supported applications.\n");
+		if (function_exists('moduleInstallApp')) {
+			$data = moduleInstallApp($url, $data);
+		} else {
+			echo fM("Aborting.\n");
+			exit(1);
+		}
 	}
-	if (!isset($data['server_type'])) {
+	if (!isset($data['server_type']) && is_array($app) && count($app) > 1) {
 		$data['server_type'] = $app['server']['type'];
 		$data['server_version'] = $app['app_version'];
 	}
 
-	/** Add the server to the account */
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
-	if (!is_array($raw_data)) {
-		if (!$raw_data) echo "An error occurred\n";
-		else echo $raw_data;
-		exit(1);
+	if (!$repeat) {
+		/** Add the server to the account */
+		$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
+		$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
+		if (!is_array($raw_data)) {
+			if (!$raw_data) echo "An error occurred\n";
+			else echo $raw_data;
+			exit(1);
+		}
+		
+		echo fM("Success\n");
 	}
-	
-	return array('data' => $data, 'add_result' => "Success\n");
+
+	return $data;
 }
 
 
@@ -1545,6 +1588,8 @@ function getInterfaceAddresses($interface = null) {
  * @return boolean
  */
 function installPackage($packages) {
+	$errors = false;
+
 	if (!is_array($packages)) {
 		$packages = array($packages);
 	}
@@ -1564,16 +1609,19 @@ function installPackage($packages) {
 	/** Install the packages */
 	foreach ($packages as $app) {
 		echo fM(sprintf('Installing the %s package...', $app));
-		exec($package_manager . ' -y install ' . $app, $output, $rc);
+		exec($package_manager . ' -y install ' . $app . ' 2>&1', $output, $rc);
 
 		if ($rc) {
 			echo fM("failed. Please install it manually.\n");
-			exit(1);
-		}
-
-		echo "done\n";
+			$errors = true;
+		} else echo "done\n";
 	}
 	
+	if ($errors == true) {
+		echo fM("Not all packages could be installed. Aborting.\n");
+		exit(1);
+	}
+
 	return true;
 }
 
@@ -1827,4 +1875,40 @@ function getLineWithString($filename, $needle) {
 		}
 	}
 	return null;
+}
+
+
+/**
+ * Attempts to install required packages
+ *
+ * @since 4.7.0
+ * @package facileManager
+ *
+ * @param array $packages Array of packages to install
+ * @param array $services Array of services to enable
+ * @return void
+ */
+function installApp($packages, $services = array()) {
+	if (!is_array($packages)) {
+		$packages = array($packages);
+	}
+	if (!is_array($services)) {
+		$services = array($services);
+	}
+
+	echo fM(sprintf('Would you like an installation attempt be made for %s? [Y/n] ', $packages[0]));
+	$auto_install = strtolower(trim(fgets(STDIN)));
+	if (!$auto_install) {
+		$auto_install = 'y';
+	}
+	
+	if ($auto_install != 'y') {
+		echo "Aborting.\n";
+		exit(1);
+	}
+	
+	installPackage($packages);
+	foreach ($services as $svc) {
+		shell_exec("update-rc.d $svc enable > /dev/null 2>&1");
+	}
 }

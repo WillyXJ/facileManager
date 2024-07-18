@@ -67,35 +67,18 @@ function installFMModule($module_name, $proto, $compress, $data, $server_locatio
 	/**
 	 * Add any module-specific installation checks here
 	 */
-	
-	extract($server_location);
+
+	 extract($server_location);
 
 	echo fM('  --> Running version tests...');
-	$app = detectDaemonVersion(true);
-	if ($app === null) {
-		echo "failed\n\n";
-		echo fM("Cannot find a supported DHCP server - please check the README document for supported DHCP servers.  Aborting.\n");
-		exit(1);
-	}
-	extract($app);
-	$data['server_type'] = $server['type'];
-	$output = versionCheck($app_version, $proto . '://' . $hostname . '/' . $path, $compress);
+	$output = versionCheck($data['server_version'], $proto . '://' . $hostname . '/' . $path, $compress);
 	if ($output === true) {
 		echo "ok\n";
 	} else {
 		echo "failed\n\n";
-		echo "$app_version is not supported.\n";
+		echo "{$data['server_type']} {$data['server_version']} is not supported.\n";
 		exit(1);
 	}
-	$data['server_version'] = $app_version;
-	
-	echo fM("\n  --> Tests complete.  Continuing installation.\n\n");
-	
-	/** Handle the update method */
-	$data['server_update_method'] = processUpdateMethod($module_name, $update_method, $data, $url);
-
-	$raw_data = getPostData(str_replace('genserial', 'addserial', $url), $data);
-	$raw_data = $data['compress'] ? @unserialize(gzuncompress($raw_data)) : @unserialize($raw_data);
 	
 	return $data;
 }
@@ -246,7 +229,7 @@ function detectServerType() {
  *
  * @return array|string|null
  */
-function detectDaemonVersion($return_array = false) {
+function detectAppVersion($return_array = false) {
 	$server = detectServerType();
 	$flags = array('dhcpd'=>'--version 2>&1 | sed "s/isc-dhcpd-//"');
 	
@@ -421,4 +404,24 @@ function deleteLease($leasefile, $remove_lease) {
 	}
 
 	exit;
+}
+
+/**
+ * Attempts to install required packages
+ *
+ * @since 0.9.0
+ * @package facileManager
+ * @subpackage fmDHCP
+ *
+ * @param string $url URL to post data to
+ * @param array $data Array of existing installation data
+ * @return array
+ */
+function moduleInstallApp($url, $data) {
+	$packages[] = (isDebianSystem($data['server_os_distro'])) ? 'isc-dhcp-server' : 'dhcp';
+	$services[] = (isDebianSystem($data['server_os_distro'])) ? 'isc-dhcp-server' : '';
+	
+	installApp($packages, $services);
+
+	return addServer($url, $data, true);
 }
