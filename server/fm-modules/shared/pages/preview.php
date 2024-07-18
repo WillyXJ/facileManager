@@ -27,7 +27,11 @@ require('fm-init.php');
 
 require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 include(ABSPATH . 'fm-modules/facileManager/classes/class_accounts.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
+if (is_file(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php')) {
+	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
+} else {
+	exit(_('This module does not utilize configuration previews.'));
+}
 
 /** Enforce authentication */
 if (!$fm_login->isLoggedIn()) {

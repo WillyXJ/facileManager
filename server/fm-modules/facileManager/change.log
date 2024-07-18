@@ -8,6 +8,7 @@
 * Server - [bug] Fixed admin logs item count.
 * Server - [bug] Fixed PHP8 errors.
 * Server - [bug] Unserialized configuration preview error messages.
+* Server - [bug] Fixed configuration previews for modules that do not utilize configurations.
 * Client - [improvement] Added client install -o|options parameter. (Issue #605)
 * Client - [improvement] Changed error messages for better clarity.
 * Client - [improvement] Provide better installation connection tests.
