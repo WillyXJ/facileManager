@@ -350,10 +350,10 @@ HTML;
 		if ($field_length !== false && strlen($post['config_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Host name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', $post['wlan_user_login'], 'wlan_user_', 'wlan_user_login');
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', $post['wlan_user_login'], 'wlan_user_', 'wlan_user_login', "AND wlan_user_id!='{$post['user_id']}'");
 		if ($fmdb->num_rows) return __('This user already exists.');
 		
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', $post['wlan_user_mac'], 'wlan_user_', 'wlan_user_mac');
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', $post['wlan_user_mac'], 'wlan_user_', 'wlan_user_mac', "AND wlan_user_id!='{$post['user_id']}'");
 		if ($fmdb->num_rows) return __('This hardware address already exists.');
 		
 		/** Valid MAC address? */
