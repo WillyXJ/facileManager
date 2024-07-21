@@ -206,6 +206,8 @@ HTML;
 			if (isset($range_array['dynamic_bootp'])) {
 				$clean_range .= $range_array['dynamic_bootp'] . ' ';
 			}
+			if (!verifyIPAddress($range_array['start'])) return sprintf(__('%s is not valid.'), $range_array['start']);
+			if (!verifyIPAddress($range_array['end'])) return sprintf(__('%s is not valid.'), $range_array['end']);
 			$clean_range .= $range_array['start'] . ' ' . $range_array['end'] . ";\n";
 		}
 		$post['range'] = rtrim(trim($clean_range), ';');

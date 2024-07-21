@@ -135,7 +135,7 @@ HTML;
 		$secondary = buildSelect('peer-address', 'peer-address', $avail_servers, $this->getConfig($config_id, 'peer-address'), 1, null, true);
 		$secondary_port = $this->getConfig($config_id, 'peer-port');
 		$load_balancing_entry = explode(' ', $this->getConfig($config_id, 'load-balancing'));
-		$load_balancing_hash = isset($load_balancing_entry[1]) ? $load_balancing_entry[1] : null;
+		$load_balancing_hash = isset($load_balancing_entry[1]) ? join(' ', array_slice($load_balancing_entry, 1)) : null;
 		$load_balancing = buildSelect('load-balancing', 'load-balancing', array('hba', 'split'), $load_balancing_entry[0]);
 		$max_response_delay = $this->getConfig($config_id, 'max-response-delay');
 		$max_unacked_updates = $this->getConfig($config_id, 'max-unacked-updates');
@@ -255,6 +255,8 @@ HTML;
 		if (!is_array($post)) return $post;
 
 		if (empty($post['load-balancing-hash'])) return __('No load balancing hash is defined.');
+		if ($post['load-balancing'] == 'split' && !verifyNumber($post['load-balancing-hash'], 0, 255, false)) return sprintf(__('%s is not valid.'), $post['load-balancing-hash']);
+		// if ($post['load-balancing'] == 'hba' && !verify ($post['load-balancing-hash'], 0, 255, false)) return sprintf(__('%s is not valid.'), $post['load-balancing-hash']);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_type='" . rtrim($post['config_type'], 's') . "' AND config_name='" . rtrim($post['config_type'], 's') . "' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");

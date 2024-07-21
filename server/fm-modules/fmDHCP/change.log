@@ -1,6 +1,7 @@
 0.9.0 (2024-??-??)
 ==================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
+* Server - [improvement] Added form validation to input fields.
 * Server - [bug] Configuration can no longer be built when the server does not have a
            configuration file defined.
 * Client - [improvement] Added client install -o|options parameter. (Issue #605)

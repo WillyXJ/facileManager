@@ -266,6 +266,9 @@ HTML;
 			if (empty($post['config_name'])) return __('No network is defined.');
 			if (empty($post['netmask'])) return __('No network mask is defined.');
 			
+			if (!verifyIPAddress($post['config_name'])) return sprintf(__('%s is not valid.'), $post['config_name']);
+			if (!verifyIPAddress($post['netmask'])) return sprintf(__('%s is not valid.'), $post['netmask']);
+
 			$post['config_name'] = $post['config_name'] . ' netmask ' . $post['netmask'];
 			unset($post['netmask']);
 			
@@ -276,6 +279,8 @@ HTML;
 				if (isset($range_array['dynamic_bootp'])) {
 					$clean_range .= $range_array['dynamic_bootp'] . ' ';
 				}
+				if (!verifyIPAddress($range_array['start'])) return sprintf(__('%s is not valid.'), $range_array['start']);
+				if (!verifyIPAddress($range_array['end'])) return sprintf(__('%s is not valid.'), $range_array['end']);
 				$clean_range .= $range_array['start'] . ' ' . $range_array['end'] . ";\n";
 			}
 			$post['range'] = rtrim(trim($clean_range), ';');

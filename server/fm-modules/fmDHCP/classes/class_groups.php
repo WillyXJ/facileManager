@@ -162,6 +162,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$post = $this->validateObjectPost($post);
+		if (empty($post['config_name'])) return __('No name defined.');
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_type='" . rtrim($post['config_type'], 's') . "' AND config_name='" . rtrim($post['config_type'], 's') . "' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
