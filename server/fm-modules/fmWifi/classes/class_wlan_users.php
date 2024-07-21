@@ -104,9 +104,7 @@ class fm_wifi_wlan_users {
 			return formatError(_('Could not add the user because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = "Added WLAN User:\nName: {$post['wlan_user_login']}\nHardware Address: {$post['wlan_user_mac']}";
-		$log_message .= "\nComment: {$post['wlan_user_comment']}";
-		addLogEntry($log_message);
+		addLogEntry(__('Added a WLAN User with the following details') . ":\n" . __('Name') . ": {$post['wlan_user_login']}\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
 		
 //		setBuildUpdateConfigFlag(getWLANServers($insert_id), 'yes', 'build');
 		
@@ -130,19 +128,19 @@ class fm_wifi_wlan_users {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'user_id', 'type');
+		$exclude = array('submit', 'action', 'user_id', 'type', 'log_message_member_wlans');
 
 		$sql_edit = '';
 		
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
-		/** Update the server */
+		/** Update the item */
 		$old_name = getNameFromID($post['user_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_', 'wlan_user_id', 'wlan_user_login');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}wlan_users` SET $sql WHERE `wlan_user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$result = $fmdb->query($query);
@@ -158,9 +156,7 @@ class fm_wifi_wlan_users {
 //		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
 		/** Add entry to audit log */
-		$log_message = "Updated WLAN user '$old_name' to:\nName: {$post['wlan_user_login']}\nHardware Address: {$post['wlan_user_mac']}";
-		$log_message .= "\nComment: {$post['wlan_user_comment']}";
-		addLogEntry($log_message);
+		addLogEntry(sprintf(__('Updated WLAN user \'%s\' with the following details'), $old_name) . ":\n" . __('Name') . ": {$post['wlan_user_login']}\n" . __('Hardware Address') . ": {$post['wlan_user_mac']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['wlan_user_comment']}");
 		return true;
 	}
 	
@@ -330,12 +326,14 @@ HTML;
 	 * @return array|string
 	 */
 	function validatePost($post) {
-		global $__FM_CONFIG, $fmdb;
+		global $__FM_CONFIG, $fmdb, $fm_wifi_wlans;
 
-		$post['wlan_user_login'] = sanitize($post['user_login']);
-		$post['wlan_user_password'] = sanitize($post['user_password']);
-		$post['wlan_user_mac'] = sanitize($post['wlan_user_mac']);
-		$post['wlan_user_comment'] = sanitize($post['wlan_user_comment']);
+		$post['wlan_user_login'] = $post['user_login'];
+		$post['wlan_user_password'] = $post['user_password'];
+		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		$post['wlan_ids'] = (in_array('0', $post['wlan_ids'])) ? 0 : join(';', $post['wlan_ids']);
 
 		if ($post['action'] == 'add' && empty($post['wlan_user_login'])) return __('No username is defined.');
@@ -361,6 +359,14 @@ HTML;
 			return __('The hardware address is invalid.');
 		}
 		
+		if (!isset($fm_wifi_wlans)) {
+			if (!class_exists('fm_wifi_wlans')) {
+				include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_wlans.php');
+			}
+		}
+		/** Process WLAN selection */
+		$post['log_message_member_wlans'] = $fm_wifi_wlans->getWLANLoggingNames(explode(';', $post['wlan_ids']));
+
 		return $post;
 	}
 	

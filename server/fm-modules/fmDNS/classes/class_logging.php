@@ -77,7 +77,6 @@ class fm_module_logging {
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_data'] = $channel_name = $post['cfg_name'];
 		$post['cfg_name'] = $post['sub_type'];
-		$post['cfg_comment'] = trim($post['cfg_comment']);
 		
 		if (empty($channel_name)) return __('No channel name defined.');
 		
@@ -135,7 +134,7 @@ class fm_module_logging {
 			}
 			if ($handler == 'cfg_destination') {
 				$post['cfg_name'] = $post['cfg_destination'];
-			} elseif (in_array($handler, array('print-category', 'print-severity', 'print-time')) && !sanitize($post['cfg_data'])) {
+			} elseif (in_array($handler, array('print-category', 'print-severity', 'print-time')) && !$post['cfg_data']) {
 				continue;
 			} else {
 				$post['cfg_name'] = $handler;
@@ -144,10 +143,9 @@ class fm_module_logging {
 			
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
-					$clean_data = sanitize($data);
 					if ($i) $sql_fields .= $key . ', ';
 					
-					$sql_values .= "'$clean_data', ";
+					$sql_values .= "'$data', ";
 				}
 			}
 			$i = 0;

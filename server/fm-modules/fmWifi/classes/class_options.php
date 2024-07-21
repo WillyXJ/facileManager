@@ -85,10 +85,10 @@ class fm_module_options {
 		if (empty($post['config_name'])) return false;
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', sanitize($post['config_name']), 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' AND server_serial_no='{$post['server_serial_no']}'");
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
 			$num_same_config = $fmdb->num_rows;
-			$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option='" . sanitize($post['config_name']) . "' AND def_option_type='{$post['config_type']}'";
+			$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option='{$post['config_name']}' AND def_option_type='{$post['config_type']}'";
 			$fmdb->get_results($query);
 			if ($fmdb->last_result[0]->def_max_parameters >= 0 && $num_same_config >= $fmdb->last_result[0]->def_max_parameters) {
 				return __('This record already exists.');
@@ -105,11 +105,10 @@ class fm_module_options {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'config_comment') return __('Empty values are not allowed.');
-//				if ($key == 'config_name' && !isDNSNameAcceptable($clean_data)) return sprintf(__('%s is not an acceptable option name.'), $clean_data);
+				if (!strlen($data) && $key != 'config_comment') return __('Empty values are not allowed.');
+//				if ($key == 'config_name' && !isDNSNameAcceptable($data)) return sprintf(__('%s is not an acceptable option name.'), $data);
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -148,12 +147,12 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', sanitize($post['config_name']), 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' AND server_serial_no='{$post['server_serial_no']}'");
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->config_id != $post['config_id']) {
 				$num_same_config = $fmdb->num_rows;
-				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option='" . sanitize($post['config_name']) . "' AND def_option_type='{$post['config_type']}'";
+				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option='{$post['config_name']}' AND def_option_type='{$post['config_type']}'";
 				$fmdb->get_results($query);
 				if ($fmdb->last_result[0]->def_max_parameters >= 0 && $num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
 					return __('This record already exists.');
@@ -167,10 +166,9 @@ class fm_module_options {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'config_comment') return false;
-//				if ($key == 'config_name' && !isDNSNameAcceptable($clean_data)) return false;
-				$sql_edit .= $key . "='" . $clean_data . "', ";
+				if (!strlen($data) && $key != 'config_comment') return false;
+//				if ($key == 'config_name' && !isDNSNameAcceptable($data)) return false;
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -451,8 +449,9 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$post['config_comment'] = trim($post['config_comment']);
-		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (is_array($post['config_data'])) $post['config_data'] = join(' ', $post['config_data']);
 		
 		if (isset($post['config_name'])) {

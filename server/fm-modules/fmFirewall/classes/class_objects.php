@@ -91,11 +91,10 @@ class fm_module_objects {
 		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'object_name') && empty($clean_data)) return __('No object name defined.');
+			if (($key == 'object_name') && empty($data)) return __('No object name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -132,7 +131,7 @@ class fm_module_objects {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -302,6 +301,9 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['object_name'])) return __('No object name defined.');
 		if (empty($post['object_address'])) return __('No object address defined.');
 		if ($post['object_type'] == 'network') {

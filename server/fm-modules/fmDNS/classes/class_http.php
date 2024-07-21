@@ -105,7 +105,7 @@ class fm_module_http {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
+				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
 				if ($key == 'cfg_data' && empty($clean_data)) return __('No HTTP endpoint name defined.');
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
@@ -144,9 +144,8 @@ class fm_module_http {
 			
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $include)) continue;
-				$clean_data = sanitize($data);
 				if ($i) $sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
@@ -206,7 +205,7 @@ class fm_module_http {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
+				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
 				if ($key == 'cfg_data' && empty($clean_data)) return __('No HTTP endpoint name defined.');
 				$sql_values .= "$key='$clean_data', ";
 				if ($key == 'cfg_comment') {
@@ -233,8 +232,7 @@ class fm_module_http {
 			$child['cfg_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
-				$sql_values .= "$key='$clean_data', ";
+				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
 			
@@ -482,13 +480,13 @@ HTML;
 	function validatePost($post, $include_sub_configs) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_name'] = 'http-endpoint';
-		$post['cfg_data'] = trim($post['cfg_data']);
-		$post['cfg_comment'] = trim($post['cfg_comment']);
 		$post['cfg_type'] = 'http';
-		$post['cfg_id'] = sanitize($post['cfg_id']);
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		

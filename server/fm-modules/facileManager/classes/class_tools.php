@@ -134,8 +134,6 @@ class fm_tools {
 				
 				$current_active_modules[] = $module_name;
 				return setOption('fm_active_modules', $current_active_modules, 'auto', true, $_SESSION['user']['account_id']);
-
-				break;
 			case 'deactivate':
 				/** Ensure $module_name is not already deactivated */
 				if (!in_array($module_name, getActiveModules())) return;
@@ -147,8 +145,6 @@ class fm_tools {
 				}
 
 				return setOption('fm_active_modules', $new_array, 'update', true, $_SESSION['user']['account_id']);
-
-				break;
 			case 'uninstall':
 				if (!in_array($module_name, getAvailableModules())) return;
 				
@@ -158,8 +154,6 @@ class fm_tools {
 				if ($output != 'Success') return false;
 				
 				return true;
-
-				break;
 			case 'update':
 				if (!in_array($module_name, getAvailableModules())) return;
 				
@@ -177,8 +171,6 @@ class fm_tools {
 				if (strpos($message, "\n")) $response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
 				
 				return $response;
-
-				break;
 		}
 		
 		return false;

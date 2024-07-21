@@ -135,7 +135,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
 					$sql_fields .= $key . ', ';
-					$sql_values .= "'" . sanitize($data) . "', ";
+					$sql_values .= "'" . $data . "', ";
 				}
 			}
 			$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -168,11 +168,10 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'server_name') && empty($clean_data)) return __('No server name defined.');
+			if (($key == 'server_name') && empty($data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -230,7 +229,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -605,10 +604,12 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		/** Server groups */
 		if (array_key_exists('group_name', $post)) {
 			/** Empty domain names are not allowed */
-			$post['group_name'] = sanitize($post['group_name']);
 			if (empty($post['group_name'])) return __('No group name defined.');
 			
 			/** Check if the group name already exists */
@@ -618,10 +619,6 @@ HTML;
 			/** Check name field length */
 			$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name');
 			if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', $field_length), $field_length);
-			
-			if ($post['group_comment']) {
-				$post['group_comment'] = sanitize($post['group_comment']);
-			}
 			
 			/** Process group masters */
 			$log_message_member_servers = '';

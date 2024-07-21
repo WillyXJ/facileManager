@@ -4153,3 +4153,26 @@ function throwAPIError($code) {
 		}
 	return array($code, $message);
 }
+
+
+/**
+ * Trims and sanitizes post input
+ *
+ * @since 4.7.0
+ * @package facileManager
+ *
+ * @param array $post Data to clean
+ * @return array
+ */
+function cleanAndTrimInputs($post) {
+	/** Trim and sanitize inputs */
+	foreach($post as $k => $v) {
+		if (is_array($post[$k])) {
+			$post[$k] = cleanAndTrimInputs($post[$k]);
+		} else {
+			$post[$k] = sanitize(trim($v));
+		}
+	}
+	
+	return $post;	
+}

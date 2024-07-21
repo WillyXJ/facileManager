@@ -142,7 +142,7 @@ class fm_dns_zones {
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
 					$sql_fields .= $key . ', ';
-					$sql_values .= "'" . sanitize($data) . "', ";
+					$sql_values .= "'" . $data . "', ";
 				}
 			}
 			$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -222,24 +222,24 @@ class fm_dns_zones {
 			foreach ($parent_domain[0] as $field => $value) {
 				if (in_array($field, array('domain_id', 'domain_template_id'))) continue;
 				if ($field == 'domain_clone_domain_id') {
-					$sql_values .= sanitize($post['domain_clone_domain_id']) . ', ';
+					$sql_values .= $post['domain_clone_domain_id'] . ', ';
 				} elseif ($field == 'domain_name') {
-					$log_message .= 'Name: ' . displayFriendlyDomainName(sanitize($post['domain_name'])) . "\n";
+					$log_message .= 'Name: ' . displayFriendlyDomainName($post['domain_name']) . "\n";
 					$log_message .= "Clone of: $value\n";
-					$sql_values .= "'" . sanitize($post['domain_name']) . "', ";
+					$sql_values .= "'" . $post['domain_name'] . "', ";
 				} elseif ($field == 'domain_view') {
 					$log_message .= "Views: $log_message_views\n";
-					$sql_values .= "'" . sanitize($post['domain_view']) . "', ";
-				} elseif ($field == 'domain_name_servers' && sanitize($post['domain_name_servers'])) {
+					$sql_values .= "'" . $post['domain_view'] . "', ";
+				} elseif ($field == 'domain_name_servers' && $post['domain_name_servers']) {
 					$log_message .= "Servers: $log_message_name_servers\n";
-					$sql_values .= "'" . sanitize($post['domain_name_servers']) . "', ";
+					$sql_values .= "'" . $post['domain_name_servers'] . "', ";
 				} elseif ($field == 'domain_reload') {
 					$sql_values .= "'no', ";
 				} elseif ($field == 'domain_clone_dname') {
 					$log_message .= "Use DNAME RRs: {$post['domain_clone_dname']}\n";
-					$sql_values .= $post['domain_clone_dname'] ? "'" . sanitize($post['domain_clone_dname']) . "', " : 'NULL, ';
+					$sql_values .= $post['domain_clone_dname'] ? "'" . $post['domain_clone_dname'] . "', " : 'NULL, ';
 				} else {
-					$sql_values .= strlen(sanitize($value)) ? "'" . sanitize($value) . "', " : 'NULL, ';
+					$sql_values .= strlen($value) ? "'" . $value . "', " : 'NULL, ';
 				}
 				$sql_fields .= $field . ', ';
 			}
@@ -252,7 +252,7 @@ class fm_dns_zones {
 				if (!in_array($key, $exclude)) {
 					$sql_fields .= $key . ',';
 					if (is_array($data)) $data = implode(';', $data);
-					$sql_values .= strlen(sanitize($data)) ? "'" . sanitize($data) . "'," : 'NULL,';
+					$sql_values .= strlen($data) ? "'" . $data . "'," : 'NULL,';
 					if ($key == 'domain_view') $data = rtrim($log_message_views, '; ');
 					if ($key == 'domain_name_servers') $data = rtrim($log_message_name_servers, '; ');
 					if ($key == 'soa_id') {
@@ -284,13 +284,13 @@ class fm_dns_zones {
 		/** Add mandatory config options */
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
-		$required_servers = sanitize($post['domain_required_servers']);
+		$required_servers = $post['domain_required_servers'];
 		if (!$post['domain_template_id']) {
 			if ($post['domain_type'] == 'forward') {
 				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
 
-				$domain_forward = sanitize($post['domain_forward'][0]);
+				$domain_forward = $post['domain_forward'][0];
 				$result = $fmdb->query($query . "'forward', '" . $domain_forward . "')");
 				$log_message .= formatLogKeyData('domain_', 'forward', $domain_forward);
 			} elseif (in_array($post['domain_type'], array('secondary', 'stub'))) {
@@ -397,7 +397,7 @@ class fm_dns_zones {
 			return true;
 		}
 
-		$domain_id = sanitize($_POST['domain_id']);
+		$domain_id = $_POST['domain_id'];
 
 		$dbupdate_error_msg = __('Could not update the zone because a database error occurred.');
 		
@@ -446,8 +446,6 @@ class fm_dns_zones {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$data = sanitize($data);
-				
 				$sql_edit .= strlen($data) ? $key . "='$data', " : $key . '=NULL, ';
 				if ($key == 'domain_view') $data = trim($log_message_views, '; ');
 				if ($key == 'domain_name_servers') $data = trim($log_message_name_servers, '; ');
@@ -1744,14 +1742,16 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		/** Zone groups */
 		if (array_key_exists('group_name', $post)) {
 			/** Empty domain names are not allowed */
-			$post['group_name'] = sanitize($post['group_name']);
 			if (empty($post['group_name'])) return __('No group name defined.');
 			
 			/** Check if the group name already exists */
-			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups', sanitize($post['group_name']), 'group_', 'group_name', "AND group_id!={$post['group_id']}");
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups', $post['group_name'], 'group_', 'group_name', "AND group_id!={$post['group_id']}");
 			if ($fmdb->num_rows) return __('Zone group already exists.');
 			
 			/** Check name field length */
@@ -1761,9 +1761,6 @@ HTML;
 			/** Ensure group_domain_ids is set */
 			if (!array_key_exists('group_domain_ids', $post)) {
 				return __('You must select one or more zones.');
-			}
-			if ($post['group_comment']) {
-				$post['group_comment'] = sanitize($post['group_comment']);
 			}
 			
 			return $post;
@@ -1857,17 +1854,17 @@ HTML;
 		}
 		
 		/** Does the record already exist for this account? */
-		$domain_id_sql = (isset($post['domain_id'])) ? 'AND domain_id!=' . sanitize($post['domain_id']) : null;
+		$domain_id_sql = (isset($post['domain_id'])) ? 'AND domain_id!=' . $post['domain_id'] : null;
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $_SESSION['user']['account_id'], 'view_', 'account_id');
 		if (!$fmdb->num_rows) { /** No views defined - all zones must be unique */
-			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $post['domain_name'], 'domain_', 'domain_name', $domain_id_sql);
 			if ($fmdb->num_rows) return __('Zone already exists.');
 		} else { /** All zones must be unique per view */
 			$defined_views = $fmdb->last_result;
 			
 			/** Format domain_view */
 			if (!$post['domain_view'] || in_array(0, (array) $post['domain_view'])) {
-				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', $domain_id_sql);
+				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $post['domain_name'], 'domain_', 'domain_name', $domain_id_sql);
 				if ($fmdb->num_rows) {
 					/** Zone exists for views, but what about on the same server? */
 					if (!$post['domain_name_servers'] || in_array('0', $post['domain_name_servers'])) {
@@ -1879,7 +1876,7 @@ HTML;
 				$domain_view = '';
 				$domain_servers_sql = '';
 				if ($post['domain_name_servers']) {
-					foreach (sanitize($post['domain_name_servers']) as $val) {
+					foreach ($post['domain_name_servers'] as $val) {
 						$domain_servers_sql .= "domain_name_servers='$val' OR domain_name_servers LIKE '$val;%' OR domain_name_servers LIKE '%;$val;%' OR domain_name_servers LIKE '%;$val' OR ";
 					}
 				}
@@ -1892,7 +1889,7 @@ HTML;
 						break;
 					}
 					$domain_view .= $val . ';';
-					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', sanitize($post['domain_name']), 'domain_', 'domain_name', "AND (domain_view='$val' OR domain_view='0' OR domain_view LIKE '$val;%' OR domain_view LIKE '%;$val;%' OR domain_view LIKE '%;$val') $domain_servers_sql $domain_id_sql");
+					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $post['domain_name'], 'domain_', 'domain_name', "AND (domain_view='$val' OR domain_view='0' OR domain_view LIKE '$val;%' OR domain_view LIKE '%;$val;%' OR domain_view LIKE '%;$val') $domain_servers_sql $domain_id_sql");
 					if ($fmdb->num_rows) {
 						$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name');
 						return sprintf(__("Zone already exists for the '%s' view."), $view_name);
@@ -1915,9 +1912,9 @@ HTML;
 			}
 			$post = $new_post;
 			unset($new_post, $post['domain_template']);
-			$post['domain_type'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
-			if (!is_array($post['domain_view']) && (!isset($post['domain_view']) || $post['domain_view'] < 0)) $post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
-			$post['domain_name_servers'] = explode(';', getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
+			$post['domain_type'] = getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+			if (!is_array($post['domain_view']) && (!isset($post['domain_view']) || $post['domain_view'] < 0)) $post['domain_view'] = getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+			$post['domain_name_servers'] = explode(';', getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers'));
 
 			return $post;
 		} else {
@@ -1926,7 +1923,6 @@ HTML;
 
 		/** Redirect zone to URL? */
 		if ($post['domain_type'] == 'url-redirect') {
-			$post['domain_redirect_url'] = sanitize($post['domain_redirect_url']);
 			if (!$post['domain_redirect_url']) {
 				return sprintf(__('You must specify a URL to redirect %s to.'), $post['domain_name']);
 			}

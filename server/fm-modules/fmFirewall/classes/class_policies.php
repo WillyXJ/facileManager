@@ -148,21 +148,20 @@ HTML;
 		$log_message = "Added a firewall policy for " . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name', $post['account_id']) . " with the following details:\n";
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
-				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no'))) {
+				$sql_values .= "'$data', ";
+				if ($data && !in_array($key, array('account_id', 'server_serial_no'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
-						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data, 'names-only'));
+						$data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($data, 'names-only'));
 					} elseif ($key == 'policy_time') {
-						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
+						$data = getNameFromID($data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 					} elseif ($key == 'policy_targets') {
-						$clean_data = str_replace("<br />\n", ', ', $this->formatServerIDs($clean_data));
+						$data = str_replace("<br />\n", ', ', $this->formatServerIDs($data));
 					} elseif ($key == 'policy_template_id') {
-						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
+						$data = getNameFromID($data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
 					}
-					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
+					$log_message .= formatLogKeyData('policy_', $key, $data);
 				}
 			}
 		}
@@ -235,18 +234,17 @@ HTML;
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				$sql_edit .= $key . "='" . $clean_data . "', ";
-				if ($clean_data && !in_array($key, array('account_id', 'server_serial_no', 'policy_source_not', 'policy_destination_not', 'policy_services_not'))) {
+				$sql_edit .= $key . "='" . $data . "', ";
+				if ($data && !in_array($key, array('account_id', 'server_serial_no', 'policy_source_not', 'policy_destination_not', 'policy_services_not'))) {
 					if (in_array($key, array('policy_source', 'policy_destination', 'policy_services'))) {
 						$not = (isset($post[$key . '_not']) && $post[$key . '_not']) ? $__FM_CONFIG['module']['icons']['negated'] . ' ' : '';
-						$clean_data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($clean_data, 'names-only', $not));
+						$data = str_replace("<br />\n", ', ', $this->formatPolicyIDs($data, 'names-only', $not));
 					} elseif ($key == 'policy_targets') {
-						$clean_data = str_replace("<br />\n", ', ', $this->formatServerIDs($clean_data));
+						$data = str_replace("<br />\n", ', ', $this->formatServerIDs($data));
 					} elseif ($key == 'policy_template_id') {
-						$clean_data = getNameFromID($clean_data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
+						$data = getNameFromID($data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_name');
 					}
-					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
+					$log_message .= formatLogKeyData('policy_', $key, $data);
 				}
 			}
 		}
@@ -365,12 +363,10 @@ HTML;
 		}
 
 		if ($class) $class = 'class="' . join(' ', $class) . '"';
-		if ($options) {
-			if (count($options) > 4) {
-				$options[2] .= '<br />';
-			}
-			$options = join(' ', $options);
+		if (count($options) > 4) {
+			$options[2] .= '<br />';
 		}
+		$options = join(' ', $options);
 
 		switch ($type) {
 			case 'filter':
@@ -896,8 +892,10 @@ FORM;
 
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
-		// echo '<pre>';print_r($post);
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		/** Process options */
 		if (@is_array($post['policy_options'])) {
 			$decimals = 0;
@@ -964,8 +962,6 @@ FORM;
 		
 		/** Remove tabs */
 		unset($post['tab-group-1']);
-
-		// echo '<pre>';print_r($post);exit;
 		
 		return $post;
 	}

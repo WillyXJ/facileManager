@@ -133,9 +133,10 @@ class fm_login {
 	function processUserPwdResetForm($user_login = null) {
 		global $fmdb;
 		
+		$user_login = sanitize(trim($user_login));
 		if (empty($user_login)) return;
 		
-		$user_info = getUserInfo(sanitize($user_login), 'user_login');
+		$user_info = getUserInfo($user_login, 'user_login');
 		
 		/** If the user is not found, just return lest we give away valid user accounts */
 		if ($user_info == false) {
@@ -500,7 +501,7 @@ This link expires in %s.',
 	 *
 	 * @param string $username Username to authenticate
 	 * @param string $password Username to authenticate with
-	 * @return boolean
+	 * @return boolean|string
 	 */
 	function doLDAPAuth($username, $password) {
 		global $__FM_CONFIG, $fmdb;

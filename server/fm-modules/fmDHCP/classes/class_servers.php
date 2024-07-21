@@ -121,11 +121,10 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'server_name') && empty($clean_data)) return __('No server name defined.');
+			if (($key == 'server_name') && empty($data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
-				$sql_values .= "'$clean_data',";
+				$sql_values .= "'$data',";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ',') . ')';
@@ -169,7 +168,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "',";
+				$sql_edit .= $key . "='" . $data . "',";
 			}
 		}
 		$sql = rtrim($sql_edit, ',');
@@ -407,6 +406,9 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['server_name'])) return __('No server name defined.');
 		
 		/** Check name field length */
@@ -420,7 +422,7 @@ HTML;
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name', "AND server_id!='{$post['server_id']}'");
 		if ($fmdb->num_rows) return __('This server name already exists.');
 		
-		if (empty($post['server_config_file'])) {
+		if (empty($post['server_config_file'])) { 
 			$post['server_config_file'] = $__FM_CONFIG['fw']['config_file']['default'];
 			if (!is_array($__FM_CONFIG['fw']['config_file'][$post['server_type']]) && $__FM_CONFIG['fw']['config_file'][$post['server_type']]) {
 				$post['server_config_file'] = $__FM_CONFIG['fw']['config_file'][$post['server_type']];

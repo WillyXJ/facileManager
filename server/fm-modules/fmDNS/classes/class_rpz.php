@@ -150,10 +150,9 @@ class fm_module_rpz {
 			
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
-					$clean_data = sanitize($data);
 					if ($i) $sql_fields .= $key . ', ';
 					
-					$sql_values .= "'$clean_data', ";
+					$sql_values .= "'$data', ";
 				}
 			}
 			$i = 0;
@@ -228,10 +227,9 @@ class fm_module_rpz {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = sanitize($data);
-				$sql_values .= "$key='$clean_data', ";
+				$sql_values .= "$key='$data', ";
 				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+					$log_message[] = sprintf('Comment: %s', $data);
 				}
 			}
 		}
@@ -254,8 +252,7 @@ class fm_module_rpz {
 			$child['cfg_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
-				$sql_values .= "$key='$clean_data', ";
+				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
 			
@@ -551,12 +548,13 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_name'] = 'zone';
-		$post['cfg_comment'] = trim($post['cfg_comment']);
 		$post['cfg_type'] = 'rpz';
-		$post['cfg_id'] = sanitize($post['cfg_id']);
 
 		unset($post['tab-group-1']);
 		

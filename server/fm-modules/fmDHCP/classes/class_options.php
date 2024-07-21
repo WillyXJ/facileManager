@@ -107,11 +107,10 @@ class fm_module_options {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'config_comment') return __('Empty values are not allowed.');
-//				if ($key == 'config_name' && !isDNSNameAcceptable($clean_data)) return sprintf(__('%s is not an acceptable option name.'), $clean_data);
+				if (!strlen($data) && $key != 'config_comment') return __('Empty values are not allowed.');
+//				if ($key == 'config_name' && !isDNSNameAcceptable($data)) return sprintf(__('%s is not an acceptable option name.'), $data);
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -169,9 +168,8 @@ class fm_module_options {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && $key != 'config_comment') return false;
-				$sql_edit .= $key . "='" . $clean_data . "', ";
+				if (!strlen($data) && $key != 'config_comment') return false;
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');

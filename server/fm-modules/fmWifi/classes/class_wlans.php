@@ -105,7 +105,6 @@ class fm_wifi_wlans {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
 		$name = $post['config_name'];
-		$post['config_comment'] = trim($post['config_comment']);
 		
 		if (empty($name)) return __('No name defined.');
 		
@@ -114,10 +113,9 @@ class fm_wifi_wlans {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = sanitize($data);
-				if ($clean_data) {
+				if ($data) {
 					$sql_fields .= $key . ', ';
-					$sql_values .= "'$clean_data', ";
+					$sql_values .= "'$data', ";
 				}
 			}
 		}
@@ -175,10 +173,9 @@ class fm_wifi_wlans {
 //			}
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
 				if ($i) $sql_fields .= $key . ', ';
 				
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
@@ -226,7 +223,6 @@ class fm_wifi_wlans {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
 		$name = $post['config_name'];
-		$post['config_comment'] = trim($post['config_comment']);
 		
 		if (empty($name)) return __('No name defined.');
 		
@@ -235,9 +231,8 @@ class fm_wifi_wlans {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = sanitize($data);
-				if ($clean_data) {
-					$sql_values .= "$key='$clean_data', ";
+				if ($data) {
+					$sql_values .= "$key='$data', ";
 				}
 			}
 		}
@@ -270,8 +265,7 @@ class fm_wifi_wlans {
 			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
-				$sql_values .= "$key='$clean_data', ";
+				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
 			
@@ -711,6 +705,9 @@ HTML;
 	function validatePost($post) {
 		global $__FM_CONFIG, $fmdb;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
 			$post_tmp['config_data'] = $post['config_name'];

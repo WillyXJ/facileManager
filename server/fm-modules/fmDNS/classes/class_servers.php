@@ -127,11 +127,10 @@ class fm_module_servers extends fm_shared_module_servers {
 			'dryrun'), $config_opts);
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'server_name') && empty($clean_data)) return __('No server name defined.');
+			if (($key == 'server_name') && empty($data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -152,8 +151,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			$sql_fields = '(`server_id`, `cfg_type`, `cfg_name`, `cfg_data`)';
 			$sql_values = '';
 			foreach ($config_opts as $option) {
-				$clean_data = sanitize($post[$option]);
-				$sql_values .= "('$new_server_id', 'global', '$option', '$clean_data'), ";
+				$sql_values .= "('$new_server_id', 'global', '$option', '{$post[$option]}'), ";
 			}
 
 			$sql_values = rtrim($sql_values, ', ');
@@ -283,7 +281,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -302,9 +300,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		/** Process config options */
 		$sql_insert = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET ";
 		foreach ($config_opts as $option) {
-			$clean_data = sanitize($post[$option]);
-
-			$query = "$sql_insert cfg_name='$option', cfg_data='$clean_data' WHERE server_id='{$post['server_id']}' AND cfg_name='$option' LIMIT 1";
+			$query = "$sql_insert cfg_name='$option', cfg_data='{$post[$option]}' WHERE server_id='{$post['server_id']}' AND cfg_name='$option' LIMIT 1";
 			$result = $fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
@@ -1073,6 +1069,9 @@ FORM;
 	private function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['server_name'])) return __('No server name defined.');
 		
 		/** Check name field length */

@@ -100,9 +100,9 @@ class fm_users {
 		
 		extract($data, EXTR_SKIP);
 		
-		$user_login = sanitize($user_login);
-		$user_password = sanitize($user_password);
-		$user_email = sanitize($user_email);
+		$user_login = $user_login;
+		$user_password = $user_password;
+		$user_email = $user_email;
 		
 		/** Template user? */
 		if (isset($user_template_only) && $user_template_only == 'yes') {
@@ -112,7 +112,7 @@ class fm_users {
 		} else {
 			$user_template_only = 'no';
 			$user_status = 'active';
-			$user_auth_type = isset($user_auth_type) ? sanitize($user_auth_type) : 1;
+			$user_auth_type = isset($user_auth_type) ? $user_auth_type : 1;
 		}
 
 		if (empty($user_login)) return _('No username defined.');
@@ -120,7 +120,7 @@ class fm_users {
 			$user_password = null;
 		} else {
 			if (empty($user_password) && $user_template_only == 'no') return _('No password defined.');
-			if ($user_password != sanitize($cpassword) && $user_template_only == 'no') return _('Passwords do not match.');
+			if ($user_password != $cpassword && $user_template_only == 'no') return _('Passwords do not match.');
 		}
 		if (empty($user_email) && $user_template_only == 'no') return _('No e-mail address defined.');
 		
@@ -182,8 +182,8 @@ class fm_users {
 		
 		extract($data, EXTR_SKIP);
 		
-		$group_name = sanitize($group_name);
-		$group_comment = sanitize($group_comment);
+		$group_name = $group_name;
+		$group_comment = $group_comment;
 		
 		if (empty($group_name)) return _('No group name defined.');
 		
@@ -262,7 +262,6 @@ class fm_users {
 
 		if (!empty($post['user_password'])) {
 			if (empty($post['cpassword']) || $post['user_password'] != $post['cpassword']) return _('Passwords do not match.');
-			$post['user_password'] = sanitize($post['user_password']);
 			if (password_verify($post['user_password'], getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_password'))) return _('Password is not changed.');
 			$sql_pwd = "`user_password`='" . password_hash($post['user_password'], PASSWORD_DEFAULT) . "',";
 		} else $sql_pwd = null;
@@ -273,7 +272,7 @@ class fm_users {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit . $sql_pwd, ', ');
@@ -322,7 +321,7 @@ class fm_users {
 		if (!isset($post['group_id'])) return _('This is a malformed request.');
 		if (empty($post['group_name'])) return _('No group name defined.');
 
-		$group_name = sanitize($post['group_name']);
+		$group_name = $post['group_name'];
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_groups', 'group_name');
@@ -339,7 +338,7 @@ class fm_users {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');

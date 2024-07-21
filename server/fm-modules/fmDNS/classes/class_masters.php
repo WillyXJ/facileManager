@@ -78,11 +78,10 @@ class fm_dns_masters {
 		$exclude = array('submit', 'action', 'server_id');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if ($key == 'master_name' && empty($clean_data)) return __('No primary name defined.');
+			if ($key == 'master_name' && empty($data)) return __('No primary name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -119,7 +118,7 @@ class fm_dns_masters {
 		$sql_edit = 'master_port=null, master_dscp=null, master_key_id=0, ';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -516,13 +515,16 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_name');
 		if ($field_length !== false && strlen($post['master_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Master name is too long (maximum %d character).', 'Master name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		if (array_key_exists('master_name', $post)) {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', sanitize($post['master_name']), 'master_', 'master_name', 'AND server_serial_no=' . $post['server_serial_no']);
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', $post['master_name'], 'master_', 'master_name', 'AND server_serial_no=' . $post['server_serial_no']);
 			if ($fmdb->num_rows) {
 				if ($fmdb->last_result[0]->master_id != $post['master_id']) return __('This master already exists.');
 			}
@@ -534,7 +536,6 @@ HTML;
 		if (!$post['master_tls_id']) unset($post['master_tls_id']);
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
-		$post['master_comment'] = trim($post['master_comment']);
 		
 		if (array_key_exists('master_parent_id', $post)) {
 			if (empty($post['master_addresses'])) {

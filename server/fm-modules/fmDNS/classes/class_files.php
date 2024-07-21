@@ -324,7 +324,7 @@ HTML;
 
 		foreach($post as $k => $v) {
 			if ($k == 'file_name') continue;
-			$post[$k] = sanitize($v);
+			$post[$k] = sanitize(trim($v));
 		}
 		
 		$pathinfo = pathinfo($post['file_name']);

@@ -92,11 +92,10 @@ class fm_module_time {
 						'time_start_time_hour', 'time_start_time_min', 'time_end_time_hour', 'time_end_time_min');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'time_name') && empty($clean_data)) return __('No time name defined.');
+			if (($key == 'time_name') && empty($data)) return __('No time name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -136,7 +135,7 @@ class fm_module_time {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -388,6 +387,9 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['time_name'])) return __('No name defined.');
 		
 		/** Check name field length */

@@ -89,11 +89,10 @@ class fm_module_groups {
 		$exclude = array('submit', 'action', 'group_id', 'compress', 'AUTHKEY');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'group_name') && empty($clean_data)) return _('No group name defined.');
+			if (($key == 'group_name') && empty($data)) return _('No group name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -127,7 +126,7 @@ class fm_module_groups {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -310,6 +309,9 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['group_name'])) return _('No group name defined.');
 		
 		/** Check name field length */

@@ -108,11 +108,10 @@ class fm_module_servers extends fm_shared_module_servers {
 			'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'server_name') && empty($clean_data)) return __('No server name defined.');
+			if (($key == 'server_name') && empty($data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -192,7 +191,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -392,6 +391,9 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['server_name'])) return __('No server name defined.');
 		
 		/** Check name field length */

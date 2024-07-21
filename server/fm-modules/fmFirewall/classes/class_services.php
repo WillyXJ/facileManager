@@ -92,11 +92,10 @@ class fm_module_services {
 		$exclude = array('submit', 'action', 'service_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'port_src', 'port_dest');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'service_name') && empty($clean_data)) return __('No service name defined.');
+			if (($key == 'service_name') && empty($data)) return __('No service name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -129,7 +128,7 @@ class fm_module_services {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -367,6 +366,9 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['service_name'])) return __('No service name defined.');
 		
 		/** Check name field length */

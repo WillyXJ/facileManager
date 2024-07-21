@@ -105,11 +105,10 @@ class fm_module_options {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && ($key != 'cfg_comment') && ($post['cfg_name'] != 'forwarders')) return __('Empty values are not allowed.');
-				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return sprintf(__('%s is not an acceptable option name.'), $clean_data);
+				if (!strlen($data) && ($key != 'cfg_comment') && ($post['cfg_name'] != 'forwarders')) return __('Empty values are not allowed.');
+				if ($key == 'cfg_name' && !isDNSNameAcceptable($data)) return sprintf(__('%s is not an acceptable option name.'), $data);
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -154,12 +153,12 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', sanitize($post['cfg_name']), 'cfg_', 'cfg_name', "AND cfg_id!={$post['cfg_id']} AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}' AND server_id='{$post['server_id']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', $post['cfg_name'], 'cfg_', 'cfg_name', "AND cfg_id!={$post['cfg_id']} AND cfg_type='{$post['cfg_type']}' AND server_serial_no='{$post['server_serial_no']}' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}' AND server_id='{$post['server_id']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->cfg_id != $post['cfg_id']) {
 				$num_same_config = $fmdb->num_rows;
-				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . sanitize($post['cfg_name']) . "' AND def_option_type='{$post['cfg_type']}'";
+				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option='" . $post['cfg_name'] . "' AND def_option_type='{$post['cfg_type']}'";
 				$fmdb->get_results($query);
 				if ($fmdb->last_result[0]->def_max_parameters >= 0 && $num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
 					return __('This record already exists.');
@@ -173,10 +172,9 @@ class fm_module_options {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				if (!strlen($clean_data) && ($key != 'cfg_comment') && ($post['cfg_name'] != 'forwarders')) return __('Empty values are not allowed.');
-				if ($key == 'cfg_name' && !isDNSNameAcceptable($clean_data)) return sprintf(__('%s is not an acceptable option name.'), $clean_data);
-				$sql_edit .= $key . "='" . $clean_data . "', ";
+				if (!strlen($data) && ($key != 'cfg_comment') && ($post['cfg_name'] != 'forwarders')) return __('Empty values are not allowed.');
+				if ($key == 'cfg_name' && !isDNSNameAcceptable($data)) return sprintf(__('%s is not an acceptable option name.'), $data);
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -508,12 +506,13 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$post['cfg_comment'] = trim($post['cfg_comment']);
-		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (is_array($post['cfg_data'])) $post['cfg_data'] = join(' ', $post['cfg_data']);
 		
 		if (isset($post['cfg_name'])) {
-			$def_option = sprintf("'%s'", sanitize($post['cfg_name']));
+			$def_option = sprintf("'%s'", $post['cfg_name']);
 		} elseif (isset($post['cfg_id'])) {
 			$def_option = sprintf("'%s'", getNameFromID(intval($post['cfg_id']), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_name', null, 'active'));
 		} else return false;
@@ -543,7 +542,7 @@ HTML;
 		if (is_array($tmp_cfg_data)) {
 			if (!$post['cfg_data'] || $post['cfg_data'] == ',') $post['cfg_data'] = 'any';
 			if ($post['cfg_data']) {
-				$tmp_cfg_data[] = '{ ' . trim(str_replace(',', $terminate, trim(sanitize($post['cfg_data']))), $terminate) . $terminate . '}';
+				$tmp_cfg_data[] = '{ ' . trim(str_replace(',', $terminate, $post['cfg_data']), $terminate) . $terminate . '}';
 			}
 			$post['cfg_data'] = join(' ', $tmp_cfg_data);
 			unset($tmp_cfg_data);

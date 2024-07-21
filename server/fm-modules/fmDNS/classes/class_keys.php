@@ -96,13 +96,12 @@ class fm_dns_keys {
 			return __('The key name cannot contain spaces.');
 		}
 		
-		$post['key_comment'] = trim($post['key_comment']);
 		if (!in_array($post['key_algorithm'], $this->getKeyAlgorithms($post['key_type']))) return __('The selected key algorithm is invalid.');
 		
 		/** DNSSEC */
 		if ($post['key_type'] == 'dnssec' && !isset($post['generate'])) {
 			if (!$post['domain_id']) return __('You must specify a zone.');
-			if (sanitize($post['key_secret']) && sanitize($post['key_subtype']) == __('Both')) return __('You must choose a key type.');
+			if ($post['key_secret'] && $post['key_subtype'] == __('Both')) return __('You must choose a key type.');
 			
 			$post['key_name'] = displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) .
 					'_' . strtolower(sanitize($post['key_subtype']));
@@ -134,11 +133,10 @@ class fm_dns_keys {
 		$exclude = array('submit', 'action', 'key_id', 'generate');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if (($key == 'key_name' || $key == 'key_secret') && empty($clean_data)) return __('No key defined.');
+			if (($key == 'key_name' || $key == 'key_secret') && empty($data)) return __('No key defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -170,8 +168,6 @@ class fm_dns_keys {
 			return __('The key name cannot contain spaces.');
 		}
 		
-		$post['key_comment'] = trim($post['key_comment']);
-		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
 		if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', $field_length), $field_length);
@@ -183,7 +179,7 @@ class fm_dns_keys {
 			if ($result[0]->key_id != $post['key_id']) return __('This key already exists.');
 		}
 		
-		if (sanitize($post['key_status']) == 'revoked') {
+		if ($post['key_status'] == 'revoked') {
 			$post = $this->revokeDNSSECKey($post);
 			if (!is_array($post)) return $post;
 		}
@@ -194,7 +190,7 @@ class fm_dns_keys {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');

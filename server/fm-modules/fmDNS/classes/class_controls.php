@@ -86,10 +86,9 @@ class fm_dns_controls {
 		$exclude = array('submit', 'action', 'server_id');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -132,7 +131,7 @@ class fm_dns_controls {
 		$sql_edit = '';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -320,10 +319,11 @@ HTML;
 	
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
-		
+
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (!$post['control_id']) unset($post['control_id']);
-		
-		$post['control_comment'] = trim($post['control_comment']);
 		
 		if (is_array($post['control_keys'])) $post['control_keys'] = join(',', $post['control_keys']);
 		

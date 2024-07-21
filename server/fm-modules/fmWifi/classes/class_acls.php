@@ -109,7 +109,7 @@ class fm_wifi_acls {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'" . sanitize($data) . "', ";
+				$sql_values .= "'" . $data . "', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -124,18 +124,8 @@ class fm_wifi_acls {
 
 		$insert_id = $fmdb->insert_id;
 
-		addLogEntry(__('Added a MAC ACL with the following details') . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated APs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
+		addLogEntry(__('Added a MAC ACL with the following details') . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
 
-		return true;
-
-		
-		
-		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware']}\nFixed Address: {$post['fixed-address']}";
-		$log_message .= "\nComment: {$post['config_comment']}";
-		addLogEntry($log_message);
-		
-		setBuildUpdateConfigFlag(getWLANServers($insert_id), 'yes', 'build');
-		
 		return true;
 	}
 
@@ -161,15 +151,13 @@ class fm_wifi_acls {
 		$sql_values = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
-		$post['config_comment'] = trim($post['config_comment']);
 		
 		$include = array('wlan_ids', 'acl_mac', 'acl_action', 'acl_comment');
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = sanitize($data);
-				$sql_values .= "$key='$clean_data', ";
+				$sql_values .= "$key='$data', ";
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
@@ -191,7 +179,7 @@ class fm_wifi_acls {
 //		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
 		/** Add entry to audit log */
-		addLogEntry(sprintf(__('Updated MAC ACL \'%s\' with the following details'), $old_name) . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated APs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
+		addLogEntry(sprintf(__('Updated MAC ACL \'%s\' with the following details'), $old_name) . ":\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Action') . ": {$post['acl_action']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
 
 		return true;
 	}
@@ -366,11 +354,14 @@ HTML;
 	 * @subpackage fmWifi
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG, $fm_wifi_wlans;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (in_array('0', $post['wlan_ids']) || !isset($post['wlan_ids'])) {
 			$post['wlan_ids'] = 0;
 		} else {
@@ -386,10 +377,6 @@ HTML;
 		/** Check if the group name already exists */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'acls', $post['acl_mac'], 'acl_', 'acl_mac', "AND acl_id!={$post['acl_id']}");
 		if ($fmdb->num_rows) return __('This address already exists.');
-
-		if ($post['acl_comment']) {
-			$post['acl_comment'] = sanitize(trim($post['acl_comment']));
-		}
 
 		if (!isset($fm_wifi_wlans)) {
 			if (!class_exists('fm_wifi_wlans')) {

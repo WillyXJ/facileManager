@@ -78,11 +78,10 @@ class fm_dns_acls {
 		$exclude = array('submit', 'action', 'server_id', 'acl_bulk');
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
-			if ($key == 'acl_name' && empty($clean_data)) return __('No ACL name defined.');
+			if ($key == 'acl_name' && empty($data)) return __('No ACL name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -118,7 +117,7 @@ class fm_dns_acls {
 		$sql_edit = '';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');

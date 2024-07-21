@@ -96,7 +96,6 @@ class fm_dhcp_objects {
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
-		// echo '<pre>';print_r($post); exit;
 		
 		/** Insert the parent */
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
@@ -107,7 +106,6 @@ class fm_dhcp_objects {
 		$post['config_is_parent'] = 'yes';
 		$post['config_data'] = $name = $post['config_name'];
 		$post['config_name'] = $post['config_type'] = rtrim($post['config_type'], 's');
-		$post['config_comment'] = trim($post['config_comment']);
 		
 		if (empty($name)) return __('No name defined.');
 		
@@ -116,10 +114,9 @@ class fm_dhcp_objects {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = sanitize($data);
-				if ($clean_data) {
+				if ($data) {
 					$sql_fields .= $key . ', ';
-					$sql_values .= "'$clean_data', ";
+					$sql_values .= "'$data', ";
 				}
 			}
 		}
@@ -158,10 +155,9 @@ class fm_dhcp_objects {
 			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
 				if ($i) $sql_fields .= $key . ', ';
 				
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
@@ -213,7 +209,6 @@ class fm_dhcp_objects {
 		$post['config_is_parent'] = 'yes';
 		$post['config_data'] = $name = $post['config_name'];
 		$post['config_name'] = $post['config_type'] = rtrim($post['config_type'], 's');
-		$post['config_comment'] = trim($post['config_comment']);
 		
 		if (empty($name)) return __('No name defined.');
 		
@@ -222,9 +217,8 @@ class fm_dhcp_objects {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = sanitize($data);
-				if ($clean_data) {
-					$sql_values .= "$key='$clean_data', ";
+				if ($data) {
+					$sql_values .= "$key='$data', ";
 				}
 			}
 		}
@@ -256,8 +250,7 @@ class fm_dhcp_objects {
 			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
-				$sql_values .= "$key='$clean_data', ";
+				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
 			
@@ -924,6 +917,9 @@ HTML;
 	function validateObjectPost($post) {
 		global $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
 			$post_tmp['config_name'] = $post['config_name'];

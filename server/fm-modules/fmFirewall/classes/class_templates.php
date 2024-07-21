@@ -140,16 +140,15 @@ class fm_module_templates {
 		if (!$post['policy_targets']) $post['policy_targets'] = 0;
 
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
-				if ($key == 'policy_targets' || $clean_data && !in_array($key, array('account_id', 'server_serial_no', 'policy_type'))) {
+				$sql_values .= "'$data', ";
+				if ($key == 'policy_targets' || $data && !in_array($key, array('account_id', 'server_serial_no', 'policy_type'))) {
 					if ($key == 'policy_targets') {
 						$key = __('Firewalls');
-						$clean_data = $log_message_servers;
+						$data = $log_message_servers;
 					}
-					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
+					$log_message .= formatLogKeyData('policy_', $key, $data);
 				}
 			}
 		}
@@ -243,14 +242,13 @@ class fm_module_templates {
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data);
-				$sql_edit .= $key . "='" . $clean_data . "', ";
-				if ($key == 'policy_targets' || $clean_data && !in_array($key, array('account_id', 'server_serial_no', 'policy_type'))) {
+				$sql_edit .= $key . "='" . $data . "', ";
+				if ($key == 'policy_targets' || $data && !in_array($key, array('account_id', 'server_serial_no', 'policy_type'))) {
 					if ($key == 'policy_targets') {
 						$key = __('Firewalls');
-						$clean_data = $log_message_servers;
+						$data = $log_message_servers;
 					}
-					$log_message .= formatLogKeyData('policy_', $key, $clean_data);
+					$log_message .= formatLogKeyData('policy_', $key, $data);
 				}
 			}
 		}
@@ -538,12 +536,14 @@ HTML;
 	 * @subpackage fmFirewall
 	 *
 	 * @param array $post Posted data to validate
-	 * @return array
+	 * @return array|string
 	 */
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$post['policy_name'] = sanitize($post['policy_name']);
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		$post['policy_type'] = 'template';
 		$post['server_serial_no'] = 0;
 		if (!array_key_exists('policy_targets', $post)) {
