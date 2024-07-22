@@ -25,7 +25,7 @@ if (!class_exists('fm_tools')) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php');
 }
 
-$admin_tools = null;
+$admin_tools = $output = $block_style = $classes = null;
 $response = isset($response) ? $response : null;
 $tools_option = array();
 $import_output = sprintf('<p>%s <i class="fa fa-spinner fa-spin"></i></p>', _('Processing...'));
@@ -91,4 +91,4 @@ echo <<<HTML
 	</div>
 HTML;
 
-printFooter();
+printFooter($classes, $output, $block_style);

@@ -1,6 +1,7 @@
 1.9.0 (2024-??-??)
 ==================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
+* Server - [bug] Fixed an issue where some JavaScript would not run.
 
 1.8.1 (2024-05-05)
 ==================

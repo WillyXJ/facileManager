@@ -6,6 +6,7 @@
 * Server - [bug] Configuration can no longer be built when the server does not have a
            configuration file defined.
 * Server - [bug] Fixed WLAN user form to allow edits without having to change the username.
+* Server - [bug] Fixed an issue where some JavaScript would not run.
 * Client - [improvement] Added client install -o|options parameter. (Issue #605)
 
 0.5.1 (2024-05-05)

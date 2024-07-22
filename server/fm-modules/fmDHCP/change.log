@@ -5,6 +5,7 @@
 * Server - [improvement] Added form validation to input fields.
 * Server - [bug] Configuration can no longer be built when the server does not have a
            configuration file defined.
+* Server - [bug] Fixed an issue where some JavaScript would not run.
 * Client - [improvement] Added client install -o|options parameter. (Issue #605)
 * Client - [improvement] Added support to automatically install isc-dhcp-server.
 
