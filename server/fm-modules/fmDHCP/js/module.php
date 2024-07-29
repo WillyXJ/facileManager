@@ -3,11 +3,6 @@ if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
 $module_name = basename(dirname(dirname(__FILE__)));
-if (!isset($_SESSION['module']) || $_SESSION['module'] != $module_name) {
-	session_start();
-	$_SESSION['module'] = $module_name;
-	session_write_close();
-}
 
 header("Content-Type: text/javascript");
 
@@ -37,7 +32,7 @@ $(document).ready(function() {
 
 		$.ajax({
 			type: "POST",
-			url: "fm-modules/' . $_SESSION['module'] . '/ajax/addFormElements.php",
+			url: "fm-modules/' . $module_name . '/ajax/addFormElements.php",
 			data: form_data,
 			success: function(response)
 			{
@@ -68,7 +63,7 @@ function displayOptionPlaceholder(option_value) {
 
 	$.ajax({
 		type: "POST",
-		url: "fm-modules/' . $_SESSION['module'] . '/ajax/getData.php",
+		url: "fm-modules/' . $module_name . '/ajax/getData.php",
 		data: form_data,
 		success: function(response)
 		{

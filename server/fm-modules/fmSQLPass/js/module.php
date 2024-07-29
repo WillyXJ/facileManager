@@ -3,11 +3,6 @@ if (!defined('FM_NO_CHECKS')) define('FM_NO_CHECKS', true);
 require_once('../../../fm-init.php');
 
 $module_name = basename(dirname(dirname(__FILE__)));
-if (!isset($_SESSION['module']) || $_SESSION['module'] != $module_name) {
-	session_start();
-	$_SESSION['module'] = $module_name;
-	session_write_close();
-}
 
 header("Content-Type: text/javascript");
 
@@ -33,7 +28,7 @@ $(document).ready(function() {
 		
 		$.ajax({
 			type: "POST",
-			url: "fm-modules/' . $_SESSION['module'] . '/ajax/processPost.php",
+			url: "fm-modules/' . $module_name . '/ajax/processPost.php",
 			data: $("#manage").serialize(),
 			success: function(response)
 			{
