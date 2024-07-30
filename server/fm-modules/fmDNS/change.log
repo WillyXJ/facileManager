@@ -3,6 +3,7 @@
 * Server - [improvement] Added additional CSS highlighting.
 * Server - [improvement] ACL elements can now be added when an ACL is defined.
 * Server - [bug] Fixed nested ACL element displays during edits.
+* Server - [bug] Fixed the ability to edit HTTP endpoints that are in use.
 
 6.0.6 (2024-05-31)
 ==================

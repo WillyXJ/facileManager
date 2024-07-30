@@ -310,7 +310,6 @@ class fm_module_tls {
 		
 		if ($row->cfg_status == 'disabled') $class[] = 'disabled';
 		
-		$server_serial_no .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
