@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] Added additional CSS highlighting.
 * Server - [improvement] ACL elements can now be added when an ACL is defined.
+* Server - [bug] Fixed nested ACL element displays during edits.
 
 6.0.6 (2024-05-31)
 ==================

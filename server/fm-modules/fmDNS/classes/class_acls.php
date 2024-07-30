@@ -299,7 +299,7 @@ HTML;
 				break;
 			}
 		}
-		if (!$found) $acl_elements = array_merge(array(array('id' => $acl_addresses, 'text' => $acl_addresses)), $acl_elements);
+		if (!$found) $acl_elements = array_merge(array(array('id' => $acl_addresses, 'text' => $this->parseACL($acl_addresses))), $acl_elements);
 
 		$acl_note = ($action == 'add') ? sprintf('<tr>
 		<th width="33&#37;" scope="row"></th>
