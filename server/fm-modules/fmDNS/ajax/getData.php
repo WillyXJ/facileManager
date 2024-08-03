@@ -25,9 +25,9 @@
 if (!defined('AJAX')) define('AJAX', true);
 require_once('../../../fm-init.php');
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+foreach (glob(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_*.php') as $filename) {
+    include_once($filename);
+}
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 	$cfg_data = isset($_POST['option_value']) ? sanitize($_POST['option_value']) : '';
@@ -255,6 +255,10 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 						$cfg_data,
 						$checkbox,
 						$available_files);
+		} elseif ($result[0]->def_option == 'dnssec-policy') {
+			$dropdown = buildSelect('cfg_data[]', 'cfg_data', $fm_module_dnssec->getDNSSECPolicies($cfg_data), $cfg_data, 1);
+			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
+					<td width="67&#37;">%s', __('Option Value'), $dropdown);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
@@ -317,7 +321,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'rpz' => 'manage_zones',
 					'http' => 'manage_servers',
 					'tls' => 'manage_servers',
-					'files' => 'manage_servers'
+					'files' => 'manage_servers',
+					'dnssec-policy' => 'manage_servers'
 				);
 
 if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_array), $_SESSION['module'])) {
@@ -351,7 +356,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	$action = 'add';
 	
 	/* Determine which class we need to deal with */
-	switch($_POST['item_type']) {
+	switch ($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
 			if (isset($_POST['item_sub_type']) && sanitize($_POST['item_sub_type']) == 'groups') {
@@ -385,9 +390,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		case 'rpz':
 		case 'http':
 		case 'tls':
-			$post_class = ${"fm_module_{$_POST['item_type']}"};
+		case 'dnssec-policy':
+			$post_class = (in_array($_POST['item_type'], array('dnssec-policy'))) ? $fm_module_dnssec : ${"fm_module_{$_POST['item_type']}"};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
+			$type_map = sanitize($_POST['item_type']);
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
@@ -405,7 +412,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	}
 	
 	if ($add_new) {
-		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys'))) {
+		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys', 'dnssec'))) {
 			$edit_form = $post_class->printForm(null, $action, sanitize($_POST['item_sub_type']));
 		} elseif ($_POST['item_type'] == 'domains') {
 			$edit_form = $post_class->printForm(null, $action, $type_map);
@@ -419,7 +426,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
 		
 		$edit_form_data[] = $fmdb->last_result[0];
-		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys'))) {
+		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys', 'dnssec'))) {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', sanitize($_POST['item_sub_type']));
 		} else {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $item_id);

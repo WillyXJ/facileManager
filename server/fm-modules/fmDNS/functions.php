@@ -774,6 +774,7 @@ function buildModuleMenu() {
 		addSubmenuPage('config-servers.php', __('TLS'), __('TLS Connections'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-tls.php');
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-servers.php', __('Logging'), __('Logging'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-logging.php');
+		addSubmenuPage('config-servers.php', __('DNSSEC'), __('DNSSEC'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-dnssec.php');
 		addSubmenuPage('config-servers.php', __('Operations'), __('Operations'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-controls.php');
 		addSubmenuPage('config-servers.php', __('Files'), __('Files'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-files.php');
 	
@@ -1352,7 +1353,7 @@ function getConfigChildren($config_id, $config_type = 'global', $return = null) 
 	global $fmdb, $__FM_CONFIG;
 	
 	/** Get the data from $config_id */
-	$query = "SELECT cfg_name,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$config_type}' AND cfg_parent='{$config_id}' ORDER BY cfg_id ASC";
+	$query = "SELECT cfg_name,cfg_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$config_type}' AND cfg_parent='{$config_id}' AND cfg_name!='!config_name!' ORDER BY cfg_id ASC";
 	$result = $fmdb->get_results($query);
 	if (!$fmdb->sql_errors && $fmdb->num_rows) {
 		foreach ($fmdb->last_result as $result) {
@@ -1360,7 +1361,7 @@ function getConfigChildren($config_id, $config_type = 'global', $return = null) 
 		}
 	}
 	
-	return isset($return) ? $return : null;
+	return isset($return) ? $return : array();
 }
 
 
@@ -1404,5 +1405,37 @@ function availableItems($type, $default = 'blank', $addl_sql = null, $prefix = n
 	}
 	
 	return $return;
+}
+
+
+/**
+ * Returns a minimum version
+ *
+ * @since 6.1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param string $feature Feature to retrieve version info for
+ * @param string $option Specific option to query
+ * @param string $format What format to return (message, version)
+ * @param string $addl_sql Additional SQL query
+ * @return string
+ */
+function getMinimumFeatureVersion($feature, $option = '', $format = 'message', $addl_sql = '') {
+	global $fmdb, $__FM_CONFIG;
+
+	if ($option) {
+		$addl_sql = "AND def_option='{$option}' $addl_sql";
+	}
+
+	$query = "SELECT def_minimum_version FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_function='{$feature}' {$addl_sql} AND def_minimum_version IS NOT NULL ORDER BY def_minimum_version,def_option ASC LIMIT 1";
+	$fmdb->query($query);
+
+	if ($fmdb->num_rows) {
+		$required_version = $fmdb->last_result[0]->def_minimum_version;
+		return ($format == 'message') ? sprintf('BIND %s or greater is required for this feature.', $required_version) : $required_version;
+	}
+
+	return '';
 }
 

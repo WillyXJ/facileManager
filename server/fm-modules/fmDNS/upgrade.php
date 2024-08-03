@@ -2658,3 +2658,41 @@ function upgradefmDNS_603($__FM_CONFIG, $running_version) {
 	
 	return true;
 }
+
+/** 6.1.0 */
+function upgradefmDNS_610($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '6.0.3', '<') ? upgradefmDNS_603($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name` = '!config_name!' WHERE `cfg_name` IN ('tls-connection', 'http-endpoint')";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_minimum_version` = '9.19.11' WHERE `def_function`='dnssec-policy' AND `def_option` = 'dnskey-ttl'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_minimum_version` = '9.19.16' WHERE `def_function`='dnssec-policy' AND `def_option` IN ('cdnskey', 'inline-signing')";
+	$queries[] = <<<INSERTSQL
+INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+	`def_function` ,
+	`def_option` ,
+	`def_type` ,
+	`def_multiple_values` ,
+	`def_clause_support`,
+	`def_zone_support`,
+	`def_dropdown`,
+	`def_minimum_version`
+	)
+VALUES 
+('dnssec-policy', 'signatures-jitter', '( duration )', 'no', 'D', NULL, 'no', '9.18.27')
+;
+INSERTSQL;
+
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '6.1.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}

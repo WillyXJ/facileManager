@@ -1,3 +1,7 @@
+6.1.0 (2024-??-??)
+==================
+* Server - [improvement] Added support for custom DNSSEC policies. (Issue #568)
+
 6.0.6 (2024-05-31)
 ==================
 * Server - [bug] Fixed PHP8 errors. (Issue #629 #630)

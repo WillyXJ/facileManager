@@ -521,6 +521,9 @@ HTML;
 					}
 				}
 				$formatted_acls[] = $address;
+			} elseif (strpos($address, 'dnssec_') !== false) {
+				$cfg_id = str_replace('dnssec_', '', $address);
+				$formatted_acls[] = getNameFromID($cfg_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active');
 			} elseif (strpos($address, 'file_') !== false) {
 				$id = trim(str_replace('file_', '', $address), '"');
 				$formatted_acls[] = sprintf('"%s/include.d/%s"', getNameFromID($id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}files", 'file_', 'file_id', 'file_location', null, 'active'), getNameFromID($id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}files", 'file_', 'file_id', 'file_name', null, 'active'));
