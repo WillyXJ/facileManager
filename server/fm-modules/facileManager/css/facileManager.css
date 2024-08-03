@@ -977,6 +977,12 @@ i.text_icon {
 #response_close i {
 	background-color: #FFFBCC;
 }
+#tabs #response {
+	width: 90%;
+	margin-top: unset;
+	margin-left: auto;
+	margin-right: auto;
+}
 
 #popup_response {
 	text-align: center;

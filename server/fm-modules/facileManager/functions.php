@@ -2773,7 +2773,7 @@ function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $mo
  *
  * @param string $menu_title Text used to display the menu item
  * @param string $page_title Text used to display the page title when the page loads
- * @param string $capability Minimum capability required for the menu item to be visible to the user
+ * @param string|array $capability Minimum capability required for the menu item to be visible to the user
  * @param string $module Module name the menu item is for
  * @param string $menu_slug Menu item slug name to used to reference this item
  * @param string $class Class name to apply to the menu item
@@ -3820,7 +3820,7 @@ function generateURIParams($params = array(), $direction = 'include', $character
  * @since 3.0
  * @package facileManager
  *
- * @param array $selected Selected option type
+ * @param string $selected Selected option type
  * @param array $avail_types Available option types
  * @param array $null_params
  * @param array $params
