@@ -44,12 +44,12 @@ class fm_module_tls {
 		echo displayPagination($page, $total_pages);
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'tls'
 					);
 
-		$title_array = array(array('title' => __('Connection Name')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		$title_array = array(array('title' => __('Connection Name'), 'rel' => 'cfg_data'), array('title' => __('Options'), 'class' => 'header-nosort'), array('title' => _('Comment'), 'class' => 'header-nosort'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		}
@@ -215,6 +215,8 @@ class fm_module_tls {
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
+
+		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 		
 		$query = "$sql_start $sql_values WHERE cfg_id={$post['cfg_id']} LIMIT 1";
 		$result = $fmdb->query($query);
@@ -250,7 +252,7 @@ class fm_module_tls {
 			}
 		}
 		
-		$log_message = sprintf("Updated TLS Connection:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
+		$log_message = sprintf("Updated TLS Connection '%s':\nName: %s\n%s", $old_name, $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 
 		return true;
@@ -327,7 +329,7 @@ class fm_module_tls {
 			$edit_status = null;
 		}
 		
-		$http_endpoint_name = $row->cfg_data;
+		$element_name = $row->cfg_data;
 		$comments = nl2br($row->cfg_comment);
 
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="tls" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no"', null, false);
@@ -340,8 +342,8 @@ class fm_module_tls {
 		if ($class) $class = 'class="' . join(' ', $class) . '"';
 
 		echo <<<HTML
-		<tr id="$row->cfg_id" name="tls" $class>
-			<td>$http_endpoint_name</td>
+		<tr id="$row->cfg_id" name="$element_name" $class>
+			<td>$element_name</td>
 			<td>$options</td>
 			<td>$comments</td>
 			$edit_status
@@ -369,7 +371,6 @@ HTML;
 		$cfg_name = $cfg_data = $cfg_comment = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 
-		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
 				extract($_POST);
@@ -378,7 +379,7 @@ HTML;
 		}
 
 		/** Get child elements */
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls' ORDER BY def_id ASC";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls' ORDER BY def_option ASC";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
@@ -400,7 +401,7 @@ HTML;
 		}
 		
 		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys($auto_fill_children, null));
-		foreach ((array) $child_config as $k => $v) {
+		foreach ($child_config as $k => $v) {
 			$child_config[$k] = str_replace(array('"', "'"), '', (string) $v);
 			if (isset($form_addl_html[$k]) && strpos($form_addl_html[$k], 'select:') !== false) {
 				$form_field = $fm_module_options->populateDefTypeDropdown(str_replace('select:', '', $form_addl_html[$k]), $child_config[$k], $k, 'include-blank');
@@ -423,6 +424,9 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
+		/** Minimum version */
+		$minimum_version = getMinimumFeatureVersion($cfg_type);
+		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s
 			<input type="hidden" name="action" value="%s" />
@@ -434,6 +438,7 @@ HTML;
 					<input type="radio" name="tab-group-1" id="tab-1" checked />
 					<label for="tab-1">%s</label>
 					<div id="tab-content">
+						<div id="response"><p class="center">%s</p></div>
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
@@ -468,7 +473,7 @@ HTML;
 			});
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_type_id, $server_serial_no,
-				__('Basic'),
+				__('Basic'), $minimum_version,
 				__('Connection Name'), $cfg_data, __('tls-name'), $tls_name_length,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
@@ -489,18 +494,22 @@ HTML;
 	 *
 	 * @param array $post Posted array
 	 * @param array $include_sub_configs Array of sub configs to validate
-	 * @return array|boolean
+	 * @return array|string|boolean
 	 */
 	function validatePost($post, $include_sub_configs) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
-		$post['cfg_name'] = 'tls-connection';
-		$post['cfg_data'] = trim($post['cfg_data']);
+		$post['cfg_name'] = '!config_name!';
+		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
 		$post['cfg_comment'] = trim($post['cfg_comment']);
 		$post['cfg_type'] = 'tls';
 		$post['cfg_id'] = sanitize($post['cfg_id']);
+
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND cfg_id!='{$post['cfg_id']}'";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) return __('This item already exists.');
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		

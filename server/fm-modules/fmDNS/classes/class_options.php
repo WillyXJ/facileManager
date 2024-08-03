@@ -133,7 +133,8 @@ class fm_module_options {
 			|| strpos($post['cfg_data'], 'domain_') !== false
 			|| strpos($post['cfg_data'], 'master_') !== false
 			|| strpos($post['cfg_data'], 'http_') !== false
-			|| strpos($post['cfg_data'], 'tls_') !== false)
+			|| strpos($post['cfg_data'], 'tls_') !== false
+			|| strpos($post['cfg_data'], 'dnssec_') !== false)
 			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Added option:\nType: {$post['cfg_type']}\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
@@ -203,7 +204,8 @@ class fm_module_options {
 			|| strpos($post['cfg_data'], 'domain_') !== false
 			|| strpos($post['cfg_data'], 'master_') !== false
 			|| strpos($post['cfg_data'], 'http_') !== false
-			|| strpos($post['cfg_data'], 'tls_') !== false)
+			|| strpos($post['cfg_data'], 'tls_') !== false
+			|| strpos($post['cfg_data'], 'dnssec_') !== false)
 			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
@@ -617,6 +619,7 @@ HTML;
 			|| strpos($def_type, 'domain_name') !== false
 			|| strpos($cfg_data, 'http_') !== false
 			|| strpos($cfg_data, 'tls_') !== false
+			|| strpos($cfg_data, 'dnssec_') !== false
 			|| strpos($cfg_data, 'file_') !== false)
 			? $fm_dns_acls->parseACL($cfg_data) : str_replace(',', '; ', $cfg_data);
 	}
