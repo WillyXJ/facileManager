@@ -1,5 +1,5 @@
-0.9.0 (2024-??-??)
-==================
+0.9.0-beta1 (2024-08-27)
+========================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
 * Server - [improvement] Form validations now trims and sanitizes all fields.
 * Server - [improvement] Added form validation to input fields.

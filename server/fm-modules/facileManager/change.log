@@ -1,5 +1,5 @@
-4.7.0 (2024-??-??)
-==================
+4.7.0-beta1 (2024-08-27)
+========================
 * Server - [security] Added authentication logging.
 * Server - [improvement] Added graphic highlighting to bulk actions. (Issue #604)
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)

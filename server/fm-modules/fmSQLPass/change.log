@@ -1,5 +1,5 @@
-1.9.0 (2024-??-??)
-==================
+1.9.0-beta1 (2024-08-27)
+========================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
 * Server - [bug] Fixed an issue where some JavaScript would not run.
 
