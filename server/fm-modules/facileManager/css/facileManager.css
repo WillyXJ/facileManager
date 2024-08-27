@@ -517,6 +517,7 @@ h4 {
 
 .display_results tbody tr.attention td:first-child,
 .display_results tbody tr.disabled td:first-child,
+.display_results tbody tr.ok td:first-child,
 .display_results tbody tr.build td:first-child,
 .display_results tbody tr.notice td:first-child,
 .modules .active.upgrade td:first-child {
@@ -542,6 +543,12 @@ h4 {
 }
 .display_results tbody tr.notice td:first-child {
 	border-color: #ffb900;
+}
+.display_results tbody tr.ok {
+	background-color: #e6f6e6;
+}
+.display_results tbody tr.ok td:first-child {
+	border-color: #00cc00;
 }
 .display_results th.header-actions {
 	width: 110px;

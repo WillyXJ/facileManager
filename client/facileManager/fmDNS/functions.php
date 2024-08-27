@@ -38,8 +38,6 @@
  * @return null
  */
 function printModuleHelp () {
-	global $argv;
-	
 	echo <<<HELP
    -D                         Name of zone to dump (required by dump-zone)
    -f                         Filename hosting the zone data (required by dump-zone)
@@ -141,11 +139,11 @@ function buildConf($url, $data) {
 	/** Freeze zones */
 	if (!$data['dryrun'] && isDaemonRunning('named')) {
 		/** Handle dynamic zones to support reloading */
-		runRndcActions('freeze');
+		runRndcActions('freeze', $server_config_file);
 	}
 	
 	/** Remove previous files so there are no stale files */
-	if ($purge || ($purge_config_files == 'yes' && $server_update_config == 'conf')) {
+	if ($purge || (isset($purge_config_files) && $purge_config_files == 'yes' && $server_update_config == 'conf')) {
 		/** Server config files */
 		$path_parts = pathinfo($server_config_file);
 		if (version_compare(PHP_VERSION, '5.2.0', '<')) {
@@ -197,12 +195,16 @@ function buildConf($url, $data) {
 			$message = "Reloading $server_type\n";
 			if ($debug) echo fM($message);
 			addLogEntry($message);
+			$retval = false;
 
 			if (isDaemonRunning('named')) {
 				$rndc_actions = array('reload', 'thaw');
 				
 				/** Handle dynamic zones to support reloading */
-				runRndcActions($rndc_actions);
+				$retval = runRndcActions($rndc_actions, $server_config_file);
+				if ($retval) {
+					return $retval;
+				}
 			} else {
 				$message = "The server is not running - attempting to start it\n";
 				if ($debug) echo fM($message);
@@ -460,7 +462,7 @@ function manageCache($action, $message) {
 function processReloadFailure($last_line) {
 	global $debug;
 	
-	if ($debug) echo fM($last_line);
+	if ($debug) echo fM($last_line) . "\n";
 	addLogEntry($last_line);
 	$message = "There was an error reloading the server - please check the logs for details\n";
 	if ($debug) echo fM($message);
@@ -538,19 +540,18 @@ function dumpZone($domain, $zonefile) {
  * @param array|string $rndc_actions rndc actions to run
  * @return boolean
  */
-function runRndcActions($rndc_actions = array()) {
-	global $server_config_file;
-
+function runRndcActions($rndc_actions = array(), $server_config_file = null) {
 	if (!is_array($rndc_actions)) $rndc_actions = array($rndc_actions);
 	
 	$rndc = findProgram('rndc');
 
-	$rndc_key = (file_exists(dirname($server_config_file) . '/named.conf.keys')) ? sprintf('-k %s/named.conf.keys', dirname($server_config_file)) : null;
+	$rndc .= (file_exists(dirname($server_config_file) . '/named.conf.keys')) ? sprintf(' -k %s/named.conf.keys', dirname($server_config_file)) : null;
 	
 	foreach ($rndc_actions as $action) {
-		$last_line = system("$rndc $rndc_key $action 2>&1", $retval);
+		$last_line = system("$rndc $action 2>&1", $retval);
 		if ($retval) {
-			return processReloadFailure($last_line);
+			processReloadFailure($last_line);
+			return $retval;
 		}
 	}
 	

@@ -308,11 +308,10 @@ class fm_module_http {
 		
 		if ($row->cfg_status == 'disabled') $class[] = 'disabled';
 		
-		$server_serial_no .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
+			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->cfg_id, 'http')) {
-				$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';

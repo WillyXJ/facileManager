@@ -89,16 +89,24 @@ class fm_dns_acls {
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
 		$result = $fmdb->query($query);
+		$new_acl_id = $fmdb->insert_id;
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the ACL because a database error occurred.'), 'sql');
 		}
 
 		$log_message = sprintf(__("Added ACL:\nName: %s\nComment: %s"), $post['acl_name'], $post['acl_comment']);
-		if (isset($post['acl_parent_id'])) {
-			$log_message = sprintf(__("'%s' was added to the '%s' ACL"), $post['acl_addresses'], getNameFromID($post['acl_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'));
+		if ($post['acl_parent_id']) {
+			$log_message = sprintf(__("'%s' was added to the '%s' ACL"), $this->parseACL($post['acl_addresses']), getNameFromID($post['acl_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'));
 		}
 		addLogEntry($log_message);
+
+		if (isset($post['acl_bulk']) && !empty($post['acl_bulk'])) {
+			unset($post['acl_name']);
+			$post['acl_parent_id'] = $new_acl_id;
+			return $this->addBulkACL($post);
+		}
+
 		return true;
 	}
 
@@ -124,7 +132,7 @@ class fm_dns_acls {
 		
 		// Update the acl
 		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-		$old_address = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses');
+		$old_address = $this->parseACL(getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses'));
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET $sql WHERE `acl_id`={$post['acl_id']}";
 		$result = $fmdb->query($query);
 		
@@ -139,7 +147,7 @@ class fm_dns_acls {
 		if (!$old_name) {
 			$tmp_parent_id = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_parent_id');
 			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-			$log_message = sprintf(__("'%s' was updated to '%s' on the '%s' ACL"), $old_address, $post['acl_addresses'], $tmp_name);
+			$log_message = sprintf(__("'%s' was updated to '%s' on the '%s' ACL"), $old_address, $this->parseACL($post['acl_addresses']), $tmp_name);
 		}
 		addLogEntry($log_message);
 		return true;
@@ -161,7 +169,7 @@ class fm_dns_acls {
 		$log_message = sprintf(__("ACL '%s' was deleted"), $tmp_name);
 		if (!$tmp_name) {
 			$tmp_parent_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_parent_id');
-			$tmp_address = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses');
+			$tmp_address = $this->parseACL(getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses'));
 			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
 			$log_message = sprintf(__("'%s' was deleted from the '%s' ACL"), $tmp_address, $tmp_name);
 		} else {
@@ -262,127 +270,104 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		if (!$acl_parent_id) {
-			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
-		%s
-			<input type="hidden" name="action" value="%s" />
-			<input type="hidden" name="acl_id" value="%d" />
-			<input type="hidden" name="server_serial_no" value="%s" />
-			<table class="form-table">
-				<tr>
-					<th width="33&#37;" scope="row"><label for="acl_name">%s</label></th>
-					<td width="67&#37;"><input name="acl_name" id="acl_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
-				</tr>
-				<tr>
-					<th width="33&#37;" scope="row"><label for="acl_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="acl_comment" name="acl_comment" rows="4" cols="26">%s</textarea></td>
-				</tr>
-			</table>
-		%s
-		</form>
-		<script>
-			$(document).ready(function() {
-				$("#manage select").select2({
-					width: "200px",
-					minimumResultsForSearch: 10
-				});
-			});
-		</script>',
-				$popup_header,
-				$action, $acl_id, $server_serial_no,
-				__('ACL Name'), $acl_name, __('internal'), $acl_name_length,
-				_('Comment'), $acl_comment,
-				$popup_footer
-			);
-		} else {
-			$acl_elements = $this->getACLList($server_serial_no, 'all', "AND acl_id!='$acl_parent_id'");
-			/** Remove used elements from the dropdown */
-			$previously_used_addresses = $this->getACLElements($acl_parent_id, 'ids-only');
-			if (is_array($previously_used_addresses)) {
-				foreach ($acl_elements as $k => $item) {
-					if (in_array($item['id'], $previously_used_addresses)) {
-						unset($acl_elements[$k]);
-					}
-				}
-			}
-			$found = false;
-			foreach ($acl_elements as $item) {
-				if ($acl_addresses == $item['id']) {
-					$found = true;
-					break;
-				}
-			}
-			if (!$found) $acl_elements = array_merge(array(array('id' => $acl_addresses, 'text' => $acl_addresses)), $acl_elements);
+		$acl_matched_addresses = ($action == 'add' || ($action == 'edit' && $acl_parent_id)) ? sprintf('<tr class="bulkhide">
+		<th width="33&#37;" scope="row"><label for="acl_addresses">%s</label></th>
+		<td width="67&#37;"><input type="hidden" name="acl_addresses" class="address_match_element" value="%s" /></td>
+	</tr>', __('Matched Address List'), $acl_addresses) : '';
 
-			$acl_note = ($action == 'add') ? sprintf('<tr>
-			<th width="33&#37;" scope="row"></th>
-			<td width="67&#37;"><span><a href="#" id="acl_bulk_add">%s</a></span></td>
-		</tr>
-		<tr class="bulkshow" style="display: none">
-		<th width="33&#37;" scope="row"><label for="acl_bulk">%s</label></th>
-		<td width="67&#37;"><textarea id="acl_bulk" name="acl_bulk" rows="4" cols="26" placeholder="%s"></textarea></td>
+		if (!$acl_parent_id) {
+			$acl_name = sprintf('<input name="acl_name" id="acl_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" />', $acl_name, __('internal'), $acl_name_length);
+		} else {
+			$acl_name = getNameFromID($acl_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
+		}
+
+		$acl_elements = $this->getACLList($server_serial_no, 'all', "AND acl_id!='$acl_parent_id'");
+		/** Remove used elements from the dropdown */
+		$previously_used_addresses = $this->getACLElements($acl_parent_id, 'ids-only');
+		if (is_array($previously_used_addresses)) {
+			foreach ($acl_elements as $k => $item) {
+				if (in_array($item['id'], $previously_used_addresses)) {
+					unset($acl_elements[$k]);
+				}
+			}
+		}
+		$found = false;
+		foreach ($acl_elements as $item) {
+			if ($acl_addresses == $item['id']) {
+				$found = true;
+				break;
+			}
+		}
+		if (!$found) $acl_elements = array_merge(array(array('id' => $acl_addresses, 'text' => $this->parseACL($acl_addresses))), $acl_elements);
+
+		$acl_note = ($action == 'add') ? sprintf('<tr>
+		<th width="33&#37;" scope="row"></th>
+		<td width="67&#37;"><span><a href="#" id="acl_bulk_add">%s</a></span></td>
 	</tr>
+	<tr class="bulkshow" style="display: none">
+	<th width="33&#37;" scope="row"><label for="acl_bulk">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+	<td width="67&#37;"><textarea id="acl_bulk" name="acl_bulk" rows="4" cols="26"></textarea></td>
+</tr>
 ', __('Configure multiple addresses in bulk') . ' &raquo;', __('Matched Address List'), __('On each line enter an address and comment delimited by a comma or semi-colon.')) : null;
 
-			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
-		%s
-			<input type="hidden" name="action" value="%s" />
-			<input type="hidden" name="acl_id" value="%d" />
-			<input type="hidden" name="acl_parent_id" value="%d" />
-			<input type="hidden" name="server_serial_no" value="%s" />
-			<table class="form-table">
-				<tr>
-					<th width="33&#37;" scope="row">%s</th>
-					<td width="67&#37;">%s</td>
-				</tr>
-				%s
-				<tr class="bulkhide">
-					<th width="33&#37;" scope="row"><label for="acl_addresses">%s</label></th>
-					<td width="67&#37;"><input type="hidden" name="acl_addresses" class="address_match_element" value="%s" /></td>
-				</tr>
-				<tr class="bulkhide">
-					<th width="33&#37;" scope="row"><label for="acl_comment">%s</label></th>
-					<td width="67&#37;"><textarea id="acl_comment" name="acl_comment" rows="4" cols="26">%s</textarea></td>
-				</tr>
-			</table>
-		%s
-		</form>
-		<script>
-			$(document).ready(function() {
-				$("#manage select").select2({
-					width: "200px",
-					minimumResultsForSearch: 10
-				});
-				$(".address_match_element").select2({
-					createSearchChoice:function(term, data) { 
-						if ($(data).filter(function() { 
-							return this.text.localeCompare(term)===0; 
-						}).length===0) 
-						{return {id:term, text:term};} 
-					},
-					multiple: true,
-					maximumSelectionSize: 1,
-					width: "200px",
-					tokenSeparators: [",", " ", ";"],
-					data: %s
-				});
-				$("#acl_bulk_add").click(function(e) {
-					$(".bulkhide").slideUp().remove();
-					$(".bulkshow").show("slow");
-					$(this).parent().parent().parent().slideUp().remove();
-				});
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+	%s
+		<input type="hidden" name="action" value="%s" />
+		<input type="hidden" name="acl_id" value="%d" />
+		<input type="hidden" name="acl_parent_id" value="%d" />
+		<input type="hidden" name="server_serial_no" value="%s" />
+		<table class="form-table">
+			<tr>
+				<th width="33&#37;" scope="row">%s</th>
+				<td width="67&#37;">%s</td>
+			</tr>
+			%s
+			%s
+			<tr class="bulkhide">
+				<th width="33&#37;" scope="row"><label for="acl_comment">%s</label></th>
+				<td width="67&#37;"><textarea id="acl_comment" name="acl_comment" rows="4" cols="26">%s</textarea></td>
+			</tr>
+		</table>
+	%s
+	</form>
+	<script>
+		$(document).ready(function() {
+			$("#manage select").select2({
+				width: "200px",
+				minimumResultsForSearch: 10
 			});
-		</script>',
-				$popup_header,
-				$action, $acl_id, $acl_parent_id, $server_serial_no,
-				__('ACL Name'), getNameFromID($acl_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'),
-				$acl_note,
-				__('Matched Address List'), $acl_addresses,
-				_('Comment'), $acl_comment,
-				$popup_footer,
-				json_encode($acl_elements)
-			);
-		}
+			$(".address_match_element").select2({
+				createSearchChoice:function(term, data) { 
+					if ($(data).filter(function() { 
+						return this.text.localeCompare(term)===0; 
+					}).length===0) 
+					{return {id:term, text:term};} 
+				},
+				multiple: true,
+				maximumSelectionSize: 1,
+				width: "200px",
+				tokenSeparators: [",", " ", ";"],
+				data: %s
+			});
+			$("#acl_bulk_add").click(function(e) {
+				if ($("input.address_match_element").val()) {
+					$("#acl_bulk").val($("input.address_match_element").val()+";"+$("#acl_comment").val());
+				}
+				$(".bulkhide").slideUp().remove();
+				$(".bulkshow").show("slow");
+				$(this).parent().parent().parent().slideUp().remove();
+			});
+		});
+	</script>',
+			$popup_header,
+			$action, $acl_id, $acl_parent_id, $server_serial_no,
+			__('ACL Name'), $acl_name,
+			$acl_note,
+			$acl_matched_addresses,
+			_('Comment'), $acl_comment,
+			$popup_footer,
+			json_encode($acl_elements)
+		);
 
 		return $return_form;
 	}
@@ -624,11 +609,12 @@ HTML;
 		if ($field_length !== false && strlen($post['acl_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'ACL name is too long (maximum %d character).', 'ACL name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		$post['acl_addresses'] = sanitize($post['acl_addresses']);
-		if (isset($post['acl_bulk'])) $post['acl_bulk'] = sanitize($post['acl_bulk']);
 		$post['acl_comment'] = sanitize(trim($post['acl_comment']));
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['acl_id'] = intval($post['acl_id']);
 		$post['acl_parent_id'] = intval($post['acl_parent_id']);
+
+		if ($post['acl_bulk'] && $post['acl_addresses']) unset($post['acl_addresses']);
 
 		/** Does the record already exist for this account? */
 		if (array_key_exists('acl_name', $post)) {
@@ -637,20 +623,9 @@ HTML;
 		} else {
 			if (!$post['acl_addresses']) {
 				if (!$post['acl_bulk']) {
-					return __('No ACL address defined.') . $post['acl_comment'];
-				} else {
-					$tmp_post = $post;
-					unset($tmp_post['acl_bulk']);
-					foreach (explode("\n", $post['acl_bulk']) as $tmp_acl_line) {
-						list($tmp_post['acl_addresses'], $tmp_post['acl_comment']) = explode(';', str_replace(',', ';', trim($tmp_acl_line)));
-
-						// Prevent never-ending loop
-						if (!$tmp_post['acl_addresses']) return __('No ACL address defined.');
-
-						$result = $this->add($tmp_post);
-						if ($result !== true) return $result;
-					}
-					return true;
+					return __('No ACL address defined nor bulk.');
+				} elseif ($post['acl_parent_id']) {
+					return $this->addBulkACL($post);
 				}
 			}
 		}
@@ -661,6 +636,7 @@ HTML;
 			if ($ip_check != $post['acl_addresses']) return $ip_check;
 		}
 
+		/** Ensure we aren't duplicating ACL entries */
 		if ($post['acl_addresses'] && $post['acl_parent_id']) {
 			if ($post['action'] == 'add' || ($post['action'] == 'edit' && $post['acl_addresses'] != getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses'))) {
 				$previously_used_addresses = $this->getACLElements(intval($post['acl_parent_id']), 'ids-only');
@@ -671,9 +647,38 @@ HTML;
 				}
 			}
 		}
+
+		if ($post['acl_addresses'] && !$post['acl_parent_id']) {
+			$post['acl_bulk'] = $post['acl_addresses'];
+		}
 		
 		return $post;
 	}
+
+	/**
+	 * Adds ACL elements in bulk
+	 *
+	 * @since 6.1
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $post Posted array
+	 * @return boolean|string
+	 */
+	function addBulkACL($post) {
+		$tmp_post = $post;
+		unset($tmp_post['acl_bulk']);
+		foreach (explode("\n", $post['acl_bulk']) as $tmp_acl_line) {
+			list($tmp_post['acl_addresses'], $tmp_post['acl_comment']) = explode(';', str_replace(',', ';', trim($tmp_acl_line)));
+
+			// Prevent never-ending loop
+			if (!$tmp_post['acl_addresses']) return __('No ACL address defined.');
+
+			$result = $this->add($tmp_post);
+			if ($result !== true) return $result;
+		}
+		return true;
+}
 
 }
 

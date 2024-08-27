@@ -6,6 +6,7 @@
 * Server - [improvement] The login message is now a textbox to support larger messages (such
            as terms and conditions notices).
 * Server - [improvement] Form validations now trims and sanitizes all fields.
+* Server - [improvement] Added additional CSS highlighting.
 * Server - [bug] Fixed admin logs item count.
 * Server - [bug] Fixed PHP8 errors.
 * Server - [bug] Unserialized configuration preview error messages.
@@ -14,6 +15,7 @@
 * Client - [improvement] Added client install -o|options parameter. (Issue #605)
 * Client - [improvement] Changed error messages for better clarity.
 * Client - [improvement] Provide better installation connection tests.
+* Client - [improvement] Provide better rndc action checks.
 * Client - [bug] Prevent blank lines from getting logged.
 
 4.6.2 (2024-05-05)
