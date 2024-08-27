@@ -93,6 +93,8 @@ $__FM_CONFIG['logging']['avail_types']    = array('channel' => __('Channels'), '
 $__FM_CONFIG['operations']['avail_types'] = array('controls' => __('Controls'), 'statistics' => __('Statistics'));
 $__FM_CONFIG['keys']['avail_types']       = array('tsig' => 'TSIG', 'dnssec' => 'DNSSEC');
 $__FM_CONFIG['keys']['avail_sizes']       = array(4096, 2048, 1024, 768, 512);
+$__FM_CONFIG['dnssec']['avail_types']     = array('dnssec-policy' => __('DNSSEC Policies'), 'trust-anchors' => __('Trust Anchors'));
+$__FM_CONFIG['dnssec']['avail_types']     = array('dnssec-policy' => __('DNSSEC Policies'));
 
 /** SOA Default Values */
 $__FM_CONFIG['soa']['soa_master_server']	= '';

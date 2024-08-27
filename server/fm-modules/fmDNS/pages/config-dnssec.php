@@ -22,10 +22,13 @@
 
 if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) unAuth();
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_http.php');
+include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_dnssec.php');
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
-$display_option_type_sql = 'http';
+
+$_GET['type'] = sanitize(strtolower($_GET['type']));
+$type = (isset($_GET['type']) && array_key_exists($_GET['type'], $__FM_CONFIG['dnssec']['avail_types'])) ? $_GET['type'] : array_key_first($__FM_CONFIG['dnssec']['avail_types']);
+$display_type = $__FM_CONFIG['dnssec']['avail_types'][$type];
 
 if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
@@ -33,7 +36,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 	switch ($action) {
 	case 'add':
 		if (!empty($_POST)) {
-			$result = $fm_module_http->add($_POST);
+			$result = $fm_module_dnssec->add($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -46,7 +49,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 		break;
 	case 'edit':
 		if (!empty($_POST)) {
-			$result = $fm_module_http->update($_POST);
+			$result = $fm_module_dnssec->update($_POST);
 			if ($result !== true) {
 				$response = $result;
 				$form_data = $_POST;
@@ -62,9 +65,10 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
+$avail_types = buildSubMenu($type, $__FM_CONFIG['dnssec']['avail_types']);
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
@@ -81,9 +85,9 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array($sort_field, 'cfg_data'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='!config_name!' AND domain_id=0 AND cfg_isparent='yes'", null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array($sort_field, 'cfg_data'), 'cfg_', "AND cfg_type='$type' AND cfg_name='!config_name!' AND server_serial_no='$server_serial_no' AND cfg_isparent='yes'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_module_http->rows($result, $page, $total_pages);
+$fm_module_dnssec->rows($result, $type, $page, $total_pages);
 
 printFooter();

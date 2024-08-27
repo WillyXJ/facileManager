@@ -7,6 +7,8 @@
            as terms and conditions notices).
 * Server - [improvement] Form validations now trims and sanitizes all fields.
 * Server - [improvement] Added additional CSS highlighting.
+* Server - [improvement] Changed the minimum PHP version to 7.3.0.
+* Server - [improvement] CSS tweaks.
 * Server - [bug] Fixed admin logs item count.
 * Server - [bug] Fixed PHP8 errors.
 * Server - [bug] Unserialized configuration preview error messages.

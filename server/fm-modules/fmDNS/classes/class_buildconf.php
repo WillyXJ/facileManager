@@ -247,11 +247,15 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 
 			/** Build HTTP endpoints */
-			$config .= $this->getHTTPTLSBlocks('http', 0, $server_serial_no, $server_group_ids);
+			$config .= $this->getStandardBlocks('http', 0, $this->server_info, $server_group_ids);
 
 
 			/** Build TLS connections */
-			$config .= $this->getHTTPTLSBlocks('tls', 0, $server_serial_no, $server_group_ids);
+			$config .= $this->getStandardBlocks('tls', 0, $this->server_info, $server_group_ids);
+
+
+			/** Build DNSSEC policies */
+			$config .= $this->getStandardBlocks('dnssec-policy', 0, $this->server_info, $server_group_ids);
 
 
 			/** Build Masters */
@@ -2638,11 +2642,12 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 	 * @param string $feature The feature to check
 	 * @param string $required_version The minimum required version
 	 * @param string $server_version Installed server version
+	 * @param string $tab Tab spacing to use
 	 * @return string
 	 */
-	private function versionCompatCheck($feature, $required_version, $server_version) {
+	private function versionCompatCheck($feature, $required_version, $server_version, $tab = "\t") {
 		if (version_compare($server_version, $required_version, '<')) {
-			return sprintf("\t//\n\t// BIND %s or greater is required for %s.\n\t//\n\n", $required_version, $feature);
+			return sprintf("%1\$s//\n%1\$s// BIND %2\$s or greater is required for %3\$s.\n%1\$s//\n\n", $tab, $required_version, $feature);
 		}
 
 		return null;
@@ -2655,25 +2660,40 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 	 * @since 6.0
 	 * @package fmDNS
 	 *
-	 * @param string $type http or tls
+	 * @param string $type http, tls, or dnssec-policy
 	 * @param integer $view_id The view_id of the zone
-	 * @param integer $server_serial_no The server serial number for overrides
+	 * @param object $server_info The server info object
 	 * @param array $server_group_ids Array containing group server IDs
 	 * @return string
 	 */
-	function getHTTPTLSBlocks($type, $view_id, $server_serial_no, $server_group_ids) {
+	function getStandardBlocks($type, $view_id, $server_info, $server_group_ids) {
 		global $fmdb, $__FM_CONFIG;
 
-		$friendly_name = ($type == 'http') ? 'HTTP Endpoints' : 'TLS Connections';
+		$display_type = $type;
+
+		/** Minimum version */
+		$minimum_version = getMinimumFeatureVersion($type, '', 'version');
+
+		switch ($type) {
+			case 'http':
+				$friendly_name = 'HTTP Endpoints';
+				break;
+			case 'tls':
+				$friendly_name = 'TLS Connections';
+				break;
+			case 'dnssec-policy':
+				$friendly_name = 'DNSSEC Policies';
+				break;
+		}
 		
-		/** Check if http is supported by server_version */
-		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
-		$unsupported_version = $this->versionCompatCheck($friendly_name, '9.18.0', $server_version);
+		/** Check if type is supported by server_version */
+		list($server_version) = explode('-', $server_info->server_version);
+		$unsupported_version = $this->versionCompatCheck($friendly_name, $minimum_version, $server_version, '');
 		
 		$global_config = '';
 		$config_array = array();
 		
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_name="!config_name!" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no="0" AND cfg_status="active"');
 		if ($fmdb->num_rows) {
 			if ($unsupported_version) return $unsupported_version;
 			$result = $fmdb->last_result;
@@ -2693,7 +2713,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		$server_config = array();
 		/** Override with group-specific configs */
 		if (is_array($server_group_ids)) {
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_name="!config_name!" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				if ($unsupported_version) return $unsupported_version;
 				$server_config_result = $fmdb->last_result;
@@ -2709,7 +2729,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		}
 
 		/** Override with server-specific configs */
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no=' . $server_serial_no . ' AND cfg_status="active"');
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_name="!config_name!" AND cfg_isparent="yes" AND view_id=' . $view_id . ' AND server_serial_no=' . $server_info->server_serial_no . ' AND cfg_status="active"');
 		if ($fmdb->num_rows) {
 			if ($unsupported_version) return $unsupported_version;
 			$server_config_result = $fmdb->last_result;
@@ -2727,10 +2747,10 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		$config_array = array_replace_recursive((array)$config_array, $server_config);
 		unset($server_config);
 		
-		foreach ($config_array as $endpoint_name => $value_array) {
-			$global_config .= sprintf("%s %s {\n", $type, $endpoint_name);
+		foreach ($config_array as $element_name => $value_array) {
+			$global_config .= sprintf("%s %s {\n", $display_type, $element_name);
 			foreach ($value_array as $param => $value) {
-				if ($value) $global_config .= $this->formatConfigOption($param, $value, null, null, "\t");
+				if ($value) $global_config .= $this->formatConfigOption($param, $value, null, $server_info, "\t", "AND def_function='{$type}'");
 			}
 			$global_config .= "};\n";
 		}

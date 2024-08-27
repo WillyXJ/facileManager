@@ -5,6 +5,9 @@
 * Server - [improvement] Form validations now trims and sanitizes all fields.
 * Server - [improvement] Added additional CSS highlighting.
 * Server - [improvement] ACL elements can now be added when an ACL is defined.
+* Server - [improvement] Added support for custom DNSSEC policies. (Issue #568)
+* Server - [improvement] HTTP endpoints and TLS connections can now be sorted.
+* Server - [bug] HTTP endpoints and TLS connections can no longer be deleted when used.
 * Server - [bug] Configuration can no longer be built when the server does not have a
            configuration file defined.
 * Server - [bug] Fixed an issue where some JavaScript would not run.

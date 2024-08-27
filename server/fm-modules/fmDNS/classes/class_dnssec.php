@@ -20,21 +20,22 @@
  +-------------------------------------------------------------------------+
 */
 
-class fm_module_tls {
+class fm_module_dnssec {
 	
 	/**
-	 * Displays the tls connection list
+	 * Displays the item list
 	 *
 	 * @since 6.0
 	 * @package facileManager
 	 * @subpackage fmDNS
 	 *
 	 * @param array $result Database query array
+	 * @param string $type Page type
 	 * @param integer $page Page number
 	 * @param integer $total_pages Total number of pages
 	 * @return none
 	 */
-	function rows($result, $page, $total_pages) {
+	function rows($result, $type, $page, $total_pages) {
 		global $fmdb, $__FM_CONFIG;
 		
 		$num_rows = $fmdb->num_rows;
@@ -46,10 +47,10 @@ class fm_module_tls {
 		$table_info = array(
 						'class' => 'display_results sortable',
 						'id' => 'table_edits',
-						'name' => 'tls'
+						'name' => $type
 					);
 
-		$title_array = array(array('title' => __('Connection Name'), 'rel' => 'cfg_data'), array('title' => __('Options'), 'class' => 'header-nosort'), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		$title_array = array(array('title' => __('Name'), 'rel' => 'cfg_data'), array('title' => __('Options'), 'class' => 'header-nosort'), array('title' => _('Comment'), 'class' => 'header-nosort'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		}
@@ -61,19 +62,19 @@ class fm_module_tls {
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
 				echo '</tbody><tbody>';
-				$this->displayRow($results[$x], $num_rows);
+				$this->displayRow($results[$x], $type);
 				$y++;
 			}
 		}
 			
 		echo "</tbody>\n</table>\n";
 		if (!$result) {
-			printf('<p id="table_edits" class="noresult" name="tls">%s</p>', __('There are no TLS connections defined.'));
+			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no items defined.'));
 		}
 	}
 
 	/**
-	 * Adds the new connection
+	 * Adds the new endpoint
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -85,7 +86,7 @@ class fm_module_tls {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = '" . sanitize($post['sub_type']) . "'";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
@@ -105,8 +106,8 @@ class fm_module_tls {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No TLS connection name defined.');
+				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
+				if ($key == 'cfg_data' && empty($clean_data)) return __('No name defined.');
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
 				if ($key == 'cfg_comment') {
@@ -144,8 +145,9 @@ class fm_module_tls {
 			
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $include)) continue;
+				$clean_data = sanitize($data);
 				if ($i) $sql_fields .= $key . ', ';
-				$sql_values .= "'$data', ";
+				$sql_values .= "'$clean_data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
@@ -164,14 +166,14 @@ class fm_module_tls {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = sprintf("Added TLS Connection:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
+		$log_message = sprintf("Added {$post['sub_type']}:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 		return true;
 	}
 	
 	
 	/**
-	 * Updates the selected connection
+	 * Updates the selected endpoint
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -183,7 +185,7 @@ class fm_module_tls {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = '" . sanitize($post['sub_type']) . "'";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
@@ -205,8 +207,8 @@ class fm_module_tls {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No TLS connection name defined.');
+				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
+				if ($key == 'cfg_data' && empty($clean_data)) return __('No name defined.');
 				$sql_values .= "$key='$clean_data', ";
 				if ($key == 'cfg_comment') {
 					$log_message[] = sprintf('Comment: %s', $clean_data);
@@ -214,7 +216,7 @@ class fm_module_tls {
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
-
+		
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 		
 		$query = "$sql_start $sql_values WHERE cfg_id={$post['cfg_id']} LIMIT 1";
@@ -225,7 +227,7 @@ class fm_module_tls {
 		}
 
 		/** Update config children */
-		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1'));
+		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1', 'sub_type'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -234,7 +236,8 @@ class fm_module_tls {
 			$child['cfg_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				$sql_values .= "$key='$data', ";
+				$clean_data = sanitize($data);
+				$sql_values .= "$key='$clean_data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
 			
@@ -250,7 +253,7 @@ class fm_module_tls {
 			}
 		}
 		
-		$log_message = sprintf("Updated TLS Connection '%s':\nName: %s\n%s", $old_name, $endpoint_name, join("\n", (array) $log_message));
+		$log_message = sprintf("Updated %s '%s':\nName: %s\n%s", $post['sub_type'], $old_name, $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 
 		return true;
@@ -258,7 +261,7 @@ class fm_module_tls {
 	
 	
 	/**
-	 * Deletes the selected tls connection
+	 * Deletes the selected item
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -273,7 +276,7 @@ class fm_module_tls {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Are there any corresponding configs? */
-		if (getConfigAssoc($id, 'tls')) {
+		if (getConfigAssoc($id, 'dnssec')) {
 			return formatError(__('This item is still being referenced and could not be deleted.'), 'sql');
 		}
 
@@ -289,7 +292,7 @@ class fm_module_tls {
 			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("TLS connection '%s' was deleted."), $tmp_name));
+			addLogEntry(sprintf(__("%s '%s' was deleted."), $type, $tmp_name));
 			return true;
 		}
 	}
@@ -303,17 +306,17 @@ class fm_module_tls {
 	 * @subpackage fmDNS
 	 *
 	 * @param object $row Row array
-	 * @param integer $num_rows Number of rows
+	 * @param integer $type Number of rows
 	 */
-	function displayRow($row, $num_rows) {
+	function displayRow($row, $type) {
 		global $__FM_CONFIG, $fmdb;
 		
 		if ($row->cfg_status == 'disabled') $class[] = 'disabled';
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
-			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if (!getConfigAssoc($row->cfg_id, 'tls')) {
+			$edit_status .= '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+			if (!getConfigAssoc($row->cfg_id, 'dnssec')) {
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';
@@ -329,7 +332,7 @@ class fm_module_tls {
 		$element_name = $row->cfg_data;
 		$comments = nl2br($row->cfg_comment);
 
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="tls" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no"', null, false);
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="' . $type . '" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no"', null, false);
 		foreach ($fmdb->last_result as $record) {
 			if ($record->cfg_data) {
 				(string) $options .= sprintf('<b>%s</b> %s<br />', $record->cfg_name, $record->cfg_data);
@@ -349,7 +352,7 @@ HTML;
 	}
 
 	/**
-	 * Displays the form to add/edit tls connections
+	 * Displays the form to add/edit items
 	 *
 	 * @since 6.0
 	 * @package facileManager
@@ -361,11 +364,11 @@ HTML;
 	 * @param integer $cfg_type_id
 	 * @return string
 	 */
-	function printForm($data = '', $action = 'add', $cfg_type = 'tls', $cfg_type_id = null) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_zones, $fm_module_options;
+	function printForm($data = '', $action = 'add', $type = 'dnssec-policy', $cfg_type_id = null) {
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		$cfg_id = 0;
-		$cfg_name = $cfg_data = $cfg_comment = null;
+		$cfg_name = $cfg_data = $cfg_comment = $cfg_type = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -376,24 +379,25 @@ HTML;
 		}
 
 		/** Get child elements */
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls' ORDER BY def_option ASC";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = '$type' ORDER BY def_option ASC";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
 			$valid_types = trim(str_replace(array('(', ')'), '', $def->def_type));
-				
-			switch ($valid_types) {
-				case 'integer':
-					$form_addl_html[$def->def_option] = 'maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)"';
-					break;
-				case 'yes | no':
-					if (!class_exists('fm_module_options')) {
-						include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
-					}
-					$form_addl_html[$def->def_option] = 'select:' . $def->def_type;
-					break;
-				default:
-					$form_addl_html[$def->def_option] = null;
+
+			if ($def->def_dropdown == 'yes') {
+				if (!class_exists('fm_module_options')) {
+					include_once (ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+				}
+				$form_addl_html[$def->def_option] = 'select:' . $def->def_type;
+			} else {
+				switch ($valid_types) {
+					case 'integer':
+						$form_addl_html[$def->def_option] = 'maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)"';
+						break;
+					default:
+						$form_addl_html[$def->def_option] = null;
+				}
 			}
 		}
 		
@@ -415,20 +419,20 @@ HTML;
 		}
 		
 		/** Get field length */
-		$tls_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name');
+		$name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_name');
 
-		$popup_title = $action == 'add' ? __('Add TLS Connection') : __('Edit TLS Connection');
+		$popup_title = $action == 'add' ? __('Add Element') : __('Edit Element');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		/** Minimum version */
-		$minimum_version = getMinimumFeatureVersion($cfg_type);
+		$minimum_version = getMinimumFeatureVersion($type, 'dnskey-ttl');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
 		%s
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
-			<input type="hidden" name="view_id" value="%d" />
+			<input type="hidden" name="sub_type" value="%s" />
 			<input type="hidden" name="server_serial_no" value="%s" />
 			<div id="tabs">
 				<div id="tab">
@@ -439,7 +443,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
+								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" maxlength="%d" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
@@ -469,9 +473,9 @@ HTML;
 				});
 			});
 		</script>',
-				$popup_header, $action, $cfg_id, $cfg_type_id, $server_serial_no,
+				$type, $popup_header, $action, $cfg_id, $type, $server_serial_no,
 				__('Basic'), $minimum_version,
-				__('Connection Name'), $cfg_data, __('tls-name'), $tls_name_length,
+				__('Name'), $cfg_data,$name_length,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
 				implode("\n", $child_config_form),
@@ -496,15 +500,13 @@ HTML;
 	function validatePost($post, $include_sub_configs) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_name'] = '!config_name!';
 		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
 		$post['cfg_comment'] = trim($post['cfg_comment']);
-		$post['cfg_type'] = 'tls';
+		$post['cfg_type'] = $post['sub_type'];
+		$post['cfg_id'] = sanitize($post['cfg_id']);
 
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND cfg_id!='{$post['cfg_id']}'";
 		$fmdb->get_results($query);
@@ -530,7 +532,46 @@ HTML;
 		return $post;
 	}
 
+
+	/**
+	 * Gets all available DNSSEC policies
+	 *
+	 * @since 6.1
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param string $cfg_data
+	 * @return array
+	 */
+	function getDNSSECPolicies($cfg_data) {
+		global $fmdb, $__FM_CONFIG;
+
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = 'dnssec-policy'";
+		$fmdb->query($query);
+
+		if (!$fmdb->num_rows) {
+			return array();
+		}
+		$default_policies = explode('|', trim($fmdb->last_result[0]->def_type, '()'));
+
+		$i = 0;
+		foreach ($default_policies as $item) {
+			$return[$i] = array_fill(0, 2, trim($item));
+			$i++;
+		}
+
+		$server_serial_no = 0;
+		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_data', 'cfg_', "AND cfg_type='dnssec-policy' AND cfg_name='!config_name!' AND server_serial_no='$server_serial_no' AND cfg_isparent='yes'");
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $result) {
+				$return[$i][] = $result->cfg_data;
+				$return[$i][] = 'dnssec_' . $result->cfg_id;
+			}
+		}
+
+		return $return;
+	}
 }
 
-if (!isset($fm_module_tls))
-	$fm_module_tls = new fm_module_tls();
+if (!isset($fm_module_dnssec))
+	$fm_module_dnssec = new fm_module_dnssec();

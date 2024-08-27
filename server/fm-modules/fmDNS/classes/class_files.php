@@ -272,7 +272,7 @@ HTML;
 					<td width="67&#37;">%s</td>
 				</tr>
 				<tr>
-					<th width="33&#37;" scope="row"><label for="file_name">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a> </th>
+					<th width="33&#37;" scope="row"><label for="file_name">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td width="67&#37;"><input name="file_name" id="file_name" type="text" value="%s" size="40" placeholder="custom-file" maxlength="%d" /></td>
 				</tr>
 				<tr>

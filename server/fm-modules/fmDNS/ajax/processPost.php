@@ -50,7 +50,8 @@ $checks_array = array('servers' => 'manage_servers',
 					'rpz' => 'manage_zones',
 					'http' => 'manage_servers',
 					'tls' => 'manage_servers',
-					'files' => 'manage_servers'
+					'files' => 'manage_servers',
+					'dnssec-policy' => 'manage_servers'
 				);
 $allowed_capabilities = array_unique($checks_array);
 
@@ -121,7 +122,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'rpz':
 		case 'http':
 		case 'tls':
-			$post_class = ${'fm_module_' . $item_type};
+		case 'dnssec-policy':
+			$post_class = (in_array($item_type, array('dnssec-policy'))) ? $fm_module_dnssec : ${'fm_module_' . $item_type};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
 			$object = $item_type;

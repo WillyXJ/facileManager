@@ -44,12 +44,12 @@ class fm_module_http {
 		echo displayPagination($page, $total_pages);
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'http'
 					);
 
-		$title_array = array(array('title' => __('Endpoint Name')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		$title_array = array(array('title' => __('Endpoint Name'), 'rel' => 'cfg_data'), array('title' => __('Options'), 'class' => 'header-nosort'), array('title' => _('Comment'), 'class' => 'header-nosort'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		}
@@ -215,6 +215,8 @@ class fm_module_http {
 		}
 		$sql_values = rtrim($sql_values, ', ');
 		
+		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
+
 		$query = "$sql_start $sql_values WHERE cfg_id={$post['cfg_id']} LIMIT 1";
 		$result = $fmdb->query($query);
 		
@@ -248,7 +250,7 @@ class fm_module_http {
 			}
 		}
 		
-		$log_message = sprintf("Updated HTTP Endpoint:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
+		$log_message = sprintf("Updated HTTP Endpoint '%s':\nName: %s\n%s", $old_name, $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 
 		return true;
@@ -337,7 +339,7 @@ class fm_module_http {
 		if ($class) $class = 'class="' . join(' ', $class) . '"';
 
 		echo <<<HTML
-		<tr id="$row->cfg_id" name="http" $class>
+		<tr id="$row->cfg_id" name="$http_endpoint_name" $class>
 			<td>$http_endpoint_name</td>
 			<td>$options</td>
 			<td>$comments</td>
@@ -375,7 +377,7 @@ HTML;
 		}
 
 		/** Get child elements */
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http' ORDER BY def_option ASC";
 		$result = $fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
@@ -391,11 +393,11 @@ HTML;
 		}
 		
 		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys($auto_fill_children, null));
-		foreach ((array) $child_config as $k => $v) {
+		foreach ($child_config as $k => $v) {
 			$child_config[$k] = str_replace(array('"', "'"), '', (string) $v);
 			$child_config_form[] = sprintf('
 				<tr>
-					<th width="33&#37;" scope="row"><label for="%s">%1$s</label></th>
+					<th width="33&#37;" scope="row"><label for="%2$s">%1$s</label></th>
 					<td width="67&#37;"><input name="%2$s" id="%2$s" type="text" value="%3$s" %4$s/></td>
 				</tr>', str_replace('-', ' ', $k), $k, $child_config[$k], $form_addl_html[$k]
 			);
@@ -407,6 +409,9 @@ HTML;
 		$popup_title = $action == 'add' ? __('Add HTTP Endpoint') : __('Edit HTTP Endpoint');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
+
+		/** Minimum version */
+		$minimum_version = getMinimumFeatureVersion($cfg_type);
 		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s
@@ -419,6 +424,7 @@ HTML;
 					<input type="radio" name="tab-group-1" id="tab-1" checked />
 					<label for="tab-1">%s</label>
 					<div id="tab-content">
+						<div id="response"><p class="center">%s</p></div>
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
@@ -453,7 +459,7 @@ HTML;
 			});
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_type_id, $server_serial_no,
-				__('Basic'),
+				__('Basic'), $minimum_version,
 				__('Endpoint Name'), $cfg_data, __('http-name'), $http_name_length,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
@@ -474,7 +480,7 @@ HTML;
 	 *
 	 * @param array $post Posted array
 	 * @param array $include_sub_configs Array of sub configs to validate
-	 * @return array|boolean
+	 * @return array|string|boolean
 	 */
 	function validatePost($post, $include_sub_configs) {
 		global $fmdb, $__FM_CONFIG;
@@ -484,8 +490,14 @@ HTML;
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
-		$post['cfg_name'] = 'http-endpoint';
+		$post['cfg_name'] = '!config_name!';
+		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
+		$post['cfg_comment'] = trim($post['cfg_comment']);
 		$post['cfg_type'] = 'http';
+
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND cfg_id!='{$post['cfg_id']}'";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) return __('This item already exists.');
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		
