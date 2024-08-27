@@ -100,7 +100,7 @@ class fm_dhcp_objects {
 		/** Insert the parent */
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
-		$sql_values = '';
+		$sql_values = $options_log_message = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
@@ -110,13 +110,19 @@ class fm_dhcp_objects {
 		if (empty($name)) return __('No name defined.');
 		
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_type', 'config_name', 'config_comment', 'config_parent_id'), $this->getIncludedFields());
-		
+		$log_exclude = array('account_id', 'config_is_parent', 'config_parent_id', 'config_type', 'config_children', 'config_data', 'server_serial_no');
+		$log_message = sprintf(__('Add a %s with the following details:'), $post['config_type']) . "\n";
+
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
 				if ($data) {
 					$sql_fields .= $key . ', ';
 					$sql_values .= "'$data', ";
+				}
+				if (!in_array($key, $log_exclude)) {
+					if ($key == 'config_name') $clean_data = $post['config_data'];
+					$log_message .= formatLogKeyData('config_', $key, $clean_data);
 				}
 			}
 		}
@@ -143,7 +149,7 @@ class fm_dhcp_objects {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'config_children'));
 		
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
@@ -152,7 +158,7 @@ class fm_dhcp_objects {
 		$i = 1;
 		foreach ($include as $handler) {
 			$child['config_name'] = $handler;
-			$child['config_data'] = $post[$handler];
+			$child['config_data'] = sanitize($post[$handler]);
 			
 			foreach ($child as $key => $data) {
 				if ($i) $sql_fields .= $key . ', ';
@@ -161,6 +167,7 @@ class fm_dhcp_objects {
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
+			if ($child['config_data'] && !in_array($handler, $log_exclude)) $options_log_message .= formatLogKeyData('config_', $handler, $child['config_data']);
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', (');
@@ -172,15 +179,24 @@ class fm_dhcp_objects {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 		
+		if ($post['config_parent_id']) {
+			// Log parent
+			$log_message .= formatLogKeyData('config_', __('Member of'), getNameFromID($post['config_parent_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data', $post['account_id']));
+		}
+
 		if (is_array($post['config_children'])) {
 			$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 			$query = "$sql_start config_parent_id={$child['config_parent_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
 			$result = $fmdb->query($query);
+
+			// Log children
+			foreach ($post['config_children'] as $child_id) {
+				$children[] = getNameFromID($child_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data', $post['account_id']);
+			}
+			$log_message .= formatLogKeyData('config_', __('Child Objects'), join(',', $children));
 		}
 
-		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware']}\nFixed Address: {$post['fixed-address']}";
-		$log_message .= "\nComment: {$post['config_comment']}";
-		addLogEntry($log_message);
+		addLogEntry(str_replace('\"', '', $log_message . $options_log_message));
 		return true;
 	}
 
@@ -203,7 +219,7 @@ class fm_dhcp_objects {
 		
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
-		$sql_values = '';
+		$sql_values = $options_log_message = '';
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
@@ -213,12 +229,16 @@ class fm_dhcp_objects {
 		if (empty($name)) return __('No name defined.');
 		
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_type', 'config_name', 'config_comment', 'config_parent_id'), $this->getIncludedFields());
+		$log_exclude = array('account_id', 'config_is_parent', 'config_parent_id', 'config_type', 'config_children', 'config_data', 'server_serial_no');
+		$log_message = sprintf(__('Updated a %s (%s) with the following details:'), $post['config_type'], getNameFromID($post['config_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data', $post['account_id'])) . "\n";
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				if ($data) {
-					$sql_values .= "$key='$data', ";
+				$sql_values .= "$key='$data', ";
+				if (!in_array($key, $log_exclude)) {
+					if ($key == 'config_name') $data = $post['config_data'];
+					$log_message .= formatLogKeyData('config_', $key, $data);
 				}
 			}
 		}
@@ -226,6 +246,7 @@ class fm_dhcp_objects {
 		
 		$query = "$sql_start $sql_values WHERE config_id={$post['config_id']} LIMIT 1";
 		$result = $fmdb->query($query);
+		$rows_affected = $fmdb->rows_affected;
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
@@ -247,29 +268,49 @@ class fm_dhcp_objects {
 		foreach ($include as $handler) {
 			$sql_values = '';
 			$child['config_name'] = $handler;
-			$child['config_data'] = $post[$handler];
+			$child['config_data'] = sanitize($post[$handler]);
 			
 			foreach ($child as $key => $data) {
 				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
-			
+			if ($child['config_data'] && !in_array($handler, $log_exclude)) {
+				if (in_array($handler, array('address', 'peer-address'))) {
+					$child['config_data'] = getNameFromID($child['config_data'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name', $post['account_id']);
+				}
+				$options_log_message .= formatLogKeyData('config_', $handler, $child['config_data']);
+			}
+
 			$query = "$sql_start $sql_values WHERE config_parent_id={$post['config_id']} AND config_name='$handler' LIMIT 1";
 			$result = $fmdb->query($query);
+			$rows_affected += $fmdb->rows_affected;
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 			}
 		}
 		
+		if ($post['config_parent_id']) {
+			// Log parent
+			$log_message .= formatLogKeyData('config_', __('Member of'), getNameFromID($post['config_parent_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data', $post['account_id']));
+		}
+
 		/** Reassigned children */
 		$query = "$sql_start config_parent_id=0 WHERE config_parent_id={$post['config_id']} AND config_is_parent='yes'";
 		$result = $fmdb->query($query);
 		if (is_array($post['config_children'])) {
 			$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
 			$result = $fmdb->query($query);
+			$rows_affected += $fmdb->rows_affected;
+
+			// Log children
+			foreach ($post['config_children'] as $child_id) {
+				$children[] = getNameFromID($child_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data', $post['account_id']);
+			}
+			$log_message .= formatLogKeyData('config_', __('Child Objects'), join(',', $children));
 		}
 
+		if ($rows_affected) addLogEntry(str_replace('\"', '', $log_message . $options_log_message));
 		return true;
 	}
 	
@@ -287,16 +328,17 @@ class fm_dhcp_objects {
 		global $fmdb, $__FM_CONFIG;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
+		$tmp_type = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_name');
 
 		/** Delete associated children */
 		updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'config_', 'deleted', 'config_parent_id');
 		
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'config_', 'deleted', 'config_id') === false) {
-			return formatError(__('This host could not be deleted because a database error occurred.'), 'sql');
+			return formatError(sprintf(__('This %s could not be deleted because a database error occurred.'), $tmp_type), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("Host '%s' was deleted."), $tmp_name));
+			addLogEntry(sprintf(__("Deleted %s '%s.'"), $tmp_type, $tmp_name));
 			return true;
 		}
 	}
@@ -722,7 +764,7 @@ HTML;
 		$return = '';
 		
 		/** Get the data from $config_opt */
-		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND config_parent_id='{$config_id}' AND config_name='$config_opt' ORDER BY config_id ASC";
+		$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND config_status!='deleted' AND (config_parent_id='{$config_id}' AND config_parent_id!='0') AND config_name='$config_opt' ORDER BY config_id ASC";
 		$result = $fmdb->get_results($query);
 		if (!$fmdb->sql_errors && $fmdb->num_rows) {
 			$results = $fmdb->last_result;
@@ -922,10 +964,10 @@ HTML;
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
-			$post_tmp['config_name'] = $post['config_name'];
+			$post_tmp['config_name'] = sanitize($post['config_name']);
 		}
 		if (array_key_exists('config_data', $post)) {
-			$post_tmp['config_data'] = $post['config_data'];
+			$post_tmp['config_data'] = sanitize($post['config_data']);
 		}
 		
 		foreach ($post as $key => $val) {
@@ -968,7 +1010,7 @@ HTML;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_name');
-		if ($field_length !== false && strlen($post['config_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Host name is too long (maximum %d characters).', $field_length), $field_length);
+		if ($field_length !== false && strlen($post['config_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Name is too long (maximum %d character).', 'Name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		return $post;
 	}

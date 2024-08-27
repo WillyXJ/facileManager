@@ -28,10 +28,8 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	return;
 }
 
-$class_dir = ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/';
-foreach (scandir($class_dir) as $class_file) {
-	if (in_array($class_file, array('.', '..'))) continue;
-	include_once($class_dir . $class_file);
+foreach (glob(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_*.php') as $filename) {
+    include_once($filename);
 }
 
 $unpriv_message = __('You do not have sufficient privileges.');
@@ -44,6 +42,7 @@ $checks_array = @array('servers' => 'manage_servers',
 					'subnets' => 'manage_networks',
 					'shared' => 'manage_networks',
 					'leases' => 'manage_leases',
+					'purge-leases' => 'manage_leases',
 					'options' => 'manage_servers'
 				);
 
@@ -54,6 +53,16 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		returnUnAuth();
 	}
 	
+	if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'purge-leases') {
+		$delete_lease_response = $fm_dhcp_leases->delete('all||', intval($_POST['server_serial_no']));
+		if ($delete_lease_response !== true) {
+			echo buildPopup('header', _('Error'));
+			echo '<p>' . $delete_lease_response . '</p>';
+			echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+		}
+		return;
+	}
+
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
 	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
@@ -137,8 +146,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 					exit(sprintf(__('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
 					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $field_data);
-					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+					list($tmp_type, $tmp_name, $tmp_parent_id) = getNameFromID($id, 'fm_' . $table, $prefix, $field, array($prefix . 'type', $field_data, $prefix . 'parent_id'));
+					$tmp_parent_name = (isset($tmp_parent_id)) ? getNameFromID($tmp_parent_id, 'fm_' . $table, $prefix, $prefix . 'id', $prefix . 'data') : null;
+					addLogEntry(sprintf(__('Set %s %s %s (%s) status to %s.'), $tmp_parent_name, $tmp_type, $object, $tmp_name, sanitize($_POST['item_status'])));
 					exit('Success');
 				}
 			}

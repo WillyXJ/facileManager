@@ -246,6 +246,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		
+		if ($row->server_update_method != 'cron' && currentUserCan('manage_leases', $_SESSION['module'])) $icons[] = sprintf('<a href="leases.php?server_serial_no=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-database" aria-hidden="true"></i></a>', $row->server_serial_no, __('Manage Leases'));
 		if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
 				$edit_actions .= $__FM_CONFIG['icons']['build'];
@@ -277,11 +278,15 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		if ($class) $class = 'class="' . $class . '"';
 		
+		if (is_array($icons)) {
+			$icons = implode(' ', $icons);
+		}
+
 		echo <<<HTML
 		<tr id="$row->server_id" $class>
 			$checkbox
 			<td>$os_image</td>
-			<td title="$row->server_serial_no">$row->server_name</td>
+			<td title="$row->server_serial_no">$row->server_name $icons</td>
 			<td>$row->server_update_method $port</td>
 			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>

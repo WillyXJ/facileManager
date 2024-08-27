@@ -124,7 +124,7 @@ class fm_module_options {
 		}
 		
 		$tmp_name = $post['config_name'];
-		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
+		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : _('All Servers');
 //		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 //		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
@@ -203,14 +203,16 @@ class fm_module_options {
 	function delete($id, $server_serial_no = 0) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_name');
+		list($tmp_type, $tmp_name, $tmp_parent_id) = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', array('config_type', 'config_name', 'config_parent_id'));
 		$tmp_server_name = $server_serial_no ? getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
 
 		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'config_', 'deleted', 'config_id') === false) {
 			return formatError(__('This option could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("Option '%s' for %s was deleted."), $tmp_name, $tmp_server_name));
+			$tmp_parent_name = (isset($tmp_parent_id)) ? getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : null;
+			addLogEntry(sprintf(__('%s (%s) option (%s) was deleted.'), $tmp_type, $tmp_parent_name, $tmp_name));
+			// addLogEntry(sprintf(__("Option '%s' for %s was deleted."), $tmp_name, $tmp_server_name));
 			return true;
 		}
 	}
@@ -397,7 +399,7 @@ HTML;
 				$config_id_sql = null;
 			}
 			
-			$query = "SELECT config_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE config_data!='' AND config_status IN (
+			$query = "SELECT DISTINCT config_name FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE config_data!='' AND config_status IN (
 						'active', 'disabled'
 					) AND account_id='{$_SESSION['user']['account_id']}' AND (
 						(server_serial_no='$server_serial_no' $config_id_sql)
@@ -487,7 +489,7 @@ HTML;
 			unset($post['host']);
 		}
 		
-		$post = $this->validateDefType($post);
+		$post = $this->validateDefType($post, $def_option);
 		
 		return $post;
 	}
@@ -502,10 +504,12 @@ HTML;
 	 * @param string $def_option Option type to validate
 	 * @return string Return formated data
 	 */
-	function validateDefType($post) {
+	function validateDefType($post, $def_option = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$post['config_name']}'";
+		$def_option = ($def_option) ? $def_option : "'{$post['config_name']}'";
+
+		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			if ($result[0]->def_dropdown == 'no') {
@@ -515,10 +519,10 @@ HTML;
 					case 'integer':
 					case 'seconds':
 					case 'minutes':
-						if (!verifyNumber($post['config_data'])) return $post['config_data'] . ' is an invalid number.';
+						if (!verifyNumber($post['config_data'])) return sprintf(__('%s is an invalid number.'), $post['config_data']);
 						break;
 					case 'port':
-						if (!verifyNumber($post['config_data'], 0, 65535)) return $post['config_data'] . ' is an invalid port number.';
+						if (!verifyNumber($post['config_data'], 0, 65535)) return sprintf(__('%s is an invalid port number.'), $post['config_data']);
 						break;
 					case 'quoted_string':
 						$post['config_data'] = '"' . str_replace(array('"', "'"), '', $post['config_data']) . '"';
@@ -526,14 +530,14 @@ HTML;
 					case 'address_match_element':
 						/** Need to check for valid ACLs or IP addresses */
 						
-						break;
+						// break;
 					case 'ipv4_address | ipv6_address':
-						if (!verifyIPAddress($post['config_data'])) return $post['config_data'] . ' is an invalid IP address.';
+						if (!verifyIPAddress($post['config_data'])) return sprintf(__('%s is an invalid IP address.'), $post['config_data']);
 						break;
 					case 'ipv4_address | *':
 					case 'ipv6_address | *':
 						if ($post['config_data'] != '*') {
-							if (!verifyIPAddress($post['config_data'])) return $post['config_data'] . ' is an invalid IP address.';
+							if (!verifyIPAddress($post['config_data'])) return sprintf(__('%s is an invalid IP address.'), $post['config_data']);
 						}
 						break;
 				}

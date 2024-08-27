@@ -30,7 +30,7 @@ function upgradefmDHCPSchema($module_name) {
 	$running_version = getOption('version', 0, 'fmDHCP');
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '0.4.7', '<') ? upgradefmDHCP_047($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '0.9.0', '<') ? upgradefmDHCP_090($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false, 0, 'fmDHCP');
@@ -43,12 +43,12 @@ function upgradefmDHCP_020($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	if (!columnExists("fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions", 'def_prefix')) {
-		$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` ADD `def_prefix` VARCHAR(20) NULL DEFAULT NULL AFTER `def_option_type`";
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` ADD `def_prefix` VARCHAR(20) NULL DEFAULT NULL AFTER `def_option_type`";
 	}
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','shared','subnet','group','host','pool','peer') NOT NULL DEFAULT 'global'";
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` CHANGE `def_option_type` `def_option_type` ENUM('global','shared','subnet','group','host','pool','peer') NOT NULL DEFAULT 'global'";
 	
 	/** Insert upgrade steps here **/
-	$inserts[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` (
+	$queries[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` (
 		`def_function`, `def_option_type`, `def_prefix`, `def_option`, `def_type`, `def_multiple_values`, `def_dropdown`, `def_max_parameters`, `def_direction`, `def_minimum_version`
 )
 VALUES
@@ -77,19 +77,12 @@ VALUES
 ('options', 'global', 'option', 'slp-service-scope', '( quoted_string )', 'no', 'no', '1', 'forward', NULL),
 ('options', 'shared', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL)
 ";
-	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` SET `def_option_type`='subnet' WHERE `def_option`='authoritative' AND `def_option_type`='global' LIMIT 1";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` SET `def_option_type`='subnet' WHERE `def_option`='authoritative' AND `def_option_type`='global' LIMIT 1";
 	
-	/** Create table schema */
-	if (count($table) && $table[0]) {
-		foreach ($table as $schema) {
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-	
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $query) {
-			$fmdb->query($query);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
@@ -130,19 +123,12 @@ function upgradefmDHCP_031($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	/** Insert upgrade steps here **/
-	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` SET `config_name`='load balance max seconds' WHERE `config_name`='load balance max secs'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` SET `config_name`='load balance max seconds' WHERE `config_name`='load balance max secs'";
 	
-	/** Create table schema */
-	if (count($table) && $table[0]) {
-		foreach ($table as $schema) {
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-	
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $query) {
-			$fmdb->query($query);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
@@ -161,19 +147,12 @@ function upgradefmDHCP_032($__FM_CONFIG, $running_version) {
 	if (!$success) return false;
 	
 	/** Insert upgrade steps here **/
-	$inserts[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` SET `config_name`='load balance max seconds' WHERE `config_name`='load_balance_max_seconds'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` SET `config_name`='load balance max seconds' WHERE `config_name`='load_balance_max_seconds'";
 	
-	/** Create table schema */
-	if (count($table) && $table[0]) {
-		foreach ($table as $schema) {
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-	
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $query) {
-			$fmdb->query($query);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
@@ -202,22 +181,15 @@ function upgradefmDHCP_045($__FM_CONFIG, $running_version) {
 			$query = "SELECT config_id,config_data FROM fm_{$__FM_CONFIG['fmDHCP']['prefix']}config WHERE config_status!='deleted' AND config_parent_id='{$record->config_id}' AND config_name='failover peer' ORDER BY config_id ASC";
 			$result = $fmdb->get_results($query);
 			if (!$fmdb->sql_errors && !$fmdb->num_rows) {
-				$inserts[] = "INSERT INTO `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` (`config_type`,`config_parent_id`,`config_name`,`config_data`) VALUES ('pool', {$record->config_id}, 'failover peer', '0')";
+				$queries[] = "INSERT INTO `fm_{$__FM_CONFIG['fmDHCP']['prefix']}config` (`config_type`,`config_parent_id`,`config_name`,`config_data`) VALUES ('pool', {$record->config_id}, 'failover peer', '0')";
 			}	
 		}
 	}
 	
-	/** Create table schema */
-	if (count($table) && $table[0]) {
-		foreach ($table as $schema) {
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
 			$fmdb->query($schema);
-			if (!$fmdb->result || $fmdb->sql_errors) return false;
-		}
-	}
-	
-	if (count($inserts) && $inserts[0]) {
-		foreach ($inserts as $query) {
-			$fmdb->query($query);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
 	}
@@ -235,11 +207,11 @@ function upgradefmDHCP_047($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '0.4.5', '<') ? upgradefmDHCP_045($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$table[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}servers` CHANGE `server_update_config` `server_update_config` ENUM('yes','no','conf') NOT NULL DEFAULT 'no'";
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDHCP']['prefix']}servers` CHANGE `server_update_config` `server_update_config` ENUM('yes','no','conf') NOT NULL DEFAULT 'no'";
 	
-	/** Create table schema */
-	if (count($table) && $table[0]) {
-		foreach ($table as $schema) {
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
 			$fmdb->query($schema);
 			if (!$fmdb->result || $fmdb->sql_errors) return false;
 		}
@@ -250,3 +222,42 @@ function upgradefmDHCP_047($__FM_CONFIG, $running_version) {
 	
 	return true;
 }
+
+/** 0.9 */
+function upgradefmDHCP_090($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '0.4.7', '<') ? upgradefmDHCP_047($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+
+	/** Insert upgrade steps here **/
+	$queries[] = "INSERT IGNORE INTO  `fm_{$__FM_CONFIG['fmDHCP']['prefix']}functions` (
+`def_function`,
+`def_option_type`,
+`def_prefix`,
+`def_option`,
+`def_type`,
+`def_multiple_values`,
+`def_dropdown`,
+`def_max_parameters`,
+`def_direction`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'global', NULL, 'authoritative', '( on | off )', 'no', 'yes', 1, 'empty', NULL)
+";
+	
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+			if (!$fmdb->result || $fmdb->sql_errors) return false;
+		}
+	}
+	
+	/** Handle updating table with module version **/
+	setOption('version', '0.9', 'auto', false, 0, 'fmDHCP');
+	
+	return true;
+}
+
