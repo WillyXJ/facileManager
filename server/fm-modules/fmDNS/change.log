@@ -1,5 +1,5 @@
-6.1.0-beta1 (2024-08-27)
-========================
+6.1.0 (2024-09-30)
+==================
 * Server - [improvement] Added graphic highlighting to bulk actions. (Issue #604)
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
 * Server - [improvement] Form validations now trims and sanitizes all fields.
