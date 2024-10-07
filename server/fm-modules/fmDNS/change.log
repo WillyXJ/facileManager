@@ -1,6 +1,6 @@
-6.1.1 (2024-??-??)
+6.1.1 (2024-10-07)
 ==================
-* Server - [bug] Fixed PHP errors when selecting certain config options.
+* Server - [bug] Fixed PHP errors that prevented editing of certain config options.
 
 6.1.0 (2024-09-30)
 ==================
