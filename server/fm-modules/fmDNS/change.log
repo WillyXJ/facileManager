@@ -1,6 +1,7 @@
 6.1.2 (2024-10-??)
 ==================
 * Server - [bug] Changed 'notify' option value from 'master-only' to 'primary-only'.
+* Server - [bug] Fixed logging display of some config options.
 
 6.1.1 (2024-10-07)
 ==================
