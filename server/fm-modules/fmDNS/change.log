@@ -1,3 +1,7 @@
+6.1.2 (2024-10-??)
+==================
+* Server - [bug] Changed 'notify' option value from 'master-only' to 'primary-only'.
+
 6.1.1 (2024-10-07)
 ==================
 * Server - [bug] Fixed PHP errors that prevented editing of certain config options.

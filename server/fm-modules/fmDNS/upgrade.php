@@ -2696,3 +2696,25 @@ INSERTSQL;
 	
 	return true;
 }
+
+/** 6.1.2 */
+function upgradefmDNS_612($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '6.1.0', '<') ? upgradefmDNS_610($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | explicit | primary-only )' WHERE `def_option` = 'notify'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data` = REPLACE(cfg_data, 'master', 'primary') WHERE `cfg_name`='notify'";
+
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '6.1.2', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}
