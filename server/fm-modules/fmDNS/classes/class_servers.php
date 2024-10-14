@@ -1124,9 +1124,7 @@ FORM;
 		$post['server_menu_display'] = (in_array($post['server_type'], array('remote', 'url-only'))) ? 'exclude' : 'include';
 
 		/** Process server_key */
-		if (isset($post['keys'])) {
-			$post['keys'] = join(',', $post['keys']);
-		} else {
+		if (!isset($post['keys'])) {
 			$post['keys'] = null;
 		}
 		

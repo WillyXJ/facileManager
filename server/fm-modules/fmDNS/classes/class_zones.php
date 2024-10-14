@@ -260,6 +260,8 @@ class fm_dns_zones {
 						$log_message .= formatLogKeyData('_id', $key, $soa_name);
 					} elseif ($key == 'domain_template_id') {
 						$log_message .= formatLogKeyData(array('domain_', '_id'), $key, getNameFromID($data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+					} elseif ($key == 'domain_key_id') {
+						$log_message .= formatLogKeyData(array('domain_', '_id'), $key, getNameFromID($data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name'));
 					} else {
 						$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
 					}
@@ -449,7 +451,11 @@ class fm_dns_zones {
 				$sql_edit .= strlen($data) ? $key . "='$data', " : $key . '=NULL, ';
 				if ($key == 'domain_view') $data = trim($log_message_views, '; ');
 				if ($key == 'domain_name_servers') $data = trim($log_message_name_servers, '; ');
-				$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+				if ($key == 'domain_key_id') {
+					$log_message .= formatLogKeyData(array('domain_', '_id'), $key, getNameFromID($data, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name'));
+				} else {
+					$log_message .= $data ? formatLogKeyData('domain_', $key, $data) : null;
+				}
 				if ($key == 'domain_default' && $data == 'yes') {
 					$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
 					$result = $fmdb->query($query);
@@ -924,7 +930,7 @@ HTML;
 		
 		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_module_options, $fm_dns_masters;
 		
-		$domain_id = $domain_name_servers = 0;
+		$domain_id = $domain_name_servers = $domain_key_id = 0;
 		$domain_view = -1;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = $domain_ttl = null;
 		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
@@ -989,7 +995,10 @@ HTML;
 			$domain_master_servers = str_replace(';', "\n", rtrim(str_replace(' ', '', getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='primaries'")), ';'));
 			if ($domain_master_servers) $available_masters = $fm_dns_masters->buildMasterJSON($domain_master_servers);
 		}
-		
+
+		$keys = ($domain_key_id) ? array($domain_key_id) : null;
+		$keys = buildSelect('domain_key_id', 'domain_key_id', availableItems('key', 'blank', 'AND `key_type`="tsig"'), $keys, 1, '', false);
+
 		/** Build forward options */
 		$query = "SELECT def_type,def_dropdown FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = 'forward'";
 		$fmdb->get_results($query);
@@ -1184,6 +1193,10 @@ HTML;
 					<th><label for="domain_ttl">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td><input type="text" id="domain_ttl" name="domain_ttl" size="40" value="%s" maxlength="%d" onkeydown="return validateTimeFormat(event, this)" /></td>
 				</tr>
+				<tr>
+					<th width="33&#37;" scope="row"><label for="view_key_id">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;">%s</td>
+				</tr>
 				%s
 			</table>',
 				$action, $domain_id, $classes,
@@ -1200,6 +1213,7 @@ HTML;
 				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
 				__('Domain TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
+				__('Zone Transfer Key'), __('Optionally specify a key for transferring this zone (overrides this setting in views).'), $keys,
 				$soa_templates . $addl_zone_options . $additional_config_link . $create_template . $template_name
 				);
 

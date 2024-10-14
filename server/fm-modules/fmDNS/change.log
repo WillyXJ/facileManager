@@ -1,5 +1,7 @@
 6.1.2 (2024-10-??)
 ==================
+* Server - [improvement] Added support to specify a zone transfer key at either the view
+           or individual zone level. (Issue #512)
 * Server - [bug] Changed 'notify' option value from 'master-only' to 'primary-only'.
 * Server - [bug] Fixed logging display of some config options.
 * Server - [bug] Removed the ability to select multiple keys per server. (Issue #512)

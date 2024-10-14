@@ -40,7 +40,7 @@ class fm_dns_views {
 						'name' => 'views'
 					);
 
-		$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => __('Zone Transfer Key')), array('title' => _('Comment'), 'class' => 'header-nosort'));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 			if ($num_rows > 1) $table_info['class'] .= ' grab1';
@@ -72,6 +72,7 @@ class fm_dns_views {
 		extract($data, EXTR_SKIP);
 		
 		$view_name = sanitize($view_name);
+		$view_key_id = intval($view_key_id);
 		
 		if (empty($view_name)) return __('No view name defined.');
 		$view_comment = trim($view_comment);
@@ -92,18 +93,22 @@ class fm_dns_views {
 			} else $view_order_id = 1;
 		}
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_order_id`, `view_name`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$view_order_id', '$view_name', '$view_comment')";
+		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` (`account_id`, `server_serial_no`, `view_order_id`, `view_name`, `view_key_id`, `view_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$view_order_id', '$view_name', '$view_key_id', '$view_comment')";
 		$result = $fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the view because a database error occurred.'), 'sql');
 		}
 
-		$tmp_server_name = _('All Servers');
+		$tmp_key_name = _('None');
+		if ($view_key_id) {
+			$tmp_key_name = getNameFromID($view_key_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
+		}
+		$tmp_server_name = 'Servers: ' . _('All Servers');
 		if ($server_serial_no) {
 			$tmp_server_name = (strpos($server_serial_no, 'g_') !== false) ? 'Group: ' . getNameFromID(str_replace('g_', '', $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name') : 'Server: ' . getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 		}
-		addLogEntry("Added view:\nName: $view_name\n$tmp_server_name\nComment: $view_comment");
+		addLogEntry("Added view:\nName: $view_name\nZone Transfer Key: $tmp_key_name\n$tmp_server_name\nComment: $view_comment");
 		return true;
 	}
 
@@ -113,14 +118,14 @@ class fm_dns_views {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		if (!isset($post['server_serial_no'])) {
+			$post['server_serial_no'] = 0;
+		}
+
 		/** Update sort order */
 		if ($post['action'] == 'update_sort') {
 			/** Make new order in array */
 			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
-			
-			if (!isset($post['server_serial_no'])) {
-				$post['server_serial_no'] = 0;
-			}
 			
 			/** Get view listing for server */
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_order_id', 'view_', "AND server_serial_no='{$post['server_serial_no']}'");
@@ -147,6 +152,7 @@ class fm_dns_views {
 		}
 		
 		if (empty($post['view_name'])) return __('No view name defined.');
+		$post['view_key_id'] = intval($post['view_key_id']);
 		$post['view_comment'] = trim($post['view_comment']);
 
 		/** Check name field length */
@@ -183,7 +189,16 @@ class fm_dns_views {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		addLogEntry("Updated view '$old_name' to the following:\nName: {$post['view_name']}\nComment: {$post['view_comment']}");
+		$tmp_key_name = _('None');
+		if ($post['view_key_id']) {
+			$tmp_key_name = getNameFromID($post['view_key_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
+		}
+		$tmp_server_name = 'Servers: ' . _('All Servers');
+		if ($post['server_serial_no']) {
+			$tmp_server_name = (strpos($post['server_serial_no'], 'g_') !== false) ? 'Group: ' . getNameFromID(str_replace('g_', '', $post['server_serial_no']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name') : 'Server: ' . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+		}
+
+		addLogEntry("Updated view '$old_name' to the following:\nName: {$post['view_name']}\nZone Transfer Key: $tmp_key_name\n$tmp_server_name\nComment: {$post['view_comment']}");
 		return true;
 	}
 	
@@ -244,12 +259,17 @@ class fm_dns_views {
 			$edit_status = $grab_bars = null;
 		}
 		
+		$tmp_key_name = _('None');
+		if ($row->view_key_id) {
+			$tmp_key_name = getNameFromID($row->view_key_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
+		}
 		$comments = nl2br($row->view_comment);
 
 		echo <<<HTML
 		<tr id="$row->view_id" name="$row->view_name"$disabled_class>
 			<td>$grab_bars</td>
 			<td>$row->view_name $icons</td>
+			<td>$tmp_key_name</td>
 			<td>$comments</td>
 			$edit_status
 		</tr>
@@ -262,7 +282,7 @@ HTML;
 	function printForm($data = '', $action = 'add') {
 		global $__FM_CONFIG;
 		
-		$view_id = $view_order_id = 0;
+		$view_id = $view_order_id = $view_key_id = 0;
 		$view_name = $view_comment = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
@@ -275,7 +295,10 @@ HTML;
 		
 		/** Get field length */
 		$view_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_name');
-		
+
+		$keys = ($view_key_id) ? array($view_key_id) : null;
+		$keys = buildSelect('view_key_id', 'view_key_id', availableItems('key', 'blank', 'AND `key_type`="tsig"'), $keys, 1, '', false);
+
 		$popup_title = $action == 'add' ? __('Add View') : __('Edit View');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
@@ -293,15 +316,29 @@ HTML;
 					<td width="67&#37;"><input name="view_name" id="view_name" type="text" value="%s" size="40" placeholder="internal" maxlength="%d" /></td>
 				</tr>
 				<tr>
+					<th width="33&#37;" scope="row"><label for="view_key_id">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+				<tr>
 					<th width="33&#37;" scope="row"><label for="view_comment">%s</label></th>
 					<td width="67&#37;"><textarea id="view_comment" name="view_comment" rows="4" cols="30">%s</textarea></td>
 				</tr>
 			</table>
 		%s
-		</form>',
+		</form>
+		<script>
+			$(document).ready(function() {
+				$("#manage select").select2({
+					minimumResultsForSearch: 10,
+					allowClear: true,
+					width: "200px"
+				});
+			});
+		</script>',
 				$popup_header,
 				$action, $view_id, $view_order_id, $server_serial_no,
 				__('View Name'), $view_name, $view_name_length,
+				__('Zone Transfer Key'), __('Optionally specify a key for all zone transfers in this view to use.'), $keys,
 				_('Comment'), $view_comment, $popup_footer
 			);
 

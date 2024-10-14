@@ -2706,6 +2706,9 @@ function upgradefmDNS_612($__FM_CONFIG, $running_version) {
 	
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | explicit | primary-only )' WHERE `def_option` = 'notify'";
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data` = REPLACE(cfg_data, 'master', 'primary') WHERE `cfg_name`='notify'";
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data` = SUBSTRING_INDEX(cfg_data, ',', 1) WHERE `cfg_name`='keys' AND `server_id`>0";
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD `view_key_id` INT(11) NOT NULL DEFAULT '0' AFTER `view_name`";
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_key_id` INT(11) NULL DEFAULT NULL AFTER `domain_clone_dname`";
 
 	/** Run queries */
 	if (count($queries) && $queries[0]) {

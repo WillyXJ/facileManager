@@ -987,7 +987,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 					$domain_name_file = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
 					$domain_name = isset($zone_result[$i]->domain_name_file) ? $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name_file)) : $domain_name_file;
-					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
+					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id, $view_id);
 					$zones .= 'zone "' . trimFullStop($domain_name) . "\" {\n";
 					$zones .= "\ttype $domain_type;\n";
 					$default_file_ext = $file_ext = '';
@@ -2152,9 +2152,10 @@ HTML;
 	 *
 	 * @param array $zone_array The zone data
 	 * @param integer $server_id The server id to check
+	 * @param integer $view_id The view id
 	 * @return array
 	 */
-	function processServerGroups($zone_array, $server_id) {
+	function processServerGroups($zone_array, $server_id, $view_id) {
 		global $fmdb, $__FM_CONFIG;
 		
 		extract(get_object_vars($zone_array), EXTR_OVERWRITE);
@@ -2181,7 +2182,14 @@ HTML;
 					}
 					
 					if (in_array($server_id, $group_slaves)) {
-						return array('secondary', sprintf("\tprimaries { %s };\n", $this->resolveServerGroupMasters($group_masters)));
+						if ($domain_key_id) {
+							$tmp_key_id = $domain_key_id;
+						}
+						if ($view_id && !$domain_key_id) {
+							$tmp_key_id = getNameFromID($view_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_key_id');
+						}
+
+						return array('secondary', sprintf("\tprimaries { %s };\n", $this->resolveServerGroupMasters($group_masters, $tmp_key_id)));
 					}
 				}
 			}
@@ -2197,18 +2205,22 @@ HTML;
 	 * @package fmDNS
 	 *
 	 * @param array $zone_array The zone data
-	 * @param integer $server_id The server id to check
+	 * @param integer $key_id The zone transfer key id
 	 * @return string
 	 */
-	function resolveServerGroupMasters($masters) {
-		global $__FM_CONFIG;
+	function resolveServerGroupMasters($masters, $key_id) {
+		global $__FM_CONFIG, $fmdb;
 		
 		if (!count($masters)) return null;
 		
 		foreach ($masters as $server_id) {
 			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			$server_ip = gethostbyname($server_name);
-			$master_ips[] = ($server_ip != $server_name) ? $server_ip : sprintf(__('Cannot resolve %s'), $server_name);
+			$key = '';
+			if ($key_id) {
+				$key = sprintf(' key %s', getNameFromID($key_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name'));
+			}
+			$master_ips[] = ($server_ip != $server_name) ? $server_ip . $key : sprintf(__('Cannot resolve %s'), $server_name) . $key;
 		}
 		
 		return implode('; ', (array) $master_ips) . ';';

@@ -112,7 +112,7 @@ HTML;
 		
 		$excluded_fields = array($prefix . '_id', 'account_id', $prefix . '_template', $prefix . '_default',
 				$prefix . '_name', $prefix . '_status', $prefix . '_template_id', $prefix . '_dynamic',
-				'soa_serial_no_previous', $prefix . '_check_config');
+				'soa_serial_no_previous', $prefix . '_check_config', $prefix . '_key_id');
 		
 		if ($prefix == 'soa') {
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));
