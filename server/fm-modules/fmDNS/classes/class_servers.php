@@ -671,8 +671,8 @@ FORM;
 
 			/** Advanced tab */
 			$keys = $this->getConfig($server_id, 'keys');
-			$keys = ($keys) ? explode(',', $keys) : null;
-			$keys = buildSelect('keys', 'keys', availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', true);
+			$keys = ($keys) ? array($keys) : null;
+			$keys = buildSelect('keys', 'keys', availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', false);
 			$transfers = str_replace(array('"', "'"), '', $this->getConfig($server_id, 'transfers'));
 			$bogus = $this->buildConfigOptions('bogus', $this->getConfig($server_id, 'bogus'));
 			$edns = $this->buildConfigOptions('edns', $this->getConfig($server_id, 'edns'));

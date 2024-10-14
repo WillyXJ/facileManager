@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Changed 'notify' option value from 'master-only' to 'primary-only'.
 * Server - [bug] Fixed logging display of some config options.
+* Server - [bug] Removed the ability to select multiple keys per server. (Issue #512)
 
 6.1.1 (2024-10-07)
 ==================
