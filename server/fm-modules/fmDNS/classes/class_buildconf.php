@@ -1361,8 +1361,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 				$record_start = str_pad($record_name, 25) . $separator . $record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
 
-				// Swap @ for domain_name in values
-				// $record_result[$i]->record_value = str_replace('@', $domain_name, $record_result[$i]->record_value);
+				// Swap custom variables for values
+				$record_result[$i]->record_value = $this->swapVars4Values($record_result[$i]->record_value, $domain);
 				
 				switch($record_result[$i]->record_type) {
 					case 'A':
@@ -2767,6 +2767,35 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			$global_config .= "};\n";
 		}
 		return ($global_config) ? $global_config . "\n" : null;
+	}
+	
+	/**
+	 * Formats the server http endpoint statements
+	 *
+	 * @since 6.2
+	 * @package fmDNS
+	 *
+	 * @param string $record_value String to parse
+	 * @param object $domain Current processing domain
+	 * @return string
+	 */
+	private function swapVars4Values($record_value, $domain) {
+		global $__FM_CONFIG;
+
+		$record_value = str_replace(array('{domain}'), array($domain->domain_name), $record_value);
+
+		preg_match_all('/{(\w+):(\d+)}/', $record_value, $matches, PREG_SET_ORDER);
+		if (count($matches)) {
+			// var_dump($matches);
+			foreach ($matches as $match_array) {
+				list($search, $type, $id) = $match_array;
+				$value = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $type . 's', $type . '_', $type . '_id', $type . '_name');
+
+				$record_value = str_replace(array($search), array($value), $record_value);
+			}
+		}
+
+		return $record_value;
 	}
 	
 }

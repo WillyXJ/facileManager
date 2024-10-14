@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] Added support to specify a zone transfer key at either the view
            or individual zone level. (Issue #512)
+* Server - [improvement] Added support for built-in variables for use in record values. (Issue #593)
 * Server - [bug] Changed 'notify' option value from 'master-only' to 'primary-only'.
 * Server - [bug] Fixed logging display of some config options.
 * Server - [bug] Removed the ability to select multiple keys per server. (Issue #512)
