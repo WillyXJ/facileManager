@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '6.1.0', '<') ? upgradefmDNS_610($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '6.2.0', '<') ? upgradefmDNS_620($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2582,7 +2582,9 @@ INSERTSQL;
 		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_clause_support` = 'OV' WHERE `def_option_type` = 'ratelimit'";
 
 		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_status`='deleted' WHERE `cfg_type`='ratelimit' AND `domain_id`!=0";
-		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` ADD `master_tls_id` INT NOT NULL DEFAULT '0' AFTER `master_key_id`";
+		if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}masters", 'master_tls_id')) {
+			$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` ADD `master_tls_id` INT NOT NULL DEFAULT '0' AFTER `master_key_id`";
+		}
 		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` CHANGE `domain_type` `domain_type` ENUM('primary','secondary','master','slave','forward','stub') NOT NULL DEFAULT 'primary'";
 		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='primary' WHERE `domain_type`='master'";
 		$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` SET `domain_type`='secondary' WHERE `domain_type`='slave'";
@@ -2697,8 +2699,8 @@ INSERTSQL;
 	return true;
 }
 
-/** 6.1.2 */
-function upgradefmDNS_612($__FM_CONFIG, $running_version) {
+/** 6.2.0 */
+function upgradefmDNS_620($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '6.1.0', '<') ? upgradefmDNS_610($__FM_CONFIG, $running_version) : true;
@@ -2707,8 +2709,12 @@ function upgradefmDNS_612($__FM_CONFIG, $running_version) {
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_type` = '( yes | no | explicit | primary-only )' WHERE `def_option` = 'notify'";
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data` = REPLACE(cfg_data, 'master', 'primary') WHERE `cfg_name`='notify'";
 	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_data` = SUBSTRING_INDEX(cfg_data, ',', 1) WHERE `cfg_name`='keys' AND `server_id`>0";
-	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD `view_key_id` INT(11) NOT NULL DEFAULT '0' AFTER `view_name`";
-	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_key_id` INT(11) NULL DEFAULT NULL AFTER `domain_clone_dname`";
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}views", 'view_key_id')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}views` ADD `view_key_id` INT(11) NOT NULL DEFAULT '0' AFTER `view_name`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_key_id')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_key_id` INT(11) NULL DEFAULT NULL AFTER `domain_clone_dname`";
+	}
 
 	/** Run queries */
 	if (count($queries) && $queries[0]) {
@@ -2717,7 +2723,7 @@ function upgradefmDNS_612($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('version', '6.1.2', 'auto', false, 0, 'fmDNS');
+	setOption('version', '6.2.0', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }
