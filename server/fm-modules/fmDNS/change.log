@@ -1,3 +1,7 @@
+6.3.0 (2024-10-??)
+==================
+* Server - [bug] Dynamic zones now pull the zone from the correct directory.
+
 6.2.0 (2024-10-14)
 ==================
 * Server - [improvement] Added support to specify a zone transfer key at either the view
