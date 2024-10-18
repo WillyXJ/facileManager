@@ -1,6 +1,7 @@
 6.3.0 (2024-10-??)
 ==================
 * Server - [bug] Dynamic zones now pull the zone from the correct directory.
+* Server - [bug] Fixed modifying dnssec policies when an override exists.
 
 6.2.0 (2024-10-14)
 ==================
