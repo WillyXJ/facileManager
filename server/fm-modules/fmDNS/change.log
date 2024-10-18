@@ -1,5 +1,7 @@
 6.3.0 (2024-10-??)
 ==================
+* Server - [improvement] When using server groups, primary zones can automatically
+           set also-notify to include all secondary servers.
 * Server - [bug] Dynamic zones now pull the zone from the correct directory.
 * Server - [bug] Fixed modifying dnssec policies when an override exists.
 * Server - [bug] Added missing icon to add options for zone templates.

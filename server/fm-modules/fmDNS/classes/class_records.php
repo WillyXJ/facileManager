@@ -86,6 +86,7 @@ class fm_dns_records {
 		
 		$sql_insert = "INSERT INTO `$table`";
 		$sql_fields = '(';
+		$sql_values = '';
 		if ($record_type != 'SOA' && $record_type) {
 			$sql_fields .= 'domain_id, record_type, ';
 			$sql_values .= "$domain_id, '$record_type', ";
@@ -989,6 +990,7 @@ HTML;
 		$_FILES['import-file']['tmp_name'] = $_FILES['import-file']['name'] = '/tmp/db.' . $domain_name;
 		file_put_contents($_FILES['import-file']['tmp_name'], join("\n", $server_remote['output']));
 
+		global $fm_module_tools;
 		$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
 		if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
 			include($module_tools_file);

@@ -2727,3 +2727,24 @@ function upgradefmDNS_620($__FM_CONFIG, $running_version) {
 	
 	return true;
 }
+
+/** 6.3.0 */
+function upgradefmDNS_630($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '6.2.0', '<') ? upgradefmDNS_620($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` ADD `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `group_name`";
+
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '6.2.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}

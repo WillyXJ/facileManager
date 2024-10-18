@@ -277,6 +277,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
   `group_name` varchar(128) NOT NULL,
+  `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no',
   `group_masters` text NOT NULL,
   `group_slaves` text NOT NULL,
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
