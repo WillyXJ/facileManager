@@ -70,7 +70,7 @@ if (!empty($fm_new_version_available)) {
 		$response .= sprintf(_('%s and %s need to be writeable by %s in order for the core and modules to be updated automatically.'), $fm_temp_directory, ABSPATH, $__FM_CONFIG['webserver']['user_info']['name']);
 	}
 
-	$update_core = sprintf('<h2>%s</h2><p>%s</p><p>%s</p><br />', sprintf(_('Update %s Core'), $fm_name), $text, $buttons);
+	$update_core = sprintf('<h2>%s</h2><div class="upgrade_notice"><p>%s</p></div><p>%s</p><br />', sprintf(_('Update %s Core'), $fm_name), $text, $buttons);
 }
 
 printHeader();
