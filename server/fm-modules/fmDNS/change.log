@@ -6,6 +6,7 @@
 * Server - [bug] Fixed modifying dnssec policies when an override exists.
 * Server - [bug] Added missing icon to add options for zone templates.
 * Server - [bug] Fixed PHP errors.
+* Server - [bug] Fixed server group member references. (Issue #637)
 
 6.2.0 (2024-10-14)
 ==================

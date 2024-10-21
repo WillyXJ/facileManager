@@ -680,7 +680,7 @@ function getModuleBadgeCounts($type) {
  * @param array $server_types Type of servers to pull
  * @return string
  */
-function getZoneServers($domain_id, $server_types = array('primaries')) {
+function getZoneServers($domain_id, $server_types = array('masters')) {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
 	$serial_no = array();
