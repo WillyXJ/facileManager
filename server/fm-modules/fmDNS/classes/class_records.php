@@ -937,7 +937,7 @@ HTML;
 			
 			/** Get zone data via ssh */
 			if ($server_update_method == 'ssh') {
-				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/' . $master_dir . '/db.' . $domain_name . '.' . $file_ext, 'return', $server_update_port);
+				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/' . $master_dir . '/db.' . $domain_name . '.' . $file_ext, 'return', $server_update_port, 'include', 'window');
 			} elseif (in_array($server_update_method, array('http', 'https'))) {
 				/** Get zone data via http(s) */
 				/** Test the port first */

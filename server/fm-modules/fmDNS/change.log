@@ -7,6 +7,7 @@
 * Server - [bug] Added missing icon to add options for zone templates.
 * Server - [bug] Fixed PHP errors.
 * Server - [bug] Fixed server group member references. (Issue #637)
+* Server - [bug] Fixed message formatting of dynamic zone errors.
 
 6.2.0 (2024-10-14)
 ==================
