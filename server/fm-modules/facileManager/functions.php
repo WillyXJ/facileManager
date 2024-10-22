@@ -2341,6 +2341,10 @@ function resetPassword($fm_login, $user_password) {
 	if ($user_info = getUserInfo($fm_login, 'user_login')) {
 		$fm_login_id = $user_info['user_id'];
 
+		/** Check if password is different */
+		if (password_verify($user_password, getNameFromID($fm_login_id, 'fm_users', 'user_', 'user_id', 'user_password', $user_info['account_id'])))
+			return _('The new password cannot be the same as the current one.');
+
 		/** Update password */
 		$query = "UPDATE `fm_users` SET `user_password`='" . password_hash($user_password, PASSWORD_DEFAULT) . "', `user_force_pwd_change`='no' WHERE `user_id`='$fm_login_id'";
 		$fmdb->query($query);
