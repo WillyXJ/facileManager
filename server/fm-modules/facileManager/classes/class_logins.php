@@ -128,9 +128,10 @@ class fm_login {
 	 * @package facileManager
 	 *
 	 * @param string $user_login Username to authenticate
-	 * @return boolean|void
+	 * @param string $option Form options
+	 * @return boolean|void|string
 	 */
-	function processUserPwdResetForm($user_login = null) {
+	function processUserPwdResetForm($user_login = null, $option = 'mail') {
 		global $fmdb;
 		
 		$user_login = sanitize(trim($user_login));
@@ -139,7 +140,7 @@ class fm_login {
 		$user_info = getUserInfo($user_login, 'user_login');
 		
 		/** If the user is not found, just return lest we give away valid user accounts */
-		if ($user_info == false) {
+		if ($user_info === false) {
 			sleep(1);
 			return true;
 		}
@@ -153,17 +154,19 @@ class fm_login {
 		if (!$fmdb->rows_affected) return false;
 		
 		/** Mail the reset link */
-		$mail_enable = getOption('mail_enable');
-		if ($mail_enable) {
-			$result = $this->mailPwdResetLink($fm_login, $uniqhash);
-			if ($result !== true) {
-				$query = "DELETE FROM fm_pwd_resets WHERE pwd_id='$uniqhash' AND pwd_login='$fm_login'";
-				$fmdb->query($query);
-		
-				return $result;
+		if ($option == 'mail') {
+			$mail_enable = getOption('mail_enable');
+			if ($mail_enable) {
+				$result = $this->mailPwdResetLink($fm_login, $uniqhash);
+				if ($result !== true) {
+					$query = "DELETE FROM fm_pwd_resets WHERE pwd_id='$uniqhash' AND pwd_login='$fm_login'";
+					$fmdb->query($query);
+
+					return $result;
+				}
 			}
 		}
-		
+
 		return true;
 	}
 	

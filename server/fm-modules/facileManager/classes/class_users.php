@@ -165,7 +165,7 @@ class fm_users {
 		}
 
 		/** Process forced password change */
-		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login);
+		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login, 'no mail');
 		
 		addLogEntry(sprintf(_("Added user '%s'."), $user_login), $fm_name);
 		return true;
@@ -300,7 +300,7 @@ class fm_users {
 		$user_login = getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_login');
 		
 		/** Process forced password change */
-		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login);
+		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login, 'no mail');
 		
 		addLogEntry(sprintf(_("Updated user '%s'."), $user_login), $fm_name);
 		
