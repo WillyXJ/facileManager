@@ -21,9 +21,10 @@
 */
 
 $fm_user_caps[$fm_name] = array(
-		'do_everything'		=> _('Super Admin'),
-		'manage_modules'	=> _('Module Management'),
-		'manage_users'		=> _('User Management'),
-		'run_tools'			=> _('Run Tools'),
-		'manage_settings'	=> _('Manage Settings')
-	);
+        'do_everything'     => _('Super Admin'),
+        'manage_modules'    => _('Module Management'),
+        'manage_users'      => _('User Management'),
+        'run_tools'         => _('Run Tools'),
+        'view_logs'         => _('View Logs'),
+        'manage_settings'   => _('Manage Settings')
+    );

@@ -1,6 +1,7 @@
 4.8.0 (2024-??-??)
 ==================
 * Server - [improvement] Changelog is now viewed in an iframe.
+* Server - [improvement] Added user permission to view logs.
 
 4.7.0 (2024-09-30)
 ==================
