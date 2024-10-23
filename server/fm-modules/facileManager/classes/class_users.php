@@ -328,7 +328,7 @@ class fm_users {
 		if ($field_length !== false && strlen($group_name) > $field_length) return sprintf(_('Group name is too long (maximum %d characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
-		$query = "SELECT * FROM `fm_groups` WHERE `group_status`!='deleted' AND `group_name`='$group_name'";
+		$query = "SELECT * FROM `fm_groups` WHERE `group_status`!='deleted' AND `group_name`='$group_name' AND `group_id`!='{$post['group_id']}'";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) return _('This group already exists.');
 		
