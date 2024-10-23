@@ -76,6 +76,11 @@ class fm_tools {
 			/** Include module variables */
 			require(ABSPATH . 'fm-includes/version.php');
 			@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+
+			/** Ensure there is actually an upgrade to perform */
+			if (version_compare($__FM_CONFIG[$module_name]['version'], $running_version, '<=')) {
+				return 'already current';
+			}
 			
 			/** Ensure the minimum core version is installed */
 			if (version_compare($__FM_CONFIG[$module_name]['required_fm_version'], $fm_version, '<=') === false) {
