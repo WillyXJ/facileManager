@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '6.2.0', '<') ? upgradefmDNS_620($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '6.3.0', '<') ? upgradefmDNS_630($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2735,7 +2735,10 @@ function upgradefmDNS_630($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '6.2.0', '<') ? upgradefmDNS_620($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` ADD `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `group_name`";
+	$queries = array();
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups", 'group_auto_also_notify')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` ADD `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `group_name`";
+	}
 
 	/** Run queries */
 	if (count($queries) && $queries[0]) {
@@ -2744,7 +2747,7 @@ function upgradefmDNS_630($__FM_CONFIG, $running_version) {
 		}
 	}
 
-	setOption('version', '6.2.0', 'auto', false, 0, 'fmDNS');
+	setOption('version', '6.3.0', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }

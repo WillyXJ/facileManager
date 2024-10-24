@@ -167,4 +167,5 @@ strong {
 
 .success {
 	color: #D0D0D0;
+	max-height: 11em;
 }

@@ -1,4 +1,4 @@
-6.3.0 (2024-10-??)
+6.3.0 (2024-10-24)
 ==================
 * Server - [improvement] When using server groups, primary zones can automatically
            set also-notify to include all secondary servers.
