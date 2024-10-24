@@ -1211,14 +1211,18 @@ i.delete {
 	padding: 0 2em;
 	background: #ffffff;
 }
-
 .popup-contents p.complete {
 	padding: 0 10px;
 }
-
 .popup-contents > p > a {
 	text-decoration: underline;
 }
+.popup-contents iframe {
+	width: 55em;
+	height: 37em;
+	border: none;
+}
+
 
 .popup-footer {
 	margin-bottom: 0;

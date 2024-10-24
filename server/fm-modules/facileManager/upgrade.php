@@ -67,13 +67,15 @@ function fmUpgrade($database) {
 	for ($x=0; $x<$num_rows; $x++) {
 		$module_name = $module_list[$x]->module_name;
 		$success = $fm_tools->upgradeModule($module_name, 'quiet', $module_list[$x]->option_value);
-		if (!$success || $fmdb->last_error) {
-			$errors = true;
-			$success = false;
-		} else {
-			$success = true;
+		if ($success !== 'already current') {
+			if (!$success || $fmdb->last_error) {
+				$errors = true;
+				$success = false;
+			} else {
+				$success = true;
+			}
+			displayProgress(sprintf(_('Upgrading %s Schema'), $module_name), $success);
 		}
-		displayProgress(sprintf(_('Upgrading %s Schema'), $module_name), $success);
 	}
 
 	echo "</table>";

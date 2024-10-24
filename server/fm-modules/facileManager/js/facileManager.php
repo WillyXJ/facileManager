@@ -1197,6 +1197,16 @@ if (isset($__FM_CONFIG)) {
 		}
 	}).disableSelection();
 	
+	/* Software changelog */
+	$(".upgrade_notice a").click(function() {
+		var changelog_href = $(this).attr("href");
+
+		$("body").addClass("fm-noscroll");
+		$("#manage_item").fadeIn(200);
+		$("#manage_item_contents").html(\'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('header', _('Changelog')))) . '<iframe src=\'+changelog_href+\' ></iframe>'. str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('footer', _('OK'), array('cancel_button' => 'cancel')))) .'\');
+
+		return false;
+	});
 });
 
 function del(msg){

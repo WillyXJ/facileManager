@@ -1,3 +1,14 @@
+4.8.0 (2024-??-??)
+==================
+* Server - [improvement] Changelog is now viewed in an iframe.
+* Server - [improvement] Added user permission to view logs.
+* Server - [improvement] Forced password changes cannot be the same as the current password.
+* Server - [improvement] Added better logging of user information changes.
+* Server - [bug] Forced password changes can take place even when the mail server
+           is inaccessible.
+* Server - [bug] Editing a user group incorrectly required a name change.
+* Server - [bug] Upgrading fM or any modules cleared the upgrade flag of other modules.
+
 4.7.0 (2024-09-30)
 ==================
 * Server - [security] Added authentication logging.
