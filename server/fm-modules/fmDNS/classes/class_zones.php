@@ -344,7 +344,7 @@ class fm_dns_zones {
 		if ((($post['domain_clone_domain_id'] || $post['domain_template_id']) &&
 			getSOACount($insert_id) && getNSCount($insert_id)) ||
 			$post['domain_type'] != 'primary'){
-				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('primaries', 'secondaries')), 'yes', 'build');
+				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('masters', 'slaves')), 'yes', 'build');
 		}
 		
 		/* Update the user/group limited access */
@@ -466,7 +466,7 @@ class fm_dns_zones {
 		
 		/** Set the server_build_config flag for existing servers */
 		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'primary') {
-			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('primaries', 'secondaries')), 'yes', 'build');
+			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 		}
 
 		/** Update the zone */
@@ -557,7 +557,7 @@ class fm_dns_zones {
 
 		/** Set the server_build_config flag for new servers */
 		if ((getSOACount($domain_id) && getNSCount($domain_id)) || $post['domain_type'] != 'primary') {
-			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('primaries', 'secondaries')), 'yes', 'build');
+			setBuildUpdateConfigFlag(getZoneServers($domain_id, array('masters', 'slaves')), 'yes', 'build');
 		}
 
 		/** Delete associated records from fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_builds */

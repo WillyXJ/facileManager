@@ -124,7 +124,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 			// $available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
 			// $available_masters = $fm_dns_masters->getMasterList($server_serial_no, 'all');
 			// $available_masters = array_merge($available_masters, $fm_dns_acls->getACLList($server_serial_no, 'tsig-keys'));
-			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no, $available_masters);
+			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;">
