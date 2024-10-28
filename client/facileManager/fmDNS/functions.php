@@ -552,10 +552,9 @@ function runRndcActions($rndc_actions, $server_config_file, $server_key_with_rnd
 	
 	$rndc = findProgram('rndc');
 
-	$rndc .= ($server_key_with_rndc == 'yes' && file_exists(dirname($server_config_file) . '/named.conf.keys')) ? sprintf(' -k %s/named.conf.keys', dirname($server_config_file)) : null;
+	$rndc .= ($server_key_with_rndc == 'yes' && $server_config_file && file_exists(dirname($server_config_file) . '/named.conf.keys')) ? sprintf(' -k %s/named.conf.keys', dirname($server_config_file)) : null;
 	
 	foreach ($rndc_actions as $action) {
-		echo "$rndc $action 2>&1\n";
 		$last_line = system("$rndc $action 2>&1", $retval);
 		if ($retval) {
 			processReloadFailure($last_line);
