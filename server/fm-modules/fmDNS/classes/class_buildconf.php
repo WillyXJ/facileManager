@@ -1190,8 +1190,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							unset($default_file_ext);
 
 							/** Build zone file */
-							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
-							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/' . $domain_name_file] = $this->buildZoneFile($zone_result, $server_serial_no);
+							$domain_type = ($zone_result->domain_type == 'primary' && version_compare($server_version, '9.16.12', '<')) ? 'master' : $zone_result->domain_type;
+							$data->files[$server_zones_dir . '/' . $domain_type . '/' . str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format)] = $this->buildZoneFile($zone_result, $server_serial_no);
 							
 							/** Track reloads */
 							$data->reload_domain_ids[] = isset($zone_result->parent_domain_id) ? $zone_result->parent_domain_id : $zone_result->domain_id;
