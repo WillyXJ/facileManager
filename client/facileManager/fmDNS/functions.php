@@ -139,7 +139,10 @@ function buildConf($url, $data) {
 	/** Freeze zones */
 	if (!$data['dryrun'] && isDaemonRunning('named')) {
 		/** Handle dynamic zones to support reloading */
-		runRndcActions('freeze', $server_config_file);
+		$retval = runRndcActions('freeze', $server_config_file, $server_key_with_rndc);
+		if ($retval) {
+			return $retval;
+		}
 	}
 	
 	/** Remove previous files so there are no stale files */
@@ -201,7 +204,7 @@ function buildConf($url, $data) {
 				$rndc_actions = array('reload', 'thaw');
 				
 				/** Handle dynamic zones to support reloading */
-				$retval = runRndcActions($rndc_actions, $server_config_file);
+				$retval = runRndcActions($rndc_actions, $server_config_file, $server_key_with_rndc);
 				if ($retval) {
 					return $retval;
 				}
@@ -221,7 +224,9 @@ function buildConf($url, $data) {
 				return processReloadFailure($last_line);
 			} else {
 				/** Only update reloaded zones */
-				$data['reload_domain_ids'] = $reload_domain_ids;
+				if (isset($reload_domain_ids)) {
+					$data['reload_domain_ids'] = $reload_domain_ids;
+				}
 				if (!isset($server_build_all)) {
 					$data['zone'] = 'update';
 				}
@@ -538,16 +543,19 @@ function dumpZone($domain, $zonefile) {
  * @package fmDNS
  *
  * @param array|string $rndc_actions rndc actions to run
+ * @param string $server_config_file Server's configuration file
+ * @param string $server_key_with_rndc Option to use server named key with rndc
  * @return boolean
  */
-function runRndcActions($rndc_actions = array(), $server_config_file = null) {
+function runRndcActions($rndc_actions, $server_config_file, $server_key_with_rndc) {
 	if (!is_array($rndc_actions)) $rndc_actions = array($rndc_actions);
 	
 	$rndc = findProgram('rndc');
 
-	$rndc .= (file_exists(dirname($server_config_file) . '/named.conf.keys')) ? sprintf(' -k %s/named.conf.keys', dirname($server_config_file)) : null;
+	$rndc .= ($server_key_with_rndc == 'yes' && file_exists(dirname($server_config_file) . '/named.conf.keys')) ? sprintf(' -k %s/named.conf.keys', dirname($server_config_file)) : null;
 	
 	foreach ($rndc_actions as $action) {
+		echo "$rndc $action 2>&1\n";
 		$last_line = system("$rndc $action 2>&1", $retval);
 		if ($retval) {
 			processReloadFailure($last_line);

@@ -92,6 +92,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				
 				exit;
 			}
+
+			/** rndc key option */
+			if ($server_key_with_rndc == 'default') {
+				$data->server_key_with_rndc = getOption('use_named_keys_with_rndc', $_SESSION['user']['account_id'], $_SESSION['module']);
+			}
 			
 			$this->server_info = $data;
 
@@ -1130,7 +1135,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$result = $fmdb->last_result;
 			$data = $result[0];
 			extract(get_object_vars($data), EXTR_SKIP);
-			
+				
 			/** check if this server is configured for cron updates */
 			if ($server_update_method != 'cron') {
 				$error = "This server is not configured to receive updates via cron.\n";

@@ -2739,6 +2739,9 @@ function upgradefmDNS_630($__FM_CONFIG, $running_version) {
 	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups", 'group_auto_also_notify')) {
 		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` ADD `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `group_name`";
 	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_key_with_rndc')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_key_with_rndc` ENUM('default','yes','no') NOT NULL DEFAULT 'default' AFTER `server_menu_display`";
+	}
 
 	/** Run queries */
 	if (count($queries) && $queries[0]) {

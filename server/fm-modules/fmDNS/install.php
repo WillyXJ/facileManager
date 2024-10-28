@@ -266,6 +266,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `server_installed` enum('yes','no') NOT NULL DEFAULT 'no',
   `server_client_version` varchar(150) DEFAULT NULL,
   `server_menu_display` enum('include','exclude') NOT NULL DEFAULT 'include',
+  `server_key_with_rndc` ENUM('default','yes','no') NOT NULL DEFAULT 'default',
   `server_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'disabled',
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)

@@ -620,8 +620,8 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$server_id = $group_id = 0;
-		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
-		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
+		$server_name = $server_root_dir = $server_zones_dir = $server_type = $server_update_port = null;
+		$server_update_method = $server_key_with_rndc = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$server_chroot_dir = $group_name = $server_type_disabled = $group_auto_also_notify = null;
 		$server_installed = $server_slave_zones_dir = false;
 		
@@ -681,6 +681,7 @@ FORM;
 				$server_type_disabled = 'disabled';
 			}
 			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1, $server_type_disabled);
+			$server_key_with_rndc = buildSelect('server_key_with_rndc', 'server_key_with_rndc', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_key_with_rndc'), $server_key_with_rndc, 1);
 			$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
@@ -709,6 +710,10 @@ FORM;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_type">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+				<tr class="local_server_options">
+					<th width="33&#37;" scope="row"><label for="server_key_with_rndc">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td width="67&#37;">%s</td>
 				</tr>
 				<tr class="local_server_options">
@@ -797,6 +802,7 @@ FORM;
 				__('Basic'), $alternative_help,
 				__('Server Name'), $server_name, $server_name_length,
 				__('Server Type'), sprintf(__('A remote server is not managed by %s.'), $_SESSION['module']), $server_type,
+				__('Use Defined Keys with rndc'), __('Override the setting for this server.'), $server_key_with_rndc,
 				__('Run-as Account'), $server_run_as_predefined, $runashow, __('Other run-as account'), $server_run_as,
 				__('Update Method'), $server_update_method, $server_update_port_style, $server_update_port,
 				__('Config File'), $server_config_file, $__FM_CONFIG['ns']['named_config_file'], $server_config_file_length,
