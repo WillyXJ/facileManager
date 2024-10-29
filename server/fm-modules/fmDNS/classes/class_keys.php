@@ -353,7 +353,7 @@ HTML;
 				);
 		} elseif ($type == 'dnssec') {
 			$available_zones = $fm_dns_zones->buildZoneJSON('defined only');
-			$key_subtype = buildSelect('key_subtype', 'key_subtype', array_merge(array(__('Both')), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys','key_subtype')), $key_subtype, 1);
+			$key_subtype_menu = buildSelect('key_subtype', 'key_subtype', array_merge(array(__('Both')), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys','key_subtype')), $key_subtype, 1);
 			$key_secret_placeholder = __('The private key and associated DNSKEY RR will be automatically generated if this field is left blank.');
 			$key_signing_checked = ($key_signing == 'yes') ? 'checked' : null;
 
@@ -410,7 +410,7 @@ HTML;
 				',
 					__('Zone'), $domain_id, $available_zones,
 					__('Configure Additional Options') . ' &raquo;',
-					__('Key Type'), $key_subtype,
+					__('Key Type'), $key_subtype_menu,
 					__('Algorithm'), $key_algorithm,
 					__('Key Size'), buildSelect('key_size', 'key_size', $__FM_CONFIG['keys']['avail_sizes'], $key_size),
 					__('Secret'), $key_secret_placeholder, $key_secret,
@@ -419,12 +419,17 @@ HTML;
 			} else {
 				$key_revoked_checked = ($key_status == 'revoked') ? 'checked disabled' : null;
 				$key_options .= sprintf('<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">%s (%s)</td>
+				</tr>
+				<tr>
 					<th></th>
 					<td>
 						<input type="checkbox" id="key_status" name="key_status" value="revoked" %s /><label for="key_status"> %s</label>
 					</td>
 				</tr>
 				',
+					__('Key Name'), $key_name, $key_subtype,
 					$key_revoked_checked, __('Revoke this key')
 				);
 			}
