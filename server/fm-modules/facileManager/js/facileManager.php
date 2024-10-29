@@ -90,12 +90,24 @@ if (isset($__FM_CONFIG)) {
 		return false;
 	} );
 	
+	$("#login_form input").on("change", function() {
+		if ($("#login_message_accept").length) {
+			var button = document.getElementById("loginbtn");
+			if ($("#login_message_accept").is(":checked") && $("#username").length && $("#password").length) {
+				button.disabled = false;
+			} else {
+				button.disabled = true;
+			}
+		}
+	});
+
 	$("#loginbtn").click(function() {
 	
 		var action = $("#loginform").attr("action");
 		var form_data = {
 			username: $("#username").val(),
 			password: $("#password").val(),
+			login_message_accept: $("#login_message_accept").is(":checked"),
 			is_ajax: 1
 		};
 		
