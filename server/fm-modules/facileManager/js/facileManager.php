@@ -1157,19 +1157,17 @@ if (isset($__FM_CONFIG)) {
 			/** Update the database */
 	        var $this 				= $(this);
 	        var item_type			= $("#table_edits").attr("name");
-	        var policy_type			= getUrlVars()["type"];
 	        var server_serial_no	= getUrlVars()["server_serial_no"];
-	
+
 			var form_data = {
 				item_id: "",
 				item_type: item_type,
-				policy_type: policy_type,
 				server_serial_no: server_serial_no,
 				sort_order: new_sort_order,
 				action: "update_sort",
+				uri_params: getUrlVars(),
 				is_ajax: 1
 			};
-			console.log(form_data);
 	
 			$.ajax({
 				type: "POST",

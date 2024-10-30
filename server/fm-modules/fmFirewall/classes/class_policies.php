@@ -190,7 +190,7 @@ HTML;
 		/** Update sort order */
 		if ($post['action'] == 'update_sort') {
 			/** Ensure policy_type is set */
-			$post['policy_type'] = (isset($post['policy_type']) && array_key_exists(sanitize(strtolower($post['policy_type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($post['policy_type'])) : 'filter';
+			$post['policy_type'] = (isset($post['uri_params']['type']) && array_key_exists(sanitize(strtolower($post['uri_params']['type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($post['uri_params']['type'])) : 'filter';
 
 			/** Make new order in array */
 			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
