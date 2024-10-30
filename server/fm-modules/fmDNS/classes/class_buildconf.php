@@ -2551,7 +2551,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 	 * @return string
 	 */
 	function getRPZ($view_id, $server_serial_no, $server_group_ids) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
 		
 		/** Check if rpz is supported by server_version */
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
@@ -2565,16 +2565,30 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			if ($unsupported_version) return $unsupported_version;
 			$result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
+
+			if (!$fm_dns_zones) {
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			}
+
 			for ($i=0; $i < $global_config_count; $i++) {
-				$domain = displayFriendlyDomainName(getNameFromID($result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
-	
-				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="0"');
-				foreach ($fmdb->last_result as $record) {
-					if ($record->cfg_data) {
-						$config_array['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+				$domain_ids = $result[$i]->domain_id;
+				if (preg_match('/^g_\d+/', $domain_ids) == true) {
+					$domain_ids = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_ids));
+				}
+				if (!is_array($domain_ids)) {
+					$domain_ids = array($domain_ids);
+				}
+
+				foreach ($domain_ids as $domain_id) {
+					$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="0"');
+					foreach ($fmdb->last_result as $record) {
+						if ($record->cfg_data) {
+							$config_array['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+						}
 					}
 				}
-		
 			}
 			unset($result);
 		}
@@ -2588,11 +2602,21 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $global_config_count; $i++) {
-					$domain = displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
-		
-					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
-					foreach ($fmdb->last_result as $record) {
-						$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+					$domain_ids = $server_config_result[$i]->domain_id;
+					if (preg_match('/^g_\d+/', $domain_ids) == true) {
+						$domain_ids = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_ids));
+					}
+					if (!is_array($domain_ids)) {
+						$domain_ids = array($domain_ids);
+					}
+	
+					foreach ($domain_ids as $domain_id) {
+						$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+	
+						basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+						foreach ($fmdb->last_result as $record) {
+							$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+						}
 					}
 				}
 				unset($server_config_result);
@@ -2606,11 +2630,21 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			$server_config_result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_config_count; $i++) {
-				$domain = displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
-	
-				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
-				foreach ($fmdb->last_result as $record) {
-					$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+				$domain_ids = $server_config_result[$i]->domain_id;
+				if (preg_match('/^g_\d+/', $domain_ids) == true) {
+					$domain_ids = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_ids));
+				}
+				if (!is_array($domain_ids)) {
+					$domain_ids = array($domain_ids);
+				}
+
+				foreach ($domain_ids as $domain_id) {
+					$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+					foreach ($fmdb->last_result as $record) {
+						$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+					}
 				}
 			}
 			unset($server_config_result);

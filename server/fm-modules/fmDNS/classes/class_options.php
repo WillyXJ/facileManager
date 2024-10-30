@@ -558,7 +558,7 @@ HTML;
 	 * @return string Return formated data
 	 */
 	function parseDefType($cfg_name, $cfg_data) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_zones;
 		
 		$query = "SELECT def_type FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 		$result = $fmdb->get_results($query);
@@ -581,10 +581,23 @@ HTML;
 		}
 
 		if (strpos($def_type, 'domain_select') !== false) {
+			if (!$fm_dns_zones) {
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			}
+
 			foreach (explode(',', $cfg_data) as $domain_name) {
-				$hosted_domain_name = getNameFromID($domain_name, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name');
-				$hosted_domain_name = ($hosted_domain_name) ? $hosted_domain_name : $domain_name;
-				$exclude_domain_names[] = '"' . displayFriendlyDomainName($hosted_domain_name) . '"';
+				if (preg_match('/^g_\d+/', $domain_name) == true) {
+					$domain_name = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_name));
+				}
+				if (!is_array($domain_name)) {
+					$domain_name = array($domain_name);
+				}
+
+				foreach ($domain_name as $domain) {
+					$hosted_domain_name = getNameFromID($domain, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name');
+					$hosted_domain_name = ($hosted_domain_name) ? $hosted_domain_name : $domain;
+					$exclude_domain_names[] = '"' . displayFriendlyDomainName($hosted_domain_name) . '"';
+				}
 			}
 			
 			return join(";\n\t\t", $exclude_domain_names);

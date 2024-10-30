@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}conf
   `cfg_type` varchar(255) NOT NULL DEFAULT 'global',
   `server_id` int(11) NOT NULL DEFAULT '0',
   `view_id` int(11) NOT NULL DEFAULT '0',
-  `domain_id` int(11) NOT NULL DEFAULT '0',
+  `domain_id` varchar(100) NOT NULL DEFAULT '0',
   `cfg_isparent` enum('yes','no') NOT NULL DEFAULT 'no',
   `cfg_parent` int(11) NOT NULL DEFAULT '0',
   `cfg_order_id` int(11) NOT NULL DEFAULT '0',

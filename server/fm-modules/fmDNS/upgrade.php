@@ -2735,7 +2735,7 @@ function upgradefmDNS_630($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '6.2.0', '<') ? upgradefmDNS_620($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$queries = array();
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `domain_id` `domain_id` VARCHAR(100) NOT NULL DEFAULT '0'";
 	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups", 'group_auto_also_notify')) {
 		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` ADD `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `group_name`";
 	}

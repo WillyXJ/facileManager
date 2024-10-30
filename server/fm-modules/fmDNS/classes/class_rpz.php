@@ -122,7 +122,8 @@ class fm_module_rpz {
 			return formatError(__('Could not add the response policy zone because a database error occurred.'), 'sql');
 		}
 
-		$domain_name = $post['domain_id'] ? getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : __('All Zones');
+		$type = (strpos($post['domain_id'], 'g_') !== false) ? 'group' : 'domain';
+		$domain_name = $post['domain_id'] ? getNameFromID(str_replace('g_', '', $post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . str_replace('domain_domain', 'domain', "domain_{$type}s"), "{$type}_", "{$type}_id", "{$type}_name") : __('All Zones');
 
 		/** Insert child configs */
 		$post['cfg_isparent'] = 'no';
@@ -217,7 +218,8 @@ class fm_module_rpz {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
-		$domain_name = $post['domain_id'] ? getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : __('All Zones');
+		$type = (strpos($post['domain_id'], 'g_') !== false) ? 'group' : 'domain';
+		$domain_name = $post['domain_id'] ? getNameFromID(str_replace('g_', '', $post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . str_replace('domain_domain', 'domain', "domain_{$type}s"), "{$type}_", "{$type}_id", "{$type}_name") : __('All Zones');
 
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
@@ -307,7 +309,6 @@ class fm_module_rpz {
 		if ($row->cfg_status == 'disabled') $class[] = 'disabled';
 		$bars_title = __('Click and drag to reorder');
 		
-		$server_serial_no .= $row->server_serial_no ? '&server_serial_no=' . $row->server_serial_no : null;
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -328,7 +329,11 @@ class fm_module_rpz {
 			$edit_status = $grab_bars = null;
 		}
 		
-		$domain_name = $row->domain_id ? getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : sprintf('<span>%s</span>', __('All Zones'));
+		$type = (strpos($row->domain_id, 'g_') !== false) ? 'group' : 'domain';
+		$domain_name = $row->domain_id ? getNameFromID(str_replace('g_', '', $row->domain_id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . str_replace('domain_domain', 'domain', "domain_{$type}s"), "{$type}_", "{$type}_id", "{$type}_name") : sprintf('<span>%s</span>', __('All Zones'));
+		if ($type == 'group') {
+			$domain_name = sprintf('<b>%s</b>', $domain_name);
+		}
 		$comments = nl2br($row->cfg_comment);
 
 		$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $row->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $row->server_serial_no. '"', null, false);
@@ -393,6 +398,11 @@ HTML;
 			}
 		}
 		$available_zones = $fm_dns_zones->buildZoneJSON('all', $excluded_domain_ids);
+
+		$available_zones_array = json_decode($available_zones);
+		$first_available_domain_id = $available_zones_array[array_key_first($available_zones_array)]->children[0]->id;
+		$domain_id = ($domain_id) ? $domain_id : $first_available_domain_id;
+		$auto_select_jq = sprintf('$(".domain_name").select2("val", "%s");', $domain_id);
 
 		/** Get child elements */
 		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys(array('policy', 'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'qname-wait-recurse', 'nsip-wait-recurse', 'min-ns-dots'), null));
@@ -504,18 +514,19 @@ HTML;
 					minimumResultsForSearch: 10,
 					allowClear: true
 				});
-			});
-			$(".domain_name").select2({
-				createSearchChoice:function(term, data) { 
-					if ($(data).filter(function() { 
-						return this.text.localeCompare(term)===0; 
-					}).length===0) 
-					{return {id:term, text:term};} 
-				},
-				multiple: false,
-				width: "200px",
-				tokenSeparators: [",", " ", ";"],
-				data: %s
+				$(".domain_name").select2({
+					createSearchChoice:function(term, data) { 
+						if ($(data).filter(function() { 
+							return this.text.localeCompare(term)===0; 
+						}).length===0) 
+						{return {id:term, text:term};} 
+					},
+					multiple: false,
+					width: "%s",
+					tokenSeparators: [",", " ", ";"],
+					data: %s
+				});
+				%s
 			});
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_order_id, $cfg_type_id, $server_serial_no,
@@ -531,8 +542,9 @@ HTML;
 				$global_show, __('Minimum NS Dots'), $min_ns_dots,
 				$global_show, __('QNAME wait recurse'), $qname_wait_recurse,
 				$global_show, __('NSIP wait recurse'), $nsip_wait_recurse, sprintf(__('This option requires BIND %s or later.'), '9.11.0'),
-				$popup_footer,
-				$available_zones
+				$popup_footer, '85%',
+				$available_zones,
+				$auto_select_jq
 			);
 
 		return $return_form;

@@ -1536,28 +1536,60 @@ HTML;
 		$result = $fmdb->query($query);
 	}
 	
-	function availableZones($include = 'no-clones', $zone_type = null, $limit = 'all', $extra = 'none', $exclude = null) {
+	function availableZones($include = 'no-clones', $zone_type = null, $limit = 'all', $extra = 'none', $exclude = array()) {
 		global $fmdb, $__FM_CONFIG;
 		
 		if (!is_array($include)) {
 			$include = (array) $include;
 		}
-		if ($exclude && !is_array($exclude)) {
+		if (!is_array($exclude)) {
 			$exclude = (array) $exclude;
+		}
+
+		$include_groups = in_array('groups', $include);
+		if ($limit == 'restricted') {
+			$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
 		}
 		
 		$start = 0;
 		$return = array();
 		
-		if ($extra == 'all' && $exclude && !@in_array(0, $exclude)) {
+		if ($extra == 'all' && !@in_array(0, $exclude)) {
 			$start = 1;
 			$return = array(array(__('All Zones'), 0));
+
+			if ($include_groups) {
+				$return = array(null => $return);
+			}
 		}
-		
+
+		/** Zone Groups */
+		if ($include_groups) {
+			$j = 0;
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domain_groups', 'group_name', 'group_', 'active');
+			if ($fmdb->num_rows) {
+				$results = $fmdb->last_result;
+				$count = $fmdb->num_rows;
+				for ($i = 0; $i < $count; $i++) {
+					if ($limit != 'restricted' ||
+						($limit == 'restricted' && currentUserCan('do_everything')) ||
+						($limit == 'restricted' && array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']]) &&
+							(in_array(0, $user_capabilities[$_SESSION['module']]['access_specific_zones']) || in_array('g_' . $results[$i]->group_id, $user_capabilities[$_SESSION['module']]['access_specific_zones']))
+						)
+					) {
+						if (!in_array('g_' . $results[$i]->group_id, $exclude)) {
+							$return[__('Groups')][$j][] = $results[$i]->group_name;
+							$return[__('Groups')][$j][] = 'g_' . $results[$i]->group_id;
+							$j++;
+						}
+					}
+				}
+			}
+		}
+
 		/** Get restricted zones only */
 		$restricted_sql = null;
 		if ($limit == 'restricted' && !currentUserCan('do_everything')) {
-			$user_capabilities = getUserCapabilities($_SESSION['user']['id'], 'all');
 			if (array_key_exists('access_specific_zones', $user_capabilities[$_SESSION['module']])) {
 				if (!in_array(0, $user_capabilities[$_SESSION['module']]['access_specific_zones'])) {
 					$restricted_sql = "AND domain_id IN ('" . implode("','", $this->getZoneAccessIDs($user_capabilities[$_SESSION['module']]['access_specific_zones'])) . "')";
@@ -1577,10 +1609,12 @@ HTML;
 			$zone_type_sql = null;
 		}
 
-		$exclude_sql = ($exclude) ? "AND domain_id NOT IN(" . implode(',', $exclude) . ')' : null;
+		$exclude_sql = ($exclude) ? "AND domain_id NOT IN(" . implode(',', array_filter($exclude, function($value) {
+			return strpos($value, 'g_') === false;
+		})) . ')' : null;
 		
 		$query = "SELECT domain_id,domain_name,domain_view FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_sql $zone_type_sql $restricted_sql $exclude_sql ORDER BY domain_mapping,domain_name ASC";
-		$result = $fmdb->get_results($query);
+		$fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;
 			$count = $fmdb->num_rows;
@@ -1589,8 +1623,13 @@ HTML;
 				if ($results[$i]->domain_view > 0) {
 					$domain_name .= ' (' . getNameFromID($results[$i]->domain_view, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name') . ')';
 				}
-				$return[$i+$start][] = $domain_name;
-				$return[$i+$start][] = $results[$i]->domain_id;
+				if ($include_groups) {
+					$return[__('Zones')][$i+$start][] = $domain_name;
+					$return[__('Zones')][$i+$start][] = $results[$i]->domain_id;
+				} else {
+					$return[$i+$start][] = $domain_name;
+					$return[$i+$start][] = $results[$i]->domain_id;
+				}
 			}
 		}
 		return $return;
@@ -2036,15 +2075,36 @@ HTML;
 	 * @return string|array
 	 */
 	function buildZoneJSON($zones = 'all', $exclude = null, $additional_zones = null) {
-		$temp_zones = $this->availableZones('no-templates', array('primary', 'secondary', 'forward'), 'all', $zones, $exclude);
+		$get_zones = ($zones == 'all') ? array('no-templates', 'groups') : 'no-templates';
+		$temp_zones = $this->availableZones($get_zones, array('primary', 'secondary', 'forward'), 'all', $zones, $exclude);
 
 		if ($additional_zones) {
-			$temp_zones = array_merge($additional_zones, $temp_zones);
+			if (array_key_exists(__('Groups'), $temp_zones)) {
+				foreach ($additional_zones as $a => $tmp_addl_array) {
+					foreach ($temp_zones[__('Groups')] as $b => $c) {
+						if (in_array($tmp_addl_array[1], $c)) {
+							unset($additional_zones[$a]);
+						}
+					}
+				}
+				$temp_zones[__('Zones')] = array_merge($additional_zones, $temp_zones[__('Zones')]);
+			} else {
+				$temp_zones = array_merge($additional_zones, $temp_zones);
+			}
 		}
 
 		$i = 0;
-		foreach ($temp_zones as $temp_zone_array) {
-			list($available_zones[$i]['text'], $available_zones[$i]['id']) = $temp_zone_array;
+		foreach ($temp_zones as $parent => $children) {
+			$j = 0;
+			foreach ($children as $temp_zone_array) {
+				list($tmp_zone_data[$j]['text'], $tmp_zone_data[$j]['id']) = $temp_zone_array;
+				$j++;
+			}
+			if ($tmp_zone_data[$j-1]['id'] === null) {
+				list($available_zones[$i]['text'], $available_zones[$i]['id']) = $children;
+			} else {
+				$available_zones[$i] = array('text' => $parent, 'children' => $tmp_zone_data);
+			}
 			$i++;
 		}
 		$available_zones = json_encode($available_zones);

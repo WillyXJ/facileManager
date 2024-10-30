@@ -72,7 +72,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 
 				$temp_addl_zones[] = array($temp_zone_id, $temp_zone_id);
 			}
-			$available_domains = $fm_dns_zones->buildZoneJSON('all', null, $temp_addl_zones);
+			$available_domains = $fm_dns_zones->buildZoneJSON('all', 0, $temp_addl_zones);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="cfg_data" class="domain_select" value="%s" /><br />
