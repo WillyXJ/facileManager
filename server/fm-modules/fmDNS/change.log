@@ -12,6 +12,7 @@
 * Server - [bug] Fixed server group member references. (Issue #637)
 * Server - [bug] Fixed message formatting of dynamic zone errors.
 * Server - [bug] Server updates via cron would specify incorrect zone directory. (Issue #638)
+* Server - [bug] Fixed RPZ ordering.
 
 6.2.0 (2024-10-14)
 ==================

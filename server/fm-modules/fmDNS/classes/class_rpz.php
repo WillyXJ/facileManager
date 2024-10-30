@@ -94,8 +94,8 @@ class fm_module_rpz {
 					'qname-wait-recurse', 'nsip-wait-recurse');
 		
 		/** Get cfg_order_id */
-		if (!isset($post['cfg_order_id']) || $post['cfg_order_id'] == 0) {
-			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['server_serial_no'], 'cfg_', 'server_serial_no', 'AND cfg_type="rpz" ORDER BY cfg_order_id DESC LIMIT 1');
+		if ($post['domain_id'] && (!isset($post['cfg_order_id']) || $post['cfg_order_id'] == 0)) {
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['server_serial_no'], 'cfg_', 'server_serial_no', 'AND cfg_type="rpz" AND view_id="' . $post['view_id'] . '" ORDER BY cfg_order_id DESC LIMIT 1');
 			if ($fmdb->num_rows) {
 				$post['cfg_order_id'] = $fmdb->last_result[0]->cfg_order_id + 1;
 			} else $post['cfg_order_id'] = 1;
@@ -190,9 +190,10 @@ class fm_module_rpz {
 			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
 			
 			$post['server_serial_no'] = (!isset($post['server_serial_no'])) ? 0 : sanitize($post['server_serial_no']);
+			$view_id = (!isset($post['uri_params']['view_id'])) ? 0 : sanitize($post['uri_params']['view_id']);
 			
 			/** Get listing for server */
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', "AND cfg_type='rpz' AND cfg_name='zone' AND cfg_isparent='yes' AND server_serial_no='{$post['server_serial_no']}'");
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', "AND cfg_type='rpz' AND cfg_name='zone' AND cfg_isparent='yes' AND view_id='{$view_id}' AND server_serial_no='{$post['server_serial_no']}'");
 			$count = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
@@ -380,6 +381,9 @@ HTML;
 			foreach ((array) $_POST['request_uri'] as $key => $val) {
 				$zone_sql .= sprintf(" AND %s='%s'", sanitize($key), sanitize($val));
 			}
+		}
+		if (!isset($_POST['request_uri']['view_id'])) {
+			$zone_sql .= " AND view_id='0'";
 		}
 		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id', 'cfg_data'), 'cfg_', "AND cfg_type='rpz' $zone_sql AND cfg_name='zone' AND cfg_isparent='yes'");
 		if ($fmdb->num_rows) {
