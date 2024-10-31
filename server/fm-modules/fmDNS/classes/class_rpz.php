@@ -53,11 +53,11 @@ class fm_module_rpz {
 			$y = 0;
 			for ($x=$start; $x<$num_rows; $x++) {
 				if ($y == $_SESSION['user']['record_count']) break;
-				if ($results[$x]->cfg_name == 'zone' && !$results[$x]->domain_id && $grabbable) {
+				if ($results[$x]->cfg_name == '!config_name!' && !$results[$x]->domain_id && $grabbable) {
 					echo '</tbody><tbody class="no-grab">';
 					$grabbable = false;
 				}
-				if ($results[$x]->cfg_name == 'zone' && $results[$x]->domain_id && !$grabbable) {
+				if ($results[$x]->cfg_name == '!config_name!' && $results[$x]->domain_id && !$grabbable) {
 					echo '</tbody><tbody>';
 					$grabbable = true;
 				}
@@ -78,8 +78,14 @@ class fm_module_rpz {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'options' AND def_option_type = 'rpz'";
+		$fmdb->query($query);
+		foreach ($fmdb->last_result as $k => $def) {
+			$include_sub_configs[] = $def->def_option;
+		}
+
 		/** Validate entries */
-		$post = $this->validatePost($post);
+		$post = $this->validatePost($post, $include_sub_configs);
 		if (!is_array($post)) return $post;
 
 		$post['cfg_data'] = null;
@@ -89,10 +95,6 @@ class fm_module_rpz {
 		$sql_fields = '(';
 		$sql_values = '';
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'tab-group-1', 'policy', 'cname_domain_name',
-					'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'min-ns-dots',
-					'qname-wait-recurse', 'nsip-wait-recurse');
-		
 		/** Get cfg_order_id */
 		if ($post['domain_id'] && (!isset($post['cfg_order_id']) || $post['cfg_order_id'] == 0)) {
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['server_serial_no'], 'cfg_', 'server_serial_no', 'AND cfg_type="rpz" AND view_id="' . $post['view_id'] . '" ORDER BY cfg_order_id DESC LIMIT 1');
@@ -101,12 +103,20 @@ class fm_module_rpz {
 			} else $post['cfg_order_id'] = 1;
 		}
 		
+		$include = array('cfg_isparent', 'cfg_order_id', 'domain_id', 'view_id', 'cfg_type', 'server_serial_no', 'cfg_name', 'cfg_data', 'cfg_comment');
+
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
-			if (!in_array($key, $exclude)) {
-				$clean_data = sanitize($data, '_');
+			if (in_array($key, $include)) {
+				$clean_data = ($key == 'cfg_data') ? sanitize($data, '_') : $data;
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
+				if ($key == 'view_id') {
+					$log_message[] = sprintf('View: %s', ($clean_data) ? getNameFromID($clean_data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+				}
+				if ($key == 'server_serial_no') {
+					$log_message[] = sprintf('Server: %s', getServerName($clean_data));
+				}
 				if ($key == 'cfg_comment') {
 					$log_message[] = sprintf('Comment: %s', $clean_data);
 				}
@@ -116,7 +126,7 @@ class fm_module_rpz {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the response policy zone because a database error occurred.'), 'sql');
@@ -132,29 +142,21 @@ class fm_module_rpz {
 		unset($post['domain_id']);
 		unset($post['cfg_order_id']);
 		unset($post['cfg_comment']);
-		$include = array('policy', 'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'min-ns-dots',
-					'qname-wait-recurse', 'nsip-wait-recurse');
+		$include[] = 'cfg_parent';
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
 		$sql_values = '(';
 		
 		$i = 1;
-		foreach ($include as $handler) {
-			$post['cfg_data'] = $post[$handler];
-			/** Logic checking */
-			if ($handler == 'policy' && $post[$handler] == 'cname') {
-				$post[$handler] = 'cname ' . $post['cname_domain_name'];
-			}
+		foreach ($include_sub_configs as $handler) {
 			$post['cfg_name'] = $handler;
 			$post['cfg_data'] = $post[$handler];
 			
 			foreach ($post as $key => $data) {
-				if (!in_array($key, $exclude)) {
-					if ($i) $sql_fields .= $key . ', ';
-					
-					$sql_values .= "'$data', ";
-				}
+				if (!in_array($key, $include)) continue;
+				if ($i) $sql_fields .= $key . ', ';
+				$sql_values .= "'$data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
@@ -194,7 +196,7 @@ class fm_module_rpz {
 			$view_id = (!isset($post['uri_params']['view_id'])) ? 0 : sanitize($post['uri_params']['view_id']);
 			
 			/** Get listing for server */
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', "AND cfg_type='rpz' AND cfg_name='zone' AND cfg_isparent='yes' AND view_id='{$view_id}' AND server_serial_no='{$post['server_serial_no']}'");
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', "AND cfg_type='rpz' AND cfg_name='!config_name!' AND cfg_isparent='yes' AND view_id='{$view_id}' AND server_serial_no='{$post['server_serial_no']}'");
 			$count = $fmdb->num_rows;
 			$results = $fmdb->last_result;
 			for ($i=0; $i<$count; $i++) {
@@ -218,6 +220,8 @@ class fm_module_rpz {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
+		unset($post['cfg_name']);
+
 		$type = (strpos($post['domain_id'], 'g_') !== false) ? 'group' : 'domain';
 		$domain_name = $post['domain_id'] ? getNameFromID(str_replace('g_', '', $post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . str_replace('domain_domain', 'domain', "domain_{$type}s"), "{$type}_", "{$type}_id", "{$type}_name") : __('All Zones');
 
@@ -225,12 +229,18 @@ class fm_module_rpz {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		$sql_values = '';
 		
-		$include = array('cfg_isparent', 'cfg_name', 'cfg_type', 'cfg_comment', 'domain_id');
+		$include = array('cfg_isparent', 'cfg_name', 'cfg_type', 'cfg_comment', 'domain_id', 'view_id', 'server_serial_no');
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
 				$sql_values .= "$key='$data', ";
+				if ($key == 'view_id') {
+					$log_message[] = sprintf('View: %s', ($data) ? getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+				}
+				if ($key == 'server_serial_no') {
+					$log_message[] = sprintf('Server: %s', getServerName($data));
+				}
 				if ($key == 'cfg_comment') {
 					$log_message[] = sprintf('Comment: %s', $data);
 				}
@@ -264,6 +274,7 @@ class fm_module_rpz {
 			}
 
 			$query = "$sql_start $sql_values WHERE cfg_parent={$post['cfg_id']} AND cfg_name='$handler' LIMIT 1";
+			// var_dump($post, $query);exit;
 			$result = $fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
@@ -365,15 +376,13 @@ HTML;
 	 * Displays the form to add/edit rpz types
 	 */
 	function printForm($data = '', $action = 'add', $cfg_type = 'rpz', $cfg_type_id = null) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
+		global $fmdb, $__FM_CONFIG, $fm_dns_zones, $fm_module_options;
 		
 		$cfg_id = $cfg_order_id = $domain_id = 0;
 		$cfg_name = $cfg_comment = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$cfg_data = $cname_domain_name = $zone_sql = $excluded_domain_ids = null;
 
-		$yes_no = array(null, 'yes', 'no');
-		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
 				extract($_POST);
@@ -390,7 +399,7 @@ HTML;
 		if (!isset($_POST['request_uri']['view_id'])) {
 			$zone_sql .= " AND view_id='0'";
 		}
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id', 'cfg_data'), 'cfg_', "AND cfg_type='rpz' $zone_sql AND cfg_name='zone' AND cfg_isparent='yes'");
+		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id', 'cfg_data'), 'cfg_', "AND cfg_type='rpz' $zone_sql AND cfg_name='!config_name!' AND cfg_isparent='yes'");
 		if ($fmdb->num_rows) {
 			foreach ($fmdb->last_result as $row) {
 				if ($action == 'edit' && $row->domain_id == $domain_id) continue;
@@ -405,38 +414,61 @@ HTML;
 		$auto_select_jq = sprintf('$(".domain_name").select2("val", "%s");', $domain_id);
 
 		/** Get child elements */
-		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys(array('policy', 'recursive-only', 'max-policy-ttl', 'log', 'break-dnssec', 'qname-wait-recurse', 'nsip-wait-recurse', 'min-ns-dots'), null));
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'options' AND def_option_type='{$cfg_type}' ORDER BY def_zone_support DESC,def_option ASC";
+		$result = $fmdb->query($query);
+		foreach ($fmdb->last_result as $k => $def) {
+			$auto_fill_children[] = $def->def_option;
+			$config_parameters[$def->def_zone_support][] = $def->def_option;
+			
+			if ($def->def_dropdown == 'yes') {
+				if (!class_exists('fm_module_options')) {
+					include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+				}
+				$form_addl_html[$def->def_option] = 'select:' . $def->def_type;
+			} else {
+				switch (trim(str_replace(array('(', ')'), '', $def->def_type))) {
+					case 'integer':
+						$form_addl_html[$def->def_option] = 'maxlength="5" style="width: 5em;" onkeydown="return validateNumber(event)"';
+						break;
+					default:
+						$form_addl_html[$def->def_option] = null;
+				}
+			}
+		}
+
+		$child_config = getConfigChildren($cfg_id, $cfg_type, array_fill_keys($auto_fill_children, null));
 		if (array_key_exists('policy', $child_config)) {
 			@list($child_config['policy'], $cname_domain_name) = explode(' ', $child_config['policy']);
 		}
-		$policy = buildSelect('policy', 'policy', array('', 'given', 'disabled', 'passthru', 'drop', 'nxdomain', 'nodata', 'tcp-only', 'cname'), $child_config['policy']);
-		$recursive_only = buildSelect('recursive-only', 'recursive-only', $yes_no, $child_config['recursive-only']);
-		$max_policy_ttl = $child_config['max-policy-ttl'];
-		$log = buildSelect('log', 'log', $yes_no, $child_config['log']);
-		$break_dnssec = buildSelect('break-dnssec', 'break-dnssec', $yes_no, $child_config['break-dnssec']);
-		$qname_wait_recurse = buildSelect('qname-wait-recurse', 'qname-wait-recurse', $yes_no, $child_config['qname-wait-recurse']);
-		$nsip_wait_recurse = buildSelect('nsip-wait-recurse', 'nsip-wait-recurse', $yes_no, $child_config['nsip-wait-recurse']);
-		$min_ns_dots = $child_config['min-ns-dots'];
-		
-		/** Show/hide divs */
-		if (!$domain_id) {
-			$global_show = 'table-row';
-			$domain_show = 'none';
-			$domain_name_show = 'none';
-		} else {
-			$global_show = 'none';
-			$domain_show = 'table-row';
-			if ($child_config['policy'] == 'cname') {
-				$domain_name_show = 'block';
+		// var_dump($config_parameters, $child_config);
+		foreach ($child_config as $k => $v) {
+			$child_config[$k] = str_replace(array('"', "'"), '', (string) $v);
+			if (isset($form_addl_html[$k]) && strpos($form_addl_html[$k], 'select:') !== false) {
+				$form_field = $fm_module_options->populateDefTypeDropdown(str_replace('select:', '', $form_addl_html[$k]), $child_config[$k], $k, 'include-blank');
 			} else {
-				$domain_name_show = 'none';
+				$form_field = sprintf('<input name="%1$s" id="%1$s" type="text" value="%2$s" %3$s/>',
+					$k, $child_config[$k], $form_addl_html[$k]);
 			}
+			foreach ($config_parameters as $param_type => $key_array) {
+				$param = array_search($k, $key_array);
+				if ($param !== false) break;
+			}
+			$child_config_form[] = sprintf('
+				<tr class="%s_option">
+					<th width="33&#37;" scope="row"><label for="%s">%s</label></th>
+					<td width="67&#37;">%s%s</td>
+				</tr>', $param_type, $k, str_replace('-', ' ', $k), $form_field,
+					($k == 'policy') ? sprintf('<div id="cname_option" style="display: %s"><input name="cname_domain_name" id="cname_domain_name" type="text" value="%s" size="40" placeholder="domainname.com" /></div>', ($v == 'cname') ? 'block' : 'none', $cname_domain_name) : null
+			);
 		}
 
 		$popup_title = $action == 'add' ? __('Add RPZ') : __('Edit RPZ');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
+		/** Minimum version */
+		$minimum_version = getMinimumFeatureVersion('options', 'policy', 'message', "AND def_option_type='{$cfg_type}'");
+
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s
 			<input type="hidden" name="action" value="%s" />
@@ -449,10 +481,11 @@ HTML;
 					<input type="radio" name="tab-group-1" id="tab-1" checked />
 					<label for="tab-1">%s</label>
 					<div id="tab-content">
+						<div id="response"><p class="center">%s</p></div>
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
-								<td width="67&#37;"><input type="hidden" id="domain_id" name="domain_id" class="domain_name" value="%d" /><br /><span class="note">%s</span></td>
+								<td width="67&#37;"><input type="hidden" id="domain_id" name="domain_id" class="domain_name" value="%d" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
@@ -466,41 +499,7 @@ HTML;
 					<label for="tab-2">%s</label>
 					<div id="tab-content">
 						<table class="form-table">
-							<tr class="domain_option" style="display: %s">
-								<th width="33&#37;" scope="row"><label for="policy">%s</label></th>
-								<td width="67&#37;">
-									%s
-									<div id="cname_option" style="display: %s"><input name="cname_domain_name" id="cname_domain_name" type="text" value="%s" size="40" placeholder="domainname.com" /></div></td>
-								</td>
-							</tr>
-							<tr>
-								<th width="33&#37;" scope="row"><label for="recursive-only">%s</label></th>
-								<td width="67&#37;">%s</td>
-							</tr>
-							<tr>
-								<th width="33&#37;" scope="row"><label for="max-policy-ttl">%s</label></th>
-								<td width="67&#37;"><input name="max-policy-ttl" id="max-policy-ttl" type="text" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /> %s</td>
-							</tr>
-							<tr class="domain_option" style="display: %s">
-								<th width="33&#37;" scope="row"><label for="log">%s</label></th>
-								<td width="67&#37;">%s<br /><span class="note">%s</span></td>
-							</tr>
-							<tr class="global_option" style="display: %s">
-								<th width="33&#37;" scope="row"><label for="break-dnssec">%s</label></th>
-								<td width="67&#37;">%s</td>
-							</tr>
-							<tr class="global_option" style="display: %s">
-								<th width="33&#37;" scope="row"><label for="min-ns-dots">%s</label></th>
-								<td width="67&#37;"><input name="min-ns-dots" id="min-ns-dots" type="text" value="%s" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
-							</tr>
-							<tr class="global_option" style="display: %s">
-								<th width="33&#37;" scope="row"><label for="qname-wait-recurse">%s</label></th>
-								<td width="67&#37;">%s</td>
-							</tr>
-							<tr class="global_option" style="display: %s">
-								<th width="33&#37;" scope="row"><label for="nsip-wait-recurse">%s</label></th>
-								<td width="67&#37;">%s<br /><span class="note">%s</span></td>
-							</tr>
+							%s
 						</table>
 					</div>
 				</div>
@@ -527,21 +526,15 @@ HTML;
 					data: %s
 				});
 				%s
+				$("#domain_id").trigger("change");
 			});
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_order_id, $cfg_type_id, $server_serial_no,
-				__('Basic'),
-				__('Zone'), $domain_id, sprintf(__('This feature requires BIND %s or later.'), '9.10.0'),
+				__('Basic'), $minimum_version,
+				__('Zone'), $domain_id,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
-				$domain_show, __('Policy'), $policy, $domain_name_show, $cname_domain_name,
-				__('Recursive only'), $recursive_only,
-				__('Maximum policy TTL'), $max_policy_ttl, __('seconds'),
-				$domain_show, __('Log'), $log, sprintf(__('This option requires BIND %s or later.'), '9.11.0'),
-				$global_show, __('Break DNSSEC'), $break_dnssec,
-				$global_show, __('Minimum NS Dots'), $min_ns_dots,
-				$global_show, __('QNAME wait recurse'), $qname_wait_recurse,
-				$global_show, __('NSIP wait recurse'), $nsip_wait_recurse, sprintf(__('This option requires BIND %s or later.'), '9.11.0'),
+				implode("\n", $child_config_form),
 				$popup_footer, '85%',
 				$available_zones,
 				$auto_select_jq
@@ -559,9 +552,10 @@ HTML;
 	 * @subpackage fmDNS
 	 *
 	 * @param array $post Posted array
+	 * @param array $include_sub_configs Array of sub configs to validate
 	 * @return array|string|boolean
 	 */
-	function validatePost($post) {
+	function validatePost($post, $include_sub_configs = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Trim and sanitize inputs */
@@ -569,15 +563,49 @@ HTML;
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
-		$post['cfg_name'] = 'zone';
+		$post['cfg_name'] = '!config_name!';
+		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
+		$post['cfg_comment'] = trim($post['cfg_comment']);
 		$post['cfg_type'] = 'rpz';
 
 		unset($post['tab-group-1']);
 		
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_id!='{$post['cfg_id']}'";
+		$fmdb->get_results($query);
+		if ($fmdb->num_rows) return __('This item already exists.');
+
+		if ($include_sub_configs === null) {
+			$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'options' AND def_option_type = 'rpz'";
+			$fmdb->query($query);
+			foreach ($fmdb->last_result as $k => $def) {
+				$include_sub_configs[] = $def->def_option;
+			}
+		}
+
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
+
+		foreach ($post as $key => $val) {
+			if (!$val) continue;
+			if (in_array($key, $include_sub_configs)) {
+				$post2['cfg_name'] = $key;
+				if (is_array($val)) $val = $val[0];
+				$post2['cfg_data'] = $val;
+				$def_check = $fm_module_options->validateDefType($post2);
+				if (!is_array($def_check)) {
+					return $def_check;
+				} else {
+					$post[$key] = $def_check['cfg_data'];
+				}
+			}
+		}
+
 		if ($post['policy'] == 'cname') {
 			if (empty($post['cname_domain_name'])) return __('No CNAME domain defined.');
+
+			$post['policy'] = sprintf('cname %s', $post['cname_domain_name']);
+			unset($post['cname_domain_name']);
 		}
-		
+
 		return $post;
 	}
 

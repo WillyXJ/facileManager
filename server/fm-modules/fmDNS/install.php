@@ -760,13 +760,39 @@ VALUES
 ('options', 'ratelimit', 'qps-scale', '( integer )', 'no', 'OV', 'no', '9.9.4'),
 ('options', 'ratelimit', 'referrals-per-second', '( integer )', 'no', 'OV', 'no', '9.9.4'),
 ('options', 'ratelimit', 'slip', '( integer )', 'no', 'OV', 'no', '9.9.4'),
-('options', 'ratelimit', 'window', '( integer )', 'no', 'OV', 'no', '9.9.4'),
-('options', 'rpz', 'break-dnssec', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
-('options', 'rpz', 'max-policy-ttl', '( integer )', 'no', 'OV', 'no', '9.10.0'),
-('options', 'rpz', 'min-ns-dots', '( integer )', 'no', 'OV', 'no', '9.10.0'),
-('options', 'rpz', 'nsip-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
-('options', 'rpz', 'qname-wait-recurse', '( yes | no )', 'no', 'OV', 'yes', '9.10.0'),
-('options', 'rpz', 'recursive-only', '( yes | no )', 'no', 'OV', 'yes', '9.10.0')
+('options', 'ratelimit', 'window', '( integer )', 'no', 'OV', 'no', '9.9.4')
+;
+INSERTSQL;
+
+$inserts[] = <<<INSERTSQL
+INSERT IGNORE INTO  `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_zone_support`,
+`def_dropdown`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'rpz', 'add-soa', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.18.0'),
+('options', 'rpz', 'max-policy-ttl', '( duration )', 'no', 'OV', 'all', 'no', '9.10.0'),
+('options', 'rpz', 'min-update-interval', '( duration )', 'no', 'OV', 'all', 'no', '9.18.0'),
+('options', 'rpz', 'recursive-only', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.10.0'),
+('options', 'rpz', 'nsip-enable', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.18.0'),
+('options', 'rpz', 'nsdname-enable', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.18.0'),
+('options', 'rpz', 'break-dnssec', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.10.0'),
+('options', 'rpz', 'min-ns-dots', '( integer )', 'no', 'OV', 'global', 'no', '9.10.0'),
+('options', 'rpz', 'nsip-wait-recurse', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.10.0'),
+('options', 'rpz', 'nsdname-wait-recurse', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.18.0'),
+('options', 'rpz', 'qname-wait-recurse', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.10.0'),
+('options', 'rpz', 'dnsrps-enable', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.18.0'),
+('options', 'rpz', 'dnsrps-options', '( string )', 'no', 'OV', 'global', 'no', '9.18.0'),
+('options', 'rpz', 'log', '( yes | no )', 'no', 'OV', 'domain', 'yes', '9.10.0'),
+('options', 'rpz', 'ede', '( none | forged | blocked | censored | filtered | prohibited )', 'no', 'OV', 'domain', 'yes', '9.19.0')
+('options', 'rpz', 'policy', '( cname | disabled | drop | given | no-op | nodata | nxdomain | passthru | tcp-only )', 'no', 'OV', 'domain', 'yes', '9.10.0'),
 ;
 INSERTSQL;
 
