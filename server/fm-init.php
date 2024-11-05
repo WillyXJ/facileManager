@@ -73,9 +73,12 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 	$GLOBALS['URI'] = convertURIToArray();
 
 	$GLOBALS['basename'] = (($path_parts['filename'] && $path_parts['filename'] != str_replace('/', '', $GLOBALS['RELPATH'])) && substr($_SERVER['REQUEST_URI'], -1) != '/') ? $path_parts['filename'] . '.php' : 'index.php';
-		
+	
 	if (!defined('INSTALL') && !defined('CLIENT') && !defined('FM_NO_CHECKS')) {
 		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
+
+		/** Trim and sanitize inputs */
+		$_POST = cleanAndTrimInputs($_POST);
 
 		/** Handle special cases with config.inc.php */
 		handleHiddenFlags();
@@ -241,6 +244,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'menu.php');
 	} elseif (defined('CLIENT')) {
 		$fmdb = new fmdb($__FM_CONFIG['db']['user'], $__FM_CONFIG['db']['pass'], $__FM_CONFIG['db']['name'], $__FM_CONFIG['db']['host']);
+
+		/** Trim and sanitize inputs */
+		$_POST = cleanAndTrimInputs($_POST);
 	}
 	
 	if (isset($_POST['module_name'])) {

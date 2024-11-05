@@ -96,7 +96,7 @@ switch ($step) {
 		/** Check if already installed */
 		if (isset($__FM_CONFIG['db']['name'])) {
 			$query = "SELECT option_id FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `option_name`='fm_db_version'";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH']);
 			exit;
@@ -410,7 +410,7 @@ function checkAccountCreation($database) {
 	global $fmdb;
 	
 	$query = "SELECT user_id FROM `$database`.fm_users WHERE user_status='active' AND user_auth_type='1' AND user_caps='" . serialize(array('facileManager' => array('do_everything' => 1))) . "' ORDER BY user_id ASC LIMIT 1";
-	$result = $fmdb->query($query);
+	$fmdb->query($query);
 
 	return ($result === false || ($result && $fmdb->num_rows)) ? true : false;
 }
