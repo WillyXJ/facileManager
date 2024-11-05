@@ -156,7 +156,7 @@ class fm_module_templates {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the template because a database error occurred.'), 'sql');
@@ -194,7 +194,7 @@ class fm_module_templates {
 				$order_id = array_search($policy_result[$i]->policy_id, $new_sort_order);
 				if ($order_id === false) return __('The sort order could not be updated due to an invalid request.');
 				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET `policy_order_id`=$order_id WHERE `policy_id`={$policy_result[$i]->policy_id} AND `server_serial_no`=0 AND policy_type='template' AND `account_id`='{$_SESSION['user']['account_id']}'";
-				$result = $fmdb->query($query);
+				$fmdb->query($query);
 				if ($fmdb->sql_errors) {
 					return formatError(__('Could not update the template order because a database error occurred.'), 'sql');
 				}
@@ -256,7 +256,7 @@ class fm_module_templates {
 		
 		/** Update the policy */
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}policies` SET $sql WHERE `policy_id`={$post['policy_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the firewall policy because a database error occurred.'), 'sql');
@@ -541,9 +541,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		$post['policy_type'] = 'template';
 		$post['server_serial_no'] = 0;
 		if (!array_key_exists('policy_targets', $post)) {

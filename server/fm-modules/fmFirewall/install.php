@@ -435,7 +435,7 @@ INSERTSQL;
 
 	/** Insert site values if not already present */
 	foreach ($inserts as $query) {
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if ($fmdb->last_error) {
 			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}
@@ -475,7 +475,7 @@ INSERTSQL;
 
 	/** Insert site values if not already present */
 	foreach ($group_inserts as $query) {
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if ($fmdb->last_error) {
 			return (function_exists('displayProgress')) ? displayProgress($module, $fmdb->result, $noisy, $fmdb->last_error) : $fmdb->result;
 		}

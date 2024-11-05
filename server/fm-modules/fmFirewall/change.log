@@ -1,3 +1,7 @@
+3.2.0 (2024-??-??)
+==================
+* Server - [improvement] Made form validation global.
+
 3.1.0 (2024-09-30)
 ==================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
