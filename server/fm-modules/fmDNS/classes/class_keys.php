@@ -91,38 +91,10 @@ class fm_dns_keys {
 	function add($post) {
 		global $fmdb, $__FM_CONFIG;
 
-		/** Ensure key_name does not contain spaces */
-		if (strpos($post['key_name'], ' ')) {
-			return __('The key name cannot contain spaces.');
-		}
-		
-		if (!in_array($post['key_algorithm'], $this->getKeyAlgorithms($post['key_type']))) return __('The selected key algorithm is invalid.');
-		
-		/** DNSSEC */
-		if ($post['key_type'] == 'dnssec' && !isset($post['generate'])) {
-			if (!$post['domain_id']) return __('You must specify a zone.');
-			if ($post['key_secret'] && $post['key_subtype'] == __('Both')) return __('You must choose a key type.');
-			
-			$post['key_name'] = displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) .
-					'_' . strtolower(sanitize($post['key_subtype']));
-			
-			/** Generate keys and replace $post */
-			if (!$post['key_secret']) {
-				$post = $this->generateDNSSECKeys($post);
-				if (!is_array($post)) return $post;
-			}
-		}
+		/** Validate entries */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
-		if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', $field_length), $field_length);
-		
-		/** Does the key already exist for this account? */
-		if ($post['key_type'] == 'tsig') {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', sanitize($post['key_name']), 'key_', 'key_name');
-			if ($fmdb->num_rows) return __('This key already exists.');
-		}
-		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys`";
 		$sql_fields = '(';
 		$sql_values = '';
@@ -143,7 +115,7 @@ class fm_dns_keys {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the key because a database error occurred.'), 'sql');
@@ -161,29 +133,10 @@ class fm_dns_keys {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if ($post['key_type'] == 'tsig' && (empty($post['key_name']) || empty($post['key_secret']))) return __('No key defined.');
+		/** Validate entries */
+		$post = $this->validatePost($post);
+		if (!is_array($post)) return $post;
 
-		/** Ensure key_name does not contain spaces */
-		if (strpos($post['key_name'], ' ')) {
-			return __('The key name cannot contain spaces.');
-		}
-		
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
-		if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', $field_length), $field_length);
-		
-		/** Does the key already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', sanitize($post['key_name']), 'key_', 'key_name');
-		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			if ($result[0]->key_id != $post['key_id']) return __('This key already exists.');
-		}
-		
-		if ($post['key_status'] == 'revoked') {
-			$post = $this->revokeDNSSECKey($post);
-			if (!is_array($post)) return $post;
-		}
-		
 		$exclude = array('submit', 'action', 'key_id');
 
 		$sql_edit = '';
@@ -195,10 +148,10 @@ class fm_dns_keys {
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
-		// Update the key
+		/** Update the key */
 		$old_name = getNameFromID($post['key_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET $sql WHERE `key_id`={$post['key_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the key because a database error occurred.'), 'sql');
@@ -207,7 +160,7 @@ class fm_dns_keys {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$view_name = $post['key_view'] ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
+		$view_name = ($post['key_view']) ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		addLogEntry("Updated key '$old_name' to the following:\nName: {$post['key_name']}\nAlgorithm: {$post['key_algorithm']}\nSecret: {$post['key_secret']}\nView: $view_name\nComment: {$post['key_comment']}");
 		return true;
 	}
@@ -668,6 +621,61 @@ HTML;
 			);
 	}
 	
+	/**
+	 * Validates the submitted form
+	 *
+	 * @since 7.0.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $post Posted array
+	 * @return array|string|boolean
+	 */
+	function validatePost($post) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if ($post['key_type'] != 'dnssec' && !in_array($post['key_algorithm'], $this->getKeyAlgorithms($post['key_type']))) return __('The selected key algorithm is invalid.');
+		
+		/** DNSSEC */
+		if ($post['key_type'] == 'dnssec' && $post['action'] == 'add' && !isset($post['generate'])) {
+			if (!$post['domain_id']) return __('You must specify a zone.');
+			if ($post['key_secret'] && $post['key_subtype'] == __('Both')) return __('You must choose a key type.');
+			
+			$post['key_name'] = displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) .
+					'_' . strtolower(sanitize($post['key_subtype']));
+			
+			/** Generate keys and replace $post */
+			if (!$post['key_secret']) {
+				$post = $this->generateDNSSECKeys($post);
+				if (!is_array($post)) return $post;
+			}
+		}
+
+		if ($post['key_type'] != 'dnssec' || ($post['key_type'] == 'dnssec' && $post['action'] == 'add')) {
+			/** Ensure key_name does not contain spaces */
+			$post['key_name'] = str_replace(' ', '-', trim($post['key_name']));
+			
+			/** Check name field length */
+			$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_name');
+			if ($field_length !== false && strlen($post['key_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Key name is too long (maximum %d character).', 'Key name is too long (maximum %d characters).', $field_length), $field_length);
+			
+			/** Ensure a key is defined */
+			if ($post['key_type'] == 'tsig') {
+				if (empty($post['key_name'] || empty($post['key_secret']))) return __('No key defined.');
+			}
+			
+			/** Does the key already exist for this account? */
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', sanitize($post['key_name']), 'key_', 'key_name', "AND key_id!='{$post['key_id']}'");
+			if ($fmdb->num_rows) return __('This key already exists.');
+		}
+		
+		if (isset($post['key_status']) && $post['key_status'] == 'revoked') {
+			$post = $this->revokeDNSSECKey($post);
+			if (!is_array($post)) return $post;
+		}
+		
+		return $post;
+	}
 	
 }
 

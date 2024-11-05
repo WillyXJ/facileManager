@@ -68,7 +68,7 @@ if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				} else {
 					/* set the server_build_config flag */
 					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_build_config`='yes' WHERE `server_id`=" . sanitize($_GET['id']);
-					$result = $fmdb->query($query);
+					$fmdb->query($query);
 
 					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 					addLogEntry(sprintf(__('Set server (%s) status to %s.'), $tmp_name, $_GET['status']));

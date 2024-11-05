@@ -102,7 +102,7 @@ class fm_module_logging {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the channel because a database error occurred.'), 'sql');
@@ -155,7 +155,7 @@ class fm_module_logging {
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the channel because a database error occurred.'), 'sql');
@@ -211,7 +211,7 @@ class fm_module_logging {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the category because a database error occurred.'), 'sql');
@@ -242,7 +242,7 @@ class fm_module_logging {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the category because a database error occurred.'), 'sql');
@@ -267,14 +267,12 @@ class fm_module_logging {
 		}
 		if ($post['sub_type'] == 'category' && !isset($post['cfg_data'])) return __('No channel defined.');
 
-		$post['cfg_comment'] = trim($post['cfg_comment']);
-
 		/** First delete all children since they will be replaced */
 		$query = "SELECT cfg_id FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_parent`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if ($fmdb->num_rows) {
 			$query = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_parent`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 			
 			if ($fmdb->sql_errors) {
 				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
@@ -307,7 +305,7 @@ class fm_module_logging {
 		/** Update the category */
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		/** Insert category children */
 		$post['cfg_isparent'] = 'no';
@@ -327,16 +325,15 @@ class fm_module_logging {
 			
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
-					$clean_data = sanitize($data);
 					$sql_fields .= $key . ', ';
-					$sql_values .= "'$clean_data', ";
+					$sql_values .= "'$data', ";
 				}
 			}
 			$sql_fields = rtrim($sql_fields, ', ') . ')';
 			$sql_values = rtrim($sql_values, ', ');
 			
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 		
 			if ($fmdb->sql_errors) {
 				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
@@ -375,10 +372,9 @@ class fm_module_logging {
 				
 				foreach ($post as $key => $data) {
 					if (!in_array($key, $exclude)) {
-						$clean_data = sanitize($data);
 						if ($i) $sql_fields .= $key . ', ';
 						
-						$sql_values .= "'$clean_data', ";
+						$sql_values .= "'$data', ";
 					}
 				}
 				$i = 0;
@@ -388,7 +384,7 @@ class fm_module_logging {
 			$sql_values = rtrim($sql_values, ', (');
 			
 			$query = "$sql_insert $sql_fields VALUES $sql_values";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 		
 			if ($fmdb->sql_errors) {
 				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');

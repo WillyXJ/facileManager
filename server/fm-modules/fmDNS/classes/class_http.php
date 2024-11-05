@@ -86,7 +86,7 @@ class fm_module_http {
 		global $fmdb, $__FM_CONFIG;
 
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
 		}
@@ -102,15 +102,19 @@ class fm_module_http {
 		
 		$include = array('cfg_isparent', 'cfg_type', 'server_serial_no', 'cfg_name', 'cfg_data', 'cfg_comment');
 		
+		$log_message = __('Added an HTTP endpoint with the following details') . ":\n";
+
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No HTTP endpoint name defined.');
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
-				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+				$sql_values .= "'$data', ";
+				if ($key == 'server_serial_no') {
+					$log_message .= formatLogKeyData('', 'server', getServerName($data));
+				} elseif ($key == 'cfg_data') {
+					$log_message .= formatLogKeyData('cfg_', 'Name', $data);
+				} elseif ($key == 'cfg_comment') {
+					$log_message .= formatLogKeyData('cfg_', $key, $data);
 				}
 			}
 		}
@@ -118,7 +122,7 @@ class fm_module_http {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
@@ -151,20 +155,19 @@ class fm_module_http {
 			$sql_values = rtrim($sql_values, ', ') . '), (';
 
 			if ($post['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $post['cfg_name'], $post['cfg_data']);
+				$log_message .= formatLogKeyData('cfg_', $post['cfg_name'], $post['cfg_data']);
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = sprintf("Added HTTP Endpoint:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 		return true;
 	}
@@ -183,14 +186,8 @@ class fm_module_http {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
-		$result = $fmdb->query($query);
-		foreach ($fmdb->last_result as $k => $def) {
-			$include_sub_configs[] = $def->def_option;
-		}
-
 		/** Validate entries */
-		$post = $this->validatePost($post, $include_sub_configs);
+		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
 		$endpoint_name = $post['cfg_data'];
@@ -200,25 +197,30 @@ class fm_module_http {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		$sql_values = '';
 		
-		$include = array('cfg_isparent', 'cfg_data', 'cfg_type', 'cfg_comment');
+		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
+		$log_message = sprintf(__('Updated an HTTP endpoint (%s) with the following details'), $old_name) . ":\n";
+
+		$include = array('cfg_isparent', 'cfg_data', 'cfg_type', 'cfg_comment', 'server_serial_no');
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No HTTP endpoint name defined.');
-				$sql_values .= "$key='$clean_data', ";
-				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+				$sql_values .= "$key='$data', ";
+				if ($key == 'server_serial_no') {
+					$log_message .= formatLogKeyData('', 'server', getServerName($data));
+				} elseif ($key == 'cfg_data') {
+					$log_message .= formatLogKeyData('cfg_', 'Name', $data);
+				} elseif ($key == 'cfg_comment') {
+					$log_message .= formatLogKeyData('cfg_', $key, $data);
 				}
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
 		
-		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
-
 		$query = "$sql_start $sql_values WHERE cfg_id={$post['cfg_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
+
+		$rows_affected = $fmdb->rows_affected;
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the item because a database error occurred.'), 'sql');
@@ -239,18 +241,19 @@ class fm_module_http {
 			$sql_values = rtrim($sql_values, ', ');
 			
 			if ($child['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $child['cfg_name'], $child['cfg_data']);
+				$log_message .= formatLogKeyData('cfg_', $child['cfg_name'], $child['cfg_data']);
 			}
 
 			$query = "$sql_start $sql_values WHERE cfg_parent={$post['cfg_id']} AND cfg_name='$handler' LIMIT 1";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
+			$num_rows_affectedrows += $fmdb->rows_affected;
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 			}
 		}
+		if (!$rows_affected) return true;
 		
-		$log_message = sprintf("Updated HTTP Endpoint '%s':\nName: %s\n%s", $old_name, $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 
 		return true;
@@ -289,7 +292,10 @@ class fm_module_http {
 			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("HTTP endpoint '%s' was deleted."), $tmp_name));
+			$log_message = __('Deleted an HTTP endpoint') . ":\n";
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
+			addLogEntry($log_message);
 			return true;
 		}
 	}
@@ -378,7 +384,7 @@ HTML;
 
 		/** Get child elements */
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http' ORDER BY def_option ASC";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
 			$valid_types = trim(str_replace(array('(', ')'), '', $def->def_type));
@@ -482,7 +488,7 @@ HTML;
 	 * @param array $include_sub_configs Array of sub configs to validate
 	 * @return array|string|boolean
 	 */
-	function validatePost($post, $include_sub_configs) {
+	function validatePost($post, $include_sub_configs = null) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Trim and sanitize inputs */
@@ -491,13 +497,22 @@ HTML;
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_name'] = '!config_name!';
-		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
-		$post['cfg_comment'] = trim($post['cfg_comment']);
+		$post['cfg_data'] = sanitize($post['cfg_data'], '-');
+		if (empty($post['cfg_data'])) return __('No HTTP endpoint name defined.');
+
 		$post['cfg_type'] = 'http';
 
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND cfg_id!='{$post['cfg_id']}'";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) return __('This item already exists.');
+
+		if ($include_sub_configs === null) {
+			$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'http'";
+			$fmdb->query($query);
+			foreach ($fmdb->last_result as $k => $def) {
+				$include_sub_configs[] = $def->def_option;
+			}	
+		}
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		

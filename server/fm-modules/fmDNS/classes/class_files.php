@@ -91,18 +91,25 @@ class fm_dns_files {
 		
 		extract($post, EXTR_SKIP);
 		
+		$log_message = __("Added a file with the following") . ":\n";
+		$logging_excluded_fields = array('page', 'action', 'file_id');
+		foreach ($post as $key => $data) {
+			if (in_array($key, $logging_excluded_fields)) continue;
+			if ($key == 'server_serial_no') {
+				$log_message .= formatLogKeyData('', 'server', getServerName($data));
+			} else {
+				$log_message .= formatLogKeyData('file_', $key, $data);
+			}
+		}
+
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}files` (`account_id`, `server_serial_no`, `file_location`, `file_name`, `file_contents`, `file_comment`) VALUES('{$_SESSION['user']['account_id']}', '$server_serial_no', '$file_location', '$file_name', '$file_contents', '$file_comment')";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 
-		$tmp_server_name = _('All Servers');
-		if ($server_serial_no) {
-			$tmp_server_name = (strpos($server_serial_no, 'g_') !== false) ? 'Group: ' . getNameFromID(str_replace('g_', '', $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name') : 'Server: ' . getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
-		}
-		addLogEntry("Added File:\nName: $file_name\nLocation: {$post['file_location']}\n$tmp_server_name\nComment: $file_comment");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -126,18 +133,24 @@ class fm_dns_files {
 		$include = array('server_serial_no', 'file_location', 'file_name', 'file_contents', 'file_comment');
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['file_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_', 'file_id', 'file_name');
+		$log_message = sprintf(__("Updated file '%s' to the following"), $old_name) . ":\n";
 		
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if ($key == 'server_serial_no') {
+					$log_message .= formatLogKeyData('', 'server', getServerName($data));
+				} else {
+					$log_message .= formatLogKeyData('file_', $key, $data);
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the file */
-		$old_name = getNameFromID($post['file_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', 'file_', 'file_id', 'file_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}files` SET $sql WHERE `file_id`={$post['file_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the item because a database error occurred.'), 'sql');
@@ -146,7 +159,7 @@ class fm_dns_files {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		addLogEntry("Updated File '$old_name' to the following:\nName: {$post['file_name']}\nLocation: {$post['file_location']}\nComment: {$post['file_comment']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -159,9 +172,10 @@ class fm_dns_files {
 	 * @subpackage fmDNS
 	 *
 	 * @param integer $id Item ID
+	 * @param integer $server_serial_no Server Serial Number
 	 * @return string|array|boolean
 	 */
-	function delete($id) {
+	function delete($id, $server_serial_no) {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Are there any corresponding configs? */
@@ -174,7 +188,10 @@ class fm_dns_files {
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', $id, 'file_', 'deleted', 'file_id') === false) {
 			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
-			addLogEntry("Deleted file '$tmp_name'.");
+			$log_message = __('Deleted a file') . ":\n";
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
+			addLogEntry($log_message);
 			return true;
 		}
 	}
@@ -322,14 +339,9 @@ HTML;
 		if (!$post['files_id']) unset($post['files_id']);
 		else $post['files_id'] = intval($post['files_id']);
 
-		foreach($post as $k => $v) {
-			if ($k == 'file_name') continue;
-			$post[$k] = sanitize(trim($v));
-		}
-		
 		$pathinfo = pathinfo($post['file_name']);
 		if (isset($pathinfo['extension'])) $post['file_name'] = $pathinfo['filename'];
-		$post['file_name'] = trim(basename(sanitize(trim($post['file_name']), '-')), '.');
+		$post['file_name'] = trim(basename(sanitize($post['file_name'], '-')), '.');
 		if (empty($post['file_name'])) return __('No file name defined.');
 
 		/** Set the extension */
@@ -340,7 +352,7 @@ HTML;
 		if ($field_length !== false && strlen($post['file_name']) > $field_length) return sprintf(__('File name is too long (maximum %s characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', $post['file_name'], 'file_', 'file_name', "AND file_location='{$post['file_location']}'");
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'files', $post['file_name'], 'file_', 'file_name', "AND file_location='{$post['file_location']}' AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->file_id != $post['file_id']) return __('This file already exists.');

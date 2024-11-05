@@ -75,30 +75,55 @@ class fm_dns_masters {
 		$sql_fields = '(';
 		$sql_values = '';
 		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+
 		$exclude = array('submit', 'action', 'server_id');
+
+		if (isset($post['master_parent_id'])) {
+			$log_message = sprintf(__("Added an address list to primary '%s' with the following"), getNameFromID($post['master_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name')) . ":\n";
+		} else {
+			$log_message = __("Added primary with the following") . ":\n";
+		}
 
 		foreach ($post as $key => $data) {
 			if ($key == 'master_name' && empty($data)) return __('No primary name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				if (strlen($data)) {
+					switch ($key) {
+						case 'master_key_id':
+							$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  $fm_dns_acls->parseACL('key_' . $data));
+							break;
+						case 'master_tls_id':
+							$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  getNameFromID(str_replace('tls_', '', $data), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active'));
+							break;
+						case 'server_serial_no':
+							$log_message .= formatLogKeyData('_serial_no', $key, getServerName($data));
+							break;
+						case 'master_addresses':
+							$log_message .= formatLogKeyData('master_', $key, $fm_dns_acls->parseACL($data));
+							break;
+						case 'master_id':
+						case 'master_parent_id':
+						case 'account_id':
+							break;
+						default:
+							$log_message .= formatLogKeyData('master_', $key, $data);
+					}
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the primary because a database error occurred.'), 'sql');
 		}
 
-		$log_message = sprintf(__("Added primary:\nName: %s\nPort: %s\nDSCP: %s\nComment: %s"), $post['master_name'], $post['master_port'], $post['master_dscp'], $post['master_comment']);
-		if (isset($post['master_parent_id'])) {
-			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-			$log_message = sprintf(__("An address list was added to the %s primary with the following:\nAddress: %s\nPort: %s\nKey: %s\nComment: %s"), getNameFromID($post['master_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name'), $fm_dns_acls->parseACL($post['master_addresses']), $post['master_port'], $fm_dns_acls->parseACL('key_' . $post['master_key_id']), $post['master_comment']);
-		}
 		addLogEntry($log_message);
 		return true;
 	}
@@ -113,22 +138,51 @@ class fm_dns_masters {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+
 		$exclude = array('submit', 'action', 'server_id');
+		$old_name = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
+		$old_address = $fm_dns_acls->parseACL(getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_addresses'));
+
+		if (!$old_name) {
+			$tmp_parent_id = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_parent_id');
+			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
+			$log_message = sprintf(__("Updated %s on primary '%s' to the following"), $old_address, $tmp_name) . ":\n";
+		} else {
+			$log_message = sprintf(__("Updated primary '%s' to the following"), $old_name) . ":\n";
+		}
 
 		$sql_edit = 'master_port=null, master_dscp=null, master_key_id=0, ';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				switch ($key) {
+					case 'master_key_id':
+						$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  $fm_dns_acls->parseACL('key_' . $data));
+						break;
+					case 'master_tls_id':
+						$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  getNameFromID(str_replace('tls_', '', $data), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active'));
+						break;
+					case 'server_serial_no':
+						$log_message .= formatLogKeyData('_serial_no', $key, getServerName($data));
+						break;
+					case 'master_addresses':
+						$log_message .= formatLogKeyData('master_', $key, $fm_dns_acls->parseACL($data));
+						break;
+					case 'master_id':
+					case 'master_parent_id':
+					case 'account_id':
+						break;
+					default:
+						$log_message .= formatLogKeyData('master_', $key, $data);
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the master
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$old_name = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-		$old_address = $fm_dns_acls->parseACL(getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_addresses'));
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` SET $sql WHERE `master_id`={$post['master_id']}";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the primary because a database error occurred.'), 'sql');
@@ -137,12 +191,6 @@ class fm_dns_masters {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$log_message = sprintf(__("Updated primary '%s' to the following:\nName: %s\nPort: %s\nDSCP: %s\nComment: %s"), $old_name, $post['master_name'], $post['master_port'], $post['master_dscp'], $post['master_comment']);
-		if (!$old_name) {
-			$tmp_parent_id = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_parent_id');
-			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-			$log_message = sprintf(__("Updated %s on primary '%s' to the following:\nAddress: %s\nPort: %s\nKey: %s\nComment: %s"), $old_address, $tmp_name, $fm_dns_acls->parseACL($post['master_addresses']), $post['master_port'], $fm_dns_acls->parseACL('key_' . $post['master_key_id']), $post['master_comment']);
-		}
 		addLogEntry($log_message);
 		return true;
 	}
@@ -152,25 +200,28 @@ class fm_dns_masters {
 	 * Deletes the selected master
 	 */
 	function delete($id, $server_serial_no = 0) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-		$log_message = sprintf(__("primary '%s' was deleted"), $tmp_name);
 		if (!$tmp_name) {
 			$tmp_parent_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_parent_id');
 			$tmp_address = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_addresses');
 			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-			$log_message = sprintf(__("%s was deleted from the %s primary"), $tmp_address, $tmp_name);
+			$log_message = __('Deleted an address list from a primary') . ":\n";
 		} else {
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` SET `master_status`='deleted' WHERE account_id='{$_SESSION['user']['account_id']}' AND `master_parent_id`='" . sanitize($id) . "'";
 			if (!$fmdb->query($query) && $fmdb->sql_errors) {
 				return formatError(__('The associated primary elements could not be deleted because a database error occurred.'), 'sql');
 			}
+			$log_message = __('Deleted a primary') . ":\n";
 		}
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', $id, 'master_', 'deleted', 'master_id') === false) {
 			return formatError(__('This master could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= (isset($tmp_address)) ? formatLogKeyData('', 'Address', $fm_dns_acls->parseACL($tmp_address)) : null;
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
 			addLogEntry($log_message);
 			return true;
 		}

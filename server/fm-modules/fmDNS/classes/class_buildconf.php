@@ -843,7 +843,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$query .= ')';
 				}
 				$query .= " ORDER BY `domain_clone_domain_id`,`domain_name`";
-				$result = $fmdb->query($query);
+				$fmdb->query($query);
 				if ($fmdb->num_rows) {
 					$count = $fmdb->num_rows;
 					$zone_result = $fmdb->last_result;
@@ -949,7 +949,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND `domain_template`='no' AND 
 			((`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' $group_sql))
 			 $view_sql ORDER BY `domain_dnssec_parent_domain_id` DESC,`domain_clone_domain_id`,`domain_name` ASC";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if ($fmdb->num_rows || $include_hint_zone) {
 			$count = $fmdb->num_rows;
 			$zone_result = $fmdb->last_result;
@@ -1162,7 +1162,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				for ($i=0; $i < count($track_reloads); $i++) {
 					$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . $track_reloads[$i]->domain_id . " OR `domain_clone_domain_id`=" . $track_reloads[$i]->domain_id . 
 							") ORDER BY `domain_clone_domain_id`,`domain_name`";
-					$result = $fmdb->query($query);
+					$fmdb->query($query);
 					if ($fmdb->num_rows) {
 						$zone_result = $fmdb->last_result[0];
 						/** Is this a clone id? */

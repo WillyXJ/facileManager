@@ -103,7 +103,12 @@ class fm_module_rpz {
 			} else $post['cfg_order_id'] = 1;
 		}
 		
+		$type = (strpos($post['domain_id'], 'g_') !== false) ? 'group' : 'domain';
+		$domain_name = $post['domain_id'] ? getNameFromID(str_replace('g_', '', $post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . str_replace('domain_domain', 'domain', "domain_{$type}s"), "{$type}_", "{$type}_id", "{$type}_name") : __('All Zones');
+
 		$include = array('cfg_isparent', 'cfg_order_id', 'domain_id', 'view_id', 'cfg_type', 'server_serial_no', 'cfg_name', 'cfg_data', 'cfg_comment');
+		$log_message = __('Added an RPZ with the following details') . ":\n";
+		$log_message .= formatLogKeyData('', 'Zone', $domain_name);
 
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
@@ -112,13 +117,13 @@ class fm_module_rpz {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
 				if ($key == 'view_id') {
-					$log_message[] = sprintf('View: %s', ($clean_data) ? getNameFromID($clean_data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+					$log_message .= formatLogKeyData('_id', $key, ($clean_data) ? getNameFromID($clean_data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
 				}
 				if ($key == 'server_serial_no') {
-					$log_message[] = sprintf('Server: %s', getServerName($clean_data));
+					$log_message .= formatLogKeyData('_serial_no', $key, getServerName($clean_data));
 				}
 				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+					$log_message .= formatLogKeyData('cfg_', $key, $clean_data);
 				}
 			}
 		}
@@ -131,9 +136,6 @@ class fm_module_rpz {
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the response policy zone because a database error occurred.'), 'sql');
 		}
-
-		$type = (strpos($post['domain_id'], 'g_') !== false) ? 'group' : 'domain';
-		$domain_name = $post['domain_id'] ? getNameFromID(str_replace('g_', '', $post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . str_replace('domain_domain', 'domain', "domain_{$type}s"), "{$type}_", "{$type}_id", "{$type}_name") : __('All Zones');
 
 		/** Insert child configs */
 		$post['cfg_isparent'] = 'no';
@@ -162,20 +164,19 @@ class fm_module_rpz {
 			$sql_values = rtrim($sql_values, ', ') . '), (';
 
 			if ($post['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $post['cfg_name'], $post['cfg_data']);
+				$log_message .= formatLogKeyData('cfg_', $post['cfg_name'], $post['cfg_data']);
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the response policy zone because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = sprintf("Added RPZ:\nZone: %s\n%s", $domain_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 		return true;
 	}
@@ -202,8 +203,8 @@ class fm_module_rpz {
 			for ($i=0; $i<$count; $i++) {
 				$order_id = array_search($results[$i]->cfg_id, $new_sort_order);
 				if ($order_id === false) return __('The sort order could not be updated due to an invalid request.');
-				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET `cfg_order_id`=$order_id WHERE `cfg_id`={$results[$i]->cfg_id} AND `server_serial_no`={$post['server_serial_no']} AND `account_id`='{$_SESSION['user']['account_id']}' LIMIT 1";
-				$result = $fmdb->query($query);
+				$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET `cfg_order_id`=$order_id WHERE `cfg_id`={$results[$i]->cfg_id} AND `server_serial_no`='{$post['server_serial_no']}' AND `account_id`='{$_SESSION['user']['account_id']}' LIMIT 1";
+				$fmdb->query($query);
 				if ($fmdb->sql_errors) {
 					return formatError(__('Could not update the order because a database error occurred.'), 'sql');
 				}
@@ -211,8 +212,12 @@ class fm_module_rpz {
 			
 			setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
-			$servername = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : _('All Servers');
-			addLogEntry('Updated RPZ order for ' . $servername);
+			$log_message = __('Updated RPZ order') . ":\n";
+			$log_message .= formatLogKeyData('', 'View', ($view_id) ? getNameFromID($view_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($post['server_serial_no']));
+
+			addLogEntry($log_message);
+
 			return true;
 		}
 
@@ -225,6 +230,9 @@ class fm_module_rpz {
 		$type = (strpos($post['domain_id'], 'g_') !== false) ? 'group' : 'domain';
 		$domain_name = $post['domain_id'] ? getNameFromID(str_replace('g_', '', $post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . str_replace('domain_domain', 'domain', "domain_{$type}s"), "{$type}_", "{$type}_id", "{$type}_name") : __('All Zones');
 
+		$log_message = __('Updated an RPZ with the following details') . ":\n";
+		$log_message .= formatLogKeyData('', 'Zone', $domain_name);
+
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		$sql_values = '';
@@ -236,20 +244,21 @@ class fm_module_rpz {
 			if (in_array($key, $include)) {
 				$sql_values .= "$key='$data', ";
 				if ($key == 'view_id') {
-					$log_message[] = sprintf('View: %s', ($data) ? getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+					$log_message .= formatLogKeyData('_id', $key, ($data) ? getNameFromID($data, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
 				}
 				if ($key == 'server_serial_no') {
-					$log_message[] = sprintf('Server: %s', getServerName($data));
+					$log_message .= formatLogKeyData('_serial_no', $key, getServerName($data));
 				}
 				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $data);
+					$log_message .= formatLogKeyData('cfg_', $key, $data);
 				}
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_start $sql_values WHERE cfg_id={$post['cfg_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
+		$rows_affected = $fmdb->rows_affected;
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the item because a database error occurred.'), 'sql');
@@ -270,19 +279,19 @@ class fm_module_rpz {
 			$sql_values = rtrim($sql_values, ', ');
 			
 			if ($child['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $child['cfg_name'], $child['cfg_data']);
+				$log_message .= formatLogKeyData('cfg_', $child['cfg_name'], $child['cfg_data']);
 			}
 
 			$query = "$sql_start $sql_values WHERE cfg_parent={$post['cfg_id']} AND cfg_name='$handler' LIMIT 1";
-			// var_dump($post, $query);exit;
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
+			$rows_affected += $fmdb->rows_affected;
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 			}
 		}
+		if (!$rows_affected) return true;
 		
-		$log_message = sprintf("Updated RPZ:\nZone: %s\n%s", $domain_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 
 		return true;
@@ -295,7 +304,7 @@ class fm_module_rpz {
 	function delete($id, $server_serial_no, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
+		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'domain_id');
 		$tmp_name = ($tmp_name) ? getNameFromID($tmp_name, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : __('All Zones');
 
 		/** Delete associated children */
@@ -308,7 +317,12 @@ class fm_module_rpz {
 			return formatError(__('This RPZ could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("RPZ '%s' was deleted."), $tmp_name));
+			$log_message = __('Deleted an RPZ') . ":\n";
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$view_id = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'view_id');
+			$log_message .= formatLogKeyData('', 'View', ($view_id) ? getNameFromID($view_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
+			addLogEntry($log_message);
 			return true;
 		}
 	}
@@ -415,7 +429,7 @@ HTML;
 
 		/** Get child elements */
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'options' AND def_option_type='{$cfg_type}' ORDER BY def_zone_support DESC,def_option ASC";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
 			$config_parameters[$def->def_zone_support][] = $def->def_option;
@@ -440,7 +454,6 @@ HTML;
 		if (array_key_exists('policy', $child_config)) {
 			@list($child_config['policy'], $cname_domain_name) = explode(' ', $child_config['policy']);
 		}
-		// var_dump($config_parameters, $child_config);
 		foreach ($child_config as $k => $v) {
 			$child_config[$k] = str_replace(array('"', "'"), '', (string) $v);
 			if (isset($form_addl_html[$k]) && strpos($form_addl_html[$k], 'select:') !== false) {

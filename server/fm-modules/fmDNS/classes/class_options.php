@@ -115,16 +115,16 @@ class fm_module_options {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the option because a database error occurred.'), 'sql');
 		}
 
 		$tmp_name = $post['cfg_name'];
-		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
+		$tmp_server_name = getServerName($post['server_serial_no']);
 		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+		$tmp_domain_name = (isset($post['domain_id']) && $post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
 		$cfg_data = str_replace(";\n\t\t", '; ', $this->parseDefType($post['cfg_name'], $post['cfg_data']));
 		addLogEntry("Added option:\nType: {$post['cfg_type']}\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
@@ -175,7 +175,7 @@ class fm_module_options {
 		// Update the config
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the option because a database error occurred.'), 'sql');
@@ -184,9 +184,9 @@ class fm_module_options {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
+		$tmp_server_name = getServerName($post['server_serial_no']);
 		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+		$tmp_domain_name = (isset($post['domain_id']) && $post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
 		$cfg_data = str_replace(";\n\t\t", '; ', $this->parseDefType($post['cfg_name'], $post['cfg_data']));
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");

@@ -149,7 +149,7 @@ class fm_dns_zones {
 			$sql_values = rtrim($sql_values, ', ');
 
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not add the zone group because a database error occurred.'), 'sql');
@@ -201,14 +201,11 @@ class fm_dns_zones {
 		foreach ($post['domain_name_servers'] as $val) {
 			if ($val == '0') {
 				$domain_name_servers = 0;
-				$log_message_name_servers = __('All Servers');
+				$log_message_name_servers = getServerName($val);
 				break;
 			}
 			$domain_name_servers .= $val . ';';
-			$server_name = (strpos($val, 's_') !== false)
-				? getNameFromID(str_replace('s_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name')
-				: getNameFromID(str_replace('g_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
-			$log_message_name_servers .= $val ? "$server_name; " : null;
+			$log_message_name_servers .= $val ? getServerName($val) . '; ' : null;
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 
@@ -267,7 +264,7 @@ class fm_dns_zones {
 					}
 					if ($key == 'domain_default' && $data == 'yes') {
 						$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
-						$result = $fmdb->query($query);
+						$fmdb->query($query);
 					}
 				}
 			}
@@ -275,7 +272,7 @@ class fm_dns_zones {
 			$sql_values .= "'{$_SESSION['user']['account_id']}'";
 		}
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError($dbupdate_error_msg, 'sql');
@@ -406,7 +403,7 @@ class fm_dns_zones {
 		$sql_edit = $domain_name_servers = $domain_view = '';
 		
 		$old_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-		$log_message = "Updated a zone ($old_name) with the following details:\n";
+		$log_message = sprintf(__('Updated a zone (%s) with the following details'), $old_name) . ":\n";
 
 		/** If changing zone to clone or different domain_type, are there any existing associated records? */
 		if ($post['domain_clone_domain_id']) {
@@ -434,13 +431,11 @@ class fm_dns_zones {
 		foreach ($post['domain_name_servers'] as $val) {
 			if ($val == '0') {
 				$domain_name_servers = 0;
+				$log_message_name_servers = getServerName($val);
 				break;
 			}
 			$domain_name_servers .= $val . ';';
-			$server_name = (strpos($val, 's_') !== false)
-				? getNameFromID(str_replace('s_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name')
-				: getNameFromID(str_replace('g_', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
-			$log_message_name_servers .= $val ? "$server_name; " : null;
+			$log_message_name_servers .= $val ? getServerName($val) . '; ' : null;
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 		
@@ -458,7 +453,7 @@ class fm_dns_zones {
 				}
 				if ($key == 'domain_default' && $data == 'yes') {
 					$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
-					$result = $fmdb->query($query);
+					$fmdb->query($query);
 				}
 			}
 		}
@@ -471,7 +466,7 @@ class fm_dns_zones {
 
 		/** Update the zone */
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET $sql_edit WHERE `domain_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError($dbupdate_error_msg, 'sql');
@@ -484,7 +479,7 @@ class fm_dns_zones {
 			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET domain_view='{$post['domain_view']}', domain_check_config='yes' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 			$query_arr[] = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET domain_name_servers='{$post['domain_name_servers']}', domain_check_config='yes' WHERE `domain_template_id`='$domain_id' AND `account_id`='{$_SESSION['user']['account_id']}'";
 			foreach ($query_arr as $query) {
-				$result = $fmdb->query($query);
+				$fmdb->query($query);
 
 				if ($fmdb->sql_errors) {
 					return formatError(__('Could not update the child zones because a database error occurred.'), 'sql');
@@ -1378,7 +1373,7 @@ HTML;
 			$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains d, fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND
 				s.soa_id=(SELECT soa_id FROM fm_dns_domains WHERE domain_id={$parent_domain_ids[2]})";
 		}
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if (!$fmdb->num_rows) return displayResponseClose(__('Failed: There was no SOA record found for this zone.'));
 
 		$domain_details = $fmdb->last_result;
@@ -1502,7 +1497,7 @@ HTML;
 		} else $sql_name_servers = null;
 		
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' AND server_type NOT IN ('remote') $sql_name_servers ORDER BY `server_type` DESC, `server_url_server_type`, `server_update_method`";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		/** No name servers so return */
 		if (!$fmdb->num_rows) return false;
@@ -1515,7 +1510,7 @@ HTML;
 		global $fmdb, $__FM_CONFIG;
 		
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}track_reloads` VALUES($domain_id, $server_serial_no)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 	}
 	
 	
@@ -1533,7 +1528,7 @@ HTML;
 		}
 		
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` SET `soa_serial_no`=$soa_serial_no WHERE `domain_template`='no' AND `domain_id`=$domain_id";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 	}
 	
 	function availableZones($include = 'no-clones', $zone_type = null, $limit = 'all', $extra = 'none', $exclude = array()) {
@@ -2280,7 +2275,7 @@ HTML;
 				
 				/** Update the user or group capabilities */
 				$query = "UPDATE `fm_{$user_or_group}s` SET $sql WHERE `{$user_or_group}_id`=$id AND `account_id`='{$_SESSION['user']['account_id']}'";
-				$result = $fmdb->query($query);
+				$fmdb->query($query);
 			}
 		}
 	}
@@ -2497,10 +2492,10 @@ HTML;
 		
 		$log_message_domains = '';
 		foreach ($ids as $id) {
-			$log_message_domains .= getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') . "\n";
+			$log_message_domains .= getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') . "; ";
 		}
 		
-		return rtrim(trim($log_message_domains), "\n");
+		return rtrim(trim($log_message_domains), ";");
 	}
 	
 	

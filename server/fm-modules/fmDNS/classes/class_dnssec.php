@@ -87,7 +87,7 @@ class fm_module_dnssec {
 		global $fmdb, $__FM_CONFIG;
 
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = '" . sanitize($post['sub_type']) . "'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
 		}
@@ -103,15 +103,20 @@ class fm_module_dnssec {
 		
 		$include = array('cfg_isparent', 'cfg_type', 'server_serial_no', 'cfg_name', 'cfg_data', 'cfg_comment');
 		
+		$endpoint_name = sanitize($post['cfg_data'], '-');
+		$log_message = sprintf(__('Added a %s with the following details'), $post['sub_type']) . ":\n";
+		$log_message .= formatLogKeyData('', 'Name', $endpoint_name);
+
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No name defined.');
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
+				if ($key == 'server_serial_no') {
+					$log_message .= formatLogKeyData('', 'server', getServerName($data));
+				}
 				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+					$log_message = formatLogKeyData('', 'Comment', $data);
 				}
 			}
 		}
@@ -119,13 +124,11 @@ class fm_module_dnssec {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
-
-		$endpoint_name = $post['cfg_data'];
 
 		/** Insert child configs */
 		$post['cfg_isparent'] = 'no';
@@ -145,28 +148,26 @@ class fm_module_dnssec {
 			
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $include)) continue;
-				$clean_data = sanitize($data);
 				if ($i) $sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
 
-			if ($post['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $post['cfg_name'], $post['cfg_data']);
+			if (strlen($post['cfg_data'])) {
+				$log_message .= formatLogKeyData('cfg_', $post['cfg_name'], $post['cfg_data']);
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = sprintf("Added {$post['sub_type']}:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
 		addLogEntry($log_message);
 		return true;
 	}
@@ -186,7 +187,7 @@ class fm_module_dnssec {
 		global $fmdb, $__FM_CONFIG;
 		
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = '" . sanitize($post['sub_type']) . "'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
 		}
@@ -207,20 +208,22 @@ class fm_module_dnssec {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : sanitize($data);
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No name defined.');
+				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
 				$sql_values .= "$key='$clean_data', ";
 				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+					$logging_comment = formatLogKeyData('', 'Comment', data: $data);
 				}
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
+		$log_message = sprintf(__('Updated %s (%s) to the following details'), $post['sub_type'], $old_name) . ":\n";
+		$log_message .= formatLogKeyData('', 'Name', $endpoint_name);
+		$log_message .= $logging_comment;
 		
 		$query = "$sql_start $sql_values WHERE cfg_id={$post['cfg_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the item because a database error occurred.'), 'sql');
@@ -236,24 +239,26 @@ class fm_module_dnssec {
 			$child['cfg_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				$clean_data = sanitize($data);
-				$sql_values .= "$key='$clean_data', ";
+				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
 			
-			if ($child['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $child['cfg_name'], $child['cfg_data']);
+			if (strlen($child['cfg_data'])) {
+				if ($child['cfg_name'] == 'server_serial_no') {
+					$log_message .= formatLogKeyData('', 'server', getServerName($child['cfg_data']));
+				} else {
+					$log_message .= formatLogKeyData('cfg_', $child['cfg_name'], $child['cfg_data']);
+				}
 			}
 
 			$query = "$sql_start $sql_values WHERE cfg_parent={$post['cfg_id']} AND cfg_name='$handler' LIMIT 1";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 			}
 		}
-		
-		$log_message = sprintf("Updated %s '%s':\nName: %s\n%s", $post['sub_type'], $old_name, $endpoint_name, join("\n", (array) $log_message));
+
 		addLogEntry($log_message);
 
 		return true;
@@ -292,7 +297,10 @@ class fm_module_dnssec {
 			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("%s '%s' was deleted."), $type, $tmp_name));
+			$log_message = sprintf(__('Deleted a %s'), $type) . ":\n";
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
+			addLogEntry($log_message);
 			return true;
 		}
 	}
@@ -380,7 +388,7 @@ HTML;
 
 		/** Get child elements */
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = '$type' ORDER BY def_option ASC";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
 			$valid_types = trim(str_replace(array('(', ')'), '', $def->def_type));
@@ -504,9 +512,9 @@ HTML;
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_name'] = '!config_name!';
 		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
+		if (empty($post['cfg_data'])) return __('No name defined.');
 		$post['cfg_comment'] = trim($post['cfg_comment']);
 		$post['cfg_type'] = $post['sub_type'];
-		$post['cfg_id'] = sanitize($post['cfg_id']);
 
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_id!='{$post['cfg_id']}'";
 		$fmdb->get_results($query);

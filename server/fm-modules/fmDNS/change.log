@@ -7,6 +7,7 @@
 * Server - [improvement] Zone groups can now be referenced in RPZ and validate-except.
 * Server - [improvement] Takes better advantage of fM JS grab functionality.
 * Server - [improvement] Added additional RPZ options.
+* Server - [improvement] Provide better configuration logging.
 * Server - [bug] Dynamic zones now pull the zone from the correct directory.
 * Server - [bug] Fixed modifying dnssec policies when an override exists.
 * Server - [bug] Added missing icon to add options for zone templates.

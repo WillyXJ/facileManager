@@ -76,29 +76,39 @@ class fm_dns_acls {
 		$sql_values = '';
 		
 		$exclude = array('submit', 'action', 'server_id', 'acl_bulk');
+		$logging_include = array_diff(array_keys($post), $exclude, array('acl_id', 'acl_parent_id', 'account_id', 'tab-group-1'));
+
+		if (isset($post['acl_parent_id']) && $post['acl_parent_id']) {
+			$log_message = sprintf(__("Added an address list to ACL '%s' with the following"), getNameFromID($post['acl_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name')) . ":\n";
+		} else {
+			$log_message = __("Added ACL with the following") . ":\n";
+		}
 
 		foreach ($post as $key => $data) {
 			if ($key == 'acl_name' && empty($data)) return __('No ACL name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				if (strlen($data) && in_array($key, $logging_include)) {
+					if ($key == 'server_serial_no') {
+						$log_message .= formatLogKeyData('', 'server', getServerName($data));
+					} elseif (strlen($data)) {
+						$log_message .= formatLogKeyData('acl_', $key, $this->parseACL($data));
+					}
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		$new_acl_id = $fmdb->insert_id;
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the ACL because a database error occurred.'), 'sql');
 		}
 
-		$log_message = sprintf(__("Added ACL:\nName: %s\nComment: %s"), $post['acl_name'], $post['acl_comment']);
-		if ($post['acl_parent_id']) {
-			$log_message = sprintf(__("'%s' was added to the '%s' ACL"), $this->parseACL($post['acl_addresses']), getNameFromID($post['acl_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name'));
-		}
 		addLogEntry($log_message);
 
 		if (isset($post['acl_bulk']) && !empty($post['acl_bulk'])) {
@@ -121,20 +131,36 @@ class fm_dns_acls {
 		if (!is_array($post)) return $post;
 		
 		$exclude = array('submit', 'action', 'server_id');
+		$logging_include = array_diff(array_keys($post), $exclude, array('acl_id', 'acl_parent_id', 'account_id', 'tab-group-1'));
+
+		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
+		if (!$old_name) {
+			$old_address = $this->parseACL(getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses'));
+			$tmp_parent_id = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_parent_id');
+			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
+			$log_message = sprintf(__("Updated %s on ACL '%s' to the following"), $old_address, $tmp_name) . ":\n";
+		} else {
+			$log_message = sprintf(__('Updated ACL (%s) to the following details'), $old_name) . ":\n";
+		}
 
 		$sql_edit = '';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if (strlen($data) && in_array($key, $logging_include)) {
+					if ($key == 'server_serial_no') {
+						$log_message .= formatLogKeyData('', 'server', getServerName($data));
+					} elseif (strlen($data)) {
+						$log_message .= formatLogKeyData('acl_', $key, $this->parseACL($data));
+					}
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the acl
-		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-		$old_address = $this->parseACL(getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses'));
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET $sql WHERE `acl_id`={$post['acl_id']}";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the ACL because a database error occurred.'), 'sql');
@@ -143,12 +169,6 @@ class fm_dns_acls {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$log_message = sprintf(__("Updated ACL '%s' to the following:\nName: %s\nComment: %s"), $old_name, $post['acl_name'], $post['acl_comment']);
-		if (!$old_name) {
-			$tmp_parent_id = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_parent_id');
-			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-			$log_message = sprintf(__("'%s' was updated to '%s' on the '%s' ACL"), $old_address, $this->parseACL($post['acl_addresses']), $tmp_name);
-		}
 		addLogEntry($log_message);
 		return true;
 	}
@@ -158,7 +178,7 @@ class fm_dns_acls {
 	 * Deletes the selected ACL
 	 */
 	function delete($id, $server_serial_no = 0) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		/** Are there any corresponding configs? */
 		if (getConfigAssoc($id, 'acl')) {
@@ -171,18 +191,22 @@ class fm_dns_acls {
 			$tmp_parent_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_parent_id');
 			$tmp_address = $this->parseACL(getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_addresses'));
 			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
-			$log_message = sprintf(__("'%s' was deleted from the '%s' ACL"), $tmp_address, $tmp_name);
+			$log_message = __('Deleted an address list from an ACL') . ":\n";
 		} else {
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}acls` SET `acl_status`='deleted' WHERE account_id='{$_SESSION['user']['account_id']}' AND `acl_parent_id`='" . sanitize($id) . "'";
 			$fmdb->query($query);
 			if ($fmdb->sql_errors) {
 				return formatError(__('The associated ACL elements could not be deleted because a database error occurred.'), 'sql');
 			}
+			$log_message = __('Deleted an ACL') . ":\n";
 		}
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $id, 'acl_', 'deleted', 'acl_id') === false) {
 			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= (isset($tmp_address)) ? formatLogKeyData('', 'Address', $fm_dns_acls->parseACL($tmp_address)) : null;
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
 			addLogEntry($log_message);
 			return true;
 		}
@@ -621,7 +645,7 @@ HTML;
 
 		/** Does the record already exist for this account? */
 		if (array_key_exists('acl_name', $post)) {
-			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $post['acl_name'], 'acl_', 'acl_name');
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', $post['acl_name'], 'acl_', 'acl_name', "AND acl_id!='{$post['acl_id']}'" . (isset($post['server_serial_no'])) ? " AND server_serial_no!='{$post['server_serial_no']}'" : null);
 			if ($fmdb->num_rows) return __('This ACL already exists.');
 		} else {
 			if (!$post['acl_addresses']) {

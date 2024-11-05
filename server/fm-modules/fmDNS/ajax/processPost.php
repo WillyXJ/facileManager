@@ -126,7 +126,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$post_class = (in_array($item_type, array('dnssec-policy'))) ? $fm_module_dnssec : ${'fm_module_' . $item_type};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$object = $item_type;
+			$type = $object = $item_type;
 			$field_data = $prefix . 'data';
 			break;
 		default:
