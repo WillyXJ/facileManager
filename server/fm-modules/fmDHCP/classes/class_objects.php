@@ -130,7 +130,7 @@ class fm_dhcp_objects {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_start $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
@@ -173,7 +173,7 @@ class fm_dhcp_objects {
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_start $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
@@ -187,7 +187,7 @@ class fm_dhcp_objects {
 		if (is_array($post['config_children'])) {
 			$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 			$query = "$sql_start config_parent_id={$child['config_parent_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 
 			// Log children
 			foreach ($post['config_children'] as $child_id) {
@@ -245,7 +245,7 @@ class fm_dhcp_objects {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_start $sql_values WHERE config_id={$post['config_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		$rows_affected = $fmdb->rows_affected;
 		
 		if ($fmdb->sql_errors) {
@@ -282,7 +282,7 @@ class fm_dhcp_objects {
 			}
 
 			$query = "$sql_start $sql_values WHERE config_parent_id={$post['config_id']} AND config_name='$handler' LIMIT 1";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 			$rows_affected += $fmdb->rows_affected;
 
 			if ($fmdb->sql_errors) {
@@ -297,10 +297,10 @@ class fm_dhcp_objects {
 
 		/** Reassigned children */
 		$query = "$sql_start config_parent_id=0 WHERE config_parent_id={$post['config_id']} AND config_is_parent='yes'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if (is_array($post['config_children'])) {
 			$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 			$rows_affected += $fmdb->rows_affected;
 
 			// Log children
@@ -959,9 +959,6 @@ HTML;
 	function validateObjectPost($post) {
 		global $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
 			$post_tmp['config_name'] = sanitize($post['config_name']);
