@@ -1385,7 +1385,7 @@ i.popout {
 	padding-right: 2px;
 }
 
-h2 > a#plus {
+h2 > a {
 	padding: 0 5px;
 	position: relative;
 	top: 1px;

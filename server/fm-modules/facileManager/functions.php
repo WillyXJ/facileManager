@@ -1444,7 +1444,7 @@ function setOption($option = null, $value = null, $insert_update = 'auto', $auto
 	
 	if ($insert_update == 'auto') {
 		$query = "SELECT * FROM fm_options WHERE option_name='$option' AND account_id=$account_id $module_sql";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		$insert_update = ($fmdb->num_rows) ? 'update' : 'insert';
 	}
 	
@@ -1546,7 +1546,7 @@ DELETE FROM $database.`fm_options` WHERE `module_name` = '$module';
 REMOVE;
 
 	foreach ($removes as $query) {
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 	}
 	
 	/** Include module variables */
@@ -2216,7 +2216,7 @@ function setOSIcon($server_os) {
  * @since 1.0
  * @package facileManager
  *
- * @param string $response Page form response
+ * @param string|array $message Page form response
  * @param string $title The page title
  * @param bool $allowed_to_add Whether the user can add new
  * @param string $name Name value of plus sign
@@ -2224,9 +2224,15 @@ function setOSIcon($server_os) {
  * @param string $scroll Scroll or noscroll
  * @return void
  */
-function printPageHeader($response = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null) {
+function printPageHeader($message = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null) {
 	global $__FM_CONFIG;
 	
+	if (is_array($message)) {
+		list($response, $comment) = $message;
+	} else {
+		$response = $message;
+	}
+
 	if (empty($title)) $title = getPageTitle();
 	
 	$style = (empty($response)) ? 'style="display: none;"' : null;
@@ -2243,7 +2249,11 @@ function printPageHeader($response = null, $title = null, $allowed_to_add = fals
 	if ($allowed_to_add) {
 		echo displayAddNew($name, $rel);
 	}
-	
+
+	if (isset($comment)) {
+		printf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle notice grey" aria-hidden="true"></i></a>', $comment);
+	}
+
 	echo '</h2>' . "\n";
 }
 
@@ -2288,7 +2298,7 @@ function setBuildUpdateConfigFlag($serial_no, $flag, $build_update, $__FM_CONFIG
 	} else {
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET `server_" . $build_update . "_config`='" . $flag . "' WHERE `server_installed`='yes' AND `server_status`='active'";
 	}
-	$result = $fmdb->query($query);
+	$fmdb->query($query);
 	
 	if ($fmdb->result) {
 		if (isset($GLOBALS[$_SESSION['module']]['DNSSEC'])) {
@@ -3788,10 +3798,11 @@ function createTempDir($subdir, $append = null) {
  * @package facileManager
  *
  * @param string $message Error message to include
+ * @param string $class Class to apply to message
  * @return string
  */
-function displayResponseClose($message) {
-	return sprintf('<div id="response_close"><p><i class="fa fa-close close" aria-hidden="true" title="%s"></i></p></div><p class="error">%s</p>', _('Close'), $message);
+function displayResponseClose($message, $class = 'error') {
+	return sprintf('<div id="response_close"><p><i class="fa fa-close close" aria-hidden="true" title="%s"></i></p></div><p class="%s">%s</p>', _('Close'), $class, $message);
 }
 
 
@@ -4186,4 +4197,30 @@ function cleanAndTrimInputs($post) {
 	}
 	
 	return $post;	
+}
+
+
+/**
+ * Gets the server/group name
+ *
+ * @since 4.8.0
+ * @package facileManager
+ *
+ * @param string|integer $id Serial number or group ID
+ * @return string
+ */
+function getServerName($id) {
+	global $__FM_CONFIG;
+
+	if (!$id) {
+		return _('All Servers');
+	} elseif (strpos($id, 'g_') !== false) {
+		return getNameFromID(str_replace('g_', '', $id), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+	} elseif (strpos($id, 's_') !== false) {
+		return getNameFromID(str_replace('s_', '', $id), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+	} elseif (intval($id)) {
+		return getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+	}
+
+	return false;
 }

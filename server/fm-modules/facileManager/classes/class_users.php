@@ -982,7 +982,7 @@ PERM;
 
 		$query = sprintf("INSERT INTO fm_keys (`account_id`, `user_id`, `key_token`, `key_secret`) VALUES (%d, %d, '%s', '%s')",
 			$_SESSION['user']['account_id'], $_SESSION['user']['id'], $key_token, password_hash($key_secret, PASSWORD_DEFAULT));
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return $popup_header . formatError(_('Could not create the keypair because a database error occurred.'), 'sql') . $popup_footer;
