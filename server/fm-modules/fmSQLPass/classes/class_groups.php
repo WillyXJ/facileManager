@@ -70,7 +70,7 @@ class fm_sqlpass_groups {
 		if (!is_array($post)) return $post;
 		
 		$query = "INSERT INTO `fm_{$__FM_CONFIG['fmSQLPass']['prefix']}groups` (`account_id`, `group_name`) VALUES('{$_SESSION['user']['account_id']}', '{$post['group_name']}')";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not add the group because a database error occurred.'), 'sql');

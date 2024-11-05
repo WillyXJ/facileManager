@@ -1,3 +1,7 @@
+1.10.0 (2024-??-??)
+==================
+* Server - [improvement] Code clean up.
+
 1.9.0 (2024-09-30)
 ==================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)
