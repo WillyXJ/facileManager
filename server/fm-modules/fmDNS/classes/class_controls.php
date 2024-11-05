@@ -353,9 +353,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (!$post['control_id']) unset($post['control_id']);
 		
 		if (is_array($post['control_keys'])) $post['control_keys'] = join(',', $post['control_keys']);

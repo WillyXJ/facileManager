@@ -186,9 +186,6 @@ class fm_module_servers extends fm_shared_module_servers {
 	function addGroup($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
 		/** Check name field length */
@@ -348,9 +345,6 @@ class fm_module_servers extends fm_shared_module_servers {
 	function updateGroup($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
 		/** Check name field length */
@@ -1105,9 +1099,6 @@ FORM;
 	private function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['server_name'])) return __('No server name defined.');
 		
 		/** Check name field length */

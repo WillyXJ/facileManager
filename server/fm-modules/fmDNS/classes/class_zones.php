@@ -1790,9 +1790,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		/** Zone groups */
 		if (array_key_exists('group_name', $post)) {
 			/** Empty domain names are not allowed */

@@ -566,9 +566,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_name');
 		if ($field_length !== false && strlen($post['master_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Master name is too long (maximum %d character).', 'Master name is too long (maximum %d characters).', $field_length), $field_length);
