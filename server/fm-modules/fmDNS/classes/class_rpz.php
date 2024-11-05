@@ -479,9 +479,6 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		/** Minimum version */
-		$minimum_version = getMinimumFeatureVersion('options', 'policy', 'message', "AND def_option_type='{$cfg_type}'");
-
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
 		%s
 			<input type="hidden" name="action" value="%s" />
@@ -494,7 +491,6 @@ HTML;
 					<input type="radio" name="tab-group-1" id="tab-1" checked />
 					<label for="tab-1">%s</label>
 					<div id="tab-content">
-						<div id="response"><p class="center">%s</p></div>
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
@@ -543,7 +539,7 @@ HTML;
 			});
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_order_id, $cfg_type_id, $server_serial_no,
-				__('Basic'), $minimum_version,
+				__('Basic'),
 				__('Zone'), $domain_id,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),

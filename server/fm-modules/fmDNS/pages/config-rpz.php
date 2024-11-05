@@ -129,7 +129,7 @@ if ($page > $total_pages) $page = $total_pages;
 /** RPZ is limited to 32 defined zones */
 $perms = ($tmp_num_rows - $global_num_rows >= 32) ? false : currentUserCan('manage_zones', $_SESSION['module']);
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel);
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion('options', 'policy', 'message', "AND def_option_type='rpz'")), $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

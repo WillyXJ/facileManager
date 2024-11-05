@@ -64,7 +64,7 @@ printHeader();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion($display_option_type_sql)), null, currentUserCan('manage_servers', $_SESSION['module']));
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

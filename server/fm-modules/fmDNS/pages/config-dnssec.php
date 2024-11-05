@@ -68,7 +68,7 @@ printHeader();
 $avail_types = buildSubMenu($type, $__FM_CONFIG['dnssec']['avail_types']);
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion($type, 'dnskey-ttl')), $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

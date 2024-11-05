@@ -433,9 +433,6 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		/** Minimum version */
-		$minimum_version = getMinimumFeatureVersion($type, 'dnskey-ttl');
-		
 		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
 		%s
 			<input type="hidden" name="action" value="%s" />
@@ -447,7 +444,6 @@ HTML;
 					<input type="radio" name="tab-group-1" id="tab-1" checked />
 					<label for="tab-1">%s</label>
 					<div id="tab-content">
-						<div id="response"><p class="center">%s</p></div>
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
@@ -482,7 +478,7 @@ HTML;
 			});
 		</script>',
 				$type, $popup_header, $action, $cfg_id, $type, $server_serial_no,
-				__('Basic'), $minimum_version,
+				__('Basic'),
 				__('Name'), $cfg_data,$name_length,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
