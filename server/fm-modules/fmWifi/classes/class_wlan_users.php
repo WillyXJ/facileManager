@@ -98,7 +98,7 @@ class fm_wifi_wlan_users {
 		
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}wlan_users` (`account_id`, `wlan_user_login`, `wlan_user_password`, `wlan_user_comment`, `wlan_user_mac`, `wlan_ids`) 
 				VALUES('{$_SESSION['user']['account_id']}', '{$post['wlan_user_login']}', '{$post['wlan_user_password']}', '{$post['wlan_user_comment']}', '{$post['wlan_user_mac']}', '{$post['wlan_ids']}')";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not add the user because a database error occurred.'), 'sql');
@@ -143,7 +143,7 @@ class fm_wifi_wlan_users {
 		/** Update the item */
 		$old_name = getNameFromID($post['user_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_', 'wlan_user_id', 'wlan_user_login');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}wlan_users` SET $sql WHERE `wlan_user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not update the user because a database error occurred.'), 'sql');
@@ -331,9 +331,6 @@ HTML;
 		$post['wlan_user_login'] = $post['user_login'];
 		$post['wlan_user_password'] = $post['user_password'];
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		$post['wlan_ids'] = (in_array('0', $post['wlan_ids'])) ? 0 : join(';', $post['wlan_ids']);
 
 		if ($post['action'] == 'add' && empty($post['wlan_user_login'])) return __('No username is defined.');

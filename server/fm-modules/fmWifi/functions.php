@@ -540,7 +540,7 @@ function getHostedServers($configured_servers) {
 	} else $servers_sql = null;
 
 	$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` WHERE `server_status`='active' AND account_id='{$_SESSION['user']['account_id']}' $servers_sql ORDER BY `server_update_method`";
-	$result = $fmdb->query($query);
+	$fmdb->query($query);
 
 	/** No name servers so return */
 	if (!$fmdb->num_rows) return false;

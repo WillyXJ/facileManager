@@ -123,7 +123,7 @@ class fm_wifi_wlans {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_start $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		$insert_id = $fmdb->insert_id;
 
@@ -184,7 +184,7 @@ class fm_wifi_wlans {
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_start $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
@@ -241,7 +241,7 @@ class fm_wifi_wlans {
 		$item_id = $post['config_id'];
 		
 		$query = "$sql_start $sql_values WHERE config_id={$post['config_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
@@ -270,7 +270,7 @@ class fm_wifi_wlans {
 			$sql_values = rtrim($sql_values, ', ');
 			
 			$query = "$sql_start $sql_values WHERE config_parent_id={$post['config_id']} AND config_name='$handler' LIMIT 1";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
@@ -279,10 +279,10 @@ class fm_wifi_wlans {
 		
 		/** Reassigned children */
 		$query = "$sql_start config_parent_id=0 WHERE config_parent_id={$post['config_id']} AND config_is_parent='yes'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if (is_array($post['config_children'])) {
 			$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 		}
 
 		/** Server changed so configuration needs to be built */
@@ -705,9 +705,6 @@ HTML;
 	function validatePost($post) {
 		global $__FM_CONFIG, $fmdb;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
 			$post_tmp['config_data'] = $post['config_name'];

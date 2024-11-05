@@ -142,7 +142,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			$sql_values = rtrim($sql_values, ', ');
 
 			$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not add the access point group because a database error occurred.'), 'sql');
@@ -179,7 +179,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		/** Add the server */
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
@@ -237,7 +237,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		/** Update the server */
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
@@ -604,9 +604,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		/** Server groups */
 		if (array_key_exists('group_name', $post)) {
 			/** Empty domain names are not allowed */

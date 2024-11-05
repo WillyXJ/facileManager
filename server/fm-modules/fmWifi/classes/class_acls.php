@@ -116,7 +116,7 @@ class fm_wifi_acls {
 		$sql_values = rtrim($sql_values, ', ');
 
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the ACL because a database error occurred.'), 'sql');
@@ -165,7 +165,7 @@ class fm_wifi_acls {
 		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_mac');
 		
 		$query = "$sql_start $sql_values WHERE acl_id={$post['acl_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
@@ -359,9 +359,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG, $fm_wifi_wlans;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (in_array('0', $post['wlan_ids']) || !isset($post['wlan_ids'])) {
 			$post['wlan_ids'] = 0;
 		} else {
