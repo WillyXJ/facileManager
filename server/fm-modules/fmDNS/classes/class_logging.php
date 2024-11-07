@@ -416,7 +416,7 @@ class fm_module_logging {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Check if channel is currently associated with category */
-		if ($type == 'channel' && is_array($this->getAssocCategories($id))) {
+		if ($type == 'channel' && count($this->getAssocCategories($id))) {
 			return sprintf(__('This %s could not be deleted because it is associated with one or more categories.'), $type);
 		}
 		
@@ -446,7 +446,7 @@ class fm_module_logging {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" name="' . $channel_category . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			if ($channel_category != 'channel' || !is_array($this->getAssocCategories($row->cfg_id))) {
+			if ($channel_category != 'channel' || !count($this->getAssocCategories($row->cfg_id))) {
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';

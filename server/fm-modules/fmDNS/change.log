@@ -19,6 +19,7 @@
 * Server - [bug] Server updates via cron would specify incorrect zone directory. (Issue #638)
 * Server - [bug] Fixed RPZ ordering.
 * Server - [bug] Fixed option value logging formatting.
+* Server - [bug] Fixed inability to delete unused logging channels.
 
 6.2.0 (2024-10-14)
 ==================
