@@ -277,7 +277,7 @@ HTML;
 			case 'ratelimit':
 			case 'rrset':
 				if (isset($_POST['item_sub_type'])) {
-					$cfg_id_name = sanitize($_POST['item_sub_type']);
+					$cfg_id_name = $_POST['item_sub_type'];
 				} else {
 					$cfg_id_name = (isset($_POST['view_id']) || strtolower($cfg_type) == 'ratelimit') ? 'view_id' : 'domain_id';
 				}
@@ -414,13 +414,13 @@ HTML;
 		
 		if ($action == 'add') {
 			if (isset($_POST['view_id'])) {
-				$cfg_id_sql[] = 'view_id = ' . sanitize($_POST['view_id']);
+				$cfg_id_sql[] = 'view_id = ' . $_POST['view_id'];
 			}
 			if (isset($_POST['item_id'])) {
 				if ($_POST['item_sub_type'] != 'domain_id') {
 					$cfg_id_sql[] = 'domain_id=0';
 				}
-				$cfg_id_sql[] = sanitize($_POST['item_sub_type']) . ' = ' . sanitize($_POST['item_id']);
+				$cfg_id_sql[] = $_POST['item_sub_type'] . ' = ' . $_POST['item_id'];
 			}
 			if (isset($cfg_id_sql)) {
 				$cfg_id_sql = implode(' AND ', $cfg_id_sql);

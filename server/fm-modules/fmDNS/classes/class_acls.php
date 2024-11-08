@@ -439,7 +439,7 @@ HTML;
 			/** Keys */
 			$key_type = ' AND key_type="tsig"';
 			if ($include == 'all') {
-				$view_id = (isset($_POST['view_id']) && is_numeric(sanitize($_POST['view_id']))) ? sanitize($_POST['view_id']) : 0;
+				$view_id = (isset($_POST['view_id']) && is_numeric($_POST['view_id'])) ? $_POST['view_id'] : 0;
 				$key_type .= ' AND key_view IN (0, ' . $view_id . ')';
 			}
 			basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_id', 'key_', $key_type . ' AND key_status="active"');
