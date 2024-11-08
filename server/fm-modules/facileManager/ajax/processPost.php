@@ -26,18 +26,9 @@ require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'functions.php');
 
-/** Handle user password change */
-if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
-	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
-	$update_status = $fm_users->updateUser($_POST);
-	if ($update_status !== true) {
-		echo $update_status;
-	} else {
-		echo 'Success';
-	}
 /** Handle fM settings */
-} elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_settings') {
-	if (!currentUserCan('manage_settings')) returnUnAuth(false);
+if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_settings') {
+	if (!currentUserCan('manage_settings')) returnUnAuth('response-close');
 
 	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 	
@@ -51,7 +42,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 /** Handle module settings */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'module_settings') {
-	if (!currentUserCan('manage_settings', $_SESSION['module'])) returnUnAuth(false);
+	if (!currentUserCan('manage_settings', $_SESSION['module'])) returnUnAuth('response-close');
 
 	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_settings.php');
 	$save_result = $fm_module_settings->save();
@@ -59,7 +50,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 /** Handle forced software update checks */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_software_update_check') {
-	if (!currentUserCan('manage_settings')) returnUnAuth(false);
+	if (!currentUserCan('manage_settings')) returnUnAuth('response-close');
 
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	$fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version, 'force');
@@ -185,9 +176,25 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	echo buildPopup('header', _('Updates Results')) . $result . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
 
 /** Handle users */
+} elseif (is_array($_POST) && array_key_exists('type', $_POST) && in_array($_POST['type'], array('users', 'groups'))) {
+	/** Handle user password change */
+	if (array_key_exists('action', $_POST) && (array_key_exists('user_id', $_POST) || array_key_exists('group_id', $_POST))) {
+		include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
+		$function = $_POST['action'] . 'User';
+		$response = $fm_users->$function($_POST);
+
+		echo ($response !== true) ? $response : 'Success';
+	}
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'users') {
+	include_once(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
+
+	/** Handle form validation */
+	if (array_key_exists('action', $_POST) && $_POST['action'] == 'validate-input') {
+		exit($fm_users->validateFormField($_POST['input_field'], $_POST['input_value']));
+	}
+
 	if (isset($_POST['item_id'])) {
-		$id = sanitize($_POST['item_id']);
+		$id = $_POST['item_id'];
 	} else returnError();
 
 	/** Process API key changes */
@@ -202,12 +209,10 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 
 	if (!currentUserCan('manage_users') && $_POST['item_sub_type'] != 'keys') returnUnAuth();
 	
-	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_users.php');
-	
 	switch ($_POST['action']) {
 		case 'delete':
 			if (isset($id)) {
-				$delete_status = $fm_users->delete(sanitize($id), substr(sanitize($_POST['item_sub_type']), 0, -1));
+				$delete_status = $fm_users->delete(sanitize($id), substr($_POST['item_sub_type'], 0, -1));
 				if ($delete_status !== true) {
 					echo $delete_status;
 				} else {
@@ -221,25 +226,24 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 					if ((!currentUserCan('do_everything') && userCan($id, 'do_everything')) || $id == getDefaultAdminID()) {
 						exit(_('You do not have permission to modify the status of this user.'));
 					}
-					if (!updateStatus('fm_users', $id, 'user_', sanitize($_POST['item_status']), 'user_id')) {
+					if (!updateStatus('fm_users', $id, 'user_', $_POST['item_status'], 'user_id')) {
 						exit(sprintf(_('This user could not be set to %s.') . "\n", $_POST['item_status']));
 					} else {
 						$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
-						addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])), $fm_name);
+						addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, $_POST['item_status']), $fm_name);
 						exit('Success');
 					}
 				} elseif (isset($_POST['url_var_type']) && $_POST['url_var_type'] == 'keys') {
-					if (!updateStatus('fm_keys', $id, 'key_', sanitize($_POST['item_status']), 'key_id')) {
+					if (!updateStatus('fm_keys', $id, 'key_', $_POST['item_status'], 'key_id')) {
 						exit(sprintf(_('This API key could not be set to %s.') . "\n", $_POST['item_status']));
 					} else {
 						$tmp_name = getNameFromID($id, 'fm_keys', 'key_', 'key_id', 'key_token');
-						addLogEntry(sprintf(_('Set API key (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])), $fm_name);
+						addLogEntry(sprintf(_('Set API key (%s) status to %s.'), $tmp_name, $_POST['item_status']), $fm_name);
 						exit('Success');
 					}
 				}
 			}
 			exit(_('Error: Malformed request.'));
-			break;
 	}
 /** Handle everything else */
 } elseif (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {

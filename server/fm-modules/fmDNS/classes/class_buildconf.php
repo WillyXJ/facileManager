@@ -92,6 +92,11 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				
 				exit;
 			}
+
+			/** rndc key option */
+			if ($server_key_with_rndc == 'default') {
+				$data->server_key_with_rndc = getOption('use_named_keys_with_rndc', $_SESSION['user']['account_id'], $_SESSION['module']);
+			}
 			
 			$this->server_info = $data;
 
@@ -838,7 +843,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					$query .= ')';
 				}
 				$query .= " ORDER BY `domain_clone_domain_id`,`domain_name`";
-				$result = $fmdb->query($query);
+				$fmdb->query($query);
 				if ($fmdb->num_rows) {
 					$count = $fmdb->num_rows;
 					$zone_result = $fmdb->last_result;
@@ -944,7 +949,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND `domain_template`='no' AND 
 			((`domain_name_servers`='0' OR `domain_name_servers`='s_{$server_id}' OR `domain_name_servers` LIKE 's_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id};%' OR `domain_name_servers` LIKE '%;s_{$server_id}' $group_sql))
 			 $view_sql ORDER BY `domain_dnssec_parent_domain_id` DESC,`domain_clone_domain_id`,`domain_name` ASC";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if ($fmdb->num_rows || $include_hint_zone) {
 			$count = $fmdb->num_rows;
 			$zone_result = $fmdb->last_result;
@@ -1130,7 +1135,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			$result = $fmdb->last_result;
 			$data = $result[0];
 			extract(get_object_vars($data), EXTR_SKIP);
-			
+				
 			/** check if this server is configured for cron updates */
 			if ($server_update_method != 'cron') {
 				$error = "This server is not configured to receive updates via cron.\n";
@@ -1157,7 +1162,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				for ($i=0; $i < count($track_reloads); $i++) {
 					$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` WHERE `domain_status`='active' AND (`domain_id`=" . $track_reloads[$i]->domain_id . " OR `domain_clone_domain_id`=" . $track_reloads[$i]->domain_id . 
 							") ORDER BY `domain_clone_domain_id`,`domain_name`";
-					$result = $fmdb->query($query);
+					$fmdb->query($query);
 					if ($fmdb->num_rows) {
 						$zone_result = $fmdb->last_result[0];
 						/** Is this a clone id? */
@@ -1190,8 +1195,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							unset($default_file_ext);
 
 							/** Build zone file */
-							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
-							$data->files[$server_zones_dir . '/' . $zone_result->domain_type . '/' . $domain_name_file] = $this->buildZoneFile($zone_result, $server_serial_no);
+							$domain_type = ($zone_result->domain_type == 'primary' && version_compare($server_version, '9.16.12', '<')) ? 'master' : $zone_result->domain_type;
+							$data->files[$server_zones_dir . '/' . $domain_type . '/' . str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format)] = $this->buildZoneFile($zone_result, $server_serial_no);
 							
 							/** Track reloads */
 							$data->reload_domain_ids[] = isset($zone_result->parent_domain_id) ? $zone_result->parent_domain_id : $zone_result->domain_id;
@@ -2546,7 +2551,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 	 * @return string
 	 */
 	function getRPZ($view_id, $server_serial_no, $server_group_ids) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
 		
 		/** Check if rpz is supported by server_version */
 		list($server_version) = explode('-', getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_version'));
@@ -2560,16 +2565,30 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			if ($unsupported_version) return $unsupported_version;
 			$result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
+
+			if (!$fm_dns_zones) {
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			}
+
 			for ($i=0; $i < $global_config_count; $i++) {
-				$domain = displayFriendlyDomainName(getNameFromID($result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
-	
-				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="0"');
-				foreach ($fmdb->last_result as $record) {
-					if ($record->cfg_data) {
-						$config_array['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+				$domain_ids = $result[$i]->domain_id;
+				if (preg_match('/^g_\d+/', $domain_ids) == true) {
+					$domain_ids = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_ids));
+				}
+				if (!is_array($domain_ids)) {
+					$domain_ids = array($domain_ids);
+				}
+
+				foreach ($domain_ids as $domain_id) {
+					$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="0"');
+					foreach ($fmdb->last_result as $record) {
+						if ($record->cfg_data) {
+							$config_array['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+						}
 					}
 				}
-		
 			}
 			unset($result);
 		}
@@ -2583,11 +2602,21 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 				$server_config_result = $fmdb->last_result;
 				$global_config_count = $fmdb->num_rows;
 				for ($i=0; $i < $global_config_count; $i++) {
-					$domain = displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
-		
-					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
-					foreach ($fmdb->last_result as $record) {
-						$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+					$domain_ids = $server_config_result[$i]->domain_id;
+					if (preg_match('/^g_\d+/', $domain_ids) == true) {
+						$domain_ids = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_ids));
+					}
+					if (!is_array($domain_ids)) {
+						$domain_ids = array($domain_ids);
+					}
+	
+					foreach ($domain_ids as $domain_id) {
+						$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+	
+						basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+						foreach ($fmdb->last_result as $record) {
+							$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+						}
 					}
 				}
 				unset($server_config_result);
@@ -2601,11 +2630,21 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			$server_config_result = $fmdb->last_result;
 			$global_config_count = $fmdb->num_rows;
 			for ($i=0; $i < $global_config_count; $i++) {
-				$domain = displayFriendlyDomainName(getNameFromID($server_config_result[$i]->domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
-	
-				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
-				foreach ($fmdb->last_result as $record) {
-					$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+				$domain_ids = $server_config_result[$i]->domain_id;
+				if (preg_match('/^g_\d+/', $domain_ids) == true) {
+					$domain_ids = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_ids));
+				}
+				if (!is_array($domain_ids)) {
+					$domain_ids = array($domain_ids);
+				}
+
+				foreach ($domain_ids as $domain_id) {
+					$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+
+					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
+					foreach ($fmdb->last_result as $record) {
+						$server_config['domain'][$domain][$record->cfg_name] = $record->cfg_data;
+					}
 				}
 			}
 			unset($server_config_result);

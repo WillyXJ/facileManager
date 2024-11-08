@@ -35,8 +35,6 @@ $response = isset($response) ? $response : null;
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['users']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : array_key_first($__FM_CONFIG['users']['avail_types']);
 $display_type = $__FM_CONFIG['users']['avail_types'][$type];
 
-$_POST = cleanAndTrimInputs($_POST);
-
 switch ($action) {
 case 'add':
 	if (!empty($_POST)) {
@@ -51,7 +49,7 @@ case 'add':
 	break;
 case 'edit':
 	if (!empty($_POST)) {
-		$response = ($_POST['type'] == 'users') ? $fm_users->updateUser($_POST) : $fm_users->updateGroup($_POST);
+		$response = ($_POST['type'] == 'users') ? $fm_users->editUser($_POST) : $fm_users->editGroup($_POST);
 		if ($response !== true) {
 			$form_data = $_POST;
 		} else {

@@ -386,7 +386,7 @@ $(document).ready(function() {
 			$("#define_forwarders").slideUp();
 			$("#define_masters").slideUp();
 			$("#define_soa").show("slow");
-			if ($(this).val() == "master") {
+			if ($(this).val() == "primary") {
 				$("#dynamic_updates").show("slow");
 				$("#define_redirect_url").slideUp();
 			} else {

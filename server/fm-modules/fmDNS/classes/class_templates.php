@@ -164,6 +164,7 @@ HTML;
 		$popup_title = $action == 'add' ? __('Add Template') : __('Edit Template');
 		$popup_header = buildPopup('header', $popup_title);
 		$force_action = $action == 'add' ? 'create' : 'update';
+		$popup_footer = buildPopup('footer');
 
 		switch ($template_type) {
 			case 'soa':
@@ -176,16 +177,16 @@ HTML;
 				$form .= $popup_header;
 
 				$form .= $fm_dns_records->buildSOA($data, array('template_name'), $force_action);
+				// $popup_footer = str_replace('button primary', 'button primary follow-action', $popup_footer);
 				break;
 			case 'domain':
 				global $fm_dns_zones;
-				$form = '<form name="manage" id="manage" method="post" action="">' . $popup_header;
+				$form = $popup_header . '<form name="manage" id="manage">';
 				$form .= $fm_dns_zones->printForm($data, $force_action, 'forward', array('template_name'));
 				break;
 		}
 		
-		$form .= buildPopup('footer');
-		$form .= '</form>';
+		$form .= $popup_footer . '</form>';
 		
 		echo $form;
 	}

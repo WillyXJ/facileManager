@@ -44,7 +44,7 @@ if (array_key_exists('submit', $_POST)) {
 		case __('Import Zones'):
 			if (!empty($_FILES['import-file']['tmp_name'])) {
 				$block_style = 'style="display: block;"';
-				$output = ($_POST['submit'] == __('Import Records')) ? $fm_module_tools->zoneImportWizard(sanitize($_POST['domain_id'])) : $fm_module_tools->bulkZoneImportWizard();
+				$output = ($_POST['submit'] == __('Import Records')) ? $fm_module_tools->zoneImportWizard($_POST['domain_id']) : $fm_module_tools->bulkZoneImportWizard();
 			}
 			break;
 		case __('Save'):

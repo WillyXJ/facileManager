@@ -2735,9 +2735,72 @@ function upgradefmDNS_630($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '6.2.0', '<') ? upgradefmDNS_620($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$queries = array();
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` CHANGE `domain_id` `domain_id` VARCHAR(100) NOT NULL DEFAULT '0'";
 	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups", 'group_auto_also_notify')) {
 		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` ADD `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER `group_name`";
+	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_key_with_rndc')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_key_with_rndc` ENUM('default','yes','no') NOT NULL DEFAULT 'default' AFTER `server_menu_display`";
+	}
+	$queries[] = "DELETE FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` WHERE `def_option_type` = 'rpz'";
+	$queries[] = <<<INSERTSQL
+INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` (
+`def_function` ,
+`def_option_type`,
+`def_option` ,
+`def_type` ,
+`def_multiple_values` ,
+`def_clause_support`,
+`def_zone_support`,
+`def_dropdown`,
+`def_minimum_version`
+)
+VALUES 
+('options', 'rpz', 'add-soa', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.18.0'),
+('options', 'rpz', 'max-policy-ttl', '( duration )', 'no', 'OV', 'all', 'no', '9.10.0'),
+('options', 'rpz', 'min-update-interval', '( duration )', 'no', 'OV', 'all', 'no', '9.18.0'),
+('options', 'rpz', 'recursive-only', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.10.0'),
+('options', 'rpz', 'nsip-enable', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.18.0'),
+('options', 'rpz', 'nsdname-enable', '( yes | no )', 'no', 'OV', 'all', 'yes', '9.18.0'),
+('options', 'rpz', 'break-dnssec', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.10.0'),
+('options', 'rpz', 'min-ns-dots', '( integer )', 'no', 'OV', 'global', 'no', '9.10.0'),
+('options', 'rpz', 'nsip-wait-recurse', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.10.0'),
+('options', 'rpz', 'nsdname-wait-recurse', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.18.0'),
+('options', 'rpz', 'qname-wait-recurse', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.10.0'),
+('options', 'rpz', 'dnsrps-enable', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.18.0'),
+('options', 'rpz', 'dnsrps-options', '( string )', 'no', 'OV', 'global', 'no', '9.18.0'),
+('options', 'rpz', 'log', '( yes | no )', 'no', 'OV', 'domain', 'yes', '9.10.0'),
+('options', 'rpz', 'ede', '( none | forged | blocked | censored | filtered | prohibited )', 'no', 'OV', 'domain', 'yes', '9.19.0'),
+('options', 'rpz', 'policy', '( cname | disabled | drop | given | no-op | nodata | nxdomain | passthru | tcp-only )', 'no', 'OV', 'domain', 'yes', '9.10.0')
+INSERTSQL;
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET `cfg_name`='!config_name!' WHERE `cfg_type`='rpz' AND `cfg_isparent`='yes' AND `cfg_name`='zone'";
+
+	/** Add new RPZ configs */
+	$query = "SELECT * FROM `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` WHERE `cfg_type`='rpz' AND `cfg_isparent`='yes' AND `cfg_status`!='deleted'";
+	$fmdb->query($query);
+	if ($fmdb->num_rows) {
+		foreach ($fmdb->last_result as $result) {
+			$queries[] = <<<INSERTSQL
+INSERT IGNORE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` (
+`server_serial_no`,
+`cfg_type`,
+`server_id`,
+`view_id`,
+`cfg_parent`,
+`cfg_name`,
+`cfg_data`
+)
+VALUES
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'add-soa', ''),
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'min-update-interval', ''),
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'nsip-enable', ''),
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'nsdname-enable', ''),
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'nsdname-wait-recurse', ''),
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'dnsrps-enable', ''),
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'dnsrps-options', ''),
+('$result->server_serial_no', 'rpz', '$result->server_id', '$result->view_id', '$result->cfg_id', 'ede', '')
+INSERTSQL;
+		}
 	}
 
 	/** Run queries */

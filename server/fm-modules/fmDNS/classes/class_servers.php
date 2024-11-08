@@ -104,7 +104,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	function addServer($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$module = ($post['module_name']) ? $post['module_name'] : $_SESSION['module'];
+		$module = (isset($post['module_name'])) ? $post['module_name'] : $_SESSION['module'];
 		
 		/** Get a valid and unique serial number */
 		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? $post['server_serial_no'] : generateSerialNo($module);
@@ -124,20 +124,24 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$exclude = array_merge(array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
 			'module_name', 'module_type', 'config', 'sub_type', 'update_from_client',
-			'dryrun'), $config_opts);
+			'dryrun', 'page', 'item_type'), $config_opts);
 
+		$log_message = __("Added server with the following") . ":\n";
+
+		$logging_excluded_fields = array('server_menu_display');
+		
 		foreach ($post as $key => $data) {
-			if (($key == 'server_name') && empty($data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
@@ -151,25 +155,30 @@ class fm_module_servers extends fm_shared_module_servers {
 			$sql_fields = '(`server_id`, `cfg_type`, `cfg_name`, `cfg_data`)';
 			$sql_values = '';
 			foreach ($config_opts as $option) {
-				$sql_values .= "('$new_server_id', 'global', '$option', '{$post[$option]}'), ";
+				$val = (isset($post[$option])) ? $post[$option] : '';
+				$sql_values .= "('$new_server_id', 'global', '$option', '{$val}'), ";
+
+				if (isset($post[$option])) {
+					if ($option == 'keys') {
+						$log_message .= formatLogKeyData('server_', 'keys', ($post['keys']) ? getNameFromID(str_replace('key_', '', $post['keys']), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None');
+					} else {
+						$log_message .= formatLogKeyData('', $option, $post[$option]);
+					}
+				}
 			}
 
 			$sql_values = rtrim($sql_values, ', ');
 
 			$query = "$sql_insert $sql_fields VALUES $sql_values";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not add the server options because a database error occurred.'), 'sql');
 			}
 		}
 		
-		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
-		$tmp_runas = $post['server_run_as_predefined'] ? $post['server_run_as_predefined'] : $post['server_run_as'];
-		addLogEntry("Added server:\nName: {$post['server_name']} ({$post['server_serial_no']})\nKey: {$tmp_key}\nType: {$post['server_type']}\n" .
-				"Run-as: {$tmp_runas}\nUpdate Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}\n" .
-				"Server Root: {$post['server_root_dir']}\nServer Chroot: {$post['server_chroot_dir']}\n" .
-				"Zone file directory: {$post['server_zones_dir']}");
+		addLogEntry(str_replace('Slave Zones Dir', 'Secondary Zones Dir', $log_message));
+
 		return true;
 	}
 
@@ -179,13 +188,10 @@ class fm_module_servers extends fm_shared_module_servers {
 	function addGroup($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
 		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'groups', 'group_name');
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name');
 		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
@@ -193,39 +199,37 @@ class fm_module_servers extends fm_shared_module_servers {
 		if ($fmdb->num_rows) return __('This group name already exists.');
 		
 		/** Options */
-		if ($post['group_auto_also_notify'] != 'yes') {
+		if (!isset($post['group_auto_also_notify']) || $post['group_auto_also_notify'] != 'yes') {
 			$post['group_auto_also_notify'] = 'no';
 		}
 
 		/** Process group masters */
-		$log_message_master_servers = '';
-		foreach ($post['group_masters'] as $val) {
+		$log_message_master_servers = $group_masters = $group_slaves = '';
+		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
+		foreach ((array) $post['group_masters'] as $val) {
 			if ($val == 0) {
 				$group_masters = 0;
 				break;
 			}
 			$group_masters .= $val . ';';
-			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			$log_message_master_servers .= $val ? "$server_name; " : null;
+			$log_message_master_servers .= $val ? getServerName('s_' . $val) . '; ' : null;
 		}
 		$log_message_master_servers = rtrim ($log_message_master_servers, '; ');
 		$post['group_masters'] = rtrim($group_masters, ';');
-		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
 
 		/** Process group slaves */
-		$log_message_slave_servers = '';
-		foreach ($post['group_slaves'] as $val) {
+		$log_message_slave_servers = $group_slaves = '';
+		if (!isset($post['group_slaves'])) $post['group_slaves'] = 0;
+		foreach ((array) $post['group_slaves'] as $val) {
 			if ($val == 0) {
 				$group_slaves = 0;
 				break;
 			}
 			$group_slaves .= $val . ';';
-			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			$log_message_slave_servers .= $val ? "$server_name; " : null;
+			$log_message_slave_servers .= $val ? getServerName('s_' . $val) . '; ' : null;
 		}
 		$log_message_slave_servers = rtrim ($log_message_slave_servers, '; ');
 		$post['group_slaves'] = rtrim($group_slaves, ';');
-		if (!isset($post['group_slaves'])) $post['group_slaves'] = 0;
 
 		$sql_insert = "REPLACE INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups`";
 		$sql_fields = '(';
@@ -233,7 +237,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type');
+		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type', 'page', 'item_type');
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
@@ -246,13 +250,13 @@ class fm_module_servers extends fm_shared_module_servers {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
 		}
 
-		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
+		$tmp_key = (isset($post['server_key'])) ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
 		addLogEntry(__('Added server group') . ":\n" . __('Name') . ": {$post['group_name']}\n" .
 				__('Also Notify') . ": {$post['group_auto_also_notify']}\n" .
 				__('Primaries') . ": {$log_message_master_servers}\n" .
@@ -263,10 +267,8 @@ class fm_module_servers extends fm_shared_module_servers {
 	/**
 	 * Updates the selected server
 	 */
-	function updateServer($post) {
+	function editServer($post) {
 		global $fmdb, $__FM_CONFIG;
-		
-		$rows_affected = 0;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -277,44 +279,58 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$exclude = array_merge(array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
 			'module_name', 'module_type', 'config', 'SERIALNO', 'sub_type',
-			'update_from_client', 'dryrun'), $config_opts);
+			'update_from_client', 'dryrun', 'page', 'item_type'), $config_opts);
 		
-		$post['server_run_as'] = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : null;
+		$post['server_run_as'] = ($post['server_run_as_predefined'] == 'as defined:') ? $post['server_run_as'] : null;
 		if (!in_array($post['server_run_as_predefined'], enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'))) {
 			$post['server_run_as'] = $post['server_run_as_predefined'];
 			$post['server_run_as_predefined'] = 'as defined:';
 		}
 
+		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$sql_edit = '';
+
+		$log_message = sprintf(__("Updated server '%s' to the following"), $old_name) . ":\n";
+
+		$logging_excluded_fields = array('server_menu_display');
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the server */
-		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
 		}
 
-		$rows_affected += $fmdb->rows_affected;
-		
+		$rows_affected = $fmdb->rows_affected;
+
 		/** Process config options */
 		$sql_insert = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET ";
 		foreach ($config_opts as $option) {
-			$query = "$sql_insert cfg_name='$option', cfg_data='{$post[$option]}' WHERE server_id='{$post['server_id']}' AND cfg_name='$option' LIMIT 1";
-			$result = $fmdb->query($query);
+			$val = (isset($post[$option])) ? $post[$option] : '';
+			$query = "$sql_insert cfg_name='$option', cfg_data='{$val}' WHERE server_id='{$post['server_id']}' AND cfg_name='$option' LIMIT 1";
+			$fmdb->query($query);
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the server options because a database error occurred.'), 'sql');
 			}
 			
+			if (isset($post[$option])) {
+				if ($option == 'keys') {
+					$log_message .= formatLogKeyData('server_', 'keys', ($post['keys']) ? getNameFromID(str_replace('key_', '', $post['keys']), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None');
+				} else {
+					$log_message .= formatLogKeyData('', $option, $post[$option]);
+				}
+			}
+
 			$rows_affected += $fmdb->rows_affected;
 		}
 		
@@ -323,35 +339,21 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
-		$tmp_key = _('None');
-		if ($post['keys']) {
-			$tmp_key = array();
-			foreach (explode(',', $post['keys']) as $key_id) {
-				$tmp_key[] = getNameFromID(str_replace('key_', '', $key_id), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
-			}
-			$tmp_key = join(',', $tmp_key);
-		}
-		$tmp_runas = $post['server_run_as_predefined'] == 'as defined:' ? $post['server_run_as'] : $post['server_run_as_predefined'];
-		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nKeys: {$tmp_key}\nType: {$post['server_type']}\n" .
-					"Run-as: {$tmp_runas}\nUpdate Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}\n" .
-					"Server Root: {$post['server_root_dir']}\nServer Chroot: {$post['server_chroot_dir']}\n" .
-					"Zone file directory: {$post['server_zones_dir']}");
+		addLogEntry(str_replace('Slave Zones Dir', 'Secondary Zones Dir', $log_message));
+
 		return true;
 	}
 	
 	/**
 	 * Updates the selected server group
 	 */
-	function updateGroup($post) {
+	function editGroup($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
 		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'groups', 'group_name');
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name');
 		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
@@ -359,44 +361,42 @@ class fm_module_servers extends fm_shared_module_servers {
 		if ($fmdb->num_rows) return __('This group name already exists.');
 		
 		/** Options */
-		if ($post['group_auto_also_notify'] != 'yes') {
+		if (!isset($post['group_auto_also_notify']) || $post['group_auto_also_notify'] != 'yes') {
 			$post['group_auto_also_notify'] = 'no';
 		}
 
 		/** Process group masters */
-		$log_message_master_servers = '';
+		$log_message_master_servers = $group_masters = '';
+		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
 		foreach ((array) $post['group_masters'] as $val) {
 			if ($val == 0) {
 				$group_masters = 0;
 				break;
 			}
 			$group_masters .= $val . ';';
-			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			$log_message_master_servers .= $val ? "$server_name; " : null;
+			$log_message_master_servers .= $val ? getServerName('s_' . $val) . '; ' : null;
 		}
 		$log_message_master_servers = rtrim ($log_message_master_servers, '; ');
 		$post['group_masters'] = rtrim($group_masters, ';');
-		if (!isset($post['group_masters'])) $post['group_masters'] = 0;
 
 		/** Process group slaves */
-		$log_message_slave_servers = '';
+		$log_message_slave_servers = $group_slaves = '';
+		if (!isset($post['group_slaves'])) $post['group_slaves'] = 0;
 		foreach ((array) $post['group_slaves'] as $val) {
 			if ($val == 0) {
 				$group_slaves = 0;
 				break;
 			}
 			$group_slaves .= $val . ';';
-			$server_name = getNameFromID($val, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			$log_message_slave_servers .= $val ? "$server_name; " : null;
+			$log_message_slave_servers .= $val ? getServerName('s_' . $val) . '; ' : null;
 		}
 		$log_message_slave_servers = rtrim ($log_message_slave_servers, '; ');
 		$post['group_slaves'] = rtrim($group_slaves, ';');
-		if (!isset($post['group_slaves'])) $post['group_slaves'] = 0;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
 		$sql_edit = '';
-		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type');
+		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type', 'page', 'item_type');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -408,7 +408,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		/** Update the server */
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}server_groups` SET $sql WHERE `group_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
@@ -417,7 +417,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		addLogEntry(sprintf(__("Updated server group '%s' to"), $old_name) . ":\n" . __('Name') . ": {$post['group_name']}\n" .
+		addLogEntry(sprintf(__("Updated server group '%s' with the following details"), $old_name) . ":\n" . __('Name') . ": {$post['group_name']}\n" .
 				__('Also Notify') . ": {$post['group_auto_also_notify']}\n" .
 				__('Primaries') . ": {$log_message_master_servers}\n" .
 				__('Secondaries') . ": {$log_message_slave_servers}\n");
@@ -620,8 +620,8 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$server_id = $group_id = 0;
-		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
-		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
+		$server_name = $server_root_dir = $server_zones_dir = $server_type = $server_update_port = null;
+		$server_update_method = $server_key_with_rndc = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$server_chroot_dir = $group_name = $server_type_disabled = $group_auto_also_notify = null;
 		$server_installed = $server_slave_zones_dir = false;
 		
@@ -643,8 +643,9 @@ HTML;
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<FORM
-			<form name="manage" id="manage" method="post" action="?type=$type">
 			$popup_header
+			<form name="manage" id="manage">
+				<input type="hidden" name="page" id="page" value="servers" />
 				<input type="hidden" name="action" value="$action" />
 				<input type="hidden" name="server_id" value="$server_id" />
 				<input type="hidden" name="sub_type" value="$type" />
@@ -681,6 +682,7 @@ FORM;
 				$server_type_disabled = 'disabled';
 			}
 			$server_type = buildSelect('server_type', 'server_type', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_type'), $server_type, 1, $server_type_disabled);
+			$server_key_with_rndc = buildSelect('server_key_with_rndc', 'server_key_with_rndc', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_key_with_rndc'), $server_key_with_rndc, 1);
 			$server_update_method = buildSelect('server_update_method', 'server_update_method', $server_update_method_choices, $server_update_method, 1);
 			$server_run_as_predefined = buildSelect('server_run_as_predefined', 'server_run_as_predefined', enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'), $server_run_as_predefined, 1, '', false, "showHideBox('run_as', 'server_run_as_predefined', 'as defined:')");
 
@@ -705,10 +707,14 @@ FORM;
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_name">%s</label></th>
-					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="dns1.local" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="dns1.local" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_type">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;">%s</td>
+				</tr>
+				<tr class="local_server_options">
+					<th width="33&#37;" scope="row"><label for="server_key_with_rndc">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td width="67&#37;">%s</td>
 				</tr>
 				<tr class="local_server_options">
@@ -797,6 +803,7 @@ FORM;
 				__('Basic'), $alternative_help,
 				__('Server Name'), $server_name, $server_name_length,
 				__('Server Type'), sprintf(__('A remote server is not managed by %s.'), $_SESSION['module']), $server_type,
+				__('Use Defined Keys with rndc'), __('Override the setting for this server.'), $server_key_with_rndc,
 				__('Run-as Account'), $server_run_as_predefined, $runashow, __('Other run-as account'), $server_run_as,
 				__('Update Method'), $server_update_method, $server_update_port_style, $server_update_port,
 				__('Config File'), $server_config_file, $__FM_CONFIG['ns']['named_config_file'], $server_config_file_length,
@@ -825,7 +832,7 @@ FORM;
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
-					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row">%s</th>
@@ -1098,9 +1105,6 @@ FORM;
 	private function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['server_name'])) return __('No server name defined.');
 		
 		/** Check name field length */
@@ -1166,7 +1170,36 @@ FORM;
 		
 		return $post;
 	}
-	
+
+
+	/**
+	 * Handles the in-line form validation calls
+	 *
+	 * @since 5.0.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $post Posted data
+	 * @return array|string
+	 */
+	function add($post) {
+		return ($post['sub_type'] == 'groups') ? $this->addGroup($post) : $this->addServer($post);
+	}
+
+
+	/**
+	 * Handles the in-line form validation calls
+	 *
+	 * @since 5.0.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $post Posted data
+	 * @return array|string
+	 */
+	function update($post) {
+		return ($post['sub_type'] == 'groups') ? $this->editGroup($post) : $this->editServer($post);
+	}
 }
 
 if (!isset($fm_module_servers))

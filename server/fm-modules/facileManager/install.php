@@ -173,7 +173,7 @@ function installDatabase($database) {
 	$db_selected = $fmdb->select($database, 'silent');
 	if (!$db_selected) {
 		$query = sanitize("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		$output = displayProgress(_('Creating Database'), $fmdb->result);
 	} else {
 		$output = true;
@@ -421,7 +421,7 @@ INSERTSQL;
 	$temp_result = $fmdb->query($query);
 	if (!$fmdb->num_rows) {
 		foreach ($inserts as $query) {
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 			if ($fmdb->last_error) {
 				return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $fmdb->result, 'noisy', $fmdb->last_error);
 			}
