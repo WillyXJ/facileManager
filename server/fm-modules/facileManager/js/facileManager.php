@@ -38,6 +38,9 @@ if (isset($__FM_CONFIG)) {
 				handle: "div.popup-header"
 			});
 		});
+		if ($("table.sortable th.header-sorted").length == 0) {
+			$("table.sortable th").not(".header-nosort").first().addClass("header-sorted");
+		}
 	});
 	
 	$(function displayHideProcessAll() {

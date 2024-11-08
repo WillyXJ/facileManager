@@ -2496,7 +2496,7 @@ function displayTableHeader($table_info, $head_values, $tbody_id = null) {
 				if ($parameter == 'rel') {
 					if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) &&
 						$value == $_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_field']) {
-							$parameters .= ' id="header-sorted"';
+							$parameters .= ' class="header-sorted"';
 					}
 				}
 			}

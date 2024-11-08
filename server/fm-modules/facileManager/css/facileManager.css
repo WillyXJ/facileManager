@@ -583,27 +583,33 @@ h4 {
 	position: relative;
 	top: 0;
 }
-.display_results.sortable th#header-sorted i,
+.display_results.sortable th {
+	border-bottom: 1px solid #ffffff;
+}
+.display_results.sortable th.header-sorted {
+	border-bottom: 2px solid #dc1111;
+}
+.display_results.sortable th.header-sorted i,
 .display_results.sortable th:not(.header-nosort):hover i {
 	border: 3px solid transparent;
 	border-top: 3px solid #464646;
 	border-bottom: 3px solid #464646;
 }
-.display_results.sortable th#header-sorted i.asc,
-.display_results.sortable th#header-sorted:hover i.desc,
+.display_results.sortable th.header-sorted i.asc,
+.display_results.sortable th.header-sorted:hover i.desc,
 .display_results.sortable th:not(.header-nosort):hover i.asc {
 	top: -3px;
 	border-bottom: 3px solid #fff;
 }
-.display_results.sortable th#header-sorted i.desc,
+.display_results.sortable th.header-sorted i.desc,
 .display_results.sortable th:not(.header-nosort):hover i.desc {
 	border-top: 3px solid #fff;
 }
-.display_results.sortable th#header-sorted:hover i.asc {
+.display_results.sortable th.header-sorted:hover i.asc {
 	border-top: 3px solid #fff;
 	border-bottom: none;
 }
-.display_results.sortable th#header-sorted:hover i.desc {
+.display_results.sortable th.header-sorted:hover i.desc {
 	border-top: none;
 	border-bottom: 3px solid #fff;
 }
