@@ -987,7 +987,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 
 					$domain_name_file = $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name));
 					$domain_name = isset($zone_result[$i]->domain_name_file) ? $this->getDomainName($zone_result[$i]->domain_mapping, trimFullStop($zone_result[$i]->domain_name_file)) : $domain_name_file;
-					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id);
+					list ($domain_type, $auto_zone_options) = $this->processServerGroups($zone_result[$i], $server_id, $view_id);
 					$zones .= 'zone "' . trimFullStop($domain_name) . "\" {\n";
 					$zones .= "\ttype $domain_type;\n";
 					$default_file_ext = $file_ext = '';
@@ -1013,7 +1013,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zone_data_dir = ($server_slave_zones_dir && $domain_type == 'secondary') ? $server_slave_zones_dir : $server_zones_dir;
 							$domain_name_file = str_replace('{ZONENAME}', trimFullStop($domain_name_file) . $file_ext, $file_format);
 							$zones .= "\tfile \"$zone_data_dir/$domain_type/$domain_name_file\";\n";
-							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
+							$zones .= $this->getZoneOptions(array($zone_result[$i]->domain_id, $zone_result[$i]->parent_domain_id, $zone_result[$i]->domain_template_id), $server_serial_no, $domain_type, $server_group_ids, $auto_zone_options);
 							/** Build zone file */
 							$zone_file_contents = ($domain_type == 'primary') ? $this->buildZoneFile($zone_result[$i], $server_serial_no, $server_group_ids) : null;
 							if ($zone_file_contents != null) {
@@ -1031,7 +1031,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$zones .= "\tprimaries { " . trim($fm_dns_acls->parseACL($domain_master_servers), '; ') . "; };\n";
 							break;
 						case 'forward':
-							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type, $server_group_ids) . $auto_zone_options;
+							$zones .= $this->getZoneOptions($zone_result[$i]->domain_id, $server_serial_no, $domain_type, $server_group_ids, $auto_zone_options);
 					}
 					$zones .= "};\n";
 
@@ -1361,8 +1361,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				}
 				$record_start = str_pad($record_name, 25) . $separator . $record_ttl . $separator . $record_result[$i]->record_class . $separator . $record_result[$i]->record_type;
 
-				// Swap @ for domain_name in values
-				// $record_result[$i]->record_value = str_replace('@', $domain_name, $record_result[$i]->record_value);
+				// Swap custom variables for values
+				$record_result[$i]->record_value = $this->swapVars4Values($record_result[$i]->record_value, $domain);
 				
 				switch($record_result[$i]->record_type) {
 					case 'A':
@@ -1931,9 +1931,10 @@ HTML;
 	 * @param integer $server_serial_no The server serial number
 	 * @param string $domain_type Type of zone (master, slave, etc.)
 	 * @param array $server_group_ids Server IDs of the server group
+	 * @param array $auto_zone_options Automatically generated zone options
 	 * @return string
 	 */
-	function getZoneOptions($domain_ids, $server_serial_no, $domain_type, $server_group_ids) {
+	function getZoneOptions($domain_ids, $server_serial_no, $domain_type, $server_group_ids, $auto_zone_options = array()) {
 		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		/** Ensure $domain_ids is an array) */
@@ -1989,6 +1990,24 @@ HTML;
 		/** Merge arrays */
 		$config_array = array_merge($global_config, $server_config);
 		unset($global_config, $server_config);
+
+		if (is_array($auto_zone_options) && count($auto_zone_options)) {
+			foreach ($auto_zone_options as $cfg_name => $cfg_data) {
+				if (array_key_exists($cfg_name, $config_array)) {
+					if (is_array($cfg_data)) {
+						$cfg_data = array(str_replace(',}', '', $config_array[$cfg_name][0]) . ',' . $cfg_data[0], $config_array[$cfg_name][1]);
+						if (strpos($config_array[$cfg_name][0], '{') !== false) {
+							$cfg_data[0] .= ',}';
+						}
+						if (count($cfg_data) < 2) {
+							$cfg_data[] = '';
+						}
+					}
+					$auto_zone_options[$cfg_name] = $cfg_data;
+				}
+			}
+			$config_array = array_merge($config_array, $auto_zone_options);
+		}
 		
 		foreach ($config_array as $cfg_name => $cfg_data) {
 			if ($cfg_name == 'include') continue;
@@ -2150,11 +2169,12 @@ HTML;
 	 * @since 2.0
 	 * @package fmDNS
 	 *
-	 * @param array $zone_array The zone data
+	 * @param object $zone_array The zone data
 	 * @param integer $server_id The server id to check
+	 * @param integer $view_id The view id
 	 * @return array
 	 */
-	function processServerGroups($zone_array, $server_id) {
+	function processServerGroups($zone_array, $server_id, $view_id) {
 		global $fmdb, $__FM_CONFIG;
 		
 		extract(get_object_vars($zone_array), EXTR_OVERWRITE);
@@ -2177,11 +2197,24 @@ HTML;
 					$group_slaves = explode(';', $group_slaves);
 					
 					if (in_array($server_id, $group_masters)) {
-						return array($domain_type, '');
+						if ($group_auto_also_notify == 'yes') {
+							$zone_options = array('also-notify' => $this->resolveServerGroupMembers($group_slaves));
+							// $zone_options = sprintf("\talso-notify { %s };\n", $this->resolveServerGroupMembers($group_slaves));
+						} else {
+							$zone_options = '';
+						}
+						return array($domain_type, $zone_options);
 					}
 					
 					if (in_array($server_id, $group_slaves)) {
-						return array('secondary', sprintf("\tprimaries { %s };\n", $this->resolveServerGroupMasters($group_masters)));
+						if ($domain_key_id) {
+							$tmp_key_id = $domain_key_id;
+						}
+						if ($view_id && !$domain_key_id) {
+							$tmp_key_id = getNameFromID($view_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_key_id');
+						}
+
+						return array('secondary', array('primaries' => $this->resolveServerGroupMembers($group_masters, $tmp_key_id)));
 					}
 				}
 			}
@@ -2191,27 +2224,31 @@ HTML;
 	}
 	
 	/**
-	 * Attempts to resolve the master servers for the group
+	 * Attempts to resolve the member servers for the group
 	 *
 	 * @since 2.0
 	 * @package fmDNS
 	 *
-	 * @param array $zone_array The zone data
-	 * @param integer $server_id The server id to check
-	 * @return string
+	 * @param array $servers The array of group members
+	 * @param integer $key_id The zone transfer key id
+	 * @return array
 	 */
-	function resolveServerGroupMasters($masters) {
-		global $__FM_CONFIG;
+	function resolveServerGroupMembers($servers, $key_id = null) {
+		global $__FM_CONFIG, $fmdb;
 		
-		if (!count($masters)) return null;
+		if (!count($servers)) return null;
 		
-		foreach ($masters as $server_id) {
+		foreach ($servers as $server_id) {
 			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 			$server_ip = gethostbyname($server_name);
-			$master_ips[] = ($server_ip != $server_name) ? $server_ip : sprintf(__('Cannot resolve %s'), $server_name);
+			$key = '';
+			if ($key_id) {
+				$key = sprintf(' key %s', getNameFromID($key_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name'));
+			}
+			$server_ips[] = ($server_ip != $server_name) ? $server_ip . $key : sprintf(__('Cannot resolve %s'), $server_name) . $key;
 		}
 		
-		return implode('; ', (array) $master_ips) . ';';
+		return array(implode(',', (array) $server_ips), '');
 	}
 	
 	/**
@@ -2755,6 +2792,34 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 			$global_config .= "};\n";
 		}
 		return ($global_config) ? $global_config . "\n" : null;
+	}
+	
+	/**
+	 * Formats the server http endpoint statements
+	 *
+	 * @since 6.2
+	 * @package fmDNS
+	 *
+	 * @param string $record_value String to parse
+	 * @param object $domain Current processing domain
+	 * @return string
+	 */
+	private function swapVars4Values($record_value, $domain) {
+		global $__FM_CONFIG;
+
+		$record_value = str_replace(array('{domain}'), array($domain->domain_name), $record_value);
+
+		preg_match_all('/{(\w+):(\d+)}/', $record_value, $matches, PREG_SET_ORDER);
+		if (count($matches)) {
+			foreach ($matches as $match_array) {
+				list($search, $type, $id) = $match_array;
+				$value = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $type . 's', $type . '_', $type . '_id', $type . '_name');
+
+				$record_value = str_replace(array($search), array($value), $record_value);
+			}
+		}
+
+		return $record_value;
 	}
 	
 }

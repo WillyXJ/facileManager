@@ -179,6 +179,9 @@ class fm_module_servers extends fm_shared_module_servers {
 	function addGroup($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
 		/** Check name field length */
@@ -189,6 +192,11 @@ class fm_module_servers extends fm_shared_module_servers {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $post['group_name'], 'group_', 'group_name');
 		if ($fmdb->num_rows) return __('This group name already exists.');
 		
+		/** Options */
+		if ($post['group_auto_also_notify'] != 'yes') {
+			$post['group_auto_also_notify'] = 'no';
+		}
+
 		/** Process group masters */
 		$log_message_master_servers = '';
 		foreach ($post['group_masters'] as $val) {
@@ -229,7 +237,6 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
-			if (($key == 'group_name') && empty($clean_data)) return __('No group name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
@@ -247,6 +254,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		$tmp_key = $post['server_key'] ? getNameFromID($post['server_key'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name') : 'None';
 		addLogEntry(__('Added server group') . ":\n" . __('Name') . ": {$post['group_name']}\n" .
+				__('Also Notify') . ": {$post['group_auto_also_notify']}\n" .
 				__('Primaries') . ": {$log_message_master_servers}\n" .
 				__('Secondaries') . ": {$log_message_slave_servers}\n");
 		return true;
@@ -337,6 +345,9 @@ class fm_module_servers extends fm_shared_module_servers {
 	function updateGroup($post) {
 		global $fmdb, $__FM_CONFIG;
 		
+		/** Trim and sanitize inputs */
+		$post = cleanAndTrimInputs($post);
+
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
 		/** Check name field length */
@@ -347,6 +358,11 @@ class fm_module_servers extends fm_shared_module_servers {
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $post['group_name'], 'group_', 'group_name', "AND group_id!='{$post['server_id']}'");
 		if ($fmdb->num_rows) return __('This group name already exists.');
 		
+		/** Options */
+		if ($post['group_auto_also_notify'] != 'yes') {
+			$post['group_auto_also_notify'] = 'no';
+		}
+
 		/** Process group masters */
 		$log_message_master_servers = '';
 		foreach ((array) $post['group_masters'] as $val) {
@@ -402,6 +418,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (!$fmdb->rows_affected) return true;
 
 		addLogEntry(sprintf(__("Updated server group '%s' to"), $old_name) . ":\n" . __('Name') . ": {$post['group_name']}\n" .
+				__('Also Notify') . ": {$post['group_auto_also_notify']}\n" .
 				__('Primaries') . ": {$log_message_master_servers}\n" .
 				__('Secondaries') . ": {$log_message_slave_servers}\n");
 		
@@ -605,7 +622,7 @@ HTML;
 		$server_id = $group_id = 0;
 		$server_name = $server_root_dir = $server_zones_dir = $runas = $server_type = $server_update_port = null;
 		$server_update_method = $server_key = $server_run_as = $server_config_file = $server_run_as_predefined = null;
-		$server_chroot_dir = $group_name = $server_type_disabled = null;
+		$server_chroot_dir = $group_name = $server_type_disabled = $group_auto_also_notify = null;
 		$server_installed = $server_slave_zones_dir = false;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -671,8 +688,8 @@ FORM;
 
 			/** Advanced tab */
 			$keys = $this->getConfig($server_id, 'keys');
-			$keys = ($keys) ? explode(',', $keys) : null;
-			$keys = buildSelect('keys', 'keys', availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', true);
+			$keys = ($keys) ? array($keys) : null;
+			$keys = buildSelect('keys', 'keys', availableItems('key', 'blank', 'AND `key_type`="tsig"', 'key_'), $keys, 1, '', false);
 			$transfers = str_replace(array('"', "'"), '', $this->getConfig($server_id, 'transfers'));
 			$bogus = $this->buildConfigOptions('bogus', $this->getConfig($server_id, 'bogus'));
 			$edns = $this->buildConfigOptions('edns', $this->getConfig($server_id, 'edns'));
@@ -802,12 +819,19 @@ FORM;
 			$group_name_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name');
 			$group_masters = buildSelect('group_masters', 'group_masters', availableItems('server'), $group_masters, 1, null, true, null, null, __('Select primary servers'));
 			$group_slaves = buildSelect('group_slaves', 'group_slaves', availableItems('server'), $group_slaves, 1, null, true, null, null, __('Select secondary servers'));
+			$group_auto_also_notify_checked = ($group_auto_also_notify == 'yes') ? 'checked' : null;
 
 			$return_form .= sprintf('
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
 					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" /></td>
+				</tr>
+				<tr>
+					<th width="33&#37;" scope="row">%s</th>
+					<td width="67&#37;">
+						<input type="checkbox" id="group_auto_also_notify" name="group_auto_also_notify" value="yes" %s /><label for="group_auto_also_notify"> %s</label> <a href="#" class="tooltip-left" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>
+					</td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_masters">%s</label></th>
@@ -828,7 +852,12 @@ FORM;
 					width: "230px"
 				});
 			});
-		</script>', __('Group Name'), $group_name, $group_name_length, __('Primary Servers'), $group_masters, __('Secondary Servers'), $group_slaves, $popup_footer);
+		</script>',
+			__('Group Name'), $group_name, $group_name_length,
+			__('Options'), $group_auto_also_notify_checked, __('Automatically set also-notify'), __('Zones on the primary servers will automatically have the secondary servers added to also-notify.'),
+			__('Primary Servers'), $group_masters,
+			__('Secondary Servers'), $group_slaves,
+			$popup_footer);
 		} else {
 			$return_form = buildPopup('header', _('Error'));
 			$return_form .= sprintf('<h3>%s</h3><p>%s</p>', __('Oops!'), __('Invalid request.'));
@@ -1124,9 +1153,7 @@ FORM;
 		$post['server_menu_display'] = (in_array($post['server_type'], array('remote', 'url-only'))) ? 'exclude' : 'include';
 
 		/** Process server_key */
-		if (isset($post['keys'])) {
-			$post['keys'] = join(',', $post['keys']);
-		} else {
+		if (!isset($post['keys'])) {
 			$post['keys'] = null;
 		}
 		

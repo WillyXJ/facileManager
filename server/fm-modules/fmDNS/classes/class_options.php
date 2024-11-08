@@ -126,15 +126,7 @@ class fm_module_options {
 		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
-			|| strpos($post['cfg_data'], 'key_') !== false
-			|| strpos($post['cfg_data'], 'domain_') !== false
-			|| strpos($post['cfg_data'], 'master_') !== false
-			|| strpos($post['cfg_data'], 'http_') !== false
-			|| strpos($post['cfg_data'], 'tls_') !== false
-			|| strpos($post['cfg_data'], 'dnssec_') !== false)
-			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$cfg_data = $this->parseDefType($post['cfg_name'], $post['cfg_data']);
 		addLogEntry("Added option:\nType: {$post['cfg_type']}\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -196,15 +188,7 @@ class fm_module_options {
 		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
 		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
 
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
-			|| strpos($post['cfg_data'], 'key_') !== false
-			|| strpos($post['cfg_data'], 'domain_') !== false
-			|| strpos($post['cfg_data'], 'master_') !== false
-			|| strpos($post['cfg_data'], 'http_') !== false
-			|| strpos($post['cfg_data'], 'tls_') !== false
-			|| strpos($post['cfg_data'], 'dnssec_') !== false)
-			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$cfg_data = $this->parseDefType($post['cfg_name'], $post['cfg_data']);
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}

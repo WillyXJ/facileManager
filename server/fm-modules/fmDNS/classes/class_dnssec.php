@@ -508,7 +508,7 @@ HTML;
 		$post['cfg_type'] = $post['sub_type'];
 		$post['cfg_id'] = sanitize($post['cfg_id']);
 
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND cfg_id!='{$post['cfg_id']}'";
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_id!='{$post['cfg_id']}'";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) return __('This item already exists.');
 

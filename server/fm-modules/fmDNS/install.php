@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}doma
   `domain_type` enum('primary','secondary','forward','stub') NOT NULL DEFAULT 'primary',
   `domain_clone_domain_id` int(11) NOT NULL DEFAULT '0',
   `domain_clone_dname` ENUM('yes','no') NULL DEFAULT NULL,
+  `domain_key_id` INT(11) NULL DEFAULT NULL,
   `domain_dynamic` ENUM('yes','no') NOT NULL DEFAULT 'no',
   `domain_dnssec` enum('yes','no') NOT NULL DEFAULT 'no',
   `domain_dnssec_generate_ds` enum('yes','no') NOT NULL DEFAULT 'no',
@@ -276,6 +277,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
   `group_name` varchar(128) NOT NULL,
+  `group_auto_also_notify` ENUM('yes','no') NOT NULL DEFAULT 'no',
   `group_masters` text NOT NULL,
   `group_slaves` text NOT NULL,
   `group_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
@@ -323,8 +325,9 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}view
   `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `view_order_id` int(11) NOT NULL,
   `view_name` VARCHAR(255) NOT NULL ,
+  `view_key_id` int(11) NOT NULL DEFAULT '0',
   `view_comment` text,
-  `view_status` ENUM( 'active',  'disabled',  'deleted') NOT NULL DEFAULT  'active'
+  `view_status` ENUM( 'active', 'disabled', 'deleted') NOT NULL DEFAULT 'active'
 ) ENGINE = INNODB DEFAULT CHARSET=utf8;
 TABLESQL;
 

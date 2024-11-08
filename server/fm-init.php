@@ -133,6 +133,9 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 			if (array_key_exists('is_ajax', $_POST) && $_POST['is_ajax']) {
 				if ($logged_in === false) {
 					echo (array_key_exists('username', $_POST) && $_POST['username']) ? 'failed' : 'force_logout';
+				} elseif (is_array($logged_in)) {
+					list($reset_key, $user_login) = $logged_in;
+					echo "password_reset.php?key=$reset_key&login=$user_login";
 				} elseif ($logged_in !== true) {
 					printf('<p class="failed">%s</p>', $logged_in);
 				} elseif (isUpgradeAvailable()) {
@@ -142,9 +145,6 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 						session_destroy();
 						printf('<p class="failed">' . _('The database for %1s and its modules still needs to be upgraded.<br />Please contact a privileged user.') . '</p>', $fm_name);
 					}
-				} elseif (is_array($logged_in)) {
-					list($reset_key, $user_login) = $logged_in;
-					echo "password_reset.php?key=$reset_key&login=$user_login";
 				} else echo $_SERVER['REQUEST_URI'];
 			} else {
 				if (!$logged_in) {

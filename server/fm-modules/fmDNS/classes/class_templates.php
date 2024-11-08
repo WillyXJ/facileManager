@@ -65,6 +65,8 @@ class fm_module_templates {
 	function displayRow($row, $prefix) {
 		global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 		
+		$icons = array();
+
 		if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -102,17 +104,25 @@ class fm_module_templates {
 		$field_name = $prefix . '_default';
 		$star = $row->$field_name == 'yes' ? str_replace(__('Super Admin'), __('Default Template'), $__FM_CONFIG['icons']['star']) : null;
 		
+		if (in_array($row->domain_type, array('primary', 'secondary')) && (currentUserCan(array('manage_zones', 'view_all'), $_SESSION['module']) || zoneAccessIsAllowed(array($row->domain_id)))) {
+			$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->domain_id, __('Configure Additional Options'));
+		}
+
+		if (is_array($icons)) {
+			$icons = implode(' ', $icons);
+		}
+
 		$field_id = $prefix . '_id';
 		echo <<<HTML
 		<tr id="{$row->$field_id}" name="$name">
 			<td>$star</td>
-			<td>$edit_name</td>
+			<td>$edit_name $icons</td>
 HTML;
 		$row = get_object_vars($row);
 		
 		$excluded_fields = array($prefix . '_id', 'account_id', $prefix . '_template', $prefix . '_default',
 				$prefix . '_name', $prefix . '_status', $prefix . '_template_id', $prefix . '_dynamic',
-				'soa_serial_no_previous', $prefix . '_check_config');
+				'soa_serial_no_previous', $prefix . '_check_config', $prefix . '_key_id');
 		
 		if ($prefix == 'soa') {
 			$excluded_fields = array_merge($excluded_fields, array($prefix . '_append'));

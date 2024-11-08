@@ -64,7 +64,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					});
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_acls);
 		} elseif (strpos($result[0]->def_type, 'domain_select') !== false) {
-			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 			$temp_addl_zones = array();
 
 			/** Check for non-hosted zones */
@@ -93,7 +92,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					});
 					</script>', __('Option Value'), $cfg_data, $result[0]->def_type, $available_domains);
 		} elseif (strpos($result[0]->def_type, 'rrset_order_spec') !== false) {
-			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 			$cfg_data = ($cfg_data) ? explode(' ', $cfg_data) : array(null, null, null, null);
 			
 			$available_classes = buildSelect('cfg_data[]', 'cfg_data', array_merge(array('any'), enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_class')), $cfg_data[0]);
@@ -110,7 +108,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					</script>',
 					__('Option Value'), $available_classes, $available_types, $available_domains, $available_orders);
 		} elseif (in_array($result[0]->def_option, array('primaries', 'also-notify'))) {
-			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_masters.php');
 			$cfg_data_array = explode('{', rtrim($cfg_data, '}'));
 			$cfg_data_port = $cfg_data_dscp = null;
 			if (count($cfg_data_array) > 1) {
@@ -127,7 +124,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 			// $available_acls = $fm_dns_acls->buildACLJSON($cfg_data, $server_serial_no);
 			// $available_masters = $fm_dns_masters->getMasterList($server_serial_no, 'all');
 			// $available_masters = array_merge($available_masters, $fm_dns_acls->getACLList($server_serial_no, 'tsig-keys'));
-			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no, $available_masters);
+			$available_masters = $fm_dns_masters->buildMasterJSON($cfg_data, $server_serial_no);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;">
@@ -220,8 +217,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 						$cfg_data,
 						$available_acls);
 		} elseif (in_array($result[0]->def_option, array('include'))) {
-			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_files.php');
-
 			$cfg_data = str_replace(array('\"', '"', "'"), '', $cfg_data);
 			$domain_id = (array_key_exists('domain_id', $_POST)) ? intval($_POST['domain_id']) : 0;
 			$available_files = $fm_dns_files->buildJSON($cfg_data, $server_serial_no);
@@ -273,7 +268,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 	}
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_available_clones', $_POST) && currentUserCan('manage_zones', $_SESSION['module'])) {
-	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 	echo buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $fm_dns_zones->availableCloneDomains($_POST['map'], 0), 0);
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_available_options', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
@@ -283,7 +277,6 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 	echo buildSelect('cfg_name', 'cfg_name', $avail_options_array, sanitize($_POST['cfg_name']), 1, null, false, 'displayOptionPlaceholder()');
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_dynamic_zone_data', $_POST) && currentUserCan('manage_records', $_SESSION['module']) && zoneAccessIsAllowed(array($_POST['domain_id']))) {
-	include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 	$server_zone_data = $fm_dns_records->getServerZoneData(sanitize($_POST['domain_id']));
 	
 	/** Add popup header and footer if missing */
@@ -300,10 +293,6 @@ if (is_array($_GET) && array_key_exists('action', $_GET) && $_GET['action'] == '
 	
 	echo $update_count;
 	exit;
-}
-
-foreach (glob(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_*.php') as $filename) {
-    include_once($filename);
 }
 
 /** Edits */

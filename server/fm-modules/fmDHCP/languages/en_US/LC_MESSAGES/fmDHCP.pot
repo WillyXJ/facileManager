@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 13:31-0600\n"
+"POT-Creation-Date: 2024-10-24 10:24-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,16 +28,16 @@ msgid "Objects"
 msgstr ""
 
 #: server/fm-modules/fmDHCP/functions.php:184
-#: server/fm-modules/fmDHCP/classes/class_objects.php:897
-#: server/fm-modules/fmDHCP/classes/class_objects.php:900
-#: server/fm-modules/fmDHCP/classes/class_objects.php:901
+#: server/fm-modules/fmDHCP/classes/class_objects.php:853
+#: server/fm-modules/fmDHCP/classes/class_objects.php:856
+#: server/fm-modules/fmDHCP/classes/class_objects.php:857
 msgid "Hosts"
 msgstr ""
 
 #: server/fm-modules/fmDHCP/functions.php:185
-#: server/fm-modules/fmDHCP/classes/class_objects.php:911
-#: server/fm-modules/fmDHCP/classes/class_objects.php:914
-#: server/fm-modules/fmDHCP/classes/class_objects.php:915
+#: server/fm-modules/fmDHCP/classes/class_objects.php:867
+#: server/fm-modules/fmDHCP/classes/class_objects.php:870
+#: server/fm-modules/fmDHCP/classes/class_objects.php:871
 msgid "Groups"
 msgstr ""
 
@@ -54,9 +54,9 @@ msgid "Peers"
 msgstr ""
 
 #: server/fm-modules/fmDHCP/functions.php:188
-#: server/fm-modules/fmDHCP/classes/class_objects.php:883
-#: server/fm-modules/fmDHCP/classes/class_objects.php:886
-#: server/fm-modules/fmDHCP/classes/class_objects.php:887
+#: server/fm-modules/fmDHCP/classes/class_objects.php:839
+#: server/fm-modules/fmDHCP/classes/class_objects.php:842
+#: server/fm-modules/fmDHCP/classes/class_objects.php:843
 msgid "Failover Peers"
 msgstr ""
 
@@ -65,7 +65,7 @@ msgid "Config"
 msgstr ""
 
 #: server/fm-modules/fmDHCP/functions.php:192
-#: server/fm-modules/fmDHCP/classes/class_objects.php:762
+#: server/fm-modules/fmDHCP/classes/class_objects.php:720
 msgid "Options"
 msgstr ""
 
@@ -88,27 +88,27 @@ msgid ""
 "longer edit configuration files manually."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/variables.inc.php:46
+#: server/fm-modules/fmDHCP/variables.inc.php:48
 msgid "disabled"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/variables.inc.php:51
+#: server/fm-modules/fmDHCP/variables.inc.php:53
 msgid "Subnets"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/variables.inc.php:51
+#: server/fm-modules/fmDHCP/variables.inc.php:53
 msgid "Shared Networks"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/variables.inc.php:62
+#: server/fm-modules/fmDHCP/variables.inc.php:64
 msgid "Enable dhcpd Checks"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/variables.inc.php:62
+#: server/fm-modules/fmDHCP/variables.inc.php:64
 msgid "Enable or disable dhcpd syntax checks."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/variables.inc.php:63
+#: server/fm-modules/fmDHCP/variables.inc.php:65
 #, php-format
 msgid "sudo must be installed on %s with the following in sudoers:"
 msgstr ""
@@ -130,26 +130,30 @@ msgid ""
 "include:"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/ajax/processPost.php:37
+#: server/fm-modules/fmDHCP/ajax/processPost.php:35
 msgid "You do not have sufficient privileges."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/ajax/processPost.php:72
+#: server/fm-modules/fmDHCP/ajax/processPost.php:81
 msgid "server"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/ajax/processPost.php:137
+#: server/fm-modules/fmDHCP/ajax/processPost.php:146
 #, php-format
 msgid "This item could not be set to %s."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/ajax/processPost.php:141
-#: server/fm-modules/fmDHCP/ajax/processPost.php:158
+#: server/fm-modules/fmDHCP/ajax/processPost.php:151
+#, php-format
+msgid "Set %s %s %s (%s) status to %s."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/ajax/processPost.php:168
 #, php-format
 msgid "Set %s (%s) status to %s."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/ajax/processPost.php:162
+#: server/fm-modules/fmDHCP/ajax/processPost.php:172
 msgid "Bulk Action Results"
 msgstr ""
 
@@ -162,20 +166,26 @@ msgstr ""
 msgid "Group '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_groups.php:84
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:84
-#: server/fm-modules/fmDHCP/classes/class_networks.php:84
-#: server/fm-modules/fmDHCP/classes/class_objects.php:416
-#: server/fm-modules/fmDHCP/classes/class_pools.php:84
+#: server/fm-modules/fmDHCP/classes/class_groups.php:85
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:85
+#: server/fm-modules/fmDHCP/classes/class_networks.php:85
+#: server/fm-modules/fmDHCP/classes/class_objects.php:375
+#: server/fm-modules/fmDHCP/classes/class_pools.php:85
 msgid "Configure Additional Options"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_groups.php:145
+#: server/fm-modules/fmDHCP/classes/class_groups.php:144
 msgid "Group Name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_groups.php:146
+#: server/fm-modules/fmDHCP/classes/class_groups.php:145
 msgid "Use host decl names"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_groups.php:165
+#: server/fm-modules/fmDHCP/classes/class_objects.php:110
+#: server/fm-modules/fmDHCP/classes/class_objects.php:229
+msgid "No name defined."
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_groups.php:169
@@ -183,77 +193,89 @@ msgid "This group already exists."
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_groups.php:184
-#: server/fm-modules/fmDHCP/classes/class_networks.php:302
+#: server/fm-modules/fmDHCP/classes/class_networks.php:306
 #: server/fm-modules/fmDHCP/classes/class_peers.php:293
-#: server/fm-modules/fmDHCP/classes/class_pools.php:228
+#: server/fm-modules/fmDHCP/classes/class_pools.php:231
 msgid "Name"
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_hosts.php:47
-#: server/fm-modules/fmDHCP/classes/class_objects.php:380
 msgid "This host could not be deleted because a database error occurred."
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_hosts.php:50
-#: server/fm-modules/fmDHCP/classes/class_objects.php:383
 #, php-format
 msgid "Host '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:170
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:169
 msgid "Host Name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:171
-#: server/fm-modules/fmDHCP/classes/class_leases.php:107
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:170
+#: server/fm-modules/fmDHCP/classes/class_leases.php:108
 msgid "Hardware Address"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:172
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:171
 msgid "Fixed IP Address"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:195
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:194
 msgid "This host already exists."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:202
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:201
 msgid "The hardware address is invalid."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:207
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:206
 msgid "The IP address is invalid."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:223
-#: server/fm-modules/fmDHCP/classes/class_leases.php:107
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:222
+#: server/fm-modules/fmDHCP/classes/class_leases.php:108
 #: server/fm-modules/fmDHCP/classes/class_servers.php:69
 msgid "Hostname"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_hosts.php:223
+#: server/fm-modules/fmDHCP/classes/class_hosts.php:222
 msgid "Fixed Address"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:92
+#: server/fm-modules/fmDHCP/classes/class_leases.php:64
+msgid "Delete All"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_leases.php:93
 msgid "There are no leases found on this server."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:107
-#: server/fm-modules/fmDHCP/classes/class_servers.php:388
+#: server/fm-modules/fmDHCP/classes/class_leases.php:108
+#: server/fm-modules/fmDHCP/classes/class_servers.php:392
 msgid "IP Address"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:107
+#: server/fm-modules/fmDHCP/classes/class_leases.php:108
 msgid "State"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:107
+#: server/fm-modules/fmDHCP/classes/class_leases.php:108
 msgid "Expires"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:129
+#: server/fm-modules/fmDHCP/classes/class_leases.php:130
 msgid "Tag as a fixed address (reservation)"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_leases.php:174
+#, php-format
+msgid "Deleted all leases from %s."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_leases.php:175
+#, php-format
+msgid "Failed to delete all leases from %s."
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_leases.php:177
@@ -261,25 +283,26 @@ msgstr ""
 msgid "Lease '%s' was deleted from %s."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:237
-msgid "Convert Lease"
+#: server/fm-modules/fmDHCP/classes/class_leases.php:178
+#, php-format
+msgid "Failed to delete lease '%s' from %s."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:318
+#: server/fm-modules/fmDHCP/classes/class_leases.php:264
 msgid "You have specified an invalid server."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:357
+#: server/fm-modules/fmDHCP/classes/class_leases.php:303
 msgid ""
 "The leases from the DHCP server could not be retrieved or managed. Possible "
 "causes include:"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:359
+#: server/fm-modules/fmDHCP/classes/class_leases.php:305
 msgid "The update ports on the server are not accessible"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_leases.php:360
+#: server/fm-modules/fmDHCP/classes/class_leases.php:306
 msgid "This server is updated via cron (only SSH and http/https are supported)"
 msgstr ""
 
@@ -292,46 +315,56 @@ msgstr ""
 msgid "Network '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:194
+#: server/fm-modules/fmDHCP/classes/class_networks.php:193
 msgid "Authoritative for this subnet"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:195
+#: server/fm-modules/fmDHCP/classes/class_networks.php:194
 msgid "Network Address"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:196
+#: server/fm-modules/fmDHCP/classes/class_networks.php:195
 msgid "Netmask"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:197
-#: server/fm-modules/fmDHCP/classes/class_pools.php:174
+#: server/fm-modules/fmDHCP/classes/class_networks.php:196
+#: server/fm-modules/fmDHCP/classes/class_pools.php:173
 msgid "Address Ranges"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:197
-#: server/fm-modules/fmDHCP/classes/class_pools.php:174
+#: server/fm-modules/fmDHCP/classes/class_networks.php:196
+#: server/fm-modules/fmDHCP/classes/class_pools.php:173
 msgid "Add another range"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:243
+#: server/fm-modules/fmDHCP/classes/class_networks.php:242
 msgid "Authoritative for this shared network"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:244
+#: server/fm-modules/fmDHCP/classes/class_networks.php:243
 msgid "Shared Network"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:267
-#: server/fm-modules/fmDHCP/classes/class_pools.php:195
+#: server/fm-modules/fmDHCP/classes/class_networks.php:266
 msgid "No network is defined."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:268
+#: server/fm-modules/fmDHCP/classes/class_networks.php:267
 msgid "No network mask is defined."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_networks.php:287
+#: server/fm-modules/fmDHCP/classes/class_networks.php:269
+#: server/fm-modules/fmDHCP/classes/class_networks.php:270
+#: server/fm-modules/fmDHCP/classes/class_networks.php:282
+#: server/fm-modules/fmDHCP/classes/class_networks.php:283
+#: server/fm-modules/fmDHCP/classes/class_peers.php:258
+#: server/fm-modules/fmDHCP/classes/class_pools.php:209
+#: server/fm-modules/fmDHCP/classes/class_pools.php:210
+#, php-format
+msgid "%s is not valid."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_networks.php:291
 msgid "This network already exists."
 msgstr ""
 
@@ -339,283 +372,312 @@ msgstr ""
 msgid "There are no items."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:113
-#: server/fm-modules/fmDHCP/classes/class_objects.php:237
-msgid "No name defined."
+#: server/fm-modules/fmDHCP/classes/class_objects.php:114
+#, php-format
+msgid "Add a %s with the following details:"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:140
-#: server/fm-modules/fmDHCP/classes/class_objects.php:200
-#: server/fm-modules/fmDHCP/classes/class_objects.php:256
-#: server/fm-modules/fmDHCP/classes/class_objects.php:320
+#: server/fm-modules/fmDHCP/classes/class_objects.php:136
+#: server/fm-modules/fmDHCP/classes/class_objects.php:179
+#: server/fm-modules/fmDHCP/classes/class_objects.php:252
 msgid "Could not add the item because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:304
-msgid "Could not update the item because a database error occurred."
-msgstr ""
-
-#: server/fm-modules/fmDHCP/classes/class_objects.php:345
-#: server/fm-modules/fmDHCP/classes/class_servers.php:183
-msgid "Could not update the server because a database error occurred."
-msgstr ""
-
-#: server/fm-modules/fmDHCP/classes/class_objects.php:524
+#: server/fm-modules/fmDHCP/classes/class_objects.php:184
+#: server/fm-modules/fmDHCP/classes/class_objects.php:295
+#: server/fm-modules/fmDHCP/classes/class_objects.php:482
 msgid "Member of"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:542
+#: server/fm-modules/fmDHCP/classes/class_objects.php:196
+#: server/fm-modules/fmDHCP/classes/class_objects.php:310
+#: server/fm-modules/fmDHCP/classes/class_objects.php:500
 msgid "Child Objects"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:546
+#: server/fm-modules/fmDHCP/classes/class_objects.php:233
+#, php-format
+msgid "Updated a %s (%s) with the following details:"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_objects.php:289
+msgid "Could not update the item because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_objects.php:338
+#, php-format
+msgid "This %s could not be deleted because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_objects.php:341
+#, php-format
+msgid "Deleted %s '%s.'"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_objects.php:504
 msgid "Add Item"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:546
+#: server/fm-modules/fmDHCP/classes/class_objects.php:504
 msgid "Edit Item"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:744
-#: server/fm-modules/fmDHCP/classes/class_peers.php:226
+#: server/fm-modules/fmDHCP/classes/class_objects.php:702
+#: server/fm-modules/fmDHCP/classes/class_peers.php:224
 msgid "Basic"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:748
-#: server/fm-modules/fmDHCP/classes/class_peers.php:233
+#: server/fm-modules/fmDHCP/classes/class_objects.php:706
+#: server/fm-modules/fmDHCP/classes/class_peers.php:231
 msgid "Advanced"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:749
+#: server/fm-modules/fmDHCP/classes/class_objects.php:707
 msgid "Default lease time"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:749
-#: server/fm-modules/fmDHCP/classes/class_objects.php:750
-#: server/fm-modules/fmDHCP/classes/class_objects.php:754
+#: server/fm-modules/fmDHCP/classes/class_objects.php:707
+#: server/fm-modules/fmDHCP/classes/class_objects.php:708
+#: server/fm-modules/fmDHCP/classes/class_objects.php:712
 msgid "seconds"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:750
+#: server/fm-modules/fmDHCP/classes/class_objects.php:708
 msgid "Maximum lease time"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:751
+#: server/fm-modules/fmDHCP/classes/class_objects.php:709
 msgid "Boot filename"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:752
+#: server/fm-modules/fmDHCP/classes/class_objects.php:710
 msgid "Boot file server"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:753
+#: server/fm-modules/fmDHCP/classes/class_objects.php:711
 msgid "Server name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:754
+#: server/fm-modules/fmDHCP/classes/class_objects.php:712
 msgid "Lease length for BOOTP clients"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:755
+#: server/fm-modules/fmDHCP/classes/class_objects.php:713
 msgid "Lease end for BOOTP clients"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:756
+#: server/fm-modules/fmDHCP/classes/class_objects.php:714
 msgid "Dynamic DNS enabled?"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:757
+#: server/fm-modules/fmDHCP/classes/class_objects.php:715
 msgid "Dynamic DNS domain name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:758
+#: server/fm-modules/fmDHCP/classes/class_objects.php:716
 msgid "Dynamic DNS reverse domain"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:759
+#: server/fm-modules/fmDHCP/classes/class_objects.php:717
 msgid "Dynamic DNS hostname"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:760
+#: server/fm-modules/fmDHCP/classes/class_objects.php:718
 msgid "Allow unknown clients"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:761
+#: server/fm-modules/fmDHCP/classes/class_objects.php:719
 msgid "Client updates"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:763
+#: server/fm-modules/fmDHCP/classes/class_objects.php:721
 msgid "Host name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:764
+#: server/fm-modules/fmDHCP/classes/class_objects.php:722
 msgid "Default routers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:765
+#: server/fm-modules/fmDHCP/classes/class_objects.php:723
 msgid "Subnet mask"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:766
+#: server/fm-modules/fmDHCP/classes/class_objects.php:724
 msgid "Broadcast address"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:767
+#: server/fm-modules/fmDHCP/classes/class_objects.php:725
 msgid "Domain name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:768
+#: server/fm-modules/fmDHCP/classes/class_objects.php:726
 msgid "Domain name servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:769
+#: server/fm-modules/fmDHCP/classes/class_objects.php:727
 msgid "Domains to search"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:769
+#: server/fm-modules/fmDHCP/classes/class_objects.php:727
 msgid "List the domains to search comma-delimited"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:770
+#: server/fm-modules/fmDHCP/classes/class_objects.php:728
 msgid "Time servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:771
+#: server/fm-modules/fmDHCP/classes/class_objects.php:729
 msgid "NTP servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:772
+#: server/fm-modules/fmDHCP/classes/class_objects.php:730
 msgid "Log servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:773
+#: server/fm-modules/fmDHCP/classes/class_objects.php:731
 msgid "Swap servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:774
+#: server/fm-modules/fmDHCP/classes/class_objects.php:732
 msgid "Root disk path"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:775
+#: server/fm-modules/fmDHCP/classes/class_objects.php:733
 msgid "NIS domain"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:776
+#: server/fm-modules/fmDHCP/classes/class_objects.php:734
 msgid "NIS servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:777
+#: server/fm-modules/fmDHCP/classes/class_objects.php:735
 msgid "Font servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:778
+#: server/fm-modules/fmDHCP/classes/class_objects.php:736
 msgid "XDM servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:779
+#: server/fm-modules/fmDHCP/classes/class_objects.php:737
 msgid "NetBIOS name servers"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:780
+#: server/fm-modules/fmDHCP/classes/class_objects.php:738
 msgid "NetBIOS scope"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:781
+#: server/fm-modules/fmDHCP/classes/class_objects.php:739
 msgid "NetBIOS node type"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:782
+#: server/fm-modules/fmDHCP/classes/class_objects.php:740
 msgid "Time offset"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:783
+#: server/fm-modules/fmDHCP/classes/class_objects.php:741
 msgid "DHCP server identifier"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:784
+#: server/fm-modules/fmDHCP/classes/class_objects.php:742
 msgid "SLP directory agent IPs"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:784
+#: server/fm-modules/fmDHCP/classes/class_objects.php:742
 msgid "These IPs only?"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:785
+#: server/fm-modules/fmDHCP/classes/class_objects.php:743
 msgid "SLP service scope"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:785
+#: server/fm-modules/fmDHCP/classes/class_objects.php:743
 msgid "This scope only?"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:984
+#: server/fm-modules/fmDHCP/classes/class_objects.php:940
 msgid "Dynamic BOOTP"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:1050
+#: server/fm-modules/fmDHCP/classes/class_objects.php:1009
 msgid "No name is defined."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_objects.php:1054
+#: server/fm-modules/fmDHCP/classes/class_objects.php:1013
 #, php-format
-msgid "Group name is too long (maximum %d character)."
-msgid_plural "Host name is too long (maximum %d characters)."
+msgid "Name is too long (maximum %d character)."
+msgid_plural "Name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:53
+#: server/fm-modules/fmDHCP/classes/class_options.php:55
 msgid "Option"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:54
+#: server/fm-modules/fmDHCP/classes/class_options.php:56
 msgid "Value"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:56
+#: server/fm-modules/fmDHCP/classes/class_options.php:58
 #: server/fm-modules/fmDHCP/classes/class_servers.php:71
 msgid "Actions"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:71
+#: server/fm-modules/fmDHCP/classes/class_options.php:73
 msgid "There are no options."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:94
-#: server/fm-modules/fmDHCP/classes/class_options.php:159
+#: server/fm-modules/fmDHCP/classes/class_options.php:96
+#: server/fm-modules/fmDHCP/classes/class_options.php:160
 msgid "This record already exists."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:109
+#: server/fm-modules/fmDHCP/classes/class_options.php:110
 msgid "Empty values are not allowed."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:122
+#: server/fm-modules/fmDHCP/classes/class_options.php:123
 msgid "Could not add the option because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:184
+#: server/fm-modules/fmDHCP/classes/class_options.php:183
 msgid "Could not update the option because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:211
+#: server/fm-modules/fmDHCP/classes/class_options.php:210
 msgid "This option could not be deleted because a database error occurred."
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_options.php:214
 #, php-format
-msgid "Option '%s' for %s was deleted."
+msgid "%s (%s) option (%s) was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:318
+#: server/fm-modules/fmDHCP/classes/class_options.php:317
 msgid "Add Option"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:318
+#: server/fm-modules/fmDHCP/classes/class_options.php:317
 msgid "Edit Option"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_options.php:360
+#: server/fm-modules/fmDHCP/classes/class_options.php:355
 msgid "Option Name"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_options.php:522
+#, php-format
+msgid "%s is an invalid number."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_options.php:525
+#, php-format
+msgid "%s is an invalid port number."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_options.php:535
+#: server/fm-modules/fmDHCP/classes/class_options.php:540
+#, php-format
+msgid "%s is an invalid IP address."
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_peers.php:47
@@ -628,47 +690,47 @@ msgstr ""
 msgid "Failover peer '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:130
+#: server/fm-modules/fmDHCP/classes/class_peers.php:128
 msgid "Add Peer"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:130
+#: server/fm-modules/fmDHCP/classes/class_peers.php:128
 msgid "Edit Peer"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:227
+#: server/fm-modules/fmDHCP/classes/class_peers.php:225
 msgid "Peer Name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:228
+#: server/fm-modules/fmDHCP/classes/class_peers.php:226
 msgid "Primary Host : Port"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:229
+#: server/fm-modules/fmDHCP/classes/class_peers.php:227
 msgid "Secondary Host : Port"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:230
+#: server/fm-modules/fmDHCP/classes/class_peers.php:228
 msgid "Load Balancing"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:231
+#: server/fm-modules/fmDHCP/classes/class_peers.php:229
 msgid "Minimum Client Lead Time"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:234
+#: server/fm-modules/fmDHCP/classes/class_peers.php:232
 msgid "Maximum Response Delay"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:235
+#: server/fm-modules/fmDHCP/classes/class_peers.php:233
 msgid "Maximum Unacknowledges Updates"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:236
+#: server/fm-modules/fmDHCP/classes/class_peers.php:234
 msgid "Load Balance Max Seconds"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_peers.php:259
+#: server/fm-modules/fmDHCP/classes/class_peers.php:257
 msgid "No load balancing hash is defined."
 msgstr ""
 
@@ -693,15 +755,15 @@ msgstr ""
 msgid "Pool '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_pools.php:173
+#: server/fm-modules/fmDHCP/classes/class_pools.php:172
 msgid "Pool Name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_pools.php:175
+#: server/fm-modules/fmDHCP/classes/class_pools.php:174
 msgid "Failover Peer"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_pools.php:199
+#: server/fm-modules/fmDHCP/classes/class_pools.php:200
 msgid "This pool already exists."
 msgstr ""
 
@@ -722,7 +784,7 @@ msgid "Version"
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_servers.php:69
-#: server/fm-modules/fmDHCP/classes/class_servers.php:390
+#: server/fm-modules/fmDHCP/classes/class_servers.php:394
 msgid "Config File"
 msgstr ""
 
@@ -730,22 +792,30 @@ msgstr ""
 msgid "There are no servers."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:125
-#: server/fm-modules/fmDHCP/classes/class_servers.php:410
+#: server/fm-modules/fmDHCP/classes/class_servers.php:124
+#: server/fm-modules/fmDHCP/classes/class_servers.php:417
 msgid "No server name defined."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:139
+#: server/fm-modules/fmDHCP/classes/class_servers.php:138
 msgid "Could not add the server because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:219
+#: server/fm-modules/fmDHCP/classes/class_servers.php:182
+msgid "Could not update the server because a database error occurred."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_servers.php:218
 #, php-format
 msgid "Server '%s' (%s) was deleted"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:224
+#: server/fm-modules/fmDHCP/classes/class_servers.php:223
 msgid "This server could not be deleted."
+msgstr ""
+
+#: server/fm-modules/fmDHCP/classes/class_servers.php:249
+msgid "Manage Leases"
 msgstr ""
 
 #: server/fm-modules/fmDHCP/classes/class_servers.php:269
@@ -756,52 +826,52 @@ msgstr ""
 msgid "Client Install Required"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:346
+#: server/fm-modules/fmDHCP/classes/class_servers.php:350
 msgid "Add Server"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:346
+#: server/fm-modules/fmDHCP/classes/class_servers.php:350
 msgid "Edit Server"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:350
+#: server/fm-modules/fmDHCP/classes/class_servers.php:354
 msgid "Note:"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:350
+#: server/fm-modules/fmDHCP/classes/class_servers.php:354
 msgid "The client installer can automatically generate this entry."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:387
+#: server/fm-modules/fmDHCP/classes/class_servers.php:391
 msgid "Server Name"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:388
+#: server/fm-modules/fmDHCP/classes/class_servers.php:392
 msgid ""
 "Enter the IP address of the server if the name is not resolvable. This is "
 "used when configuring failover peers."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:389
+#: server/fm-modules/fmDHCP/classes/class_servers.php:393
 msgid "Update Method"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:414
+#: server/fm-modules/fmDHCP/classes/class_servers.php:421
 #, php-format
 msgid "Server name is too long (maximum %d character)."
 msgid_plural "Server name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:417
+#: server/fm-modules/fmDHCP/classes/class_servers.php:424
 msgid "Server address must be a valid IP address."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:421
+#: server/fm-modules/fmDHCP/classes/class_servers.php:428
 msgid "This server name already exists."
 msgstr ""
 
-#: server/fm-modules/fmDHCP/classes/class_servers.php:442
+#: server/fm-modules/fmDHCP/classes/class_servers.php:449
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
@@ -841,7 +911,15 @@ msgstr ""
 msgid "Lease Management"
 msgstr ""
 
-#: server/fm-modules/fmDHCP/js/module.php:87
+#: server/fm-modules/fmDHCP/js/module.php:47
+msgid "Are you sure you want to delete all leases?"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/js/module.php:49
+msgid "Processing"
+msgstr ""
+
+#: server/fm-modules/fmDHCP/js/module.php:121
 msgid "Pulling the leases from the server"
 msgstr ""
 

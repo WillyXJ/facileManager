@@ -86,6 +86,7 @@ class fm_dns_records {
 		
 		$sql_insert = "INSERT INTO `$table`";
 		$sql_fields = '(';
+		$sql_values = '';
 		if ($record_type != 'SOA' && $record_type) {
 			$sql_fields .= 'domain_id, record_type, ';
 			$sql_values .= "$domain_id, '$record_type', ";
@@ -930,10 +931,13 @@ HTML;
 			if (version_compare($server_client_version, '3.0-alpha1', '<')) continue;
 			
 			$file_ext = ($domain_mapping == 'forward') ? 'hosts' : 'rev';
+
+			/** Set master/primary nomenclature */
+			$master_dir = (version_compare($server_version, '9.13.0', '<')) ? 'master' : 'primary';
 			
 			/** Get zone data via ssh */
 			if ($server_update_method == 'ssh') {
-				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.' . $file_ext, 'return', $server_update_port);
+				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/' . $master_dir . '/db.' . $domain_name . '.' . $file_ext, 'return', $server_update_port, 'include', 'window');
 			} elseif (in_array($server_update_method, array('http', 'https'))) {
 				/** Get zone data via http(s) */
 				/** Test the port first */
@@ -946,7 +950,7 @@ HTML;
 						'serial_no' => $server_serial_no,
 						'domain_id' => $domain_id,
 						'module' => $_SESSION['module'],
-						'command_args' => 'dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.' . $file_ext
+						'command_args' => 'dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/' . $master_dir . '/db.' . $domain_name . '.' . $file_ext
 					);
 
 					$server_remote = getPostData($url, $post_data);
@@ -986,6 +990,7 @@ HTML;
 		$_FILES['import-file']['tmp_name'] = $_FILES['import-file']['name'] = '/tmp/db.' . $domain_name;
 		file_put_contents($_FILES['import-file']['tmp_name'], join("\n", $server_remote['output']));
 
+		global $fm_module_tools;
 		$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
 		if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
 			include($module_tools_file);
