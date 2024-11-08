@@ -76,37 +76,6 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 	if ($option_type == 'Global') $display_option_type_sql .= "' AND domain_id='0' AND server_id='0";
 }
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$uri_params = generateURIParams(array('view_id', 'server_serial_no'), 'include');
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_rpz->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_rpz->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 

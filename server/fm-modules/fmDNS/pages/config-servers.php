@@ -27,69 +27,6 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['servers']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'servers';
 $display_type = ($type == 'servers') ? __('Name Servers') : __('Name Server Groups');
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			if ($_POST['sub_type'] == 'servers') {
-				$result = $fm_module_servers->addServer($_POST);
-			} elseif ($_POST['sub_type'] == 'groups') {
-				$result = $fm_module_servers->addGroup($_POST);
-			}
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			if ($_POST['sub_type'] == 'servers') {
-				$result = $fm_module_servers->updateServer($_POST);
-			} elseif ($_POST['sub_type'] == 'groups') {
-				$result = $fm_module_servers->updateGroup($_POST);
-			}
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type']);
-				exit;
-			}
-		}
-		if (isset($_GET['status'])) {
-			if ($_GET['type'] == 'servers') {
-				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $_GET['id'], 'server_', $_GET['status'], 'server_id')) {
-					$response = sprintf(__('This server could not be set to %s.') . "\n", $_GET['status']);
-				} else {
-					/* set the server_build_config flag */
-					$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` SET `server_build_config`='yes' WHERE `server_id`=" . sanitize($_GET['id']);
-					$fmdb->query($query);
-
-					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-					addLogEntry(sprintf(__('Set server (%s) status to %s.'), $tmp_name, $_GET['status']));
-					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
-					exit;
-				}
-			} elseif ($_GET['type'] == 'groups') {
-				if (!updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', $_GET['id'], 'group_', $_GET['status'], 'group_id')) {
-					$response = sprintf(__('This server group could not be set to %s.') . "\n", $_GET['status']);
-				} else {
-					$tmp_name = getNameFromID($_GET['id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
-					addLogEntry(sprintf(__('Set server group (%s) status to %s.'), $tmp_name, $_GET['status']));
-					header('Location: ' . $GLOBALS['basename'] . '?type=' . $_GET['type']);
-					exit;
-				}
-			}
-		}
-		break;
-	}
-}
-
 printHeader();
 @printMenu();
 

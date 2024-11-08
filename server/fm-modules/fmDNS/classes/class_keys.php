@@ -102,13 +102,18 @@ class fm_dns_keys {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['key_created'] = strtotime('now');
 		
-		$exclude = array('submit', 'action', 'key_id', 'generate');
+		$exclude = array('submit', 'action', 'key_id', 'generate', 'page', 'item_type');
+		$log_message = __("Added key with the following") . ":\n";
 
 		foreach ($post as $key => $data) {
-			if (($key == 'key_name' || $key == 'key_secret') && empty($data)) return __('No key defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				if ($key == 'key_view') {
+					$log_message .= formatLogKeyData('key_', $key, ($data) ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+				} else {
+					$log_message .= formatLogKeyData('key_', $key, $data);
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -121,9 +126,9 @@ class fm_dns_keys {
 			return formatError(__('Could not add the key because a database error occurred.'), 'sql');
 		}
 
-		$view_name = $post['key_view'] ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		addLogEntry("Added key:\nName: {$post['key_name']}\nType: " . strtoupper($post['key_type']) . "\nAlgorithm: {$post['key_algorithm']}\nView: $view_name\nComment: {$post['key_comment']}");
+		setBuildUpdateConfigFlag(0, 'yes', 'build');
 				
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -137,19 +142,25 @@ class fm_dns_keys {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
-		$exclude = array('submit', 'action', 'key_id');
+		$exclude = array('submit', 'action', 'key_id', 'page', 'item_type');
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['key_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
+		$log_message = sprintf(__("Updated key '%s' to the following"), $old_name) . ":\n";
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if ($key == 'key_view') {
+					$log_message .= formatLogKeyData('key_', $key, ($data) ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views');
+				} else {
+					$log_message .= formatLogKeyData('key_', $key, $data);
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the key */
-		$old_name = getNameFromID($post['key_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}keys` SET $sql WHERE `key_id`={$post['key_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$fmdb->query($query);
 		
@@ -160,8 +171,9 @@ class fm_dns_keys {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$view_name = ($post['key_view']) ? getNameFromID($post['key_view'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		addLogEntry("Updated key '$old_name' to the following:\nName: {$post['key_name']}\nAlgorithm: {$post['key_algorithm']}\nSecret: {$post['key_secret']}\nView: $view_name\nComment: {$post['key_comment']}");
+		setBuildUpdateConfigFlag(0, 'yes', 'build');
+
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -285,7 +297,7 @@ HTML;
 
 			$key_options = sprintf('<tr>
 					<th width="33&#37;" scope="row"><label for="key_name">%s</label></th>
-					<td width="67&#37;"><input name="key_name" id="key_name" type="text" value="%s" size="40" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="key_name" id="key_name" type="text" value="%s" size="40" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="key_view">%s</label></th>
@@ -297,7 +309,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="key_secret">%s</label></th>
-					<td width="67&#37;"><input name="key_secret" id="key_secret" type="text" value="%s" size="40" /></td>
+					<td width="67&#37;"><input name="key_secret" id="key_secret" type="text" value="%s" size="40" class="required" /></td>
 				</tr>',
 					__('Key Name'), $key_name, $key_name_length,
 					__('View'), $key_view,
@@ -397,8 +409,10 @@ HTML;
 				);
 		}
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="keys" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="key_id" value="%d" />
 			<input type="hidden" name="key_type" value="%s" />

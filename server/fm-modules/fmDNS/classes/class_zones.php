@@ -135,7 +135,7 @@ class fm_dns_zones {
 
 			$post['account_id'] = $_SESSION['user']['account_id'];
 			
-			$exclude = array('submit', 'action', 'group_domain_ids', 'group_id');
+			$exclude = array('submit', 'action', 'page', 'item_type', 'group_domain_ids', 'group_id');
 		
 			$log_message_domains = $this->getZoneLogDomainNames($post['group_domain_ids']);
 
@@ -179,38 +179,43 @@ class fm_dns_zones {
 
 		/** Format domain_view */
 		$log_message_views = '';
-		$domain_view_array = explode(';', $post['domain_view']);
-		if (is_array($domain_view_array)) {
-			$domain_view = '';
-			foreach ($domain_view_array as $val) {
-				if ($val == 0 || $val == '') {
-					$domain_view = 0;
-					break;
+		if (isset($post['domain_view'])) {
+			$domain_view_array = explode(';', $post['domain_view']);
+			if (is_array($domain_view_array)) {
+				$domain_view = '';
+				foreach ($domain_view_array as $val) {
+					if ($val == 0 || $val == '') {
+						$domain_view = 0;
+						break;
+					}
+					$domain_view .= $val . ';';
+					$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name');
+					$log_message_views .= $val ? "$view_name; " : null;
 				}
-				$domain_view .= $val . ';';
-				$view_name = getNameFromID($val, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name');
-				$log_message_views .= $val ? "$view_name; " : null;
+				$post['domain_view'] = rtrim($domain_view, ';');
+				$log_message_views = rtrim(trim($log_message_views), ';');
 			}
-			$post['domain_view'] = rtrim($domain_view, ';');
-			$log_message_views = rtrim(trim($log_message_views), ';');
 		}
-		if (!$post['domain_view']) $post['domain_view'] = 0;
+		if (!isset($post['domain_view']) || !$post['domain_view']) $post['domain_view'] = 0;
 
 		/** Format domain_name_servers */
 		$log_message_name_servers = '';
-		foreach ($post['domain_name_servers'] as $val) {
-			if ($val == '0') {
-				$domain_name_servers = 0;
-				$log_message_name_servers = getServerName($val);
-				break;
+		if (isset($post['domain_name_servers'])) {
+			foreach ($post['domain_name_servers'] as $val) {
+				if ($val == '0') {
+					$domain_name_servers = 0;
+					$log_message_name_servers = getServerName($val);
+					break;
+				}
+				$domain_name_servers .= $val . ';';
+				$log_message_name_servers .= $val ? getServerName($val) . '; ' : null;
 			}
-			$domain_name_servers .= $val . ';';
-			$log_message_name_servers .= $val ? getServerName($val) . '; ' : null;
+			$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 		}
-		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
+		if (!isset($post['domain_name_servers']) || !$post['domain_name_servers']) $post['domain_name_servers'] = 0;
 
 		/** Get clone parent values */
-		if ($post['domain_clone_domain_id']) {
+		if (isset($post['domain_clone_domain_id']) && $post['domain_clone_domain_id']) {
 			$query = "SELECT * FROM `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains` WHERE domain_id={$post['domain_clone_domain_id']}";
 			$fmdb->query($query);
 			if (!$fmdb->num_rows) return __('Cannot find cloned zone.');
@@ -236,14 +241,14 @@ class fm_dns_zones {
 					$log_message .= "Use DNAME RRs: {$post['domain_clone_dname']}\n";
 					$sql_values .= $post['domain_clone_dname'] ? "'" . $post['domain_clone_dname'] . "', " : 'NULL, ';
 				} else {
-					$sql_values .= strlen($value) ? "'" . $value . "', " : 'NULL, ';
+					$sql_values .= (isset($value) && strlen($value)) ? "'" . $value . "', " : 'NULL, ';
 				}
 				$sql_fields .= $field . ', ';
 			}
 			$sql_fields = rtrim($sql_fields, ', ') . ')';
 			$sql_values = rtrim($sql_values, ', ');
 		} else {
-			$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url');
+			$exclude = array('submit', 'action', 'page', 'item_type', 'domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url');
 		
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
@@ -283,8 +288,8 @@ class fm_dns_zones {
 		/** Add mandatory config options */
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
-		$required_servers = $post['domain_required_servers'];
 		if (!$post['domain_template_id']) {
+			$required_servers = $post['domain_required_servers'];
 			if ($post['domain_type'] == 'forward') {
 				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
@@ -322,7 +327,7 @@ class fm_dns_zones {
 		}
 
 		/** Add DNSSEC inline signing zone options */
-		if ($post['domain_dnssec_sign_inline'] == 'yes') {
+		if (isset($post['domain_dnssec_sign_inline']) && $post['domain_dnssec_sign_inline'] == 'yes') {
 			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'dnssec-policy' => 'default') as $param => $val) {
 				$result = $fmdb->query($query . "'$param', '$val')");
 				$log_message .= formatLogKeyData('domain_', $param, $val);
@@ -338,7 +343,8 @@ class fm_dns_zones {
 		addLogEntry($log_message);
 		
 		/* Set the server_build_config flag for servers */
-		if ((($post['domain_clone_domain_id'] || $post['domain_template_id']) &&
+		if ((((isset($post['domain_clone_domain_id']) && $post['domain_clone_domain_id']) ||
+			(isset($post['domain_template_id']) && $post['domain_template_id'])) &&
 			getSOACount($insert_id) && getNSCount($insert_id)) ||
 			$post['domain_type'] != 'primary'){
 				setBuildUpdateConfigFlag(getZoneServers($insert_id, array('masters', 'slaves')), 'yes', 'build');
@@ -357,8 +363,10 @@ class fm_dns_zones {
 		global $fmdb, $__FM_CONFIG;
 		
 		/** Validate post */
-		$_POST['domain_mapping'] = getNameFromID(sanitize($_POST['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
-		$_POST['domain_type'] = getNameFromID(sanitize($_POST['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+		if (isset($_POST['domain_id'])) {
+			$_POST['domain_mapping'] = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+			$_POST['domain_type'] = getNameFromID($_POST['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type');
+		}
 		
 		$post = $this->validatePost($_POST);
 		if (!is_array($post)) return $post;
@@ -406,7 +414,7 @@ class fm_dns_zones {
 		$log_message = sprintf(__('Updated a zone (%s) with the following details'), $old_name) . ":\n";
 
 		/** If changing zone to clone or different domain_type, are there any existing associated records? */
-		if ($post['domain_clone_domain_id']) {
+		if (!empty($post['domain_clone_domain_id']) && $post['domain_clone_domain_id']) {
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) return __('There are associated records with this zone.');
 		}
@@ -439,11 +447,11 @@ class fm_dns_zones {
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 		
-		$exclude = array('submit', 'action', 'domain_id', 'domain_required_servers', 'domain_forward');
+		$exclude = array('submit', 'action', 'page', 'item_type', 'domain_id', 'domain_required_servers', 'domain_forward');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= strlen($data) ? $key . "='$data', " : $key . '=NULL, ';
+				$sql_edit .= (isset($data) && strlen($data)) ? $key . "='$data', " : $key . '=NULL, ';
 				if ($key == 'domain_view') $data = trim($log_message_views, '; ');
 				if ($key == 'domain_name_servers') $data = trim($log_message_name_servers, '; ');
 				if ($key == 'domain_key_id') {
@@ -492,8 +500,8 @@ class fm_dns_zones {
 		/** Add mandatory config options */
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $domain_id, ";
-		$required_servers = $post['domain_required_servers'];
 		if (!$post['domain_template_id']) {
+			$required_servers = $post['domain_required_servers'];
 			if ($post['domain_type'] == 'forward') {
 				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forwarders'") !== false) {
 					basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forwarders'"), 'cfg_data', $required_servers, 'cfg_id');
@@ -506,7 +514,7 @@ class fm_dns_zones {
 				}
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
 
-				$domain_forward = sanitize($post['domain_forward'][0]);
+				$domain_forward = $post['domain_forward'][0];
 				if (getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='forward'") !== false) {
 					basicUpdate("fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_id', null, "AND cfg_name='forward'"), 'cfg_data', $domain_forward, 'cfg_id');
 				} else {
@@ -533,7 +541,7 @@ class fm_dns_zones {
 		}
 
 		/** Add DNSSEC inline signing zone options */
-		if ($post['domain_dnssec_sign_inline'] == 'yes') {
+		if (!empty($post['domain_dnssec_sign_inline']) && $post['domain_dnssec_sign_inline'] == 'yes') {
 			foreach (array('inline-signing' => 'yes', 'key-directory' => '"$ZONES/keys"', 'dnssec-policy' => 'default') as $param => $val) {
 				if (!getNameFromID($domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'domain_id', 'cfg_data', null, "AND cfg_name='$param'")) {
 					$result = $fmdb->query($query . "'$param', '$val')");
@@ -930,7 +938,7 @@ HTML;
 		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = $domain_ttl = null;
 		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
 		$domain_dnssec_sig_expire = $domain_dnssec_sign_inline = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
-		$disabled = $action == 'create' ? null : 'disabled';
+		$disabled = ($action == 'create') ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST)) {
@@ -1130,14 +1138,15 @@ HTML;
 			);
 		}
 		
-		$return_form = (array_search('popup', $show) !== false) ? '<form name="manage" id="manage" method="post" action="">' . $popup_header : null;
+		$return_form = (array_search('popup', $show) !== false) ? $popup_header . '<form name="manage" id="manage">' : null;
 		
-		$return_form .= sprintf('<input type="hidden" name="action" value="%s" />
+		$return_form .= sprintf('<input type="hidden" name="page" value="zones" />
+			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="domain_id" value="%d" />
 			<table class="form-table %s">
 				<tr class="include-with-template">
 					<th><label for="domain_name">%s</label></th>
-					<td><input type="text" id="domain_name" name="domain_name" size="40" value="%s" maxlength="%d" /></td>
+					<td><input type="text" id="domain_name" name="domain_name" size="40" value="%s" maxlength="%d" class="required" /></td>
 				</tr>
 				%s
 				<tr class="include-with-template">
@@ -1154,16 +1163,16 @@ HTML;
 						%s
 						<div id="define_forwarders" style="display: %s">
 							<p>%s</p>
-							<input type="hidden" name="domain_required_servers[forwarders]" id="domain_required_servers" class="address_match_element" data-placeholder="%s" value="%s" /><br />
+							<input type="hidden" name="domain_required_servers[forwarders]" id="domain_required_servers" class="address_match_element required" data-placeholder="%s" value="%s" /><br />
 							( address_match_element )
 						</div>
 						<div id="define_masters" style="display: %s">
-							<input type="hidden" name="domain_required_servers[primaries]" id="domain_required_servers" class="address_match_element" data-placeholder="%s" value="%s" /><br />
+							<input type="hidden" name="domain_required_servers[primaries]" id="domain_required_servers" class="address_match_element required" data-placeholder="%s" value="%s" /><br />
 							( address_match_element )
 						</div>
 						<div id="define_redirect_url" style="display: none">
 							<h4>%s <a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h4>
-							<input type="text" id="domain_redirect_url" name="domain_redirect_url" size="40" value="" />
+							<input type="text" id="domain_redirect_url" name="domain_redirect_url" size="40" value="" class="required" />
 						</div>
 					</td>
 				</tr>
@@ -1604,9 +1613,9 @@ HTML;
 			$zone_type_sql = null;
 		}
 
-		$exclude_sql = ($exclude) ? "AND domain_id NOT IN(" . implode(',', array_filter($exclude, function($value) {
+		$exclude_sql = ($exclude) ? trim("AND domain_id NOT IN(0," . implode(',', array_filter($exclude, function($value) {
 			return strpos($value, 'g_') === false;
-		})) . ')' : null;
+		})), ',') . ')' : null;
 		
 		$query = "SELECT domain_id,domain_name,domain_view FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' $include_sql $zone_type_sql $restricted_sql $exclude_sql ORDER BY domain_mapping,domain_name ASC";
 		$fmdb->get_results($query);
@@ -1831,7 +1840,7 @@ HTML;
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_name');
 		if ($field_length !== false && strlen($post['domain_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Zone name is too long (maximum %d character).', 'Zone name is too long (maximum %d characters).', $field_length), $field_length);
 		
-		if ($post['domain_template'] != 'yes') {
+		if (isset($post['domain_template']) && $post['domain_template'] != 'yes') {
 			$post['domain_name'] = rtrim(trim(strtolower($post['domain_name'])), '.');
 
 			/** Perform domain name validation */
@@ -1848,12 +1857,12 @@ HTML;
 		}
 		
 		/** Dynamic updates */
-		if ($post['domain_dynamic'] != 'yes') {
+		if (isset($post['domain_dynamic']) && $post['domain_dynamic'] != 'yes') {
 			$post['domain_dynamic'] = 'no';
 		}
 		
 		/** DNSSEC */
-		if ($post['domain_dnssec'] != 'yes') {
+		if (isset($post['domain_dnssec']) && $post['domain_dnssec'] != 'yes') {
 			$post['domain_dnssec'] = 'no';
 		}
 		if (!empty($post['domain_dnssec_sig_expire'])) {
@@ -1861,40 +1870,40 @@ HTML;
 		} else {
 			$post['domain_dnssec_sig_expire'] = 0;
 		}
-		if ($post['domain_dnssec_generate_ds'] != 'yes') {
+		if (isset($post['domain_dnssec_generate_ds']) && $post['domain_dnssec_generate_ds'] != 'yes') {
 			$post['domain_dnssec_generate_ds'] = 'no';
 		}
-		if ($post['domain_dnssec_sign_inline'] != 'yes') {
+		if (isset($post['domain_dnssec_sign_inline']) && $post['domain_dnssec_sign_inline'] != 'yes') {
 			$post['domain_dnssec_sign_inline'] = 'no';
 		} else {
 			$post['domain_dnssec_signed'] = 0;
 		}
 		
 		/** Ensure domain_view is set */
-		$tmp_domain_clone_domain_id = getNameFromID(sanitize($post['domain_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		$tmp_domain_clone_domain_id = (isset($post['domain_id'])) ? getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id') : null;
 		if (!array_key_exists('domain_view', $post) && $tmp_domain_clone_domain_id) {
 			$post['domain_view'] = ($post['domain_clone_domain_id'] || $post['domain_template_id'] || $tmp_domain_clone_domain_id) ? -1 : 0;
-		} elseif (is_array($post['domain_view']) && in_array(0, $post['domain_view'])) {
+		} elseif (!isset($post['domain_view']) || (is_array($post['domain_view']) && in_array(0, $post['domain_view']))) {
 			$post['domain_view'] = 0;
 		}
 
 		/** Is this based on a template? */
-		if ($post['domain_template_id'] && !is_array($post['domain_view']) && $post['domain_view'] < 0) {
-			$post['domain_view'] = getNameFromID(sanitize($post['domain_template_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
+		if (isset($post['domain_template_id']) && $post['domain_template_id'] && !is_array($post['domain_view']) && $post['domain_view'] < 0) {
+			$post['domain_view'] = getNameFromID($post['domain_template_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_view');
 		}
 		
 		/** Format domain_clone_domain_id */
-		if (!$post['domain_clone_domain_id'] && $post['action'] == 'add') $post['domain_clone_domain_id'] = 0;
+		if (isset($post['domain_clone_domain_id']) && !$post['domain_clone_domain_id'] && $post['action'] == 'add') $post['domain_clone_domain_id'] = 0;
 		
 		/** domain_clone_dname override */
-		if (!$post['domain_clone_dname_override']) {
+		if (!isset($post['domain_clone_dname_override']) || !$post['domain_clone_dname_override']) {
 			$post['domain_clone_dname'] = null;
 		} else {
 			unset($post['domain_clone_dname_override']);
 		}
 
 		/** Ensure domain_name_servers is set */
-		if (!$post['domain_name_servers']) {
+		if (!isset($post['domain_name_servers']) || !$post['domain_name_servers']) {
 			$post['domain_name_servers'] = array(0);
 		}
 		
@@ -1907,7 +1916,7 @@ HTML;
 		} else { /** All zones must be unique per view */
 			$defined_views = $fmdb->last_result;
 			
-			/** Format domain_view */
+			/** Does the domain exist in all views? */
 			if (!$post['domain_view'] || in_array(0, (array) $post['domain_view'])) {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $post['domain_name'], 'domain_', 'domain_name', $domain_id_sql);
 				if ($fmdb->num_rows) {
@@ -1945,7 +1954,7 @@ HTML;
 		}
 		
 		/** Is this based on a template? */
-		if ($post['domain_template_id']) {
+		if (isset($post['domain_template_id']) && $post['domain_template_id']) {
 			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
 				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
 				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view',
@@ -1980,7 +1989,7 @@ HTML;
 		}
 		
 		/** No need to process more if zone is cloned */
-		if ($post['domain_clone_domain_id'] || $tmp_domain_clone_domain_id) {
+		if (isset($post['domain_clone_domain_id']) && $post['domain_clone_domain_id'] || $tmp_domain_clone_domain_id) {
 			return $post;
 		}
 		
@@ -1994,7 +2003,8 @@ HTML;
 		}
 
 		/** Forward servers */
-		if (!empty($post['domain_required_servers']['forwarders'])) {
+		if ($post['domain_type'] == 'forward') {
+			if (empty($post['domain_required_servers']['forwarders'])) return __('No forward servers defined.');
 			$post['domain_required_servers'] = $post['domain_required_servers']['forwarders'];
 		}
 		
@@ -2310,17 +2320,18 @@ HTML;
 		$group_domain_ids = $this->getZoneGroupMembers($group_id);
 		
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name');
-		$group_domain_ids = buildSelect('group_domain_ids', 'group_domain_ids', $this->availableZones('no-templates'), (array) $group_domain_ids, 1, null, true, null, null, __('Select one or more zones'));
+		$group_domain_ids = buildSelect('group_domain_ids', 'group_domain_ids', $this->availableZones('no-templates'), (array) $group_domain_ids, 1, null, true, null, 'required', __('Select one or more zones'));
 
 		$return_form .= sprintf('
-		<form name="manage" id="manage" method="post" action="">
-			%s
+		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="domains" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="group_id" value="%d" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
-					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_masters">%s</label></th>

@@ -113,7 +113,8 @@ class fm_module_rpz {
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '_') : $data;
+				// $clean_data = ($key == 'cfg_data') ? sanitize($data, '_') : $data;
+				$clean_data = $data;
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$clean_data', ";
 				if ($key == 'view_id') {
@@ -177,6 +178,8 @@ class fm_module_rpz {
 			return formatError(__('Could not add the response policy zone because a database error occurred.'), 'sql');
 		}
 		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 		return true;
 	}
@@ -193,8 +196,8 @@ class fm_module_rpz {
 			/** Make new order in array */
 			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
 			
-			$post['server_serial_no'] = (!isset($post['server_serial_no'])) ? 0 : sanitize($post['server_serial_no']);
-			$view_id = (!isset($post['uri_params']['view_id'])) ? 0 : sanitize($post['uri_params']['view_id']);
+			$post['server_serial_no'] = (!isset($post['server_serial_no'])) ? 0 : $post['server_serial_no'];
+			$view_id = (!isset($post['uri_params']['view_id'])) ? 0 : $post['uri_params']['view_id'];
 			
 			/** Get listing for server */
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_order_id', 'cfg_', "AND cfg_type='rpz' AND cfg_name='!config_name!' AND cfg_isparent='yes' AND view_id='{$view_id}' AND server_serial_no='{$post['server_serial_no']}'");
@@ -265,7 +268,7 @@ class fm_module_rpz {
 		}
 
 		/** Update config children */
-		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'cfg_order_id', 'view_id', 'server_serial_no'));
+		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'cfg_order_id', 'view_id', 'server_serial_no', 'page', 'item_type'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -292,6 +295,8 @@ class fm_module_rpz {
 		}
 		if (!$rows_affected) return true;
 		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 
 		return true;
@@ -407,7 +412,7 @@ HTML;
 		/** Build the available zones list */
 		if (isset($_POST['request_uri'])) {
 			foreach ((array) $_POST['request_uri'] as $key => $val) {
-				$zone_sql .= sprintf(" AND %s='%s'", sanitize($key), sanitize($val));
+				$zone_sql .= sprintf(" AND %s='%s'", $key, $val);
 			}
 		}
 		if (!isset($_POST['request_uri']['view_id'])) {
@@ -471,7 +476,7 @@ HTML;
 					<th width="33&#37;" scope="row"><label for="%s">%s</label></th>
 					<td width="67&#37;">%s%s</td>
 				</tr>', $param_type, $k, str_replace('-', ' ', $k), $form_field,
-					($k == 'policy') ? sprintf('<div id="cname_option" style="display: %s"><input name="cname_domain_name" id="cname_domain_name" type="text" value="%s" size="40" placeholder="domainname.com" /></div>', ($v == 'cname') ? 'block' : 'none', $cname_domain_name) : null
+					($k == 'policy') ? sprintf('<div id="cname_option" style="display: %s"><input name="cname_domain_name" id="cname_domain_name" type="text" value="%s" size="40" placeholder="domainname.com" class="required" /></div>', ($v == 'cname') ? 'block' : 'none', $cname_domain_name) : null
 			);
 		}
 
@@ -479,8 +484,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="%s" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="cfg_order_id" value="%d" />
@@ -538,7 +545,7 @@ HTML;
 				$("#domain_id").trigger("change");
 			});
 		</script>',
-				$popup_header, $action, $cfg_id, $cfg_order_id, $cfg_type_id, $server_serial_no,
+				$popup_header, $cfg_type, $action, $cfg_id, $cfg_order_id, $cfg_type_id, $server_serial_no,
 				__('Basic'),
 				__('Zone'), $domain_id,
 				_('Comment'), $cfg_comment,
@@ -565,13 +572,12 @@ HTML;
 	 * @return array|string|boolean
 	 */
 	function validatePost($post, $include_sub_configs = null) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_name'] = '!config_name!';
-		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
-		$post['cfg_comment'] = trim($post['cfg_comment']);
+		if (!empty($post['cfg_data'])) $post['cfg_data'] = sanitize($post['cfg_data'], '-');
 		$post['cfg_type'] = 'rpz';
 
 		unset($post['tab-group-1']);

@@ -116,7 +116,7 @@ class fm_module_dnssec {
 					$log_message .= formatLogKeyData('', 'server', getServerName($data));
 				}
 				if ($key == 'cfg_comment') {
-					$log_message = formatLogKeyData('', 'Comment', $data);
+					$log_message .= formatLogKeyData('', 'Comment', $data);
 				}
 			}
 		}
@@ -168,6 +168,8 @@ class fm_module_dnssec {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 		return true;
 	}
@@ -230,7 +232,7 @@ class fm_module_dnssec {
 		}
 
 		/** Update config children */
-		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1', 'sub_type'));
+		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1', 'sub_type', 'page', 'item_type'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -258,6 +260,8 @@ class fm_module_dnssec {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 			}
 		}
+
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
 		addLogEntry($log_message);
 
@@ -433,8 +437,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="?type=%s">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="dnssec-policy" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="sub_type" value="%s" />
@@ -447,7 +453,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" maxlength="%d" /></td>
+								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" maxlength="%d" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
@@ -477,7 +483,7 @@ HTML;
 				});
 			});
 		</script>',
-				$type, $popup_header, $action, $cfg_id, $type, $server_serial_no,
+				$popup_header, $action, $cfg_id, $type, $server_serial_no,
 				__('Basic'),
 				__('Name'), $cfg_data,$name_length,
 				_('Comment'), $cfg_comment,
@@ -502,7 +508,7 @@ HTML;
 	 * @return array|string|boolean
 	 */
 	function validatePost($post, $include_sub_configs) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';

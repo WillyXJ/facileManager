@@ -86,9 +86,9 @@ class fm_dns_controls {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id');
+		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
 		$logging_exclude = array_diff(array_keys($post), $exclude, array('control_id', 'action', 'account_id', 'tab-group-1', 'sub_type'));
-		$log_message = sprintf(__('Added %s with the following details'), $post['sub_type']) . ":\n";
+		$log_message = sprintf(__('Added %s with the following details'), $post['control_type']) . ":\n";
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -117,6 +117,8 @@ class fm_dns_controls {
 			return formatError(__('Could not add the control because a database error occurred.'), 'sql');
 		}
 
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 		return true;
 	}
@@ -144,9 +146,9 @@ class fm_dns_controls {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id');
+		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
 		$logging_exclude = array_diff(array_keys($post), $exclude, array('control_id', 'action', 'account_id', 'tab-group-1', 'sub_type'));
-		$log_message = sprintf(__('Updated %s (%s) to the following details'), $post['sub_type'], $post['control_ip']) . ":\n";
+		$log_message = sprintf(__('Updated %s (%s) to the following details'), $post['control_type'], $post['control_ip']) . ":\n";
 
 		$sql_edit = '';
 		foreach ($post as $key => $data) {
@@ -177,6 +179,8 @@ class fm_dns_controls {
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
+
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
 		addLogEntry($log_message);
 		return true;
@@ -284,8 +288,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="controls" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="control_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
@@ -303,7 +309,7 @@ HTML;
 				<tr>
 					<th width="33&#37;" scope="row"><label for="control_predefined">%s</label></th>
 					<td width="67&#37;">
-						<input type="hidden" name="control_addresses" id="address_match_element" data-placeholder="%s" value="%s" /><br />
+						<input type="hidden" name="control_addresses" id="address_match_element" data-placeholder="%s" value="%s" class="required" /><br />
 						( address_match_element )
 					</td>
 				</tr>

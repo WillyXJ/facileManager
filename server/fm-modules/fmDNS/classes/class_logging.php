@@ -86,9 +86,9 @@ class fm_module_logging {
 		if ($post['cfg_destination'] == 'file') {
 			if (empty($post['cfg_file_path'][0])) return __('No file path defined.');
 		}
-		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'cfg_destination',
-					'cfg_file_path', 'cfg_syslog', 'severity', 'print-category', 'print-severity',
-					'print-time');
+		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'page', 'item_type',
+					'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
+					'print-severity', 'print-time');
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
@@ -172,6 +172,9 @@ class fm_module_logging {
 				}
 			}
 		}
+
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		$log_message .= "\nSeverity: {$post['severity']}\nPrint Category: {$post['print-category']}\nPrint Severity: {$post['print-severity']}\nPrint Time: {$post['print-time']}\nComment: {$post['cfg_comment']}";
 		addLogEntry($log_message);
 		return true;
@@ -197,7 +200,7 @@ class fm_module_logging {
 		$post['cfg_name'] = $post['sub_type'];
 		$post['cfg_comment'] = trim($post['cfg_comment']);
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data');
+		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'page', 'item_type');
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
@@ -248,6 +251,8 @@ class fm_module_logging {
 			return formatError(__('Could not add the category because a database error occurred.'), 'sql');
 		}
 		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry("Added logging category:\nName: $category_name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -280,7 +285,9 @@ class fm_module_logging {
 		}
 		
 		/** Update category parent */
-		$post['temp_data'] = $post['cfg_data'];
+		if ($post['sub_type'] == 'category') {
+			$post['temp_data'] = $post['cfg_data'];
+		}
 		$post['cfg_data'] = $name = $post['cfg_name'];
 		$post['cfg_name'] = $post['sub_type'];
 		
@@ -289,7 +296,8 @@ class fm_module_logging {
 			if (!$this->validateChannel($post)) return __('This channel already exists.');
 		}
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
+		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'page', 'item_type',
+					'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
 					'print-severity', 'print-time');
 
 		$sql_edit = '';
@@ -315,7 +323,12 @@ class fm_module_logging {
 		
 		if ($post['sub_type'] == 'category') {
 			foreach ($post['temp_data'] as $channel) {
+				$logging_channel = $channel;
+				if (is_numeric($channel)) {
+					$logging_channel = getNameFromID($channel, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
+				}
 				$post['cfg_data'] .= "$channel;";
+				$logging_channels[] = $logging_channel;
 			}
 			$post['cfg_data'] = rtrim($post['cfg_data'], ';');
 			
@@ -339,7 +352,7 @@ class fm_module_logging {
 				return formatError(sprintf(__('Could not update the %s because a database error occurred.'), $post['sub_type']), 'sql');
 			}
 			
-			addLogEntry("Updated logging category '$old_name' to the following:\nName: $name\nChannels: " . implode(', ', $post['temp_data']) . "\nComment: {$post['cfg_comment']}");
+			addLogEntry("Updated logging category '$old_name' to the following:\nName: $name\nChannels: " . implode(', ', $logging_channels) . "\nComment: {$post['cfg_comment']}");
 		} else {
 			/** Insert channel children */
 			$include = array('cfg_destination', 'severity', 'print-category', 'print-severity', 'print-time');
@@ -405,6 +418,8 @@ class fm_module_logging {
 			addLogEntry($log_message);
 		}
 		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		return true;
 	}
 	
@@ -431,7 +446,10 @@ class fm_module_logging {
 			return formatError(sprintf(__('This %s could not be deleted because a database error occurred.'), $type), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("Logging %s '%s' was deleted."), $type, $tmp_name));
+			$log_message = sprintf(__('Deleted a logging %s'), $type) . ":\n";
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
+			addLogEntry($log_message);
 			return true;
 		}
 	}
@@ -513,8 +531,9 @@ HTML;
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = <<<FORM
-			<form name="manage" id="manage" method="post" action="?type=$type">
 			$popup_header
+			<form name="manage" id="manage">
+				<input type="hidden" name="page" value="logging" />
 				<input type="hidden" name="action" value="$action" />
 				<input type="hidden" name="cfg_id" value="$cfg_id" />
 				<input type="hidden" name="cfg_type" value="logging" />
@@ -550,7 +569,7 @@ FORM;
 			$return_form .= sprintf('<table class="form-table">
 					<tr>
 						<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
-						<td width="67&#37;"><input name="cfg_name" id="cfg_name" type="text" value="%s" size="40" /></td>
+						<td width="67&#37;"><input name="cfg_name" id="cfg_name" type="text" value="%s" size="40" class="required" /></td>
 					</tr>
 					<tr>
 						<th width="33&#37;" scope="row"><label for="cfg_destination">%s</label></th>
@@ -783,6 +802,20 @@ FORM;
 		return true;
 	}
 
+
+	/**
+	 * Handles the in-line form validation calls
+	 *
+	 * @since 5.0.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param array $post Posted data
+	 * @return array|string
+	 */
+	function add($post) {
+		return ($post['sub_type'] == 'channel') ? $this->addChannel($post) : $this->addCategory($post);
+	}
 }
 
 if (!isset($fm_module_logging))

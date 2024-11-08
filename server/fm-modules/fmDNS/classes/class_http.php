@@ -128,8 +128,6 @@ class fm_module_http {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 
-		$endpoint_name = $post['cfg_data'];
-
 		/** Insert child configs */
 		$post['cfg_isparent'] = 'no';
 		$post['cfg_parent'] = $fmdb->insert_id;
@@ -167,6 +165,8 @@ class fm_module_http {
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
+		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
 		addLogEntry($log_message);
 		return true;
@@ -246,7 +246,7 @@ class fm_module_http {
 
 			$query = "$sql_start $sql_values WHERE cfg_parent={$post['cfg_id']} AND cfg_name='$handler' LIMIT 1";
 			$fmdb->query($query);
-			$num_rows_affectedrows += $fmdb->rows_affected;
+			$rows_affected += $fmdb->rows_affected;
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
@@ -254,6 +254,8 @@ class fm_module_http {
 		}
 		if (!$rows_affected) return true;
 		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 
 		return true;
@@ -373,7 +375,6 @@ HTML;
 		$cfg_id = 0;
 		$cfg_name = $cfg_data = $cfg_comment = null;
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
-
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
 			if (is_array($_POST))
@@ -416,8 +417,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="http" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="view_id" value="%d" />
@@ -430,7 +433,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
+								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
@@ -485,7 +488,7 @@ HTML;
 	 * @return array|string|boolean
 	 */
 	function validatePost($post, $include_sub_configs = null) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';

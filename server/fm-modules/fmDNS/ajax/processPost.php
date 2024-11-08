@@ -35,7 +35,6 @@ if (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] =
 	return;
 }
 
-$unpriv_message = __('You do not have sufficient privileges.');
 $checks_array = array('servers' => 'manage_servers',
 					'views' => 'manage_servers',
 					'acls' => 'manage_servers',
@@ -46,6 +45,7 @@ $checks_array = array('servers' => 'manage_servers',
 					'masters' => 'manage_servers',
 					'domains' => 'manage_zones',
 					'domain' => 'manage_zones',
+					'zones' => 'manage_zones',
 					'soa' => 'manage_zones',
 					'rpz' => 'manage_zones',
 					'http' => 'manage_servers',
@@ -56,26 +56,27 @@ $checks_array = array('servers' => 'manage_servers',
 $allowed_capabilities = array_unique($checks_array);
 
 if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+	if (isset($_POST['page']) && !isset($_POST['item_type'])) {
+		$_POST['item_type'] = $_POST['page'];
+	}
 	$perms = checkUserPostPerms($checks_array, $_POST['item_type']);
 	
 	if ($_POST['item_type'] == 'options' && !$perms) {
 		if (array_key_exists('item_sub_type', $_POST) && $_POST['item_sub_type'] == 'domain_id') {
 			$perms = zoneAccessIsAllowed(array($_POST['item_id']), 'manage_zones');
 		} elseif ($_POST['item_type'] == 'options') {
-			$perms = zoneAccessIsAllowed(array(getNameFromID(sanitize($_POST['item_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'domain_id')), 'manage_zones');
+			$perms = zoneAccessIsAllowed(array(getNameFromID($_POST['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'domain_id')), 'manage_zones');
 		}
 	}
 	if (!$perms) {
-		returnUnAuth();
+		returnUnAuth('text');
 	}
 	
-	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . sanitize($_POST['item_type']);
-
-	$id = sanitize($_POST['item_id']);
-	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
-	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
+	if (isset($_POST['item_id'])) $id = $_POST['item_id'];
+	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : null;
+	$type = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
 	$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . $_POST['item_type'];
-	$item_type = sanitize($_POST['item_type']);
+	$item_type = $_POST['item_type'];
 	$prefix = substr($item_type, 0, -1) . '_';
 	
 	/* Determine which class we need to deal with */
@@ -83,7 +84,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'servers':
 			$post_class = $fm_module_servers;
 			$object = __('server');
-			if (isset($_POST['url_var_type']) && sanitize($_POST['url_var_type']) == 'groups') {
+			if ((isset($_POST['page']) && $_POST['page'] == 'groups') || (isset($_POST['url_var_type']) && $_POST['url_var_type'] == 'groups')) {
 				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
 				$prefix = 'group_';
 				$object = __('server group');
@@ -106,7 +107,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$post_class = $fm_module_logging;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$type = isset($_POST['url_var_type']) ? sanitize($_POST['url_var_type']) : 'channel';
+			$type = isset($_POST['log_type']) ? $_POST['log_type'] : 'channel';
 			$object = $type;
 			$field_data = $prefix . 'data';
 			break;
@@ -116,6 +117,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'domain':
 			$post_class = $fm_module_templates;
+			$server_serial_no = $item_type;
+			$type = $item_type . 's';
+			break;
+		case 'zones':
+			$post_class = $fm_dns_zones;
 			$server_serial_no = $item_type;
 			$type = $item_type . 's';
 			break;
@@ -138,12 +144,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 
 	switch ($_POST['action']) {
 		case 'add':
-			if (!empty($_POST[$table . '_name'])) {
-				if (!$post_class->add($_POST)) {
-					printf('<div class="error"><p>%s</p></div>' . "\n", __('This item could not be added.'));
-					$form_data = $_POST;
-				} else exit('Success');
-			}
+		case 'create':
+			$response = $post_class->add($_POST);
+			echo ($response !== true) ? $response : 'Success';
 			break;
 		case 'delete':
 			if (isset($id)) {
@@ -151,8 +154,9 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			}
 			break;
 		case 'edit':
+		case 'update':
 			if (isset($_POST['item_status'])) {
-				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $prefix . 'id')) {
+				if (!updateStatus('fm_' . $table, $id, $prefix, $_POST['item_status'], $prefix . 'id')) {
 					exit(sprintf(__('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
 					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
@@ -160,9 +164,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 					if ($object == 'rpz') {
 						$tmp_name = ($tmp_name) ? getNameFromID($tmp_name, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name') : __('All Zones');
 					}
-					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, sanitize($_POST['item_status'])));
+					addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, $_POST['item_status']));
 					exit('Success');
 				}
+			} else {
+				$response = $post_class->update($_POST);
+				echo ($response !== true) ? $response : 'Success';
 			}
 			break;
 		case 'bulk':
@@ -178,7 +185,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 					case 'enable':
 					case 'disable':
 					case 'delete':
-						$status = sanitize($_POST['bulk_action']) . 'd';
+						$status = $_POST['bulk_action'] . 'd';
 						if ($status == 'enabled') $status = 'active';
 						foreach ((array) $_POST['item_id'] as $id) {
 							$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $prefix . 'id', $field_data);
@@ -190,14 +197,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 
 						echo buildPopup('header', __('Bulk Action Results'));
 						echo '<p>' . sprintf('%s action is complete.', ucfirst($_POST['bulk_action'])) . '</p>';
-						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), sanitize($_POST['rel_url']));
+						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), $_POST['rel_url']);
 						break;
 				}
 			}
 			break;
 		case 'update_sort':
 			if (!empty($_POST)) {
-				$result = $post_class->update($_POST);
+				$result = $post_class->edit($_POST);
 				if ($result !== true) {
 					exit($result);
 				}
@@ -209,7 +216,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	exit;
 }
 
-echo $unpriv_message;
+returnUnAuth('text');
 
 /**
  * Processes the array of domain ids for reload

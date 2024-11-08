@@ -128,8 +128,6 @@ class fm_module_tls {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 
-		$endpoint_name = $post['cfg_data'];
-
 		/** Insert child configs */
 		$post['cfg_isparent'] = 'no';
 		$post['cfg_parent'] = $fmdb->insert_id;
@@ -168,6 +166,8 @@ class fm_module_tls {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 		return true;
 	}
@@ -190,7 +190,6 @@ class fm_module_tls {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
-		$endpoint_name = $post['cfg_data'];
 		unset($post['cfg_name']);
 
 		/** Update the parent */
@@ -227,7 +226,7 @@ class fm_module_tls {
 		}
 
 		/** Update config children */
-		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1'));
+		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1', 'page', 'item_type'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -253,6 +252,8 @@ class fm_module_tls {
 			}
 		}
 		if (!$rows_affected) return true;
+		
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 		
 		addLogEntry($log_message);
 
@@ -427,8 +428,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="tls" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="view_id" value="%d" />
@@ -441,7 +444,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
+								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
@@ -496,7 +499,7 @@ HTML;
 	 * @return array|string|boolean
 	 */
 	function validatePost($post, $include_sub_configs = null) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';

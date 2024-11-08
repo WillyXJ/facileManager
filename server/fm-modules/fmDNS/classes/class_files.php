@@ -92,7 +92,7 @@ class fm_dns_files {
 		extract($post, EXTR_SKIP);
 		
 		$log_message = __("Added a file with the following") . ":\n";
-		$logging_excluded_fields = array('page', 'action', 'file_id');
+		$logging_excluded_fields = array('page', 'action', 'file_id', 'item_type');
 		foreach ($post as $key => $data) {
 			if (in_array($key, $logging_excluded_fields)) continue;
 			if ($key == 'server_serial_no') {
@@ -108,6 +108,8 @@ class fm_dns_files {
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
+
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
 		addLogEntry($log_message);
 		return true;
@@ -158,6 +160,8 @@ class fm_dns_files {
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
+
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
 		addLogEntry($log_message);
 		return true;
@@ -277,8 +281,9 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
 			<input type="hidden" name="page" id="page" value="files" />
 			<input type="hidden" name="action" id="action" value="%s" />
 			<input type="hidden" name="file_id" id="file_id" value="%d" />
@@ -290,7 +295,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="file_name">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
-					<td width="67&#37;"><input name="file_name" id="file_name" type="text" value="%s" size="40" placeholder="custom-file" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="file_name" id="file_name" type="text" value="%s" size="40" placeholder="custom-file" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="file_contents">%s</label></th>
@@ -336,7 +341,7 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		if (!$post['files_id']) unset($post['files_id']);
+		if (empty($post['files_id']) || !$post['files_id']) unset($post['files_id']);
 		else $post['files_id'] = intval($post['files_id']);
 
 		$pathinfo = pathinfo($post['file_name']);

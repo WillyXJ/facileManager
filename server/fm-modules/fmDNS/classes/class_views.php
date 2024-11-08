@@ -142,7 +142,7 @@ class fm_dns_views {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
-		$exclude = array('submit', 'action', 'view_id', 'page', 'view_order_id');
+		$exclude = array('submit', 'action', 'view_id', 'page', 'view_order_id', 'item_type');
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');
@@ -278,12 +278,14 @@ HTML;
 		$keys = ($view_key_id) ? array($view_key_id) : null;
 		$keys = buildSelect('view_key_id', 'view_key_id', availableItems('key', 'blank', 'AND `key_type`="tsig"'), $keys, 1, '', false);
 
-		$popup_title = $action == 'add' ? __('Add View') : __('Edit View');
+		$popup_title = ($action == 'add') ? __('Add View') : __('Edit View');
+
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
 			<input type="hidden" name="page" id="page" value="views" />
 			<input type="hidden" name="action" id="action" value="%s" />
 			<input type="hidden" name="view_id" id="view_id" value="%d" />
@@ -292,7 +294,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="view_name">%s</label></th>
-					<td width="67&#37;"><input name="view_name" id="view_name" type="text" value="%s" size="40" placeholder="internal" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="view_name" id="view_name" type="text" value="%s" size="40" placeholder="internal" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="view_key_id">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
@@ -346,7 +348,7 @@ HTML;
 		if ($field_length !== false && strlen($post['view_name']) > $field_length) return sprintf(__('View name is too long (maximum %d characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $post['view_name'], 'view_', 'view_name');
+		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $post['view_name'], 'view_', 'view_name', "AND view_id!='{$post['view_id']}'");
 		if ($fmdb->num_rows) return __('This view already exists.');
 
 		return $post;

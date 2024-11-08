@@ -101,7 +101,7 @@ class fm_module_options {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'cfg_id');
+		$exclude = array('submit', 'action', 'cfg_id', 'page', 'item_type');
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -120,6 +120,8 @@ class fm_module_options {
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the option because a database error occurred.'), 'sql');
 		}
+
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
 		$tmp_name = $post['cfg_name'];
 		$tmp_server_name = getServerName($post['server_serial_no']);
@@ -159,7 +161,7 @@ class fm_module_options {
 			}
 		}
 		
-		$exclude = array('submit', 'action', 'cfg_id');
+		$exclude = array('submit', 'action', 'cfg_id', 'page', 'item_type');
 
 		$sql_edit = '';
 		
@@ -183,6 +185,8 @@ class fm_module_options {
 
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
+
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
 		$tmp_server_name = getServerName($post['server_serial_no']);
 		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
@@ -279,15 +283,9 @@ HTML;
 				}
 				$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 				$server_serial_no_field = '<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />';
-				$request_uri = 'config-options.php';
-				if (isset($_REQUEST['request_uri'])) {
-					$request_uri .= '?';
-					foreach ($_REQUEST['request_uri'] as $key => $val) {
-						$request_uri .= $key . '=' . sanitize($val) . '&';
-					}
-					$request_uri = rtrim($request_uri, '&');
-				}
-				$disabled = $action == 'add' ? null : 'disabled';
+				$server_id = (isset($_REQUEST['request_uri']['server_id']) && intval($_REQUEST['request_uri']['server_id']) > 0) ? sanitize($_REQUEST['request_uri']['server_id']) : 0;
+				$server_id_field = '<input type="hidden" name="server_id" value="' . $server_id . '" />';
+				$disabled = ($action == 'add') ? null : 'disabled';
 				break;
 		}
 		
@@ -324,14 +322,16 @@ HTML;
 		$return_form = sprintf('<script>
 			displayOptionPlaceholder("%s");
 		</script>
-		<form name="manage" id="manage" method="post" action="%s">
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="options" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="cfg_type" value="%s" />
 			<input type="hidden" name="%s" value="%s" />
+			%s
+			%s
 			<table class="form-table">
-				%s
 				<tr>
 					<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
 					<td width="67&#37;">%s</td>
@@ -353,8 +353,9 @@ HTML;
 				});
 			});
 		</script>',
-				$cfg_data, $request_uri, $popup_header,
-				$action, $cfg_id, $cfg_type, $cfg_id_name, $cfg_type_id, $server_serial_no_field,
+				$cfg_data, $popup_header,
+				$action, $cfg_id, $cfg_type, $cfg_id_name, $cfg_type_id,
+				$server_serial_no_field, $server_id_field,
 				__('Option Name'), $cfg_avail_options,
 				_('Comment'), $cfg_comment,
 				$popup_footer
@@ -511,7 +512,7 @@ HTML;
 				break;
 		}
 		/** Handle masters and also-notify formats */
-		if ($post['cfg_data_port']) {
+		if (!empty($post['cfg_data_port']) && $post['cfg_data_port']) {
 			$tmp_cfg_data[] = 'port ' . $post['cfg_data_port'];
 		}
 		if (!empty($post['cfg_data_dscp'])) {
@@ -522,7 +523,7 @@ HTML;
 				if ($v) $tmp_cfg_data[] = "$k $v";
 			}
 		}
-		if (is_array($tmp_cfg_data)) {
+		if (isset($tmp_cfg_data) && is_array($tmp_cfg_data)) {
 			if (!$post['cfg_data'] || $post['cfg_data'] == ',') $post['cfg_data'] = 'any';
 			if ($post['cfg_data']) {
 				$tmp_cfg_data[] = '{ ' . trim(str_replace(',', $terminate, $post['cfg_data']), $terminate) . $terminate . '}';
