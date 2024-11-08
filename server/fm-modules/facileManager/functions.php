@@ -223,9 +223,9 @@ function sanitize($data, $replace = null) {
 		if (is_string($data)) {
 			$data = htmlspecialchars(strip_tags($data), ENT_NOQUOTES);
 			if ($fmdb->use_mysqli) {
-				return @mysqli_real_escape_string($fmdb->dbh, $data);
+				return html_entity_decode(str_replace('\r\n', "\n", mysqli_real_escape_string($fmdb->dbh, $data)));
 			} else {
-				return @mysql_real_escape_string($data);
+				return html_entity_decode(str_replace('\r\n', "\n", @mysql_real_escape_string($data)));
 			}
 		}
 		return $data;
@@ -2997,6 +2997,7 @@ function buildPopup($section, $text = null, $buttons = array('primary_button' =>
 	
 	if ($section == 'header') {
 		return <<<HTML
+		<div id="popup_response" style="display: none;"></div>
 		<div class="popup-header">
 			{$__FM_CONFIG['icons']['close']}
 			<h3>$text</h3>
@@ -3031,6 +3032,12 @@ HTML;
 			$submit
 			$cancel
 		</div>
+		<script>
+			$(document).ready(function() {
+				$("form .required").closest("tr").children("th").children("label").addClass("required");
+				$("form[method=post]").parent().parent().find("input[type=submit].primary").addClass("follow-action");
+			});
+		</script>
 
 HTML;
 	}
@@ -3882,10 +3889,11 @@ function formatError($message, $option = null) {
 	$addl_text = null;
 	
 	if ($option == 'sql') {
-		$addl_text = ($fmdb->last_error) ? '<br />' . $fmdb->last_error : null;
+		$addl_text = ($fmdb->last_error) ? sprintf(' [<a class="more" href="#">%s</a>]', _('more')) . $fmdb->last_error : null;
+		$message = displayResponseClose($message . $addl_text);
 	}
 	
-	return $message . $addl_text;
+	return $message;
 }
 
 

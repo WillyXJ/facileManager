@@ -410,7 +410,7 @@ function checkAccountCreation($database) {
 	global $fmdb;
 	
 	$query = "SELECT user_id FROM `$database`.fm_users WHERE user_status='active' AND user_auth_type='1' AND user_caps='" . serialize(array('facileManager' => array('do_everything' => 1))) . "' ORDER BY user_id ASC LIMIT 1";
-	$fmdb->query($query);
+	$result = $fmdb->query($query);
 
 	return ($result === false || ($result && $fmdb->num_rows)) ? true : false;
 }

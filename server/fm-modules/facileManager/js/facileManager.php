@@ -428,7 +428,7 @@ if (isset($__FM_CONFIG)) {
 	});
 	
     /* Cancel button */
-    $("#manage_item_contents").delegate("#cancel_button, .close", "click tap", function(e) {
+    $("#manage_item_contents").delegate("#cancel_button, .popup-header .close", "click tap", function(e) {
 		e.preventDefault();
 		$("#manage_item").fadeOut(200);
 		$("#manage_item_contents").html();
@@ -565,9 +565,13 @@ if (isset($__FM_CONFIG)) {
 		return false;
     });
     
-    /* Account password changes */
-    $("#manage_item_contents").delegate("#update_user_profile", "click tap", function(e) {
-		var form_data = $("#fm_user_profile").serialize();
+    /* Popup form submissions */
+    $("#manage_item_contents").delegate("input[type=submit].primary:not(.follow-action)", "click tap", function(e) {
+		e.preventDefault();
+		if ($(this).checkRequiredFields() === false) {
+			return false;
+		}
+		var form_data = $("div.popup-contents form").serialize();
 
 		$.ajax({
 			type: "POST",
@@ -578,22 +582,37 @@ if (isset($__FM_CONFIG)) {
 				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
 					return false;
-				} else if (response == "Success") {
-					$("#popup_response").html("<p>' . _('Profile has been updated.') . '</p>");
-				} else {
+				} else if (response != "Success" && !$.isNumeric(response)) {
 					$("#popup_response").html("<p>" + response + "</p>");
-				}
-				$("#popup_response").fadeIn(200);
+
+					/* Popup response more link */
+					$("#popup_response").delegate("a.more", "click tap", function(e1) {
+						e1.preventDefault();
+						error_div = $("#popup_response div#error")
+						if (error_div.is(":visible")) {
+							error_div.hide();
+							$(this).text("' . _('more') . '");
+						} else {
+							error_div.show();
+							$(this).text("' . _('less') . '");
+						}
+					});
+					$("#popup_response").delegate("#response_close i.close", "click tap", function(e2) {
+						e2.preventDefault();
+						$("#popup_response").fadeOut(200, function() {
+							$("#popup_response").html();
+						});
+					});
 				
-				if (response == "Success") {
-					$("#manage_item").delay(2000).fadeOut(200, function() {
-						$("#manage_item_contents").html();
-						$("body").removeClass("fm-noscroll");
-					});
+					$("#popup_response").fadeIn(200);
+
+					if (response.indexOf("a class=\"more\"") <= 0) {
+						$("#popup_response").delay(2000).fadeOut(200, function() {
+							$("#popup_response").html();
+						});
+					}
 				} else {
-					$("#popup_response").delay(2000).fadeOut(200, function() {
-						$("#popup_response").html();
-					});
+					location.reload();
 				}
 			}
 		});
@@ -626,6 +645,22 @@ if (isset($__FM_CONFIG)) {
 		}
 	});
 
+	/* Account template changes */
+	$("#manage_item_contents").delegate("#user_template_only", "click", function(e) {
+		if ($(this).is(":checked")) {
+			$("#user_email.required").closest("tr").children("th").children("label").removeClass("required");
+			$("#user_email").removeClass("required validate-error");
+			$(".user_password").hide();
+			$(".user_password").find("input[type=password]").removeClass("required validate-error");
+		} else {
+			$("#user_email").addClass("required");
+			$("#user_email.required").closest("tr").children("th").children("label").addClass("required");
+			$(".user_password").find("input[type=password]").addClass("required");
+			$(".user_password").show();
+		}
+		// $(this).setSubmitButtonStatus();
+	});
+	
 	/* Account password reset */
     $(".reset_password").click(function() {
         var $this 		= $(this);
@@ -741,11 +776,6 @@ if (isset($__FM_CONFIG)) {
 	$("#help_file_container ul li div a").click(function() {
 		window.opener.location.href = $(this).attr("href");
 		return false;
-	});
-	
-	$("#manage_item_contents").delegate("#user_template_only", "click tap", function(e) {
-		$("input[type=\"submit\"]").removeAttr("disabled");
-		$("input[type=\"submit\"]").removeClass("disabled");
 	});
 	
 	$("#auth_method").change(function() {
@@ -1175,7 +1205,6 @@ if (isset($__FM_CONFIG)) {
 				data: form_data,
 				success: function(response)
 				{
-				console.log(response);
 					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
 						return false;
@@ -1207,6 +1236,51 @@ if (isset($__FM_CONFIG)) {
 		}
 	}).disableSelection();
 	
+	/* Check if form submit button should be enabled */
+	$.fn.setSubmitButtonStatus = function() {
+		/** Submit button */
+		var button = $("input[type=submit][name=submit].primary");
+
+		/** Are there any validate-error elements? */
+		var errors = $(".validate-error").length;
+
+		if (errors) {
+			$(button).attr("disabled", true);
+			$(button).addClass("disabled");
+		} else {
+			$(button).attr("disabled", false);
+			$(button).removeClass("disabled");
+		}
+	}
+
+	/* Check if all required fields are filled */
+	$.fn.checkRequiredFields = function() {
+		isValid = true;
+		$("#manage_item_contents input.required").each(function() {
+			if ($(this).is(":visible") && $(this).val() === "") {
+				$(this).addClass("validate-error");
+				isValid = false;
+			}
+		});
+		
+		// $(this).setSubmitButtonStatus();
+
+		return isValid;
+	}
+
+	/* Inline form validation */
+	$("#manage_item_contents").delegate("input.required", "keyup blur", function(e) {
+		/** Update the database */
+		var $this				= $(this);
+
+		if ($this.val() != "") {
+			$this.removeClass("validate-error");
+		} else {
+			$this.addClass("validate-error");
+		}
+		// $this.setSubmitButtonStatus();
+	});
+
 	/* Software changelog */
 	$(".upgrade_notice a").click(function() {
 		var changelog_href = $(this).attr("href");
@@ -1238,6 +1312,7 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 		strength.style.background = "";
 		button.disabled = true;
 		$(button).addClass("disabled");
+		$(pwd1).addClass("validate-error");
 	} else {
 		strength.style.color = "white";
 		if (false == enoughRegex.test(pwd1.value)) {
@@ -1245,26 +1320,31 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 			strength.style.background = "#878787";
 			button.disabled = true;
 			$(button).addClass("disabled");
+			$(pwd1).addClass("validate-error");
 		} else if (strongRegex.test(pwd1.value)) {
 			strength.innerHTML = "' . _('Strong') . '";
 			strength.style.background = "green";
 			button.disabled = false;
 			$(button).removeClass("disabled");
+			$(pwd1).removeClass("validate-error");
 		} else if (mediumRegex.test(pwd1.value)) {
 			strength.innerHTML = "' . _('Medium') . '";
 			strength.style.background = "orange";
 			if (pwdtype == "strong") {
 				button.disabled = true;
 				$(button).addClass("disabled");
+				$(pwd1).addClass("validate-error");
 			} else {
 				button.disabled = false;
 				$(button).removeClass("disabled");
+				$(pwd1).removeClass("validate-error");
 			}
 		} else {
 			strength.innerHTML = "' . _('Weak') . '";
 			strength.style.background = "red";
 			button.disabled = true;
 			$(button).addClass("disabled");
+			$(pwd1).addClass("validate-error");
 		}
 	}
 	if (pwd2.value.length!=0 && pwd1.value!=pwd2.value) {
@@ -1272,9 +1352,11 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 		strength.style.background = "red";
 		button.disabled = true;
 		$(button).addClass("disabled");
+		$(pwd2).addClass("validate-error");
 	} else if (pwd2.value.length==0) {
 		button.disabled = true;
 		$(button).addClass("disabled");
+		$(pwd2).addClass("validate-error");
 	} else if (user.value.length==0) {
 		strength.innerHTML = "' . _('No Username Specified') . '";
 		strength.style.background = "#878787";

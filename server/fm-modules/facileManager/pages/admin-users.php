@@ -49,7 +49,7 @@ case 'add':
 	break;
 case 'edit':
 	if (!empty($_POST)) {
-		$response = ($_POST['type'] == 'users') ? $fm_users->updateUser($_POST) : $fm_users->updateGroup($_POST);
+		$response = ($_POST['type'] == 'users') ? $fm_users->editUser($_POST) : $fm_users->editGroup($_POST);
 		if ($response !== true) {
 			$form_data = $_POST;
 		} else {

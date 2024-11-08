@@ -1,5 +1,6 @@
 4.8.0 (2024-10-24)
 ==================
+* Server - [feature] Added framework for in-field form validation.
 * Server - [improvement] Changelog is now viewed in an iframe.
 * Server - [improvement] Added user permission to view logs.
 * Server - [improvement] Forced password changes cannot be the same as the current password.
