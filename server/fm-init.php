@@ -129,8 +129,8 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		
 		/** Process authentication */
 		if (!$is_logged_in && is_array($_POST) && count($_POST)) {
-			$user_login = sanitize($_POST['username']);
-			$user_pass  = sanitize($_POST['password']);
+			$user_login = $_POST['username'];
+			$user_pass  = $_POST['password'];
 			
 			$logged_in = $fm_login->checkPassword($user_login, $user_pass);
 			if (array_key_exists('is_ajax', $_POST) && $_POST['is_ajax']) {

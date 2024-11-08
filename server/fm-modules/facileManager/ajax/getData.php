@@ -71,11 +71,11 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	if (!currentUserCan('manage_users')) returnUnAuth();
 	
 	if (array_key_exists('add_form', $_POST)) {
-		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
+		$id = isset($_POST['item_id']) ? $_POST['item_id'] : null;
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {
-		$id = sanitize($_POST['item_id']);
-		$view_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
+		$id = $_POST['item_id'];
+		$view_id = isset($_POST['view_id']) ? $_POST['view_id'] : null;
 		$add_new = false;
 	} else returnError();
 

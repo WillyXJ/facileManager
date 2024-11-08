@@ -194,7 +194,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	}
 
 	if (isset($_POST['item_id'])) {
-		$id = sanitize($_POST['item_id']);
+		$id = $_POST['item_id'];
 	} else returnError();
 
 	/** Process API key changes */
@@ -212,7 +212,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	switch ($_POST['action']) {
 		case 'delete':
 			if (isset($id)) {
-				$delete_status = $fm_users->delete(sanitize($id), substr(sanitize($_POST['item_sub_type']), 0, -1));
+				$delete_status = $fm_users->delete(sanitize($id), substr($_POST['item_sub_type'], 0, -1));
 				if ($delete_status !== true) {
 					echo $delete_status;
 				} else {
@@ -226,25 +226,24 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 					if ((!currentUserCan('do_everything') && userCan($id, 'do_everything')) || $id == getDefaultAdminID()) {
 						exit(_('You do not have permission to modify the status of this user.'));
 					}
-					if (!updateStatus('fm_users', $id, 'user_', sanitize($_POST['item_status']), 'user_id')) {
+					if (!updateStatus('fm_users', $id, 'user_', $_POST['item_status'], 'user_id')) {
 						exit(sprintf(_('This user could not be set to %s.') . "\n", $_POST['item_status']));
 					} else {
 						$tmp_name = getNameFromID($id, 'fm_users', 'user_', 'user_id', 'user_login');
-						addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])), $fm_name);
+						addLogEntry(sprintf(_('Set user (%s) status to %s.'), $tmp_name, $_POST['item_status']), $fm_name);
 						exit('Success');
 					}
 				} elseif (isset($_POST['url_var_type']) && $_POST['url_var_type'] == 'keys') {
-					if (!updateStatus('fm_keys', $id, 'key_', sanitize($_POST['item_status']), 'key_id')) {
+					if (!updateStatus('fm_keys', $id, 'key_', $_POST['item_status'], 'key_id')) {
 						exit(sprintf(_('This API key could not be set to %s.') . "\n", $_POST['item_status']));
 					} else {
 						$tmp_name = getNameFromID($id, 'fm_keys', 'key_', 'key_id', 'key_token');
-						addLogEntry(sprintf(_('Set API key (%s) status to %s.'), $tmp_name, sanitize($_POST['item_status'])), $fm_name);
+						addLogEntry(sprintf(_('Set API key (%s) status to %s.'), $tmp_name, $_POST['item_status']), $fm_name);
 						exit('Success');
 					}
 				}
 			}
 			exit(_('Error: Malformed request.'));
-			break;
 	}
 /** Handle everything else */
 } elseif (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
