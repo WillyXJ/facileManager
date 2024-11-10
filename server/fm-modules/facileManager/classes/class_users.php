@@ -273,7 +273,7 @@ class fm_users {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function updateUser($post) {
+	function editUser($post) {
 		global $__FM_CONFIG, $fmdb, $fm_name, $fm_login;
 
 		if (isset($post['group_id'])) {
