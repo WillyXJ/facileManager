@@ -334,39 +334,25 @@ function getTopHeader($help) {
 	include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . 'facileManager' . DIRECTORY_SEPARATOR . 'variables.inc.php');
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
-	$fm_new_version_available = $account_menu = $user_account_menu = $module_menu = $module_version_info = null;
+	$fm_new_version_available = $account_menu = $user_account_menu = $module_menu = $module_version_info = $return_extra = null;
+
+	$sections = array('left' => array(), 'right' => array());
 	
 	if ($help != 'help-file') {
-		$auth_method = getOption('auth_method');
-		if ($auth_method) {
-			if ($_SESSION['user']['account_id'] != 1) {
-				$account = getNameFromID($_SESSION['user']['account_id'], 'fm_accounts', 'account_', 'account_id', 'account_name');
-				$account_menu = <<<HTML
-		<div id="topheadpart">
-			<span style="line-height: 18pt;">Account:&nbsp;&nbsp; $account</span>
-		</div>
-HTML;
-			}
-
-			$star = currentUserCan('do_everything') ? $__FM_CONFIG['icons']['star'] . ' ' : null;
-			$change_pwd_link = ($auth_method) ? sprintf('<li><a class="account_settings" id="%s" href="#"><span>%s</span></a></li>' . "\n", $_SESSION['user']['id'], _('Edit Profile')) : null;
-			$logout = _('Logout');
-			$user_account_menu = <<<HTML
-		<div id="topheadpartright" style="padding: 0 1px 0 0;">
-			<div id="cssmenu">
-			<ul>
-				<li class="has-sub has-image"><a href="#"><span>{$__FM_CONFIG['icons']['account']}</span></a>
-					<ul class="sub-right">
-						<li class="text-only"><span>$star{$_SESSION['user']['name']}</span></li>
-						$change_pwd_link
-						<li class="last"><a href="{$GLOBALS['RELPATH']}?logout"><span>$logout</span></a></li>
-					</ul>
-				</li>
-			</ul>
-			</div>
-		</div>
-HTML;
+		$branding_logo = getBrandLogo();
+		
+		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
+			$module_version_info = sprintf('<br />%s v%s', $_SESSION['module'], $__FM_CONFIG[$_SESSION['module']]['version']);
+			$fm_version_info = "$fm_name v$fm_version";
+		} else {
+			$fm_version_info = sprintf('<span class="single_line">%s v%s</span>', $fm_name, $fm_version);
 		}
+		
+		$sections['left'][] = sprintf('<img src="%s" alt="%s" title="%s" />%s%s', 
+				$branding_logo, $fm_name, $fm_name, 
+				$fm_version_info,
+				$module_version_info
+		);
 		
 		/** Build app dropdown menu */
 		$modules = getAvailableModules();
@@ -382,77 +368,45 @@ HTML;
 			
 			if ($avail_modules) {
 				$module_menu = <<<HTML
-		<div id="topheadpartright" style="padding: 0;">
 			<div id="cssmenu">
 			<ul>
 				<li class="has-sub last"><a href="#"><span>{$_SESSION['module']}</span></a>
-					<ul>
+					<ul class="sub-right">
 					$avail_modules
 					</ul>
 				</li>
 			</ul>
 			</div>
-		</div>
 HTML;
+				$sections['right'][] = $module_menu;
 			}
 			
 			/** Include module toolbar items */
 			if (function_exists('buildModuleToolbar')) {
 				list($module_toolbar_left, $module_toolbar_right) = @buildModuleToolbar();
+				$sections['left'][] = $module_toolbar_left;
+				$sections['right'][] = $module_toolbar_right;
 			}
 		} else {
 			$module_menu = null;
 			$fm_name = isset($_SESSION['module']) ? $_SESSION['module'] : $fm_name;
 		}
 	
+		$sections['right'][] = '<a class="single_line help_link" href="#"><i class="fa fa-life-ring fa-lg" aria-hidden="true"></i></a>';
+
 		$help_file = buildHelpFile();
-		$help_text = _('Help');
-	
-		$process_all_text = _('Process all available updates now');
-		$process_all = <<<HTML
-		<div id="topheadpartright" style="display: none;">
-			<a class="single_line process_all_updates tooltip-bottom" href="#" data-tooltip="$process_all_text"><i class="fa fa-refresh fa-lg"></i></a>
-			<span class="update_count"></span>
-		</div>
-HTML;
 	
 		if (defined('FM_INCLUDE_SEARCH') && FM_INCLUDE_SEARCH === true) {
-			$search = '<div id="topheadpartright">
-			<a class="single_line search" href="#" title="' . _('Search this page') . '"><i class="fa fa-search fa-lg"></i></a>' .
-				displaySearchForm() . '</div>';
-		} else $search = null;
-
-		$branding_logo = getBrandLogo();
-		
-		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
-			$module_version_info = sprintf('<br />%s v%s', $_SESSION['module'], $__FM_CONFIG[$_SESSION['module']]['version']);
-			$fm_version_info = "$fm_name v$fm_version";
-		} else {
-			$fm_version_info = sprintf('<span class="single_line">%s v%s</span>', $fm_name, $fm_version);
+			$sections['right'][] = sprintf('<a class="single_line search" href="#" title="%s"><i class="fa fa-search fa-lg"></i></a>%s', _('Search this page'), displaySearchForm());
 		}
-		
-		$return = <<<HTML
-	<div id="tophead">
-		<div id="topheadpart">
-			<img src="$branding_logo" alt="$fm_name" title="$fm_name" />
-			$fm_version_info
-			$module_version_info
-		</div>
-$account_menu
-$module_toolbar_left
-$user_account_menu
-		<div id="topheadpartright">
-			<a class="single_line help_link" href="#">$help_text</a>
-		</div>
-$module_menu
-$module_toolbar_right
-$search
-$process_all
-	</div>
+
+		$sections['right'][] = sprintf('<a class="single_line process_all_updates tooltip-bottom" href="#" data-tooltip="%s"><i class="fa fa-refresh fa-lg"></i></a><span class="update_count"></span>', _('Process all available updates now'));
+
+		$return_extra .= <<<HTML
 	<div id="help">
-		<div id="help_topbar">
-			<p class="title">fmHelp</p>
-			<p id="help_buttons">{$__FM_CONFIG['icons']['popout']} {$__FM_CONFIG['icons']['close']}</p>
+		<div id="help_topbar" class="flex-apart">
+			<div><p class="title">fmHelp</p></div>
+			<div><p>{$__FM_CONFIG['icons']['popout']} {$__FM_CONFIG['icons']['close']}</p></div>
 		</div>
 		<div id="help_file_container">
 		$help_file
@@ -461,18 +415,20 @@ $process_all
 
 HTML;
 	} else {
-		$return = <<<HTML
-	<div id="tophead">
-		<div id="topheadpart">
-			fmHelp<br />
-			v$fm_version
-		</div>
-	</div>
-
-HTML;
+		$sections['left'][] = sprintf('fmHelp<br />v%s', $fm_version);
 	}
 
-	return $return;
+	$return_parts = '';
+	foreach ($sections as $class => $section_array) {
+		$return_parts .= sprintf('<div class="header-container flex-%s">' . "\n", $class);
+		foreach ($section_array as $section) {
+			if ($section) $return_parts .= sprintf("<div>\n%s</div>\n", $section);
+		}
+		$return_parts .= '</div>' . "\n";
+	}
+	$return = sprintf("<div id=\"tophead\" class=\"flex-apart\">\n%s</div>\n", $return_parts);
+
+	return $return . $return_extra;
 }
 
 /**
@@ -482,7 +438,9 @@ HTML;
  * @package facileManager
  */
 function printMenu() {
-	$main_menu_html = '';
+	global $__FM_CONFIG;
+
+	$main_menu_html = $account_info = '';
 	
 	list($filtered_menu, $filtered_submenu) = getCurrentUserMenu();
 	ksort($filtered_menu);
@@ -490,10 +448,10 @@ function printMenu() {
 	
 	$i = 1;
 	foreach ($filtered_menu as $position => $main_menu_array) {
-		$sub_menu_html = '</li>';
+		$sub_menu_html = '';
 		$show_top_badge_count = true;
 		
-		list($menu_title, $page_title, $capability, $module, $slug, $classes, $badge_count) = $main_menu_array;
+		list($menu_title, $page_title, $menu_icon, $capability, $module, $slug, $classes, $badge_count) = $main_menu_array;
 		if (!is_array($classes)) {
 			$classes = !empty($classes) ? array_fill(0, 1, $classes) : array();
 		}
@@ -503,21 +461,23 @@ function printMenu() {
 		
 		/** Check if menu item is current page */
 		if ($slug == findTopLevelMenuSlug($filtered_submenu)) {
-			array_push($classes, 'current', 'arrow');
+			array_push($classes, 'current');
 			
 			if (array_key_exists($slug, $filtered_submenu)) {
 				$show_top_badge_count = false;
 				$k = 0;
 				foreach ($filtered_submenu[$slug] as $submenu_array) {
+					$sub_menu_icon = $submenu_array[2];
 					if (!empty($submenu_array[0])) {
-						$submenu_class = ($submenu_array[4] == $GLOBALS['basename']) ? ' class="current"' : null;
-						if ($submenu_array[6]) {
-							if ($submenu_array[6] > 100) {
-								$submenu_array[6] = '99+';
+						$submenu_class = ($submenu_array[5] == $GLOBALS['basename']) ? ' class="current"' : null;
+						if ($submenu_array[7]) {
+							if ($submenu_array[7] > 100) {
+								$submenu_array[7] = '99+';
 							}
-							$submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%s</p></span>', $submenu_array[6]);
+							$submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu-badge"><p>%s</p></span>', $submenu_array[7]);
 						}
-						$sub_menu_html .= sprintf('<li%s><a href="%s">%s</a></li>' . "\n", $submenu_class, $submenu_array[4], $submenu_array[0]);
+						$sub_menu_icon = ($sub_menu_icon) ? sprintf('<i class="fa fa-%s" aria-hidden="true"></i>', $sub_menu_icon) : null;
+						$sub_menu_html .= sprintf('<li%s><a href="%s"><span class="menu-icon">%s</span><span>%s</span></a></li>' . "\n", $submenu_class, $submenu_array[5], $sub_menu_icon, $submenu_array[0]);
 					} elseif (!$k) {
 						$show_top_badge_count = true;
 					}
@@ -525,44 +485,47 @@ function printMenu() {
 				}
 				
 				$sub_menu_html = <<<HTML
-					</li>
-					<div id="submenu">
-						<div id="subitems">
-							<ul>
-							$sub_menu_html
-							</ul>
-						</div>
+					<div id="subitems">
+						<ul>
+						$sub_menu_html
+						</ul>
 					</div>
 HTML;
 			}
 		}
 		
 		/** Build submenus */
-		if (!count($classes) && count((array) $filtered_submenu[$slug]) > 1) {
+		if (count((array) $filtered_submenu[$slug]) > 1) {
 			array_push($classes, 'has-sub');
-			foreach ($filtered_submenu[$slug] as $submenu_array) {
-				if (!empty($submenu_array[0])) {
-					if ($submenu_array[6]) {
-						if ($submenu_array[6] > 100) {
-							$submenu_array[6] = '99+';
+			if (!in_array('current', $classes)) {
+				foreach ($filtered_submenu[$slug] as $submenu_array) {
+					$sub_menu_icon = 'fa-filter';
+					if (!empty($submenu_array[0])) {
+						if ($submenu_array[7]) {
+							if ($submenu_array[7] > 100) {
+								$submenu_array[7] = '99+';
+							}
+							$submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu-badge"><p>%s</p></span>', $submenu_array[7]);
 						}
-						$submenu_array[0] = sprintf($submenu_array[0] . ' <span class="menu_badge"><p>%s</p></span>', $submenu_array[6]);
+						$sub_menu_html .= sprintf('<li><a href="%s">%s</a></li>' . "\n", $submenu_array[5], $submenu_array[0]);
 					}
-					$sub_menu_html .= sprintf('<li><a href="%s">%s</a></li>' . "\n", $submenu_array[4], $submenu_array[0]);
 				}
-			}
 			
 			$sub_menu_html = <<<HTML
-				<div class="arrow"></div>
 				<ul>
 				$sub_menu_html
 				</ul>
 </li>
 
 HTML;
+			}
 		}
 		
-		$arrow = (in_array('arrow', $classes)) ? '<u></u>' : null;
+		$arrow = null;
+		if (in_array('has-sub', $classes)) {
+			$arrow = sprintf('<span class="menu-arrow"><i class="fa fa-angle-%s menu-icon" aria-hidden="true"></i></span>', (in_array('current', $classes)) ? 'down' : 'right');
+		}
+		$menu_icon = ($menu_icon) ? sprintf('<i class="fa fa-%s" aria-hidden="true"></i>', $menu_icon) : null;
 		
 		/** Join all of the classes */
 		if (count($classes)) $class = ' class="' . implode(' ', $classes) . '"';
@@ -571,13 +534,13 @@ HTML;
 		if (empty($slug) && !empty($class)) {
 			/** Ideally this should be the separator */
 			if ($i != count($filtered_menu)) {
-				$main_menu_html .= '<li' . $class . '></li>' . "\n";
+				$main_menu_html .= '<li' . $class . '><hr /></li>' . "\n";
 			}
 		} else {
 			/** Display the menu item if allowed */
 			if (currentUserCan($capability, $module)) {
-				if ($badge_count && $show_top_badge_count) $menu_title = sprintf($menu_title . ' <span class="menu_badge"><p>%s</p></span>', $badge_count);
-				$main_menu_html .= sprintf('<li%s><a href="%s">%s</a>%s%s' . "\n", $class, $slug, $menu_title, $arrow, $sub_menu_html);
+				if ($badge_count && $show_top_badge_count) $menu_title = sprintf($menu_title . ' <span class="menu-badge"><p>%s</p></span>', $badge_count);
+				$main_menu_html .= sprintf('<li%s><a href="%s"><span class="menu-icon">%s</span><span>%s</span>%s</a>%s</li>' . "\n", $class, $slug, $menu_icon, $menu_title, $arrow, $sub_menu_html);
 			}
 		}
 		
@@ -586,17 +549,38 @@ HTML;
 	
 	$donate_text = _('Donate');
 	
-	echo <<<MENU
-	<div id="menuback"></div>
+	$auth_method = getOption('auth_method');
+	if ($auth_method) {
+		$star = currentUserCan('do_everything') ? $__FM_CONFIG['icons']['star'] . ' ' : null;
+		$profile_link = ($auth_method) ? sprintf('<div><a class="account_settings" id="%s" href="#"><i class="fa fa-user-circle-o" aria-hidden="true"></i>%s</a></div>' . "\n", $_SESSION['user']['id'], _('Edit Profile')) : null;
+		$logout = _('Logout');
+		$account_info = <<<HTML
+			<div><span>{$star}{$_SESSION['user']['name']}</span></div>
+			<div id="account_info_actions" class="flex-apart">
+				$profile_link
+				<div><a href="{$GLOBALS['RELPATH']}?logout"><i class="fa fa-power-off" aria-hidden="true"></i>$logout</a></div>
+			</div>
+			<div><hr /></div>
+HTML;
+	}
+	
+echo <<<MENU
+	<div id="menuback" class="flex-apart">
 	<div id="menu">
+		<div id="account_info" class="flex-apart">
+		$account_info
+		</div>
 		<div id="mainitems">
 			<ul>
 $main_menu_html
 			</ul>
 		</div>
-		<div id="donate" class="grey">
-			<p><a href="http://www.facilemanager.com/donate/" target="_blank"><i class="fa fa-heart"></i> $donate_text</a></p>
-		</div>
+	</div>
+	<div id="menu_footer">
+		<ul>
+			<li><a href="http://www.facilemanager.com/donate/" target="_blank"><i class="fa fa-heart menu-icon" aria-hidden="true"></i>$donate_text</a></li>
+		</ul>
+	</div>
 	</div>
 
 MENU;
@@ -613,7 +597,7 @@ MENU;
  * @return bool
  */
 function filterMenu($element) {
-	return currentUserCan($element[2], $element[3]);
+	return currentUserCan($element[3], $element[4]);
 }
 
 
@@ -657,17 +641,18 @@ function getCurrentUserMenu() {
 		ksort($submenu_array);
 		$filtered_menus[1][$slug] = array_filter($submenu_array, 'filterMenu');
 	}
+	// echo '<pre>';print_r($filtered_menus);echo '</pre>';
 	
 	/** Main menu */
 	$temp_menu = $menu;
 	foreach ($menu as $position => $element) {
-		list($menu_title, $page_title, $capability, $module, $slug, $class) = $element;
+		list($menu_title, $page_title, $menu_icon, $capability, $module, $slug, $class) = $element;
 		if (array_key_exists($slug, $filtered_menus[1])) {
 			if (count($filtered_menus[1][$slug]) == 1) {
 				$single_element = array_values($filtered_menus[1][$slug]);
 				if (!empty($single_element[0][0])) {
 					$temp_menu[$position] = array_shift($filtered_menus[1][$slug]);
-					if (isset($element[7]) && $element[7]) $temp_menu[$position][0] = $menu_title;
+					if (isset($element[8]) && $element[8]) $temp_menu[$position][0] = $menu_title;
 				}
 			}
 		}
@@ -677,6 +662,8 @@ function getCurrentUserMenu() {
 	
 	unset($temp_menu, $element, $submenu_array, $slug, $position, $single_element);
 
+	// echo '<pre>';print_r($filtered_menus);echo '</pre>';
+	// exit;
 	return $filtered_menus;
 }
 
@@ -2709,11 +2696,12 @@ function handleHiddenFlags() {
  * @param bool $sticky Whether or not to keep the menu title when there's only one submenu item or to take on the submenu item title
  * @param integer $position Menu position for the item
  * @param integer $badge_count Number of items to display in the badge
+ * @param string $menu_icon Icon name to use for the menu
  */
-function addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $sticky = false, $position = null, $badge_count = 0) {
+function addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $sticky = false, $position = null, $badge_count = 0, $menu_icon = null) {
 	global $menu;
 	
-	$new_menu = array($menu_title, $page_title, $capability, $module, $menu_slug, $class, $badge_count, $sticky);
+	$new_menu = array($menu_title, $page_title, $menu_icon, $capability, $module, $menu_slug, $class, $badge_count, $sticky);
 	
 	if ($position === null) {
 		$menu[] = $new_menu;
@@ -2729,7 +2717,7 @@ function addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug,
  * @since 1.2
  * @package facileManager
  *
- * @param string $menu_title Text used to display the menu item
+ * @param string|array $menu_title Text used to display the menu item
  * @param string $page_title Text used to display the page title when the page loads
  * @param string|array $capability Minimum capability required for the menu item to be visible to the user
  * @param string $module Module name the menu item is for
@@ -2740,10 +2728,15 @@ function addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug,
  */
 function addObjectPage($menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $sticky = false, $badge_count = 0) {
 	global $_fm_last_object_menu;
+
+	$menu_icon = null;
+	if (is_array($menu_title)) {
+		list($menu_title, $menu_icon) = $menu_title;
+	}
 	
 	$_fm_last_object_menu++;
 	
-	addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class, $sticky, $_fm_last_object_menu, $badge_count);
+	addMenuPage($menu_title, $page_title, $capability, $module, $menu_slug, $class, $sticky, $_fm_last_object_menu, $badge_count, $menu_icon);
 }
 
 
@@ -2766,7 +2759,12 @@ function addObjectPage($menu_title, $page_title, $capability, $module, $menu_slu
 function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $module, $menu_slug, $class = null, $position = null, $badge_count = 0) {
 	global $submenu;
 	
-	$new_menu = array($menu_title, $page_title, $capability, $module, $menu_slug, $class, $badge_count);
+	$menu_icon = null;
+	if (is_array($menu_title)) {
+		list($menu_title, $menu_icon) = $menu_title;
+	}
+	
+	$new_menu = array($menu_title, $page_title, $menu_icon, $capability, $module, $menu_slug, $class, $badge_count);
 	
 	if ($position === null) {
 		$submenu[$parent_slug][] = $new_menu;
@@ -2780,7 +2778,7 @@ function addSubmenuPage($parent_slug, $menu_title, $page_title, $capability, $mo
 		
 		$parent_menu_key = getParentMenuKey($parent_slug);
 		if ($parent_menu_key !== false) {
-			$menu[$parent_menu_key][6] += $badge_count;
+			$menu[$parent_menu_key][7] += $badge_count;
 		}
 	}
 }
@@ -2962,14 +2960,14 @@ function getMenuURL($search_slug = null) {
 	foreach ($menu as $position => $menu_items) {
 		$parent_key = array_search($search_slug, $menu_items, true);
 		if ($parent_key !== false) {
-			return $menu[$position][4];
+			return $menu[$position][5];
 		}
 	}
 	
 	foreach ($submenu as $parent_slug => $menu_items) {
 		foreach ($menu_items as $submenu_id => $element) {
 			if (array_search($search_slug, $element, true) !== false) {
-				return $submenu[$parent_slug][$submenu_id][4];
+				return $submenu[$parent_slug][$submenu_id][5];
 			}
 		}
 	}

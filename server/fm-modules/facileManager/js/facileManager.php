@@ -58,7 +58,7 @@ if (isset($__FM_CONFIG)) {
 					if (response == 0 || ! $.isNumeric(response)) {
 						$(".process_all_updates").parent().fadeOut(400);
 					} else {
-						$("#topheadpartright span.update_count").html(response);
+						$("#tophead span.update_count").html(response);
 						$(".process_all_updates").parent().fadeIn(400);
 					}
 					window.setTimeout(displayHideProcessAll, 45000);
@@ -752,7 +752,7 @@ if (isset($__FM_CONFIG)) {
 		}
 	});
 
-	$("#topheadpartright .help_link").click(function() {
+	$("#tophead .help_link").click(function() {
 		var body_right		= $("#body_container").css("right");
 		var help_right		= $("#help").css("right");
 		
@@ -858,13 +858,13 @@ if (isset($__FM_CONFIG)) {
 	});
 	
 	$("#help_topbar i.popout").click(function() {
-		$("#topheadpartright .help_link").click();
+		$("#tophead .help_link").click();
 		window.open("help.php","1356124444538","width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0");
 		return false;
 	});
 	
 	$("#help_topbar .close").click(function() {
-		$("#topheadpartright .help_link").click();
+		$("#tophead .help_link").click();
 	});
 	
 	$(function () {

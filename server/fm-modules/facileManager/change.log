@@ -10,6 +10,7 @@
 * Server - [improvement] CSS tweaks.
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Supports feature minimum version notices.
+* Server - [improvement] Updated menu styling.
 * Server - [bug] Forced password changes failed when the mail server was inaccessible.
 * Server - [bug] Editing a user group incorrectly required a name change.
 * Server - [bug] Upgrading fM or any modules inadvertently cleared the upgrade flag of other modules.

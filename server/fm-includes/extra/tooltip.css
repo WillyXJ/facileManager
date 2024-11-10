@@ -67,7 +67,7 @@
 	z-index: 1000;
 	padding: 12px;
 	width: 265px;
-	background-color: #464646;
+	background-color: #5e85a4;
 	color: #fff;
 	content: attr(data-tooltip);
 	font-size: 12px;
@@ -96,7 +96,7 @@
 .tooltip-top:before {
 	margin-left: -6px;
 	margin-bottom: -12px;
-	border-top-color: #464646;
+	border-top-color: #5e85a4;
 }
 
 /* Horizontally align top/bottom tooltips */
@@ -136,7 +136,7 @@
 	margin-right: -12px;
 	margin-bottom: 0;
 	border-top-color: transparent;
-	border-left-color: #464646;
+	border-left-color: #5e85a4;
 }
 
 .tooltip-left:hover:before,
@@ -160,7 +160,7 @@
 	margin-top: -12px;
 	margin-bottom: 0;
 	border-top-color: transparent;
-	border-bottom-color: #464646;
+	border-bottom-color: #5e85a4;
 }
 
 .tooltip-bottom:hover:before,
@@ -183,7 +183,7 @@
 	margin-bottom: 0;
 	margin-left: -12px;
 	border-top-color: transparent;
-	border-right-color: #464646;
+	border-right-color: #5e85a4;
 }
 
 .tooltip-right:hover:before,
