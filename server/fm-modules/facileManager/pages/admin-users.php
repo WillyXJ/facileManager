@@ -90,23 +90,11 @@ if ($type == 'users') {
 }
 $sort_direction = null;
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['users']['avail_types']);
-echo printPageHeader($response, $display_type, $can_add, $type);
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['users']['avail_types']);
+echo printPageHeader($response, $display_type, $can_add, $type, null, null, $addl_title_blocks);
 
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
-}
-
-if (count($__FM_CONFIG['users']['avail_types']) > 1) {
-	echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	</div>
-</div>
-
-HTML;
 }
 
 if ($type == 'users') {

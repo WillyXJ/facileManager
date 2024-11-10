@@ -312,6 +312,7 @@ HTML;
 function printFooter($classes = null, $text = null, $block_style = null) {
 	echo <<<FOOT
 	</div>
+</div>
 <div class="manage_form_container" id="manage_item" $block_style>
 	<div class="manage_form_container_flex">
 		<div class="manage_form_contents $classes" id="manage_item_contents">
@@ -1751,10 +1752,9 @@ function arrayKeysExist($keys, $array) {
  * @param integer $page Current page
  * @param integer $total_pages Total number of pages
  * @param string $classes Additional classes to apply to the div
- * @param string $position Additional blocks to be on left or right
  * @return string
  */
-function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null, $position = 'left') {
+function displayPagination($page, $total_pages, $addl_blocks = null, $classes = null) {
 	global $fmdb;
 	
 	$page_params = '';
@@ -1772,41 +1772,40 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	
 	$page_links = array();
 	$page_links[] = '<div id="pagination_container">';
-	$page_links[] = '<div>';
-	if ($position == 'right') {
-		$page_links[] = buildPaginationCountMenu(0, 'pagination');
-		if ($addl_blocks) $addl_blocks = (array) $addl_blocks;
-		array_unshift($addl_blocks, null);
-	}
+	$page_links[] = '<div class="flex-left">';
 	if (isset($addl_blocks)) {
 		foreach ((array) $addl_blocks as $block) {
-			$page_links[] = '<div>' . $block . '</div>';
+			if ($block) $page_links[] = '<div>' . $block . '</div>';
 		}
 	}
-	if ($position == 'left') $page_links[] = buildPaginationCountMenu(0, 'pagination');
 
-	$page_links[] = '<div id="pagination" class="' . $classes . '">';
-	$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
-	$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', $fmdb->num_rows), formatNumber($fmdb->num_rows)));
-
-	/** Previous link */
-	if ($page > 1 && $total_pages > 1) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=1\">&laquo;</a>";
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page - 1) . '">&lsaquo;</a>';
-	}
-	
-	/** Page number */
-	$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . formatNumber($total_pages);
-	
-	/** Next link */
-	if ($page < $total_pages) {
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page + 1) . '">&rsaquo;</a>';
-		$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . $total_pages . '">&raquo;</a>';
-	}
-
-	$page_links[] = '</form>';
 	$page_links[] = '</div>';
-	$page_links[] = '</div>';
+	if ($total_pages) {
+		$page_links[] = '<div class="flex-right">';
+		$page_links[] = '<div id="pagination" class="' . $classes . '">';
+		$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
+		$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', $fmdb->num_rows), formatNumber($fmdb->num_rows)));
+
+		/** Previous link */
+		if ($page > 1 && $total_pages > 1) {
+			$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=1\">&laquo;</a>";
+			$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page - 1) . '">&lsaquo;</a>';
+		}
+		
+		/** Page number */
+		$page_links[] = '<input id="paged" type="text" value="' . $page . '" /> of ' . formatNumber($total_pages);
+		
+		/** Next link */
+		if ($page < $total_pages) {
+			$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . ($page + 1) . '">&rsaquo;</a>';
+			$page_links[] = '<a href="' . $GLOBALS['basename'] . "?{$page_params}p=" . $total_pages . '">&raquo;</a>';
+		}
+
+		$page_links[] = '</form>';
+		$page_links[] = '</div>';
+		$page_links[] = buildPaginationCountMenu(0, 'pagination');
+		$page_links[] = '</div>';
+	}
 	$page_links[] = '</div>';
 	
 	return join("\n", $page_links);
@@ -2209,9 +2208,10 @@ function setOSIcon($server_os) {
  * @param string $name Name value of plus sign
  * @param string $rel Rel value of plus sign
  * @param string $scroll Scroll or noscroll
+ * @param array $addl_title_blocks Addition blocks that will be displayed on the right side
  * @return void
  */
-function printPageHeader($message = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null) {
+function printPageHeader($message = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null, $addl_title_blocks = array()) {
 	global $__FM_CONFIG;
 	
 	if (is_array($message)) {
@@ -2230,18 +2230,24 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 	echo '<div id="body_container"';
 	if ($scroll == 'noscroll') echo ' class="fm-noscroll" style="padding-bottom: 0;"';
 	echo '>' . "\n";
-	echo '<div id="response" ' . $style . '>' . $response . "</div>\n";
-	echo '<h2>' . $title;
-	
-	if ($allowed_to_add) {
-		echo displayAddNew($name, $rel);
-	}
-
-	if (isset($comment)) {
-		printf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle notice grey" aria-hidden="true"></i></a>', $comment);
-	}
-
-	echo '</h2>' . "\n";
+	printf('<div id="body_top_container">
+	<div id="response" %s>%s</div>
+	<div id="page_title_container" class="flex-apart">
+		<div class="flex-left">
+			<div><h2>%s</h2></div>
+			<div>%s</div>
+			<div>%s</div>
+		</div>
+		<div class="flex-right">
+			%s
+		</div>
+	</div>
+	',
+		$style, $response, $title,
+		($allowed_to_add) ? displayAddNew($name, $rel) : null,
+		(isset($comment)) ? printf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle notice grey" aria-hidden="true"></i></a>', $comment) : null,
+		implode("\n", $addl_title_blocks)
+	);
 }
 
 
@@ -3857,6 +3863,8 @@ function generateURIParams($params = array(), $direction = 'include', $character
  */
 function buildSubMenu($selected, $avail_types, $null_params = array(), $params = array('type', 'action', 'id', 'status'), $direction = 'exclude', $character = '&') {
 	global $__FM_CONFIG;
+
+	if (count($avail_types) <= 1) return '';
 	
 	$menu_selects = '';
 	
