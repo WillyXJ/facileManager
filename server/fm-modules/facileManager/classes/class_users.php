@@ -346,6 +346,13 @@ class fm_users {
 			return formatError(_('Could not update the user because a database error occurred.'), 'sql');
 		}
 
+		/** Set theme */
+		if (isset($post['user_theme'])) {
+			@session_start();
+			$_SESSION['user']['theme'] = $post['user_theme'];
+			session_write_close();
+		}
+
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login, 'no mail');
 		
@@ -613,7 +620,7 @@ HTML;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
-		$user_email = $user_default_module = null;
+		$user_email = $user_default_module = $user_theme = null;
 		$hidden = $user_perm_form = $return_form_rows = null;
 		$user_force_pwd_change = $user_template_only = null;
 		$group_name = $group_comment = $user_group = null;
@@ -723,6 +730,15 @@ HTML;
 			unset($active_modules);
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row">' . _('Default Module') . '</th>
+					<td width="67%">' . $user_module_options . '</td>
+				</tr>';
+		}
+		
+		if (in_array('user_theme', $form_bits)) {
+			$user_module_options = buildSelect('user_theme', 'user_theme', getThemes(), $user_theme);
+			unset($available_themes);
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row">' . _('Theme') . '</th>
 					<td width="67%">' . $user_module_options . '</td>
 				</tr>';
 		}

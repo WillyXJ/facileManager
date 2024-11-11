@@ -882,6 +882,33 @@ function fmUpgrade_470($database) {
 }
 
 
+/** fM v5.0.0 **/
+function fmUpgrade_500($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 52) ? fmUpgrade_470($database) : true;
+	
+	if ($success) {
+		$queries[] = "ALTER TABLE `fm_users` ADD `user_theme` VARCHAR(255) NULL DEFAULT NULL AFTER `user_default_module`";
+		
+		/** Create table schema */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 60, false);
+	
+	return $success;
+}
+
+
 /**
  * Updates the database with the db version number.
  *

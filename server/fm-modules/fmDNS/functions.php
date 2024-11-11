@@ -168,7 +168,7 @@ function buildModuleToolbar() {
 			$domain_name = displayFriendlyDomainName($domain_name);
 			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
 			$domain_menu .= sprintf('<div id="topheadpart">
-			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
+			<span>%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
 		</div>', __('Clone of'), $domain_mapping, $parent_domain_id, $record_type_uri, __('Edit parent zone records'), $domain_name);
 		}
 		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
@@ -177,7 +177,7 @@ function buildModuleToolbar() {
 			$domain_name = displayFriendlyDomainName($domain_name);
 			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
 			$domain_menu .= sprintf('<div id="topheadpart">
-			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
+			<span>%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
 		</div>', __('Based on template'), $domain_mapping, $parent_domain_id, $record_type_uri, __('Edit template zone records'), $domain_name);
 		}
 	} else $domain_menu = null;

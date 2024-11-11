@@ -1,0 +1,64 @@
+.Ocean {
+    /* Synonym for default-theme */
+}
+
+.Burgandy {
+    /* Common color changes */
+    --top-header-bg: #583b3b;
+    --top-header-border: #433838;
+    --top-header-divider: #5c5656;
+	--top-header-search-bg: #765353;
+	--top-header-search-border: #9e6262;
+
+    --menu-bg: #352f2f;
+    --menu-divider: #583b3b;
+    --menu-select-highlight: #bc3b3b;
+    --menu-expand-bg: #ebe4e4;
+	--submenu-hover: #915353;
+
+	--tooltip-bg: #a45e5e;
+	--tooltip-text: #fff;
+
+	--info-icon: #a33a3a;
+}
+
+.Forest {
+    /* Common color changes */
+    --top-header-bg: #3d583b;
+    --top-header-border: #384338;
+    --top-header-divider: #565c56;
+	--top-header-search-bg: #56865c;
+	--top-header-search-border: #679E62;
+
+    --menu-bg: #2f352f;
+    --menu-divider: #3b583b;
+    --menu-select-highlight: #44bc3b;
+    --menu-expand-bg: #e4ebe4;
+	--submenu-hover: #45753b;
+
+	--tooltip-bg: #5ea46a;
+	--tooltip-text: #fff;
+
+	--info-icon: #45a33a;
+}
+
+.Orange {
+    /* Common color changes */
+    --top-header-bg: #7e532b;
+    --top-header-border: #433f38;
+    --top-header-divider: #5c5956;
+	--top-header-search-bg: #8e7143;
+	--top-header-search-border: #cda445;
+	--submenu-hover: #ee9d3b;
+
+    --menu-bg: #35322f;
+    --menu-divider: #584b3b;
+    --menu-select-highlight: #ee9d3b;
+    --menu-expand-bg: #ebe8e4;
+
+	--tooltip-bg: #a4815e;
+	--tooltip-text: #fff;
+
+	--info-icon: #d37a37;
+}
+

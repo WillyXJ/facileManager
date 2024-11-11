@@ -41,6 +41,7 @@ if (isset($__FM_CONFIG)) {
 		if ($("table.sortable th.header-sorted").length == 0) {
 			$("table.sortable th").not(".header-nosort").first().addClass("header-sorted");
 		}
+		$("#login_form input").change();
 	});
 	
 	$(function displayHideProcessAll() {
@@ -105,6 +106,12 @@ if (isset($__FM_CONFIG)) {
 	});
 
 	$("#loginbtn").click(function() {
+		if ($("#login_message_accept").length) {
+			if ($("#login_message_accept").prop("checked") != true) {
+				$("#login_message_accept").parent().addClass("failed");
+				return false;
+			}
+		}
 	
 		var action = $("#loginform").attr("action");
 		var form_data = {
@@ -637,6 +644,12 @@ if (isset($__FM_CONFIG)) {
 			$("input#submit").attr("disabled", "disabled");
 			$("input#submit").addClass("disabled");
 		}
+	});
+
+	/* User theme changes */
+	$("#manage_item_contents").delegate("#user_theme", "change", function(e) {
+		$("html").removeClass();
+		$("html").addClass("default-theme " + $(this).val());
 	});
 
 	/* Account group association changes */
