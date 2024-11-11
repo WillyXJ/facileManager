@@ -76,9 +76,6 @@ if (!empty($fm_new_version_available)) {
 printHeader();
 @printMenu();
 
-echo '<div id="body_container">';
-if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
-
 $table_info = array(
 				'class' => 'display_results modules',
 				'id' => 'table_edits',
@@ -101,7 +98,7 @@ $header = displayTableHeader($table_info, $title_array);
 
 $modules = getAvailableModules();
 if (count($modules)) {
-	$module_display = @buildBulkActionMenu($bulk_actions_list, 'module_list') . $header;
+	$module_display = $header;
 
 	foreach ($modules as $module_name) {
 		/** Include module variables */
@@ -180,11 +177,12 @@ printf('
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="">
 			%s
-			<h2>%s</h2>
+			%s
+			%s
 			%s
 		</form>
 	</div>
 </div>' . "\n",
-		$update_core, getPageTitle(), $module_display);
+		$update_core, printPageHeader($response), displayPagination(0, 0, buildBulkActionMenu($bulk_actions_list, 'module_list')), $module_display);
 
 printFooter(null, $output);

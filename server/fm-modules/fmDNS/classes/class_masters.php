@@ -65,7 +65,7 @@ class fm_dns_masters {
 	 * Adds the new master
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -75,30 +75,56 @@ class fm_dns_masters {
 		$sql_fields = '(';
 		$sql_values = '';
 		
-		$exclude = array('submit', 'action', 'server_id');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+
+		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+
+		if (isset($post['master_parent_id'])) {
+			$log_message = sprintf(__("Added an address list to primary '%s' with the following"), getNameFromID($post['master_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name')) . ":\n";
+		} else {
+			$log_message = __("Added primary with the following") . ":\n";
+		}
 
 		foreach ($post as $key => $data) {
-			if ($key == 'master_name' && empty($data)) return __('No primary name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				if (strlen($data)) {
+					switch ($key) {
+						case 'master_key_id':
+							$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  $fm_dns_acls->parseACL('key_' . $data));
+							break;
+						case 'master_tls_id':
+							$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  getNameFromID(str_replace('tls_', '', $data), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active'));
+							break;
+						case 'server_serial_no':
+							$log_message .= formatLogKeyData('_serial_no', $key, getServerName($data));
+							break;
+						case 'master_addresses':
+							$log_message .= formatLogKeyData('master_', $key, $fm_dns_acls->parseACL($data));
+							break;
+						case 'master_id':
+						case 'master_parent_id':
+						case 'account_id':
+							break;
+						default:
+							$log_message .= formatLogKeyData('master_', $key, $data);
+					}
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the primary because a database error occurred.'), 'sql');
 		}
 
-		$log_message = sprintf(__("Added primary:\nName: %s\nPort: %s\nDSCP: %s\nComment: %s"), $post['master_name'], $post['master_port'], $post['master_dscp'], $post['master_comment']);
-		if (isset($post['master_parent_id'])) {
-			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-			$log_message = sprintf(__("An address list was added to the %s primary with the following:\nAddress: %s\nPort: %s\nKey: %s\nComment: %s"), getNameFromID($post['master_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name'), $fm_dns_acls->parseACL($post['master_addresses']), $post['master_port'], $fm_dns_acls->parseACL('key_' . $post['master_key_id']), $post['master_comment']);
-		}
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 		return true;
 	}
@@ -107,28 +133,57 @@ class fm_dns_masters {
 	 * Updates the selected master
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id');
+		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+
+		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$old_name = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
+		$old_address = $fm_dns_acls->parseACL(getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_addresses'));
+
+		if (!$old_name) {
+			$tmp_parent_id = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_parent_id');
+			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
+			$log_message = sprintf(__("Updated %s on primary '%s' to the following"), $old_address, $tmp_name) . ":\n";
+		} else {
+			$log_message = sprintf(__("Updated primary '%s' to the following"), $old_name) . ":\n";
+		}
 
 		$sql_edit = 'master_port=null, master_dscp=null, master_key_id=0, ';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				switch ($key) {
+					case 'master_key_id':
+						$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  $fm_dns_acls->parseACL('key_' . $data));
+						break;
+					case 'master_tls_id':
+						$log_message .= formatLogKeyData(array('_id', 'master_'), $key,  getNameFromID(str_replace('tls_', '', $data), "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config", 'cfg_', 'cfg_id', 'cfg_data', null, 'active'));
+						break;
+					case 'server_serial_no':
+						$log_message .= formatLogKeyData('_serial_no', $key, getServerName($data));
+						break;
+					case 'master_addresses':
+						$log_message .= formatLogKeyData('master_', $key, $fm_dns_acls->parseACL($data));
+						break;
+					case 'master_id':
+					case 'master_parent_id':
+					case 'account_id':
+						break;
+					default:
+						$log_message .= formatLogKeyData('master_', $key, $data);
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
-		// Update the master
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$old_name = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-		$old_address = $fm_dns_acls->parseACL(getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_addresses'));
+		/** Update the master */
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` SET $sql WHERE `master_id`={$post['master_id']}";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the primary because a database error occurred.'), 'sql');
@@ -137,12 +192,8 @@ class fm_dns_masters {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$log_message = sprintf(__("Updated primary '%s' to the following:\nName: %s\nPort: %s\nDSCP: %s\nComment: %s"), $old_name, $post['master_name'], $post['master_port'], $post['master_dscp'], $post['master_comment']);
-		if (!$old_name) {
-			$tmp_parent_id = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_parent_id');
-			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-			$log_message = sprintf(__("Updated %s on primary '%s' to the following:\nAddress: %s\nPort: %s\nKey: %s\nComment: %s"), $old_address, $tmp_name, $fm_dns_acls->parseACL($post['master_addresses']), $post['master_port'], $fm_dns_acls->parseACL('key_' . $post['master_key_id']), $post['master_comment']);
-		}
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+	
 		addLogEntry($log_message);
 		return true;
 	}
@@ -152,25 +203,28 @@ class fm_dns_masters {
 	 * Deletes the selected master
 	 */
 	function delete($id, $server_serial_no = 0) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
 		
 		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-		$log_message = sprintf(__("primary '%s' was deleted"), $tmp_name);
 		if (!$tmp_name) {
 			$tmp_parent_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_parent_id');
 			$tmp_address = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_addresses');
 			$tmp_name = getNameFromID($tmp_parent_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
-			$log_message = sprintf(__("%s was deleted from the %s primary"), $tmp_address, $tmp_name);
+			$log_message = __('Deleted an address list from a primary') . ":\n";
 		} else {
 			$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}masters` SET `master_status`='deleted' WHERE account_id='{$_SESSION['user']['account_id']}' AND `master_parent_id`='" . sanitize($id) . "'";
 			if (!$fmdb->query($query) && $fmdb->sql_errors) {
 				return formatError(__('The associated primary elements could not be deleted because a database error occurred.'), 'sql');
 			}
+			$log_message = __('Deleted a primary') . ":\n";
 		}
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', $id, 'master_', 'deleted', 'master_id') === false) {
 			return formatError(__('This master could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= (isset($tmp_address)) ? formatLogKeyData('', 'Address', $fm_dns_acls->parseACL($tmp_address)) : null;
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
 			addLogEntry($log_message);
 			return true;
 		}
@@ -236,7 +290,7 @@ HTML;
 		
 		$master_id = $parent_id = $master_key_id = $master_tls_id = 0;
 		$master_name = $master_addresses = $master_comment = $master_port = $master_dscp = null;
-		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && ((is_int($_REQUEST['request_uri']['server_serial_no']) && $_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
+		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no'] > 0) || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		
 		if (!empty($_POST) && array_key_exists('add_form', $_POST)) {
 			if (is_array($_POST))
@@ -260,15 +314,17 @@ HTML;
 		$popup_footer = buildPopup('footer');
 		
 		if (!$parent_id) {
-			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+			$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="masters" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="master_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="master_name">%s</label></th>
-					<td width="67&#37;"><input name="master_name" id="master_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="master_name" id="master_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="master_port">%s</label></th>
@@ -310,8 +366,10 @@ HTML;
 			$master_keys = buildSelect('master_key_id', 'master_key_id', availableItems('key', 'blank', 'AND key_type="tsig"'), explode(';', $master_key_id), 1, $disabled, false, null, null, __('Select a key'));
 			$tls_connections = buildSelect('master_tls_id', 'master_tls_id', $fm_module_options->availableParents('tls', null, $server_serial_no, 'blank'), $master_tls_id, 1, null, false, null, 'cfg_drop_down', __('Select a connection'));
 			
-			$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+			$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="masters" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="master_id" value="%d" />
 			<input type="hidden" name="master_parent_id" value="%d" />
@@ -323,7 +381,7 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="master_addresses">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
-					<td width="67&#37;"><input type="hidden" id="master_addresses" name="master_addresses" class="address_match_element" value="%s" /></td>
+					<td width="67&#37;"><input type="hidden" id="master_addresses" name="master_addresses" class="address_match_element required" value="%s" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="master_port">%s</label></th>
@@ -515,12 +573,13 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
+		if ($post['action'] == 'add' && !array_key_exists('master_parent_id', $post)) {
+			if (empty($post['master_name'])) return __('No primary name defined.');
 
-		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_name');
-		if ($field_length !== false && strlen($post['master_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Master name is too long (maximum %d character).', 'Master name is too long (maximum %d characters).', $field_length), $field_length);
+			/** Check name field length */
+			$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_name');
+			if ($field_length !== false && strlen($post['master_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Master name is too long (maximum %d character).', 'Master name is too long (maximum %d characters).', $field_length), $field_length);
+		}
 		
 		/** Does the record already exist for this account? */
 		if (array_key_exists('master_name', $post)) {
@@ -530,10 +589,10 @@ HTML;
 			}
 		}
 		
-		if (!$post['master_port']) unset($post['master_port']);
-		if (!$post['master_dscp']) unset($post['master_dscp']);
-		if (!$post['master_key_id']) unset($post['master_key_id']);
-		if (!$post['master_tls_id']) unset($post['master_tls_id']);
+		if (empty($post['master_port']) || !$post['master_port']) unset($post['master_port']);
+		if (empty($post['master_dscp']) || !$post['master_dscp']) unset($post['master_dscp']);
+		if (empty($post['master_key_id']) || !$post['master_key_id']) unset($post['master_key_id']);
+		if (empty($post['master_tls_id']) || !$post['master_tls_id']) unset($post['master_tls_id']);
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
@@ -549,7 +608,7 @@ HTML;
 			}
 		}
 		
-		if (!array_key_exists('master_parent_id', $post)  && $post['master_dscp']) {
+		if (!array_key_exists('master_parent_id', $post)  && !empty($post['master_dscp'])) {
 			if (!verifyNumber($post['master_dscp'], 0, 95)) return sprintf(__('%d is not a valid port number.'), $post['master_dscp']);
 		}
 		

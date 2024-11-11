@@ -38,6 +38,10 @@ if (isset($__FM_CONFIG)) {
 				handle: "div.popup-header"
 			});
 		});
+		if ($("table.sortable th.header-sorted").length == 0) {
+			$("table.sortable th").not(".header-nosort").first().addClass("header-sorted");
+		}
+		$("#login_form input").change();
 	});
 	
 	$(function displayHideProcessAll() {
@@ -55,7 +59,7 @@ if (isset($__FM_CONFIG)) {
 					if (response == 0 || ! $.isNumeric(response)) {
 						$(".process_all_updates").parent().fadeOut(400);
 					} else {
-						$("#topheadpartright span.update_count").html(response);
+						$("#tophead span.update_count").html(response);
 						$(".process_all_updates").parent().fadeIn(400);
 					}
 					window.setTimeout(displayHideProcessAll, 45000);
@@ -90,12 +94,30 @@ if (isset($__FM_CONFIG)) {
 		return false;
 	} );
 	
+	$("#login_form input").on("change", function() {
+		if ($("#login_message_accept").length) {
+			var button = document.getElementById("loginbtn");
+			if ($("#login_message_accept").is(":checked") && $("#username").length && $("#password").length) {
+				button.disabled = false;
+			} else {
+				button.disabled = true;
+			}
+		}
+	});
+
 	$("#loginbtn").click(function() {
+		if ($("#login_message_accept").length) {
+			if ($("#login_message_accept").prop("checked") != true) {
+				$("#login_message_accept").parent().addClass("failed");
+				return false;
+			}
+		}
 	
 		var action = $("#loginform").attr("action");
 		var form_data = {
 			username: $("#username").val(),
 			password: $("#password").val(),
+			login_message_accept: $("#login_message_accept").is(":checked"),
 			is_ajax: 1
 		};
 		
@@ -416,7 +438,7 @@ if (isset($__FM_CONFIG)) {
 	});
 	
     /* Cancel button */
-    $("#manage_item_contents").delegate("#cancel_button, .close", "click tap", function(e) {
+    $("#manage_item_contents").delegate("#cancel_button, .popup-header .close", "click tap", function(e) {
 		e.preventDefault();
 		$("#manage_item").fadeOut(200);
 		$("#manage_item_contents").html();
@@ -553,9 +575,13 @@ if (isset($__FM_CONFIG)) {
 		return false;
     });
     
-    /* Account password changes */
-    $("#manage_item_contents").delegate("#update_user_profile", "click tap", function(e) {
-		var form_data = $("#fm_user_profile").serialize();
+    /* Popup form submissions */
+    $("#manage_item_contents").delegate("input[type=submit].primary:not(.follow-action)", "click tap", function(e) {
+		e.preventDefault();
+		if ($(this).checkRequiredFields() === false) {
+			return false;
+		}
+		var form_data = $("div.popup-contents form").serialize();
 
 		$.ajax({
 			type: "POST",
@@ -566,22 +592,37 @@ if (isset($__FM_CONFIG)) {
 				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
 					return false;
-				} else if (response == "Success") {
-					$("#popup_response").html("<p>' . _('Profile has been updated.') . '</p>");
-				} else {
+				} else if (response != "Success" && !$.isNumeric(response)) {
 					$("#popup_response").html("<p>" + response + "</p>");
-				}
-				$("#popup_response").fadeIn(200);
+
+					/* Popup response more link */
+					$("#popup_response").delegate("a.more", "click tap", function(e1) {
+						e1.preventDefault();
+						error_div = $("#popup_response div#error")
+						if (error_div.is(":visible")) {
+							error_div.hide();
+							$(this).text("' . _('more') . '");
+						} else {
+							error_div.show();
+							$(this).text("' . _('less') . '");
+						}
+					});
+					$("#popup_response").delegate("#response_close i.close", "click tap", function(e2) {
+						e2.preventDefault();
+						$("#popup_response").fadeOut(200, function() {
+							$("#popup_response").html();
+						});
+					});
 				
-				if (response == "Success") {
-					$("#manage_item").delay(2000).fadeOut(200, function() {
-						$("#manage_item_contents").html();
-						$("body").removeClass("fm-noscroll");
-					});
+					$("#popup_response").fadeIn(200);
+
+					if (response.indexOf("a class=\"more\"") <= 0) {
+						$("#popup_response").delay(2000).fadeOut(200, function() {
+							$("#popup_response").html();
+						});
+					}
 				} else {
-					$("#popup_response").delay(2000).fadeOut(200, function() {
-						$("#popup_response").html();
-					});
+					location.reload();
 				}
 			}
 		});
@@ -605,6 +646,12 @@ if (isset($__FM_CONFIG)) {
 		}
 	});
 
+	/* User theme changes */
+	$("#manage_item_contents").delegate("#user_theme", "change", function(e) {
+		$("html").removeClass();
+		$("html").addClass("default-theme " + $(this).val());
+	});
+
 	/* Account group association changes */
 	$("#manage_item_contents").delegate("#user_group", "change", function(e) {
 		if ($(this).val() == 0) {
@@ -614,6 +661,22 @@ if (isset($__FM_CONFIG)) {
 		}
 	});
 
+	/* Account template changes */
+	$("#manage_item_contents").delegate("#user_template_only", "click", function(e) {
+		if ($(this).is(":checked")) {
+			$("#user_email.required").closest("tr").children("th").children("label").removeClass("required");
+			$("#user_email").removeClass("required validate-error");
+			$(".user_password").hide();
+			$(".user_password").find("input[type=password]").removeClass("required validate-error");
+		} else {
+			$("#user_email").addClass("required");
+			$("#user_email.required").closest("tr").children("th").children("label").addClass("required");
+			$(".user_password").find("input[type=password]").addClass("required");
+			$(".user_password").show();
+		}
+		// $(this).setSubmitButtonStatus();
+	});
+	
 	/* Account password reset */
     $(".reset_password").click(function() {
         var $this 		= $(this);
@@ -702,7 +765,7 @@ if (isset($__FM_CONFIG)) {
 		}
 	});
 
-	$("#topheadpartright .help_link").click(function() {
+	$("#tophead .help_link").click(function() {
 		var body_right		= $("#body_container").css("right");
 		var help_right		= $("#help").css("right");
 		
@@ -729,11 +792,6 @@ if (isset($__FM_CONFIG)) {
 	$("#help_file_container ul li div a").click(function() {
 		window.opener.location.href = $(this).attr("href");
 		return false;
-	});
-	
-	$("#manage_item_contents").delegate("#user_template_only", "click tap", function(e) {
-		$("input[type=\"submit\"]").removeAttr("disabled");
-		$("input[type=\"submit\"]").removeClass("disabled");
 	});
 	
 	$("#auth_method").change(function() {
@@ -813,13 +871,13 @@ if (isset($__FM_CONFIG)) {
 	});
 	
 	$("#help_topbar i.popout").click(function() {
-		$("#topheadpartright .help_link").click();
+		$("#tophead .help_link").click();
 		window.open("help.php","1356124444538","width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0");
 		return false;
 	});
 	
 	$("#help_topbar .close").click(function() {
-		$("#topheadpartright .help_link").click();
+		$("#tophead .help_link").click();
 	});
 	
 	$(function () {
@@ -1145,19 +1203,17 @@ if (isset($__FM_CONFIG)) {
 			/** Update the database */
 	        var $this 				= $(this);
 	        var item_type			= $("#table_edits").attr("name");
-	        var policy_type			= getUrlVars()["type"];
 	        var server_serial_no	= getUrlVars()["server_serial_no"];
-	
+
 			var form_data = {
 				item_id: "",
 				item_type: item_type,
-				policy_type: policy_type,
 				server_serial_no: server_serial_no,
 				sort_order: new_sort_order,
 				action: "update_sort",
+				uri_params: getUrlVars(),
 				is_ajax: 1
 			};
-			console.log(form_data);
 	
 			$.ajax({
 				type: "POST",
@@ -1165,7 +1221,6 @@ if (isset($__FM_CONFIG)) {
 				data: form_data,
 				success: function(response)
 				{
-				console.log(response);
 					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 						doLogout();
 						return false;
@@ -1197,6 +1252,51 @@ if (isset($__FM_CONFIG)) {
 		}
 	}).disableSelection();
 	
+	/* Check if form submit button should be enabled */
+	$.fn.setSubmitButtonStatus = function() {
+		/** Submit button */
+		var button = $("input[type=submit][name=submit].primary");
+
+		/** Are there any validate-error elements? */
+		var errors = $(".validate-error").length;
+
+		if (errors) {
+			$(button).attr("disabled", true);
+			$(button).addClass("disabled");
+		} else {
+			$(button).attr("disabled", false);
+			$(button).removeClass("disabled");
+		}
+	}
+
+	/* Check if all required fields are filled */
+	$.fn.checkRequiredFields = function() {
+		isValid = true;
+		$("#manage_item_contents input.required").each(function() {
+			if ($(this).is(":visible") && $(this).val() === "") {
+				$(this).addClass("validate-error");
+				isValid = false;
+			}
+		});
+		
+		// $(this).setSubmitButtonStatus();
+
+		return isValid;
+	}
+
+	/* Inline form validation */
+	$("#manage_item_contents").delegate("input.required", "keyup blur", function(e) {
+		/** Update the database */
+		var $this				= $(this);
+
+		if ($this.val() != "") {
+			$this.removeClass("validate-error");
+		} else {
+			$this.addClass("validate-error");
+		}
+		// $this.setSubmitButtonStatus();
+	});
+
 	/* Software changelog */
 	$(".upgrade_notice a").click(function() {
 		var changelog_href = $(this).attr("href");
@@ -1228,6 +1328,7 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 		strength.style.background = "";
 		button.disabled = true;
 		$(button).addClass("disabled");
+		$(pwd1).addClass("validate-error");
 	} else {
 		strength.style.color = "white";
 		if (false == enoughRegex.test(pwd1.value)) {
@@ -1235,26 +1336,31 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 			strength.style.background = "#878787";
 			button.disabled = true;
 			$(button).addClass("disabled");
+			$(pwd1).addClass("validate-error");
 		} else if (strongRegex.test(pwd1.value)) {
 			strength.innerHTML = "' . _('Strong') . '";
 			strength.style.background = "green";
 			button.disabled = false;
 			$(button).removeClass("disabled");
+			$(pwd1).removeClass("validate-error");
 		} else if (mediumRegex.test(pwd1.value)) {
 			strength.innerHTML = "' . _('Medium') . '";
 			strength.style.background = "orange";
 			if (pwdtype == "strong") {
 				button.disabled = true;
 				$(button).addClass("disabled");
+				$(pwd1).addClass("validate-error");
 			} else {
 				button.disabled = false;
 				$(button).removeClass("disabled");
+				$(pwd1).removeClass("validate-error");
 			}
 		} else {
 			strength.innerHTML = "' . _('Weak') . '";
 			strength.style.background = "red";
 			button.disabled = true;
 			$(button).addClass("disabled");
+			$(pwd1).addClass("validate-error");
 		}
 	}
 	if (pwd2.value.length!=0 && pwd1.value!=pwd2.value) {
@@ -1262,9 +1368,11 @@ function checkPasswd(pass, pwdbutton, pwdtype) {
 		strength.style.background = "red";
 		button.disabled = true;
 		$(button).addClass("disabled");
+		$(pwd2).addClass("validate-error");
 	} else if (pwd2.value.length==0) {
 		button.disabled = true;
 		$(button).addClass("disabled");
+		$(pwd2).addClass("validate-error");
 	} else if (user.value.length==0) {
 		strength.innerHTML = "' . _('No Username Specified') . '";
 		strength.style.background = "#878787";

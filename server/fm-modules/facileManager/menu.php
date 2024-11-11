@@ -36,22 +36,22 @@
  */
 
 if (!defined('NO_DASH')) {
-	$menu[2] = array(_('Dashboard'), _('Dashboard'), null, $fm_name, 'index.php', null, null, true);
+	$menu[2] = array(_('Dashboard'), _('Dashboard'), 'home', null, $fm_name, 'index.php', null, null, true);
 }
 
 $_fm_last_object_menu = 2;
 
-$menu[45] = array(null, null, null, null, null, 'separator');
+$menu[45] = array(null, null, null, null, null, null, 'separator');
 
-$menu[50] = array(_('Admin'), null, 'run_tools', $fm_name, 'admin-tools.php');
-	$submenu['admin-tools.php'][5] = array(_('Tools'), _('Tools'), 'run_tools', $fm_name, 'admin-tools.php');
+$menu[50] = array(_('Admin'), null, 'compass', array('run_tools', 'manage_users', 'view_logs'), $fm_name, 'admin-tools.php');
+	$submenu['admin-tools.php'][5] = array(_('Tools'), _('Tools'), null, 'run_tools', $fm_name, 'admin-tools.php');
 	if (!defined('AJAX') && getOption('auth_method')) {
-		$submenu['admin-tools.php'][10] = array(_('Users & Groups'), _('Users & Groups'), 'manage_users', $fm_name, 'admin-users.php');
+		$submenu['admin-tools.php'][10] = array(_('Users & Groups'), _('Users & Groups'), null, 'manage_users', $fm_name, 'admin-users.php');
 	}
-	$submenu['admin-tools.php'][15] = array(_('Logs'), _('Logs'), 'view_logs', $fm_name, 'admin-logs.php');
+	$submenu['admin-tools.php'][15] = array(_('Logs'), _('Logs'), null, 'view_logs', $fm_name, 'admin-logs.php');
 
-$menu[70] = array(_('Settings'), _('General Settings'), 'manage_settings', $fm_name, 'admin-settings.php', null, null, true);
-	$submenu['admin-settings.php'][5] = array(_('General'), _('General Settings'), 'manage_settings', $fm_name, 'admin-settings.php');
+$menu[70] = array(_('Settings'), _('General Settings'), 'cog', 'manage_settings', $fm_name, 'admin-settings.php', null, null, true);
+	$submenu['admin-settings.php'][5] = array(_('General'), _('General Settings'), null, 'manage_settings', $fm_name, 'admin-settings.php');
 
 $badge_counts = (!defined('AJAX')) ? getBadgeCounts('modules') + getBadgeCounts('core') : null;
-$menu[99] = array(_('Modules'), _('Module Configuration'), 'manage_modules', $fm_name, 'admin-modules.php', null, $badge_counts, true);
+$menu[99] = array(_('Modules'), _('Module Configuration'), 'university', 'manage_modules', $fm_name, 'admin-modules.php', null, $badge_counts, true);

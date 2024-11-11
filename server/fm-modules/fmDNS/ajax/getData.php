@@ -30,8 +30,7 @@ foreach (glob(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_*.
 }
 
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
-	$cfg_data = isset($_POST['option_value']) ? sanitize($_POST['option_value']) : '';
-	if (isset($_POST['option_name'])) $_POST['option_name'] = sanitize($_POST['option_name']);
+	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : '';
 	$server_serial_no = isset($_POST['server_serial_no']) ? intval($_POST['server_serial_no']) : 0;
 	$query = "SELECT def_option,def_type,def_multiple_values,def_dropdown,def_minimum_version FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$_POST['option_name']}'";
 	if (array_key_exists('domain_id', $_POST)) {
@@ -72,7 +71,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 
 				$temp_addl_zones[] = array($temp_zone_id, $temp_zone_id);
 			}
-			$available_domains = $fm_dns_zones->buildZoneJSON('all', null, $temp_addl_zones);
+			$available_domains = $fm_dns_zones->buildZoneJSON('all', 0, $temp_addl_zones);
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
 					<td width="67&#37;"><input type="hidden" name="cfg_data" class="domain_select" value="%s" /><br />
@@ -230,7 +229,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 			}
 
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label>%s</th>
-					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element" value="%s" />
+					<td width="67&#37;"><input type="hidden" name="cfg_data" class="address_match_element required" value="%s" />
 					%s
 					<script>
 					$(".address_match_element").select2({
@@ -256,7 +255,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 					<td width="67&#37;">%s', __('Option Value'), $dropdown);
 		} elseif ($result[0]->def_dropdown == 'no') {
 			printf('<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" /><br />
+					<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" class="required" /><br />
 					%s', __('Option Value'), str_replace(array('\"', '"', "'"), '', $cfg_data), $result[0]->def_type);
 		} else {
 			/** Build array of possible values */
@@ -271,13 +270,13 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST)) {
 	echo buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $fm_dns_zones->availableCloneDomains($_POST['map'], 0), 0);
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_available_options', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
-	$cfg_type = isset($_POST['cfg_type']) ? sanitize($_POST['cfg_type']) : 'global';
+	$cfg_type = isset($_POST['cfg_type']) ? $_POST['cfg_type'] : 'global';
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
 	$avail_options_array = $fm_module_options->availableOptions('add', $server_serial_no, $cfg_type);
-	echo buildSelect('cfg_name', 'cfg_name', $avail_options_array, sanitize($_POST['cfg_name']), 1, null, false, 'displayOptionPlaceholder()');
+	echo buildSelect('cfg_name', 'cfg_name', $avail_options_array, $_POST['cfg_name'], 1, null, false, 'displayOptionPlaceholder()');
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_dynamic_zone_data', $_POST) && currentUserCan('manage_records', $_SESSION['module']) && zoneAccessIsAllowed(array($_POST['domain_id']))) {
-	$server_zone_data = $fm_dns_records->getServerZoneData(sanitize($_POST['domain_id']));
+	$server_zone_data = $fm_dns_records->getServerZoneData($_POST['domain_id']);
 	
 	/** Add popup header and footer if missing */
 	if (strpos($server_zone_data, 'popup-header') === false) {
@@ -321,7 +320,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		if (array_key_exists('item_sub_type', $_POST) && $_POST['item_sub_type'] == 'domain_id') {
 			$perms = zoneAccessIsAllowed(array($_POST['item_id']), 'manage_zones');
 		} elseif ($_POST['item_type'] == 'options') {
-			$perms = zoneAccessIsAllowed(array(getNameFromID(sanitize($_POST['item_id']), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'domain_id')), 'manage_zones');
+			$perms = zoneAccessIsAllowed(array(getNameFromID($_POST['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'domain_id')), 'manage_zones');
 		}
 	}
 	if (!$perms) {
@@ -329,12 +328,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	}
 	
 	if (array_key_exists('add_form', $_POST)) {
-		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
+		$id = isset($_POST['item_id']) ? $_POST['item_id'] : null;
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {
-		$id = sanitize($_POST['item_id']);
-		$item_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
-		$item_id = isset($_POST['domain_id']) ? sanitize($_POST['domain_id']) : $item_id;
+		$id = $_POST['item_id'];
+		$item_id = isset($_POST['view_id']) ? $_POST['view_id'] : null;
+		$item_id = isset($_POST['domain_id']) ? $_POST['domain_id'] : $item_id;
 		$add_new = false;
 	} else returnError();
 	
@@ -348,7 +347,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	switch ($_POST['item_type']) {
 		case 'servers':
 			$post_class = $fm_module_servers;
-			if (isset($_POST['item_sub_type']) && sanitize($_POST['item_sub_type']) == 'groups') {
+			if (isset($_POST['item_sub_type']) && $_POST['item_sub_type'] == 'groups') {
 				$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups';
 				$prefix = 'group_';
 			}
@@ -357,11 +356,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$post_class = $fm_module_options;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$type_map = @isset($_POST['request_uri']['type']) ? sanitize($_POST['request_uri']['type']) : 'global';
+			$type_map = @isset($_POST['request_uri']['type']) ? $_POST['request_uri']['type'] : 'global';
 			break;
 		case 'domains':
 			$post_class = $fm_dns_zones;
-			$type_map = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
+			$type_map = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
 			$action = 'create';
 			if (!$add_new) $item_id = array('popup', 'template_menu');
 			
@@ -374,7 +373,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$post_class = $fm_module_logging;
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$item_type = sanitize($_POST['item_sub_type']) . ' ';
+			$item_type = $_POST['item_sub_type'] . ' ';
 			break;
 		case 'rpz':
 		case 'http':
@@ -383,17 +382,17 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 			$post_class = (in_array($_POST['item_type'], array('dnssec-policy'))) ? $fm_module_dnssec : ${"fm_module_{$_POST['item_type']}"};
 			$table = $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config';
 			$prefix = 'cfg_';
-			$type_map = sanitize($_POST['item_type']);
+			$type_map = $_POST['item_type'];
 			break;
 		case 'soa':
 			$post_class = $fm_module_templates;
 			$prefix = 'soa_';
-			$type_map = sanitize($_POST['item_type']);
+			$type_map = $_POST['item_type'];
 			break;
 		case 'domain':
 			$post_class = $fm_module_templates;
 			$prefix = 'domain_';
-			$type_map = sanitize($_POST['item_type']);
+			$type_map = $_POST['item_type'];
 			$table .= 's';
 			break;
 		default:
@@ -402,7 +401,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 	
 	if ($add_new) {
 		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys', 'dnssec'))) {
-			$edit_form = $post_class->printForm(null, $action, sanitize($_POST['item_sub_type']));
+			$edit_form = $post_class->printForm(null, $action, $_POST['item_sub_type']);
 		} elseif ($_POST['item_type'] == 'domains') {
 			$edit_form = $post_class->printForm(null, $action, $type_map);
 		} else {
@@ -416,7 +415,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan(array_unique($checks_arr
 		
 		$edit_form_data[] = $fmdb->last_result[0];
 		if (in_array($_POST['item_type'], array('logging', 'servers', 'controls', 'keys', 'dnssec'))) {
-			$edit_form = $post_class->printForm($edit_form_data, 'edit', sanitize($_POST['item_sub_type']));
+			$edit_form = $post_class->printForm($edit_form_data, 'edit', $_POST['item_sub_type']);
 		} else {
 			$edit_form = $post_class->printForm($edit_form_data, 'edit', $type_map, $item_id);
 		}

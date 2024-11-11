@@ -44,6 +44,10 @@ class fm_login {
 		$login_message = getOption('login_message');
 		if ($login_message) {
 			$login_message = '<p class="success">' . $login_message . '</p>';
+
+			if (getOption('login_message_accept')) {
+				$login_message = '<p class="success"><input name="login_message_accept" id="login_message_accept" type="checkbox" value="1" /><label for="login_message_accept">' . _('I acknowledge and accept the notice below') . '</label></p>' . $login_message;
+			}
 		}
 
 		printf('<form id="loginform" action="%1$s" method="post">
@@ -262,6 +266,8 @@ class fm_login {
 		global $fmdb, $__FM_CONFIG, $fm_name;
 		
 		if (empty($user_login) || empty($user_password)) return false;
+
+		if (getOption('login_message_accept') && isset($_POST['login_message_accept']) && $_POST['login_message_accept'] != 'true') return false;
 		
 		/** Built-in authentication */
 		$fm_db_version = getOption('fm_db_version');
@@ -482,6 +488,7 @@ This link expires in %s.',
 		$_SESSION['user']['name'] = $user->user_login;
 		$_SESSION['user']['last_login'] = $user->user_last_login;
 		$_SESSION['user']['account_id'] = $user->account_id;
+		$_SESSION['user']['theme'] = $user->user_theme;
 		$_SESSION['user']['ipaddr'] = isset($_SERVER['REMOTE_HOST']) ? $_SERVER['REMOTE_HOST'] : $_SERVER['REMOTE_ADDR'];
 		
 		/** Upgrade compatibility */

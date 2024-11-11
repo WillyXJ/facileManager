@@ -98,6 +98,11 @@ class fm_users {
 	function addUser($data) {
 		global $__FM_CONFIG, $fmdb, $fm_name, $fm_login;
 		
+		if (isset($data['group_id'])) {
+			return $this->addGroup($data);
+		}
+		
+		if (!isset($data['user_template_only'])) $data['user_template_only'] = 'no';
 		extract($data, EXTR_SKIP);
 		
 		$log_message = "Added user:\n";
@@ -122,14 +127,16 @@ class fm_users {
 			$user_auth_type = isset($user_auth_type) ? $user_auth_type : 1;
 		}
 
-		if (empty($user_login)) return _('No username defined.');
+		$ret = $this->validateFormField('user_login', $user_login);
+		if ($ret !== true) return $ret;
 		if ($user_auth_type == 2) {
 			$user_password = null;
-		} else {
-			if (empty($user_password) && $user_template_only == 'no') return _('No password defined.');
-			if ($user_password != $cpassword && $user_template_only == 'no') return _('Passwords do not match.');
+		} elseif (isset($user_template_only) && $user_template_only == 'no') {
+			$ret = $this->validateFormField('user_password', $user_password, $data);
+			if ($ret !== true) return $ret;
 		}
-		if (empty($user_email) && $user_template_only == 'no') return _('No e-mail address defined.');
+		$ret = $this->validateFormField('user_email', $user_email, $data);
+		if ($ret !== true) return $ret;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_users', 'user_login');
@@ -266,8 +273,12 @@ class fm_users {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function updateUser($post) {
+	function editUser($post) {
 		global $__FM_CONFIG, $fmdb, $fm_name, $fm_login;
+
+		if (isset($post['group_id'])) {
+			return $this->editGroup($post);
+		}
 		
 		/** Template user? */
 		if (isset($post['user_template_only']) && $post['user_template_only'] == 'yes') {
@@ -335,6 +346,13 @@ class fm_users {
 			return formatError(_('Could not update the user because a database error occurred.'), 'sql');
 		}
 
+		/** Set theme */
+		if (isset($post['user_theme'])) {
+			@session_start();
+			$_SESSION['user']['theme'] = $post['user_theme'];
+			session_write_close();
+		}
+
 		/** Process forced password change */
 		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login, 'no mail');
 		
@@ -350,7 +368,7 @@ class fm_users {
 	 * @since 2.1
 	 * @package facileManager
 	 */
-	function updateGroup($post) {
+	function editGroup($post) {
 		global $fmdb, $fm_name, $fm_login;
 		
 		$post['group_id'] = intval($post['group_id']);
@@ -602,7 +620,7 @@ HTML;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
-		$user_email = $user_default_module = null;
+		$user_email = $user_default_module = $user_theme = null;
 		$hidden = $user_perm_form = $return_form_rows = null;
 		$user_force_pwd_change = $user_template_only = null;
 		$group_name = $group_comment = $user_group = null;
@@ -622,6 +640,7 @@ HTML;
 			$popup_title = $type == 'users' ? __('Edit User') : __('Edit Group');
 		}
 		$popup_header = buildPopup('header', $popup_title);
+		$popup_footer = buildPopup('footer');
 		
 		$hidden = '<input type="hidden" name="type" value="' . $type . '" />';
 		
@@ -629,7 +648,7 @@ HTML;
 			/** Get field length */
 			$field_length = getColumnLength('fm_users', 'user_login');
 			
-			$username_form = ($action == 'add' || (string) array_search('user_login', $form_bits) == 'editable') ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" />' : '<span id="form_username">' . $user_login . '</span>';
+			$username_form = ($action == 'add' || (string) array_search('user_login', $form_bits) == 'editable') ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" class="required" />' : '<span id="form_username">' . $user_login . '</span>';
 			$hidden .= '<input type="hidden" name="user_id" value="' . $user_id . '" />';
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_login">' . _('User Login') . '</label></th>
@@ -651,7 +670,7 @@ HTML;
 			
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_email">' . _('User Email') . '</label></th>
-					<td width="67%"><input name="user_email" id="user_email" type="email" value="' . $user_email . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' /></td>
+					<td width="67%"><input name="user_email" id="user_email" type="email" value="' . $user_email . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' class="required" /></td>
 				</tr>';
 		}
 
@@ -663,23 +682,29 @@ HTML;
 			$auth_method_types = $__FM_CONFIG['options']['auth_method'];
 			if (array_shift($auth_method_types) && count($auth_method_types) > 1) {
 				$return_form_rows .= '<tr>
-					<th width="33%" scope="row"><label for="user_email">' . _('Authentication Method') . '</label></th>
+					<th width="33%" scope="row"><label for="user_auth_type">' . _('Authentication Method') . '</label></th>
 					<td width="67%">' . buildSelect('user_auth_type', 'user_auth_type', $auth_method_types, $user_auth_type) . '</td>
 				</tr>';
 			}
 		}
 		
 		if ((in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) || ($user_id == $_SESSION['user']['id'] && $user_auth_type != 2)) {
-			if ($action == 'add') $button_disabled = 'disabled';
+			if ($action == 'add') {
+				$button_disabled = 'disabled';
+				$field_required = 'class="required" ';
+			} else {
+				$field_required = '';
+			}
+
 			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
 			$return_form_rows .= '<tr class="user_password">
 					<th width="33%" scope="row"><label for="user_password">' . _('User Password') . '</label></th>
-					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'user_password\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
+					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'user_password\', \'' . $button_id . '\', \'' . $strength . '\');" ' . $field_required . '/></td>
 				</tr>
 				<tr class="user_password">
 					<th width="33%" scope="row"><label for="cpassword">' . _('Confirm Password') . '</label></th>
-					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'cpassword\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
+					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'cpassword\', \'' . $button_id . '\', \'' . $strength . '\');" ' . $field_required . '/></td>
 				</tr>
 				<tr class="user_password">
 					<th width="33%" scope="row">' . _('Password Validity') . '</th>
@@ -705,6 +730,15 @@ HTML;
 			unset($active_modules);
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row">' . _('Default Module') . '</th>
+					<td width="67%">' . $user_module_options . '</td>
+				</tr>';
+		}
+		
+		if (in_array('user_theme', $form_bits)) {
+			$user_module_options = buildSelect('user_theme', 'user_theme', getThemes(), $user_theme);
+			unset($available_themes);
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row">' . _('Theme') . '</th>
 					<td width="67%">' . $user_module_options . '</td>
 				</tr>';
 		}
@@ -738,7 +772,7 @@ HTML;
 			$hidden .= $action != 'add' ? '<input type="hidden" name="group_name" value="' . $group_name . '" />' : null;
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="group_name">' . _('Group Name') . '</label></th>
-					<td width="67%"><input name="group_name" id="group_name" type="text" value="' . $group_name . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' /></td>
+					<td width="67%"><input name="group_name" id="group_name" type="text" value="' . $group_name . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' class="required" /></td>
 				</tr>';
 		}
 		
@@ -860,6 +894,7 @@ PERM;
 		} while (false);
 		
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
+		$return_form = '';
 		if ($display_type == 'popup') $return_form .= $popup_header;
 		$return_form .= '
 			<div>
@@ -870,12 +905,7 @@ PERM;
 		
 		$return_form .= '</table></div>';
 
-		if ($display_type == 'popup') $return_form .= '
-		</div>
-		<div class="popup-footer">
-			<input type="submit" id="' . $button_id . '" name="submit" value="' . $button_text . '" class="button primary ' . $button_disabled . '" ' . $button_disabled . '/>
-			<input type="button" value="' . _('Cancel') . '" class="button left" id="cancel_button" />
-		</div>
+		if ($display_type == 'popup') $return_form .= $popup_footer . '
 		</form>
 		<script>
 			$(document).ready(function() {
@@ -982,7 +1012,7 @@ PERM;
 
 		$query = sprintf("INSERT INTO fm_keys (`account_id`, `user_id`, `key_token`, `key_secret`) VALUES (%d, %d, '%s', '%s')",
 			$_SESSION['user']['account_id'], $_SESSION['user']['id'], $key_token, password_hash($key_secret, PASSWORD_DEFAULT));
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return $popup_header . formatError(_('Could not create the keypair because a database error occurred.'), 'sql') . $popup_footer;
@@ -1038,6 +1068,7 @@ PERM;
 		$fm_user_caps = getAvailableUserCapabilities();
 
 		if (!is_array($caps)) return _('None');
+		$perms = array();
 
 		foreach ($caps as $module => $module_caps) {
 			$module_perms = array();
@@ -1062,6 +1093,39 @@ PERM;
 		return join("\n", $perms);
 	}
 
+
+	/**
+	 * Validates a form field
+	 *
+	 * @since 4.8.0
+	 * @package facileManager
+	 *
+	 * @param string $field Form field name
+	 * @param string $value Form field value
+	 * @param array $data Data array of secondary fields and values
+	 * @return string
+	 */
+	function validateFormField($field, $value, $data = '') {
+		switch ($field) {
+			case 'user_login':
+				if (empty($value)) return _('No username defined.');
+				break;
+			case 'user_password':
+			case 'cpassword':
+				if (is_array($data)) {
+					if (empty($value) && isset($data['user_template_only']) && $data['user_template_only'] == 'no') return _('No password defined.');
+					if ($value != $data['cpassword'] && isset($data['user_template_only']) && $data['user_template_only'] == 'no') return _('Passwords do not match.');
+					$regex = ($GLOBALS['PWD_STRENGTH'] == 'strong') ? '/^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\W).*$/' : "^(?=.{7,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$";
+					if (!preg_match($regex, $value)) return _('Password does not meet the complexity requirements.');
+				}
+				break;
+			case 'user_email':
+				if (empty($value) && isset($data['user_template_only']) && $data['user_template_only'] == 'no') return _('No e-mail address defined.');
+				break;
+		}
+
+		return true;
+	}
 }
 
 if (!isset($fm_users))

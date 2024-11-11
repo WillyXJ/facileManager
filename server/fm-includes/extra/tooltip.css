@@ -67,8 +67,8 @@
 	z-index: 1000;
 	padding: 12px;
 	width: 265px;
-	background-color: #464646;
-	color: #fff;
+	background-color: var(--tooltip-bg);
+	color: var(--tooltip-text);
 	content: attr(data-tooltip);
 	font-size: 12px;
 	line-height: 1.2;
@@ -96,7 +96,7 @@
 .tooltip-top:before {
 	margin-left: -6px;
 	margin-bottom: -12px;
-	border-top-color: #464646;
+	border-top-color: var(--tooltip-bg);
 }
 
 /* Horizontally align top/bottom tooltips */
@@ -136,7 +136,7 @@
 	margin-right: -12px;
 	margin-bottom: 0;
 	border-top-color: transparent;
-	border-left-color: #464646;
+	border-left-color: var(--tooltip-bg);
 }
 
 .tooltip-left:hover:before,
@@ -160,7 +160,7 @@
 	margin-top: -12px;
 	margin-bottom: 0;
 	border-top-color: transparent;
-	border-bottom-color: #464646;
+	border-bottom-color: var(--tooltip-bg);
 }
 
 .tooltip-bottom:hover:before,
@@ -183,7 +183,7 @@
 	margin-bottom: 0;
 	margin-left: -12px;
 	border-top-color: transparent;
-	border-right-color: #464646;
+	border-right-color: var(--tooltip-bg);
 }
 
 .tooltip-right:hover:before,

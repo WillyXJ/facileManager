@@ -2,12 +2,26 @@
 ==================
 * Server - [improvement] When using server groups, primary zones can automatically
            set also-notify to include all secondary servers.
+* Server - [improvement] Defined keys can now be optionally used with rndc. (Issue #636 #389)
+* Server - [improvement] Editing DNSSEC keys now shows the key name and type.
+* Server - [improvement] Zone groups can now be referenced in RPZ and validate-except.
+* Server - [improvement] Takes better advantage of fM JS grab functionality.
+* Server - [improvement] Added additional RPZ options.
+* Server - [improvement] Provide better configuration logging.
+* Server - [improvement] Made form validation global.
+* Server - [improvement] Moved feature minimum version notices.
+* Server - [improvement] Form validation is done inline now (less zone records).
 * Server - [bug] Dynamic zones now pull the zone from the correct directory.
 * Server - [bug] Fixed modifying dnssec policies when an override exists.
 * Server - [bug] Added missing icon to add options for zone templates.
 * Server - [bug] Fixed PHP errors.
 * Server - [bug] Fixed server group member references. (Issue #637)
 * Server - [bug] Fixed message formatting of dynamic zone errors.
+* Server - [bug] Server updates via cron would specify incorrect zone directory. (Issue #638)
+* Server - [bug] Fixed RPZ ordering.
+* Server - [bug] Fixed option value logging formatting.
+* Server - [bug] Fixed inability to delete unused logging channels.
+* Server - [bug] Redirect URL field no longer shows when creating a primary zone.
 
 6.2.0 (2024-10-14)
 ==================

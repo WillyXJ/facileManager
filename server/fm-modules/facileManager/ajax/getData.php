@@ -44,17 +44,16 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
-	$form_bits = array('user_login', 'user_comment', 'user_email', 'user_module', 'user_token');
+	$form_bits = array('user_login', 'user_comment', 'user_email', 'user_module', 'user_token', 'user_theme');
 	if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_auth_type') == 1) {
 		$form_bits[] = 'user_password';
 	}
-	$edit_form = '<div id="popup_response" style="display: none;"></div>' . "\n";
 	basicGet('fm_users', $_SESSION['user']['id'], 'user_', 'user_id');
 	$results = $fmdb->last_result;
 	if (!$fmdb->num_rows || $fmdb->sql_errors) returnError($fmdb->last_error);
 	
 	$edit_form_data[] = $results[0];
-	$edit_form .= $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits, 'users', 'Save', 'update_user_profile', null, false);
+	$edit_form = $fm_users->printUsersForm($edit_form_data, 'edit', $form_bits, 'users', 'Save', 'update_user_profile', null, false);
 
 	exit($edit_form);
 }
@@ -72,11 +71,11 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	if (!currentUserCan('manage_users')) returnUnAuth();
 	
 	if (array_key_exists('add_form', $_POST)) {
-		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
+		$id = isset($_POST['item_id']) ? $_POST['item_id'] : null;
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {
-		$id = sanitize($_POST['item_id']);
-		$view_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
+		$id = $_POST['item_id'];
+		$view_id = isset($_POST['view_id']) ? $_POST['view_id'] : null;
 		$add_new = false;
 	} else returnError();
 
