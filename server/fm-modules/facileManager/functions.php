@@ -250,6 +250,9 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 		if ($subtitle == 'auto') $subtitle = getPageTitle();
 		$title = "$subtitle &lsaquo; $title";
 	}
+
+	$theme = (isset($_SESSION['user']['theme'])) ? $_SESSION['user']['theme'] : getOption('theme');
+	if (!$theme) $theme = getThemes()[0];
 	
 	$head = $logo = null;
 	
@@ -279,12 +282,13 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 	
 	echo <<<HTML
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" class="default-theme $theme">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>$title</title>
 		<link rel="shortcut icon" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/images/favicon.png" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/themes.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui.min.css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/font-awesome/css/font-awesome.min.css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css" />
@@ -346,7 +350,7 @@ function getTopHeader($help) {
 			$module_version_info = sprintf('<br />%s v%s', $_SESSION['module'], $__FM_CONFIG[$_SESSION['module']]['version']);
 			$fm_version_info = "$fm_name v$fm_version";
 		} else {
-			$fm_version_info = sprintf('<span class="single_line">%s v%s</span>', $fm_name, $fm_version);
+			$fm_version_info = sprintf('<span>%s v%s</span>', $fm_name, $fm_version);
 		}
 		
 		$sections['left'][] = sprintf('<img src="%s" alt="%s" title="%s" />%s%s', 
@@ -393,15 +397,15 @@ HTML;
 			$fm_name = isset($_SESSION['module']) ? $_SESSION['module'] : $fm_name;
 		}
 	
-		$sections['right'][] = '<a class="single_line help_link" href="#"><i class="fa fa-life-ring fa-lg" aria-hidden="true"></i></a>';
+		$sections['right'][] = '<a class="help_link" href="#"><i class="fa fa-life-ring fa-lg" aria-hidden="true"></i></a>';
 
 		$help_file = buildHelpFile();
 	
 		if (defined('FM_INCLUDE_SEARCH') && FM_INCLUDE_SEARCH === true) {
-			$sections['right'][] = sprintf('<a class="single_line search" href="#" title="%s"><i class="fa fa-search fa-lg"></i></a>%s', _('Search this page'), displaySearchForm());
+			$sections['right'][] = sprintf('<div class="flex-apart"><a class="search" href="#" title="%s"><i class="fa fa-search fa-lg"></i></a>%s</div>', _('Search this page'), displaySearchForm());
 		}
 
-		$sections['right'][] = sprintf('<a class="single_line process_all_updates tooltip-bottom" href="#" data-tooltip="%s"><i class="fa fa-refresh fa-lg"></i></a><span class="update_count"></span>', _('Process all available updates now'));
+		$sections['right'][] = sprintf('<a class="process_all_updates tooltip-bottom" href="#" data-tooltip="%s"><i class="fa fa-refresh fa-lg"></i></a><span class="update_count"></span>', _('Process all available updates now'));
 
 		$return_extra .= <<<HTML
 	<div id="help">
@@ -4217,7 +4221,7 @@ function cleanAndTrimInputs($post) {
 /**
  * Gets the server/group name
  *
- * @since 4.8.0
+ * @since 5.0.0
  * @package facileManager
  *
  * @param string|integer $id Serial number or group ID
@@ -4237,4 +4241,27 @@ function getServerName($id) {
 	}
 
 	return false;
+}
+
+
+/**
+ * Gets the available themes
+ *
+ * @since 5.0.0
+ * @package facileManager
+ *
+ * @return array
+ */
+function getThemes() {
+	$theme_css = dirname(__FILE__) . '/css/themes.css';
+	$theme_contents = file_get_contents($theme_css);
+
+	$themes = array();
+
+	preg_match_all('/\.([A-Za-z0-9_\-])+ {/', $theme_contents, $selectors);
+	if (is_array($selectors[0])) {
+		$themes = str_replace(array('.', ' {'), '', $selectors[0]);
+	}
+	
+	return $themes;
 }

@@ -44,7 +44,7 @@ if (is_array($_POST) && array_key_exists('user_id', $_POST)) {
 	
 	include(ABSPATH . 'fm-modules/'. $fm_name . '/classes/class_users.php');
 	
-	$form_bits = array('user_login', 'user_comment', 'user_email', 'user_module', 'user_token');
+	$form_bits = array('user_login', 'user_comment', 'user_email', 'user_module', 'user_token', 'user_theme');
 	if (getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_auth_type') == 1) {
 		$form_bits[] = 'user_password';
 	}
