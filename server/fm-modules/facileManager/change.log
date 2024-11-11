@@ -14,6 +14,7 @@
 * Server - [bug] Forced password changes failed when the mail server was inaccessible.
 * Server - [bug] Editing a user group incorrectly required a name change.
 * Server - [bug] Upgrading fM or any modules inadvertently cleared the upgrade flag of other modules.
+* Server - [bug] Fixed menu display for limited user access.
 
 4.7.0 (2024-09-30)
 ==================

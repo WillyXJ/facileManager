@@ -496,7 +496,7 @@ HTML;
 		}
 		
 		/** Build submenus */
-		if (count((array) $filtered_submenu[$slug]) > 1) {
+		if (count((array) $filtered_submenu[$slug])) {
 			array_push($classes, 'has-sub');
 			if (!in_array('current', $classes)) {
 				foreach ($filtered_submenu[$slug] as $submenu_array) {
@@ -523,8 +523,10 @@ HTML;
 		}
 		
 		$arrow = null;
+		$main_menu_item_link = $slug;
 		if (in_array('has-sub', $classes)) {
 			$arrow = sprintf('<span class="menu-arrow"><i class="fa fa-angle-%s menu-icon" aria-hidden="true"></i></span>', (in_array('current', $classes)) ? 'down' : 'right');
+			$main_menu_item_link = '#';
 		}
 		$menu_icon = ($menu_icon) ? sprintf('<i class="fa fa-%s" aria-hidden="true"></i>', $menu_icon) : null;
 		
@@ -539,9 +541,9 @@ HTML;
 			}
 		} else {
 			/** Display the menu item if allowed */
-			if (currentUserCan($capability, $module)) {
+			if (currentUserCan($capability, $module) || in_array('has-sub', $classes)) {
 				if ($badge_count && $show_top_badge_count) $menu_title = sprintf($menu_title . ' <span class="menu-badge"><p>%s</p></span>', $badge_count);
-				$main_menu_html .= sprintf('<li%s><a href="%s"><span class="menu-icon">%s</span><span>%s</span>%s</a>%s</li>' . "\n", $class, $slug, $menu_icon, $menu_title, $arrow, $sub_menu_html);
+				$main_menu_html .= sprintf('<li%s><a href="%s"><span class="menu-icon">%s</span><span>%s</span>%s</a>%s</li>' . "\n", $class, $main_menu_item_link, $menu_icon, $menu_title, $arrow, $sub_menu_html);
 			}
 		}
 		
@@ -642,29 +644,16 @@ function getCurrentUserMenu() {
 		ksort($submenu_array);
 		$filtered_menus[1][$slug] = array_filter($submenu_array, 'filterMenu');
 	}
-	// echo '<pre>';print_r($filtered_menus);echo '</pre>';
 	
-	/** Main menu */
-	$temp_menu = $menu;
-	foreach ($menu as $position => $element) {
-		list($menu_title, $page_title, $menu_icon, $capability, $module, $slug, $class) = $element;
-		if (array_key_exists($slug, $filtered_menus[1])) {
-			if (count($filtered_menus[1][$slug]) == 1) {
-				$single_element = array_values($filtered_menus[1][$slug]);
-				if (!empty($single_element[0][0])) {
-					$temp_menu[$position] = array_shift($filtered_menus[1][$slug]);
-					if (isset($element[8]) && $element[8]) $temp_menu[$position][0] = $menu_title;
-				}
-			}
-		}
-	}
-	
-	$filtered_menus[0] = array_filter($temp_menu, 'filterMenu');
+	$filtered_menus[0] = array_filter($menu, 'filterMenu');
 	
 	unset($temp_menu, $element, $submenu_array, $slug, $position, $single_element);
 
-	// echo '<pre>';print_r($filtered_menus);echo '</pre>';
-	// exit;
+	/** Handle module settings, but no fM settings permissions */
+	if (array_key_exists('admin-settings.php', $filtered_menus[1]) && !array_key_exists('70', $filtered_menus[0])) {
+		$filtered_menus[0][70] = $menu[70];
+	}
+
 	return $filtered_menus;
 }
 

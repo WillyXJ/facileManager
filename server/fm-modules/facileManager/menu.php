@@ -43,7 +43,7 @@ $_fm_last_object_menu = 2;
 
 $menu[45] = array(null, null, null, null, null, null, 'separator');
 
-$menu[50] = array(_('Admin'), null, 'compass', 'run_tools', $fm_name, 'admin-tools.php');
+$menu[50] = array(_('Admin'), null, 'compass', array('run_tools', 'manage_users', 'view_logs'), $fm_name, 'admin-tools.php');
 	$submenu['admin-tools.php'][5] = array(_('Tools'), _('Tools'), null, 'run_tools', $fm_name, 'admin-tools.php');
 	if (!defined('AJAX') && getOption('auth_method')) {
 		$submenu['admin-tools.php'][10] = array(_('Users & Groups'), _('Users & Groups'), null, 'manage_users', $fm_name, 'admin-users.php');
