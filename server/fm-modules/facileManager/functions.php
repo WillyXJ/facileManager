@@ -4222,11 +4222,11 @@ function getServerName($id) {
 	if (!$id) {
 		return _('All Servers');
 	} elseif (strpos($id, 'g_') !== false) {
-		return getNameFromID(str_replace('g_', '', $id), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
+		return getNameFromID(str_replace('g_', '', $id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 	} elseif (strpos($id, 's_') !== false) {
-		return getNameFromID(str_replace('s_', '', $id), 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+		return getNameFromID(str_replace('s_', '', $id), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 	} elseif (intval($id)) {
-		return getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
+		return getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name');
 	}
 
 	return false;

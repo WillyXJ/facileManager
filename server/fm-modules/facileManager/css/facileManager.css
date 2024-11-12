@@ -547,6 +547,9 @@ h4 {
 #page_title_container > div.flex-left > div {
 	padding-right: 1em;
 }
+#page_title_container > div.flex-right > div {
+	padding-left: 1em;
+}
 
 
 .fm-noscroll {
