@@ -302,8 +302,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="acls" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="acl_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
@@ -364,7 +366,6 @@ HTML;
 		} else {
 			$post['wlan_ids'] = join(';', $post['wlan_ids']);
 		}
-		$post['acl_mac'] = sanitize($post['acl_mac']);
 
 		/** Valid MAC address? */
 		if (version_compare(PHP_VERSION, '5.5.0', '>=') && !verifySimpleVariable($post['acl_mac'], FILTER_VALIDATE_MAC)) {

@@ -93,8 +93,8 @@ if (currentUserCan($required_permission, $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-$avail_servers = buildServerSubMenu($server_serial_no);
-$avail_wlans = buildWLANSubMenu($item_id);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildWLANSubMenu($item_id);
 
 $sort_direction = null;
 $sort_field = 'config_name';
@@ -102,19 +102,8 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan($required_permission, $_SESSION['module']), $name, $rel);
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	<div id="configtypesmenu"></div>
-	$avail_wlans
-	$avail_servers
-	</div>
-</div>
+echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan($required_permission, $_SESSION['module']), $name, $rel, null, $addl_title_blocks);
 
-HTML;
-	
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('config_id', $sort_field, 'config_name'), 'config_', "AND config_type IN ('$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;

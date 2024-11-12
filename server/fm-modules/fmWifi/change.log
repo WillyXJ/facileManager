@@ -1,6 +1,8 @@
 0.7.0 (2024-??-??)
 ==================
 * Server - [improvement] Made form validation global.
+* Server - [improvement] Supports fM 5.0.0.
+* Server - [improvement] Provide better configuration logging.
 
 0.6.0 (2024-09-30)
 ==================

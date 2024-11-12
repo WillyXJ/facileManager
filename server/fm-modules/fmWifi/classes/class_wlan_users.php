@@ -104,7 +104,7 @@ class fm_wifi_wlan_users {
 			return formatError(_('Could not add the user because a database error occurred.'), 'sql');
 		}
 		
-		addLogEntry(__('Added a WLAN User with the following details') . ":\n" . __('Name') . ": {$post['wlan_user_login']}\n" . __('Hardware Address') . ": {$post['acl_mac']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['acl_comment']}");
+		addLogEntry(__('Added a WLAN User with the following details') . ":\n" . __('Name') . ": {$post['wlan_user_login']}\n" . __('Hardware Address') . ": {$post['wlan_user_mac']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['wlan_user_comment']}");
 		
 //		setBuildUpdateConfigFlag(getWLANServers($insert_id), 'yes', 'build');
 		
@@ -128,7 +128,7 @@ class fm_wifi_wlan_users {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'user_id', 'type', 'log_message_member_wlans');
+		$exclude = array('submit', 'action', 'user_id', 'type', 'log_message_member_wlans', 'page', 'item_type');
 
 		$sql_edit = '';
 		
@@ -177,7 +177,7 @@ class fm_wifi_wlan_users {
 
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', $id, 'wlan_user_', 'deleted', 'wlan_user_id') === false) {
-			return formatError(__('This user could not be deleted because a database error occurred.'), 'sql');
+			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 			addLogEntry(sprintf(__("WLAN User '%s' was deleted."), $tmp_name));
@@ -277,8 +277,9 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
 		%s
 						<table class="form-table">
 							<tr>
@@ -341,8 +342,8 @@ HTML;
 		unset($post['user_login'], $post['user_password'], $post['cpassword']);
 		
 		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_name');
-		if ($field_length !== false && strlen($post['config_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Host name is too long (maximum %d characters).', $field_length), $field_length);
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_login');
+		if ($field_length !== false && strlen($post['wlan_user_login']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'User name is too long (maximum %d character).', 'User name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', $post['wlan_user_login'], 'wlan_user_', 'wlan_user_login', "AND wlan_user_id!='{$post['user_id']}'");

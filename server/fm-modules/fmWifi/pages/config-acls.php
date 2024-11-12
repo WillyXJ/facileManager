@@ -39,40 +39,6 @@ if (!isset($display_type)) $display_type = null;
 if (!isset($avail_types)) $avail_types = null;
 if (!isset($include_submenus)) $include_submenus = true;
 
-if (currentUserCan($required_permission, $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'server_serial_no'), 'include');
-	
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_wifi_acls->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-//				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_wifi_acls->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-//				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	}
-}
-
 printHeader();
 @printMenu();
 
@@ -95,7 +61,6 @@ HTML;
 /** Process domain_view filtering */
 if (isset($_GET['wlan_ids']) && !in_array(0, $_GET['wlan_ids'])) {
 	foreach (array_merge(array(0), (array) $_GET['wlan_ids']) as $view_id) {
-		$view_id = sanitize($view_id);
 		(string) $domain_view_sql .= " (wlan_ids='$view_id' OR wlan_ids LIKE '$view_id;%' OR wlan_ids LIKE '%;$view_id;%' OR wlan_ids LIKE '%;$view_id') OR";
 	}
 	if ($domain_view_sql) {

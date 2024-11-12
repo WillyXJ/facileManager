@@ -164,7 +164,10 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
+		$exclude = array('submit', 'action', 'page', 'item_type', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
+		$logging_excluded_fields = array('account_id');
+
+		$log_message = __("Added server with the following") . ":\n";
 
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
@@ -172,6 +175,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -186,8 +190,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		}
 		
 		/** Add entry to audit log */
-		addLogEntry("Added server:\nName: {$post['server_name']} ({$post['server_serial_no']})\n" .
-				"Update Method: {$post['server_update_method']}");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -216,13 +219,19 @@ class fm_module_servers extends fm_shared_module_servers {
 				return formatError(__('Could not update the zone group because a database error occurred.') . $fmdb->last_query, 'sql');
 			}
 
+			/** Return if there are no changes */
+			if (!$fmdb->rows_affected) return true;
+
 			$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
 			$log_message = sprintf(__('Updated AP group (%s) with the following details'), $old_name) . "\n";
 			addLogEntry($log_message . __('Name') . ": {$post['group_name']}\n" . __('Member APs') . ": " . $post['log_message_member_servers'] . "\n" . _('Comment') . ": {$post['group_comment']}");
 			return true;
 		}
 
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun');
+		$exclude = array('submit', 'action', 'page', 'item_type', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun');
+
+		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+		$log_message = sprintf(__("Updated server '%s' to the following"), $old_name) . ":\n";
 
 		$sql_edit = '';
 		
@@ -230,12 +239,12 @@ class fm_module_servers extends fm_shared_module_servers {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				$log_message .= ($data) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		/** Update the server */
-		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$fmdb->query($query);
 		
@@ -250,7 +259,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
 		/** Add entry to audit log */
-		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nConfig File: {$post['server_config_file']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -476,8 +485,10 @@ HTML;
 		$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name');
 
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="servers" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="%s_id" value="%d" />',
 				$popup_header, $action, rtrim($type, 's'), $server_id
@@ -513,7 +524,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_name">%s</label></th>
-					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="placeholder" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="placeholder" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_update_method">%s</label></th>
@@ -556,7 +567,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
-					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_masters">%s</label></th>
@@ -610,7 +621,7 @@ HTML;
 			if (empty($post['group_name'])) return __('No group name defined.');
 			
 			/** Check if the group name already exists */
-			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', sanitize($post['group_name']), 'group_', 'group_name', "AND group_id!={$post['group_id']}");
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', $post['group_name'], 'group_', 'group_name', "AND group_id!={$post['group_id']}");
 			if ($fmdb->num_rows) return __('Access point group already exists.');
 			
 			/** Check name field length */
@@ -618,7 +629,7 @@ HTML;
 			if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Group name is too long (maximum %d characters).', $field_length), $field_length);
 			
 			/** Process group masters */
-			$log_message_member_servers = '';
+			$log_message_member_servers = $group_members = '';
 			foreach ($post['group_members'] as $val) {
 				if (!$val) {
 					$group_members = 0;

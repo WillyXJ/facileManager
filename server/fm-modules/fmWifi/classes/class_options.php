@@ -85,14 +85,9 @@ class fm_module_options {
 		if (empty($post['config_name'])) return false;
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' AND server_serial_no='{$post['server_serial_no']}'");
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' AND config_parent_id!='{$post['item_id']}' AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
-			$num_same_config = $fmdb->num_rows;
-			$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option='{$post['config_name']}' AND def_option_type='{$post['config_type']}'";
-			$fmdb->get_results($query);
-			if ($fmdb->last_result[0]->def_max_parameters >= 0 && $num_same_config >= $fmdb->last_result[0]->def_max_parameters) {
-				return __('This record already exists.');
-			}
+			return __('This record already exists.');
 		}
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
@@ -101,7 +96,7 @@ class fm_module_options {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'config_id');
+		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type', 'item_id');
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -118,17 +113,14 @@ class fm_module_options {
 		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
-			return formatError(__('Could not add the option because a database error occurred.'), 'sql');
+			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 		
 		$tmp_name = $post['config_name'];
-		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
-//		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-//		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+		$tmp_server_name = getServerName($post['server_serial_no']);
+		$tmp_wlan_name = ($post['item_id']) ? getNameFromID($post['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
 
-//		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-//		$config_data = strpos($post['config_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['config_data']) : $post['config_data'];
-		addLogEntry("Added option:\nName: $tmp_name\nValue: {$post['config_data']}\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
+		addLogEntry("Added option:\nName: $tmp_name\nValue: {$post['config_data']}\nWLAN: $tmp_wlan_name\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
 		return true;
 	}
 
@@ -147,20 +139,12 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' AND server_serial_no='{$post['server_serial_no']}'");
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' AND config_parent_id!='{$post['item_id']}' AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
-			$result = $fmdb->last_result;
-			if ($result[0]->config_id != $post['config_id']) {
-				$num_same_config = $fmdb->num_rows;
-				$query = "SELECT def_max_parameters FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option='{$post['config_name']}' AND def_option_type='{$post['config_type']}'";
-				$fmdb->get_results($query);
-				if ($fmdb->last_result[0]->def_max_parameters >= 0 && $num_same_config > $fmdb->last_result[0]->def_max_parameters - 1) {
-					return __('This record already exists.');
-				}
-			}
+			return __('This record already exists.');
 		}
 		
-		$exclude = array('submit', 'action', 'config_id');
+		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type');
 
 		$sql_edit = '';
 		
@@ -185,13 +169,10 @@ class fm_module_options {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
-//		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-//		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+		$tmp_server_name = getServerName($post['server_serial_no']);
+		$tmp_wlan_name = ($post['item_id']) ? getNameFromID($post['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
 
-//		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-//		$config_data = strpos($post['config_data'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['config_data']) : $post['config_data'];
-		addLogEntry("Updated option '$old_name' to:\nName: {$post['config_name']}\nValue: {$post['config_data']}\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
+		addLogEntry("Updated option '$old_name' to:\nName: {$post['config_name']}\nValue: {$post['config_data']}\nWLAN: $tmp_wlan_name\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
 		return true;
 	}
 	
@@ -270,18 +251,10 @@ HTML;
 		$server_serial_no_field = $config_is_parent = $config_parent_id = $config_data = $config_id_name = null;
 		
 		if (isset($_POST['item_sub_type'])) {
-			$config_id_name = sanitize($_POST['item_sub_type']);
+			$config_id_name = $_POST['item_sub_type'];
 		}
 		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 		$server_serial_no_field = '<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />';
-		$request_uri = 'config-options.php';
-		if (isset($_REQUEST['request_uri'])) {
-			$request_uri .= '?';
-			foreach ($_REQUEST['request_uri'] as $key => $val) {
-				$request_uri .= $key . '=' . sanitize($val) . '&';
-			}
-			$request_uri = rtrim($request_uri, '&');
-		}
 		$disabled = $action == 'add' ? null : 'disabled';
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -309,8 +282,6 @@ HTML;
 			$data_holder = $results[0]->def_type;
 		}
 		
-		$config_data = sanitize($config_data);
-
 		$popup_title = $action == 'add' ? __('Add Option') : __('Edit Option');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
@@ -318,8 +289,9 @@ HTML;
 		$return_form = sprintf('<script>
 			displayOptionPlaceholder("%s");
 		</script>
-		<form name="manage" id="manage" method="post" action="%s">
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="options" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="config_id" value="%d" />
 			<input type="hidden" name="config_type" value="%s" />
@@ -347,7 +319,7 @@ HTML;
 				});
 			});
 		</script>',
-				$config_data, $request_uri, $popup_header,
+				$config_data, $popup_header,
 				$action, $config_id, $config_type, $config_id_name, $config_type_id, $server_serial_no_field,
 				__('Option Name'), $config_avail_options,
 				_('Comment'), $config_comment,
@@ -387,10 +359,10 @@ HTML;
 		
 		if ($action == 'add') {
 //			if (isset($_POST['view_id'])) {
-//				$config_id_sql[] = 'view_id = ' . sanitize($_POST['view_id']);
+//				$config_id_sql[] = 'view_id = ' . $_POST['view_id'];
 //			}
 			if (isset($_POST['item_id'])) {
-				$config_id_sql[] = 'config_parent_id = ' . sanitize($_POST['item_id']);
+				$config_id_sql[] = 'config_parent_id = ' . $_POST['item_id'];
 			}
 			if (isset($config_id_sql)) {
 				$config_id_sql = 'AND ' . implode(' AND ', $config_id_sql);
@@ -414,7 +386,7 @@ HTML;
 			$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function='options'";
 			$query .= " AND def_option_type IN ('";
 			if (isset($_POST['item_id']) && $_POST['item_id'] != 0) {
-				$query .= sanitize($_POST['item_sub_type']);
+				$query .= $_POST['item_sub_type'];
 				if ($_POST['item_sub_type'] != 'failover') {
 					$query .= "','global";
 				}
@@ -465,7 +437,7 @@ HTML;
 			}
 		}
 		
-		$post = $this->validateDefType($post);
+		$post = $this->validateDefType($post, $def_option);
 		
 		return $post;
 	}
@@ -477,13 +449,15 @@ HTML;
 	 * @since 0.1
 	 * @package fmWifi
 	 *
-	 * @param array $def_option Option type to validate
+	 * @param string $def_option Option type to validate
 	 * @return string Return formated data
 	 */
-	function validateDefType($post) {
+	function validateDefType($post, $def_option = null) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT def_type,def_dropdown,def_int_range FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = '{$post['config_name']}'";
+		$def_option = ($def_option) ? $def_option : "'{$post['config_name']}'";
+		
+		$query = "SELECT def_type,def_dropdown,def_int_range FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_option = $def_option";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			if ($result[0]->def_dropdown == 'no') {

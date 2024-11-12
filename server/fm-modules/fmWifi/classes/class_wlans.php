@@ -109,6 +109,8 @@ class fm_wifi_wlans {
 		if (empty($name)) return __('No name defined.');
 		
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps', 'config_type'));
+		$logging_excluded_fields = array('account_id', 'config_is_parent', 'config_type', 'config_data');
+		$log_message = __("Added WLAN with the following") . ":\n";
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
@@ -116,6 +118,7 @@ class fm_wifi_wlans {
 				if ($data) {
 					$sql_fields .= $key . ', ';
 					$sql_values .= "'$data', ";
+					$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('config_', $key, $data) : null;
 				}
 			}
 		}
@@ -144,7 +147,7 @@ class fm_wifi_wlans {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'page', 'item_type', 'config_type'));
 		
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
@@ -176,6 +179,7 @@ class fm_wifi_wlans {
 				if ($i) $sql_fields .= $key . ', ';
 				
 				$sql_values .= "'$data', ";
+				$log_message .= ($post[$handler]) ? formatLogKeyData('config_', $handler, $post[$handler]) : null;
 			}
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
@@ -190,12 +194,9 @@ class fm_wifi_wlans {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = "Added host:\nName: $name\nHardware Address: {$post['hardware']}\nFixed Address: {$post['fixed-address']}";
-		$log_message .= "\nComment: {$post['config_comment']}";
-		addLogEntry($log_message);
-		
 		setBuildUpdateConfigFlag(getWLANServers($insert_id), 'yes', 'build');
 		
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -227,12 +228,17 @@ class fm_wifi_wlans {
 		if (empty($name)) return __('No name defined.');
 		
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps'));
+		$logging_excluded_fields = array('account_id', 'config_is_parent', 'config_type', 'config_data');
 		
+		$old_name = getNameFromID($post['config_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
+		$log_message = sprintf(__("Updated SSID '%s' to the following"), $old_name) . ":\n";
+
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
 				if ($data) {
 					$sql_values .= "$key='$data', ";
+					$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('config_', $key, $data) : null;
 				}
 			}
 		}
@@ -247,6 +253,8 @@ class fm_wifi_wlans {
 			return formatError(__('Could not add the item because a database error occurred.'), 'sql');
 		}
 		
+		$rows_affected = $fmdb->rows_affected;
+
 		/** Update config children */
 		$child['config_is_parent'] = 'no';
 		$child['config_data'] = $child['config_name'] = null;
@@ -256,7 +264,7 @@ class fm_wifi_wlans {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'account_id', 'config_children'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'account_id', 'page', 'item_type', 'config_type'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -267,6 +275,7 @@ class fm_wifi_wlans {
 			foreach ($child as $key => $data) {
 				$sql_values .= "$key='$data', ";
 			}
+			$log_message .= ($post[$handler]) ? formatLogKeyData('config_', $handler, $post[$handler]) : null;
 			$sql_values = rtrim($sql_values, ', ');
 			
 			$query = "$sql_start $sql_values WHERE config_parent_id={$post['config_id']} AND config_name='$handler' LIMIT 1";
@@ -275,19 +284,21 @@ class fm_wifi_wlans {
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 			}
+
+			$rows_affected += $fmdb->rows_affected;
 		}
 		
 		/** Reassigned children */
 		$query = "$sql_start config_parent_id=0 WHERE config_parent_id={$post['config_id']} AND config_is_parent='yes'";
 		$fmdb->query($query);
-		if (is_array($post['config_children'])) {
-			$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
-			$fmdb->query($query);
-		}
+
+		/** Return if there are no changes */
+		if (!$rows_affected) return true;
 
 		/** Server changed so configuration needs to be built */
 		setBuildUpdateConfigFlag(getWLANServers($item_id), 'yes', 'build');
 		
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -311,10 +322,10 @@ class fm_wifi_wlans {
 		
 		/** Delete item */
 		if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $id, 'config_', 'deleted', 'config_id') === false) {
-			return formatError(__('This host could not be deleted because a database error occurred.'), 'sql');
+			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("Host '%s' was deleted."), $tmp_name));
+			addLogEntry(sprintf(__("SSID '%s' was deleted."), $tmp_name));
 			return true;
 		}
 	}
@@ -510,8 +521,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="wlans" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="config_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
@@ -525,7 +538,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
-								<td width="67&#37;" nowrap><input name="config_name" id="config_name" type="text" value="%s" /><br /><input name="ignore_broadcast_ssid" id="ignore_broadcast_ssid" type="checkbox" value="on" %s /> <label for="ignore_broadcast_ssid">%s</label></td>
+								<td width="67&#37;" nowrap><input name="config_name" id="config_name" type="text" value="%s" class="required" /><br /><input name="ignore_broadcast_ssid" id="ignore_broadcast_ssid" type="checkbox" value="on" %s /> <label for="ignore_broadcast_ssid">%s</label></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="config_aps">%s</label></th>
@@ -703,7 +716,7 @@ HTML;
 	 * @return array|string
 	 */
 	function validatePost($post) {
-		global $__FM_CONFIG, $fmdb;
+		global $__FM_CONFIG, $fmdb, $fm_module_options;
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
@@ -780,21 +793,8 @@ HTML;
 		
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_name='wlan' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
-		if ($fmdb->num_rows) return __('This host already exists.');
+		if ($fmdb->num_rows) return __('This SSID already exists.');
 		
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['fixed-address'], 'config_', 'config_data', "AND config_name='fixed-address' AND config_is_parent='no' AND config_parent_id!='{$post['config_id']}'");
-		if ($fmdb->num_rows) return __('This address already exists.');
-		
-		/** Valid MAC address? */
-		if ($post['hardware-type'] == 'ethernet' && version_compare(PHP_VERSION, '5.5.0', '>=') && !verifySimpleVariable($post['hardware'], FILTER_VALIDATE_MAC)) {
-			return __('The hardware address is invalid.');
-		}
-		
-		/** Valid IP address? */
-		if ($post['hardware-type'] == 'ethernet' && !verifyIPAddress($post['fixed-address'])) {
-			return __('The IP address is invalid.');
-		}
-
 		$post['config_type'] = 'wlan';
 		
 		return $post;
@@ -853,15 +853,16 @@ HTML;
 	function getWLANLoggingNames($wlan_ids) {
 		global $__FM_CONFIG, $fmdb;
 		
+		$wlan_names = '';
 		foreach ((array) $wlan_ids as $id) {
 			if (!$id) {
 				return __('All WLANs');
 			}
 			$name = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
-			(string) $wlan_names .= "$name; ";
+			$wlan_names .= "$name; ";
 		}
 		
-		return rtrim((string) $wlan_names, '; ');
+		return rtrim($wlan_names, '; ');
 	}
 	
 	/**
