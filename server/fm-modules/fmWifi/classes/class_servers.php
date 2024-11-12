@@ -130,7 +130,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			$post['account_id'] = $_SESSION['user']['account_id'];
 			
-			$exclude = array('submit', 'action', 'group_id', 'log_message_member_servers');
+			$exclude = array('submit', 'action', 'group_id', 'log_message_member_servers', 'page', 'item_type', 'uri_params');
 		
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
@@ -164,7 +164,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'page', 'item_type', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
+		$exclude = array('submit', 'action', 'page', 'item_type', 'uri_params', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
 		$logging_excluded_fields = array('account_id');
 
 		$log_message = __("Added server with the following") . ":\n";
@@ -213,7 +213,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		if (array_key_exists('group_name', $_POST)) {
 			/** Update group_name */
-			$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups` SET `group_name`='" . $post['group_name'] . "', `group_comment`='" . $post['group_comment'] . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `group_id`='" . $post['group_id'] . "'";
+			$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}server_groups` SET `group_name`='" . $post['group_name'] . "', `group_members`='" . $post['group_members'] . "', `group_comment`='" . $post['group_comment'] . "' WHERE account_id='{$_SESSION['user']['account_id']}' AND `group_id`='" . $post['group_id'] . "'";
 			$fmdb->query($query);
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the zone group because a database error occurred.') . $fmdb->last_query, 'sql');

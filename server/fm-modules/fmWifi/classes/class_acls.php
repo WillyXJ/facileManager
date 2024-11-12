@@ -104,7 +104,7 @@ class fm_wifi_acls {
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
-		$exclude = array('submit', 'action', 'acl_id', 'log_message_member_wlans');
+		$exclude = array('submit', 'action', 'acl_id', 'log_message_member_wlans', 'uri_params');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

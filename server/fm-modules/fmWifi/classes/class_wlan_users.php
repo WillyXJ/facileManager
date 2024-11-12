@@ -128,7 +128,7 @@ class fm_wifi_wlan_users {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'user_id', 'type', 'log_message_member_wlans', 'page', 'item_type');
+		$exclude = array('submit', 'action', 'user_id', 'type', 'log_message_member_wlans', 'page', 'item_type', 'uri_params');
 
 		$sql_edit = '';
 		

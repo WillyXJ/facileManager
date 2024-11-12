@@ -147,7 +147,7 @@ class fm_wifi_wlans {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'page', 'item_type', 'config_type'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'page', 'item_type', 'config_type', 'uri_params'));
 		
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
@@ -231,7 +231,7 @@ class fm_wifi_wlans {
 		$logging_excluded_fields = array('account_id', 'config_is_parent', 'config_type', 'config_data');
 		
 		$old_name = getNameFromID($post['config_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
-		$log_message = sprintf(__("Updated SSID '%s' to the following"), $old_name) . ":\n";
+		$log_message = sprintf(__("Updated WLAN '%s' to the following"), $old_name) . ":\n";
 
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
@@ -264,7 +264,7 @@ class fm_wifi_wlans {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'account_id', 'page', 'item_type', 'config_type'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'account_id', 'page', 'item_type', 'config_type', 'uri_params'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -325,7 +325,7 @@ class fm_wifi_wlans {
 			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("SSID '%s' was deleted."), $tmp_name));
+			addLogEntry(sprintf(__("WLAN '%s' was deleted."), $tmp_name));
 			return true;
 		}
 	}
@@ -788,12 +788,12 @@ HTML;
 		if (empty($post['config_name'])) return __('No name is defined.');
 		
 		/** Check name field length */
-		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_name');
+		$field_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_data');
 		if ($field_length !== false && strlen($post['config_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Group name is too long (maximum %d character).', 'Host name is too long (maximum %d characters).', $field_length), $field_length);
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_data', "AND config_name='wlan' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
-		if ($fmdb->num_rows) return __('This SSID already exists.');
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_data'], 'config_', 'config_data', "AND config_name='ssid' AND config_is_parent='yes' AND config_id!='{$post['config_id']}'");
+		if ($fmdb->num_rows) return __('This WLAN already exists.');
 		
 		$post['config_type'] = 'wlan';
 		

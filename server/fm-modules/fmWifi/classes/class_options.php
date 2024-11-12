@@ -85,7 +85,8 @@ class fm_module_options {
 		if (empty($post['config_name'])) return false;
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' AND config_parent_id!='{$post['item_id']}' AND server_serial_no='{$post['server_serial_no']}'");
+		$wlan_id_sql = (isset($post['uri_params']) && isset($post['uri_params']['item_id'])) ? "AND config_parent_id!='{$post['uri_params']['item_id']}'" : '';
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_type='{$post['config_type']}' AND config_data!='' $wlan_id_sql AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
 			return __('This record already exists.');
 		}
@@ -96,7 +97,7 @@ class fm_module_options {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type', 'item_id');
+		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type', 'item_id', 'uri_params');
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -118,7 +119,7 @@ class fm_module_options {
 		
 		$tmp_name = $post['config_name'];
 		$tmp_server_name = getServerName($post['server_serial_no']);
-		$tmp_wlan_name = ($post['item_id']) ? getNameFromID($post['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
+		$tmp_wlan_name = (isset($post['uri_params']) && isset($post['uri_params']['item_id'])) ? getNameFromID($post['uri_params']['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
 
 		addLogEntry("Added option:\nName: $tmp_name\nValue: {$post['config_data']}\nWLAN: $tmp_wlan_name\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
 		return true;
@@ -139,12 +140,13 @@ class fm_module_options {
 		}
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' AND config_parent_id!='{$post['item_id']}' AND server_serial_no='{$post['server_serial_no']}'");
+		$wlan_id_sql = (isset($post['uri_params']) && isset($post['uri_params']['item_id'])) ? "AND config_parent_id!='{$post['uri_params']['item_id']}'" : '';
+		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', $post['config_name'], 'config_', 'config_name', "AND config_id!={$post['config_id']} AND config_data!='{$post['config_data']}' AND config_type='{$post['config_type']}' $wlan_id_sql AND server_serial_no='{$post['server_serial_no']}'");
 		if ($fmdb->num_rows) {
 			return __('This record already exists.');
 		}
 		
-		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type');
+		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type', 'uri_params');
 
 		$sql_edit = '';
 		
@@ -170,7 +172,7 @@ class fm_module_options {
 		if (!$fmdb->rows_affected) return true;
 
 		$tmp_server_name = getServerName($post['server_serial_no']);
-		$tmp_wlan_name = ($post['item_id']) ? getNameFromID($post['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
+		$tmp_wlan_name = (isset($post['uri_params']) && isset($post['uri_params']['item_id'])) ? getNameFromID($post['uri_params']['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
 
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['config_name']}\nValue: {$post['config_data']}\nWLAN: $tmp_wlan_name\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
 		return true;
