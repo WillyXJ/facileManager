@@ -119,12 +119,16 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
 
+		$log_message = __("Added server with the following") . ":\n";
+		$logging_excluded_fields = array('account_id');
+
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
 			if (($key == 'server_name') && empty($data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ',';
 				$sql_values .= "'$data',";
+				$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ',') . ')';
@@ -139,8 +143,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		}
 		
 		/** Add entry to audit log */
-		addLogEntry("Added server:\nName: {$post['server_name']} ({$post['server_serial_no']})\n" .
-				"Update Method: {$post['server_update_method']}");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -164,17 +167,20 @@ class fm_module_servers extends fm_shared_module_servers {
 		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun');
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		
+		$log_message = sprintf(__("Updated server '%s' to the following"), $old_name) . ":\n";
+
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "',";
+				$log_message .= ($data) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql = rtrim($sql_edit, ',');
 		
 		/** Update the server */
-		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$fmdb->query($query);
 		
@@ -189,8 +195,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
 		/** Add entry to audit log */
-		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nType: {$post['server_type']}\n" .
-					"Update Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	

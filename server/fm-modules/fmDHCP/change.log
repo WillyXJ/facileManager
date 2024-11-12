@@ -1,6 +1,7 @@
 0.10.0 (2024-??-??)
 ==================
 * Server - [improvement] Made form validation global.
+* Server - [improvement] Provide better configuration logging.
 * Server - [bug] Duplicate lease reservations cannot be made when viewing active leases.
 
 0.9.0 (2024-09-30)
