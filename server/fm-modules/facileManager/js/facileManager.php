@@ -582,7 +582,8 @@ if (isset($__FM_CONFIG)) {
 			return false;
 		}
 
-		var form_data = $("div.popup-contents form").serialize() + "&" + $.param(getUrlVars());
+		var uri_params = {"uri_params":getUrlVars()};
+		var form_data = $("div.popup-contents form").serialize() + "&" + $.param(uri_params);
 
 		$.ajax({
 			type: "POST",
