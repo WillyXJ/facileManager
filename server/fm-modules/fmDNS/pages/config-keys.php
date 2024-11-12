@@ -32,24 +32,14 @@ $display_type = $__FM_CONFIG['keys']['avail_types'][$type];
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['keys']['avail_types']);
-echo printPageHeader((string) $response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type);
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['keys']['avail_types']);
+echo printPageHeader((string) $response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 	
 $sort_direction = null;
 $sort_field = 'key_name';
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
-
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	</div>
-</div>
-
-HTML;
 
 /** Process domain_id filtering */
 if (isset($_GET['domain_id']) && !in_array(0, $_GET['domain_id'])) {

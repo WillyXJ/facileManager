@@ -2238,7 +2238,7 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 	',
 		$style, $response, $title,
 		($allowed_to_add) ? displayAddNew($name, $rel) : null,
-		(isset($comment)) ? printf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle notice grey" aria-hidden="true"></i></a>', $comment) : null,
+		(isset($comment)) ? sprintf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle notice grey" aria-hidden="true"></i></a>', $comment) : null,
 		implode("\n", $addl_title_blocks)
 	);
 }

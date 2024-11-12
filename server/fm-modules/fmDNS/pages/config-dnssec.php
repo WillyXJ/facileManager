@@ -33,20 +33,11 @@ $display_type = $__FM_CONFIG['dnssec']['avail_types'][$type];
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['dnssec']['avail_types']);
-$avail_servers = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['dnssec']['avail_types']);
 
-echo printPageHeader(array((string) $response, getMinimumFeatureVersion($type, 'dnskey-ttl')), $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_servers
-	</div>
-</div>
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion($type, 'dnskey-ttl')), $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 
-HTML;
-	
 $sort_direction = null;
 $sort_field = 'cfg_data';
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {

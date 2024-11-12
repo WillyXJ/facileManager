@@ -38,20 +38,10 @@ if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['logging']['avail_types']);
-$avail_servers = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['logging']['avail_types']);
 
-echo printPageHeader((string) $response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	$avail_servers
-	</div>
-</div>
-
-HTML;
+echo printPageHeader((string) $response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 	
 $sort_direction = null;
 $sort_field = 'cfg_data';

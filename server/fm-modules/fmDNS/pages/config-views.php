@@ -29,18 +29,9 @@ $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST[
 printHeader();
 @printMenu();
 
-$avail_servers = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_servers
-	</div>
-</div>
-
-HTML;
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']), null, null, null, $addl_title_blocks);
 	
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);

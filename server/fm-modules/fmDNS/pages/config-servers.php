@@ -30,23 +30,13 @@ $display_type = ($type == 'servers') ? __('Name Servers') : __('Name Server Grou
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['servers']['avail_types']);
-echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['servers']['avail_types']);
+echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 	
 $sort_direction = null;
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
-
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	</div>
-</div>
-
-HTML;
 
 if ($type == 'groups') {
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'server_groups', 'group_name', 'group_', null, null, false, $sort_direction);
