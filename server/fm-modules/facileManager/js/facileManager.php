@@ -581,7 +581,8 @@ if (isset($__FM_CONFIG)) {
 		if ($(this).checkRequiredFields() === false) {
 			return false;
 		}
-		var form_data = $("div.popup-contents form").serialize();
+
+		var form_data = $("div.popup-contents form").serialize() + "&" + $.param(getUrlVars());
 
 		$.ajax({
 			type: "POST",
