@@ -193,8 +193,6 @@ class fm_settings {
 		$auth_method = getOption('auth_method');
 		$auth_method_list = buildSelect('auth_method', 'auth_method', $__FM_CONFIG['options']['auth_method'], $auth_method);
 		
-		$login_message = getOption('login_message');
-		
 		/** fM Auth Section */
 		$i=0;
 		$password_strength_descriptions = sprintf("<p>%s</p>\n", _('Required password strength for user accounts.'));
@@ -241,6 +239,10 @@ class fm_settings {
 
 		$ldap_user_template = getOption('ldap_user_template');
 		$ldap_user_template_list = buildSelect('ldap_user_template', 'ldap_user_template', $this->buildUserList(), $ldap_user_template);
+
+		/** Login Message Section */
+		$login_message = getOption('login_message');
+		$login_message_accept_checked = (getOption('login_message_accept')) ? 'checked' : null;
 
 		/** Client Autoregistration Section */
 		$client_auto_register_checked = (getOption('client_auto_register')) ? 'checked' : null;
@@ -336,6 +338,7 @@ class fm_settings {
 		<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">
 			<input type="hidden" name="item_type" value="fm_settings" />
 			<input type="hidden" name="ldap_group_require" value="0" />
+			<input type="hidden" name="login_message_accept" value="0" />
 			<input type="hidden" name="client_auto_register" value="0" />
 			<input type="hidden" name="api_token_support" value="0" />
 			<input type="hidden" name="enforce_ssl" value="0" />
@@ -508,7 +511,8 @@ class fm_settings {
 								<p>' . _('An optional message to display on the login page.') . '</p>
 							</div>
 							<div class="choices">
-								<textarea name="login_message" id="login_message" type="text" cols="40">' . $login_message . '</textarea>
+								<textarea name="login_message" id="login_message" type="text" cols="40">' . $login_message . '</textarea><br />
+								<input name="login_message_accept" id="login_message_accept" type="checkbox" value="1" ' . $login_message_accept_checked . ' /><label for="login_message_accept">' . _('Require Users to Acknowledge Login Message') . '</label>
 							</div>
 						</div>
 					</div>

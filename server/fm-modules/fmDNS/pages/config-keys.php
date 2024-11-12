@@ -29,40 +29,6 @@ $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST[
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['keys']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'tsig';
 $display_type = $__FM_CONFIG['keys']['avail_types'][$type];
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type'));
-	
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_dns_keys->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_dns_keys->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	}
-}
-
 printHeader();
 @printMenu();
 

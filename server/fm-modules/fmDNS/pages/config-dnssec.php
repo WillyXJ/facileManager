@@ -30,45 +30,13 @@ $_GET['type'] = sanitize(strtolower($_GET['type']));
 $type = (isset($_GET['type']) && array_key_exists($_GET['type'], $__FM_CONFIG['dnssec']['avail_types'])) ? $_GET['type'] : array_key_first($__FM_CONFIG['dnssec']['avail_types']);
 $display_type = $__FM_CONFIG['dnssec']['avail_types'][$type];
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_dnssec->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_dnssec->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 
 $avail_types = buildSubMenu($type, $__FM_CONFIG['dnssec']['avail_types']);
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion($type, 'dnskey-ttl')), $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

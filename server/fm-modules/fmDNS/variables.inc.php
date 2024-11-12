@@ -31,7 +31,7 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Information */
 $__FM_CONFIG['fmDNS'] = array(
-		'version'							=> '6.1.0',
+		'version'							=> '6.3.0',
 		'client_version'					=> '6.1.0',
 		'description'						=> __('Easily manage one or more ISC BIND servers through a web interface. No more editing configuration and zone files manually.', 'fmDNS'),
 		'prefix'							=> 'dns_',
@@ -150,6 +150,10 @@ $__FM_CONFIG['fmDNS']['default']['options'] = @array(
 				'type' => 'checkbox'),
 		'purge_config_files' => array(
 				'description' => array(__('Purge Configuration Files'), __('When enabled, configuration files will be deleted on the DNS servers before building the server config. This can be handy if you want to remove unused files.')),
+				'default_value' => 'no',
+				'type' => 'checkbox'),
+		'use_named_keys_with_rndc' => array(
+				'description' => array(__('Use Defined Keys with rndc'), __('Use keys defined in named.conf.keys with rndc actions (each server can override this).')),
 				'default_value' => 'no',
 				'type' => 'checkbox'),
 		'zone_file_format' => array(

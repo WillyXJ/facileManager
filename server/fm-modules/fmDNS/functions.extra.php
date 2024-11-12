@@ -21,13 +21,15 @@
 */
 
 /**
- * Checks if an email address is valid
+ * Print module users permission form
  *
  * @since 1.0
  * @package facileManager
+ * @subpackage fmDNS
  *
- * @param string $address Email address to validate
- * @return boolean
+ * @param string $user_module_perms Existing permissions
+ * @param string $module_name Module name
+ * @return string
  */
 function printfmDNSUsersForm($user_module_perms, $module_name) {
 	global $__FM_CONFIG, $fmdb;
@@ -88,4 +90,42 @@ function printfmDNSUsersForm($user_module_perms, $module_name) {
 							</tr>
 ', __('Limit access to the following zones:'), $zones_list);
 	
+}
+
+/**
+ * Get user permissions for logging
+ *
+ * @since 6.3.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param array $fm_user_caps All user permissions
+ * @param string $perm Non-standard permission
+ * @param array $value_array Array of permissions
+ * @return string
+ */
+function getfmDNSUsersPermLogging($fm_user_caps, $perm, $value_array) {
+	global $__FM_CONFIG;
+
+	$specific_perms = ucwords(str_replace('_', ' ', $perm));
+	if ($perm == 'access_specific_zones') {
+		if ($value_array[0] == '0') {
+			$specific_items[] = __('All Zones');
+		} else {
+			foreach ($value_array as $domain_id) {
+				if (strpos($domain_id, 'g_') !== false) {
+					$id = substr($domain_id, 2);
+					$type = 'group';
+					$table = 'domain_groups';
+				} else {
+					$id = $domain_id;
+					$type = 'domain';
+					$table = 'domains';
+				}
+				$specific_items[] = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, "{$type}_", "{$type}_id", "{$type}_name");
+			}
+		}
+	}
+
+	return (is_array($specific_items)) ? sprintf('%s (%s)', $specific_perms, join(', ', (array) $specific_items)) : null;
 }

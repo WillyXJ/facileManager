@@ -1,6 +1,7 @@
 3.2.0 (2024-??-??)
 ==================
 * Server - [improvement] Made form validation global.
+* Server - [improvement] Takes better advantage of fM JS grab functionality.
 
 3.1.0 (2024-09-30)
 ==================

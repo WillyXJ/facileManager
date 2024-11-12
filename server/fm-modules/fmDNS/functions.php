@@ -168,7 +168,7 @@ function buildModuleToolbar() {
 			$domain_name = displayFriendlyDomainName($domain_name);
 			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
 			$domain_menu .= sprintf('<div id="topheadpart">
-			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
+			<span>%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
 		</div>', __('Clone of'), $domain_mapping, $parent_domain_id, $record_type_uri, __('Edit parent zone records'), $domain_name);
 		}
 		if ($parent_domain_id = getNameFromID($_GET['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
@@ -177,7 +177,7 @@ function buildModuleToolbar() {
 			$domain_name = displayFriendlyDomainName($domain_name);
 			$record_type_uri = array_key_exists('record_type', $_GET) ? '&record_type=' . $_GET['record_type'] : null;
 			$domain_menu .= sprintf('<div id="topheadpart">
-			<span class="single_line">%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
+			<span>%s:&nbsp;&nbsp; <a href="zone-records.php?map=%s&domain_id=%s%s" title="%s">%s</a></span>
 		</div>', __('Based on template'), $domain_mapping, $parent_domain_id, $record_type_uri, __('Edit template zone records'), $domain_name);
 		}
 	} else $domain_menu = null;
@@ -266,6 +266,15 @@ function buildModuleHelpFile() {
 			that will handle the web redirects at Admin &rarr; <a href="__menu{{$_SESSION['module']} Settings}">Settings</a>. The supporting web servers
 			will also need the client installed to enable URL redirects (reference client help file). Once defined, the URL RR will be available when 
 			managing zone records.</p>
+			<p><b>Built-in Variables</b><br />
+			There are built-in variables that can be used in any record value that will get translated to the appropriate value. Such variables include:</p>
+			<ul>
+				<li><b>{domain}</b><br />
+				This will be substituted for the current domain name.</li>
+				<li><b>{domain:&lt;id>}</b><br />
+				This will be substituted for the name of domain id &lt;id>.<br/>
+				Example: {domain:42}</li>
+			</ul>
 			<br />
 		</div>
 	</li>
@@ -671,7 +680,7 @@ function getModuleBadgeCounts($type) {
  * @param array $server_types Type of servers to pull
  * @return string
  */
-function getZoneServers($domain_id, $server_types = array('primaries')) {
+function getZoneServers($domain_id, $server_types = array('masters')) {
 	global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 	
 	$serial_no = array();
