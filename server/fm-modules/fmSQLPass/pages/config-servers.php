@@ -24,35 +24,6 @@ if (!currentUserCan(array('manage_servers', 'view_all'), $_SESSION['module'])) u
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.php');
 
-$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_servers->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename']);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_servers->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename']);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 

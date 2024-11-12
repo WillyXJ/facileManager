@@ -33,6 +33,10 @@ if (!function_exists('returnUnAuth')) {
 }
 
 $unpriv_message = _('You do not have sufficient privileges.');
+if (isset($_POST['page']) && !isset($_POST['item_type'])) {
+	$_POST['item_type'] = $_POST['page'];
+}
+
 /** Handle password changes */
 if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'set_mysql_password') {
 	if (!currentUserCan('manage_passwords', $_SESSION['module'])) returnUnAuth(true);
@@ -51,8 +55,8 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 
 	$field = $prefix . 'id';
 	$type_map = null;
-	$id = sanitize($_POST['item_id']);
-	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
+	$id = ($_POST['item_id']) ? $_POST['item_id'] : $_POST[$prefix . 'id'];
+	$type = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
 
 	/* Determine which class we need to deal with */
 	switch($_POST['item_type']) {
@@ -65,20 +69,29 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	}
 
 	switch ($_POST['action']) {
+		case 'add':
+		case 'create':
+			$response = $post_class->add($_POST);
+			echo ($response !== true) ? $response : 'Success';
+			break;
 		case 'delete':
 			if (isset($id)) {
-				exit(parseAjaxOutput($post_class->delete(sanitize($id), $type)));
+				exit(parseAjaxOutput($post_class->delete($id, $type)));
 			}
 			break;
 		case 'edit':
+		case 'update':
 			if (isset($_POST['item_status'])) {
-				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $field)) {
+				if (!updateStatus('fm_' . $table, $id, $prefix, $_POST['item_status'], $field)) {
 					exit(sprintf(_('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
 					$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . 'name');
-					addLogEntry(sprintf(_('Set %s (%s) status to %s.'), substr($item_type, 0, -1), $tmp_name, sanitize($_POST['item_status'])));
+					addLogEntry(sprintf(_('Set %s (%s) status to %s.'), substr($item_type, 0, -1), $tmp_name, $_POST['item_status']));
 					exit('Success');
 				}
+			} else {
+				$response = $post_class->update($_POST);
+				echo ($response !== true) ? $response : 'Success';
 			}
 			break;
 	}

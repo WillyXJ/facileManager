@@ -70,8 +70,6 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		extract($post, EXTR_SKIP);
 		
-		$server_name = sanitize($server_name);
-		
 		if (empty($server_name)) return __('No server name defined.');
 		
 		/** Check name field length */
@@ -118,24 +116,23 @@ class fm_module_servers extends fm_shared_module_servers {
 		}
 		
 		foreach ($post as $key => $data) {
-			$clean_data = sanitize($data);
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
+				$sql_values .= "'$data', ";
 				if ($key == 'server_credentials') {
-					$clean_data = str_repeat('*', 7);
+					$data = str_repeat('*', 7);
 				}
 				if ($key == 'server_groups') {
 					if ($post['server_groups']) {
 						$group_array = explode(';', $post['server_group']);
-						$clean_data = '';
+						$data = '';
 						foreach ($group_array as $group_id) {
-							$clean_data .= getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name') . '; ';
+							$data .= getNameFromID($group_id, 'fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_', 'group_id', 'group_name') . '; ';
 						}
-						$clean_data = rtrim($clean_data, '; ');
-					} else $clean_data = 'None';
+						$data = rtrim($data, '; ');
+					} else $data = 'None';
 				}
-				$log_message .= ($clean_data && $key != 'account_id') ? formatLogKeyData('server_', $key, $clean_data) : null;
+				$log_message .= ($data && $key != 'account_id') ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
@@ -164,7 +161,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name');
 
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', sanitize($post['server_name']), 'server_', 'server_name');
+		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->server_id != $post['server_id']) return __('This server name already exists.');
@@ -199,7 +196,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 				if ($key == 'server_credentials') {
 					$data = str_repeat('*', 7);
 				}

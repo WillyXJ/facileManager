@@ -96,7 +96,7 @@ class fm_sqlpass_groups {
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . sanitize($data) . "', ";
+				$sql_edit .= $key . "='" . $data . "', ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -200,14 +200,16 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="groups" />
 			<input type="hidden" name="action" id="action" value="%s" />
 			<input type="hidden" name="group_id" id="group_id" value="%d" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
-					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" class="required" /></td>
 				</tr>
 			</table>
 		%s
@@ -224,16 +226,16 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$post['group_name'] = sanitize($post['group_name']);
-		
 		if (empty($post['group_name'])) return __('No group name defined.');
+
+		unset($post['page'], $post['item_type']);
 
 		/** Check name field length */
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', 'group_name');
 		if ($field_length !== false && strlen($post['group_name']) > $field_length) return sprintf(__('Group name is too long (maximum %d characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
-		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', sanitize($post['group_name']), 'group_', 'group_name');
+		basicGet('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'groups', $post['group_name'], 'group_', 'group_name');
 		if ($fmdb->num_rows) {
 			$result = $fmdb->last_result;
 			if ($result[0]->group_id != $post['group_id']) return __('This group name already exists.');

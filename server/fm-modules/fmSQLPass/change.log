@@ -2,6 +2,8 @@
 ==================
 * Server - [improvement] Code clean up.
 * Server - [improvement] Removed dashboard.
+* Server - [improvement] Made form validation global.
+* Server - [improvement] Supports fM 5.0.0.
 
 1.9.0 (2024-09-30)
 ==================
