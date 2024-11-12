@@ -23,7 +23,7 @@
 $type = (isset($_GET['type']) && array_key_exists(sanitize(strtolower($_GET['type'])), $__FM_CONFIG['networks']['avail_types'])) ? sanitize(strtolower($_GET['type'])) : 'subnets';
 $display_type = $__FM_CONFIG['networks']['avail_types'][$type];
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['networks']['avail_types']);
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['networks']['avail_types']);
 
 if (!isset($fm_dhcp_item)) {
 	if (!class_exists('fm_dhcp_networks')) {

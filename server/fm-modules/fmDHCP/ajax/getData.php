@@ -28,7 +28,6 @@ foreach (scandir($class_dir) as $class_file) {
 	if (in_array($class_file, array('.', '..'))) continue;
 	include_once($class_dir . $class_file);
 }
-
 if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && currentUserCan('manage_servers', $_SESSION['module'])) {
 	$cfg_data = isset($_POST['option_value']) ? $_POST['option_value'] : '';
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : 0;
@@ -75,7 +74,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 	exit;
 } elseif (is_array($_POST) && array_key_exists('get_leases', $_POST) && currentUserCan(array('manage_leases', 'view_all'), $_SESSION['module'])) {
 	include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_leases.php');
-	$server_data = $fm_dhcp_leases->getServerLeases(sanitize($_POST['server_serial_no']));
+	$server_data = $fm_dhcp_leases->getServerLeases($_POST['server_serial_no']);
 	
 	/** Add popup header and footer if missing */
 	if (strpos($server_data, __('The leases could not be retrieved from the DHCP server. Possible causes include:')) !== false && strpos($server_data, 'popup-header') === false) {
@@ -106,11 +105,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	}
 	
 	if (array_key_exists('add_form', $_POST)) {
-		$id = isset($_POST['item_id']) ? sanitize($_POST['item_id']) : null;
+		$id = isset($_POST['item_id']) ? $_POST['item_id'] : null;
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {
-		$id = sanitize($_POST['item_id']);
-		$view_id = isset($_POST['view_id']) ? sanitize($_POST['view_id']) : null;
+		$id = $_POST['item_id'];
+		$view_id = isset($_POST['view_id']) ? $_POST['view_id'] : null;
 		$add_new = false;
 	} else returnError();
 	
@@ -155,7 +154,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$field = 'config_id';
 			$field_data = $prefix . 'data';
 			$type_map = $_POST['item_type'];
-			$type_map = @isset($_POST['request_uri']['option_type']) ? sanitize($_POST['request_uri']['option_type']) : 'global';
+			$type_map = @isset($_POST['request_uri']['option_type']) ? $_POST['request_uri']['option_type'] : 'global';
 			break;
 		case 'leases':
 			$post_class = $fm_dhcp_leases;

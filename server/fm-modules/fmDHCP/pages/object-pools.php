@@ -33,6 +33,4 @@ if (!isset($fm_dhcp_item)) {
 /** Ensure user can use this page */
 $required_permission[] = 'manage_pools';
 
-$include_submenus = false;
-
 include(dirname(__FILE__) . '/objects.php');

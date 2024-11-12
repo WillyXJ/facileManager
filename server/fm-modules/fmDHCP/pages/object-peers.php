@@ -21,7 +21,6 @@
 */
 
 $type = 'peers';
-$include_submenus = false;
 
 if (!isset($fm_dhcp_item)) {
 	if (!class_exists('fm_dhcp_peers')) {

@@ -102,6 +102,8 @@ class fm_dhcp_objects {
 		$sql_fields = '(';
 		$sql_values = $options_log_message = '';
 		
+		$server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
 		$post['config_data'] = $name = $post['config_name'];
@@ -149,7 +151,7 @@ class fm_dhcp_objects {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'config_children'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'config_children', 'item_type', 'uri_params'));
 		
 		$sql_start = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config`";
 		$sql_fields = '(';
@@ -158,7 +160,7 @@ class fm_dhcp_objects {
 		$i = 1;
 		foreach ($include as $handler) {
 			$child['config_name'] = $handler;
-			$child['config_data'] = sanitize($post[$handler]);
+			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
 				if ($i) $sql_fields .= $key . ', ';
@@ -184,7 +186,7 @@ class fm_dhcp_objects {
 			$log_message .= formatLogKeyData('config_', __('Member of'), getNameFromID($post['config_parent_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data', $post['account_id']));
 		}
 
-		if (is_array($post['config_children'])) {
+		if (isset($post['config_children']) && is_array($post['config_children'])) {
 			$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 			$query = "$sql_start config_parent_id={$child['config_parent_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
 			$fmdb->query($query);
@@ -195,6 +197,8 @@ class fm_dhcp_objects {
 			}
 			$log_message .= formatLogKeyData('config_', __('Child Objects'), join(',', $children));
 		}
+
+		setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 
 		addLogEntry(str_replace('\"', '', $log_message . $options_log_message));
 		return true;
@@ -221,6 +225,8 @@ class fm_dhcp_objects {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		$sql_values = $options_log_message = '';
 		
+		$server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['config_is_parent'] = 'yes';
 		$post['config_data'] = $name = $post['config_name'];
@@ -262,13 +268,13 @@ class fm_dhcp_objects {
 			unset($post['hardware-type']);
 		}
 		
-		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'account_id', 'config_children'));
+		$include = array_diff(array_keys($post), $include, array('config_id', 'action', 'tab-group-1', 'submit', 'account_id', 'config_children', 'item_type', 'uri_params'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
 			$sql_values = '';
 			$child['config_name'] = $handler;
-			$child['config_data'] = sanitize($post[$handler]);
+			$child['config_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
 				$sql_values .= "$key='$data', ";
@@ -298,7 +304,7 @@ class fm_dhcp_objects {
 		/** Reassigned children */
 		$query = "$sql_start config_parent_id=0 WHERE config_parent_id={$post['config_id']} AND config_is_parent='yes'";
 		$fmdb->query($query);
-		if (is_array($post['config_children'])) {
+		if (isset($post['config_children']) && is_array($post['config_children'])) {
 			$query = "$sql_start config_parent_id={$post['config_id']} WHERE config_id IN (" . join(',', $post['config_children']) . ")";
 			$fmdb->query($query);
 			$rows_affected += $fmdb->rows_affected;
@@ -309,6 +315,8 @@ class fm_dhcp_objects {
 			}
 			$log_message .= formatLogKeyData('config_', __('Child Objects'), join(',', $children));
 		}
+
+		setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 
 		if ($rows_affected) addLogEntry(str_replace('\"', '', $log_message . $options_log_message));
 		return true;
@@ -505,8 +513,9 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="config_id" value="%d" />
 			<input type="hidden" name="config_type" value="%s" />
@@ -957,14 +966,14 @@ HTML;
 	 * @return array|string
 	 */
 	function validateObjectPost($post) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fm_module_options;
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		if (array_key_exists('config_name', $post)) {
-			$post_tmp['config_name'] = sanitize($post['config_name']);
+			$post_tmp['config_name'] = $post['config_name'];
 		}
 		if (array_key_exists('config_data', $post)) {
-			$post_tmp['config_data'] = sanitize($post['config_data']);
+			$post_tmp['config_data'] = $post['config_data'];
 		}
 		
 		foreach ($post as $key => $val) {

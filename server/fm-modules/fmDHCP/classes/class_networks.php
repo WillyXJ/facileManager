@@ -177,11 +177,11 @@ HTML;
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
-								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" placeholder="10.1.2.0" /></td>
+								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" placeholder="10.1.2.0" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="netmask">%s</label></th>
-								<td width="67&#37;"><input name="netmask" id="netmask" type="text" value="%s" placeholder="255.255.255.0" /></td>
+								<td width="67&#37;"><input name="netmask" id="netmask" type="text" value="%s" placeholder="255.255.255.0" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="range[]">%s</label></th>
@@ -237,7 +237,7 @@ HTML;
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
-								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" placeholder="10.1.2-5" /></td>
+								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" placeholder="10.1.2-5" class="required" /></td>
 							</tr>',
 				$authoritative, __('Authoritative for this shared network'),
 				__('Shared Network'), $config_data

@@ -238,8 +238,7 @@ HTML;
 			$fm_dhcp_item = new fm_dhcp_hosts();
 		}
 
-		$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
-		list($ip, $hostname, $hardware) = explode('|', sanitize($_POST['item_id']));
+		list($ip, $hostname, $hardware) = explode('|', $_POST['item_id']);
 		if ($hostname == 'N/A') {
 			$hostname = null;
 		}
@@ -248,7 +247,7 @@ HTML;
 			unset($_REQUEST['request_uri']['server_serial_no']);
 		}
 		
-		return $fm_dhcp_item->printForm(array(), 'add', 'host', array('config_data' => $hostname, 'fixed_address' => $ip, 'hardware_address_entry' => array('ethernet', $hardware)));
+		return $fm_dhcp_item->printForm(array(), 'add', 'hosts', array('config_data' => $hostname, 'fixed_address' => $ip, 'hardware_address_entry' => array('ethernet', $hardware)));
 	}
 	
 	

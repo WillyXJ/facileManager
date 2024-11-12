@@ -49,6 +49,13 @@ $checks_array = @array('servers' => 'manage_servers',
 $allowed_capabilities = array_unique($checks_array);
 
 if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
+	if (isset($_POST['page']) && !isset($_POST['item_type'])) {
+		$_POST['item_type'] = $_POST['page'];
+	}
+	if (isset($_POST['config_type']) && !isset($_POST['item_type'])) {
+		$_POST['item_type'] = $_POST['config_type'];
+	}
+
 	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
 		returnUnAuth();
 	}
@@ -69,9 +76,10 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 
 	$field = $prefix . 'id';
 	$type_map = null;
-	$id = sanitize($_POST['item_id']);
-	$server_serial_no = isset($_POST['server_serial_no']) ? sanitize($_POST['server_serial_no']) : null;
-	$type = isset($_POST['item_sub_type']) ? sanitize($_POST['item_sub_type']) : null;
+	$id = (isset($_POST['item_id'])) ? $_POST['item_id'] : null;
+	if (!$id && isset($_POST[$field])) $id = $_POST[$field];
+	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : null;
+	$type = isset($_POST['item_sub_type']) ? $_POST['item_sub_type'] : null;
 	$field_data = $prefix . 'name';
 
 	/* Determine which class we need to deal with */
@@ -120,6 +128,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$type_map = $_POST['item_type'];
 			$item = rtrim($_POST['item_type'], 's') . 's';
 			$object = rtrim($item, 's');
+			if (!$id) $id = $_POST[$field];
 			break;
 		default:
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
@@ -128,29 +137,30 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 
 	switch ($_POST['action']) {
 		case 'add':
-			if (!empty($_POST[$table . '_name'])) {
-				if (!$post_class->add($_POST)) {
-					echo '<div class="error"><p>This ' . $table . ' could not be added.</p></div>'. "\n";
-					$form_data = $_POST;
-				} else exit('Success');
-			}
+		case 'create':
+			$response = $post_class->add($_POST);
+			echo ($response !== true) ? $response : 'Success';
 			break;
 		case 'delete':
 			if (isset($id)) {
-				exit(parseAjaxOutput($post_class->delete(sanitize($id), $server_serial_no, $type)));
+				exit(parseAjaxOutput($post_class->delete($id, $server_serial_no, $type)));
 			}
 			break;
 		case 'edit':
+		case 'update':
 			if (isset($_POST['item_status'])) {
-				if (!updateStatus('fm_' . $table, $id, $prefix, sanitize($_POST['item_status']), $prefix . 'id')) {
+				if (!updateStatus('fm_' . $table, $id, $prefix, $_POST['item_status'], $prefix . 'id')) {
 					exit(sprintf(__('This item could not be set to %s.') . "\n", $_POST['item_status']));
 				} else {
 					setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 					list($tmp_type, $tmp_name, $tmp_parent_id) = getNameFromID($id, 'fm_' . $table, $prefix, $field, array($prefix . 'type', $field_data, $prefix . 'parent_id'));
 					$tmp_parent_name = (isset($tmp_parent_id)) ? getNameFromID($tmp_parent_id, 'fm_' . $table, $prefix, $prefix . 'id', $prefix . 'data') : null;
-					addLogEntry(sprintf(__('Set %s %s %s (%s) status to %s.'), $tmp_parent_name, $tmp_type, $object, $tmp_name, sanitize($_POST['item_status'])));
+					addLogEntry(sprintf(__('Set %s %s %s (%s) status to %s.'), $tmp_parent_name, $tmp_type, $object, $tmp_name, $_POST['item_status']));
 					exit('Success');
 				}
+			} else {
+				$response = $post_class->update($_POST);
+				echo ($response !== true) ? $response : 'Success';
 			}
 			break;
 		case 'bulk':
@@ -159,7 +169,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 					case 'enable':
 					case 'disable':
 					case 'delete':
-						$status = sanitize($_POST['bulk_action']) . 'd';
+						$status = $_POST['bulk_action'] . 'd';
 						if ($status == 'enabled') $status = 'active';
 						foreach ((array) $_POST['item_id'] as $id) {
 							$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . 'name');
@@ -172,7 +182,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 						echo buildPopup('header', __('Bulk Action Results'));
 						echo '<p>' . sprintf('%s action is complete.', ucfirst($_POST['bulk_action'])) . '</p>';
 						echo $fmdb->last_error;
-						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), sanitize($_POST['rel_url']));
+						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), $_POST['rel_url']);
 						break;
 				}
 			}

@@ -117,7 +117,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun', 'page', 'item_type');
 
 		$log_message = __("Added server with the following") . ":\n";
 		$logging_excluded_fields = array('account_id');
@@ -164,7 +164,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun');
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun', 'page', 'item_type');
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
@@ -359,15 +359,17 @@ HTML;
 		$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name');
 
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="servers" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="server_id" value="%d" />
 			%s
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_name">%s</label></th>
-					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="placeholder" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="placeholder" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_address">%s</label></th>
@@ -430,18 +432,7 @@ HTML;
 		if ($fmdb->num_rows) return __('This server name already exists.');
 		
 		if (empty($post['server_config_file'])) { 
-			$post['server_config_file'] = $__FM_CONFIG['fw']['config_file']['default'];
-			if (!is_array($__FM_CONFIG['fw']['config_file'][$post['server_type']]) && $__FM_CONFIG['fw']['config_file'][$post['server_type']]) {
-				$post['server_config_file'] = $__FM_CONFIG['fw']['config_file'][$post['server_type']];
-			} elseif (is_array($__FM_CONFIG['fw']['config_file'][$post['server_type']])) {
-				if (isset($post['server_os_distro'])) $distro = $post['server_os_distro'];
-				else {
-					if ($post['action'] == 'edit') {
-						$distro = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_os_distro');
-					}
-				}
-				if (isset($distro) && array_key_exists($distro, $__FM_CONFIG['fw']['config_file'][$post['server_type']])) $post['server_config_file'] = $__FM_CONFIG['fw']['config_file'][$post['server_type']][$distro];
-			}
+			$post['server_config_file'] = $__FM_CONFIG['dhcpd']['config_file']['default'];
 		}
 		
 		/** Set default ports */
