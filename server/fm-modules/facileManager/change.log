@@ -8,7 +8,7 @@
 * Server - [improvement] Added better logging of user information changes.
 * Server - [improvement] Added setting to require user acceptance of login message.
 * Server - [improvement] Improved JS grab functionality to be more modular.
-* Server - [improvement] CSS tweaks.
+* Server - [improvement] CSS and icon tweaks.
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Supports feature minimum version notices.
 * Server - [improvement] Updated menu styling.
