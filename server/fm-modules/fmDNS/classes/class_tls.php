@@ -86,7 +86,7 @@ class fm_module_tls {
 		global $fmdb, $__FM_CONFIG;
 
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$include_sub_configs[] = $def->def_option;
 		}
@@ -102,15 +102,19 @@ class fm_module_tls {
 		
 		$include = array('cfg_isparent', 'cfg_type', 'server_serial_no', 'cfg_name', 'cfg_data', 'cfg_comment');
 		
+		$log_message = __('Added TLS connection with the following details') . ":\n";
+
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No TLS connection name defined.');
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$clean_data', ";
-				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+				$sql_values .= "'$data', ";
+				if ($key == 'server_serial_no') {
+					$log_message .= formatLogKeyData('', 'server', getServerName($data));
+				} elseif ($key == 'cfg_data') {
+					$log_message .= formatLogKeyData('cfg_', 'Name', $data);
+				} elseif ($key == 'cfg_comment') {
+					$log_message .= formatLogKeyData('cfg_', $key, $data);
 				}
 			}
 		}
@@ -118,13 +122,11 @@ class fm_module_tls {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
-
-		$endpoint_name = $post['cfg_data'];
 
 		/** Insert child configs */
 		$post['cfg_isparent'] = 'no';
@@ -151,20 +153,21 @@ class fm_module_tls {
 			$sql_values = rtrim($sql_values, ', ') . '), (';
 
 			if ($post['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $post['cfg_name'], $post['cfg_data']);
+				$log_message .= formatLogKeyData('cfg_', $post['cfg_name'], $post['cfg_data']);
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', (');
 		
 		$query = "$sql_insert $sql_fields VALUES $sql_values";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the record because a database error occurred.'), 'sql');
 		}
 		
-		$log_message = sprintf("Added TLS Connection:\nName: %s\n%s", $endpoint_name, join("\n", (array) $log_message));
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
 		addLogEntry($log_message);
 		return true;
 	}
@@ -183,49 +186,47 @@ class fm_module_tls {
 	function update($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls'";
-		$result = $fmdb->query($query);
-		foreach ($fmdb->last_result as $k => $def) {
-			$include_sub_configs[] = $def->def_option;
-		}
-
 		/** Validate entries */
-		$post = $this->validatePost($post, $include_sub_configs);
+		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
-		$endpoint_name = $post['cfg_data'];
 		unset($post['cfg_name']);
 
 		/** Update the parent */
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		$sql_values = '';
 		
-		$include = array('cfg_isparent', 'cfg_data', 'cfg_type', 'cfg_comment');
+		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
+		$log_message = sprintf(__('Updated TLS connection (%s) with the following details'), $old_name) . ":\n";
+
+		$include = array('cfg_isparent', 'cfg_data', 'cfg_type', 'cfg_comment', 'server_serial_no');
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
 			if (in_array($key, $include)) {
-				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
-				if ($key == 'cfg_data' && empty($clean_data)) return __('No TLS connection name defined.');
-				$sql_values .= "$key='$clean_data', ";
-				if ($key == 'cfg_comment') {
-					$log_message[] = sprintf('Comment: %s', $clean_data);
+				$sql_values .= "$key='$data', ";
+				if ($key == 'server_serial_no') {
+					$log_message .= formatLogKeyData('', 'server', getServerName($data));
+				} elseif ($key == 'cfg_data') {
+					$log_message .= formatLogKeyData('cfg_', 'Name', $data);
+				} elseif ($key == 'cfg_comment') {
+					$log_message .= formatLogKeyData('cfg_', $key, $data);
 				}
 			}
 		}
 		$sql_values = rtrim($sql_values, ', ');
 
-		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_data');
-		
 		$query = "$sql_start $sql_values WHERE cfg_id={$post['cfg_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
+		$rows_affected = $fmdb->rows_affected;
+
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 		}
 
 		/** Update config children */
-		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1'));
+		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'view_id', 'tab-group-1', 'page', 'item_type'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include as $handler) {
@@ -239,18 +240,21 @@ class fm_module_tls {
 			$sql_values = rtrim($sql_values, ', ');
 			
 			if ($child['cfg_data']) {
-				$log_message[] = sprintf('%s: %s', $child['cfg_name'], $child['cfg_data']);
+				$log_message .= formatLogKeyData('cfg_', $child['cfg_name'], $child['cfg_data']);
 			}
 
 			$query = "$sql_start $sql_values WHERE cfg_parent={$post['cfg_id']} AND cfg_name='$handler' LIMIT 1";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
+			$rows_affected += $fmdb->rows_affected;
 
 			if ($fmdb->sql_errors) {
 				return formatError(__('Could not update the item because a database error occurred.'), 'sql');
 			}
 		}
+		if (!$rows_affected) return true;
 		
-		$log_message = sprintf("Updated TLS Connection '%s':\nName: %s\n%s", $old_name, $endpoint_name, join("\n", (array) $log_message));
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+		
 		addLogEntry($log_message);
 
 		return true;
@@ -289,7 +293,10 @@ class fm_module_tls {
 			return formatError(__('This item could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("TLS connection '%s' was deleted."), $tmp_name));
+			$log_message = __('Deleted a TLS connection') . ":\n";
+			$log_message .= formatLogKeyData('', 'Name', $tmp_name);
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
+			addLogEntry($log_message);
 			return true;
 		}
 	}
@@ -377,7 +384,7 @@ HTML;
 
 		/** Get child elements */
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls' ORDER BY def_option ASC";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		foreach ($fmdb->last_result as $k => $def) {
 			$auto_fill_children[] = $def->def_option;
 			$valid_types = trim(str_replace(array('(', ')'), '', $def->def_type));
@@ -421,11 +428,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		/** Minimum version */
-		$minimum_version = getMinimumFeatureVersion($cfg_type);
-		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="tls" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="view_id" value="%d" />
@@ -435,11 +441,10 @@ HTML;
 					<input type="radio" name="tab-group-1" id="tab-1" checked />
 					<label for="tab-1">%s</label>
 					<div id="tab-content">
-						<div id="response"><p class="center">%s</p></div>
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_data">%s</label></th>
-								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" /></td>
+								<td width="67&#37;"><input name="cfg_data" id="cfg_data" type="text" value="%s" size="40" placeholder="%s" maxlength="%d" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="cfg_comment">%s</label></th>
@@ -470,7 +475,7 @@ HTML;
 			});
 		</script>',
 				$popup_header, $action, $cfg_id, $cfg_type_id, $server_serial_no,
-				__('Basic'), $minimum_version,
+				__('Basic'),
 				__('Connection Name'), $cfg_data, __('tls-name'), $tls_name_length,
 				_('Comment'), $cfg_comment,
 				__('Advanced'),
@@ -493,22 +498,27 @@ HTML;
 	 * @param array $include_sub_configs Array of sub configs to validate
 	 * @return array|string|boolean
 	 */
-	function validatePost($post, $include_sub_configs) {
-		global $fmdb, $__FM_CONFIG;
+	function validatePost($post, $include_sub_configs = null) {
+		global $fmdb, $__FM_CONFIG, $fm_module_options;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['cfg_isparent'] = 'yes';
 		$post['cfg_name'] = '!config_name!';
-		$post['cfg_data'] = sanitize(trim($post['cfg_data']), '-');
-		$post['cfg_comment'] = trim($post['cfg_comment']);
+		$post['cfg_data'] = sanitize($post['cfg_data'], '-');
+		if (empty($post['cfg_data'])) return __('No TLS connection name defined.');
 		$post['cfg_type'] = 'tls';
 
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND cfg_data='{$post['cfg_data']}' AND cfg_id!='{$post['cfg_id']}'";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) return __('This item already exists.');
+
+		if ($include_sub_configs === null) {
+			$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'tls'";
+			$fmdb->query($query);
+			foreach ($fmdb->last_result as $k => $def) {
+				$include_sub_configs[] = $def->def_option;
+			}
+		}
 
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 		

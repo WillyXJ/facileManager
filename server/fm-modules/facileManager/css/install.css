@@ -148,6 +148,12 @@ strong {
 	margin: 0;
 	text-align: center;
 }
+#message p.failed {
+	margin-bottom: 1em;
+	padding: 5px;
+	background-color: #CB3739;
+	color: #ffffff;
+}
 
 .status {
 	width: 15px;

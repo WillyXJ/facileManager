@@ -173,7 +173,7 @@ function installDatabase($database) {
 	$db_selected = $fmdb->select($database, 'silent');
 	if (!$db_selected) {
 		$query = sanitize("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		$output = displayProgress(_('Creating Database'), $fmdb->result);
 	} else {
 		$output = true;
@@ -279,6 +279,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_users` (
   `user_comment` varchar(255) DEFAULT NULL,
   `user_group` INT(11) DEFAULT NULL,
   `user_default_module` varchar(255) DEFAULT NULL,
+  `user_theme` VARCHAR(255) NULL DEFAULT NULL,
   `user_auth_type` int(1) NOT NULL DEFAULT '1',
   `user_caps` text,
   `user_last_login` int(10) NOT NULL DEFAULT '0',
@@ -421,7 +422,7 @@ INSERTSQL;
 	$temp_result = $fmdb->query($query);
 	if (!$fmdb->num_rows) {
 		foreach ($inserts as $query) {
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 			if ($fmdb->last_error) {
 				return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $fmdb->result, 'noisy', $fmdb->last_error);
 			}

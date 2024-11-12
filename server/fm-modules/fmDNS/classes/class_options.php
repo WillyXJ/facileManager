@@ -101,7 +101,7 @@ class fm_module_options {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'cfg_id');
+		$exclude = array('submit', 'action', 'cfg_id', 'page', 'item_type');
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -115,26 +115,20 @@ class fm_module_options {
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the option because a database error occurred.'), 'sql');
 		}
 
-		$tmp_name = $post['cfg_name'];
-		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
-		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
-			|| strpos($post['cfg_data'], 'key_') !== false
-			|| strpos($post['cfg_data'], 'domain_') !== false
-			|| strpos($post['cfg_data'], 'master_') !== false
-			|| strpos($post['cfg_data'], 'http_') !== false
-			|| strpos($post['cfg_data'], 'tls_') !== false
-			|| strpos($post['cfg_data'], 'dnssec_') !== false)
-			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$tmp_name = $post['cfg_name'];
+		$tmp_server_name = getServerName($post['server_serial_no']);
+		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
+		$tmp_domain_name = (isset($post['domain_id']) && $post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+
+		$cfg_data = str_replace(";\n\t\t", '; ', $this->parseDefType($post['cfg_name'], $post['cfg_data']));
 		addLogEntry("Added option:\nType: {$post['cfg_type']}\nName: $tmp_name\nValue: $cfg_data\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -167,7 +161,7 @@ class fm_module_options {
 			}
 		}
 		
-		$exclude = array('submit', 'action', 'cfg_id');
+		$exclude = array('submit', 'action', 'cfg_id', 'page', 'item_type');
 
 		$sql_edit = '';
 		
@@ -183,7 +177,7 @@ class fm_module_options {
 		// Update the config
 		$old_name = getNameFromID($post['cfg_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_', 'cfg_id', 'cfg_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}config` SET $sql WHERE `cfg_id`={$post['cfg_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the option because a database error occurred.'), 'sql');
@@ -192,19 +186,13 @@ class fm_module_options {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$tmp_server_name = $post['server_serial_no'] ? getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') : 'All Servers';
-		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
-		$tmp_domain_name = isset($post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
 
-		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
-		$cfg_data = (strpos($post['cfg_data'], 'acl_') !== false
-			|| strpos($post['cfg_data'], 'key_') !== false
-			|| strpos($post['cfg_data'], 'domain_') !== false
-			|| strpos($post['cfg_data'], 'master_') !== false
-			|| strpos($post['cfg_data'], 'http_') !== false
-			|| strpos($post['cfg_data'], 'tls_') !== false
-			|| strpos($post['cfg_data'], 'dnssec_') !== false)
-			? $fm_dns_acls->parseACL($post['cfg_data']) : $post['cfg_data'];
+		$tmp_server_name = getServerName($post['server_serial_no']);
+		$tmp_view_name = $post['view_id'] ? getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name') : 'All Views';
+		$tmp_domain_name = (isset($post['domain_id']) && $post['domain_id']) ? "\nZone: " . displayFriendlyDomainName(getNameFromID($post['domain_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) : null;
+
+		$cfg_data = str_replace(";\n\t\t", '; ', $this->parseDefType($post['cfg_name'], $post['cfg_data']));
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['cfg_name']}\nValue: {$cfg_data}\nServer: $tmp_server_name\nView: {$tmp_view_name}{$tmp_domain_name}\nComment: {$post['cfg_comment']}");
 		return true;
 	}
@@ -289,21 +277,15 @@ HTML;
 			case 'ratelimit':
 			case 'rrset':
 				if (isset($_POST['item_sub_type'])) {
-					$cfg_id_name = sanitize($_POST['item_sub_type']);
+					$cfg_id_name = $_POST['item_sub_type'];
 				} else {
 					$cfg_id_name = (isset($_POST['view_id']) || strtolower($cfg_type) == 'ratelimit') ? 'view_id' : 'domain_id';
 				}
 				$server_serial_no = (isset($_REQUEST['request_uri']['server_serial_no']) && (intval($_REQUEST['request_uri']['server_serial_no']) > 0 || $_REQUEST['request_uri']['server_serial_no'][0] == 'g')) ? sanitize($_REQUEST['request_uri']['server_serial_no']) : 0;
 				$server_serial_no_field = '<input type="hidden" name="server_serial_no" value="' . $server_serial_no . '" />';
-				$request_uri = 'config-options.php';
-				if (isset($_REQUEST['request_uri'])) {
-					$request_uri .= '?';
-					foreach ($_REQUEST['request_uri'] as $key => $val) {
-						$request_uri .= $key . '=' . sanitize($val) . '&';
-					}
-					$request_uri = rtrim($request_uri, '&');
-				}
-				$disabled = $action == 'add' ? null : 'disabled';
+				$server_id = (isset($_REQUEST['request_uri']['server_id']) && intval($_REQUEST['request_uri']['server_id']) > 0) ? sanitize($_REQUEST['request_uri']['server_id']) : 0;
+				$server_id_field = '<input type="hidden" name="server_id" value="' . $server_id . '" />';
+				$disabled = ($action == 'add') ? null : 'disabled';
 				break;
 		}
 		
@@ -340,14 +322,16 @@ HTML;
 		$return_form = sprintf('<script>
 			displayOptionPlaceholder("%s");
 		</script>
-		<form name="manage" id="manage" method="post" action="%s">
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="options" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="cfg_id" value="%d" />
 			<input type="hidden" name="cfg_type" value="%s" />
 			<input type="hidden" name="%s" value="%s" />
+			%s
+			%s
 			<table class="form-table">
-				%s
 				<tr>
 					<th width="33&#37;" scope="row"><label for="cfg_name">%s</label></th>
 					<td width="67&#37;">%s</td>
@@ -369,8 +353,9 @@ HTML;
 				});
 			});
 		</script>',
-				$cfg_data, $request_uri, $popup_header,
-				$action, $cfg_id, $cfg_type, $cfg_id_name, $cfg_type_id, $server_serial_no_field,
+				$cfg_data, $popup_header,
+				$action, $cfg_id, $cfg_type, $cfg_id_name, $cfg_type_id,
+				$server_serial_no_field, $server_id_field,
 				__('Option Name'), $cfg_avail_options,
 				_('Comment'), $cfg_comment,
 				$popup_footer
@@ -429,13 +414,13 @@ HTML;
 		
 		if ($action == 'add') {
 			if (isset($_POST['view_id'])) {
-				$cfg_id_sql[] = 'view_id = ' . sanitize($_POST['view_id']);
+				$cfg_id_sql[] = 'view_id = ' . $_POST['view_id'];
 			}
 			if (isset($_POST['item_id'])) {
 				if ($_POST['item_sub_type'] != 'domain_id') {
 					$cfg_id_sql[] = 'domain_id=0';
 				}
-				$cfg_id_sql[] = sanitize($_POST['item_sub_type']) . ' = ' . sanitize($_POST['item_id']);
+				$cfg_id_sql[] = $_POST['item_sub_type'] . ' = ' . $_POST['item_id'];
 			}
 			if (isset($cfg_id_sql)) {
 				$cfg_id_sql = implode(' AND ', $cfg_id_sql);
@@ -508,9 +493,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (is_array($post['cfg_data'])) $post['cfg_data'] = join(' ', $post['cfg_data']);
 		
 		if (isset($post['cfg_name'])) {
@@ -530,7 +512,7 @@ HTML;
 				break;
 		}
 		/** Handle masters and also-notify formats */
-		if ($post['cfg_data_port']) {
+		if (!empty($post['cfg_data_port']) && $post['cfg_data_port']) {
 			$tmp_cfg_data[] = 'port ' . $post['cfg_data_port'];
 		}
 		if (!empty($post['cfg_data_dscp'])) {
@@ -541,7 +523,7 @@ HTML;
 				if ($v) $tmp_cfg_data[] = "$k $v";
 			}
 		}
-		if (is_array($tmp_cfg_data)) {
+		if (isset($tmp_cfg_data) && is_array($tmp_cfg_data)) {
 			if (!$post['cfg_data'] || $post['cfg_data'] == ',') $post['cfg_data'] = 'any';
 			if ($post['cfg_data']) {
 				$tmp_cfg_data[] = '{ ' . trim(str_replace(',', $terminate, $post['cfg_data']), $terminate) . $terminate . '}';
@@ -574,7 +556,7 @@ HTML;
 	 * @return string Return formated data
 	 */
 	function parseDefType($cfg_name, $cfg_data) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_zones;
 		
 		$query = "SELECT def_type FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}functions WHERE def_option = '{$cfg_name}'";
 		$result = $fmdb->get_results($query);
@@ -597,10 +579,23 @@ HTML;
 		}
 
 		if (strpos($def_type, 'domain_select') !== false) {
+			if (!$fm_dns_zones) {
+				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
+			}
+
 			foreach (explode(',', $cfg_data) as $domain_name) {
-				$hosted_domain_name = getNameFromID($domain_name, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name');
-				$hosted_domain_name = ($hosted_domain_name) ? $hosted_domain_name : $domain_name;
-				$exclude_domain_names[] = '"' . displayFriendlyDomainName($hosted_domain_name) . '"';
+				if (preg_match('/^g_\d+/', $domain_name) == true) {
+					$domain_name = $fm_dns_zones->getZoneGroupMembers(str_replace('g_', '', $domain_name));
+				}
+				if (!is_array($domain_name)) {
+					$domain_name = array($domain_name);
+				}
+
+				foreach ($domain_name as $domain) {
+					$hosted_domain_name = getNameFromID($domain, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_name');
+					$hosted_domain_name = ($hosted_domain_name) ? $hosted_domain_name : $domain;
+					$exclude_domain_names[] = '"' . displayFriendlyDomainName($hosted_domain_name) . '"';
+				}
 			}
 			
 			return join(";\n\t\t", $exclude_domain_names);

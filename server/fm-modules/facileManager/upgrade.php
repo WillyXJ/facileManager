@@ -67,13 +67,15 @@ function fmUpgrade($database) {
 	for ($x=0; $x<$num_rows; $x++) {
 		$module_name = $module_list[$x]->module_name;
 		$success = $fm_tools->upgradeModule($module_name, 'quiet', $module_list[$x]->option_value);
-		if (!$success || $fmdb->last_error) {
-			$errors = true;
-			$success = false;
-		} else {
-			$success = true;
+		if ($success !== 'already current') {
+			if (!$success || $fmdb->last_error) {
+				$errors = true;
+				$success = false;
+			} else {
+				$success = true;
+			}
+			displayProgress(sprintf(_('Upgrading %s Schema'), $module_name), $success);
 		}
-		displayProgress(sprintf(_('Upgrading %s Schema'), $module_name), $success);
 	}
 
 	echo "</table>";
@@ -875,6 +877,33 @@ function fmUpgrade_470($database) {
 	}
 
 	upgradeConfig('fm_db_version', 52, false);
+	
+	return $success;
+}
+
+
+/** fM v5.0.0 **/
+function fmUpgrade_500($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 52) ? fmUpgrade_470($database) : true;
+	
+	if ($success) {
+		$queries[] = "ALTER TABLE `fm_users` ADD `user_theme` VARCHAR(255) NULL DEFAULT NULL AFTER `user_default_module`";
+		
+		/** Create table schema */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 60, false);
 	
 	return $success;
 }

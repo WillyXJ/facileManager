@@ -48,14 +48,19 @@ function returnError($addl_msg = null, $display = 'window') {
  * @since 1.0
  * @package facileManager
  */
-function returnUnAuth($window = true) {
+function returnUnAuth($format = 'window') {
 	$msg = _('You do not have permission to make these changes.');
-	if ($window) {
-		echo buildPopup('header', _('Error'));
-		echo "<p>$msg</p>\n";
-		echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
-	} else {
-		echo displayResponseClose($msg);
+	switch ($format) {
+		case 'window':
+			echo buildPopup('header', _('Error'));
+			echo "<p>$msg</p>\n";
+			echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+			break;
+		case 'response-close':
+			echo displayResponseClose($msg);
+			break;
+		default:
+			echo $msg;
 	}
 	exit;
 }

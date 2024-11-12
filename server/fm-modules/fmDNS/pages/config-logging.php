@@ -35,38 +35,6 @@ if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {
 	exit;
 }
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '&server_serial_no=' . $server_serial_no : null;
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = ($_POST['sub_type'] == 'channel') ? $fm_module_logging->addChannel($_POST) : $fm_module_logging->addCategory($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $type . $server_serial_no_uri);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_logging->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . '?type=' . $_POST['sub_type'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-	}
-} $server_serial_no_uri = null;
-
 printHeader();
 @printMenu();
 

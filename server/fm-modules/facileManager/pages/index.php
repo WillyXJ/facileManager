@@ -21,7 +21,7 @@
 
 /* Redirect to activate modules if none are active */
 if ($_SESSION['module'] == $fm_name && currentUserCan('manage_modules')) {
-	header('Location: ' . $menu[getParentMenuKey(_('Modules'))][4]);
+	header('Location: ' . $menu[getParentMenuKey(_('Modules'))][5]);
 	exit;
 }
 

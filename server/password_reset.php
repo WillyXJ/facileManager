@@ -47,11 +47,16 @@ if (count($_POST)) {
 		$login = sanitize($login);
 		$user_password = sanitize($user_password);
 
-		if (!resetPassword($login, $user_password)) $message = sprintf('<p class="failed">%s</p>', _('Your password failed to get updated.'));
-		else {
+		$result = resetPassword($login, $user_password);
+		if ($result !== true) {
+			$message_text = ($result === false) ? _('Your password failed to get updated.') : $result;
+			$message = sprintf('<p class="failed">%s</p>', $message_text);
+		} else {
 			require_once(ABSPATH . 'fm-modules/facileManager/classes/class_logins.php');
 			$fm_login->checkPassword($login, $user_password);
 			
+			addLogEntry(_('Changed password'), $fm_name);
+
 			exit(printResetConfirmation());
 		}
 	}
