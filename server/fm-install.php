@@ -96,7 +96,7 @@ switch ($step) {
 		/** Check if already installed */
 		if (isset($__FM_CONFIG['db']['name'])) {
 			$query = "SELECT option_id FROM `{$__FM_CONFIG['db']['name']}`.`fm_options` WHERE `option_name`='fm_db_version'";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH']);
 			exit;

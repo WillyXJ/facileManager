@@ -145,7 +145,7 @@ if (isset($record_type) && $domain_id && !isset($import_records)) {
  * @package facileManager
  * @subpackage fmDNS
  *
- * @param id $domain_id domain_id
+ * @param int $domain_id domain_id
  * @param string $record_type Type of RR
  * @param array $data RR data to process
  * @param string $operation Add or Update

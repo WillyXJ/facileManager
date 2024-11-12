@@ -161,10 +161,11 @@ strong {
 	margin: 1em 0 0;
 }
 
-.failed {
-	color: #CB3739;
-}
-
 .success {
 	color: #D0D0D0;
+	max-height: 11em;
+}
+
+.failed {
+	color: #FF4C4F;
 }

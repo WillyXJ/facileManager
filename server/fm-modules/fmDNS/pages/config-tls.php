@@ -27,44 +27,12 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_tls.php'
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 $display_option_type_sql = 'tls';
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_tls->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_tls->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 
 $avail_servers = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion($display_option_type_sql)), null, currentUserCan('manage_servers', $_SESSION['module']));
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>
@@ -74,7 +42,7 @@ echo <<<HTML
 </div>
 
 HTML;
-	
+
 $sort_direction = null;
 $sort_field = 'cfg_data';
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {

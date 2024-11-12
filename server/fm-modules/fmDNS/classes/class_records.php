@@ -86,6 +86,7 @@ class fm_dns_records {
 		
 		$sql_insert = "INSERT INTO `$table`";
 		$sql_fields = '(';
+		$sql_values = '';
 		if ($record_type != 'SOA' && $record_type) {
 			$sql_fields .= 'domain_id, record_type, ';
 			$sql_values .= "$domain_id, '$record_type', ";
@@ -111,14 +112,14 @@ class fm_dns_records {
 			}
 			if ($key == 'soa_default' && $data == 'yes') {
 				$query = "UPDATE `$table` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
-				$result = $fmdb->query($query);
+				$fmdb->query($query);
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) return false;
 		$insert_id = $fmdb->insert_id;
@@ -149,7 +150,8 @@ class fm_dns_records {
 
 		$domain_name = displayFriendlyDomainName(getNameFromID($_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
 		$record_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_name');
-		$log_message = "Updated a record ($record_name) with the following details:\nDomain: $domain_name\n";
+		$log_message = sprintf(__('Updated a record (%s) with the following details'), $record_name) . ":\n";
+		$log_message .= ($_domain_id) ? formatLogKeyData('', 'domain', $domain_name) : null;
 
 		$table = ($record_type == 'SOA') ? 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa' : 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records';
 		$field = ($record_type == 'SOA') ? 'soa_id' : 'record_id';
@@ -174,7 +176,7 @@ class fm_dns_records {
 			if (!$skipped_record) $log_message .= $data ? formatLogKeyData('record_', $key, $data) : null;
 			if ($key == 'soa_default' && $data == 'yes') {
 				$query = "UPDATE `$table` SET $key = 'no' WHERE `account_id`='{$_SESSION['user']['account_id']}'";
-				$result = $fmdb->query($query);
+				$fmdb->query($query);
 			}
 		}
 		$sql_edit = rtrim($sql_edit, ', ');
@@ -183,7 +185,7 @@ class fm_dns_records {
 		if ($skipped_record) {
 			$table .= '_skipped';
 			$query = "SELECT * FROM `$table` WHERE account_id={$_SESSION['user']['account_id']} AND domain_id=$domain_id AND record_id=$id";
-			$result = $fmdb->query($query);
+			$fmdb->query($query);
 			if ($fmdb->num_rows) {
 				$query = "UPDATE `$table` SET domain_id=$domain_id, record_id=$id, record_status='{$array['record_status']}' WHERE account_id={$_SESSION['user']['account_id']} AND domain_id=$domain_id AND record_id=$id";
 			} else {
@@ -711,7 +713,7 @@ HTML;
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains d, fm_{$__FM_CONFIG['fmDNS']['prefix']}soa s WHERE domain_status='active' AND d.account_id='{$_SESSION['user']['account_id']}' AND 
 				s.soa_id=d.soa_id AND d.domain_id IN (" . join(',', $parent_domain_ids) . ')';
 		}
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		if (!$fmdb->num_rows) return false;
 		
 		$domain_reload = getNameFromID($domain_id, "fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_', 'domain_id', 'domain_reload');
@@ -930,10 +932,13 @@ HTML;
 			if (version_compare($server_client_version, '3.0-alpha1', '<')) continue;
 			
 			$file_ext = ($domain_mapping == 'forward') ? 'hosts' : 'rev';
+
+			/** Set master/primary nomenclature */
+			$master_dir = (version_compare($server_version, '9.13.0', '<')) ? 'master' : 'primary';
 			
 			/** Get zone data via ssh */
 			if ($server_update_method == 'ssh') {
-				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.' . $file_ext, 'return', $server_update_port);
+				$server_remote = runRemoteCommand($server_name, 'sudo php /usr/local/facileManager/fmDNS/client.php dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/' . $master_dir . '/db.' . $domain_name . '.' . $file_ext, 'return', $server_update_port, 'include', 'window');
 			} elseif (in_array($server_update_method, array('http', 'https'))) {
 				/** Get zone data via http(s) */
 				/** Test the port first */
@@ -946,7 +951,7 @@ HTML;
 						'serial_no' => $server_serial_no,
 						'domain_id' => $domain_id,
 						'module' => $_SESSION['module'],
-						'command_args' => 'dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/master/db.' . $domain_name . '.' . $file_ext
+						'command_args' => 'dump-zone -D ' . $domain_name . ' -f ' . $server_chroot_dir . $server_zones_dir . '/' . $master_dir . '/db.' . $domain_name . '.' . $file_ext
 					);
 
 					$server_remote = getPostData($url, $post_data);
@@ -986,6 +991,7 @@ HTML;
 		$_FILES['import-file']['tmp_name'] = $_FILES['import-file']['name'] = '/tmp/db.' . $domain_name;
 		file_put_contents($_FILES['import-file']['tmp_name'], join("\n", $server_remote['output']));
 
+		global $fm_module_tools;
 		$module_tools_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $_SESSION['module'] . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'class_tools.php';
 		if (file_exists($module_tools_file) && !class_exists('fm_module_tools')) {
 			include($module_tools_file);

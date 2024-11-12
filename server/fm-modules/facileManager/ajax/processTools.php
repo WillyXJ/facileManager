@@ -40,7 +40,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 	if (isset($_POST['task']) && !empty($_POST['task'])) {
 		switch($_POST['task']) {
 			case 'module_install':
-				$module_name = isset($_POST['item']) ? sanitize($_POST['item']) : null;
+				$module_name = isset($_POST['item']) ? $_POST['item'] : null;
 				$response = buildPopup('header', _('Installing Module'));
 				$response .= $fm_tools->installModule($module_name);
 				if ($fmdb->last_error) $response .= $fmdb->last_error;
@@ -48,10 +48,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				
 				echo $response;
 				exit;
-				
-				break;
 			case 'module_upgrade':
-				$module_name = isset($_POST['item']) ? sanitize($_POST['item']) : null;
+				$module_name = isset($_POST['item']) ? $_POST['item'] : null;
 				$response = buildPopup('header', _('Upgrading Module'));
 				$response .= $fm_tools->upgradeModule($module_name);
 				if ($fmdb->last_error) $response .= $fmdb->last_error;
@@ -59,8 +57,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				
 				echo $response;
 				exit;
-				
-				break;
 			case 'db-cleanup':
 				$response = buildPopup('header', _('Database Clean Up Results'));
 				$response .= '<p>' . $fm_tools->cleanupDatabase() . '</p>';
@@ -84,8 +80,6 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				
 				echo $response;
 				exit;
-
-				break;
 		}
 	}
 } else {

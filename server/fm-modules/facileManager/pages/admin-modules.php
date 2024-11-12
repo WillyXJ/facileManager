@@ -70,14 +70,11 @@ if (!empty($fm_new_version_available)) {
 		$response .= sprintf(_('%s and %s need to be writeable by %s in order for the core and modules to be updated automatically.'), $fm_temp_directory, ABSPATH, $__FM_CONFIG['webserver']['user_info']['name']);
 	}
 
-	$update_core = sprintf('<h2>%s</h2><p>%s</p><p>%s</p><br />', sprintf(_('Update %s Core'), $fm_name), $text, $buttons);
+	$update_core = sprintf('<h2>%s</h2><div class="upgrade_notice"><p>%s</p></div><p>%s</p><br />', sprintf(_('Update %s Core'), $fm_name), $text, $buttons);
 }
 
 printHeader();
 @printMenu();
-
-echo '<div id="body_container">';
-if (!empty($response)) echo '<div id="response"><p>' . $response . '</p></div>';
 
 $table_info = array(
 				'class' => 'display_results modules',
@@ -101,7 +98,7 @@ $header = displayTableHeader($table_info, $title_array);
 
 $modules = getAvailableModules();
 if (count($modules)) {
-	$module_display = @buildBulkActionMenu($bulk_actions_list, 'module_list') . $header;
+	$module_display = $header;
 
 	foreach ($modules as $module_name) {
 		/** Include module variables */
@@ -180,11 +177,12 @@ printf('
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="">
 			%s
-			<h2>%s</h2>
+			%s
+			%s
 			%s
 		</form>
 	</div>
 </div>' . "\n",
-		$update_core, getPageTitle(), $module_display);
+		$update_core, printPageHeader($response), displayPagination(0, 0, buildBulkActionMenu($bulk_actions_list, 'module_list')), $module_display);
 
 printFooter(null, $output);

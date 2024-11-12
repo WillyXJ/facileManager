@@ -28,9 +28,8 @@ printHeader();
 
 include_once(ABSPATH . 'fm-modules/shared/classes/class_settings.php');
 
-echo '<div id="body_container">
-<div id="response" style="display: none;"></div>
-	<h2>' . getPageTitle() . '</h2>
-	' . $fm_module_settings->printForm() . '</div>' . "\n";
+echo printPageHeader();
+
+echo $fm_module_settings->printForm() . '</div>' . "\n";
 
 printFooter();

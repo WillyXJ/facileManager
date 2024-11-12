@@ -96,14 +96,26 @@ class fm_users {
 	 * @package facileManager
 	 */
 	function addUser($data) {
-		global $fmdb, $fm_name, $fm_login;
+		global $__FM_CONFIG, $fmdb, $fm_name, $fm_login;
 		
+		if (isset($data['group_id'])) {
+			return $this->addGroup($data);
+		}
+		
+		if (!isset($data['user_template_only'])) $data['user_template_only'] = 'no';
 		extract($data, EXTR_SKIP);
 		
-		$user_login = $user_login;
-		$user_password = $user_password;
-		$user_email = $user_email;
-		
+		$log_message = "Added user:\n";
+		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax', 'process_user_caps', 'type');
+
+		foreach ($data as $key => $val) {
+			if (!in_array($key, $exclude)) {
+				if ($key == 'user_auth_type') $val = $__FM_CONFIG['options']['auth_method'][$val][0];
+				if ($key == 'user_group') $val = $this->getName('group', $val);
+				$log_message .= formatLogKeyData('user_', $key, $val);
+			}
+		}
+
 		/** Template user? */
 		if (isset($user_template_only) && $user_template_only == 'yes') {
 			$user_template_only = 'yes';
@@ -115,14 +127,16 @@ class fm_users {
 			$user_auth_type = isset($user_auth_type) ? $user_auth_type : 1;
 		}
 
-		if (empty($user_login)) return _('No username defined.');
+		$ret = $this->validateFormField('user_login', $user_login);
+		if ($ret !== true) return $ret;
 		if ($user_auth_type == 2) {
 			$user_password = null;
-		} else {
-			if (empty($user_password) && $user_template_only == 'no') return _('No password defined.');
-			if ($user_password != $cpassword && $user_template_only == 'no') return _('Passwords do not match.');
+		} elseif (isset($user_template_only) && $user_template_only == 'no') {
+			$ret = $this->validateFormField('user_password', $user_password, $data);
+			if ($ret !== true) return $ret;
 		}
-		if (empty($user_email) && $user_template_only == 'no') return _('No e-mail address defined.');
+		$ret = $this->validateFormField('user_email', $user_email, $data);
+		if ($ret !== true) return $ret;
 		
 		/** Check name field length */
 		$field_length = getColumnLength('fm_users', 'user_login');
@@ -154,20 +168,30 @@ class fm_users {
 					$user_caps[$module] = array('read_only' => 1);
 				}
 			}
+			$log_message .= formatLogKeyData('', 'permissions', $this->getFriendlyCaps($user_caps));
 		}
 		
 		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_comment`, `user_email`, `user_group`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
 				VALUES('{$_SESSION['user']['account_id']}', '$user_login', '" . password_hash($user_password, PASSWORD_DEFAULT) . "', '$user_comment', '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not add the user because a database error occurred.'), 'sql');
 		}
 
 		/** Process forced password change */
-		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login);
+		if ($user_force_pwd_change == 'yes') $fm_login->processUserPwdResetForm($user_login, 'no mail');
 		
-		addLogEntry(sprintf(_("Added user '%s'."), $user_login), $fm_name);
+		$log_message = sprintf("Added user:\n", $user_login);
+		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax', 'process_user_caps', 'type');
+
+		foreach ($data as $key => $data) {
+			if (!in_array($key, $exclude)) {
+				$log_message .= formatLogKeyData('user_', $key, $data);
+			}
+		}
+
+		addLogEntry($log_message, $fm_name);
 		return true;
 	}
 
@@ -182,9 +206,15 @@ class fm_users {
 		
 		extract($data, EXTR_SKIP);
 		
-		$group_name = $group_name;
-		$group_comment = $group_comment;
-		
+		$log_message = "Added user group:\n";
+		$exclude = array('submit', 'action', 'group_id', 'user_caps', 'is_ajax', 'process_user_caps', 'type', 'group_users');
+
+		foreach ($data as $key => $val) {
+			if (!in_array($key, $exclude)) {
+				$log_message .= formatLogKeyData('group_', $key, $val);
+			}
+		}
+
 		if (empty($group_name)) return _('No group name defined.');
 		
 		/** Check name field length */
@@ -208,25 +238,32 @@ class fm_users {
 					$user_caps[$module] = array('read_only' => 1);
 				}
 			}
+			$log_message .= formatLogKeyData('', 'permissions', $this->getFriendlyCaps($user_caps));
 		}
 		
 		$query = "INSERT INTO `fm_groups` (`account_id`, `group_name`, `group_caps`, `group_comment`, `group_status`) 
 				VALUES('{$_SESSION['user']['account_id']}', '$group_name', '" . serialize($user_caps) . "', '$group_comment', 'active')";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
 		}
-		
+
 		if (isset($group_users) && is_array($group_users)) {
 			$query = "UPDATE `fm_users` SET `user_group`='{$fmdb->insert_id}', `user_caps`=NULL WHERE `user_id` IN ('" . join("','", $group_users) . "')";
 			if (!$fmdb->query($query)) {
 				$addl_text = ($fmdb->last_error) ? '<br />' . $fmdb->last_error : null;
 				return formatError(_('Could not associate the users with the group.'), 'sql');
 			}
+			foreach ((array) $group_users as $id) {
+				$group_members[] = $this->getName('user', $id);
+			}
+		} else {
+			$group_members[] = _('None');
 		}
+		$log_message .= formatLogKeyData('group_', 'group_users', join(', ', (array) $group_members));
 
-		addLogEntry(sprintf(_("Added group '%s'."), $group_name), $fm_name);
+		addLogEntry($log_message, $fm_name);
 		return true;
 	}
 
@@ -236,8 +273,12 @@ class fm_users {
 	 * @since 1.0
 	 * @package facileManager
 	 */
-	function updateUser($post) {
-		global $fmdb, $fm_name, $fm_login;
+	function editUser($post) {
+		global $__FM_CONFIG, $fmdb, $fm_name, $fm_login;
+
+		if (isset($post['group_id'])) {
+			return $this->editGroup($post);
+		}
 		
 		/** Template user? */
 		if (isset($post['user_template_only']) && $post['user_template_only'] == 'yes') {
@@ -260,10 +301,14 @@ class fm_users {
 				return _('You do not have permission to make these changes.');
 		}
 
+		$user_login = getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_login');
+		$log_message = sprintf("Updated user '%s':\n", $user_login);
+
 		if (!empty($post['user_password'])) {
 			if (empty($post['cpassword']) || $post['user_password'] != $post['cpassword']) return _('Passwords do not match.');
 			if (password_verify($post['user_password'], getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_password'))) return _('Password is not changed.');
 			$sql_pwd = "`user_password`='" . password_hash($post['user_password'], PASSWORD_DEFAULT) . "',";
+			$log_message .= formatLogKeyData('user_', 'Password', 'Changed');
 		} else $sql_pwd = null;
 		
 		$sql_edit = '';
@@ -273,6 +318,9 @@ class fm_users {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if ($key == 'user_auth_type') $data = $__FM_CONFIG['options']['auth_method'][$data][0];
+				if ($key == 'user_group') $data = $this->getName('group', $data);
+				$log_message .= formatLogKeyData('user_', $key, $data);
 			}
 		}
 		$sql = rtrim($sql_edit . $sql_pwd, ', ');
@@ -287,22 +335,28 @@ class fm_users {
 		}
 		if (isset($post['user_caps'])) {
 			$sql .= ",user_caps='" . serialize($post['user_caps']) . "'";
+			$log_message .= formatLogKeyData('', 'permissions', $this->getFriendlyCaps($post['user_caps']));
 		}
 		
 		/** Update the user */
 		$query = "UPDATE `fm_users` SET $sql WHERE `user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not update the user because a database error occurred.'), 'sql');
 		}
 
-		$user_login = getNameFromID($post['user_id'], 'fm_users', 'user_', 'user_id', 'user_login');
-		
+		/** Set theme */
+		if (isset($post['user_theme'])) {
+			@session_start();
+			$_SESSION['user']['theme'] = $post['user_theme'];
+			session_write_close();
+		}
+
 		/** Process forced password change */
-		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login);
+		if (isset($post['user_force_pwd_change']) && $post['user_force_pwd_change'] == 'yes') $fm_login->processUserPwdResetForm($user_login, 'no mail');
 		
-		addLogEntry(sprintf(_("Updated user '%s'."), $user_login), $fm_name);
+		addLogEntry($log_message, $fm_name);
 		
 		return true;
 	}
@@ -314,7 +368,7 @@ class fm_users {
 	 * @since 2.1
 	 * @package facileManager
 	 */
-	function updateGroup($post) {
+	function editGroup($post) {
 		global $fmdb, $fm_name, $fm_login;
 		
 		$post['group_id'] = intval($post['group_id']);
@@ -328,10 +382,12 @@ class fm_users {
 		if ($field_length !== false && strlen($group_name) > $field_length) return sprintf(_('Group name is too long (maximum %d characters).'), $field_length);
 		
 		/** Does the record already exist for this account? */
-		$query = "SELECT * FROM `fm_groups` WHERE `group_status`!='deleted' AND `group_name`='$group_name'";
+		$query = "SELECT * FROM `fm_groups` WHERE `group_status`!='deleted' AND `group_name`='$group_name' AND `group_id`!='{$post['group_id']}'";
 		$fmdb->get_results($query);
 		if ($fmdb->num_rows) return _('This group already exists.');
 		
+		$log_message = sprintf("Updated user group '%s':\n", $this->getName('group', $post['group_id']));
+
 		$sql_edit = '';
 		
 		$exclude = array('submit', 'action', 'group_id', 'user_caps', 'is_ajax', 'process_user_caps', 'type', 'group_users');
@@ -339,10 +395,20 @@ class fm_users {
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				$log_message .= formatLogKeyData('group_', $key, $data);
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
-		
+
+		if (isset($post['group_users']) && is_array($post['group_users'])) {
+			foreach ((array) $post['group_users'] as $id) {
+				$group_members[] = $this->getName('user', $id);
+			}
+		} else {
+			$group_members[] = _('None');
+		}
+		$log_message .= formatLogKeyData('group_', 'group_users', join(', ', (array) $group_members));
+
 		/** Process group permissions */
 		if (isset($post['process_user_caps']) && !isset($post['user_caps'])) $post['user_caps'] = array();
 		
@@ -353,11 +419,12 @@ class fm_users {
 		}
 		if (isset($post['user_caps'])) {
 			$sql .= ",group_caps='" . serialize($post['user_caps']) . "'";
+			$log_message .= formatLogKeyData('', 'permissions', $this->getFriendlyCaps($post['user_caps']));
 		}
 		
 		/** Update the group */
 		$query = "UPDATE `fm_groups` SET $sql WHERE `group_id`={$post['group_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
@@ -373,7 +440,7 @@ class fm_users {
 			}
 		}
 
-		addLogEntry(sprintf(_("Updated group '%s'."), $post['group_name']), $fm_name);
+		addLogEntry($log_message, $fm_name);
 		
 		return true;
 	}
@@ -553,7 +620,7 @@ HTML;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
-		$user_email = $user_default_module = null;
+		$user_email = $user_default_module = $user_theme = null;
 		$hidden = $user_perm_form = $return_form_rows = null;
 		$user_force_pwd_change = $user_template_only = null;
 		$group_name = $group_comment = $user_group = null;
@@ -573,6 +640,7 @@ HTML;
 			$popup_title = $type == 'users' ? __('Edit User') : __('Edit Group');
 		}
 		$popup_header = buildPopup('header', $popup_title);
+		$popup_footer = buildPopup('footer');
 		
 		$hidden = '<input type="hidden" name="type" value="' . $type . '" />';
 		
@@ -580,7 +648,7 @@ HTML;
 			/** Get field length */
 			$field_length = getColumnLength('fm_users', 'user_login');
 			
-			$username_form = ($action == 'add' || (string) array_search('user_login', $form_bits) == 'editable') ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" />' : '<span id="form_username">' . $user_login . '</span>';
+			$username_form = ($action == 'add' || (string) array_search('user_login', $form_bits) == 'editable') ? '<input name="user_login" id="user_login" type="text" value="' . $user_login . '" size="40" maxlength="' . $field_length . '" class="required" />' : '<span id="form_username">' . $user_login . '</span>';
 			$hidden .= '<input type="hidden" name="user_id" value="' . $user_id . '" />';
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_login">' . _('User Login') . '</label></th>
@@ -602,7 +670,7 @@ HTML;
 			
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="user_email">' . _('User Email') . '</label></th>
-					<td width="67%"><input name="user_email" id="user_email" type="email" value="' . $user_email . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' /></td>
+					<td width="67%"><input name="user_email" id="user_email" type="email" value="' . $user_email . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' class="required" /></td>
 				</tr>';
 		}
 
@@ -614,23 +682,29 @@ HTML;
 			$auth_method_types = $__FM_CONFIG['options']['auth_method'];
 			if (array_shift($auth_method_types) && count($auth_method_types) > 1) {
 				$return_form_rows .= '<tr>
-					<th width="33%" scope="row"><label for="user_email">' . _('Authentication Method') . '</label></th>
+					<th width="33%" scope="row"><label for="user_auth_type">' . _('Authentication Method') . '</label></th>
 					<td width="67%">' . buildSelect('user_auth_type', 'user_auth_type', $auth_method_types, $user_auth_type) . '</td>
 				</tr>';
 			}
 		}
 		
 		if ((in_array('user_password', $form_bits) || array_key_exists('user_password', $form_bits)) || ($user_id == $_SESSION['user']['id'] && $user_auth_type != 2)) {
-			if ($action == 'add') $button_disabled = 'disabled';
+			if ($action == 'add') {
+				$button_disabled = 'disabled';
+				$field_required = 'class="required" ';
+			} else {
+				$field_required = '';
+			}
+
 			$strength = $GLOBALS['PWD_STRENGTH'];
 			if (array_key_exists('user_password', $form_bits)) $strength = $form_bits['user_password'];
 			$return_form_rows .= '<tr class="user_password">
 					<th width="33%" scope="row"><label for="user_password">' . _('User Password') . '</label></th>
-					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'user_password\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
+					<td width="67%"><input name="user_password" id="user_password" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'user_password\', \'' . $button_id . '\', \'' . $strength . '\');" ' . $field_required . '/></td>
 				</tr>
 				<tr class="user_password">
 					<th width="33%" scope="row"><label for="cpassword">' . _('Confirm Password') . '</label></th>
-					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'cpassword\', \'' . $button_id . '\', \'' . $strength . '\');" /></td>
+					<td width="67%"><input name="cpassword" id="cpassword" type="password" value="" size="40" onkeyup="javascript:checkPasswd(\'cpassword\', \'' . $button_id . '\', \'' . $strength . '\');" ' . $field_required . '/></td>
 				</tr>
 				<tr class="user_password">
 					<th width="33%" scope="row">' . _('Password Validity') . '</th>
@@ -656,6 +730,15 @@ HTML;
 			unset($active_modules);
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row">' . _('Default Module') . '</th>
+					<td width="67%">' . $user_module_options . '</td>
+				</tr>';
+		}
+		
+		if (in_array('user_theme', $form_bits)) {
+			$user_module_options = buildSelect('user_theme', 'user_theme', getThemes(), $user_theme);
+			unset($available_themes);
+			$return_form_rows .= '<tr>
+					<th width="33%" scope="row">' . _('Theme') . '</th>
 					<td width="67%">' . $user_module_options . '</td>
 				</tr>';
 		}
@@ -689,7 +772,7 @@ HTML;
 			$hidden .= $action != 'add' ? '<input type="hidden" name="group_name" value="' . $group_name . '" />' : null;
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row"><label for="group_name">' . _('Group Name') . '</label></th>
-					<td width="67%"><input name="group_name" id="group_name" type="text" value="' . $group_name . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' /></td>
+					<td width="67%"><input name="group_name" id="group_name" type="text" value="' . $group_name . '" size="32" maxlength="' . $field_length . '" ' . $disabled . ' class="required" /></td>
 				</tr>';
 		}
 		
@@ -811,6 +894,7 @@ PERM;
 		} while (false);
 		
 		$return_form = ($print_form_head) ? '<form name="manage" id="manage" method="post" action="' . $action_page . '">' . "\n" : null;
+		$return_form = '';
 		if ($display_type == 'popup') $return_form .= $popup_header;
 		$return_form .= '
 			<div>
@@ -821,12 +905,7 @@ PERM;
 		
 		$return_form .= '</table></div>';
 
-		if ($display_type == 'popup') $return_form .= '
-		</div>
-		<div class="popup-footer">
-			<input type="submit" id="' . $button_id . '" name="submit" value="' . $button_text . '" class="button primary ' . $button_disabled . '" ' . $button_disabled . '/>
-			<input type="button" value="' . _('Cancel') . '" class="button left" id="cancel_button" />
-		</div>
+		if ($display_type == 'popup') $return_form .= $popup_footer . '
 		</form>
 		<script>
 			$(document).ready(function() {
@@ -933,7 +1012,7 @@ PERM;
 
 		$query = sprintf("INSERT INTO fm_keys (`account_id`, `user_id`, `key_token`, `key_secret`) VALUES (%d, %d, '%s', '%s')",
 			$_SESSION['user']['account_id'], $_SESSION['user']['id'], $key_token, password_hash($key_secret, PASSWORD_DEFAULT));
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return $popup_header . formatError(_('Could not create the keypair because a database error occurred.'), 'sql') . $popup_footer;
@@ -957,6 +1036,95 @@ PERM;
 		$popup_footer = buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), 'admin-users.php?type=keys');
 
 		return $popup_header . $message . $popup_footer;
+	}
+
+
+	/**
+	 * Gets the user or group name
+	 *
+	 * @since 4.8.0
+	 * @package facileManager
+	 *
+	 * @param string $type User or group
+	 * @param integer $id ID of object to get
+	 * @return string
+	 */
+	private function getName($type, $id) {
+		$field = ($type == 'user') ? "{$type}_login" : "{$type}_name";
+		return ($id) ? getNameFromID($id, "fm_{$type}s", "{$type}_", "{$type}_id", $field) : _('None');
+	}
+
+
+	/**
+	 * Gets a friendly version of the user/group capabilities
+	 *
+	 * @since 4.8.0
+	 * @package facileManager
+	 *
+	 * @param array $caps Array of capabilities
+	 * @return string
+	 */
+	private function getFriendlyCaps($caps) {
+		$fm_user_caps = getAvailableUserCapabilities();
+
+		if (!is_array($caps)) return _('None');
+		$perms = array();
+
+		foreach ($caps as $module => $module_caps) {
+			$module_perms = array();
+			foreach ($module_caps as $key => $val) {
+				if (array_key_exists($key, $fm_user_caps[$module])) {
+					$module_perms[] = $fm_user_caps[$module][$key];
+				} else {
+					$module_extra_functions = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'functions.extra.php';
+					if (file_exists($module_extra_functions)) {
+						include_once($module_extra_functions);
+
+						$function = 'get' . $module . 'UsersPermLogging';
+						if (function_exists($function)) {
+							$module_perms[] = $function($fm_user_caps, $key, $val);
+						}
+					}
+				}
+			}
+			$perms[] = sprintf('%s - %s', $module, join(', ', $module_perms));
+		}
+
+		return join("\n", $perms);
+	}
+
+
+	/**
+	 * Validates a form field
+	 *
+	 * @since 4.8.0
+	 * @package facileManager
+	 *
+	 * @param string $field Form field name
+	 * @param string $value Form field value
+	 * @param array $data Data array of secondary fields and values
+	 * @return string
+	 */
+	function validateFormField($field, $value, $data = '') {
+		switch ($field) {
+			case 'user_login':
+				if (empty($value)) return _('No username defined.');
+				break;
+			case 'user_password':
+			case 'cpassword':
+				if (is_array($data)) {
+					if (empty($value) && isset($data['user_template_only']) && $data['user_template_only'] == 'no') return _('No password defined.');
+					if ($value != $data['cpassword'] && isset($data['user_template_only']) && $data['user_template_only'] == 'no') return _('Passwords do not match.');
+					$regex = ($GLOBALS['PWD_STRENGTH'] == 'strong') ? '/^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\W).*$/' : "^(?=.{7,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$";
+					if (!preg_match($regex, $value)) return _('Password does not meet the complexity requirements.');
+				}
+				break;
+			case 'user_email':
+				if (empty($value) && isset($data['user_template_only']) && $data['user_template_only'] == 'no') return _('No e-mail address defined.');
+				break;
+		}
+
+		return true;
 	}
 }
 

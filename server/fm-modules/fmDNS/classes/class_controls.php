@@ -67,12 +67,15 @@ class fm_dns_controls {
 	 * Adds the new control
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
 		
 		if (!class_exists('fm_dns_acls')) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 		}
-		
+		if (!class_exists('fm_dns_keys')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
+		}
+
 		/** Validate post */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
@@ -83,26 +86,40 @@ class fm_dns_controls {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id');
+		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$logging_exclude = array_diff(array_keys($post), $exclude, array('control_id', 'action', 'account_id', 'tab-group-1', 'sub_type'));
+		$log_message = sprintf(__('Added %s with the following details'), $post['control_type']) . ":\n";
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				if (in_array($key, $logging_exclude)) {
+					if ($key == 'server_serial_no') {
+						$log_message .= formatLogKeyData('', 'server', getServerName($data));
+					} elseif ($key == 'control_addresses') {
+						$log_message .= formatLogKeyData('control_', $key, (strpos($data, 'acl_') !== false) ? $fm_dns_acls->parseACL($data) : $data);
+					} elseif ($key == 'control_keys') {
+						$log_message .= formatLogKeyData('control_', $key, $fm_dns_keys->parseKey($data, '; '));
+					} elseif (strlen($data)) {
+						$log_message .= formatLogKeyData('control_', $key, $data);
+					}
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the control because a database error occurred.'), 'sql');
 		}
 
-		$control_addresses = strpos($post['control_addresses'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['control_addresses']) : $post['control_addresses'];
-		addLogEntry(__('Added control') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . _('Comment') . ": {$post['control_comment']}");
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -110,10 +127,13 @@ class fm_dns_controls {
 	 * Updates the selected control
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
 		
 		if (!class_exists('fm_dns_acls')) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+		}
+		if (!class_exists('fm_dns_keys')) {
+			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_keys.php');
 		}
 		
 		/** Validate post */
@@ -126,19 +146,32 @@ class fm_dns_controls {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id');
+		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$logging_exclude = array_diff(array_keys($post), $exclude, array('control_id', 'action', 'account_id', 'tab-group-1', 'sub_type'));
+		$log_message = sprintf(__('Updated %s (%s) to the following details'), $post['control_type'], $post['control_ip']) . ":\n";
 
 		$sql_edit = '';
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if (in_array($key, $logging_exclude)) {
+					if ($key == 'server_serial_no') {
+						$log_message .= formatLogKeyData('', 'server', getServerName($data));
+					} elseif ($key == 'control_addresses') {
+						$log_message .= formatLogKeyData('control_', $key, (strpos($data, 'acl_') !== false) ? $fm_dns_acls->parseACL($data) : $data);
+					} elseif ($key == 'control_keys') {
+						$log_message .= formatLogKeyData('control_', $key, $fm_dns_keys->parseKey($data, '; '));
+					} elseif (strlen($data)) {
+						$log_message .= formatLogKeyData('control_', $key, $data);
+					}
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the control
 		$query = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}controls` SET $sql WHERE `control_id`={$post['control_id']}";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the control because a database error occurred.'), 'sql');
@@ -147,8 +180,9 @@ class fm_dns_controls {
 		/** Return if there are no changes */
 		if (!$fmdb->rows_affected) return true;
 
-		$control_addresses = strpos($post['control_addresses'], 'acl_') !== false ? $fm_dns_acls->parseACL($post['control_addresses']) : $post['control_addresses'];
-		addLogEntry(__('Updated control to the following') . ":\n" . __('IP') . ": {$post['control_ip']}\n" . __('Port') . ": {$post['control_port']}\n" . __('Addresses') . ": $control_addresses\n" . _('Comment') . ": {$post['control_comment']}");
+		setBuildUpdateConfigFlag($post['server_serial_no'], 'yes', 'build');
+
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -156,15 +190,18 @@ class fm_dns_controls {
 	/**
 	 * Deletes the selected control
 	 */
-	function delete($id, $server_serial_no = 0) {
+	function delete($id, $server_serial_no, $type) {
 		global $fmdb, $__FM_CONFIG;
 		
-		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_', 'control_id', 'control_name');
+		$tmp_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_', 'control_id', 'control_ip');
 		if (updateStatus('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', $id, 'control_', 'deleted', 'control_id') === false) {
 			return formatError(__('This control could not be deleted because a database error occurred.'), 'sql');
 		} else {
 			setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-			addLogEntry(sprintf(__("Control '%s' was deleted."), $tmp_name));
+			$log_message = sprintf(__('Deleted a %s'), $type) . ":\n";
+			$log_message .= formatLogKeyData('', 'Address', $tmp_name);
+			$log_message .= formatLogKeyData('_serial_no', 'server_serial_no', getServerName($server_serial_no));
+			addLogEntry($log_message);
 			return true;
 		}
 	}
@@ -199,7 +236,7 @@ class fm_dns_controls {
 		
 		$control_port = !empty($row->control_port) ? $row->control_port : 953;
 		$control_addresses = strpos($row->control_addresses, 'acl_') !== false ? $fm_dns_acls->parseACL($row->control_addresses) : $row->control_addresses;
-		$control_keys = ($type == 'controls') ? '<td>' . $fm_dns_keys->parseKey($row->control_keys) . '</td>' : null;
+		$control_keys = ($type == 'controls') ? '<td>' . $fm_dns_keys->parseKey($row->control_keys, '; ') . '</td>' : null;
 		
 		$comments = nl2br($row->control_comment);
 
@@ -251,8 +288,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="controls" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="control_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
@@ -270,7 +309,7 @@ HTML;
 				<tr>
 					<th width="33&#37;" scope="row"><label for="control_predefined">%s</label></th>
 					<td width="67&#37;">
-						<input type="hidden" name="control_addresses" id="address_match_element" data-placeholder="%s" value="%s" /><br />
+						<input type="hidden" name="control_addresses" id="address_match_element" data-placeholder="%s" value="%s" class="required" /><br />
 						( address_match_element )
 					</td>
 				</tr>
@@ -319,9 +358,6 @@ HTML;
 	
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
-
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
 
 		if (!$post['control_id']) unset($post['control_id']);
 		

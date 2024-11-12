@@ -76,37 +76,6 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 	if ($option_type == 'Global') $display_option_type_sql .= "' AND domain_id='0' AND server_id='0";
 }
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$uri_params = generateURIParams(array('view_id', 'server_serial_no'), 'include');
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_rpz->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_rpz->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 
@@ -117,10 +86,10 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='zone' AND domain_id=0 AND cfg_isparent='yes'", null, false, $sort_direction);
+basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='!config_name!' AND domain_id=0 AND cfg_isparent='yes'", null, false, $sort_direction);
 $global_result = $fmdb->last_result;
 $global_num_rows = $fmdb->num_rows;
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='zone' AND domain_id>0 AND cfg_isparent='yes'", null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='!config_name!' AND domain_id>0 AND cfg_isparent='yes'", null, false, $sort_direction);
 $tmp_last_result = array_merge((array) $global_result, (array) $fmdb->last_result);
 $tmp_num_rows = $fmdb->num_rows + $global_num_rows;
 $total_pages = ceil($tmp_num_rows / $_SESSION['user']['record_count']);
@@ -129,7 +98,7 @@ if ($page > $total_pages) $page = $total_pages;
 /** RPZ is limited to 32 defined zones */
 $perms = ($tmp_num_rows - $global_num_rows >= 32) ? false : currentUserCan('manage_zones', $_SESSION['module']);
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel);
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion('options', 'policy', 'message', "AND def_option_type='rpz'")), $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel);
 echo <<<HTML
 <div id="pagination_container" class="submenus">
 	<div>

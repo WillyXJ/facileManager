@@ -26,38 +26,6 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_files.ph
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 
-$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$server_serial_no_uri = (array_key_exists('server_serial_no', $_REQUEST) && $server_serial_no) ? '?server_serial_no=' . $server_serial_no : null;
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_dns_files->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_dns_files->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $server_serial_no_uri);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 
