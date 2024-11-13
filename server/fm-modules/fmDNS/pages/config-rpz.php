@@ -79,8 +79,8 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 printHeader();
 @printMenu();
 
-$avail_views = buildViewSubMenu($view_id);
-$avail_servers = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildViewSubMenu($view_id);
 
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
@@ -98,18 +98,7 @@ if ($page > $total_pages) $page = $total_pages;
 /** RPZ is limited to 32 defined zones */
 $perms = ($tmp_num_rows - $global_num_rows >= 32) ? false : currentUserCan('manage_zones', $_SESSION['module']);
 
-echo printPageHeader(array((string) $response, getMinimumFeatureVersion('options', 'policy', 'message', "AND def_option_type='rpz'")), $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel);
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	<div id="configtypesmenu">&nbsp;</div>
-	$avail_views
-	$avail_servers
-	</div>
-</div>
-
-HTML;
+echo printPageHeader(array((string) $response, getMinimumFeatureVersion('options', 'policy', 'message', "AND def_option_type='rpz'")), $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel, null, $addl_title_blocks);
 
 $fmdb->last_result = $tmp_last_result;
 $fmdb->num_rows = $tmp_num_rows;

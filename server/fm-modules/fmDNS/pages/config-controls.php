@@ -32,22 +32,11 @@ $display_type = ($type == 'controls') ? __('Controls') : __('Statistics Channels
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['operations']['avail_types']);
-echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['operations']['avail_types']);
 
-$avail_servers = buildServerSubMenu($server_serial_no);
+echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	$avail_servers
-	</div>
-</div>
-
-HTML;
-	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', "AND control_type='$type' AND server_serial_no='$server_serial_no'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;

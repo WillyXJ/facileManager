@@ -1749,9 +1749,6 @@ div.fm-table > div > div.fm-half {
 	position: relative;
 	margin-bottom: -1.6em;
 }
-#pagination_container div.stretch {
-	width: 100%;
-}
 
 #pagination_container #configtypesmenu.nopadding {
 	padding: 0;

@@ -109,15 +109,15 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 printHeader();
 @printMenu();
 
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
+if (!array_key_exists('server_id', $_GET) && !array_key_exists('domain_id', $_GET)) {
+	$addl_title_blocks[] = buildViewSubMenu($view_id);
+}
 if (array_key_exists('server_id', $_GET) || array_key_exists('domain_id', $_GET)) {
 	array_pop($__FM_CONFIG['options']['avail_types']);
 	array_pop($__FM_CONFIG['options']['avail_types']);
-	$avail_views = null;
-} else {
-	$avail_views = buildViewSubMenu($view_id);
 }
-$avail_types = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
-$avail_servers = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
 
 $sort_direction = null;
 $sort_field = 'cfg_name';
@@ -125,18 +125,7 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel);
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	$avail_views
-	$avail_servers
-	</div>
-</div>
-
-HTML;
+echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel, null, $addl_title_blocks);
 	
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', $sort_field, 'cfg_name'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

@@ -34,7 +34,7 @@ if (isset($_POST['domain_id'])) {
 $exclude = array('action', 'domain_id');
 
 foreach ($_POST['api'] as $key => $val) {
-    if (!in_array($key, $exclude)) $record_data[$key] = sanitize($val);
+    if (!in_array($key, $exclude)) $record_data[$key] = $val;
 }
 /** Remove double quotes */
 if (isset($record_data['record_value'])) $record_data['record_value'] = str_replace('"', '', $record_data['record_value']);
