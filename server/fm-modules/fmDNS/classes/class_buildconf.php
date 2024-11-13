@@ -693,7 +693,6 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 							$key_config .= "};\n\n";
 					
 							/** Get associated servers */
-							basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND server_serial_no!="' . $server_serial_no . '" AND cfg_name="keys" AND (cfg_data=' . $key_result[$k]->key_id . ' OR cfg_data LIKE "' . $key_result[$k]->key_id . ',%" OR cfg_data LIKE "%,' . $key_result[$k]->key_id . ',%" OR cfg_data LIKE "%,' . $key_result[$k]->key_id . '") AND cfg_status="active"');
 							basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND server_id!="' . $server_id . '" AND cfg_name="keys" AND (cfg_data="key_' . $key_result[$k]->key_id . '" OR cfg_data LIKE "key_' . $key_result[$k]->key_id . ',%" OR cfg_data LIKE "%,key_' . $key_result[$k]->key_id . ',%" OR cfg_data LIKE "%,key_' . $key_result[$k]->key_id . '") AND cfg_status="active"');
 							if ($fmdb->num_rows) {
 								$server_result = $fmdb->last_result;
@@ -1804,58 +1803,63 @@ HTML;
 	function formatServerKeys($server_id, $key_name = null, $view = false) {
 		global $fmdb, $__FM_CONFIG, $server_group_ids, $server_serial_no;
 		
-		$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-		$server_root_dir = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_root_dir');
-		
-		$extra_tab = ($view == true) ? "\t" : null;
-		$server_ip = gethostbyname($server_name);
-		$server = ($server_ip) ? $extra_tab . 'server ' . $server_ip . " {\n" : "server [cannot resolve " . $server_name . "] {\n";
-		$config = ($key_name) ? "$extra_tab\tkeys { \"$key_name\"; };\n" : null;
-		
-		/** Get additional server options */
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="keys" AND cfg_data!="" AND server_id=' . $server_id . ' AND server_serial_no="0" AND cfg_status="active"');
-		if ($fmdb->num_rows) {
-			foreach ($fmdb->last_result as $config_result) {
-				$global_config[$config_result->cfg_name] = array($config_result->cfg_data, $config_result->cfg_comment);
-			}
-		} else $global_config = array();
+		$server_status = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_status');
+		if ($server_status == 'active') {
+			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
+			$server_root_dir = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_root_dir');
+			
+			$extra_tab = ($view == true) ? "\t" : null;
+			$server_ip = gethostbyname($server_name);
+			$server = ($server_ip) ? $extra_tab . 'server ' . $server_ip . " {\n" : "server [cannot resolve " . $server_name . "] {\n";
+			$config = ($key_name) ? "$extra_tab\tkeys { \"$key_name\"; };\n" : null;
+			
+			/** Get additional server options */
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="keys" AND cfg_data!="" AND server_id=' . $server_id . ' AND server_serial_no="0" AND cfg_status="active"');
+			if ($fmdb->num_rows) {
+				foreach ($fmdb->last_result as $config_result) {
+					$global_config[$config_result->cfg_name] = array($config_result->cfg_data, $config_result->cfg_comment);
+				}
+			} else $global_config = array();
 
-		$server_config = array();
-		/** Override with group-specific configs */
-		if (is_array($server_group_ids)) {
-			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="keys" AND cfg_data!="" AND server_id=' . $server_id . ' AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
+			$server_config = array();
+			/** Override with group-specific configs */
+			if (is_array($server_group_ids)) {
+				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="keys" AND cfg_data!="" AND server_id=' . $server_id . ' AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '") AND cfg_status="active"');
+				if ($fmdb->num_rows) {
+					foreach ($fmdb->last_result as $server_config_result) {
+						$server_config[$server_config_result->cfg_name] = @array($server_config_result->cfg_data, $server_config_result->cfg_comment);
+					}
+				}
+			}
+
+			/** Override with server-specific configs */
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="keys" AND cfg_data!="" AND server_id=' . $server_id . ' AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
 			if ($fmdb->num_rows) {
 				foreach ($fmdb->last_result as $server_config_result) {
 					$server_config[$server_config_result->cfg_name] = @array($server_config_result->cfg_data, $server_config_result->cfg_comment);
 				}
 			}
-		}
 
-		/** Override with server-specific configs */
-		basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'cfg_id', 'cfg_', 'AND cfg_type="global" AND cfg_name!="keys" AND cfg_data!="" AND server_id=' . $server_id . ' AND server_serial_no="' . $server_serial_no . '" AND cfg_status="active"');
-		if ($fmdb->num_rows) {
-			foreach ($fmdb->last_result as $server_config_result) {
-				$server_config[$server_config_result->cfg_name] = @array($server_config_result->cfg_data, $server_config_result->cfg_comment);
+			/** Merge arrays */
+			$config_array = array_merge($global_config, $server_config);
+			unset($global_config, $server_config);
+
+			foreach ($config_array as $cfg_name => $cfg_data) {
+				list($cfg_info, $cfg_comment) = $cfg_data;
+
+				$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t$extra_tab");
 			}
+			
+			if (!$config) {
+				return null;
+			}
+			
+			$config .= "$extra_tab};\n";
+			
+			return $server . $config;
 		}
 
-		/** Merge arrays */
-		$config_array = array_merge($global_config, $server_config);
-		unset($global_config, $server_config);
-
-		foreach ($config_array as $cfg_name => $cfg_data) {
-			list($cfg_info, $cfg_comment) = $cfg_data;
-
-			$config .= $this->formatConfigOption($cfg_name, $cfg_info, $cfg_comment, $this->server_info, "\t$extra_tab");
-		}
-		
-		if (!$config) {
-			return null;
-		}
-		
-		$config .= "$extra_tab};\n";
-		
-		return $server . $config;
+		return null;
 	}
 
 
