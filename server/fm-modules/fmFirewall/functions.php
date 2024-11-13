@@ -331,8 +331,7 @@ function getModuleBadgeCounts($type) {
  * @subpackage fmFirewall
  */
 function buildModuleMenu() {
-	addObjectPage(__('Firewalls'), __('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true);
-		addSubmenuPage('config-servers.php', null, __('Firewall Policy'), null, $_SESSION['module'], 'config-policy.php', null, null, getModuleBadgeCounts('servers'));
+	addObjectPage(__('Firewalls'), __('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true, getModuleBadgeCounts('servers'));
 
 	addObjectPage(__('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
 		addSubmenuPage('config-policy.php', __('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');

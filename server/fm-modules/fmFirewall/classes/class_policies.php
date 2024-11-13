@@ -53,7 +53,7 @@ class fm_module_policies {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-			if ($num_rows > 1) $title_array[] = array('class' => 'header-tiny');
+			if ($num_rows > 1) $title_array[] = array('class' => 'header-tiny header-nosort');
 		}
 		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), __('Name'), __('Location'), __('Source'), __('Destination'), __('Service'), __('Interface')));
 		if ($type == 'filter') {
@@ -143,7 +143,8 @@ HTML;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
+		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type', 'uri_params',
+			'module_name', 'module_type', 'config');
 
 		$log_message = "Added a firewall policy for " . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name', $post['account_id']) . " with the following details:\n";
 
@@ -190,7 +191,7 @@ HTML;
 		/** Update sort order */
 		if ($post['action'] == 'update_sort') {
 			/** Ensure policy_type is set */
-			$post['policy_type'] = (isset($post['uri_params']['type']) && array_key_exists(sanitize(strtolower($post['uri_params']['type'])), $__FM_CONFIG['policy']['avail_types'])) ? sanitize(strtolower($post['uri_params']['type'])) : 'filter';
+			$post['policy_type'] = (isset($post['uri_params']['type']) && array_key_exists(strtolower($post['uri_params']['type']), $__FM_CONFIG['policy']['avail_types'])) ? strtolower($post['uri_params']['type']) : 'filter';
 
 			/** Make new order in array */
 			$new_sort_order = explode(';', rtrim($post['sort_order'], ';'));
@@ -226,7 +227,8 @@ HTML;
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
+		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type', 'uri_params',
+			'module_name', 'module_type', 'config', 'SERIALNO');
 
 		$sql_edit = '';
 		
@@ -316,7 +318,8 @@ HTML;
 				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->policy_id .'" /></td>';
 				$grab_bars = ($num_rows > 1) ? '<td><i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i></td>' : null;
 			} else {
-				$checkbox = $grab_bars = '<td></td>';
+				$checkbox = '<td></td>';
+				$grab_bars = ($num_rows > 1) ? $checkbox : null;
 				$class[] = 'no-grab';
 			}
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
@@ -434,8 +437,9 @@ HTML;
 		$popup_footer = ($action != 'add' && ($policy_template_id && 't_' . $policy_template_id != $_POST['server_serial_no'])) ? buildPopup('footer', _('Cancel'), array('cancel_button' => 'cancel')) : buildPopup('footer');
 		
 		$return_form = <<<FORM
-		<form name="manage" id="manage" method="post" action="?type=$type&server_serial_no={$_REQUEST['server_serial_no']}">
 		$popup_header
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="policies" />
 			<input type="hidden" name="action" value="$action" />
 			<input type="hidden" name="policy_id" value="$policy_id" />
 			<input type="hidden" name="policy_order_id" value="$policy_order_id" />
@@ -904,16 +908,18 @@ FORM;
 			unset($dec);
 		} else $post['policy_options'] = 0;
 		
-		$post['server_serial_no'] = isset($post['server_serial_no']) ? $post['server_serial_no'] : $_REQUEST['server_serial_no'];
-		if ($post['server_serial_no'][0] == 't') {
+		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? strval($post['server_serial_no']) : null;
+		$post['server_serial_no'] = (!isset($post['server_serial_no']) && isset($_REQUEST['server_serial_no'])) ? strval($_REQUEST['server_serial_no']) : null;
+		$post['server_serial_no'] = (!isset($post['server_serial_no']) && isset($post['uri_params']['server_serial_no'])) ? strval($post['uri_params']['server_serial_no']) : 0;
+		if (isset($post['server_serial_no']) && $post['server_serial_no'][0] == 't') {
 			$post['policy_template_id'] = preg_replace('/\D/', '', $post['server_serial_no']);
 			$post['server_serial_no'] = 0;
 		}
-		$post['policy_source'] = implode(';', (array) $post['source_items']);
-		$post['policy_destination'] = implode(';', (array) $post['destination_items']);
-		$post['policy_services'] = implode(';', (array) $post['services_items']);
-		$post['policy_packet_state'] = implode(',', (array) $post['policy_packet_state']);
-		$post['policy_targets'] = implode(';', (array) $post['policy_targets']);
+		$post['policy_source'] = isset($post['source_items']) ? implode(';', (array) $post['source_items']) : '';
+		$post['policy_destination'] = isset($post['destination_items']) ? implode(';', (array) $post['destination_items']) : '';
+		$post['policy_services'] = isset($post['services_items']) ? implode(';', (array) $post['services_items']) : '';
+		$post['policy_packet_state'] = isset($post['policy_packet_state']) ? implode(',', (array) $post['policy_packet_state']) : '';
+		$post['policy_targets'] = isset($post['policy_targets']) ? implode(';', (array) $post['policy_targets']) : '';
 		if (!$post['policy_targets']) $post['policy_targets'] = 0;
 		unset($post['source_items']);
 		unset($post['destination_items']);
@@ -931,10 +937,12 @@ FORM;
 			$post['policy_services_translated'] = null;
 		}
 		unset($post['policy_dnat']);
+
+		if (!isset($post['policy_type'])) $post['policy_type'] = 'filter';
 		
 		/** Get policy_order_id */
 		if (!isset($post['policy_order_id']) || $post['policy_order_id'] == 0) {
-			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['server_serial_no'], 'policy_', 'server_serial_no', 'AND policy_type="' . sanitize($post['policy_type']) . '" ORDER BY policy_order_id DESC LIMIT 1');
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', $post['server_serial_no'], 'policy_', 'server_serial_no', 'AND policy_type="' . $post['policy_type'] . '" ORDER BY policy_order_id DESC LIMIT 1');
 			if ($fmdb->num_rows) {
 				$result = $fmdb->last_result[0];
 				$post['policy_order_id'] = $result->policy_order_id + 1;
@@ -970,6 +978,7 @@ FORM;
 		$names = array();
 		foreach (explode(';', trim($ids, ';')) as $temp_id) {
 			$tooltip_objects = $addl_search_terms = array();
+			$temp_id = strval($temp_id);
 
 			if (in_array($temp_id[0], array('s', 'o', 'g'))) {
 				$tmp_info = $this->getObjectInfo($temp_id);

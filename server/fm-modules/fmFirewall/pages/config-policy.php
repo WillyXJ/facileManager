@@ -50,29 +50,9 @@ if ($valid === false) {
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_policies.php');
 
-if (currentUserCan('manage_policies', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	switch ($action) {
-	case 'add':
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = ($action == 'add') ? $fm_module_policies->add($_POST) : $fm_module_policies->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . "?type=$type&server_serial_no=$server_serial_no");
-				exit;
-			}
-		}
-		break;
-	}
-}
-
 printHeader();
 @printMenu();
 
-$avail_types = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
 $avail_servers = availableServers('serial', array('null', 'groups', 'servers'));
 $j = 0;
 /** Templates */
@@ -85,21 +65,11 @@ if ($fmdb->num_rows && !$fmdb->sql_errors) {
 		$j++;
 	}
 }
-$avail_servers = buildServerSubMenu($server_serial_no, $avail_servers, null, 'Select a policy');
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no, $avail_servers, null, 'Select a policy');
+$addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
 
 $allowed_to_add = ($server_serial_no) ? currentUserCan('manage_policies', $_SESSION['module']) : false;
-echo printPageHeader((string) $response, null, $allowed_to_add, $type, null, 'noscroll');
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	$avail_servers
-	</div>
-</div>
-
-HTML;
-
+echo printPageHeader((string) $response, null, $allowed_to_add, $type, null, 'noscroll', $addl_title_blocks);
 if ($server_serial_no) {
 	/** Get template ID if appropriate */
 	$template_id = 0;
@@ -133,13 +103,13 @@ if ($server_serial_no) {
 	if ($page > $total_pages) $page = $total_pages;
 	$fm_module_policies->rows($result, $type, $page, $total_pages);
 } else {
-	$avail_servers = str_replace('id="server_serial_no"', 'id="server_serial_no_extended"', $avail_servers);
+	$avail_servers = str_replace('id="server_serial_no"', 'id="server_serial_no_extended"', $addl_title_blocks[0]);
 	printf('
 	<div>
 		<p>%s:</p>
 		%s
 	</div>',
-	__('Please choose a policy to view'), $avail_servers);
+	__('Please choose a policy to view'), $addl_title_blocks[0]);
 }
 
 printFooter();

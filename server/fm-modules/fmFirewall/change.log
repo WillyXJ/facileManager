@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Takes better advantage of fM JS grab functionality.
+* Server - [improvement] Supports fM 5.0.
 * Server - [bug] Fixed display of address group objects.
 * Server - [bug] All selected stacks are retained when editing stack order.
 

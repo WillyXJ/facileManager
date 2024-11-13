@@ -64,7 +64,7 @@ class fm_module_templates {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-			if ($num_rows > 1) $title_array[] = array('class' => 'header-tiny');
+			if ($num_rows > 1) $title_array[] = array('class' => 'header-tiny header-nosort');
 		}
 		$title_array = array_merge((array) $title_array, array(__('Name'), __('Stack'), __('Targets'),
 								array('title' => _('Comment'), 'style' => 'width: 20%;')));
@@ -111,12 +111,13 @@ class fm_module_templates {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
+		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type',
+			'module_name', 'module_type', 'config');
 
 		$log_message = "Added a policy template for with the following details:\n";
 
 		/** Format policy_targets */
-		$log_message_servers = null;
+		$log_message_servers = $policy_servers = null;
 		foreach ($post['policy_targets'] as $val) {
 			if (!$val) {
 				$policy_servers = 0;
@@ -129,11 +130,7 @@ class fm_module_templates {
 				break;
 			}
 			$policy_servers .= $val . ';';
-			if ($val[0] == 's') {
-				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			} elseif ($val[0] == 'g') {
-				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
-			}
+			$server_name = getServerName($val);
 			$log_message_servers .= $val ? "$server_name; " : null;
 		}
 		$post['policy_targets'] = rtrim($policy_servers, ';');
@@ -147,6 +144,9 @@ class fm_module_templates {
 					if ($key == 'policy_targets') {
 						$key = __('Firewalls');
 						$data = $log_message_servers;
+					}
+					if ($key == 'policy_template_stack') {
+						$data = $this->IDs2Name($data, 'policy');
 					}
 					$log_message .= formatLogKeyData('policy_', $key, $data);
 				}
@@ -210,14 +210,15 @@ class fm_module_templates {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
+		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type',
+			'module_name', 'module_type', 'config', 'SERIALNO');
 
 		$sql_edit = '';
 		
 		$log_message = "Updated a policy template for with the following details:\n";
 
 		/** Format policy_targets */
-		$log_message_servers = null;
+		$log_message_servers = $policy_servers = null;
 		foreach ($post['policy_targets'] as $val) {
 			if (!$val) {
 				$policy_servers = 0;
@@ -230,11 +231,7 @@ class fm_module_templates {
 				break;
 			}
 			$policy_servers .= $val . ';';
-			if ($val[0] == 's') {
-				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			} elseif ($val[0] == 'g') {
-				$server_name = getNameFromID(preg_replace('/\D/', '', $val), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_', 'group_id', 'group_name');
-			}
+			$server_name = getServerName($val);
 			$log_message_servers .= $val ? "$server_name; " : null;
 		}
 		$post['policy_targets'] = rtrim($policy_servers, ';');
@@ -247,6 +244,9 @@ class fm_module_templates {
 					if ($key == 'policy_targets') {
 						$key = __('Firewalls');
 						$data = $log_message_servers;
+					}
+					if ($key == 'policy_template_stack') {
+						$data = $this->IDs2Name($data, 'policy');
 					}
 					$log_message .= formatLogKeyData('policy_', $key, $data);
 				}
@@ -405,8 +405,10 @@ HTML;
 		$available_templates = buildSelect('select-from', 'select-from', array_merge($available_templates, array()), null, 1, null, true, null, 'select-stack');
 		$selected_templates = buildSelect('policy_template_stack', 'policy_template_stack', array_merge($selected_templates, array()), null, 1, null, true, null, 'select-stack');
 		
-		$form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$form = sprintf('
 			%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="policy" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="policy_id" value="%s" />
 	<div id="tabs">
@@ -417,7 +419,7 @@ HTML;
 			<table class="form-table policy-form">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="policy_name">%s</label></th>
-					<td width="67&#37;"><input name="policy_name" id="policy_name" type="text" value="%s" /></td>
+					<td width="67&#37;"><input name="policy_name" id="policy_name" type="text" value="%s" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="policy_comment">%s</label></th>
@@ -506,8 +508,8 @@ HTML;
 						}
 					});
 				});
-				$("#button-stack-down").bind("click", function() {
-					var countOptions = $("#policy_template_stack option").size();
+				$("#button-down").bind("click", function() {
+					var countOptions = $("#policy_template_stack option").length;
 					$("#policy_template_stack option:selected").each(function() {
 						var newPos = $("#policy_template_stack option").index(this) + 1;
 						if (newPos < countOptions) {
@@ -516,7 +518,8 @@ HTML;
 						}
 					});
 				});
-				$("form").submit(function(event) {
+				$("input[type=submit].primary:not(.follow-action)").click(function(event) {
+					console.log("clicked");
 					$("#policy_template_stack option").each(function() {
 						$(this).prop("selected", true);
 					});
