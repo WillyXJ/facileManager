@@ -677,7 +677,6 @@ if (isset($__FM_CONFIG)) {
 			$(".user_password").find("input[type=password]").addClass("required");
 			$(".user_password").show();
 		}
-		// $(this).setSubmitButtonStatus();
 	});
 	
 	/* Account password reset */
@@ -988,24 +987,25 @@ if (isset($__FM_CONFIG)) {
 		
 		/* Process items and action */
 		item_type = $("#table_edits").attr("name");
+		bulk_action = $("#bulk_action").val().toLowerCase();
 		if (itemIDs.length == 0) {
 			alert("You must select at least one " + item_type.slice(0,-1) + ".");
 		} else {
 			if (confirm("Are you sure you want to " + $("#bulk_action").val().toLowerCase() + " these selected " + item_type + "?")) {
-				$("body").addClass("fm-noscroll");
-				$("#manage_item").fadeIn(200);
-				$("#manage_item_contents").html("<p>' . _('Processing Bulk Action') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
-		
 				var form_data = {
 					item_id: itemIDs,
 					action: "bulk",
-					bulk_action: $("#bulk_action").val().toLowerCase(),
+					bulk_action: bulk_action,
 					item_type: item_type,
 					server_serial_no: getUrlVars()["server_serial_no"],
 					rel_url: window.location.href,
 					is_ajax: 1
 				};
-				
+
+				$("body").addClass("fm-noscroll");
+				$("#manage_item").fadeIn(200);
+				$("#manage_item_contents").html("<p>' . _('Processing Bulk Action') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
+		
 				$.ajax({
 					type: "POST",
 					url: "fm-modules/facileManager/ajax/processPost.php",
@@ -1015,8 +1015,23 @@ if (isset($__FM_CONFIG)) {
 						if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 							doLogout();
 							return false;
+						} else if (response != "Success") {
+							$("#manage_item_contents").html(response);
+						} else {
+							if (bulk_action == "delete") {
+								$("#manage_item").hide();
+								$.each(itemIDs, function(key, val) {
+									var $row_element = $("#table_edits tr#" + val);
+									$row_element.css({"background-color":"#D98085"});
+									$row_element.fadeOut("slow", function() {
+										$row_element.remove();
+									});
+								});
+								$("#bulk_action").val(null).trigger("change");
+							} else {
+								location.reload();
+							}
 						}
-						$("#manage_item_contents").html(response);
 					}
 				});
 			}

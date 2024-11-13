@@ -91,14 +91,12 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$object = rtrim($item, 's');
 			$field = $prefix . 'id';
 			$field_data = $prefix . 'data';
-			$name = 'data';
 			break;
 		case 'wlan_users':
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$field_data = $prefix . 'login';
 			$item = rtrim($_POST['item_type'], 's') . 's';
 			$object = rtrim($item, 's');
-			$name = 'login';
 			break;
 		case 'options':
 			$post_class = $fm_module_options;
@@ -114,14 +112,14 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$object = substr($item_type, 0, -1);
 			$field_data = $prefix . 'mac';
-			$name = 'mac';
 			break;
 		default:
 			$post_class = ${"fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}{$_POST['item_type']}"};
 			$object = substr($item_type, 0, -1);
-			$name = 'name';
 			$field_data = $prefix . 'name';
 	}
+
+	if (!isset($field_data)) $field_data = $prefix . 'name';
 
 	switch ($_POST['action']) {
 		case 'add':
@@ -159,18 +157,13 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 						$status = $_POST['bulk_action'] . 'd';
 						if ($status == 'enabled') $status = 'active';
 						foreach ((array) $_POST['item_id'] as $id) {
-							$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $prefix . $name);
+							$tmp_name = getNameFromID($id, 'fm_' . $table, $prefix, $field, $field_data);
 							if (updateStatus('fm_' . $table, $id, $prefix, $status, $prefix . 'id')) {
 								setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 								addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, $status));
 							}
 						}
-
-						echo buildPopup('header', __('Bulk Action Results'));
-						echo '<p>' . sprintf('%s action is complete.', ucfirst($_POST['bulk_action'])) . '</p>';
-						echo $fmdb->last_error;
-						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), $_POST['rel_url']);
-						break;
+						exit('Success');
 				}
 			}
 			break;

@@ -196,11 +196,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 								addLogEntry(sprintf(__('Set %s (%s) status to %s.'), $object, $tmp_name, $status));
 							}
 						}
-
-						echo buildPopup('header', __('Bulk Action Results'));
-						echo '<p>' . sprintf('%s action is complete.', ucfirst($_POST['bulk_action'])) . '</p>';
-						echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), $_POST['rel_url']);
-						break;
+						exit('Success');
 				}
 			}
 			break;
