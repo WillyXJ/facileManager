@@ -81,7 +81,7 @@ $parent_domain_ids = getZoneParentID($domain_id);
 $zone_access_allowed = zoneAccessIsAllowed($parent_domain_ids);
 		
 if (!in_array($record_type, $supported_record_types) && $record_type != 'CUSTOM') $record_type = $default_record_type;
-$avail_types = buildRecordTypes($record_type, $parent_domain_ids, $map, $supported_record_types, $search_query);
+$addl_title_blocks[] = buildRecordTypes($record_type, $parent_domain_ids, $map, $supported_record_types, $search_query);
 
 if (reloadZone($domain_id)) {
 	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = sprintf(__('You need to %s this zone'), sprintf('<a href="" class="zone_reload" id="' . $domain_id . '">%s</a>', __('reload')));
@@ -95,15 +95,8 @@ if (!getSOACount($domain_id)) {
 	$response_class = 'attention';
 }
 
-$body = '<div id="body_container" class="fm-noscroll">' . "\n";
-if (!empty($response)) $body .= '<div id="response" class="' . (string) $response_class . '"><p>' . $response . '</p></div>';
-$body .= sprintf('<h2>%s</h2>
-	<div id="pagination_container" class="submenus record-types">
-	<div>
-	<div class="stretch"></div>
-	%s
-	</div>
-</div>', __('Records'), $avail_types);
+echo printPageHeader((string) $response, null, false, $type, null, null, $addl_title_blocks);
+
 
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php">

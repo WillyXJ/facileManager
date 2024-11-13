@@ -32,7 +32,7 @@ printHeader();
 
 $addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['servers']['avail_types']);
 echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
-	
+
 $sort_direction = null;
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
