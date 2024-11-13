@@ -121,6 +121,9 @@ class fm_module_options {
 		$tmp_server_name = getServerName($post['server_serial_no']);
 		$tmp_wlan_name = (isset($post['uri_params']) && isset($post['uri_params']['item_id'])) ? getNameFromID($post['uri_params']['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
 
+		$server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+		setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
+
 		addLogEntry("Added option:\nName: $tmp_name\nValue: {$post['config_data']}\nWLAN: $tmp_wlan_name\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
 		return true;
 	}
@@ -173,6 +176,9 @@ class fm_module_options {
 
 		$tmp_server_name = getServerName($post['server_serial_no']);
 		$tmp_wlan_name = (isset($post['uri_params']) && isset($post['uri_params']['item_id'])) ? getNameFromID($post['uri_params']['item_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data') : 'All WLANs';
+
+		$server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
+		setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
 
 		addLogEntry("Updated option '$old_name' to:\nName: {$post['config_name']}\nValue: {$post['config_data']}\nWLAN: $tmp_wlan_name\nServer: $tmp_server_name\nComment: {$post['config_comment']}");
 		return true;

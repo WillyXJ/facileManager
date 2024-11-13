@@ -109,7 +109,7 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 printHeader();
 @printMenu();
 
-$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
+$addl_title_blocks[] = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
 if (!array_key_exists('server_id', $_GET) && !array_key_exists('domain_id', $_GET)) {
 	$addl_title_blocks[] = buildViewSubMenu($view_id);
 }
@@ -117,7 +117,7 @@ if (array_key_exists('server_id', $_GET) || array_key_exists('domain_id', $_GET)
 	array_pop($__FM_CONFIG['options']['avail_types']);
 	array_pop($__FM_CONFIG['options']['avail_types']);
 }
-$addl_title_blocks[] = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
 $sort_direction = null;
 $sort_field = 'cfg_name';

@@ -260,12 +260,14 @@ class fm_shared_module_servers {
 	function getGroupServers($id) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$server_serial_nos = array();
+		
 		basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', sanitize($id), 'group_', 'group_id');
 		if (!$fmdb->num_rows) return sprintf(_('%d is not a valid group number.'), $id);
 
 		$group_details = $fmdb->last_result[0];
-		$group_masters = (isset($group_details->group_masters)) ? explode(';', $group_details->group_masters) : null;
-		$group_slaves  = (isset($group_details->group_slaves)) ? explode(';', $group_details->group_slaves) : null;
+		$group_masters = (isset($group_details->group_masters)) ? explode(';', $group_details->group_masters) : array();
+		$group_slaves  = (isset($group_details->group_slaves)) ? explode(';', $group_details->group_slaves) : array();
 
 		$group_servers = array_merge($group_masters, $group_slaves);
 		

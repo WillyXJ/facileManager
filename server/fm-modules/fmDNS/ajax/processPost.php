@@ -114,6 +114,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 		case 'soa':
 			$post_class = $fm_module_templates;
 			$server_serial_no = $type = $item_type;
+			$prefix = $item_type . '_';
+			$object = $type;
 			break;
 		case 'domain':
 			$post_class = $fm_module_templates;
@@ -204,7 +206,7 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 			break;
 		case 'update_sort':
 			if (!empty($_POST)) {
-				$result = $post_class->edit($_POST);
+				$result = $post_class->update($_POST);
 				if ($result !== true) {
 					exit($result);
 				}

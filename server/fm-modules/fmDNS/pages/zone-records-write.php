@@ -132,7 +132,7 @@ if (isset($record_type) && $domain_id && !isset($import_records)) {
 		header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id);
 		exit;
 	} else {
-		header('Location: ' . $menu[getParentMenuKey(__('SOA'))][4]);
+		header('Location: ' . $menu[getParentMenuKey(__('SOA'))][5]);
 		exit;
 	}
 }

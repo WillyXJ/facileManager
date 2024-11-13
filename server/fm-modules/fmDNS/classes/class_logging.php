@@ -310,7 +310,7 @@ class fm_module_logging {
 			if (!$this->validateChannel($post)) return __('This channel already exists.');
 		}
 		
-		$exclude = array_merge($global_form_field_excludes, array('sub_type', 'temp_data',
+		$exclude = array_merge($global_form_field_excludes, array('cfg_id', 'sub_type', 'temp_data',
 			'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
 			'print-severity', 'print-time'));
 
@@ -721,7 +721,7 @@ FORM;
 			$i++;
 		}
 		
-		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_isparent='yes' AND cfg_name='channel' AND cfg_type='logging' ORDER BY cfg_name,cfg_data ASC";
+		$query = "SELECT cfg_id,cfg_name,cfg_data FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status='active' AND cfg_isparent='yes' AND cfg_name='channel' AND cfg_type='logging' ORDER BY cfg_name,cfg_data ASC";
 		$result = $fmdb->get_results($query);
 		if ($fmdb->num_rows) {
 			$results = $fmdb->last_result;

@@ -79,8 +79,8 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 printHeader();
 @printMenu();
 
-$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 $addl_title_blocks[] = buildViewSubMenu($view_id);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
 if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);

@@ -57,44 +57,11 @@ if (array_key_exists('item_id', $_GET)) {
 	$display_option_type_sql .= "') AND config_parent_id='0' AND config_is_parent='no";
 }
 
-if (currentUserCan($required_permission, $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'item_id', 'server_serial_no'), 'include');
-	
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_options->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_options->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 
-$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 $addl_title_blocks[] = buildWLANSubMenu($item_id);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
 $sort_direction = null;
 $sort_field = 'config_name';

@@ -38,8 +38,8 @@ if (!array_key_exists($type, $__FM_CONFIG['logging']['avail_types'])) {
 printHeader();
 @printMenu();
 
-$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 $addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['logging']['avail_types']);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
 echo printPageHeader((string) $response, getPageTitle() . ' ' . $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 	
