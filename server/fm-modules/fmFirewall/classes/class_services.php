@@ -77,7 +77,7 @@ class fm_module_services {
 	 * Adds the new service
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -89,8 +89,7 @@ class fm_module_services {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'service_id', 'compress', 'AUTHKEY', 'page', 'item_type',
-			'module_name', 'module_type', 'config', 'port_src', 'port_dest');
+		$exclude = array_merge($global_form_field_excludes, array('service_id', 'port_src', 'port_dest'));
 
 		$log_message = __("Added service with the following") . ":\n";
 		$logging_excluded_fields = array('account_id');
@@ -126,14 +125,13 @@ class fm_module_services {
 	 * Updates the selected service
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'service_id', 'compress', 'AUTHKEY', 'page', 'item_type',
-			'module_name', 'module_type', 'config', 'SERIALNO', 'port_src', 'port_dest');
+		$exclude = array_merge($global_form_field_excludes, array('service_id', 'port_src', 'port_dest'));
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['service_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');

@@ -118,7 +118,7 @@ class fm_dns_views {
 	 * Updates the selected view
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		if (!isset($post['server_serial_no'])) {
 			$post['server_serial_no'] = 0;
@@ -156,7 +156,7 @@ class fm_dns_views {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
-		$exclude = array('submit', 'action', 'view_id', 'page', 'view_order_id', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('view_id', 'view_order_id'));
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['view_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', 'view_', 'view_id', 'view_name');

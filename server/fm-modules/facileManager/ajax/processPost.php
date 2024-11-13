@@ -26,6 +26,9 @@ require_once('../../../fm-init.php');
 
 include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'functions.php');
 
+$global_form_field_excludes = array('submit', 'action', 'page', 'item_type', 'uri_params', 'is_ajax', 'dryrun',
+	'compress', 'AUTHKEY', 'SERIALNO', 'module_name', 'module_type', 'update_from_client', 'config');
+
 /** Handle fM settings */
 if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_settings') {
 	if (!currentUserCan('manage_settings')) returnUnAuth('response-close');

@@ -81,7 +81,7 @@ class fm_dns_controls {
 	 * Adds the new control
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes, $fm_dns_acls, $fm_dns_keys;
 		
 		if (!class_exists('fm_dns_acls')) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
@@ -100,7 +100,7 @@ class fm_dns_controls {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 		$logging_exclude = array_diff(array_keys($post), $exclude, array('control_id', 'action', 'account_id', 'tab-group-1', 'sub_type'));
 		$log_message = sprintf(__('Added %s with the following details'), $post['control_type']) . ":\n";
 
@@ -141,7 +141,7 @@ class fm_dns_controls {
 	 * Updates the selected control
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls, $fm_dns_keys;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes, $fm_dns_acls, $fm_dns_keys;
 		
 		if (!class_exists('fm_dns_acls')) {
 			include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
@@ -160,7 +160,7 @@ class fm_dns_controls {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 		$logging_exclude = array_diff(array_keys($post), $exclude, array('control_id', 'action', 'account_id', 'tab-group-1', 'sub_type'));
 		$log_message = sprintf(__('Updated %s (%s) to the following details'), $post['control_type'], $post['control_ip']) . ":\n";
 

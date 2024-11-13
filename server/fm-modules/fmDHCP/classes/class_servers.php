@@ -100,7 +100,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @return boolean|string
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG, $fm_name;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes, $fm_name;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -117,7 +117,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'update_from_client', 'dryrun', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 
 		$log_message = __("Added server with the following") . ":\n";
 		$logging_excluded_fields = array('account_id');
@@ -158,13 +158,13 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * @return boolean|string
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'update_from_client', 'dryrun', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');

@@ -99,7 +99,7 @@ class fm_module_templates {
 	 * @return boolean|string
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -111,8 +111,7 @@ class fm_module_templates {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type',
-			'module_name', 'module_type', 'config');
+		$exclude = array_merge($global_form_field_excludes, array('policy_id'));
 
 		$log_message = "Added a policy template for with the following details:\n";
 
@@ -179,7 +178,7 @@ class fm_module_templates {
 	 * @return boolean|string
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Update sort order */
 		if ($post['action'] == 'update_sort') {
@@ -210,8 +209,7 @@ class fm_module_templates {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type',
-			'module_name', 'module_type', 'config', 'SERIALNO');
+		$exclude = array_merge($global_form_field_excludes, array('policy_id'));
 
 		$sql_edit = '';
 		

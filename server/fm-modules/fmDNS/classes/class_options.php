@@ -82,7 +82,7 @@ class fm_module_options {
 	 * Adds the new option
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -107,7 +107,7 @@ class fm_module_options {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('cfg_id'));
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -143,7 +143,7 @@ class fm_module_options {
 	 * Updates the selected option
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -167,7 +167,7 @@ class fm_module_options {
 			}
 		}
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('cfg_id'));
 
 		$sql_edit = '';
 		

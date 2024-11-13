@@ -134,7 +134,7 @@ class fm_dns_zones {
 	 * Adds the new zone
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
@@ -148,7 +148,7 @@ class fm_dns_zones {
 
 			$post['account_id'] = $_SESSION['user']['account_id'];
 			
-			$exclude = array('submit', 'action', 'page', 'item_type', 'group_domain_ids', 'group_id');
+			$exclude = array_merge($global_form_field_excludes, array('group_domain_ids', 'group_id'));
 		
 			$log_message_domains = $this->getZoneLogDomainNames($post['group_domain_ids']);
 
@@ -261,7 +261,7 @@ class fm_dns_zones {
 			$sql_fields = rtrim($sql_fields, ', ') . ')';
 			$sql_values = rtrim($sql_values, ', ');
 		} else {
-			$exclude = array('submit', 'action', 'page', 'item_type', 'domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url');
+			$exclude = array_merge($global_form_field_excludes, array('domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url'));
 		
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
@@ -373,7 +373,7 @@ class fm_dns_zones {
 	 * Updates the selected zone
 	 */
 	function update() {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		if (isset($_POST['domain_id'])) {
@@ -460,7 +460,7 @@ class fm_dns_zones {
 		}
 		$post['domain_name_servers'] = rtrim($domain_name_servers, ';');
 		
-		$exclude = array('submit', 'action', 'page', 'item_type', 'domain_id', 'domain_required_servers', 'domain_forward');
+		$exclude = array_merge($global_form_field_excludes, array('domain_id', 'domain_required_servers', 'domain_forward'));
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

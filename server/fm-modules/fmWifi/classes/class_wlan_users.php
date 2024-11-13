@@ -122,13 +122,13 @@ class fm_wifi_wlan_users {
 	 * @return boolean|string
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'user_id', 'type', 'log_message_member_wlans', 'page', 'item_type', 'uri_params');
+		$exclude = array_merge($global_form_field_excludes, array('user_id', 'type', 'log_message_member_wlans'));
 
 		$sql_edit = '';
 		

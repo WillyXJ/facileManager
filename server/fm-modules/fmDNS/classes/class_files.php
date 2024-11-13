@@ -97,7 +97,7 @@ class fm_dns_files {
 	 * @return string|array|boolean
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -106,7 +106,7 @@ class fm_dns_files {
 		extract($post, EXTR_SKIP);
 		
 		$log_message = __("Added a file with the following") . ":\n";
-		$logging_excluded_fields = array('page', 'action', 'file_id', 'item_type');
+		$logging_excluded_fields = array_merge($global_form_field_excludes, array('file_id'));
 		foreach ($post as $key => $data) {
 			if (in_array($key, $logging_excluded_fields)) continue;
 			if ($key == 'server_serial_no') {

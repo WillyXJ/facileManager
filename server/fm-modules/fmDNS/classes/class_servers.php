@@ -102,7 +102,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * Adds the new server
 	 */
 	function addServer($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		$module = (isset($post['module_name'])) ? $post['module_name'] : $_SESSION['module'];
 		
@@ -122,9 +122,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$config_opts = array('keys', 'bogus', 'edns', 'provide-ixfr', 'request-ixfr',
 			'transfers', 'transfer-format');
 		
-		$exclude = array_merge(array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
-			'module_name', 'module_type', 'config', 'sub_type', 'update_from_client',
-			'dryrun', 'page', 'item_type'), $config_opts);
+		$exclude = array_merge($global_form_field_excludes, array('server_id', 'group_id', 'sub_type'), $config_opts);
 
 		$log_message = __("Added server with the following") . ":\n";
 
@@ -186,7 +184,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * Adds the new server group
 	 */
 	function addGroup($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
@@ -237,7 +235,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id', 'group_id', 'sub_type'));
 
 		foreach ($post as $key => $data) {
 			$clean_data = sanitize($data);
@@ -268,7 +266,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * Updates the selected server
 	 */
 	function editServer($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -277,9 +275,8 @@ class fm_module_servers extends fm_shared_module_servers {
 		$config_opts = array('keys', 'bogus', 'edns', 'provide-ixfr', 'request-ixfr',
 			'transfers', 'transfer-format');
 		
-		$exclude = array_merge(array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
-			'module_name', 'module_type', 'config', 'SERIALNO', 'sub_type',
-			'update_from_client', 'dryrun', 'page', 'item_type'), $config_opts);
+		$exclude = array_merge($global_form_field_excludes, array('server_id', 'AUTHKEY', 'module_name', 'module_type',
+			'config', 'SERIALNO', 'sub_type', 'update_from_client'), $config_opts);
 		
 		$post['server_run_as'] = ($post['server_run_as_predefined'] == 'as defined:') ? $post['server_run_as'] : null;
 		if (!in_array($post['server_run_as_predefined'], enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_run_as_predefined'))) {
@@ -348,7 +345,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * Updates the selected server group
 	 */
 	function editGroup($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		if (empty($post['group_name'])) return __('No group name defined.');
 		
@@ -396,7 +393,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
 		$sql_edit = '';
-		$exclude = array('submit', 'action', 'server_id', 'group_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'sub_type', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id', 'group_id', 'sub_type'));
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

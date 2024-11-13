@@ -131,7 +131,7 @@ HTML;
 	 * Adds the new policy
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -143,8 +143,7 @@ HTML;
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type', 'uri_params',
-			'module_name', 'module_type', 'config');
+		$exclude = array_merge($global_form_field_excludes, array('policy_id'));
 
 		$log_message = "Added a firewall policy for " . getNameFromID($post['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name', $post['account_id']) . " with the following details:\n";
 
@@ -186,7 +185,7 @@ HTML;
 	 * Updates the selected policy
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Update sort order */
 		if ($post['action'] == 'update_sort') {
@@ -227,8 +226,7 @@ HTML;
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'policy_id', 'compress', 'AUTHKEY', 'page', 'item_type', 'uri_params',
-			'module_name', 'module_type', 'config', 'SERIALNO');
+		$exclude = array_merge($global_form_field_excludes, array('policy_id'));
 
 		$sql_edit = '';
 		

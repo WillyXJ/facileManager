@@ -79,7 +79,7 @@ class fm_dns_masters {
 	 * Adds the new master
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes, $fm_dns_acls;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -91,7 +91,7 @@ class fm_dns_masters {
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 
-		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 
 		if (isset($post['master_parent_id'])) {
 			$log_message = sprintf(__("Added an address list to primary '%s' with the following"), getNameFromID($post['master_parent_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name')) . ":\n";
@@ -147,7 +147,7 @@ class fm_dns_masters {
 	 * Updates the selected master
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG, $fm_dns_acls;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes, $fm_dns_acls;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -155,7 +155,7 @@ class fm_dns_masters {
 		
 		include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
 
-		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 		$old_name = getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_name');
 		$old_address = $fm_dns_acls->parseACL(getNameFromID($post['master_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_', 'master_id', 'master_addresses'));
 

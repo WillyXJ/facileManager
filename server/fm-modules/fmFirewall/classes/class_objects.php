@@ -76,7 +76,7 @@ class fm_module_objects {
 	 * Adds the new object
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -88,7 +88,7 @@ class fm_module_objects {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('object_id'));
 
 		$log_message = __("Added object with the following") . ":\n";
 		$logging_excluded_fields = array('account_id');
@@ -118,13 +118,13 @@ class fm_module_objects {
 	 * Updates the selected object
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('object_id'));
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['object_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');

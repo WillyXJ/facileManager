@@ -84,13 +84,13 @@ class fm_sqlpass_groups {
 	 * Updates the selected group
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'group_id', 'page');
+		$exclude = array_merge($global_form_field_excludes, array('group_id'));
 
 		$sql_edit = '';
 		

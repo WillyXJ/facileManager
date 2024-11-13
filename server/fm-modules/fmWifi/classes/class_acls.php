@@ -91,7 +91,7 @@ class fm_wifi_acls {
 	 * @return boolean|string
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -104,7 +104,7 @@ class fm_wifi_acls {
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
-		$exclude = array('submit', 'action', 'acl_id', 'log_message_member_wlans', 'uri_params');
+		$exclude = array_merge($global_form_field_excludes, array('acl_id', 'log_message_member_wlans'));
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

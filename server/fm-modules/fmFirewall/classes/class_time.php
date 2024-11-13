@@ -76,7 +76,7 @@ class fm_module_time {
 	 * Adds the new time
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -88,9 +88,8 @@ class fm_module_time {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'time_id', 'compress', 'AUTHKEY', 'page', 'item_type',
-			'module_name', 'module_type', 'config', 'time_start_time_hour', 'time_start_time_min',
-			'time_end_time_hour', 'time_end_time_min');
+		$exclude = array_merge($global_form_field_excludes, array('time_id', 'time_start_time_hour', 'time_start_time_min',
+			'time_end_time_hour', 'time_end_time_min'));
 
 		foreach ($post as $key => $data) {
 			if (($key == 'time_name') && empty($data)) return __('No time name defined.');
@@ -121,15 +120,14 @@ class fm_module_time {
 	 * Updates the selected time
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'time_id', 'compress', 'AUTHKEY', 'page', 'item_type',
-			'module_name', 'module_type', 'config', 'time_start_time_hour', 'time_start_time_min',
-			'time_end_time_hour', 'time_end_time_min');
+		$exclude = array_merge($global_form_field_excludes, array('time_id', 'time_start_time_hour', 'time_start_time_min',
+			'time_end_time_hour', 'time_end_time_min'));
 
 		$sql_edit = '';
 		

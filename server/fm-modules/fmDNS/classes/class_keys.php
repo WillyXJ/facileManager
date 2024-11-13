@@ -94,7 +94,7 @@ class fm_dns_keys {
 	 * Adds the new key
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -107,7 +107,7 @@ class fm_dns_keys {
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		$post['key_created'] = strtotime('now');
 		
-		$exclude = array('submit', 'action', 'key_id', 'generate', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('key_id', 'generate'));
 		$log_message = __("Added key with the following") . ":\n";
 
 		foreach ($post as $key => $data) {
@@ -141,13 +141,13 @@ class fm_dns_keys {
 	 * Updates the selected key
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 
-		$exclude = array('submit', 'action', 'key_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('key_id'));
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['key_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'keys', 'key_', 'key_id', 'key_name');

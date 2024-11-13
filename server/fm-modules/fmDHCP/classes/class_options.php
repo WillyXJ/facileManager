@@ -78,7 +78,7 @@ class fm_module_options {
 	 * Adds the new option
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -105,7 +105,7 @@ class fm_module_options {
 		
 		$server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 
-		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type', 'item_id', 'uri_params');
+		$exclude = array_merge($global_form_field_excludes, array('config_id'));
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -138,7 +138,7 @@ class fm_module_options {
 	 * Updates the selected option
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -169,7 +169,7 @@ class fm_module_options {
 			}
 		}
 		
-		$exclude = array('submit', 'action', 'config_id', 'page', 'item_type', 'uri_params');
+		$exclude = array_merge($global_form_field_excludes, array('config_id'));
 
 		$sql_edit = '';
 		

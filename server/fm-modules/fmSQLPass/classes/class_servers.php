@@ -66,7 +66,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * Adds the new server
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		extract($post, EXTR_SKIP);
 		
@@ -99,7 +99,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		/** Get a valid and unique serial number */
 		$post['server_serial_no'] = (isset($post['server_serial_no'])) ? $post['server_serial_no'] : generateSerialNo($module);
 
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 
 		/** Convert groups and policies arrays into strings */
 		if (isset($post['server_groups']) && is_array($post['server_groups'])) {
@@ -153,7 +153,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * Updates the selected server
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		if (empty($post['server_name'])) return __('No server name defined.');
 
@@ -173,7 +173,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			$post['server_port'] = $__FM_CONFIG['fmSQLPass']['default']['ports'][$post['server_type']];
 		}
 		
-		$exclude = array('submit', 'action', 'server_id', 'page');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 
 		$sql_edit = '';
 		

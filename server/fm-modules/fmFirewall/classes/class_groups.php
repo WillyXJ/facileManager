@@ -74,7 +74,7 @@ class fm_module_groups {
 	 * Adds the new group
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -86,7 +86,7 @@ class fm_module_groups {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'group_id', 'compress', 'AUTHKEY', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('group_id'));
 
 		$log_message = __("Added group with the following") . ":\n";
 		$logging_excluded_fields = array('account_id');
@@ -123,13 +123,13 @@ class fm_module_groups {
 	 * Updates the selected group
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'group_id', 'AUTHKEY', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('group_id'));
 
 		$sql_edit = '';
 		$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');

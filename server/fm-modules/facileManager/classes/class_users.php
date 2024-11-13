@@ -96,7 +96,7 @@ class fm_users {
 	 * @package facileManager
 	 */
 	function addUser($data) {
-		global $__FM_CONFIG, $fmdb, $fm_name, $fm_login;
+		global $__FM_CONFIG, $fmdb, $global_form_field_excludes, $fm_name, $fm_login;
 		
 		if (isset($data['group_id'])) {
 			return $this->addGroup($data);
@@ -106,7 +106,7 @@ class fm_users {
 		extract($data, EXTR_SKIP);
 		
 		$log_message = "Added user:\n";
-		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax', 'process_user_caps', 'type');
+		$exclude = array_merge($global_form_field_excludes, array('user_id', 'cpassword', 'user_password', 'user_caps', 'process_user_caps', 'type'));
 
 		foreach ($data as $key => $val) {
 			if (!in_array($key, $exclude)) {
@@ -202,12 +202,12 @@ class fm_users {
 	 * @package facileManager
 	 */
 	function addGroup($data) {
-		global $fmdb, $fm_name, $fm_login;
+		global $fmdb, $global_form_field_excludes, $fm_name, $fm_login;
 		
 		extract($data, EXTR_SKIP);
 		
 		$log_message = "Added user group:\n";
-		$exclude = array('submit', 'action', 'group_id', 'user_caps', 'is_ajax', 'process_user_caps', 'type', 'group_users');
+		$exclude = array_merge($global_form_field_excludes, array('group_id', 'user_caps', 'process_user_caps', 'type', 'group_users'));
 
 		foreach ($data as $key => $val) {
 			if (!in_array($key, $exclude)) {
@@ -274,7 +274,7 @@ class fm_users {
 	 * @package facileManager
 	 */
 	function editUser($post) {
-		global $__FM_CONFIG, $fmdb, $fm_name, $fm_login;
+		global $__FM_CONFIG, $fmdb, $global_form_field_excludes, $fm_name, $fm_login;
 
 		if (isset($post['group_id'])) {
 			return $this->editGroup($post);
@@ -313,7 +313,7 @@ class fm_users {
 		
 		$sql_edit = '';
 		
-		$exclude = array('submit', 'action', 'user_id', 'cpassword', 'user_password', 'user_caps', 'is_ajax', 'process_user_caps', 'type');
+		$exclude = array_merge($global_form_field_excludes, array('user_id', 'cpassword', 'user_password', 'user_caps', 'process_user_caps', 'type'));
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -369,7 +369,7 @@ class fm_users {
 	 * @package facileManager
 	 */
 	function editGroup($post) {
-		global $fmdb, $fm_name, $fm_login;
+		global $fmdb, $global_form_field_excludes, $fm_name, $fm_login;
 		
 		$post['group_id'] = intval($post['group_id']);
 		if (!isset($post['group_id'])) return _('This is a malformed request.');
@@ -390,7 +390,7 @@ class fm_users {
 
 		$sql_edit = '';
 		
-		$exclude = array('submit', 'action', 'group_id', 'user_caps', 'is_ajax', 'process_user_caps', 'type', 'group_users');
+		$exclude = array_merge($global_form_field_excludes, array('group_id', 'user_caps', 'process_user_caps', 'type', 'group_users'));
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {

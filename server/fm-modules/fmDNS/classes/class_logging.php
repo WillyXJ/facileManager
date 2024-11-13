@@ -80,7 +80,7 @@ class fm_module_logging {
 	 * Adds the new channel
 	 */
 	function addChannel($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Insert the parent */
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
@@ -100,7 +100,7 @@ class fm_module_logging {
 		if ($post['cfg_destination'] == 'file') {
 			if (empty($post['cfg_file_path'][0])) return __('No file path defined.');
 		}
-		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'page', 'item_type',
+		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'page', 'item_type', 'uri_params',
 					'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
 					'print-severity', 'print-time');
 		
@@ -199,7 +199,7 @@ class fm_module_logging {
 	 * Adds the new category
 	 */
 	function addCategory($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		$sql_insert = "INSERT INTO `fm_{$__FM_CONFIG['fmDNS']['prefix']}config`";
 		$sql_fields = '(';
@@ -214,7 +214,7 @@ class fm_module_logging {
 		$post['cfg_name'] = $post['sub_type'];
 		$post['cfg_comment'] = trim($post['cfg_comment']);
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('sub_type', 'temp_data'));
 		
 		/** Insert the category parent */
 		foreach ($post as $key => $data) {
@@ -275,7 +275,7 @@ class fm_module_logging {
 	 * Updates the selected logging type
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Ensure no empty inputs */
 		if ($post['sub_type'] == 'channel') {
@@ -310,9 +310,9 @@ class fm_module_logging {
 			if (!$this->validateChannel($post)) return __('This channel already exists.');
 		}
 		
-		$exclude = array('submit', 'action', 'cfg_id', 'sub_type', 'temp_data', 'page', 'item_type',
-					'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
-					'print-severity', 'print-time');
+		$exclude = array_merge($global_form_field_excludes, array('sub_type', 'temp_data',
+			'cfg_destination', 'cfg_file_path', 'cfg_syslog', 'severity', 'print-category',
+			'print-severity', 'print-time'));
 
 		$sql_edit = '';
 		

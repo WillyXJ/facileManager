@@ -79,7 +79,7 @@ class fm_dns_acls {
 	 * Adds the new acl
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
@@ -89,7 +89,7 @@ class fm_dns_acls {
 		$sql_fields = '(';
 		$sql_values = '';
 		
-		$exclude = array('submit', 'action', 'server_id', 'acl_bulk', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id', 'acl_bulk'));
 		$logging_include = array_diff(array_keys($post), $exclude, array('acl_id', 'acl_parent_id', 'account_id', 'tab-group-1'));
 
 		if (isset($post['acl_parent_id']) && $post['acl_parent_id']) {
@@ -140,13 +140,13 @@ class fm_dns_acls {
 	 * Updates the selected acl
 	 */
 	function update($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate post */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id', 'page', 'item_type');
+		$exclude = array_merge($global_form_field_excludes, array('server_id'));
 		$logging_include = array_diff(array_keys($post), $exclude, array('acl_id', 'acl_parent_id', 'account_id', 'tab-group-1'));
 
 		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_name');
