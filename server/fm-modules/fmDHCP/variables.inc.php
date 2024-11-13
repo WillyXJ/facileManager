@@ -67,3 +67,5 @@ $__FM_CONFIG['fmDHCP']['default']['options'] = @array(
 				'default_value' => 'no',
 				'type' => 'checkbox')
 	);
+
+$__FM_CONFIG['dhcpd']['config_file']['default'] = '/etc/dhcp/dhcpd.conf';

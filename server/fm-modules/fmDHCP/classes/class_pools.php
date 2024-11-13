@@ -156,7 +156,7 @@ HTML;
 
 		$return_form = sprintf('<tr>
 								<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
-								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" placeholder="client1.local" /></td>
+								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" placeholder="client1.local" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="range[]">%s</label></th>

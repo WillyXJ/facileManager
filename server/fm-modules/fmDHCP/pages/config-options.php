@@ -52,45 +52,11 @@ if (array_key_exists('item_id', $_GET)) {
 //	if ($option_type == 'Global') $display_option_type_sql .= "' AND domain_id='0";
 }
 
-if (currentUserCan('manage_servers', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'item_id', 'server_serial_no'), 'include');
-	
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_module_options->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_module_options->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-	}
-}
-
 printHeader();
 @printMenu();
 
 //$avail_servers = buildServerSubMenu($server_serial_no);
-$avail_servers = null;
-$avail_objects = buildObjectsSubMenu($item_id);
+$addl_title_blocks[] = buildObjectsSubMenu($item_id);
 
 $sort_direction = null;
 $sort_field = 'config_name';
@@ -98,19 +64,8 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
 }
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel);
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	<div id="configtypesmenu"></div>
-	$avail_objects
-	$avail_servers
-	</div>
-</div>
+echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel, null, $addl_title_blocks);
 
-HTML;
-	
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('config_id', $sort_field, 'config_name'), 'config_', "AND config_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;

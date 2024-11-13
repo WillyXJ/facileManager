@@ -30,62 +30,13 @@ if (!currentUserCan(array_merge($required_permission, array('view_all')), $_SESS
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 if (!isset($display_type)) $display_type = null;
-if (!isset($avail_types)) $avail_types = null;
-if (!isset($include_submenus)) $include_submenus = true;
-
-if (currentUserCan($required_permission, $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'server_serial_no'), 'include');
-	
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_dhcp_item->add($_POST, $type);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_dhcp_item->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	}
-}
+if (!isset($addl_title_blocks)) $addl_title_blocks = array();
 
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']), $type);
+echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']), $type, null, null, $addl_title_blocks);
 
-if ($include_submenus === true) {
-//	$avail_servers = buildServerSubMenu($server_serial_no);
-	echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_types
-	$avail_servers
-	</div>
-</div>
-
-HTML;
-}
-	
 /** Get server listing */
 $sort_direction = null;
 $sort_field = 'config_data';

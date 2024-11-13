@@ -380,6 +380,7 @@ if (isset($__FM_CONFIG)) {
 		};
 
 		if (confirm("' . _('Are you sure you want to delete this item?') . ' ("+ item_name +")")) {
+			$this.html("<i class=\"fa fa-spinner fa-spin\"></i>");
 			$.ajax({
 				type: "POST",
 				url: "fm-modules/facileManager/ajax/processPost.php",

@@ -25,65 +25,17 @@ if (!currentUserCan(array('manage_leases', 'view_all'), $_SESSION['module'])) un
 
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 
-if (currentUserCan('manage_leases', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('server_serial_no'), 'include');
-	
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			if (!isset($fm_dhcp_item)) {
-				if (!class_exists('fm_dhcp_hosts')) {
-					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_hosts.php');
-				}
-
-				$fm_dhcp_item = new fm_dhcp_hosts();
-			}
-
-			$result = $fm_dhcp_item->add($_POST, 'host');
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-//	case 'edit':
-//		if (!empty($_POST)) {
-//			$result = $fm_dhcp_item->update($_POST, $type);
-//			if ($result !== true) {
-//				$response = $result;
-//				$form_data = $_POST;
-//			} else header('Location: ' . $GLOBALS['basename'] . $uri_params);
-//		}
-//		break;
-	}
-}
-
-$placeholder = sprintf('<p id="table_edits" class="noresult">%s</p>', __('You must select a server to view leases from.'));
-
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response);
+$addl_title_blocks[] = buildServerSubMenu($server_serial_no, null, null, __('Select a server'));
+echo printPageHeader((string) $response, null, false, null, null, null, $addl_title_blocks);
 
-$avail_servers = buildServerSubMenu($server_serial_no);
-echo <<<HTML
-<div id="pagination_container" class="submenus">
-	<div>
-	<div class="stretch"></div>
-	$avail_servers
-	</div>
-</div>
-
-HTML;
+$placeholder = sprintf('<div><p>%s:</p>%s</div>', __('Please choose a server to view leases from.'), $addl_title_blocks[0]);
 
 if ($server_serial_no) {
 	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_leases.php');
-	$placeholder = $fm_dhcp_leases->getServerLeases(sanitize($server_serial_no));
+	$placeholder = $fm_dhcp_leases->getServerLeases($server_serial_no);
 }
 
 echo $placeholder;

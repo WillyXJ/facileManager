@@ -156,7 +156,7 @@ HTML;
 						<table class="form-table">
 							<tr>
 								<th width="33&#37;" scope="row"><label for="config_name">%s</label></th>
-								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" /></td>
+								<td width="67&#37;"><input name="config_name" id="config_name" type="text" value="%s" class="required" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="address">%s</label></th>
