@@ -1,3 +1,11 @@
+0.7.0 (2024-??-??)
+==================
+* Server - [improvement] Made form validation global.
+* Server - [improvement] Supports fM 5.0.0.
+* Server - [improvement] Provide better configuration logging.
+* Server - [bug] Duplicate WLAN names can no longer exist.
+* Server - [bug] AP group members can be modified.
+
 0.6.0 (2024-09-30)
 ==================
 * Server - [improvement] Updated database tables to the INNODB storage engine. (Issue #607)

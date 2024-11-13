@@ -104,7 +104,7 @@ class fm_wifi_acls {
 
 		$post['account_id'] = $_SESSION['user']['account_id'];
 
-		$exclude = array('submit', 'action', 'acl_id', 'log_message_member_wlans');
+		$exclude = array('submit', 'action', 'acl_id', 'log_message_member_wlans', 'uri_params');
 
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
@@ -116,7 +116,7 @@ class fm_wifi_acls {
 		$sql_values = rtrim($sql_values, ', ');
 
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the ACL because a database error occurred.'), 'sql');
@@ -165,7 +165,7 @@ class fm_wifi_acls {
 		$old_name = getNameFromID($post['acl_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'acls', 'acl_', 'acl_id', 'acl_mac');
 		
 		$query = "$sql_start $sql_values WHERE acl_id={$post['acl_id']} LIMIT 1";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
@@ -302,8 +302,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="acls" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="acl_id" value="%d" />
 			<input type="hidden" name="server_serial_no" value="%s" />
@@ -359,15 +361,11 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG, $fm_wifi_wlans;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (in_array('0', $post['wlan_ids']) || !isset($post['wlan_ids'])) {
 			$post['wlan_ids'] = 0;
 		} else {
 			$post['wlan_ids'] = join(';', $post['wlan_ids']);
 		}
-		$post['acl_mac'] = sanitize($post['acl_mac']);
 
 		/** Valid MAC address? */
 		if (version_compare(PHP_VERSION, '5.5.0', '>=') && !verifySimpleVariable($post['acl_mac'], FILTER_VALIDATE_MAC)) {

@@ -26,42 +26,6 @@ if (!currentUserCan(array_merge($required_permission, array('view_all')), $_SESS
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_wlan_users.php');
 
-$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-
-if (currentUserCan($required_permission, $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'server_serial_no'), 'include');
-	
-	switch ($action) {
-	case 'add':
-		if (!empty($_POST)) {
-			$result = $fm_wifi_wlan_users->add($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-//				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = $fm_wifi_wlan_users->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-//				setBuildUpdateConfigFlag($server_serial_no, 'yes', 'build');
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	}
-}
-
 printHeader();
 @printMenu();
 
