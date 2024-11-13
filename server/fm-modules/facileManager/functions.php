@@ -1775,6 +1775,7 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 	$page_links[] = '</div>';
 	if ($total_pages) {
 		$page_links[] = '<div class="flex-right">';
+		$page_links[] = buildPaginationCountMenu(0, 'pagination');
 		$page_links[] = '<div id="pagination" class="' . $classes . '">';
 		$page_links[] = '<form id="pagination_search" method="GET" action="' . $GLOBALS['basename'] . '?' . $page_params . '">';
 		$page_links[] = sprintf('<span>%s</span>', sprintf(ngettext('%d item', '%d items', $fmdb->num_rows), formatNumber($fmdb->num_rows)));
@@ -1796,7 +1797,6 @@ function displayPagination($page, $total_pages, $addl_blocks = null, $classes = 
 
 		$page_links[] = '</form>';
 		$page_links[] = '</div>';
-		$page_links[] = buildPaginationCountMenu(0, 'pagination');
 		$page_links[] = '</div>';
 	}
 	$page_links[] = '</div>';

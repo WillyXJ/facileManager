@@ -181,7 +181,7 @@ div.header-container {
 #tophead div.header-container:first-child img {
 	margin-right: 10px;
 }
-div.flex-right {
+#tophead div.flex-right {
 	flex-direction: row-reverse;
 }
 #tophead > div.flex-left > div {
