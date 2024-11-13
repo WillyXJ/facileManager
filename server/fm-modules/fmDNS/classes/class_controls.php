@@ -32,7 +32,11 @@ class fm_dns_controls {
 		$results = $fmdb->last_result;
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages);
+
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results',
@@ -40,7 +44,17 @@ class fm_dns_controls {
 						'name' => 'controls'
 					);
 
-		$title_array = array(__('IP Address'), __('Port'), __('Address List'));
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
+		}
+		$title_array = array_merge((array) $title_array, array(__('IP Address'), __('Port'), __('Address List')));
 		if ($type == 'controls') $title_array[] = __('Keys');
 		$title_array[] = _('Comment');
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
@@ -219,6 +233,7 @@ class fm_dns_controls {
 		}
 		
 		$disabled_class = ($row->control_status == 'disabled') ? ' class="disabled"' : null;
+		$checkbox = null;
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
@@ -230,6 +245,7 @@ class fm_dns_controls {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" name="' . $type . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
+			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->control_id .'" />';
 		} else {
 			$edit_status = null;
 		}
@@ -242,6 +258,7 @@ class fm_dns_controls {
 
 		echo <<<HTML
 		<tr id="$row->control_id"$disabled_class>
+			<td>$checkbox</td>
 			<td>$row->control_ip</td>
 			<td>$control_port</td>
 			<td>$control_addresses</td>

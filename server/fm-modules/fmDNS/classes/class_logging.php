@@ -32,7 +32,11 @@ class fm_module_logging {
 		$results = $fmdb->last_result;
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages);
+
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results sortable',
@@ -40,6 +44,16 @@ class fm_module_logging {
 						'name' => 'logging'
 					);
 
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
+		}
 		$title_array[] = array('title' => __('Name'), 'rel' => 'cfg_data');
 		if ($channel_category == 'category') $title_array[] = array('title' => __('Channels'), 'class' => 'header-nosort');
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
@@ -459,7 +473,8 @@ class fm_module_logging {
 		global $__FM_CONFIG;
 		
 		$disabled_class = ($row->cfg_status == 'disabled') ? ' class="disabled"' : null;
-		
+		$checkbox = null;
+	
 		$edit_name = ($row->cfg_parent) ? '&nbsp;&nbsp;&nbsp;' : null;
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
@@ -471,6 +486,7 @@ class fm_module_logging {
 				$edit_status .= ($row->cfg_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" />';
 			}
 			$edit_status .= '</td>';
 		} else {
@@ -496,6 +512,7 @@ class fm_module_logging {
 
 		echo <<<HTML
 		<tr id="$row->cfg_id" name="$row->cfg_data"$disabled_class>
+			<td>$checkbox</td>
 			<td>$edit_name</td>
 			$channels_row
 			<td>$comments</td>

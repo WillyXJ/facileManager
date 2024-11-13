@@ -37,7 +37,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
-		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
+		if (currentUserCan('build_server_configs', $_SESSION['module']) && $type == 'servers') {
 			$bulk_actions_list[] = __('Build Config');
 		}
 		if (is_array($bulk_actions_list)) {
@@ -566,7 +566,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 HTML;
 		} elseif ($type == 'groups') {
-			$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" /></td>' : null;
+			$checkbox = (currentUserCan('manage_servers', $_SESSION['module'])) ? '<td><input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" /></td>' : null;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';

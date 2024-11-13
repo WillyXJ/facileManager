@@ -31,14 +31,15 @@ class fm_dns_zones {
 		$all_num_rows = $num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
+		$bulk_actions_list = array();
 		if (currentUserCan('reload_zones', $_SESSION['module']) && $map != 'groups') {
-			$bulk_actions_list = array(__('Reload'));
+			$bulk_actions_list[] = __('Reload');
 			$checkbox[] = array(
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'domain_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
 		} else {
-			$checkbox = $bulk_actions_list = '';
+			$checkbox = '';
 		}
 
 		if (array_key_exists('attention', $_GET)) {
@@ -50,13 +51,6 @@ class fm_dns_zones {
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		$end = $_SESSION['user']['record_count'] * $page > $num_rows ? $num_rows : $_SESSION['user']['record_count'] * $page;
 
-		$classes = (array_key_exists('attention', $_GET)) ? null : ' grey';
-		$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-eye fa-lg eye-attention %s"></i></a>', __('Only view zones that need attention'), $classes) : null;
-		$addl_blocks = ($map != 'groups') ? array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention) : null;
-		$fmdb->num_rows = $num_rows;
-		echo displayPagination($page, $total_pages, $addl_blocks);
-		echo '<div class="overflow-container">';
-
 		$table_info = array(
 						'class' => 'display_results sortable',
 						'id' => 'table_edits',
@@ -64,10 +58,21 @@ class fm_dns_zones {
 					);
 
 		if ($map == 'groups') {
-			$title_array = array(array('title' => __('Group Name'), 'rel' => 'group_name'),
+			if (is_array($bulk_actions_list)) {
+				array_unshift($bulk_actions_list, _('Enable'), _('Disable'), _('Delete'));
+				$title_array[] = array(
+									'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+									'class' => 'header-tiny header-nosort'
+								);
+			} else {
+				$title_array[] = array(
+					'class' => 'header-tiny header-nosort'
+				);
+			}
+			$title_array = array_merge((array) $title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
 				array('title' => __('Associated Domains')),
 				array('title' => _('Comment'))
-				);
+				));
 		} else {
 			$title_array = array(array('title' => __('ID'), 'class' => 'header-small header-nosort'), 
 				array('title' => __('Domain'), 'rel' => 'domain_name'), 
@@ -80,6 +85,14 @@ class fm_dns_zones {
 		if (is_array($checkbox)) {
 			$title_array = array_merge($checkbox, $title_array);
 		}
+
+		if (!count($bulk_actions_list)) $bulk_actions_list = '';
+		$classes = (array_key_exists('attention', $_GET)) ? null : ' grey';
+		$eye_attention = $GLOBALS['zone_badge_counts'][$map] ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-eye fa-lg eye-attention %s"></i></a>', __('Only view zones that need attention'), $classes) : null;
+		$addl_blocks = ($map != 'groups') ? array(@buildBulkActionMenu($bulk_actions_list, 'server_id_list'), $this->buildFilterMenu(), $eye_attention) : buildBulkActionMenu($bulk_actions_list);
+		$fmdb->num_rows = $num_rows;
+		echo displayPagination($page, $total_pages, $addl_blocks);
+		echo '<div class="overflow-container">';
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
 		echo displayTableHeader($table_info, $title_array, 'zones');
@@ -891,6 +904,7 @@ HTML;
 			if ($row->group_status == 'disabled') $classes[] = 'disabled';
 			
 			$class = 'class="' . implode(' ', $classes) . '"';
+			$checkbox = null;
 
 			/** Get domains_ids associated with group_id */
 			$group_domain_ids = $this->getZoneGroupMembers($row->group_id);
@@ -906,12 +920,14 @@ HTML;
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" name="' . $map . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" />';
 			} else {
 				$edit_status = null;
 			}
 			
 			echo <<<HTML
 		<tr id="$row->group_id" name="$row->group_name" $class>
+			<td>$checkbox</td>
 			<td>$row->group_name</td>
 			<td>$domain_names</td>
 			<td>$row->group_comment</td>

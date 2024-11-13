@@ -31,9 +31,11 @@ class fm_module_options {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
-
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
+
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
@@ -47,6 +49,10 @@ class fm_module_options {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		$title_array[] = array('title' => __('Option'), 'rel' => 'cfg_name');
 		$title_array[] = array('title' => __('Value'), 'rel' => 'cfg_data');
@@ -237,10 +243,9 @@ class fm_module_options {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" /></td>';
+			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" />';
 		} else {
-			$edit_status = null;
-			$checkbox = '<td></td>';
+			$edit_status = $checkbox = null;
 		}
 		
 		$comments = nl2br($row->cfg_comment);
@@ -252,7 +257,7 @@ class fm_module_options {
 
 		echo <<<HTML
 		<tr id="$row->cfg_id" name="$row->cfg_name"$disabled_class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$cfg_name</td>
 			<td>$cfg_data</td>
 			<td>$comments</td>

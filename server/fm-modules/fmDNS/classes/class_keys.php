@@ -31,13 +31,14 @@ class fm_dns_keys {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
-
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
 		$addl_blocks = ($type == 'dnssec') ? $this->buildFilterMenu() : null;
 		
 		$fmdb->num_rows = $num_rows;
 
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
 		echo displayPagination($page, $total_pages, array(@buildBulkActionMenu($bulk_actions_list), $addl_blocks));
 
 		$table_info = array(
@@ -51,6 +52,10 @@ class fm_dns_keys {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny header-nosort'), array('title' => __('Key'), 'rel' => 'key_name')));
 		if ($type == 'tsig') {

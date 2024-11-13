@@ -32,7 +32,11 @@ class fm_module_templates {
 		$results = $fmdb->last_result;
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages);
+
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Delete'));
+		}
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results sortable',
@@ -40,9 +44,19 @@ class fm_module_templates {
 						'name' => $type
 					);
 
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
+		}
 		global $fm_dns_records;
 		if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
-		$title_array = array_merge(array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
+		$title_array = array_merge((array) $title_array, array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
 		if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 		echo displayTableHeader($table_info, $title_array);
@@ -66,6 +80,7 @@ class fm_module_templates {
 		global $__FM_CONFIG, $fmdb, $fm_dns_zones;
 		
 		$icons = array();
+		$checkbox = null;
 
 		if (currentUserCan('manage_zones', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
@@ -75,9 +90,11 @@ class fm_module_templates {
 			/** Cannot delete templates in use */
 			if ($prefix == 'soa') {
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $row->soa_id, 'domain_', 'soa_id');
+				$check_id = $row->soa_id;
 			}
 			if ($prefix == 'domain') {
 				basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $row->domain_id, 'domain_', 'domain_template_id');
+				$check_id = $row->domain_id;
 			}
 			if ($fmdb->num_rows) {
 				$show_delete = false;
@@ -85,6 +102,7 @@ class fm_module_templates {
 			
 			$edit_status .= $show_delete ? '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>' : null;
 			$edit_status .= '</td>';
+			$checkbox = ($show_delete) ? '<input type="checkbox" name="bulk_list[]" value="' . $check_id .'" />' : null;
 		} else {
 			$edit_status = null;
 		}
@@ -115,6 +133,7 @@ class fm_module_templates {
 		$field_id = $prefix . '_id';
 		echo <<<HTML
 		<tr id="{$row->$field_id}" name="$name">
+			<td>$checkbox</td>
 			<td>$star</td>
 			<td>$edit_name $icons</td>
 HTML;

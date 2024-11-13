@@ -32,7 +32,11 @@ class fm_dns_masters {
 		$results = $fmdb->last_result;
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages);
+
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results sortable',
@@ -40,8 +44,18 @@ class fm_dns_masters {
 						'name' => 'masters'
 					);
 
-		$title_array = array(array('title' => __('Name'), 'rel' => 'master_name'), 
-			array('title' => _('Comment'), 'class' => 'header-nosort'));
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
+		}
+		$title_array = array_merge((array) $title_array, array(array('title' => __('Name'), 'rel' => 'master_name'), 
+			array('title' => _('Comment'), 'class' => 'header-nosort')));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 		echo displayTableHeader($table_info, $title_array, 'masters');
@@ -235,6 +249,7 @@ class fm_dns_masters {
 		global $__FM_CONFIG;
 		
 		$classes = array();
+		$checkbox = null;
 		
 		if ($row->master_status == 'disabled') $classes[] = 'disabled';
 		
@@ -248,6 +263,7 @@ class fm_dns_masters {
 				$edit_status .= ($row->master_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->master_id .'" />';
 			}
 			$edit_status .= '</td>';
 		} else {
@@ -275,6 +291,7 @@ class fm_dns_masters {
 
 		echo <<<HTML
 		<tr id="$row->master_id" name="$row->master_name" $class>
+			<td>$checkbox</td>
 			<td>$edit_name $element_names</td>
 			<td>$comments $element_comment</td>
 			$edit_status

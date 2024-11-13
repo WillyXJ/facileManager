@@ -32,7 +32,11 @@ class fm_module_rpz {
 		$results = $fmdb->last_result;
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages);
+
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results',
@@ -40,7 +44,17 @@ class fm_module_rpz {
 						'name' => 'rpz'
 					);
 
-		$title_array = array(array('class' => 'header-tiny'), array('title' => __('Zone')), array('title' => __('Policy')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
+		}
+		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), array('title' => __('Zone')), array('title' => __('Policy')), array('title' => __('Options')), array('title' => _('Comment'), 'class' => 'header-nosort')));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 			if ($num_rows > 1) $table_info['class'] .= ' grab1';
@@ -338,6 +352,7 @@ class fm_module_rpz {
 		
 		if ($row->cfg_status == 'disabled') $class[] = 'disabled';
 		$bars_title = __('Click and drag to reorder');
+		$checkbox = null;
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
@@ -349,6 +364,7 @@ class fm_module_rpz {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status .= '</td>';
+			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->cfg_id .'" />';
 			if ($row->domain_id) {
 				$grab_bars = ($num_rows > 1) ? '<i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i>' : null;
 			} else {
@@ -381,6 +397,7 @@ class fm_module_rpz {
 
 		echo <<<HTML
 		<tr id="$row->cfg_id" name="rpz" $class>
+			<td>$checkbox</td>
 			<td>$grab_bars</td>
 			<td>$domain_name</td>
 			<td>$policy</td>

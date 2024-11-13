@@ -32,7 +32,11 @@ class fm_dns_views {
 		$results = $fmdb->last_result;
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
-		echo displayPagination($page, $total_pages);
+
+		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+			$bulk_actions_list = array(_('Enable'), _('Disable'), _('Delete'));
+		}
+		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
 						'class' => 'display_results',
@@ -40,7 +44,17 @@ class fm_dns_views {
 						'name' => 'views'
 					);
 
-		$title_array = array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => __('Zone Transfer Key')), array('title' => _('Comment'), 'class' => 'header-nosort'));
+		if (is_array($bulk_actions_list)) {
+			$title_array[] = array(
+								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
+								'class' => 'header-tiny header-nosort'
+							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
+		}
+		$title_array = array_merge((array) $title_array, array(array('class' => 'header-tiny'), array('title' => __('View Name')), array('title' => __('Zone Transfer Key')), array('title' => _('Comment'), 'class' => 'header-nosort')));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 			if ($num_rows > 1) $table_info['class'] .= ' grab1';
@@ -216,7 +230,7 @@ class fm_dns_views {
 
 
 	function displayRow($row, $num_rows) {
-		global $__FM_CONFIG;
+		global $__FM_CONFIG, $fmdb;
 		
 		$disabled_class = ($row->view_status == 'disabled') ? ' class="disabled"' : null;
 		$bars_title = __('Click and drag to reorder');
@@ -226,16 +240,24 @@ class fm_dns_views {
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$edit_status = '<td id="row_actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
-			$edit_status .= '<a class="status_form_link" href="#" rel="';
-			$edit_status .= ($row->view_status == 'active') ? 'disabled' : 'active';
-			$edit_status .= '">';
-			$edit_status .= ($row->view_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
-			$edit_status .= '</a>';
-			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status .= '</td>';
+
+			/** Are there any associated zones? */
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_id', 'domain_', "AND (`domain_view`={$row->view_id} or `domain_view` LIKE '{$row->view_id};%' or `domain_view` LIKE '%;{$row->view_id}' or `domain_view` LIKE '%;{$row->view_id};%')");
+			if (!$fmdb->num_rows) {
+				$edit_status .= '<a class="status_form_link" href="#" rel="';
+				$edit_status .= ($row->view_status == 'active') ? 'disabled' : 'active';
+				$edit_status .= '">';
+				$edit_status .= ($row->view_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+				$edit_status .= '</a>';
+
+				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '</td>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->view_id .'" />';
+			}
+
 			$grab_bars = ($num_rows > 1) ? '<i class="fa fa-bars mini-icon" title="' . $bars_title . '"></i>' : null;
 		} else {
-			$edit_status = $grab_bars = null;
+			$edit_status = $grab_bars = $checkbox = null;
 		}
 		
 		$tmp_key_name = _('None');
@@ -246,6 +268,7 @@ class fm_dns_views {
 
 		echo <<<HTML
 		<tr id="$row->view_id" name="$row->view_name"$disabled_class>
+			<td>$checkbox</td>
 			<td>$grab_bars</td>
 			<td>$row->view_name $icons</td>
 			<td>$tmp_key_name</td>
