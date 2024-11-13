@@ -198,35 +198,7 @@ class fm_module_groups {
 		}
 		
 		/** Process group items */
-		foreach (explode(';', $row->group_items) as $item) {
-			$item_id = substr($item, 1);
-			switch ($item[0]) {
-				case 's':
-					$item_name = basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $item_id, 'service_', 'service_id');
-					if ($fmdb->num_rows) {
-						$result = $fmdb->last_result[0];
-						if ($result->service_type == 'icmp') {
-							$group_items[] = $result->service_name . ' (type: ' . $result->service_icmp_type . ' code: ' . $result->service_icmp_code . ')';
-						} else {
-							$service_src_ports = $result->service_src_ports ? $result->service_src_ports : '0:0';
-							$service_dest_ports = $result->service_dest_ports ? $result->service_dest_ports : '0:0';
-							$group_items[] = $result->service_name . ' (' . $service_src_ports . ' / ' . $service_dest_ports . ')';
-						}
-					}
-					break;
-				case 'o':
-					$item_name = basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $item_id, 'object_', 'object_id');
-					if ($fmdb->num_rows) {
-						$result = $fmdb->last_result[0];
-						$group_items[] = $result->object_name . ' (' . $result->object_address . ' / ' . $result->object_mask . ')';
-					}
-					break;
-				case 'g':
-					$group_items[] = getNameFromID($item_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
-					break;
-			}
-		}
-		$group_items = implode("<br />\n", $group_items);
+		$group_items = nl2br($this->getGroupItemNames($row->group_items));
 		$comments = nl2br($row->group_comment);
 		
 		echo <<<HTML
@@ -326,6 +298,52 @@ HTML;
 		return $post;
 	}
 	
+
+	/**
+	 * Gets friendly group member names
+	 *
+	 * @since 6.1.0
+	 * @package facileManager
+	 * @subpackage fmFirewall
+	 *
+	 * @param string $group_ids Semi-colon delimited string of group item ids
+	 * @return string
+	 */
+	function getGroupItemNames($group_ids) {
+		global $__FM_CONFIG, $fmdb;
+
+		foreach (explode(';', $group_ids) as $item) {
+			$item_id = substr($item, 1);
+			switch ($item[0]) {
+				case 's':
+					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $item_id, 'service_', 'service_id');
+					if ($fmdb->num_rows) {
+						$result = $fmdb->last_result[0];
+						if ($result->service_type == 'icmp') {
+							$group_items[] = $result->service_name . ' (type: ' . $result->service_icmp_type . ' code: ' . $result->service_icmp_code . ')';
+						} else {
+							$service_src_ports = $result->service_src_ports ? $result->service_src_ports : '0:0';
+							$service_dest_ports = $result->service_dest_ports ? $result->service_dest_ports : '0:0';
+							$group_items[] = $result->service_name . ' (' . $service_src_ports . ' / ' . $service_dest_ports . ')';
+						}
+					}
+					break;
+				case 'o':
+					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $item_id, 'object_', 'object_id');
+					if ($fmdb->num_rows) {
+						$result = $fmdb->last_result[0];
+						$group_items[] = sprintf('%s (%s%s)', $result->object_name, $result->object_address, ($result->object_mask) ? ' / ' . $result->object_mask : null);
+					}
+					break;
+				case 'g':
+					$group_items[] = getNameFromID($item_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
+					break;
+			}
+		}
+		$group_items = implode("\n", $group_items);
+
+		return $group_items;
+	}
 
 }
 
