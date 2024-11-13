@@ -493,7 +493,7 @@ function getGlobalSearchResults($item_id) {
 		$tab[] = sprintf('
 		<div id="tab">
 			<input type="radio" name="tab-group-1" id="tab-%1$d" %2$s />
-			<label for="tab-%1$d">%3$s <span class="menu_badge"><p>%4$s</p></span></label>
+			<label for="tab-%1$d">%3$s <span class="menu-badge"><p>%4$s</p></span></label>
 			<div id="tab-content">
 				%5$s
 			</div>
