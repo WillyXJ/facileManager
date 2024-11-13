@@ -89,26 +89,36 @@ class fm_module_services {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'service_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'port_src', 'port_dest');
+		$exclude = array('submit', 'action', 'service_id', 'compress', 'AUTHKEY', 'page', 'item_type',
+			'module_name', 'module_type', 'config', 'port_src', 'port_dest');
+
+		$log_message = __("Added service with the following") . ":\n";
+		$logging_excluded_fields = array('account_id');
 
 		foreach ($post as $key => $data) {
 			if (($key == 'service_name') && empty($data)) return __('No service name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				if ($data && !in_array($key, $logging_excluded_fields)) {
+					if ($key == 'service_tcp_flags') {
+						$data = $this->getTCPFlags($data);
+					}
+					$log_message .= formatLogKeyData('service_', $key, $data);
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the service because a database error occurred.'), 'sql');
 		}
 
-		addLogEntry("Added service:\nName: {$post['service_name']}\nType: {$post['service_type']}");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -122,21 +132,30 @@ class fm_module_services {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'service_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'port_src', 'port_dest');
+		$exclude = array('submit', 'action', 'service_id', 'compress', 'AUTHKEY', 'page', 'item_type',
+			'module_name', 'module_type', 'config', 'SERIALNO', 'port_src', 'port_dest');
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['service_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
 		
+		$log_message = sprintf(__("Updated service '%s' to the following"), $old_name) . ":\n";
+
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if ($data) {
+					if ($key == 'service_tcp_flags') {
+						$data = $this->getTCPFlags($data);
+					}
+					$log_message .= formatLogKeyData('service_', $key, $data);
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the service
-		$old_name = getNameFromID($post['service_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', 'service_', 'service_id', 'service_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}services` SET $sql WHERE `service_id`={$post['service_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the service because a database error occurred.'), 'sql');
@@ -147,8 +166,7 @@ class fm_module_services {
 
 //		setBuildUpdateConfigFlag(getServerSerial($post['service_id'], $_SESSION['module']), 'yes', 'build');
 		
-		addLogEntry("Updated service '$old_name' to:\nName: {$post['service_name']}\nType: {$post['service_type']}\n" .
-					"Update Method: {$post['service_update_method']}\nConfig File: {$post['service_config_file']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -285,14 +303,16 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="services" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="service_id" value="%s" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="service_name">%s</label></th>
-					<td width="67&#37;"><input name="service_name" id="service_name" type="text" value="%s" size="40" placeholder="http" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="service_name" id="service_name" type="text" value="%s" size="40" placeholder="http" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="service_type">%s</label></th>
@@ -366,9 +386,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['service_name'])) return __('No service name defined.');
 		
 		/** Check name field length */

@@ -88,30 +88,29 @@ class fm_module_time {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'time_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config',
-						'time_start_time_hour', 'time_start_time_min', 'time_end_time_hour', 'time_end_time_min');
+		$exclude = array('submit', 'action', 'time_id', 'compress', 'AUTHKEY', 'page', 'item_type',
+			'module_name', 'module_type', 'config', 'time_start_time_hour', 'time_start_time_min',
+			'time_end_time_hour', 'time_end_time_min');
 
 		foreach ($post as $key => $data) {
 			if (($key == 'time_name') && empty($data)) return __('No time name defined.');
 			if (!in_array($key, $exclude)) {
+				$data = is_null($data) ? 'NULL' : "'$data'";
 				$sql_fields .= $key . ', ';
-				$sql_values .= "'$data', ";
+				$sql_values .= "$data, ";
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the time restriction because a database error occurred.'), 'sql');
 		}
 
-		/** Format weekdays */
-		$weekdays = $this->formatDays($post['time_weekdays']);
-		
-		addLogEntry("Added time restriction:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
+		@addLogEntry("Added time restriction:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
 					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
 					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(',', ', ', $post['time_monthdays']) .
 					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
@@ -128,14 +127,16 @@ class fm_module_time {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'time_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config',
-						'time_start_time_hour', 'time_start_time_min', 'time_end_time_hour', 'time_end_time_min');
+		$exclude = array('submit', 'action', 'time_id', 'compress', 'AUTHKEY', 'page', 'item_type',
+			'module_name', 'module_type', 'config', 'time_start_time_hour', 'time_start_time_min',
+			'time_end_time_hour', 'time_end_time_min');
 
 		$sql_edit = '';
 		
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
-				$sql_edit .= $key . "='" . $data . "', ";
+				$data = is_null($data) ? 'NULL' : "'$data'";
+				$sql_edit .= $key . "=" . $data . ", ";
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
@@ -143,7 +144,7 @@ class fm_module_time {
 		// Update the time
 		$old_name = getNameFromID($post['time_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_', 'time_id', 'time_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}time` SET $sql WHERE `time_id`={$post['time_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the time restriction because a database error occurred.'), 'sql');
@@ -154,7 +155,7 @@ class fm_module_time {
 
 //		setBuildUpdateConfigFlag(getServerSerial($post['time_id'], $_SESSION['module']), 'yes', 'build');
 		
-		addLogEntry("Updated time restriction '$old_name' to:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
+		@addLogEntry("Updated time restriction '$old_name' to:\nName: {$post['time_name']}\nDates: " . $this->formatDates($post['time_start_date'], $post['time_end_date']) . "\n" .
 					"Time: {$post['time_start_time']} &rarr; {$post['time_end_time']}\nWeekdays: " . $post['time_weekdays_not'] . ' ' . $this->formatDays($post['time_weekdays']) .
 					"\nMonthdays: " . $post['time_monthdays_not'] . ' ' . str_replace(',', ', ', $post['time_monthdays']) .
 					"\nContiguous: {$post['time_contiguous']}\nTimezone: {$post['time_zone']}\nComment: {$post['time_comment']}");
@@ -284,7 +285,7 @@ HTML;
 		for ($x = 1; $x <= 31; $x++) {
 			$monthdaysopt[] = sprintf("%02d", $x);
 		}
-		$monthdays_form = buildSelect('time_monthdays', 'time_monthdays', $monthdaysopt, explode(',', trim($time_monthdays, ',')), 1, null, true);
+		$monthdays_form = buildSelect('time_monthdays', 'time_monthdays', $monthdaysopt, explode(',', trim(strval($time_monthdays), ',')), 1, null, true);
 		
 		$time_zone_form = '<h4>' . _('Timezone') . '</h4>' . buildSelect('time_zone', 'time_zone', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_zone'), $time_zone);
 
@@ -297,8 +298,10 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="time" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="time_id" value="%d" />
 			<input type="hidden" name="time_weekdays_not" value="" />
@@ -307,7 +310,7 @@ HTML;
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="time_name">%s</label></th>
-					<td width="67&#37;"><input name="time_name" id="time_name" type="text" value="%s" size="40" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="time_name" id="time_name" type="text" value="%s" size="40" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="time_start_date">%s</label></th>
@@ -387,9 +390,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['time_name'])) return __('No name defined.');
 		
 		/** Check name field length */
@@ -413,11 +413,11 @@ HTML;
 			$post['time_weekdays'] = $decimals;
 		} else $post['time_weekdays'] = 0;
 		
-		$post['time_monthdays'] = implode(',', $post['time_monthdays']);
+		if (isset($post['time_monthdays'])) $post['time_monthdays'] = implode(',', $post['time_monthdays']);
 		
 		/** Process dates */
-		if (empty($post['time_start_date'])) unset($post['time_start_date']);
-		if (empty($post['time_end_date'])) unset($post['time_end_date']);
+		if (empty($post['time_start_date'])) $post['time_start_date'] = null;
+		if (empty($post['time_end_date'])) $post['time_end_date'] = null;
 		
 		return $post;
 	}

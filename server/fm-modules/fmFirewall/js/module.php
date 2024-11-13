@@ -33,36 +33,6 @@ $(document).ready(function() {
 		}
 	});
 	
-	$("#manage_item_contents").delegate("#buttonRight", "click", function(e) {
-		var box_id = $(this).attr("class");
-		if (box_id == null) {
-			box_id = "group";
-		}
-		var selectedOpts = $("#" + box_id + "_items_assigned option:selected");
-		if (selectedOpts.length == 0) {
-			e.preventDefault();
-		}
-		
-		$("#" + box_id + "_items_available").append($(selectedOpts).clone());
-		$(selectedOpts).remove();
-		e.preventDefault();
-	});
-	
-	$("#manage_item_contents").delegate("#buttonLeft", "click", function(e) {
-		var box_id = $(this).attr("class");
-		if (box_id == null) {
-			box_id = "group";
-		}
-		var selectedOpts = $("#" + box_id + "_items_available option:selected");
-		if (selectedOpts.length == 0) {
-			e.preventDefault();
-		}
-		
-		$("#" + box_id + "_items_assigned").append($(selectedOpts).clone());
-		$(selectedOpts).remove();
-		e.preventDefault();
-	});
-	
 	$("#manage_item_contents").delegate("#submit_items", "click", function(e) {
 		var arr = [ "group", "source", "destination", "services" ];
 		$.each(arr, function(index, box_id) {
@@ -83,11 +53,7 @@ $(document).ready(function() {
 		item_sub_type	= $this.attr("name");
 		item_id			= $this.parent().attr("rel");
 		var server_serial_no	= getUrlVars()["server_serial_no"];
-		var queryParameters = {}, queryString = location.search.substring(1),
-			re = /([^&=]+)=([^&]*)/g, m;
-		while (m = re.exec(queryString)) {
-			queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-		}
+		var uri_params = getUrlVars();
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
@@ -99,7 +65,7 @@ $(document).ready(function() {
 			item_sub_type: item_sub_type,
 			item_id: item_id,
 			server_serial_no: server_serial_no,
-			request_uri: queryParameters,
+			request_uri: uri_params,
 			is_ajax: 1
 		};
 

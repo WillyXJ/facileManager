@@ -87,7 +87,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	 * Adds the new server
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG, $fm_name;
+		global $fmdb, $__FM_CONFIG, $fm_name, $fm_module_policies;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
@@ -104,21 +104,24 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'page', 'item_type',
 			'module_name', 'module_type', 'config', 'update_from_client', 'dryrun');
 
+		$log_message = __("Added server with the following") . ":\n";
+		$logging_excluded_fields = array('account_id');
+
 		foreach ($post as $key => $data) {
-			if (($key == 'server_name') && empty($data)) return __('No server name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the server because a database error occurred.'), 'sql');
@@ -130,6 +133,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$fm_host_id = getNameFromID($fm_name, 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'objects', 'object_', 'object_name', 'object_id', $account_id);
 		
 		/** Get server->client interaction services */
+		$fm_in_service_id = array();
 		$web_service_id = 'g' . getNameFromID('Web Server', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'groups', 'group_', 'group_name', 'group_id', $account_id);
 		$fm_out_service_id[] = $web_service_id;
 		switch ($post['server_update_method']) {
@@ -142,13 +146,14 @@ class fm_module_servers extends fm_shared_module_servers {
 				break;
 		}
 		if ($post['server_type'] == 'iptables') $fm_out_service_id[] = 's' . getNameFromID('High TCP Ports', 'fm_' . $__FM_CONFIG[$module]['prefix'] . 'services', 'service_', 'service_name', 'service_id', $account_id);
-		if (is_array($fm_in_service_id)) {
+		if (count($fm_in_service_id)) {
 			$default_rules[] = array(
 				'account_id' => $account_id,
 				'server_serial_no' => $post['server_serial_no'],
 				'source_items' => array('o' . $fm_host_id),
 				'destination_items' => '',
 				'services_items' => $fm_in_service_id,
+				'policy_type' => 'filter',
 				'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
 				'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
 			);
@@ -160,6 +165,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			'source_items' => '',
 			'destination_items' => array('o' . $fm_host_id),
 			'services_items' => $fm_out_service_id,
+			'policy_type' => 'filter',
 			'policy_options' => array($__FM_CONFIG['fw']['policy_options']['established']['bit']),
 			'policy_comment' => sprintf(__('Required for %s client interaction.'), $fm_name)
 		);
@@ -168,8 +174,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			$fm_module_policies->add($rule);
 		}
 
-		addLogEntry("Added server:\nName: {$post['server_name']} ({$post['server_serial_no']})\nType: {$post['server_type']}\n" .
-				"Update Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -183,23 +188,26 @@ class fm_module_servers extends fm_shared_module_servers {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY',
+		$exclude = array('submit', 'action', 'server_id', 'compress', 'AUTHKEY', 'page', 'item_type',
 			'module_name', 'module_type', 'config', 'SERIALNO',
 			'update_from_client', 'dryrun');
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		
+		$log_message = sprintf(__("Updated server '%s' to the following"), $old_name) . ":\n";
+
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				$log_message .= ($data) ? formatLogKeyData('server_', $key, $data) : null;
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the server
-		$old_name = getNameFromID($post['server_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}servers` SET $sql WHERE `server_id`={$post['server_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the server because a database error occurred.'), 'sql');
@@ -210,8 +218,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
-		addLogEntry("Updated server '$old_name' to:\nName: {$post['server_name']}\nType: {$post['server_type']}\n" .
-					"Update Method: {$post['server_update_method']}\nConfig File: {$post['server_config_file']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -344,15 +351,17 @@ HTML;
 		$alternative_help = ($action == 'add' && getOption('client_auto_register')) ? sprintf('<p><b>%s</b> %s</p>', __('Note:'), __('The client installer can automatically generate this entry.')) : null;
 		$server_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name');
 
-		$return_form = sprintf('<form name="manage" id="manage" method="post" action="">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="servers" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="server_id" value="%d" />
 			%s
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_name">%s</label></th>
-					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="fw1.local" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="fw1.local" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_type">%s</label></th>
@@ -391,9 +400,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['server_name'])) return __('No server name defined.');
 		
 		/** Check name field length */

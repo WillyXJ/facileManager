@@ -24,27 +24,6 @@ if (!currentUserCan(array('manage_time', 'view_all'), $_SESSION['module'])) unAu
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_time.php');
 
-if (currentUserCan('manage_time', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'q', 'p'), 'include');
-
-	switch ($action) {
-	case 'add':
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = ($action == 'add') ? $fm_module_time->add($_POST) : $fm_module_time->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	}
-}
-
 printHeader();
 @printMenu();
 

@@ -26,27 +26,6 @@ define('FM_INCLUDE_SEARCH', true);
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_groups.php');
 
-if (currentUserCan('manage_services', $_SESSION['module'])) {
-	$action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'add';
-	$uri_params = generateURIParams(array('type', 'q', 'p'), 'include');
-
-	switch ($action) {
-	case 'add':
-	case 'edit':
-		if (!empty($_POST)) {
-			$result = ($action == 'add') ? $fm_module_groups->add($_POST) : $fm_module_groups->update($_POST);
-			if ($result !== true) {
-				$response = $result;
-				$form_data = $_POST;
-			} else {
-				header('Location: ' . $GLOBALS['basename'] . $uri_params);
-				exit;
-			}
-		}
-		break;
-	}
-}
-
 printHeader();
 @printMenu();
 

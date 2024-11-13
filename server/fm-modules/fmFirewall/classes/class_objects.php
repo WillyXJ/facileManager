@@ -88,30 +88,29 @@ class fm_module_objects {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config');
+		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'page', 'item_type');
+
+		$log_message = __("Added object with the following") . ":\n";
+		$logging_excluded_fields = array('account_id');
 
 		foreach ($post as $key => $data) {
-			if (($key == 'object_name') && empty($data)) return __('No object name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('object_', $key, $data) : null;
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not add the object because a database error occurred.'), 'sql');
 		}
 
-		if ($post['object_type'] == 'network') {
-			$post['object_mask'] = '/ ' . $post['object_mask'];
-		}
-		addLogEntry("Added object:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
-				"Address: {$post['object_address']} {$post['object_mask']}\nComment: {$post['object_comment']}");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -125,21 +124,24 @@ class fm_module_objects {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO');
+		$exclude = array('submit', 'action', 'object_id', 'compress', 'AUTHKEY', 'module_name', 'module_type', 'config', 'SERIALNO', 'page', 'item_type');
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['object_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
 		
+		$log_message = sprintf(__("Updated object '%s' to the following"), $old_name) . ":\n";
+
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				$log_message .= ($data) ? formatLogKeyData('object_', $key, $data) : null;
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		
 		// Update the object
-		$old_name = getNameFromID($post['object_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_', 'object_id', 'object_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}objects` SET $sql WHERE `object_id`={$post['object_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(__('Could not update the object because a database error occurred.'), 'sql');
@@ -150,11 +152,7 @@ class fm_module_objects {
 
 //		setBuildUpdateConfigFlag(getServerSerial($post['object_id'], $_SESSION['module']), 'yes', 'build');
 		
-		if ($post['object_type'] == 'network') {
-			$post['object_mask'] = '/ ' . $post['object_mask'];
-		}
-		addLogEntry("Updated object '$old_name' to:\nName: {$post['object_name']}\nType: {$post['object_type']}\n" .
-					"Address: {$post['object_address']} {$post['object_mask']}\nComment: {$post['object_comment']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -247,14 +245,16 @@ HTML;
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
-		$return_form = sprintf('<form name="manage" id="manage" method="post">
+		$return_form = sprintf('
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="objects" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="object_id" value="%s" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="object_name">%s</label></th>
-					<td width="67&#37;"><input name="object_name" id="object_name" type="text" value="%s" size="40" placeholder="http" maxlength="%s" /></td>
+					<td width="67&#37;"><input name="object_name" id="object_name" type="text" value="%s" size="40" placeholder="http" maxlength="%s" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="object_type">%s</label></th>
@@ -264,11 +264,11 @@ HTML;
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="object_address">%s</label></th>
-					<td width="67&#37;"><input name="object_address" id="object_address" type="text" value="%s" size="40" placeholder="127.0.0.1" maxlength="%s" /></td>
+					<td width="67&#37;"><input name="object_address" id="object_address" type="text" value="%s" size="40" placeholder="127.0.0.1" maxlength="%s" class="required" /></td>
 				</tr>
 				<tr id="netmask_option" %s>
 					<th width="33&#37;" scope="row"><label for="object_mask">%s</label></th>
-					<td width="67&#37;"><input name="object_mask" id="object_mask" type="text" value="%s" size="40" placeholder="255.255.255.0" maxlength="%s" /></td>
+					<td width="67&#37;"><input name="object_mask" id="object_mask" type="text" value="%s" size="40" placeholder="255.255.255.0" maxlength="%s" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="object_comment">%s</label></th>
@@ -301,9 +301,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['object_name'])) return __('No object name defined.');
 		if (empty($post['object_address'])) return __('No object address defined.');
 		if ($post['object_type'] == 'network') {

@@ -86,27 +86,36 @@ class fm_module_groups {
 		
 		$post['account_id'] = $_SESSION['user']['account_id'];
 		
-		$exclude = array('submit', 'action', 'group_id', 'compress', 'AUTHKEY');
+		$exclude = array('submit', 'action', 'group_id', 'compress', 'AUTHKEY', 'page', 'item_type');
+
+		$log_message = __("Added group with the following") . ":\n";
+		$logging_excluded_fields = array('account_id');
 
 		foreach ($post as $key => $data) {
 			if (($key == 'group_name') && empty($data)) return _('No group name defined.');
 			if (!in_array($key, $exclude)) {
 				$sql_fields .= $key . ', ';
 				$sql_values .= "'$data', ";
+				if ($data && !in_array($key, $logging_excluded_fields)) {
+					if ($key == 'group_items') {
+						$log_message .= formatLogKeyData('', 'objects', $this->getGroupItemNames($data));
+					} else {
+						$log_message .= formatLogKeyData('group_', $key, $data);
+					}
+				}
 			}
 		}
 		$sql_fields = rtrim($sql_fields, ', ') . ')';
 		$sql_values = rtrim($sql_values, ', ');
 		
 		$query = "$sql_insert $sql_fields VALUES ($sql_values)";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not add the group because a database error occurred.'), 'sql');
 		}
 
-		addLogEntry("Added {$post['group_type']} group:\nName: {$post['group_name']}\n" .
-				"Comment: {$post['group_comment']}");
+		addLogEntry($log_message);
 		return true;
 	}
 
@@ -120,22 +129,31 @@ class fm_module_groups {
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$exclude = array('submit', 'action', 'group_id', 'AUTHKEY');
+		$exclude = array('submit', 'action', 'group_id', 'AUTHKEY', 'page', 'item_type');
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 		
+		$log_message = sprintf(__("Updated group '%s' to the following"), $old_name) . ":\n";
+
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if ($data) {
+					if ($key == 'group_items') {
+						$log_message .= formatLogKeyData('', 'objects', $this->getGroupItemNames($data));
+					} else {
+						$log_message .= formatLogKeyData('group_', $key, $data);
+					}
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
 		$group_id = (int)$post['group_id'];
 
 		// Update the group
-		$old_name = getNameFromID($post['group_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}groups` SET $sql WHERE `group_id`=$group_id AND `account_id`='{$_SESSION['user']['account_id']}'";
-		$result = $fmdb->query($query);
+		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not update the group because a database error occurred.'), 'sql');
@@ -146,8 +164,7 @@ class fm_module_groups {
 
 //		setBuildUpdateConfigFlag(getServerSerial($post['group_id'], $_SESSION['module']), 'yes', 'build');
 		
-		addLogEntry("Updated {$post['group_type']} group '$old_name' to:\nName: {$post['group_name']}\n" .
-					"Comment: {$post['group_comment']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -198,35 +215,7 @@ class fm_module_groups {
 		}
 		
 		/** Process group items */
-		foreach (explode(';', $row->group_items) as $item) {
-			$item_id = substr($item, 1);
-			switch ($item[0]) {
-				case 's':
-					$item_name = basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $item_id, 'service_', 'service_id');
-					if ($fmdb->num_rows) {
-						$result = $fmdb->last_result[0];
-						if ($result->service_type == 'icmp') {
-							$group_items[] = $result->service_name . ' (type: ' . $result->service_icmp_type . ' code: ' . $result->service_icmp_code . ')';
-						} else {
-							$service_src_ports = $result->service_src_ports ? $result->service_src_ports : '0:0';
-							$service_dest_ports = $result->service_dest_ports ? $result->service_dest_ports : '0:0';
-							$group_items[] = $result->service_name . ' (' . $service_src_ports . ' / ' . $service_dest_ports . ')';
-						}
-					}
-					break;
-				case 'o':
-					$item_name = basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $item_id, 'object_', 'object_id');
-					if ($fmdb->num_rows) {
-						$result = $fmdb->last_result[0];
-						$group_items[] = $result->object_name . ' (' . $result->object_address . ' / ' . $result->object_mask . ')';
-					}
-					break;
-				case 'g':
-					$group_items[] = getNameFromID($item_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
-					break;
-			}
-		}
-		$group_items = implode("<br />\n", $group_items);
+		$group_items = nl2br($this->getGroupItemNames($row->group_items));
 		$comments = nl2br($row->group_comment);
 		
 		echo <<<HTML
@@ -261,22 +250,23 @@ HTML;
 		$group_items_assigned = getGroupItems($group_items);
 
 		$group_name_length = getColumnLength('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_name');
-		$group_items = buildSelect('group_items', 'group_items', availableGroupItems($group_type, 'available', null, $group_id), $group_items_assigned, 1, null, true, null, null, 'Select one or more ' . $group_type . 's');
+		$group_items = buildSelect('group_items', 'group_items', availableGroupItems($group_type, 'available', null, $group_id), $group_items_assigned, 1, null, true, null, 'required', 'Select one or more ' . $group_type . 's');
 		
 		$popup_title = $action == 'add' ? __('Add Group') : __('Edit Group');
 		$popup_header = buildPopup('header', $popup_title);
 		$popup_footer = buildPopup('footer');
 		
 		$return_form = sprintf('
-		<form name="manage" id="manage" method="post" action="">
 		%s
+		<form name="manage" id="manage">
+			<input type="hidden" name="page" value="groups" />
 			<input type="hidden" name="action" value="%s" />
 			<input type="hidden" name="group_id" value="%d" />
 			<input type="hidden" name="group_type" value="%s" />
 			<table class="form-table">
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_name">%s</label></th>
-					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" placeholder="http" maxlength="%d" /></td>
+					<td width="67&#37;"><input name="group_name" id="group_name" type="text" value="%s" size="40" placeholder="http" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="group_items">%s</label></th>
@@ -309,9 +299,6 @@ HTML;
 	function validatePost($post) {
 		global $fmdb, $__FM_CONFIG;
 		
-		/** Trim and sanitize inputs */
-		$post = cleanAndTrimInputs($post);
-
 		if (empty($post['group_name'])) return _('No group name defined.');
 		
 		/** Check name field length */
@@ -323,12 +310,58 @@ HTML;
 		if ($fmdb->num_rows) return _('This group name already exists.');
 		
 		/** Process assigned items */
-		$post['group_items'] = implode(';', $post['group_items']);
+		$post['group_items'] = (isset($post['group_items'])) ? implode(';', $post['group_items']) : null;
 		if (empty($post['group_items'])) return 'You must assign at least one ' . $post['group_type'] . '.';
 		
 		return $post;
 	}
 	
+
+	/**
+	 * Gets friendly group member names
+	 *
+	 * @since 6.1.0
+	 * @package facileManager
+	 * @subpackage fmFirewall
+	 *
+	 * @param string $group_ids Semi-colon delimited string of group item ids
+	 * @return string
+	 */
+	function getGroupItemNames($group_ids) {
+		global $__FM_CONFIG, $fmdb;
+
+		foreach (explode(';', $group_ids) as $item) {
+			$item_id = substr($item, 1);
+			switch ($item[0]) {
+				case 's':
+					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'services', $item_id, 'service_', 'service_id');
+					if ($fmdb->num_rows) {
+						$result = $fmdb->last_result[0];
+						if ($result->service_type == 'icmp') {
+							$group_items[] = $result->service_name . ' (type: ' . $result->service_icmp_type . ' code: ' . $result->service_icmp_code . ')';
+						} else {
+							$service_src_ports = $result->service_src_ports ? $result->service_src_ports : '0:0';
+							$service_dest_ports = $result->service_dest_ports ? $result->service_dest_ports : '0:0';
+							$group_items[] = $result->service_name . ' (' . $service_src_ports . ' / ' . $service_dest_ports . ')';
+						}
+					}
+					break;
+				case 'o':
+					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', $item_id, 'object_', 'object_id');
+					if ($fmdb->num_rows) {
+						$result = $fmdb->last_result[0];
+						$group_items[] = sprintf('%s (%s%s)', $result->object_name, $result->object_address, ($result->object_mask) ? ' / ' . $result->object_mask : null);
+					}
+					break;
+				case 'g':
+					$group_items[] = getNameFromID($item_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_', 'group_id', 'group_name');
+					break;
+			}
+		}
+		$group_items = implode("\n", $group_items);
+
+		return $group_items;
+	}
 
 }
 
