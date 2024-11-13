@@ -518,7 +518,7 @@ HTML;
 				});
 				$("form").submit(function(event) {
 					$("#policy_template_stack option").each(function() {
-						$(this).attr("selected", true);
+						$(this).prop("selected", true);
 					});
 				});
 			});

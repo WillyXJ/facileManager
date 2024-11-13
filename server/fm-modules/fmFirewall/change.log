@@ -3,6 +3,7 @@
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Takes better advantage of fM JS grab functionality.
 * Server - [bug] Fixed display of address group objects.
+* Server - [bug] All selected stacks are retained when editing stack order.
 
 3.1.0 (2024-09-30)
 ==================
