@@ -891,8 +891,11 @@ function fmUpgrade_500b1($database) {
 	/** Prereq */
 	$success = ($GLOBALS['running_db_version'] < 52) ? fmUpgrade_470($database) : true;
 	
+	$queries = array();
 	if ($success) {
-		$queries[] = "ALTER TABLE `fm_users` ADD `user_theme` VARCHAR(255) NULL DEFAULT NULL AFTER `user_default_module`";
+		if (!columnExists("fm_users", 'user_theme')) {
+			$queries[] = "ALTER TABLE `fm_users` ADD `user_theme` VARCHAR(255) NULL DEFAULT NULL AFTER `user_default_module`";
+		}
 		
 		/** Create table schema */
 		if (count($queries) && $queries[0]) {
