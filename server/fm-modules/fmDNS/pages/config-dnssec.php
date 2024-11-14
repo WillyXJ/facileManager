@@ -36,7 +36,7 @@ printHeader();
 $addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 $addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['dnssec']['avail_types']);
 
-echo printPageHeader(array((string) $response, getMinimumFeatureVersion($type, 'dnskey-ttl')), $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
+echo printPageHeader(array('message' => (string) $response, 'comment' => getMinimumFeatureVersion($type, 'dnskey-ttl')), $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 
 $sort_direction = null;
 $sort_field = 'cfg_data';

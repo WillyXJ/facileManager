@@ -2207,24 +2207,28 @@ function setOSIcon($server_os) {
 function printPageHeader($message = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null, $addl_title_blocks = array()) {
 	global $__FM_CONFIG;
 	
+	$class = null;
+
 	if (is_array($message)) {
-		list($response, $comment) = $message;
-	} else {
-		$response = $message;
+		if (array_key_exists('message', $message)) {
+			extract($message, EXTR_OVERWRITE);
+		} else {
+			list($message, $comment) = $message;
+		}
 	}
 
 	if (empty($title)) $title = getPageTitle();
 	
-	$style = (empty($response)) ? 'style="display: none;"' : null;
-	if (strpos($response, '</p>') === false || strpos($response, _('Database error')) !== false) {
-		$response = displayResponseClose($response);
+	$style = (empty($message)) ? 'style="display: none;"' : null;
+	if (strpos($message, '</p>') === false || strpos($message, _('Database error')) !== false) {
+		$message = displayResponseClose($message);
 	}
 
 	echo '<div id="body_container"';
 	if ($scroll == 'noscroll') echo ' class="fm-noscroll" style="padding-bottom: 0;"';
 	echo '>' . "\n";
 	printf('<div id="body_top_container">
-	<div id="response" %s>%s</div>
+	<div id="response" class="%s" %s>%s</div>
 	<div id="page_title_container" class="flex-apart">
 		<div class="flex-left">
 			<div><h2>%s</h2></div>
@@ -2236,9 +2240,9 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 		</div>
 	</div>
 	',
-		$style, $response, $title,
+		$class, $style, $message, $title,
 		($allowed_to_add) ? displayAddNew($name, $rel) : null,
-		(isset($comment)) ? sprintf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle notice grey" aria-hidden="true"></i></a>', $comment) : null,
+		(isset($comment)) ? sprintf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle fa-lg notice grey" aria-hidden="true"></i></a>', $comment) : null,
 		implode("\n", $addl_title_blocks)
 	);
 }
