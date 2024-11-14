@@ -63,7 +63,7 @@
 	--table-header-bg: #464646;
 	--table-header-text: #f1f1f1;
 	--table-header-border: #fff;
-	--table-header-sorted: #dc1111;
+	--table-header-sorted: var(--menu-select-highlight);
   
 	--table-rows-grabbing-border: #dfdfdf;
 
@@ -1019,7 +1019,7 @@ i.text_icon {
 	text-align: center;
 	color: #000;
 	font-size: 10pt;
-	margin-top: -13px;
+	margin-top: -14px;
 	width: 75%;
 	margin-left: 12.5%;
 	background-color: #FFFBCC;
