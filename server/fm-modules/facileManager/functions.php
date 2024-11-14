@@ -4251,6 +4251,7 @@ function getThemes() {
 	if (is_array($selectors[0])) {
 		$themes = str_replace(array('.', ' {'), '', $selectors[0]);
 	}
+	sort($themes);
 	
 	return $themes;
 }
