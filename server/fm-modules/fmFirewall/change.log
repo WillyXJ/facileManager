@@ -1,8 +1,8 @@
-3.2.0 (2024-??-??)
-==================
+3.2.0-beta1 (2024-11-13)
+========================
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Takes better advantage of fM JS grab functionality.
-* Server - [improvement] Supports fM 5.0.
+* Server - [improvement] fM 5.0 compatibility.
 * Server - [bug] Fixed display of address group objects.
 * Server - [bug] All selected stacks are retained when editing stack order.
 

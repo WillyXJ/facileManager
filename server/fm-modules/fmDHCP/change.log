@@ -1,7 +1,7 @@
-0.10.0 (2024-??-??)
-==================
+0.10.0-beta1 (2024-11-13)
+=========================
 * Server - [improvement] Made form validation global.
-* Server - [improvement] Compatible with fM 5.0.
+* Server - [improvement] fM 5.0 compatibility.
 * Server - [improvement] Provide better configuration logging.
 * Server - [bug] Duplicate lease reservations cannot be made when viewing active leases.
 

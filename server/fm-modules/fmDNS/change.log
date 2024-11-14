@@ -1,8 +1,8 @@
-6.3.0 (2024-10-24)
-==================
-* Server - [improvement] When using server groups, primary zones can automatically
+7.0.0-beta1 (2024-11-13)
+========================
+* Server - [feature] When using server groups, primary zones can automatically
            set also-notify to include all secondary servers.
-* Server - [improvement] Defined keys can now be optionally used with rndc. (Issue #636 #389)
+* Both   - [feature] Defined keys can now be optionally used with rndc. (Issue #636 #389)
 * Server - [improvement] Editing DNSSEC keys now shows the key name and type.
 * Server - [improvement] Zone groups can now be referenced in RPZ and validate-except.
 * Server - [improvement] Takes better advantage of fM JS grab functionality.
@@ -11,7 +11,7 @@
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Moved feature minimum version notices.
 * Server - [improvement] Form validation is done inline now (less zone records).
-* Server - [improvement] Supports fM 5.0.0.
+* Server - [improvement] fM 5.0 compatibility.
 * Server - [bug] Dynamic zones now pull the zone from the correct directory.
 * Server - [bug] Fixed modifying dnssec policies when an override exists.
 * Server - [bug] Added missing icon to add options for zone templates.

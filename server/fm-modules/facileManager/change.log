@@ -1,12 +1,12 @@
-4.8.0 (2024-10-24)
-==================
+5.0.0-beta1 (2024-11-13)
+========================
 * Server - [feature] Added framework for in-field form validation.
 * Server - [feature] Added theme support.
+* Server - [feature] Added setting to require user acceptance of login message.
 * Server - [improvement] Changelog is now viewed in an iframe.
 * Server - [improvement] Added user permission to view logs.
 * Server - [improvement] Forced password changes cannot be the same as the current password.
 * Server - [improvement] Added better logging of user information changes.
-* Server - [improvement] Added setting to require user acceptance of login message.
 * Server - [improvement] Improved JS grab functionality to be more modular.
 * Server - [improvement] CSS and icon tweaks.
 * Server - [improvement] Made form validation global.
