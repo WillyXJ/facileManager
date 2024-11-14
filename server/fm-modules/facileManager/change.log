@@ -1,7 +1,3 @@
-5.0.0-beta2 (2024-??-??)
-========================
-* Server - [bug] Cannot select non-active servers in various module forms.
-
 5.0.0-beta1 (2024-11-13)
 ========================
 * Server - [feature] Added framework for in-field form validation.
@@ -20,6 +16,7 @@
 * Server - [bug] Editing a user group incorrectly required a name change.
 * Server - [bug] Upgrading fM or any modules inadvertently cleared the upgrade flag of other modules.
 * Server - [bug] Fixed menu display for limited user access.
+* Server - [bug] Cannot select non-active servers in various module forms.
 
 4.7.0 (2024-09-30)
 ==================
