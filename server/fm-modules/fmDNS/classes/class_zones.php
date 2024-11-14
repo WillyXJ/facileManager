@@ -1930,15 +1930,27 @@ HTML;
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $post['domain_name'], 'domain_', 'domain_name', $domain_id_sql);
 			if ($fmdb->num_rows) return __('Zone already exists.');
 		} else { /** All zones must be unique per view */
-			$defined_views = $fmdb->last_result;
-			
 			/** Does the domain exist in all views? */
 			if (!$post['domain_view'] || in_array(0, (array) $post['domain_view'])) {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $post['domain_name'], 'domain_', 'domain_name', $domain_id_sql);
 				if ($fmdb->num_rows) {
-					/** Zone exists for views, but what about on the same server? */
+					/** Zone exists for views, but what about on all servers? */
 					if (!$post['domain_name_servers'] || in_array('0', $post['domain_name_servers'])) {
-						return __('Zone already exists for all views.');
+						return __('Zone already exists for all views on all servers.');
+					}
+					/** Zone exists for views, but what about on the same server? */
+					if ($post['domain_name_servers']) {
+						$existing_name_servers = $this->getNameServers($fmdb->last_result[0]->domain_name_servers);
+						$submitted_name_servers = $this->getNameServers(implode(';', $post['domain_name_servers']));
+						if ($submitted_name_servers && $existing_name_servers) {
+							$name_server_ids = array();
+							foreach ($existing_name_servers as $key => $obj) {
+								$name_server_ids[] = $obj->server_id;
+							}
+							foreach ($submitted_name_servers as $val) {
+								if (in_array($val->server_id, $name_server_ids)) return __('Zone already exists for all views on selected servers.');
+							}
+						}
 					}
 				}
 			}

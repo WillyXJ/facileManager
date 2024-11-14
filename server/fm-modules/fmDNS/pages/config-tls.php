@@ -32,7 +32,7 @@ printHeader();
 
 $addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
-echo printPageHeader(array((string) $response, getMinimumFeatureVersion($display_option_type_sql)), null, currentUserCan('manage_servers', $_SESSION['module']), null, null, null, $addl_title_blocks);
+echo printPageHeader(array('message' => (string) $response, 'comment' => getMinimumFeatureVersion($display_option_type_sql)), null, currentUserCan('manage_servers', $_SESSION['module']), null, null, null, $addl_title_blocks);
 
 $sort_direction = null;
 $sort_field = 'cfg_data';
