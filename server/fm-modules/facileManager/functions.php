@@ -3869,10 +3869,10 @@ function buildSubMenu($selected, $avail_types, $null_params = array(), $params =
 	
 	foreach ($avail_types as $general => $type) {
 		$select = ($selected == $general) ? ' class="selected"' : '';
-		$menu_selects .= "<span$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></span>\n";
+		$menu_selects .= "<li$select><a$select href=\"{$GLOBALS['basename']}?type=$general$uri_params\">" . ucfirst($type) . "</a></li>\n";
 	}
 	
-	return '<div id="configtypesmenu">' . $menu_selects . '</div>';
+	return '<div class="tab-strip"><ul>' . $menu_selects . '</ul></div>';
 }
 
 

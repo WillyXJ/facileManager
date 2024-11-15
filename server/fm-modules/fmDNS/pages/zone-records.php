@@ -228,7 +228,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 			}
 
 			$select = ($record_type == $type) ? ' class="selected"' : '';
-			$menu_selects .= "<span$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\">$type</a></span>\n";
+			$menu_selects .= "<li$select><a$select href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\">$type</a></li>\n";
 		}
 		
 		/** More record types menu */
@@ -236,7 +236,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 			foreach ($supported_record_types as $type) {
 				if (!in_array($type, $used_record_types)) {
 					if ($record_type == $type) {
-						$menu_selects .= "<span class=\"selected\"><a class=\"selected\" href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></span>\n";
+						$menu_selects .= "<li class=\"selected\"><a class=\"selected\" href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type=$type\">$type</a></li>\n";
 					} else {
 						$menu_sub_selects .= "<li><a href=\"zone-records.php?map={$map}&domain_id={$domain_id}&record_type={$type}{$q}\"><span>$type</span></a></li>\n";
 					}
@@ -248,11 +248,13 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 				if ($record_type == 'CUSTOM') {
 					$select = $classes[] = 'selected';
 				} else $select = null;
-				$custom_rr = '<span class="' . $select . '"><a href="zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=CUSTOM" class="' . join(' ', $classes) . '" data-tooltip="' . $custom_tip . '"><i class="fa fa-window-maximize" aria-hidden="true"></i></a></span>';
+				$custom_rr = '<li class="' . $select . '"><a href="zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=CUSTOM" class="' . join(' ', $classes) . '" data-tooltip="' . $custom_tip . '"><i class="fa fa-window-maximize" aria-hidden="true"></i></a></li>';
 			}
 			$menu_selects = <<<MENU
+			<ul>
 			$menu_selects
 			$custom_rr
+			</ul>
 			</div>
 			<div id="configtypesmenu" class="nopadding dropdown">
 				<div id="recordmenu">
@@ -269,7 +271,7 @@ MENU;
 		}
 	}
 	
-	return '<div id="configtypesmenu" class="submenus">' . $menu_selects . '</div>';
+	return '<div class="tab-strip">' . $menu_selects . '</div>';
 }
 
 function isValidDomain($domain_id) {
