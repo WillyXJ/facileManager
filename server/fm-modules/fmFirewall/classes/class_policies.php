@@ -529,7 +529,7 @@ FORM;
 			/** Time restriction */
 			if ($server_firewall_type == 'iptables' || $_POST['server_serial_no'][0] == 't') {
 				$policy_time = buildSelect('policy_time', 'policy_time', $this->availableTimes(), $policy_time);
-				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-top mini-icon" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></span>',
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></span>',
 						__('Supported firewalls:'), 'iptables'
 					) : null;
 				$policy_time_form .= sprintf('
@@ -543,7 +543,7 @@ FORM;
 
 			/** UID support */
 			if (in_array($server_firewall_type, array('iptables', 'ipfw', 'pf')) || $_POST['server_serial_no'][0] == 't') {
-				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-top mini-icon" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></span>',
+				$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-top" data-tooltip="%s %s"><i class="fa fa-question-circle" aria-hidden="true"></i></span>',
 						__('Supported firewalls:'), 'iptables, ipfw, pf'
 					) : null;
 				$policy_uid_form = sprintf('
@@ -638,7 +638,7 @@ FORM;
 								%s
 							</tr>
 							<tr>
-								<th style="text-align: right;">%s <span class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></th>
+								<th style="text-align: right;">%s <span class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></th>
 								%s
 							</tr>
 							<tr>

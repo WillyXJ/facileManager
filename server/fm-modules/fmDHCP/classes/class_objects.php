@@ -626,8 +626,8 @@ HTML;
 								<td width="67&#37;"><input name="domain-name-servers" id="domain-name-servers" type="text" value="%s" /></td>
 							</tr>
 							<tr>
-								<th width="33&#37;" scope="row"><label for="domain-search">%s</label></th>
-								<td width="67&#37;"><input name="domain-search" id="domain-search" type="text" value="%s" /> <a href="#" class="tooltip-left" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></td>
+								<th width="33&#37;" scope="row"><label for="domain-search">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+								<td width="67&#37;"><input name="domain-search" id="domain-search" type="text" value="%s" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="time-servers">%s</label></th>
@@ -687,11 +687,11 @@ HTML;
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="slp-directory-agent">%s</label></th>
-								<td width="67&#37;" nowrap><input name="slp-directory-agent" id="slp-directory-agent" type="text" value="%s" /> <input name="slp-directory-agent-only" id="slp-directory-agent-only" type="checkbox" value="on" %s /> <label for="slp-directory-agent-only">%s</label></td>
+								<td width="67&#37;" nowrap><input name="slp-directory-agent" id="slp-directory-agent" type="text" value="%s" /><br /><input name="slp-directory-agent-only" id="slp-directory-agent-only" type="checkbox" value="on" %s /> <label for="slp-directory-agent-only">%s</label></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="slp-service-scope">%s</label></th>
-								<td width="67&#37;" nowrap><input name="slp-service-scope" id="slp-service-scope" type="text" value="%s" /> <input name="slp-service-scope-only" id="slp-service-scope-only" type="checkbox" value="on" %s /> <label for="slp-service-scope-only">%s</label></td>
+								<td width="67&#37;" nowrap><input name="slp-service-scope" id="slp-service-scope" type="text" value="%s" /><br /><input name="slp-service-scope-only" id="slp-service-scope-only" type="checkbox" value="on" %s /> <label for="slp-service-scope-only">%s</label></td>
 							</tr>
 						</table>
 					</div>
@@ -733,7 +733,7 @@ HTML;
 				__('Broadcast address'), $broadcast_address,
 				__('Domain name'), $domain_name,
 				__('Domain name servers'), $domain_name_servers,
-				__('Domains to search'), $domain_search, __('List the domains to search comma-delimited'),
+				__('Domains to search'), __('List the domains to search comma-delimited'), $domain_search,
 				__('Time servers'), $time_servers,
 				__('NTP servers'), $ntp_servers,
 				__('Log servers'), $log_servers,
@@ -748,8 +748,8 @@ HTML;
 				__('NetBIOS node type'), $netbios_node_type,
 				__('Time offset'), $time_offset,
 				__('DHCP server identifier'), $dhcp_server_identifier,
-				__('SLP directory agent IPs'), $slp_directory_agent, $slp_directory_agent_only_checked, __('These IPs only?'),
-				__('SLP service scope'), $slp_service_scope, $slp_service_scope_only_checked, __('This scope only?'),
+				__('SLP directory agent IPs'), $slp_directory_agent, $slp_directory_agent_only_checked, __('Only these IPs?'),
+				__('SLP service scope'), $slp_service_scope, $slp_service_scope_only_checked, __('Only this scope?'),
 				$popup_footer
 			);
 
