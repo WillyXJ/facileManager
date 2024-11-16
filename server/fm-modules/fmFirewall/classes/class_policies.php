@@ -91,39 +91,6 @@ class fm_module_policies {
 			printf('<p id="table_edits" class="noresult" name="policies">%s</p>', __('There are no firewall rules.'));
 		}
 		
-		$server_firewall_type = getNameFromID($_REQUEST['server_serial_no'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
-		if (array_key_exists($server_firewall_type, $__FM_CONFIG['fw']['notes'])) {
-			$policy_note = sprintf('<br />
-			<div id="shadow_box" class="fullwidthbox">
-				<div id="shadow_container" class="fullwidthbox note">
-				<p><b>%s</b><br />%s</p>
-				</div>
-			</div>',
-					__('Note:'), $__FM_CONFIG['fw']['notes'][$server_firewall_type]
-				);
-		} else $policy_note = null;
-		
-		$action_icons = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_action');
-		$action_icons[] = 'log';
-		
-		if ($type == 'filter') {
-			foreach ($action_icons as $action) {
-				$action_active[] = '<td>' . str_replace(array('__action__', '__Action__'), array($action, ucfirst($action)), $__FM_CONFIG['icons']['action'][$action]) . "<span>$action</span></td>\n";
-			}
-			
-			$action_active = implode("\n", $action_active);
-			
-			echo <<<HTML
-			$policy_note
-			<table class="legend">
-				<tbody>
-					<tr>
-						$action_active
-					</tr>
-				</tbody>
-			</table>
-HTML;
-		}
 		echo '</div></div>';
 	}
 

@@ -115,10 +115,10 @@ $__FM_CONFIG['fw']['config_file'] 		= array(
 
 /** Firewall notes */
 $__FM_CONFIG['fw']['notes'] 			= array(
-												'iptables' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked will be passed by default. So make sure you take care with your rule order.'),
-												'pf' => __('Rules are evaluated on a last-match basis and everything that isn\'t explicitly blocked will be allowed by default. So make sure you take care with your rule order.'),
-												'ipfw' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly passed will be blocked by default. So make sure you take care with your rule order.'),
-												'ipfilter' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked will be passed by default. So make sure you take care with your rule order.')
+												'iptables' => __('Rules in this policy are evaluated on a first-match basis and everything that is not explicitly blocked will be passed by default.'),
+												'pf' => __('Rules in this policy are evaluated on a last-match basis and everything that is not explicitly blocked will be allowed by default.'),
+												'ipfw' => __('Rules in this policy are evaluated on a first-match basis and everything that is not explicitly passed will be blocked by default.'),
+												'ipfilter' => __('Rules in this policy are evaluated on a first-match basis and everything that is not explicitly blocked will be passed by default.')
 											);
 
 $__FM_CONFIG['policy']['avail_types'] = array('filter' => 'Filter', 'nat' => 'NAT');
