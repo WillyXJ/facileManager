@@ -2814,3 +2814,34 @@ INSERTSQL;
 	
 	return true;
 }
+
+/** 7.0.0-beta2 */
+function upgradefmDNS_700b2($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '7.0.0-beta1', '<') ? upgradefmDNS_700b1($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$queries[] = "";
+
+	/** Run queries */
+	if (count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	/** Delete unused files */
+	$files_to_delete = array('pages/config-rpz.php');
+	$this_dir = dirname(__FILE__);
+	foreach ($files_to_delete as $file) {
+		$filename = $this_dir . '/' . $file;
+		if (is_writable($filename)) {
+			unlink($filename);
+		}
+	}
+
+	setOption('version', '7.0.0-beta2', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}

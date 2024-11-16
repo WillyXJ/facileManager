@@ -771,7 +771,6 @@ function buildModuleMenu() {
 		addSubmenuPage('zones.php', __('Groups'), __('Zones Groups'), array('view_all'), $_SESSION['module'], 'zones-groups.php');
 		addSubmenuPage('zones.php', null, __('Records'), null, $_SESSION['module'], 'zone-records.php');
 		addSubmenuPage('zones.php', null, __('Record Validation'), null, $_SESSION['module'], 'zone-records-validate.php');
-		addSubmenuPage('zones.php', __('Response Policy'), __('Response Policy Zones'), array('manage_zones', 'view_all'), $_SESSION['module'], 'config-rpz.php');
 	
 	addObjectPage(__('Config'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
 		addSubmenuPage('config-servers.php', _('Servers'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));

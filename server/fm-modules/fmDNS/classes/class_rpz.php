@@ -238,6 +238,12 @@ class fm_module_rpz {
 			return true;
 		}
 
+		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}functions WHERE def_function = 'options' AND def_option_type = 'rpz'";
+		$fmdb->query($query);
+		foreach ($fmdb->last_result as $k => $def) {
+			$include_sub_configs[] = $def->def_option;
+		}
+
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
@@ -282,15 +288,15 @@ class fm_module_rpz {
 		}
 
 		/** Update config children */
-		$include = array_diff(array_keys($post), $include, array('cfg_id', 'action', 'account_id', 'cfg_order_id', 'view_id', 'server_serial_no', 'page', 'item_type'));
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
-		foreach ($include as $handler) {
+		foreach ($include_sub_configs as $handler) {
 			$sql_values = '';
 			$child['cfg_name'] = $handler;
 			$child['cfg_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
+				if (!in_array($key, $include)) continue;
 				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
@@ -429,6 +435,7 @@ HTML;
 		/** Build the available zones list */
 		if (isset($_POST['request_uri'])) {
 			foreach ((array) $_POST['request_uri'] as $key => $val) {
+				if (in_array($key, array('type', 'p'))) continue;
 				$zone_sql .= sprintf(" AND %s='%s'", $key, $val);
 			}
 		}
