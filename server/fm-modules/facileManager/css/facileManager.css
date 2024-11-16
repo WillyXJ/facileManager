@@ -412,7 +412,7 @@ div.header-container {
 	position: absolute;
 	right: 5px;
 }
-#mainitems > ul > li > a:hover {
+#mainitems > ul > li:hover {
 	background: var(--menu-main-select-bg);
 }
 #mainitems ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
