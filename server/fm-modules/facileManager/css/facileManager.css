@@ -976,10 +976,12 @@ i.text_icon {
 	padding: 2px 4px;
 }
 .tab-strip li.selected a,
-.tab-strip li a:hover,
-#tab [type=radio]:checked ~ label,
-#tab [type=radio] ~ label:hover {
+#tab [type=radio]:checked ~ label {
 	border-bottom-color: var(--menu-select-highlight);
+	color: var(--tab-selected-text);
+}
+.tab-strip li a:hover,
+#tab [type=radio] ~ label:hover {
 	color: var(--tab-selected-text);
 }
 .tab-strip a,
