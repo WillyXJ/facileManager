@@ -412,7 +412,7 @@ div.header-container {
 	position: absolute;
 	right: 5px;
 }
-#mainitems > ul > li > a:hover {
+#mainitems > ul > li:hover {
 	background: var(--menu-main-select-bg);
 }
 #mainitems ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
@@ -975,10 +975,12 @@ i.text_icon {
 	padding: 2px 4px;
 }
 .tab-strip li.selected a,
-.tab-strip li a:hover,
-#tab [type=radio]:checked ~ label,
-#tab [type=radio] ~ label:hover {
+#tab [type=radio]:checked ~ label {
 	border-bottom-color: var(--menu-select-highlight);
+	color: var(--tab-selected-text);
+}
+.tab-strip li a:hover,
+#tab [type=radio] ~ label:hover {
 	color: var(--tab-selected-text);
 }
 .tab-strip a,
@@ -2037,14 +2039,6 @@ a.subelement_edit img {
 }
 #tab span.menu-badge p {
 	margin-top: 0px;
-}
-#tab [type=radio] ~ label:hover span.menu-badge,
-#tab [type=radio]:checked ~ label span.menu-badge {
-	background-color: var(--menu-expanded-badge-bg);
-}
-#tab [type=radio] ~ label:hover span.menu-badge p,
-#tab [type=radio]:checked ~ label span.menu-badge p {
-	color: var(--tab-selected-bg);
 }
 
 #tab-content {
