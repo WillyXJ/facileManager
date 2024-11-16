@@ -1799,6 +1799,10 @@ HTML;
 			$response[] = ' --> ' . __('Failed: You do not have permission to reload this zone.');
 		}
 		
+		/** Check the zone file for loadable syntax */
+		$syntax_check = $this->singleZoneReloadSyntaxCheck($domain_id);
+		if ($syntax_check) $response[] = $syntax_check;
+
 		/** Format output */
 		if (count($response) == 1) {
 			foreach (makePlainText($this->buildZoneConfig($domain_id), true) as $line) {
@@ -2559,6 +2563,46 @@ HTML;
 		}
 		
 		return $return;
+	}
+	
+	
+	/**
+	 * Processes zone check on single zone before reload
+	 *
+	 * @since 7.0.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param integer $domain_id Domain ID to get the zone data for
+	 * @return string
+	 */
+	function singleZoneReloadSyntaxCheck($domain_id) {
+		global $__FM_CONFIG, $fmdb;
+
+		$response = null;
+
+		if (getOption('enable_config_checks', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
+			global $fm_module_buildconf;
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_buildconf.php');
+
+			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', $domain_id, 'domain_', 'domain_id');
+			$zone_result = $fmdb->last_result[0];
+			
+			/** Is this a clone id? */
+			if ($zone_result->domain_clone_domain_id) $zone_result = $fm_module_buildconf->mergeZoneDetails($zone_result, 'clone');
+			elseif ($zone_result->domain_template_id) $zone_result = $fm_module_buildconf->mergeZoneDetails($zone_result, 'template');
+
+			$zone_file_contents = @$fm_module_buildconf->buildZoneFile($zone_result, 0);
+
+			if (method_exists($fm_module_buildconf, 'processConfigsChecks')) {
+				$response = @$fm_module_buildconf->processConfigsChecks(array('server_serial_no' => 0, 'files' => array($zone_result->domain_name . '.conf' => $zone_file_contents)), 'checkzone');
+			}
+			if (strpos($response, @$fm_module_buildconf->getSyntaxCheckMessage('loadable')) !== false) {
+				$response = false;
+			}
+		}
+
+		return $response;
 	}
 
 }
