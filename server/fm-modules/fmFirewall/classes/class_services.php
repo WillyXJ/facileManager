@@ -50,10 +50,12 @@ class fm_module_services {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
-		// $title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), _('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
-		$title_array = array_merge((array) $title_array, array(__('Service Name'), __('Type'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(__('Service Name'), __('Type'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment'), array('title' => _('Actions'), 'class' => 'header-actions')));
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
 		echo displayTableHeader($table_info, $title_array);
@@ -204,12 +206,10 @@ class fm_module_services {
 			$edit_status .= '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->service_id, 'service')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->service_id .'" /></td>';
-			} else {
-				$checkbox = '<td></td>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->service_id .'" />';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
+		$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		
 		/** Process TCP Flags */
 		if ($row->service_type == 'tcp') {
@@ -222,7 +222,7 @@ class fm_module_services {
 		
 		echo <<<HTML
 			<tr id="$row->service_id" name="$row->service_name"$disabled_class>
-				$checkbox
+				<td>$checkbox</td>
 				<td>$row->service_name</td>
 
 HTML;

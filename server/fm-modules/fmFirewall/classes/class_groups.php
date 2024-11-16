@@ -49,9 +49,12 @@ class fm_module_groups {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
-		$title_array = array_merge((array) $title_array, array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;'), array('title' => _('Actions'), 'class' => 'header-actions')));
 
 		echo displayTableHeader($table_info, $title_array);
 		
@@ -207,12 +210,10 @@ class fm_module_groups {
 			$edit_status .= '<a class="edit_form_link" name="' . $row->group_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->group_id, 'group')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" /></td>';
-			} else {
-				$checkbox = '<td></td>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" />';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
+		$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		
 		/** Process group items */
 		$group_items = nl2br($this->getGroupItemNames($row->group_items));
@@ -220,7 +221,7 @@ class fm_module_groups {
 		
 		echo <<<HTML
 			<tr id="$row->group_id" name="$row->group_name"$disabled_class>
-				$checkbox
+				<td>$checkbox</td>
 				<td>$row->group_name</td>
 				<td>$group_items</td>
 				<td>$comments</td>

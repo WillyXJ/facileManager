@@ -50,9 +50,12 @@ class fm_module_objects {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
-		$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address'), __('Netmask'), array('title' => _('Comment'), 'style' => 'width: 40%;')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address'), __('Netmask'), array('title' => _('Comment'), 'style' => 'width: 40%;'), array('title' => _('Actions'), 'class' => 'header-actions')));
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
 		echo displayTableHeader($table_info, $title_array);
@@ -192,18 +195,16 @@ class fm_module_objects {
 			$edit_status .= '<a class="edit_form_link" name="' . $row->object_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->object_id, 'object')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->object_id .'" /></td>';
-			} else {
-				$checkbox = '<td></td>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->object_id .'" />';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
+		$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		
 		$comments = nl2br($row->object_comment);
 		
 		echo <<<HTML
 			<tr id="$row->object_id" name="$row->object_name"$disabled_class>
-				$checkbox
+				<td>$checkbox</td>
 				<td>$row->object_name</td>
 				<td>$row->object_address</td>
 				<td>$row->object_mask</td>
