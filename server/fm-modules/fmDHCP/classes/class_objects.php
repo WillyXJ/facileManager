@@ -49,7 +49,7 @@ class fm_dhcp_objects {
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => $type
 					);
@@ -59,9 +59,14 @@ class fm_dhcp_objects {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		$title_array = array_merge((array) $title_array, $this->getTableHeader());
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
 		echo displayTableHeader($table_info, $title_array);
 
