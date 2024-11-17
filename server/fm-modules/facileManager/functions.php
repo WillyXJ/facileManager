@@ -2232,7 +2232,7 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 	<div id="page_title_container" class="flex-apart">
 		<div class="flex-left">
 			<div><h2>%s</h2></div>
-			<div>%s</div>
+			%s
 			<div>%s</div>
 		</div>
 		<div class="flex-right">
@@ -2241,7 +2241,7 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 	</div>
 	',
 		$class, $style, $message, $title,
-		($allowed_to_add) ? displayAddNew($name, $rel) : null,
+		($allowed_to_add) ? sprintf('<div>%s</div>', displayAddNew($name, $rel)) : null,
 		(isset($comment)) ? sprintf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle fa-lg notice grey" aria-hidden="true"></i></a>', $comment) : null,
 		implode("\n", $addl_title_blocks)
 	);
@@ -2520,7 +2520,7 @@ function handleSortOrder() {
 		} elseif (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'])) {
 			$sort_direction = $_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'];
 		} else {
-			$sort_direction = 'DESC';
+			$sort_direction = 'ASC';
 		}
 		@session_start();
 		$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']] = array(
