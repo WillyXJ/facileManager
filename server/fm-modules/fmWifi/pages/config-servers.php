@@ -35,11 +35,15 @@ $addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['servers']['avail_types'
 echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 	
 $sort_direction = null;
+$sort_field = 'server_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
 
 if ($type == 'groups') {
 	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'server_groups', 'group_name', 'group_', null, null, false, $sort_direction);
 } else {
-	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_name', 'server_', null, null, false, $sort_direction);
+	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', array($sort_field, 'server_name'), 'server_', null, null, false, $sort_direction);
 }
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
